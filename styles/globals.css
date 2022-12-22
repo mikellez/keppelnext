@@ -19,6 +19,16 @@ a {
   padding-top: 2em;
 }
 
+.mainContainer {
+  margin-top: 2em;
+  padding: 2em;
+  background-color: #EEEEEE;
+  border: 1px solid #CCCCCC;
+  border-radius: 25px;
+  display: flex;
+  align-items: flex-start;
+}
+
 /*
 @media (prefers-color-scheme: dark) {
   html {
