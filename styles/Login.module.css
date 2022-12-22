@@ -1,0 +1,28 @@
+.loginContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.textContainer {
+    background-color: rgba(0, 0, 0, .1);
+    border-radius: 10px;
+
+    padding: 2em;
+
+    text-align: center;
+    font-size: large;
+}
+
+.loginImage {
+    margin-bottom: 3em;
+}
+
+.headerLogin {
+    margin-bottom: 1em;
+}
+
+.group {
+    margin-bottom: 1em;
+}

@@ -1,0 +1,15 @@
+.mainContainer {
+    margin-top: 2em;
+    padding: 2em;
+    background-color: #EEEEEE;
+    border: 1px solid #CCCCCC;
+    border-radius: 25px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.halfContainer {
+    padding: 1em;
+    flex-grow: 1;
+    flex-basis: 0;
+}
