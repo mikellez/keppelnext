@@ -1,5 +1,6 @@
 import styles from '../styles/Login.module.css'
 import React, { useState, useRef } from 'react'
+import Router from 'next/router'
 import Image from 'next/image'
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
@@ -20,9 +21,11 @@ function Login() {
 		console.log(data);
 		axios.post("/api/login", data)
 		.then((response) => {
-			console.log(response);
+			console.log("success", response);
+			window.location.href = '/';
 		}).catch((e) => {
-			console.log(e);
+			console.log("error", e);
+			alert("login fail")
 		})
 	};
 
@@ -36,7 +39,7 @@ function Login() {
 						<input className="form-control" type="text" placeholder="Username" {...register("username")} />
 					</div>
 					<div className={`form-group ${styles.group}`}>
-						<input className="form-control" type="text" placeholder="Password" {...register("password")} />
+						<input className="form-control" type="password" placeholder="Password" {...register("password")} />
 					</div>
 					<button type="submit" className="btn btn-warning">Login</button>
 				</form>
