@@ -1,6 +1,5 @@
 import styles from '../styles/Login.module.css'
 import React, { useState, useRef } from 'react'
-import Router from 'next/router'
 import Image from 'next/image'
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
@@ -15,7 +14,10 @@ function Login() {
 	const {
 		register,
 		handleSubmit,
+		formState
 	} = useForm<FormValues>();
+
+	const { isSubmitting } = formState;
 
 	const formSubmit: SubmitHandler<FormValues> = (data) => {
 		console.log(data);
@@ -41,7 +43,7 @@ function Login() {
 					<div className={`form-group ${styles.group}`}>
 						<input className="form-control" type="password" placeholder="Password" {...register("password")} />
 					</div>
-					<button type="submit" className="btn btn-warning">Login</button>
+					<button type="submit" disabled={isSubmitting} className="btn btn-warning">Login</button>
 				</form>
 			</div>
 		</div>
