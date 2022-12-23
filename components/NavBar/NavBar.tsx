@@ -17,27 +17,27 @@ const NavBar= () => {
         },
         {
             name: "Request",
-            path: "/request",
+            path: "/Request",
             selected: false
         },
         {
             name: "Asset",
-            path: "/asset",
+            path: "/Asset",
             selected: false
         },
         {
             name: "Schedule",
-            path: "/schedule",
+            path: "/Schedule",
             selected: false
         },
         {
             name: "Checklist",
-            path: "/checklist",
+            path: "/Checklist",
             selected: false
         },
         {
             name: "E-Logbook",
-            path: "/logbook",
+            path: "/Logbook",
             selected: false
         },
         {
@@ -47,12 +47,12 @@ const NavBar= () => {
         },
         {
             name: "Workflow",
-            path: "/workflow",
+            path: "/Workflow",
             selected: false
         },
         {
             name: "Master",
-            path: "/master",
+            path: "/Master",
             selected: false
         }
     ];
