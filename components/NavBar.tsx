@@ -3,9 +3,10 @@ import Link from 'next/link';
 import styles from '../styles/Nav.module.css'
 import { GrClose } from "react-icons/gr";
 import { BsList } from 'react-icons/bs'
+import NavDropdown from './NavDropdown';
 
 const NavBar= () => {
-    const [navDisplay, setNavDisplay] = useState(true);
+    const [navDisplay, setNavDisplay] = useState(false);
 
     const navArr = [
         {
@@ -47,7 +48,7 @@ const NavBar= () => {
 
     const navElement = navArr.map(item => {
         return <Link href={item.path} key={item.name} className={styles.navItem}>
-                <h5>{item.name}</h5>
+                <h6>{item.name}</h6>
             </Link>
     });
 
@@ -69,8 +70,7 @@ const NavBar= () => {
                         <GrClose onClick={displayNav} size={25} style={{color:"#4D4D4D", marginLeft: "auto"}} />
                     </div>
                     {navElement}
-                    <div className={styles.navItem}><h5>User Management</h5></div>
-                    <div className={styles.navItem}><h5>Activity Log</h5></div>
+                    <NavDropdown />
                 </div>
             </div>
             </div>
