@@ -85,8 +85,8 @@ const NavBar= () => {
         return <Link href={item.path} 
         key={item.name} 
         className={styles.navItem} 
-        style={{backgroundColor: item.selected ? "#E38B29" : "#f7f7f7", color: item.selected ? "#FFFFFF" : "#4D4D4D"}}>
-                <h6>{item.name}</h6>
+        style={{backgroundColor: item.selected ? "#E38B29" : "#f7f7f7"}}>
+                <h6 className={styles.navItemText}>{item.name}</h6>
             </Link>
     });
 
@@ -133,7 +133,7 @@ const NavBar= () => {
             <div className={styles.navMain} style={{display: navDisplay ? "block" : "none"}}>
                 <div className={styles.navItems}>
                     <div className={styles.navHead}>
-                        <h3>Menu</h3>
+                        <h3 className={styles.navItemText}>Menu</h3>
                         <GrClose onClick={displayNav} size={25} style={{color:"#4D4D4D", marginLeft: "auto"}} />
                     </div>
                     {navElement}

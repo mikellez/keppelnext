@@ -33,6 +33,12 @@
 
 .navItem:hover {
     color: #dc3545;
+    cursor: pointer;
+}
+
+.navItemText {
+   margin: auto 0 auto 0;
+   padding: 0.2rem 0 0.2rem 0;
 }
 
 .overlay {
