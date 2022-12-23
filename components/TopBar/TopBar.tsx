@@ -2,7 +2,7 @@
 import Image from 'next/image'
 import { VscAccount } from "react-icons/vsc";
 import DropdownMenu from './DropdownMenu';
-import NavBar from '../NavBar';
+import NavBar from '../NavBar/NavBar';
 
 export default function TopBar() {
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import styles from '../styles/Nav.module.css'
+import styles from '../../styles/Nav.module.css'
 import { SlArrowDown } from 'react-icons/sl';
 
 interface NavList {

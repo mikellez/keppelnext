@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import styles from '../styles/Nav.module.css'
+import styles from '../../styles/Nav.module.css'
 import { GrClose } from "react-icons/gr";
 import { BsList } from 'react-icons/bs'
 import NavDropdown from './NavDropdown';
