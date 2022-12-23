@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useRouter } from 'next/router';
 import TopBar from '../components/TopBar/TopBar';
 
+
 export default function App({ Component, pageProps }: AppProps) {
 	const router = useRouter();
 	const { asPath, route, pathname } = router;
