@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 import styles from '../../styles/Nav.module.css'
 import { GrClose } from "react-icons/gr";
@@ -6,13 +7,14 @@ import { BsList } from 'react-icons/bs'
 import NavDropdown from './NavDropdown';
 
 const NavBar= () => {
+    const router = useRouter();
     // Storing whether user has clicked on the nav button as a state
     const [navDisplay, setNavDisplay] = useState(false);
     // List of nav elements and paths
-    const navArr = [
+    const [navState, setNavState] = useState([
         {
             name: "Dashboard",
-            path: "",
+            path: "/Dashboard",
             selected: false
         },
         {
@@ -55,11 +57,35 @@ const NavBar= () => {
             path: "/Master",
             selected: false
         }
-    ];
+    ]);
+
+    useEffect(() => {
+        // Hide nav on page change
+        setNavDisplay(false);
+
+        // Current path 
+        const currentPath = router.pathname;
+
+        // Change the state of the nav according to the current path
+        setNavState(prevNav => {
+            const newNav = prevNav.map(item => {
+                if (currentPath.includes(item.path)) {
+                    item.selected = true;
+                } else {
+                    item.selected = false;
+                }
+                return item;
+            })
+            return newNav;
+        })
+    }, [router.pathname]);
 
     // Mapping the nav array elements into jsx elements
-    const navElement = navArr.map(item => {
-        return <Link href={item.path} key={item.name} className={styles.navItem}>
+    const navElement = navState.map(item => {
+        return <Link href={item.path} 
+        key={item.name} 
+        className={styles.navItem} 
+        style={{backgroundColor: item.selected ? "#E38B29" : "#f7f7f7", color: item.selected ? "#FFFFFF" : "#4D4D4D"}}>
                 <h6>{item.name}</h6>
             </Link>
     });
@@ -69,6 +95,7 @@ const NavBar= () => {
         setNavDisplay(prev => !prev);
     };
 
+    // Dropdown list for user management
     const userManagementList = [
         {
             name: "User Management",
@@ -87,6 +114,8 @@ const NavBar= () => {
             path: ""
         }
     ];
+
+    // Dropdown list for activity log
     const activityLogList = [
         {
             name: "Account Activity Log",
