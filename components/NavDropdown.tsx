@@ -3,7 +3,17 @@ import Link from 'next/link';
 import styles from '../styles/Nav.module.css'
 import { SlArrowDown } from 'react-icons/sl';
 
-const NavDropdown = (props: any) => {
+interface NavList {
+    name: string;
+    path: string;
+}
+
+interface NavDropdownInfo {
+    name: string;
+    list: Array<NavList>;
+} 
+
+function NavDropdown(props: NavDropdownInfo) {
     // Storing whether user has clicked on the dropdown as a state
     const [isClicked, setIsClicked] = useState(false);
     // Props mapped into dropdown elements
