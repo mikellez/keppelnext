@@ -1,0 +1,27 @@
+.footerMain {
+    background-color: #f7f7f7;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 0 1rem 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    align-items: center;
+}
+
+.footerLine {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: auto;
+}
+
+.footerCopyrightText {
+    margin: auto;
+    font-size: 0.8rem;
+}
+
+.footerLastText {
+    font-size: 0.9rem;
+    margin: 1rem;
+}

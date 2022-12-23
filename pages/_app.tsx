@@ -4,6 +4,7 @@ import type { AppProps } from 'next/app'
 import { useEffect } from "react";
 import { useRouter } from 'next/router';
 import TopBar from '../components/TopBar/TopBar';
+import Footer from '../components/Footer';
 
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -17,5 +18,5 @@ export default function App({ Component, pageProps }: AppProps) {
 	if(asPath === "/Login")
 		return <div><Component {...pageProps} /></div>
 
-	return <div><TopBar/><Component {...pageProps} /></div>
+	return <div><TopBar /><Component {...pageProps} /><Footer /></div>
 }
