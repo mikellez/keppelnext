@@ -1,9 +1,11 @@
 import React from 'react'
+import Layout from '../components/Layout'
 
 const Asset = () => {
-  return (
-    <div>Asset</div>
-  )
+  	return (
+		<Layout>
+			<div>Asset</div>
+		</Layout>
+  	)
 }
-
 export default Asset

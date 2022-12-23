@@ -5,6 +5,7 @@ import React, { useState, useRef } from 'react'
 import axios from 'axios';
 
 import ModuleMain from '../components/ModuleMain';
+import Layout from '../components/Layout';
 
 async function getAssets(plant_id: number)
 {
@@ -55,6 +56,7 @@ function QRCode() {
 	};
 
 	return (
+		<Layout>
 		<ModuleMain title="QRCode" header="Generate QR Code">
 			<div className={styles.halfContainer}>
 				<div className="form-group">
@@ -79,6 +81,7 @@ function QRCode() {
 				</div>
 			</div>
 		</ModuleMain>
+		</Layout>
 	)
 }
 

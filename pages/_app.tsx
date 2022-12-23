@@ -18,5 +18,6 @@ export default function App({ Component, pageProps }: AppProps) {
 	if(asPath === "/Login")
 		return <div><Component {...pageProps} /></div>
 
-	return <div><TopBar /><Component {...pageProps} /><Footer /></div>
+	// return <div><TopBar /><Component {...pageProps} /><Footer /></div>
+	return <div><Component {...pageProps} /></div>
 }
