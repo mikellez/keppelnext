@@ -1,94 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import styles from '../../styles/Nav.module.css'
+import styles from '../../styles/Nav.module.scss'
 import { GrClose } from "react-icons/gr";
 import { BsList } from 'react-icons/bs'
 import NavDropdown from './NavDropdown';
+import NavLink from './NavLink';
 
 const NavBar= () => {
     const router = useRouter();
     // Storing whether user has clicked on the nav button as a state
     const [navDisplay, setNavDisplay] = useState(false);
-    // List of nav elements and paths
-    const [navState, setNavState] = useState([
-        {
-            name: "Dashboard",
-            path: "/Dashboard",
-            selected: false
-        },
-        {
-            name: "Request",
-            path: "/Request",
-            selected: false
-        },
-        {
-            name: "Asset",
-            path: "/Asset",
-            selected: false
-        },
-        {
-            name: "Schedule",
-            path: "/Schedule",
-            selected: false
-        },
-        {
-            name: "Checklist",
-            path: "/Checklist",
-            selected: false
-        },
-        {
-            name: "E-Logbook",
-            path: "/Logbook",
-            selected: false
-        },
-        {
-            name: "Generate QR Codes",
-            path: "/QRCode",
-            selected: false
-        },
-        {
-            name: "Workflow",
-            path: "/Workflow",
-            selected: false
-        },
-        {
-            name: "Master",
-            path: "/Master",
-            selected: false
-        }
-    ]);
-
-    useEffect(() => {
-        // Hide nav on page change
-        setNavDisplay(false);
-
-        // Current path 
-        const currentPath = router.pathname;
-
-        // Change the state of the nav according to the current path
-        setNavState(prevNav => {
-            const newNav = prevNav.map(item => {
-                if (currentPath.includes(item.path)) {
-                    item.selected = true;
-                } else {
-                    item.selected = false;
-                }
-                return item;
-            })
-            return newNav;
-        })
-    }, [router.pathname]);
-
-    // Mapping the nav array elements into jsx elements
-    const navElement = navState.map(item => {
-        return <Link href={item.path} 
-        key={item.name} 
-        className={styles.navItem} 
-        style={{backgroundColor: item.selected ? "#E38B29" : "#f7f7f7"}}>
-                <h6 className={styles.navItemText}>{item.name}</h6>
-            </Link>
-    });
 
     // Display and hide nav by toggling the state
     function displayNav() {
@@ -136,7 +58,17 @@ const NavBar= () => {
                         <h3 className={styles.navItemText}>Menu</h3>
                         <GrClose onClick={displayNav} size={25} style={{color:"#4D4D4D", marginLeft: "auto"}} />
                     </div>
-                    {navElement}
+
+                    <NavLink name="Dashboard" path="/Dashboard" />
+                    <NavLink name="Request" path="/Request" />
+                    <NavLink name="Asset" path="/Asset" />
+                    <NavLink name="Schedule" path="/Schedule" />
+                    <NavLink name="Checklist" path="/Checklist" />
+                    <NavLink name="E-Logbook" path="/Logbook" />
+                    <NavLink name="Generate QR Codes" path="/QRCode" />
+                    <NavLink name="Workflow" path="/Workflow" />
+                    <NavLink name="Master" path="/Master" />
+
                     <NavDropdown name="User Management" list={userManagementList} />
                     <NavDropdown name="Activity Log" list={activityLogList} />
                 </div>

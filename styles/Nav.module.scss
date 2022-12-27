@@ -1,7 +1,13 @@
+@use "colours.module.scss" as global;
+/*
+Link {
+    color: global.$gray;
+}*/
+
 .navMain {
     height: 100%;
     position: absolute;
-    color: #4D4D4D;
+    color: global.$gray;
     left: 0;
     top: 0;
     background-color: #EEEEEE;
@@ -22,6 +28,7 @@
 }
 
 .navItem {
+    color: global.$gray;
     background-color: #f7f7f7;
     margin: 0.2rem 0 0.2rem 0;
     padding: 0.2rem 2rem;
@@ -31,8 +38,13 @@
     align-items: center;
 }
 
+.navItemSelected {
+    color: white;
+    background-color: global.$primary;
+}
+
 .navItem:hover {
-    color: #dc3545;
+    color: global.$primary;
     cursor: pointer;
 }
 
@@ -55,6 +67,7 @@
 }
 
 .navDropdownItem {
+    color: global.$gray;
     padding: 0.2rem 2rem;
     border-radius: 5%;
     display: flex;
@@ -64,7 +77,5 @@
 }
 
 .navDropdownItem:hover {
-    color: #dc3545;
+    color: global.$primary;
 }
-
-

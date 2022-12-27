@@ -3,7 +3,11 @@
     display: flex;
     flex-direction: column;
     padding: 1rem 0 1rem 0;
+<<<<<<< HEAD
     /* position: relative;
+=======
+    /* position: fixed;
+>>>>>>> db2b56d9a450cbf932b5975eb2e0e2e585fea956
     bottom: 0; */
     width: 100%;
     align-items: center;
