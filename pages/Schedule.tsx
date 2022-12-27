@@ -3,13 +3,12 @@ import Layout from '../components/Layout'
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import styles from '../styles/Schedule.module.scss';
-import AZButton from '../components/AZButton';
 
 const Schedule = () => {
   	return (
 		<Layout>
 			<div className={styles.calendar}>
-				<AZButton text="Schedule Maintenance"/>
+				<button className="btn btn-primary">Schedule Maintenance</button>
 				<FullCalendar
 						plugins={[ dayGridPlugin ]}
 						initialView="dayGridMonth"
