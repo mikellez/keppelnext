@@ -1,7 +1,7 @@
 import React from "react";
 
 interface SVGInfo {
-    size: string;
+    size: number;
 }
 
 export default function AzendianLogo(props: SVGInfo) {
