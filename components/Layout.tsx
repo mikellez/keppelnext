@@ -4,12 +4,12 @@ import Footer from "./Footer";
 
 export default function Layout({ children }: PropsWithChildren) {
     return (
-        <>
+        <div>
             <TopBar />
-            <body style={{display: "flex", flexDirection: "column", minHeight: "100vh"}}>
+            <div style={{display: "flex", flexDirection: "column", minHeight: "100vh"}}>
             { children }
-            </body>
+            </div>
             <Footer />
-        </>
+        </div>
     )
 }
