@@ -1,6 +1,7 @@
+@use "colours.module.scss" as global;
 
-$primary: #C70F2B;
+$primary: global.$primary;
 
 $link-decoration: none;
 
-@import "~bootstrap/scss/bootstrap.scss"
+@import "~bootstrap/scss/bootstrap.scss";
