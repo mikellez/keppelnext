@@ -17,7 +17,7 @@ function Login() {
 		formState
 	} = useForm<FormValues>();
 
-	const { isSubmitting } = formState;
+	const { isSubmitting, errors } = formState;
 
 	const formSubmit: SubmitHandler<FormValues> = (data) => {
 		console.log(data);
@@ -38,12 +38,18 @@ function Login() {
 				<h1 className={styles.headerLogin}>Login</h1>
 				<form onSubmit={handleSubmit(formSubmit)}>
 					<div className={`form-group ${styles.group}`}>
-						<input className="form-control" type="text" placeholder="Username" {...register("username")} />
+						<input className="form-control" type="text" placeholder="Username" {...register("username", {required: true})} />
+						{errors.username && (
+							<div className={styles.loginErrorInfoText}>Please enter your username</div>
+						)}
 					</div>
 					<div className={`form-group ${styles.group}`}>
-						<input className="form-control" type="password" placeholder="Password" {...register("password")} />
+						<input className="form-control" type="password" placeholder="Password" {...register("password", {required: true})} />
+						{errors.password && (
+							<div className={styles.loginErrorInfoText}>Please enter your password</div>
+						)}
 					</div>
-					<button type="submit" disabled={isSubmitting} className="btn btn-warning">Login</button>
+					<button type="submit" disabled={isSubmitting} className="btn btn-primary">Login</button>
 				</form>
 			</div>
 		</div>

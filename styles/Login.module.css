@@ -7,12 +7,24 @@
 
 .textContainer {
     background-color: rgba(0, 0, 0, .1);
+
+    border-style: solid;
     border-radius: 10px;
+    border-width: 2px;
+    border-color: rgba(0, 0, 0, .1);
 
     padding: 2em;
 
     text-align: center;
     font-size: large;
+}
+
+.loginErrorInfoText {
+    font-size: 70%;
+    font-style: italic;
+    color: rgb(210, 159, 20);
+    padding-left: 0.4em;
+    text-align: left;
 }
 
 .loginImage {
