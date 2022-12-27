@@ -70,7 +70,7 @@ function QRCode() {
 					</select>
 				</div>
 				<br/>
-				<button className="btn btn-warning" onClick={generateQR}>Generate QR Code</button>
+				<button className="btn btn-primary" onClick={generateQR}>Generate QR Code</button>
 			</div>
 			<div className={styles.halfContainer}>
 				<div className="form-group">
