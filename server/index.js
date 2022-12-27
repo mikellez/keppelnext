@@ -57,6 +57,10 @@ app.prepare().then(() => {
     return handle(req, res);
   });
 
+  server.get("/Dashboard*", checkIfLoggedIn, (req, res) => {
+    return handle(req, res);
+  });
+
   server.get("/Request*", checkIfLoggedIn, (req, res) => {
     return handle(req, res);
   });
