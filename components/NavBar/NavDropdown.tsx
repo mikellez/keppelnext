@@ -26,7 +26,7 @@ function NavDropdown(props: NavDropdownInfo) {
     return (
         <div>
             <div className={styles.navItem} onClick={() => {setIsClicked(prev => !prev)}}>
-                <h6 className={styles.navDropdown}>{props.name}</h6>
+                <h6 className={styles.navItemText}>{props.name}</h6>
                 <SlArrowDown style={{color:"#4D4D4D", marginLeft: "1.5rem"}}/>
             </div>
             <div style={{display: isClicked ? "flex" : "none"}} className={styles.navDropdownItems}>
