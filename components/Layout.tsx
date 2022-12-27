@@ -1,9 +1,8 @@
-import React from "react";
+import React, { PropsWithChildren } from "react";
 import TopBar from "./TopBar/TopBar";
 import Footer from "./Footer";
-import { NextPageContext } from "next";
 
-export default function Layout({ children }: any) {
+export default function Layout({ children }: PropsWithChildren) {
     return (
         <>
             <TopBar />
