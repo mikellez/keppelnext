@@ -3,9 +3,7 @@ import Layout from '../components/Layout'
 
 const Logbook = () => {
   	return (
-		<Layout>
-			<div>Logbook</div>
-		</Layout>
+		<div>Logbook</div>
   	)
 }
 

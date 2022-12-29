@@ -56,7 +56,6 @@ function QRCode() {
 	};
 
 	return (
-		<Layout>
 		<ModuleMain title="QRCode" header="Generate QR Code">
 			<div className={styles.halfContainer}>
 				<div className="form-group">
@@ -81,7 +80,6 @@ function QRCode() {
 				</div>
 			</div>
 		</ModuleMain>
-		</Layout>
 	)
 }
 

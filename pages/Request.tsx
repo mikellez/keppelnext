@@ -3,9 +3,7 @@ import Layout from '../components/Layout'
 
 const Request = () => {
   	return (
-		<Layout>
-			<div>Request</div>
-		</Layout>
+		<div>Request</div>
   	)
 }
 export default Request

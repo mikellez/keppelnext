@@ -3,9 +3,7 @@ import Layout from '../components/Layout'
 
 const Master = () => {
   	return (
-		<Layout>
-			<div>Master</div>
-		</Layout>
+		<div>Master</div>
   	)
 }
 

@@ -49,6 +49,7 @@ const NavBar= () => {
         <div>
             <BsList onClick={displayNav} size={42} style={{color:"#707070", marginRight:"1em"}}/>
             <div className={styles.overlay} style={{
+                position: "fixed",
                 display: navDisplay ? "block" : "none",
                 zIndex: navDisplay ? 5 : -1
                 }}>

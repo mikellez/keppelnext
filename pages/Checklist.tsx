@@ -3,9 +3,7 @@ import Layout from '../components/Layout'
 
 const Checklist = () => {
   	return (
-		<Layout>
-			<div>Checklist</div>
-		</Layout>
+		<div>Checklist</div>
   	)
 }
 
