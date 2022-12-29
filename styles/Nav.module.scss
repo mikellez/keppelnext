@@ -5,18 +5,26 @@ Link {
 }*/
 
 .navMain {
-    height: 100%;
     position: fixed;
-    color: global.$gray;
+
     left: 0;
     top: 0;
-    background-color: #EEEEEE;
     z-index: 10;
+
+    width: 20rem;
+    height: 100%;
+
+    color: global.$gray;
+    background-color: #EEEEEE;
+
+    
+    transition: transform 0.2s ease-out;
 }
 
 .navHead {
     background-color: #E3E3E3;
-    padding: 0.5rem 2rem;
+    height: 4rem;
+    padding: 0rem 2rem;
     margin-bottom: 4rem;
     display: flex;
     align-items: center;
@@ -31,8 +39,8 @@ Link {
     color: global.$gray;
     background-color: #f7f7f7;
     margin: 0.2rem 0 0.2rem 0;
-    padding: 0.2rem 2rem;
-    border-radius: 5%;
+    padding: 0.3rem 2rem;
+    border-left: rgba(0,0,0,0.2) solid 6px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -45,7 +53,13 @@ Link {
 
 .navItem:hover {
     color: global.$primary;
+    border-left: global.$primary solid 6px;
     cursor: pointer;
+}
+
+.navItemSelected:hover {
+    color: white;
+    border-left: rgba(0,0,0,0.2) solid 6px;
 }
 
 .navItemText {
@@ -59,7 +73,8 @@ Link {
     left: 0;
     height: 100%;
     width: 100%;
-    background-color: rgba(0,0,0,0.5)
+    background-color: rgba(0,0,0,0.6);
+    transition: opacity 0.2s ease-out, visibility 0.2s;
 }
 
 .navDropdownItems {

@@ -8,12 +8,22 @@ import NavDropdown from './NavDropdown';
 import NavLink from './NavLink';
 
 const NavBar= () => {
-    const router = useRouter();
-    // Storing whether user has clicked on the nav button as a state
+
     const [navDisplay, setNavDisplay] = useState(false);
+    const [isTransitioning, setTransitioning] = useState(false);
 
     // Display and hide nav by toggling the state
     function displayNav() {
+        // check if the navbar is still transitioning to another state
+        // ignore if still transitioning to prevent double clicks
+        if(isTransitioning)
+            return;
+
+        setTransitioning(true);
+        setTimeout(() => {
+            setTransitioning(false)
+        }, 300);
+
         setNavDisplay(prev => !prev);
     };
 
@@ -48,12 +58,21 @@ const NavBar= () => {
     return (
         <div>
             <BsList onClick={displayNav} size={42} style={{color:"#707070", marginRight:"1em"}}/>
-            <div className={styles.overlay} style={{
-                position: "fixed",
-                display: navDisplay ? "block" : "none",
-                zIndex: navDisplay ? 5 : -1
-                }}>
-            <div className={styles.navMain} style={{display: navDisplay ? "block" : "none"}}>
+            <div onClick={displayNav} className={styles.overlay} style={
+                {
+                    position: "fixed",
+                    visibility: navDisplay ? "visible"  : "collapse",
+                    opacity:    navDisplay ? "100%"     : "0%",
+                    zIndex: 5
+                }
+            }>
+            </div>
+            <div className={styles.navMain} style={
+                {
+                    //display: navDisplay ? "block" : "none",
+                    transform: navDisplay ? "translateX(0)" : "translateX(-20rem)"
+                }
+            }>
                 <div className={styles.navItems}>
                     <div className={styles.navHead}>
                         <h3 className={styles.navItemText}>Menu</h3>
@@ -73,7 +92,6 @@ const NavBar= () => {
                     <NavDropdown name="User Management" list={userManagementList} />
                     <NavDropdown name="Activity Log" list={activityLogList} />
                 </div>
-            </div>
             </div>
         </div>
     );
