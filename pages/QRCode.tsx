@@ -1,11 +1,11 @@
 import styles from '../styles/QRCode.module.css'
 
-import Head from 'next/head'
 import React, { useState, useRef } from 'react'
 import axios from 'axios';
 
 import ModuleMain from '../components/ModuleMain';
-import Layout from '../components/Layout';
+import { QRAssetSelect, QRAssetSelectOption } from '../components/QR/QRAssetSelect';
+import QRPlantSelect from '../components/QR/QRPlantSelect';
 
 async function getAssets(plant_id: number)
 {
@@ -21,22 +21,23 @@ async function getAssets(plant_id: number)
 }
 
 function QRCode() {
-	const [plantOptions, setPlantOptions] = useState<JSX.Element[]>([]);
-	const selectedAssets = useRef<string[]>([]);
+	const [plantOptions, setPlantOptions] = useState<QRAssetSelectOption[]>([]);
+	const [selectedAssetIds, setSelectedAssetIds] = useState<number[]>([]);
 
 	function updateAssetLists(plant_id : number)
 	{
-		let options: JSX.Element[] = [];
+		let options: QRAssetSelectOption[] = [];
 
-		getAssets(plant_id).then((d) => {
-			if(d === null)
-			{
-				console.log("assets null")
-				return;
-			}
+		getAssets(plant_id).then((data) => {
+			if(data === null)
+				return console.log("assets null");
 
-			for(let a of d)
-				options.push(<option key={a.psa_id.toString() + a.asset_name} value={a.psa_id}>{a.asset_name}</option>);
+			for(let asset of data)
+				options.push({
+					key: asset.psa_id.toString() + asset.asset_name,
+					value: asset.psa_id,
+					text: asset.asset_name
+				});
 
 			setPlantOptions(options);
 		});
@@ -46,27 +47,16 @@ function QRCode() {
 		updateAssetLists(parseInt(e.target.value));
 	};
 
-	const assetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		selectedAssets.current = (Array.from(e.target.options).filter(o => o.selected).map(o => o.value));
-		console.log(selectedAssets.current);
-	};
-
 	const generateQR = () => {
-		alert("selected values: " + selectedAssets.current.toString());
-	};
+        alert("selected values: " + selectedAssetIds.toString());
+    }
 
 	return (
 		<ModuleMain title="QRCode" header="Generate QR Code">
 			<div className={styles.halfContainer}>
 				<div className="form-group">
 					<label className='form-label'>Plant Location:</label>
-					<select className="form-control" required onChange={plantChange}>
-						<option value="" hidden>--Please Select a Plant--</option>
-						<option value="2">Woodlands DHCS</option>
-						<option value="3">Biopolis</option>
-						<option value="4">Mediapolis</option>
-						<option value="1">Changi DHCS</option>
-					</select>
+					<QRPlantSelect onSelect={plantChange}/>
 				</div>
 				<br/>
 				<button className="btn btn-primary" onClick={generateQR}>Generate QR Code</button>
@@ -74,9 +64,7 @@ function QRCode() {
 			<div className={styles.halfContainer}>
 				<div className="form-group">
 					<label className="form-label">Assets:</label>
-					<select className="form-control" name="assetList" multiple={true} onChange={assetChange} style={{height:"300px"}}>
-						{plantOptions}
-					</select>
+					<QRAssetSelect options={plantOptions} onSelect={setSelectedAssetIds}/>
 				</div>
 			</div>
 		</ModuleMain>
