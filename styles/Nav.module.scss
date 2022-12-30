@@ -1,8 +1,4 @@
 @use "colours.module.scss" as global;
-/*
-Link {
-    color: global.$gray;
-}*/
 
 .navMain {
     position: fixed;
@@ -28,6 +24,7 @@ Link {
     margin-bottom: 4rem;
     display: flex;
     align-items: center;
+    border-bottom: 4px solid global.$primary;
 }
 
 .navItems {

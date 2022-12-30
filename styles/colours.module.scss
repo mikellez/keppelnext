@@ -1,4 +1,7 @@
 
 $primary: #C70F2B;
-
 $gray: #4D4D4D;
+
+:export {
+    primary: $primary
+}

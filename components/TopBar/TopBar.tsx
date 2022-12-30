@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { VscAccount } from "react-icons/vsc";
 import DropdownMenu from './DropdownMenu';
 import NavBar from '../NavBar/NavBar';
+import colours from '../../styles/colours.module.scss'
 
 export default function TopBar() {
 
@@ -20,6 +21,8 @@ export default function TopBar() {
 					padding: "0.5rem",
 
 					backgroundColor: "#E3E3E3",
+					borderBottom: "4px solid " + colours.primary,
+
 					display: "flex",
 					alignItems: "center"
 				}

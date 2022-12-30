@@ -7,7 +7,7 @@ import { BsList } from 'react-icons/bs'
 import NavDropdown from './NavDropdown';
 import NavLink from './NavLink';
 
-const NavBar= () => {
+export default function NavBar() {
 
     const [navDisplay, setNavDisplay] = useState(false);
     const [isTransitioning, setTransitioning] = useState(false);
@@ -96,5 +96,3 @@ const NavBar= () => {
         </div>
     );
 };
-
-export default NavBar;
