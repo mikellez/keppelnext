@@ -4,6 +4,7 @@ import { VscAccount } from "react-icons/vsc";
 import DropdownMenu from './DropdownMenu';
 import NavBar from '../NavBar/NavBar';
 import colours from '../../styles/colours.module.scss'
+import Link from 'next/link';
 
 export default function TopBar() {
 
@@ -28,7 +29,7 @@ export default function TopBar() {
 				}
 			}>
 				<NavBar />
-				<Image src="/keppellogo.png" alt="Keppell Logo" width={225} height={28}/>
+				<a href="/"><Image src="/keppellogo.png" alt="Keppell Logo" width={225} height={28}/></a>
 				<VscAccount size={28} style={{color:"#707070", marginLeft: "auto"}}/>
 				<DropdownMenu/>
 			</div>
