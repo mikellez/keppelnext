@@ -1,12 +1,19 @@
 
 import Image from 'next/image'
-import styles from '../styles/Login.module.css'
+import styles from '../styles/404.module.scss'
 
-export default function Custom404() {
+function Custom404() {
 	return (
-		<div className={styles.loginContainer}>
-			<Image src="/keppellogo.png" alt="Keppell Logo" className={styles.loginImage} width={450} height={56}/><br></br>
-			<h1 className={styles.headerLogin} style={{textAlign: "center"}}>404</h1>
+		<div className={styles.errorContainer}>
+			<Image src="/keppellogo.png" alt="Keppell Logo" className={styles.errorTopImage} width={450} height={56}/>
+			<div className={styles.errorText}>
+				<span className={styles.errorHeader}>404|</span>
+				<Image src="/server.png" alt="Error Image" className={styles.errorImage} width={234} height={307}/>
+			</div>
+			<span style={{position: "relative", top: "0.4em"}}>The page cannot be found</span>
+			<p>Contact your administrator or <a href="/"><u>return to home</u></a></p>
 		</div>
 	)
 }
+
+export default Custom404;
