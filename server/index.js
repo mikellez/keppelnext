@@ -1,11 +1,12 @@
 const express = require("express");
 const next = require("next");
 const bodyParser = require("body-parser");
-const db = require("../db");
 const passport = require("passport");
 const session = require("express-session");
 
 const userAuth = require("./userAuth");
+
+const controllers = require("./controllers");
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -26,18 +27,25 @@ app.prepare().then(() => {
     next();
   }
 
+  function checkIfLoggedInAPI(req, res, next) {
+    if (req.user === undefined) return res.status(400).json("you are not logged in");
+    next();
+  }
+
   server.post("/api/login", passport.authenticate("local", {}), (req, res) => {
-    return res.status(200).send("success");
+    return res.status(200).json("success");
   });
 
   server.post("/api/logout", (req, res) => {
-    if (req.user === undefined) return res.status(400).send("you are not logged in");
+    if (req.user === undefined) return res.status(400).json("you are not logged in");
 
     req.logout((err) => {
       if (err) return res.status(500).send(err);
       return res.status(200).send();
     });
   });
+
+  server.get("/api/request/getRequests/", checkIfLoggedInAPI, controllers.request.getRequests)
 
   // NO API ROUTE
   server.all("/api/*", (req, res) => {
@@ -57,41 +65,15 @@ app.prepare().then(() => {
     return handle(req, res);
   });
 
-  server.get("/Dashboard*", checkIfLoggedIn, (req, res) => {
-    return handle(req, res);
-  });
-
-  server.get("/Request*", checkIfLoggedIn, (req, res) => {
-    return handle(req, res);
-  });
-
-  server.get("/Asset*", checkIfLoggedIn, (req, res) => {
-    return handle(req, res);
-  });
-
-  server.get("/Schedule*", checkIfLoggedIn, (req, res) => {
-    return handle(req, res);
-  });
-
-  server.get("/Checklist*", checkIfLoggedIn, (req, res) => {
-    return handle(req, res);
-  });
-
-  server.get("/Logbook*", checkIfLoggedIn, (req, res) => {
-    return handle(req, res);
-  });
-
-  server.get("/QRCode*", checkIfLoggedIn, (req, res) => {
-    return handle(req, res);
-  });
-
-  server.get("/Workflow*", checkIfLoggedIn, (req, res) => {
-    return handle(req, res);
-  });
-
-  server.get("/Master*", checkIfLoggedIn, (req, res) => {
-    return handle(req, res);
-  });
+  server.get("/Dashboard*", checkIfLoggedIn,  (req, res) => { return handle(req, res); });
+  server.get("/Request*", checkIfLoggedIn,    (req, res) => { return handle(req, res); });
+  server.get("/Asset*", checkIfLoggedIn,      (req, res) => { return handle(req, res); });
+  server.get("/Schedule*", checkIfLoggedIn,   (req, res) => { return handle(req, res); });
+  server.get("/Checklist*", checkIfLoggedIn,  (req, res) => { return handle(req, res); });
+  server.get("/Logbook*", checkIfLoggedIn,    (req, res) => { return handle(req, res); });
+  server.get("/QRCode*", checkIfLoggedIn,     (req, res) => { return handle(req, res); });
+  server.get("/Workflow*", checkIfLoggedIn,   (req, res) => { return handle(req, res); });
+  server.get("/Master*", checkIfLoggedIn,     (req, res) => { return handle(req, res); });
 
   server.get("*", (req, res) => {
     return handle(req, res);

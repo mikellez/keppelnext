@@ -52,7 +52,7 @@ function QRCode() {
     }
 
 	return (
-		<ModuleMain title="QRCode" header="Generate QR Code">
+		<ModuleMain title="QRCode" header="Generate QR Code" includeGreyContainer>
 			<div className={styles.halfContainer}>
 				<div className="form-group">
 					<label className='form-label'>Plant Location:</label>

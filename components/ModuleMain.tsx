@@ -1,8 +1,9 @@
-import Head from 'next/head'
+import ModuleHeader from "./ModuleHeader";
 
 interface ModuleInfo {
     title: string;
-    header: string;
+	header: string;
+	includeGreyContainer?: boolean; 
     children: React.ReactNode;
 }
 
@@ -10,14 +11,9 @@ function ModuleMain(props: ModuleInfo) {
 
 	return (
 		<div>
-			<Head>
-				<title>{props.title}</title>
-				<link rel="icon" href="/favicon.ico" />
-			</Head>
-
 			<main className="container-md">
-				<h1>{props.header}</h1>
-				<div className="mainContainer">
+				<ModuleHeader title={props.title} header={props.header}></ModuleHeader>
+				<div className={props.includeGreyContainer ? "mainContainer" : ""}>
                     {props.children}
                 </div>
             </main>
