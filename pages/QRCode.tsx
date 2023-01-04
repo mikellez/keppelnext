@@ -6,6 +6,8 @@ import axios from 'axios';
 import ModuleMain from '../components/ModuleMain';
 import { QRAssetSelect, QRAssetSelectOption } from '../components/QR/QRAssetSelect';
 import QRPlantSelect from '../components/QR/QRPlantSelect';
+import ModuleHeader from '../components/ModuleHeader';
+import ModuleContent from '../components/ModuleContent';
 
 async function getAssets(plant_id: number)
 {
@@ -52,21 +54,24 @@ function QRCode() {
     }
 
 	return (
-		<ModuleMain title="QRCode" header="Generate QR Code" includeGreyContainer>
-			<div className={styles.halfContainer}>
-				<div className="form-group">
-					<label className='form-label'>Plant Location:</label>
-					<QRPlantSelect onSelect={plantChange}/>
+		<ModuleMain>
+			<ModuleHeader title="QRCode" header="Generate QR Codes"></ModuleHeader>
+			<ModuleContent includeGreyContainer>
+				<div className={styles.halfContainer}>
+					<div className="form-group">
+						<label className='form-label'>Plant Location:</label>
+						<QRPlantSelect onSelect={plantChange}/>
+					</div>
+					<br/>
+					<button className="btn btn-primary" onClick={generateQR}>Generate QR Code</button>
 				</div>
-				<br/>
-				<button className="btn btn-primary" onClick={generateQR}>Generate QR Code</button>
-			</div>
-			<div className={styles.halfContainer}>
-				<div className="form-group">
-					<label className="form-label">Assets:</label>
-					<QRAssetSelect options={plantOptions} onSelect={setSelectedAssetIds}/>
+				<div className={styles.halfContainer}>
+					<div className="form-group">
+						<label className="form-label">Assets:</label>
+						<QRAssetSelect options={plantOptions} onSelect={setSelectedAssetIds}/>
+					</div>
 				</div>
-			</div>
+			</ModuleContent>
 		</ModuleMain>
 	)
 }

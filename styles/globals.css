@@ -16,13 +16,15 @@ body {
 }
 
 .mainContainer {
-  margin-top: 2em;
+  display: flex;
+  align-items: flex-start;
+}
+
+.greyContainer {
   padding: 2em;
   background-color: #EEEEEE;
   border: 1px solid #CCCCCC;
   border-radius: 25px;
-  display: flex;
-  align-items: flex-start;
 }
 
 /*

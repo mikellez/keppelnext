@@ -11,5 +11,7 @@ export default function ModuleHeader(props: ModuleHeaderProps) {
 		<Head>
 			<title>{props.title}</title>
 		</Head>
+		<div style={{marginBottom: "2em"}}>
 		<h1>{props.header}</h1></div>
+	</div>
 }

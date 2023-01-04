@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import ModuleMain from '../components/ModuleMain'
+import ModuleContent from '../components/ModuleContent';
+import ModuleHeader from '../components/ModuleHeader';
 
 import { CompactTable } from '@table-library/react-table-library/compact';
 import { TableNode } from '@table-library/react-table-library/types/table';
@@ -91,8 +93,11 @@ export default function Request() {
 	}
 	
   	return (
-		<ModuleMain title="Request" header="Request">
-			<CompactTable columns={COLUMNS} data={{nodes: requestNodes}} theme={theme} layout={{custom: true}}/>
+		<ModuleMain>
+			<ModuleHeader title="Request" header="Request"></ModuleHeader>
+			<ModuleContent>
+				<CompactTable columns={COLUMNS} data={{nodes: requestNodes}} theme={theme} layout={{custom: true}}/>
+			</ModuleContent>
 		</ModuleMain>
   	)
 }
