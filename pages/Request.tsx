@@ -94,7 +94,10 @@ export default function Request() {
 	
   	return (
 		<ModuleMain>
-			<ModuleHeader title="Request" header="Request"></ModuleHeader>
+			<ModuleHeader title="Request" header="Request">
+				<button className="btn btn-primary">New Request</button>
+				<button className="btn btn-primary">Export CSV</button>
+			</ModuleHeader>
 			<ModuleContent>
 				<CompactTable columns={COLUMNS} data={{nodes: requestNodes}} theme={theme} layout={{custom: true}}/>
 			</ModuleContent>
