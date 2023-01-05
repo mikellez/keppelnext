@@ -57,7 +57,7 @@ export default function NavBar() {
 
     return (
         <div>
-            <BsList onClick={displayNav} size={42} style={{color:"#707070", marginRight:"1em"}}/>
+            <BsList onClick={displayNav} size={42} style={{color:"#707070", marginRight:"1em", cursor: "pointer"}}/>
             <div onClick={displayNav} className={styles.overlay} style={
                 {
                     position: "fixed",
@@ -76,7 +76,7 @@ export default function NavBar() {
                 <div className={styles.navItems}>
                     <div className={styles.navHead}>
                         <h3 className={styles.navItemText}>Menu</h3>
-                        <GrClose onClick={displayNav} size={25} style={{color:"#4D4D4D", marginLeft: "auto"}} />
+                        <GrClose onClick={displayNav} size={25} style={{color:"#4D4D4D", marginLeft: "auto", cursor: "pointer"}} />
                     </div>
 
                     <NavLink name="Dashboard" path="/Dashboard" />
