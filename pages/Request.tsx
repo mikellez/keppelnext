@@ -1,9 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react'
-import ModuleMain from '../components/ModuleMain'
-import ModuleContent from '../components/ModuleContent';
-import ModuleHeader from '../components/ModuleHeader';
+import { ModuleContent, ModuleHeader, ModuleMain } from '../components'
 
 import { CompactTable } from '@table-library/react-table-library/compact';
 import { TableNode } from '@table-library/react-table-library/types/table';

@@ -2,8 +2,9 @@ import Head from 'next/head'
 import React, { CSSProperties } from 'react';
 
 interface ModuleHeaderProps {
-	title: string;
+	title?: string;
 	header: string;
+	headerSize?: string;
     children?: React.ReactNode;
 }
 
@@ -28,12 +29,14 @@ const headerSideElement: CSSProperties = {
 	marginRight: "0.3em"
 }
 
-export default function ModuleHeader(props: ModuleHeaderProps) {
+export function ModuleHeader(props: ModuleHeaderProps) {
+	const headerFinalName:CSSProperties = props.headerSize ? {fontSize: props.headerSize} : headerName;
+	 
 	return (
 	<div>
-		<Head><title>{props.title}</title></Head>
+		{props.title && <Head><title>{props.title}</title></Head>}
 		<div style={headerStyle}>
-			<span style={headerName}>{props.header}</span>
+			<span style={headerFinalName}>{props.header}</span>
 			<span style={headerSide}>
 				{
 					React.Children.map(props.children, child => {

@@ -1,0 +1,8 @@
+.halfContainer {
+    padding: 1em;
+}
+
+.largeContainer {
+    padding: 1em;
+    grid-column: span 2;
+}

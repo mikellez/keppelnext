@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-import ModuleContent from '../components/ModuleContent'
-import ModuleHeader from '../components/ModuleHeader'
-import ModuleMain from '../components/ModuleMain'
+import { ModuleContent, ModuleHeader, ModuleMain } from '../../components'
 
 import { CompactTable } from '@table-library/react-table-library/compact';
 import { TableNode } from '@table-library/react-table-library/types/table';
@@ -83,10 +81,10 @@ export default function Checklist() {
 		});
 	}
 	
-  	return (
+	return (
 		<ModuleMain>
 			<ModuleHeader title="Checklist" header="Checklist">
-				<button className="btn btn-primary">New Checklist</button>
+				<a href="/Checklist/New" className="btn btn-primary">New Checklist</a>
 				<button className="btn btn-primary">Export CSV</button>
 			</ModuleHeader>
 			<ModuleContent>
