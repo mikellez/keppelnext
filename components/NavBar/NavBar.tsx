@@ -55,6 +55,22 @@ export default function NavBar() {
         }
     ];
 
+    // Dropdown list for schedule
+    const scheduleList = [
+        {
+            name: "View Schedule",
+            path: "/Schedule"
+        },
+        {
+            name: "Create Schedule",
+            path: "/Schedule/Create"
+        },
+        {
+            name: "Manage Schedule",
+            path: "/Schedule/Manage"
+        }
+    ];
+
     return (
         <div>
             <BsList onClick={displayNav} size={42} style={{color:"#707070", marginRight:"1em", cursor: "pointer"}}/>
@@ -79,18 +95,17 @@ export default function NavBar() {
                         <GrClose onClick={displayNav} size={25} style={{color:"#4D4D4D", marginLeft: "auto", cursor: "pointer"}} />
                     </div>
 
-                    <NavLink name="Dashboard" path="/Dashboard" />
-                    <NavLink name="Request" path="/Request" />
-                    <NavLink name="Asset" path="/Asset" />
-                    <NavLink name="Schedule" path="/Schedule" />
-                    <NavLink name="Checklist" path="/Checklist" />
-                    <NavLink name="E-Logbook" path="/Logbook" />
-                    <NavLink name="Generate QR Codes" path="/QRCode" />
-                    <NavLink name="Workflow" path="/Workflow" />
-                    <NavLink name="Master" path="/Master" />
-
-                    <NavDropdown name="User Management" list={userManagementList} />
-                    <NavDropdown name="Activity Log" list={activityLogList} />
+                    <NavLink     name="Dashboard"         path="/Dashboard" />
+                    <NavLink     name="Request"           path="/Request" />
+                    <NavLink     name="Asset"             path="/Asset" />
+                    <NavDropdown name="Schedule"          list={scheduleList} />
+                    <NavLink     name="Checklist"         path="/Checklist" />
+                    <NavLink     name="E-Logbook"         path="/Logbook" />
+                    <NavLink     name="Generate QR Codes" path="/QRCode" />
+                    <NavLink     name="Workflow"          path="/Workflow" />
+                    <NavLink     name="Master"            path="/Master" />
+                    <NavDropdown name="User Management"   list={userManagementList} />
+                    <NavDropdown name="Activity Log"      list={activityLogList} />
                 </div>
             </div>
         </div>
