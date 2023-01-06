@@ -8,7 +8,7 @@ export default function ChecklistNew() {
 	return (
 		<ModuleMain>
 			<ModuleHeader title="New Checklist" header="Create New Checklist">
-				<a href="/Checklist" className="btn btn-primary">Back</a>
+				<a href="/Checklist" className="btn btn-secondary">Back</a>
 			</ModuleHeader>
 			<ModuleContent includeGreyContainer grid>
 				<div className={formStyles.halfContainer}>

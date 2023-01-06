@@ -1,9 +1,9 @@
 import formStyles from '../styles/formStyles.module.css'
 
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import axios from 'axios';
 
-import { ModuleMain, ModuleHeader, ModuleContent } from '../components/';
+import { ModuleMain, ModuleHeader, ModuleContent, ModuleFooter } from '../components/';
 import { QRAssetSelect, QRAssetSelectOption } from '../components/QR/QRAssetSelect';
 import QRPlantSelect from '../components/QR/QRPlantSelect';
 
@@ -61,7 +61,6 @@ function QRCode() {
 						<QRPlantSelect onSelect={plantChange}/>
 					</div>
 					<br/>
-					<button className="btn btn-primary" onClick={generateQR}>Generate QR Code</button>
 				</div>
 				<div className={formStyles.halfContainer}>
 					<div className="form-group">
@@ -70,6 +69,9 @@ function QRCode() {
 					</div>
 				</div>
 			</ModuleContent>
+			<ModuleFooter>
+				<button className="btn btn-primary" onClick={generateQR}>Generate QR Code</button>
+			</ModuleFooter>
 		</ModuleMain>
 	)
 }
