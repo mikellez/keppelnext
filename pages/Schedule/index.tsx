@@ -8,7 +8,11 @@ export default function Schedule() {
 
 	// Calls an api on load to get the list of plants
 	useEffect(() => {
-		
+		axios.get("/api/request/getScheduleAccess")
+		.then(res => {
+			console.log(res.data)
+		})
+		.catch(err => console.log(err.message))
 	}, []);
 	
   	return (
@@ -21,4 +25,6 @@ export default function Schedule() {
 		</ScheduleTemplate>
   	);
 };
+
+
 

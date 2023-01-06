@@ -45,7 +45,8 @@ app.prepare().then(() => {
     });
   });
 
-  server.get("/api/request/getRequests/", checkIfLoggedInAPI, controllers.request.getRequests)
+  server.get("/api/request/getRequests/", checkIfLoggedInAPI, controllers.request.getRequests);
+  server.get("/api/request/getScheduleAccess", checkIfLoggedIn, controllers.schedule.getScheduleAccess);
 
   // NO API ROUTE
   server.all("/api/*", (req, res) => {
