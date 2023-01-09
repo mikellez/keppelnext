@@ -94,6 +94,10 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                         selectable={true}
                         unselectAuto={true}
                         events={eventList}
+                        eventDisplay="block"
+                        eventBackgroundColor="#C70F2B"
+                        eventBorderColor="#FFFFFF"
+                        displayEventTime={false}
                 />
 			</ModuleContent>
 		</ModuleMain>
