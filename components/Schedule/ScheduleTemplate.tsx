@@ -90,6 +90,6 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 />
 			</ModuleContent>
 		</ModuleMain>
-    )
-}
+    );
+};
 
