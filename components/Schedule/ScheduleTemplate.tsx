@@ -10,6 +10,12 @@ interface ScheduleTemplateInfo extends PropsWithChildren {
     timeline?: number;
 };
 
+export interface PlantInfo {
+    plant_id: number;
+    plant_name: string;
+    plant_description: string;
+};
+
 export interface ScheduleInfo {
     assigned_ids: number[]
     calendar_dates: string[]
@@ -44,6 +50,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
 
     // Add events to be displayed on the calendar
     useEffect(() => {
+        setEventList([]);
         if (props.schedules) {
             let newEvents : EventInfo[] = [];
             props.schedules.forEach(item => {
@@ -63,7 +70,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 newEvents.push(event);
                 setEventList(newEvents)
             });
-        }
+        } 
     }, [props.schedules]);
 
     return (

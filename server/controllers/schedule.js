@@ -26,9 +26,45 @@ const makeScheduleDict = (arr) => {
     return newArr;
 };
 
-const getScheduleAccess = async(req, res, next) => {
+const getViewSchedules = async(req, res, next) => {
     let queryS = [];
-    if (req.user.user_role === 0 || req.user.user_role === 4) {
+    if (req.params.plant_id === '0') {
+        if (req.user.user_role === 0 || req.user.user_role === 4) {
+            queryS.push(`SELECT SC.SCHEDULE_ID, SC.CHECKLIST_TEMPLATE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
+            SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL, STRING_AGG(DISTINCT(U.user_email), ' ,') AS USERNAME, PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS
+            FROM 
+            KEPPEL.SCHEDULE_CHECKLIST  as SC,
+            KEPPEL.USERS AS U,
+            KEPPEL.PLANT_MASTER  AS PM,
+            KEPPEL.CHECKLIST_TEMPLATES AS CT,
+            KEPPEL.USER_PLANT AS UP
+            WHERE
+            U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
+            SC.PLANT_ID = PM.PLANT_ID AND 
+            CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND 
+            SC.PLANT_ID =ANY(SELECT DISTINCT(PLANT_ID) FROM KEPPEL.USER_PLANT WHERE USER_ID = ${req.user.user_id} OR ${req.user.user_id} = ANY(SC.SCHEDULER_USERIDS_FOR_EMAIL))
+            AND
+            SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 'Approved') 
+            
+            GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
+        } else {
+            queryS.push(`SELECT 
+            SC.SCHEDULE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
+          SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL,
+          PM.PLANT_NAME, CT.CHL_NAME,SC.CHECKLIST_TEMPLATE_ID, STRING_AGG(U.user_name, ' ,') AS USERNAME, SC.REMARKS
+          FROM 
+          KEPPEL.SCHEDULE_CHECKLIST  as SC,
+          KEPPEL.PLANT_MASTER  AS PM,
+          KEPPEL.CHECKLIST_TEMPLATES AS CT,
+          KEPPEL.USERS AS U
+          WHERE
+          SC.PLANT_ID = PM.PLANT_ID AND 
+          CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
+          U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
+          SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 'Approved')
+          GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
+        };
+    } else {
         queryS.push(`SELECT SC.SCHEDULE_ID, SC.CHECKLIST_TEMPLATE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
         SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL, STRING_AGG(DISTINCT(U.user_email), ' ,') AS USERNAME, PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS
         FROM 
@@ -41,29 +77,13 @@ const getScheduleAccess = async(req, res, next) => {
         U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
         SC.PLANT_ID = PM.PLANT_ID AND 
         CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND 
-        SC.PLANT_ID =ANY(SELECT DISTINCT(PLANT_ID) FROM KEPPEL.USER_PLANT WHERE USER_ID = ${req.params.user_id} OR ${req.params.user_id} = ANY(SC.SCHEDULER_USERIDS_FOR_EMAIL))
+        SC.PLANT_ID = ${req.params.plant_id}
         AND
         SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 'Approved') 
         
-        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
-    } else {
-        queryS.push(`SELECT 
-        SC.SCHEDULE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
-      SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL,
-      PM.PLANT_NAME, CT.CHL_NAME,SC.CHECKLIST_TEMPLATE_ID, STRING_AGG(U.user_name, ' ,') AS USERNAME, SC.REMARKS
-      FROM 
-      KEPPEL.SCHEDULE_CHECKLIST  as SC,
-      KEPPEL.PLANT_MASTER  AS PM,
-      KEPPEL.CHECKLIST_TEMPLATES AS CT,
-      KEPPEL.USERS AS U
-      WHERE
-      SC.PLANT_ID = PM.PLANT_ID AND 
-      CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
-      U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
-      SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 'Approved')
-      GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
-    };
-
+        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`)
+    }
+    console.log(queryS[0])
     db.query(queryS[0], (err, result) => {
         if (err) throw err;
         if (result) {
@@ -73,6 +93,25 @@ const getScheduleAccess = async(req, res, next) => {
     });
 };
 
+const getPlants = async(req, res, next) => {
+    if (req.user.user_role === 0 || req.user.user_role === 4) {
+        db.query(`SELECT * FROM keppel.plant_master`, (err, result) => {
+            if (err) throw err;
+            if (result) {
+                res.status(200).send(result.rows);
+            };
+        }); 
+    } else {
+        db.query("SELECT * FROM keppel.plant_master WHERE plant_id IN (SELECT plant_id FROM keppel.user_plant WHERE user_id = $1::integer)", [req.user.user_id], (err, result) => {
+            if (err) throw err;
+            if (result) {
+                res.status(200).send(result.rows);
+            }; 
+        })
+    }
+};
+
 module.exports = {
-    getScheduleAccess
+    getViewSchedules, 
+    getPlants
 };
