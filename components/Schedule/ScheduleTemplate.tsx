@@ -45,7 +45,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     // Add events to be displayed on the calendar
     useEffect(() => {
         if (props.schedules) {
-            let newEvents:EventInfo[] = [];
+            let newEvents : EventInfo[] = [];
             props.schedules.forEach(item => {
                 const event = {
                     title: item.checklist_name,
@@ -60,11 +60,11 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                         remarks: item.remarks
                     },
                 };
-                console.log(event)
                 newEvents.push(event);
+                setEventList(newEvents)
             });
         }
-    }, []);
+    }, [props.schedules]);
 
     return (
         <ModuleMain>
