@@ -44,7 +44,7 @@ const getViewSchedules = async(req, res, next) => {
             CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND 
             SC.PLANT_ID =ANY(SELECT DISTINCT(PLANT_ID) FROM KEPPEL.USER_PLANT WHERE USER_ID = ${req.user.user_id} OR ${req.user.user_id} = ANY(SC.SCHEDULER_USERIDS_FOR_EMAIL))
             AND
-            SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 'Approved') 
+            SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1) 
             
             GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
         } else {
@@ -61,7 +61,7 @@ const getViewSchedules = async(req, res, next) => {
           SC.PLANT_ID = PM.PLANT_ID AND 
           CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
           U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
-          SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 'Approved')
+          SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1)
           GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
         };
     } else {
@@ -79,7 +79,7 @@ const getViewSchedules = async(req, res, next) => {
         CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND 
         SC.PLANT_ID = ${req.params.plant_id}
         AND
-        SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 'Approved') 
+        SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1) 
         
         GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`)
     }

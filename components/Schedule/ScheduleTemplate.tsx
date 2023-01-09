@@ -2,6 +2,7 @@ import React, { PropsWithChildren, useState, useEffect } from 'react';
 import { ModuleContent, ModuleHeader, ModuleMain } from '../';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import EventModal from './EventModal';
 
 interface ScheduleTemplateInfo extends PropsWithChildren {
     title: string;
@@ -30,7 +31,7 @@ export interface ScheduleInfo {
     username: string;
 };
 
-interface EventInfo {
+export interface EventInfo {
     title: string;
     start: Date;
     extendedProps: {
@@ -47,6 +48,7 @@ interface EventInfo {
 export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     // Store the list of events in a state to be rendered on the calendar
     const [eventList, setEventList] = useState<EventInfo[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
     // Add events to be displayed on the calendar
     useEffect(() => {
@@ -77,6 +79,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
 
     return (
         <ModuleMain>
+        <EventModal isOpen={isModalOpen} />
 			<ModuleHeader title={props.title} header={props.header}>
                 {props.children}
 			</ModuleHeader>
@@ -101,7 +104,8 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                         eventBorderColor="#FFFFFF"
                         eventTextColor="#000000"
                         displayEventTime={false}
-                />
+                        eventClick={() => setIsModalOpen(true)}
+                /> 
 			</ModuleContent>
 		</ModuleMain>
     );

@@ -57,7 +57,6 @@ export default function Schedule() {
 		updateSchedules(parseInt(e.target.value));
 	};
 
-	console.log(scheduleList)
 	// Plant dropdown options
 	const plantOptions = plantList.map(plant => <option key={plant.plant_id} value={plant.plant_id}>{plant.plant_name}</option>)
 
