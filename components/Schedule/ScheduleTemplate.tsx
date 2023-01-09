@@ -54,20 +54,22 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
         if (props.schedules) {
             let newEvents : EventInfo[] = [];
             props.schedules.forEach(item => {
-                const event = {
-                    title: item.checklist_name,
-                    start: new Date(item.start_date),
-                    extendedProps: {
-                        plant: item.plant,
-                        scheduleId: item.schedule_id,
-                        startDate: new Date(item.start_date),
-                        endDate: new Date(item.end_date),
-                        recurringPeriod: item.period,
-                        assignedTo: item.assigned_ids,
-                        remarks: item.remarks
-                    },
-                };
-                newEvents.push(event);
+                item.calendar_dates.forEach(date => {
+                    const event = {
+                        title: item.checklist_name,
+                        start: new Date(date),
+                        extendedProps: {
+                            plant: item.plant,
+                            scheduleId: item.schedule_id,
+                            startDate: new Date(item.start_date),
+                            endDate: new Date(item.end_date),
+                            recurringPeriod: item.period,
+                            assignedTo: item.assigned_ids,
+                            remarks: item.remarks
+                        },
+                    };
+                    newEvents.push(event);
+                });
                 setEventList(newEvents)
             });
         } 
@@ -95,8 +97,9 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                         unselectAuto={true}
                         events={eventList}
                         eventDisplay="block"
-                        eventBackgroundColor="#C70F2B"
+                        eventBackgroundColor="#FA9494"
                         eventBorderColor="#FFFFFF"
+                        eventTextColor="#000000"
                         displayEventTime={false}
                 />
 			</ModuleContent>
