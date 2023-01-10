@@ -27,10 +27,10 @@ export default function EventModal(props: ModalProps) {
                         margin: "auto", 
                         width: "100%", 
                         height: "100%", 
-                        // backgroundColor: "transparent",
+                        backgroundColor: "rgba(0,0,0,0.4)",
                     },
                     content: {
-                        backgroundColor: "#F7F7F7",
+                        backgroundColor: "#F0F0F0",
                         height: "50%",
                         width: "50%",
                         margin: "auto", 
