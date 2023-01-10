@@ -1,6 +1,6 @@
-import React, { MouseEventHandler } from "react";
+import React, { MouseEventHandler, useState, useEffect } from "react";
 import Modal from 'react-modal';
-import { EventInfo, dateFormat } from "./ScheduleTemplate";
+import { EventInfo, dateFormat, toPeriodString, getUser, UserInfo } from "./ScheduleTemplate";
 import { GrClose } from "react-icons/gr";
 import styles from "../../styles/Schedule.module.scss"
 
@@ -14,6 +14,24 @@ interface ModalProps {
 
 
 export default function EventModal(props: ModalProps) {
+    // Store the assigned users as a state
+    const [assignedUsers, setAssignedUsers] = useState<UserInfo[]>([]);
+
+    useEffect(() => {
+        if (props.event) {
+            const users : UserInfo[] = [];
+            props.event.extendedProps.assignedTo.forEach((id) => {
+                getUser(id).then((x) => {
+                    if(x != null) {
+                        users.push(x)
+                    }   
+                });
+            });
+            setAssignedUsers(users);
+        }
+    }, [props.event]);
+
+    const assignedUserElement = assignedUsers.map(user => <span key={user.id}>{user.name}</span>)
 
     return (
         <Modal
@@ -46,42 +64,43 @@ export default function EventModal(props: ModalProps) {
                 </div>
                 <div>
                     <table className={styles.eventModalTable}>
-                        <tr className={styles.eventModalTableRow}>
-                            <th>Schedule ID:</th>
-                            <td>{props.event.extendedProps.scheduleId}</td>
-                        </tr>
-                        <tr className={styles.eventModalTableRow}>
-                            <th>Checklist ID:</th>
-                            <td>{props.event.extendedProps.checklistId}</td>
-                        </tr>
-                        <tr className={styles.eventModalTableRow}>
-                            <th>Plant:</th>
-                            <td>{props.event.extendedProps.plant}</td>
-                        </tr>
-                        <tr className={styles.eventModalTableRow}>
-                            <th>Start Date:</th>
-                            <td>{dateFormat(props.event.extendedProps.startDate)}</td>
-                        </tr>
-                        <tr className={styles.eventModalTableRow}>
-                            <th>End Date:</th>
-                            <td>{dateFormat(props.event.extendedProps.endDate)}</td>
-                        </tr>
-                        <tr className={styles.eventModalTableRow}>
-                            <th>Recurring Period:</th>
-                            <td>{props.event.extendedProps.recurringPeriod}</td>
-                        </tr>
-                        <tr className={styles.eventModalTableRow}>
-                            <th>Assigned To:</th>
-                            <td>{props.event.extendedProps.assignedTo}</td>
-                        </tr>
-                        <tr className={styles.eventModalTableRow}>
-                            <th>Remarks:</th>
-                            <td>{props.event.extendedProps.remarks}</td>
-                        </tr>
+                        <tbody>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Schedule ID:</th>
+                                <td>{props.event.extendedProps.scheduleId}</td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Checklist ID:</th>
+                                <td>{props.event.extendedProps.checklistId}</td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Plant:</th>
+                                <td>{props.event.extendedProps.plant}</td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Start Date:</th>
+                                <td>{dateFormat(props.event.extendedProps.startDate)}</td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>End Date:</th>
+                                <td>{dateFormat(props.event.extendedProps.endDate)}</td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Recurring Period:</th>
+                                <td>{toPeriodString(props.event.extendedProps.recurringPeriod)}</td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Assigned To:</th>
+                                <td>{assignedUserElement}</td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Remarks:</th>
+                                <td>{props.event.extendedProps.remarks}</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>  
-            </div>}
-            
+            </div>}    
         </Modal>
     );
 };

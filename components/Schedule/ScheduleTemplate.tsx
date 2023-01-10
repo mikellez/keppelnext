@@ -3,6 +3,7 @@ import { ModuleContent, ModuleHeader, ModuleMain } from '../';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import EventModal from './EventModal';
+import axios from 'axios';
 
 interface ScheduleTemplateInfo extends PropsWithChildren {
     title: string;
@@ -40,21 +41,61 @@ export interface EventInfo {
         checklistId: number;
         startDate: Date;
         endDate: Date;
-        recurringPeriod: string | number;
-        assignedTo: number[] | string[]
+        recurringPeriod: number;
+        assignedTo: number[] 
         remarks: string
     };
 };
 
+export interface UserInfo {
+    id: number;
+    email: string;
+    name: string;
+};
+
 // Function to format Date to string
-export function dateFormat(date: Date) {
+export function dateFormat(date : Date) : string {
     return date.toLocaleDateString("en-GB", {
         weekday: "short",
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
     });
-}
+};
+
+// Function to convert a recurring period to string format
+export function toPeriodString(period:  number) : string {
+    switch(period) {
+        case 1:
+            return "Daily";
+        case 7:
+            return "Weekly";
+        case 14:
+            return "Fortnightly";
+        case 30:
+            return "Monthly";
+        case 90:
+            return "Quarterly";
+        case 180:
+            return "Semi-Annually";
+        case 365:
+            return "Yearly";
+        default:
+            return "NA";  
+    };
+};
+
+export async function getUser(id : number)  {
+    return await axios.get(`/api/getUser/${id}`)
+    .then(res => {
+        return {id: id, email: res.data.user_email, name: res.data.first_name + " " + res.data.last_name} as UserInfo
+    })
+    .catch(err => {
+        console.log(err.message)
+        return null;
+    })
+
+};
 
 export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     // Store the list of events in a state to be rendered on the calendar

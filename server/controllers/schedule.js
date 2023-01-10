@@ -26,6 +26,7 @@ const makeScheduleDict = (arr) => {
     return newArr;
 };
 
+// Get all schedules or plant specific schedules
 const getViewSchedules = async(req, res, next) => {
     let queryS = [];
     if (req.params.plant_id === '0') {
@@ -93,6 +94,7 @@ const getViewSchedules = async(req, res, next) => {
     });
 };
 
+// Get plants based on the user role
 const getPlants = async(req, res, next) => {
     if (req.user.user_role === 0 || req.user.user_role === 4) {
         db.query(`SELECT * FROM keppel.plant_master`, (err, result) => {
@@ -111,7 +113,18 @@ const getPlants = async(req, res, next) => {
     }
 };
 
+// Get details of a user via user id
+const getUser = async(req, res, next) => {
+    db.query(`SELECT user_email, first_name, last_name FROM keppel.users WHERE user_id = $1::integer`, [req.params.user_id], (err, result) => {
+        if (err) throw err;
+        if (result) {
+            res.status(200).send(result.rows[0]);
+        }; 
+    })
+}
+
 module.exports = {
     getViewSchedules, 
-    getPlants
+    getPlants,
+    getUser
 };
