@@ -51,6 +51,17 @@ app.prepare().then(() => {
     });
   });
 
+  server.get("/api/user", checkIfLoggedInAPI, (req, res) => {
+    res.status(200).json(
+      {
+        id:req.user.id,
+        name:req.user.name,
+        role_id: req.user.role_id,
+        role_name:req.user.role_name
+      }
+    );
+  });
+
   server.get("/api/request/getRequests/", checkIfLoggedInAPI, controllers.request.getRequests);
   
   server.get("/api/schedule/:plant_id", checkIfLoggedIn, controllers.schedule.getViewSchedules);

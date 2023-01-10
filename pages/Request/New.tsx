@@ -9,6 +9,9 @@ import ImagePreview from '../../components/Request/ImagePreview'
 import { useForm } from 'react-hook-form';
 import { SubmitHandler } from 'react-hook-form/dist/types';
 
+import { CMMSBaseType, CMMSUser } from '../../types/common/interfaces'
+import { GetServerSideProps, GetServerSidePropsContext } from 'next'
+
 type FormValues = {
 	requestTypeID: number;
 	faultTypeID: number;
@@ -18,12 +21,7 @@ type FormValues = {
 	image: File;
 }
 
-interface CMMSTypes {
-	id: number
-	name: string
-}
-
-const r: CMMSTypes[] = [
+const r: CMMSBaseType[] = [
 	{id:1, name:"COOLING TOWER"},
 	{id:2, name:"CONDENSATION"},
 	{id:3, name:"CHW SUPPLY TEMPERTURE ANOMALY"},
@@ -35,7 +33,7 @@ const r: CMMSTypes[] = [
 	{id:9, name:"CHANGE OF PARTS"},
 ]
 
-const f: CMMSTypes[] = [
+const f: CMMSBaseType[] = [
 	{id:1, name:"OPERATIONS"},
 	{id:2, name:"MAINTENANCE"},
 	{id:3, name:"EXTERNAL"},
@@ -54,13 +52,17 @@ async function getAssets(plant_id: number)
 	});
 }
 
-export default function RequesttNew() {
+interface NewRequestProps {
+	user: CMMSUser
+}
+
+export default function RequesttNew(props: NewRequestProps) {
 	const [selectedFile ,setSelectedFile] = useState<File>();
 	const [previewedFile, setPreviewedFile] = useState<string>();
 
-	const [requestTypes, setRequestTypes] = useState<CMMSTypes[]>(r);
-	const [faultTypes, setFaultTypes] = useState<CMMSTypes[]>(f);
-	const [availableAssets, setAvailableAssets] = useState<CMMSTypes[]>([]);
+	const [requestTypes, setRequestTypes] = useState<CMMSBaseType[]>(r);
+	const [faultTypes, setFaultTypes] = useState<CMMSBaseType[]>(f);
+	const [availableAssets, setAvailableAssets] = useState<CMMSBaseType[]>([]);
 
 	const {
 		register,
@@ -96,7 +98,7 @@ export default function RequesttNew() {
 	}
 
 	const updateAssetLists = (plant_id : number) => {
-		let options: CMMSTypes[] = [];
+		let options: CMMSBaseType[] = [];
 
 		getAssets(plant_id).then((data) => {
 			if(data === null)
@@ -130,7 +132,7 @@ export default function RequesttNew() {
 						<select className="form-control" id="formControlTypeRequest" {...register("requestTypeID")}>
 							<option hidden key={0} value={0}>-- Please Select a Type --</option>
 							{
-								requestTypes.map((rType: CMMSTypes) => {
+								requestTypes.map((rType: CMMSBaseType) => {
 									return <option key={rType.id} value={rType.id}>{rType.name}</option>
 								})
 							}
@@ -142,7 +144,7 @@ export default function RequesttNew() {
 						<select className="form-control" id="formControlTypeFault" {...register("faultTypeID")}>
 							<option hidden key={0} value={0}>-- Please Select a Type --</option>
 							{
-								faultTypes.map((fType: CMMSTypes) => {
+								faultTypes.map((fType: CMMSBaseType) => {
 									return <option key={fType.id} value={fType.id}>{fType.name}</option>
 								})
 							}
@@ -170,7 +172,7 @@ export default function RequesttNew() {
 						<select multiple className="form-control" id="formControlLinkedAssets" {...register("linkedAssetIDs")}
 							style={{display:"block", flex:1, height: "50%"}}>
 							{
-								availableAssets.map((asset: CMMSTypes) => {
+								availableAssets.map((asset: CMMSBaseType) => {
 									return <option key={asset.id} value={asset.id}>{asset.name}</option>
 								})
 							}
@@ -190,12 +192,12 @@ export default function RequesttNew() {
 
 					<div className="form-group">
 						<label className='form-label'>Reported By</label>
-						<select className="form-control" id="formControlReported"/>
+						<input className="form-control" type="text" disabled value={props.user.role_name}/>
 					</div>
 					
 					<div className="form-group">
 						<label className='form-label'>Reporter Name</label>
-						<select className="form-control" id="formControlReporterName"/>
+						<input className="form-control" type="text" disabled value={props.user.name}/>
 					</div>
 				</div>
 
@@ -205,4 +207,23 @@ export default function RequesttNew() {
 			</ModuleFooter></form>
 		</ModuleMain>
   	)
+}
+
+export const getServerSideProps: GetServerSideProps = async(context: GetServerSidePropsContext) => {
+
+	const res = await axios.get<CMMSUser>("http://localhost:3001/api/user", {
+		withCredentials: true,
+		headers: {
+			Cookie: context.req.headers.cookie
+		}
+	})
+
+	let data: CMMSUser = res.data;
+	console.log("success", res);
+
+	let props: NewRequestProps = { user: data }
+
+	return {
+		props: props
+	}
 }

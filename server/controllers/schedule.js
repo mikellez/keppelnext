@@ -30,7 +30,7 @@ const makeScheduleDict = (arr) => {
 const getViewSchedules = async(req, res, next) => {
     let queryS = [];
     if (req.params.plant_id === '0') {
-        if (req.user.user_role === 0 || req.user.user_role === 4) {
+        if (req.user.role_id === 0 || req.user.role_id === 4) {
             queryS.push(`SELECT SC.SCHEDULE_ID, SC.CHECKLIST_TEMPLATE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
             SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL, STRING_AGG(DISTINCT(U.user_email), ' ,') AS USERNAME, PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS
             FROM 
@@ -43,7 +43,7 @@ const getViewSchedules = async(req, res, next) => {
             U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
             SC.PLANT_ID = PM.PLANT_ID AND 
             CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND 
-            SC.PLANT_ID =ANY(SELECT DISTINCT(PLANT_ID) FROM KEPPEL.USER_PLANT WHERE USER_ID = ${req.user.user_id} OR ${req.user.user_id} = ANY(SC.SCHEDULER_USERIDS_FOR_EMAIL))
+            SC.PLANT_ID =ANY(SELECT DISTINCT(PLANT_ID) FROM KEPPEL.USER_PLANT WHERE USER_ID = ${req.user.id} OR ${req.user.id} = ANY(SC.SCHEDULER_USERIDS_FOR_EMAIL))
             AND
             SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1) 
             
@@ -96,7 +96,7 @@ const getViewSchedules = async(req, res, next) => {
 
 // Get plants based on the user role
 const getPlants = async(req, res, next) => {
-    if (req.user.user_role === 0 || req.user.user_role === 4) {
+    if (req.user.role_id === 0 || req.user.role_id === 4) {
         db.query(`SELECT * FROM keppel.plant_master`, (err, result) => {
             if (err) throw err;
             if (result) {
@@ -104,7 +104,7 @@ const getPlants = async(req, res, next) => {
             };
         }); 
     } else {
-        db.query("SELECT * FROM keppel.plant_master WHERE plant_id IN (SELECT plant_id FROM keppel.user_plant WHERE user_id = $1::integer)", [req.user.user_id], (err, result) => {
+        db.query("SELECT * FROM keppel.plant_master WHERE plant_id IN (SELECT plant_id FROM keppel.user_plant WHERE user_id = $1::integer)", [req.user.id], (err, result) => {
             if (err) throw err;
             if (result) {
                 res.status(200).send(result.rows);
