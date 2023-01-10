@@ -21,6 +21,10 @@ app.prepare().then(() => {
 
   // ROUTES
 
+  // checkIfLoggdeIn      - auth failures redirect to /Login page. use this for front facing page routes
+  // vs
+  // checkIfLoggedInAPI   - auth failures send 401 requrest. use this for API routes
+
   function checkIfLoggedIn(req, res, next) {
     console.log("check");
     if (req.user === undefined) return res.redirect("/Login");
@@ -28,9 +32,11 @@ app.prepare().then(() => {
   }
 
   function checkIfLoggedInAPI(req, res, next) {
-    if (req.user === undefined) return res.status(400).json("you are not logged in");
+    if (req.user === undefined) return res.status(401).json("you are not logged in");
     next();
   }
+
+  // -----------------------------------
 
   server.post("/api/login", passport.authenticate("local", {}), (req, res) => {
     return res.status(200).json("success");

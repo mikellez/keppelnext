@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react'
-import { ModuleContent, ModuleHeader, ModuleMain } from '../components'
+import { ModuleContent, ModuleHeader, ModuleMain } from '../../components'
 
 import { CompactTable } from '@table-library/react-table-library/compact';
 import { TableNode } from '@table-library/react-table-library/types/table';
@@ -93,8 +93,8 @@ export default function Request() {
   	return (
 		<ModuleMain>
 			<ModuleHeader title="Request" header="Request">
-				<button className="btn btn-primary">New Request</button>
-				<button className="btn btn-primary">Export CSV</button>
+				<a href="./Request/New" className="btn btn-primary">New Request</a>
+				<a className="btn btn-primary">Export CSV</a>
 			</ModuleHeader>
 			<ModuleContent>
 				<CompactTable columns={COLUMNS} data={{nodes: requestNodes}} theme={theme} layout={{custom: true}}/>
