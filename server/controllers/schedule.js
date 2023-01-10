@@ -30,7 +30,7 @@ const makeScheduleDict = (arr) => {
 const getViewSchedules = async(req, res, next) => {
     let queryS = [];
     if (req.params.plant_id === '0') {
-        if (req.user.user_role === 0 || req.user.user_role === 4) {
+        if (req.user.role_id === 0 || req.user.role_id === 4) {
             queryS.push(`SELECT SC.SCHEDULE_ID, SC.CHECKLIST_TEMPLATE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
             SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL, STRING_AGG(DISTINCT(U.user_email), ' ,') AS USERNAME, PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS
             FROM 
@@ -96,7 +96,7 @@ const getViewSchedules = async(req, res, next) => {
 
 // Get plants based on the user role
 const getPlants = async(req, res, next) => {
-    if (req.user.user_role === 0 || req.user.user_role === 4) {
+    if (req.user.role_id === 0 || req.user.role_id === 4) {
         db.query(`SELECT * FROM keppel.plant_master`, (err, result) => {
             if (err) throw err;
             if (result) {
