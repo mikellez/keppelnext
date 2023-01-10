@@ -48,6 +48,7 @@ export interface EventInfo {
 export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     // Store the list of events in a state to be rendered on the calendar
     const [eventList, setEventList] = useState<EventInfo[]>([]);
+    // Store the state of the view event modal
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
     // Add events to be displayed on the calendar
@@ -79,7 +80,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
 
     return (
         <ModuleMain>
-        <EventModal isOpen={isModalOpen} />
+            <EventModal isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} />
 			<ModuleHeader title={props.title} header={props.header}>
                 {props.children}
 			</ModuleHeader>
@@ -99,12 +100,19 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                         selectable={true}
                         unselectAuto={true}
                         events={eventList}
+                        dayMaxEvents={2}
                         eventDisplay="block"
                         eventBackgroundColor="#FA9494"
                         eventBorderColor="#FFFFFF"
                         eventTextColor="#000000"
                         displayEventTime={false}
                         eventClick={() => setIsModalOpen(true)}
+                        eventMouseEnter={() => {
+                            document.body.style.cursor = "pointer";
+                        }}
+                        eventMouseLeave={() => {
+                            document.body.style.cursor = "default";
+                        }}
                 /> 
 			</ModuleContent>
 		</ModuleMain>

@@ -1,3 +1,18 @@
 .calendar {
     margin: 1rem;
 }
+
+.eventModalHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.eventModalTitle {
+    margin: auto 0 auto
+}
+
+.eventModalClose {
+    cursor: pointer;
+    margin-left: auto;
+}

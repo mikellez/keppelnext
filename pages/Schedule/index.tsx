@@ -4,7 +4,7 @@ import axios from 'axios';
 
 
 async function getSchedules(id : number) {
-	return await axios.get<ScheduleInfo[]>(`/api/schedule/getViewSchedules/${id}`)
+	return await axios.get<ScheduleInfo[]>(`/api/schedule/${id}`)
 	.then(res => {
 		return res.data
 	})
@@ -12,7 +12,7 @@ async function getSchedules(id : number) {
 };
 
 async function getPlants() {
-	return await axios.get<PlantInfo[]>("/api/schedule/getPlants")
+	return await axios.get<PlantInfo[]>("/api/getPlants")
 	.then(res => {
 		return res.data
 	})

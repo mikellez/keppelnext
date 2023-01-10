@@ -47,8 +47,8 @@ app.prepare().then(() => {
 
   server.get("/api/request/getRequests/", checkIfLoggedInAPI, controllers.request.getRequests);
   
-  server.get("/api/schedule/getViewSchedules/:plant_id", checkIfLoggedIn, controllers.schedule.getViewSchedules);
-  server.get("/api/schedule/getPlants", checkIfLoggedIn, controllers.schedule.getPlants);
+  server.get("/api/schedule/:plant_id", checkIfLoggedIn, controllers.schedule.getViewSchedules);
+  server.get("/api/getPlants", checkIfLoggedIn, controllers.schedule.getPlants);
  
 
 
