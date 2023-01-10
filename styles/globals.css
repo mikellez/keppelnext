@@ -30,6 +30,12 @@ body {
   grid-template-rows: 1fr auto;
 }
 
+/*
+.gridContainer>* {
+  border: 1px solid black;
+}
+*/
+
 .greyContainer {
   padding: 2em;
   background-color: #EEEEEE;
