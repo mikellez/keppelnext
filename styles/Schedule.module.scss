@@ -16,3 +16,17 @@
     cursor: pointer;
     margin-left: auto;
 }
+
+.eventModalTable {
+    margin: 0.5rem 0;
+    width: 100%;
+}
+
+.eventModalTableRow {
+    border-bottom: solid #888888;
+}
+
+.eventModalTableRow th{
+    padding: 0.3rem;
+    font-weight: 500;
+}

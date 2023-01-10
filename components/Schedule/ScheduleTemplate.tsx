@@ -33,10 +33,11 @@ export interface ScheduleInfo {
 
 export interface EventInfo {
     title: string;
-    start: Date;
+    start?: Date;
     extendedProps: {
         plant: string;
         scheduleId: number;
+        checklistId: number;
         startDate: Date;
         endDate: Date;
         recurringPeriod: string | number;
@@ -45,11 +46,23 @@ export interface EventInfo {
     };
 };
 
+// Function to format Date to string
+export function dateFormat(date: Date) {
+    return date.toLocaleDateString("en-GB", {
+        weekday: "short",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    });
+}
+
 export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     // Store the list of events in a state to be rendered on the calendar
     const [eventList, setEventList] = useState<EventInfo[]>([]);
     // Store the state of the view event modal
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    // Store the current event which will pop up as a modal in a state
+    const [currentEvent, setCurrentEvent] = useState<EventInfo>();
 
     // Add events to be displayed on the calendar
     useEffect(() => {
@@ -64,6 +77,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                         extendedProps: {
                             plant: item.plant,
                             scheduleId: item.schedule_id,
+                            checklistId: item.checklist_id,
                             startDate: new Date(item.start_date),
                             endDate: new Date(item.end_date),
                             recurringPeriod: item.period,
@@ -80,7 +94,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
 
     return (
         <ModuleMain>
-            <EventModal isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} />
+            <EventModal isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} event={currentEvent} />
 			<ModuleHeader title={props.title} header={props.header}>
                 {props.children}
 			</ModuleHeader>
@@ -107,8 +121,25 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                         eventTextColor="#000000"
                         displayEventTime={false}
                         eventClick={() => setIsModalOpen(true)}
-                        eventMouseEnter={() => {
+                        eventMouseEnter={(info) => {
                             document.body.style.cursor = "pointer";
+
+                            const event = {
+                                title: info.event._def.title,
+                                start: info.event._instance?.range.start,
+                                extendedProps: {
+                                    plant: info.event._def.extendedProps.plant,
+                                    scheduleId: info.event._def.extendedProps.scheduleId,
+                                    checklistId: info.event._def.extendedProps.checklistId,
+                                    startDate: info.event._def.extendedProps.startDate,
+                                    endDate: info.event._def.extendedProps.endDate,
+                                    recurringPeriod: info.event._def.extendedProps.recurringPeriod,
+                                    assignedTo: info.event._def.extendedProps.assignedTo,
+                                    remarks: info.event._def.extendedProps.remarks,
+                                },
+                            };
+
+                            setCurrentEvent(event);
                         }}
                         eventMouseLeave={() => {
                             document.body.style.cursor = "default";
