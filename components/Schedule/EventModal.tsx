@@ -1,6 +1,7 @@
 import React, { MouseEventHandler, useState, useEffect } from "react";
 import Modal from 'react-modal';
 import { EventInfo, dateFormat, toPeriodString, getUser, UserInfo } from "./ScheduleTemplate";
+import EventModalUser from "./EventModalUser";
 import { GrClose } from "react-icons/gr";
 import styles from "../../styles/Schedule.module.scss"
 
@@ -10,7 +11,6 @@ interface ModalProps {
     closeModal: MouseEventHandler;
     event?: EventInfo;
 };
-
 
 
 export default function EventModal(props: ModalProps) {
@@ -31,7 +31,19 @@ export default function EventModal(props: ModalProps) {
         }
     }, [props.event]);
 
-    const assignedUserElement = assignedUsers.map(user => <span key={user.id}>{user.name}</span>)
+    const assignedUserElement = assignedUsers.map((user, index) => {
+        return (
+            // <span key={user.id} className={styles.eventModalAssignedUser}>{index + 1}. {user.name}</span>
+            <EventModalUser 
+                key={user.id} 
+                serial={index + 1} 
+                role={user.role} 
+                name={user.name} 
+                id={user.id} 
+                email={user.email} 
+            />
+        );  
+    });
 
     return (
         <Modal
@@ -51,13 +63,16 @@ export default function EventModal(props: ModalProps) {
                         backgroundColor: "#F0F0F0",
                         height: "50%",
                         width: "50%",
-                        margin: "auto", 
+                        margin: "auto",
+                        border: "2px solid #393E46",
                     }
                 }
             }
         >
-            {props.event && 
+            
+            {props.event ? 
             <div>
+                {/* Display event details on event select */}
                 <div className={styles.eventModalHeader}>
                     <h4 className={styles.eventModalTitle}>{props.event.title}</h4>
                     <GrClose onClick={props.closeModal} size={20} className={styles.eventModalClose} />
@@ -91,7 +106,7 @@ export default function EventModal(props: ModalProps) {
                             </tr>
                             <tr className={styles.eventModalTableRow}>
                                 <th>Assigned To:</th>
-                                <td>{assignedUserElement}</td>
+                                <td className={styles.eventModalAssignedUsers}>{assignedUserElement}</td>
                             </tr>
                             <tr className={styles.eventModalTableRow}>
                                 <th>Remarks:</th>
@@ -100,7 +115,50 @@ export default function EventModal(props: ModalProps) {
                         </tbody>
                     </table>
                 </div>  
-            </div>}    
+            </div>
+            :
+            <div>
+                {/* Edit event details to create a new schedule */}
+                <div className={styles.eventModalHeader}>
+                    <h4 className={styles.eventModalTitle}>New Schedule</h4>
+                    <GrClose onClick={props.closeModal} size={20} className={styles.eventModalClose} />
+                </div>
+                <div>
+                    <table className={styles.eventModalTable}>
+                        <tbody>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Checklist ID:</th>
+                                <td></td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Plant:</th>
+                                <td></td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Start Date:</th>
+                                <td><input type="date" /></td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>End Date:</th>
+                                <td><input type="date" /></td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Recurring Period:</th>
+                                <td></td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Assigned To:</th>
+                                <td></td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Remarks:</th>
+                                <td><textarea></textarea></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>  
+            </div>
+            }    
         </Modal>
     );
 };

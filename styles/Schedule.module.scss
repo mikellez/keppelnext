@@ -30,3 +30,29 @@
     padding: 0.3rem;
     font-weight: 500;
 }
+
+.eventModalAssignedUsers {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.eventModalAssignedUser {
+    background-color: #CACACA;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    margin: 0.2rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.modalUserArrow {
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.modalUserTooltip {
+    display: flex;
+    flex-direction: column;
+    background-color: #888888;
+}

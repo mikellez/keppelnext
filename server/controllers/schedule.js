@@ -115,7 +115,9 @@ const getPlants = async(req, res, next) => {
 
 // Get details of a user via user id
 const getUser = async(req, res, next) => {
-    db.query(`SELECT user_email, first_name, last_name FROM keppel.users WHERE user_id = $1::integer`, [req.params.user_id], (err, result) => {
+    db.query(`SELECT U.first_name, U.last_name, U.user_email, UA.role_name 
+        FROM keppel.users U JOIN keppel.user_access UA ON UA.user_id = U.user_id 
+        WHERE U.user_id = $1::integer`, [req.params.user_id], (err, result) => {
         if (err) throw err;
         if (result) {
             res.status(200).send(result.rows[0]);
