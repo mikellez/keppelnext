@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 export interface NavLinkInfo {
     name: string;
     path: string;
-    onClick: MouseEventHandler;
+    onClick?: MouseEventHandler;
 }
 
 export default function NavLink(props: NavLinkInfo) {

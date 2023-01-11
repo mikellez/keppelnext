@@ -5,7 +5,8 @@ import styles from '../../styles/Nav.module.scss'
 import { GrClose } from "react-icons/gr";
 import { BsList } from 'react-icons/bs'
 import NavDropdown from './NavDropdown';
-import NavLink from './NavLink';
+import NavLink, { NavLinkInfo } from './NavLink';
+import { MenuItem } from 'react-pro-sidebar';
 
 export default function NavBar() {
 
@@ -28,7 +29,7 @@ export default function NavBar() {
     };
 
     // Dropdown list for user management
-    const userManagementList = [
+    const userManagementList : NavLinkInfo[] = [
         {
             name: "User Management",
             path: ""
@@ -48,7 +49,7 @@ export default function NavBar() {
     ];
 
     // Dropdown list for activity log
-    const activityLogList = [
+    const activityLogList : NavLinkInfo[] = [
         {
             name: "Account Activity Log",
             path: ""
@@ -56,18 +57,18 @@ export default function NavBar() {
     ];
 
     // Dropdown list for schedule
-    const scheduleList = [
+    const scheduleList : NavLinkInfo[] = [
         {
             name: "View Schedule",
-            path: "/Schedule"
+            path: "/Schedule",
         },
         {
             name: "Create Schedule",
-            path: "/Schedule/Create"
+            path: "/Schedule/Create",
         },
         {
             name: "Manage Schedule",
-            path: "/Schedule/Manage"
+            path: "/Schedule/Manage",
         }
     ];
 
@@ -97,14 +98,20 @@ export default function NavBar() {
 
                     <NavLink     name="Request"           onClick={displayNav} path="/Request" />
                     <NavLink     name="Asset"             onClick={displayNav} path="/Asset" />
-                    <NavDropdown name="Schedule"          list={scheduleList} />
+                    <NavDropdown name="Schedule"          list={scheduleList.map(item => {
+                        return {...item, onClick: displayNav}
+                    })} navOpen={navDisplay} />
                     <NavLink     name="Checklist"         onClick={displayNav} path="/Checklist" />
                     <NavLink     name="E-Logbook"         onClick={displayNav} path="/Logbook" />
                     <NavLink     name="Generate QR Codes" onClick={displayNav} path="/QRCode" />
                     <NavLink     name="Workflow"          onClick={displayNav} path="/Workflow" />
                     <NavLink     name="Master"            onClick={displayNav} path="/Master" />
-                    <NavDropdown name="User Management"   list={userManagementList} />
-                    <NavDropdown name="Activity Log"      list={activityLogList} />
+                    <NavDropdown name="User Management"   list={userManagementList.map(item => {
+                        return {...item, onClick: displayNav}
+                    })} navOpen={navDisplay} />
+                    <NavDropdown name="Activity Log"      list={activityLogList.map(item => {
+                        return {...item, onClick: displayNav}
+                    })} navOpen={navDisplay} />
                 </div>
             </div>
         </div>
