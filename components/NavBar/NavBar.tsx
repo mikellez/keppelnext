@@ -95,15 +95,14 @@ export default function NavBar() {
                         <GrClose onClick={displayNav} size={25} style={{color:"#4D4D4D", marginLeft: "auto", cursor: "pointer"}} />
                     </div>
 
-                    <NavLink     name="Dashboard"         path="/Dashboard" />
-                    <NavLink     name="Request"           path="/Request" />
-                    <NavLink     name="Asset"             path="/Asset" />
+                    <NavLink     name="Request"           onClick={displayNav} path="/Request" />
+                    <NavLink     name="Asset"             onClick={displayNav} path="/Asset" />
                     <NavDropdown name="Schedule"          list={scheduleList} />
-                    <NavLink     name="Checklist"         path="/Checklist" />
-                    <NavLink     name="E-Logbook"         path="/Logbook" />
-                    <NavLink     name="Generate QR Codes" path="/QRCode" />
-                    <NavLink     name="Workflow"          path="/Workflow" />
-                    <NavLink     name="Master"            path="/Master" />
+                    <NavLink     name="Checklist"         onClick={displayNav} path="/Checklist" />
+                    <NavLink     name="E-Logbook"         onClick={displayNav} path="/Logbook" />
+                    <NavLink     name="Generate QR Codes" onClick={displayNav} path="/QRCode" />
+                    <NavLink     name="Workflow"          onClick={displayNav} path="/Workflow" />
+                    <NavLink     name="Master"            onClick={displayNav} path="/Master" />
                     <NavDropdown name="User Management"   list={userManagementList} />
                     <NavDropdown name="Activity Log"      list={activityLogList} />
                 </div>

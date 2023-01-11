@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import styles from '../../styles/Nav.module.scss'
 import { SlArrowDown } from 'react-icons/sl';
+import { NavLinkInfo } from './NavLink';
 
-interface NavList {
+
+interface NavListInfo {
     name: string;
     path: string;
 }
 
 interface NavDropdownInfo {
     name: string;
-    list: Array<NavList>;
+    list: Array<NavListInfo>;
 } 
 
 function NavDropdown(props: NavDropdownInfo) {
