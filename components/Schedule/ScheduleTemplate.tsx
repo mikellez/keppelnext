@@ -90,7 +90,12 @@ export function toPeriodString(period: number): string {
 export async function getUser(id : number)  {
     return await axios.get(`/api/getUser/${id}`)
     .then(res => {
-        return {id: id, email: res.data.user_email, name: res.data.first_name + " " + res.data.last_name} as UserInfo
+        return {
+            id: id, 
+            email: res.data.user_email, 
+            name: res.data.first_name + " " + res.data.last_name,
+            role: res.data.role_name
+        } as UserInfo
     })
     .catch(err => {
         console.log(err.message)

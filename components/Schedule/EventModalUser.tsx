@@ -18,7 +18,13 @@ export default function EventModalUser(props: UserProps) {
     return (
         <div>
             <div
-                className={styles.eventModalAssignedUser} 
+                className={styles.eventModalAssignedUser}
+                style={displayTooltip ? {
+                    borderTopLeftRadius: "5px",
+                    borderTopRightRadius: "5px"
+                } : {
+                    borderRadius: "5px"
+                }}
             >
                 {props.serial}. {props.name}
                 <div className={styles.modalUserArrow}>
@@ -26,8 +32,8 @@ export default function EventModalUser(props: UserProps) {
                 </div>
             </div>
             {displayTooltip && <div className={styles.modalUserTooltip}>
-                <p>{props.role}</p>
-                <p>{props.email}</p>
+                <p>Role: {props.role}</p>
+                <p>Email: {props.email}</p>
             </div>}
         </div>
     )
