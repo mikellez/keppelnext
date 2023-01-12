@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import styles from '../../styles/Nav.module.scss'
 import { SlArrowDown } from 'react-icons/sl';
+import { SlArrowUp} from 'react-icons/sl';
 import { NavLinkInfo } from './NavLink';
 
 
@@ -26,11 +27,13 @@ function NavDropdown(props: NavDropdownInfo) {
             </Link>
     });
 
+    const arrowStyles = {color:"#4D4D4D", marginLeft: "auto"};
+
     return (
         <div>
             <div className={styles.navItem} onClick={() => {setIsClicked(prev => !prev)}}>
                 <h6 className={styles.navItemText}>{props.name}</h6>
-                <SlArrowDown style={{color:"#4D4D4D", marginLeft: "1.5rem"}}/>
+                {isClicked ? <SlArrowUp style={arrowStyles}/> : <SlArrowDown style={arrowStyles}/>}
             </div>
             <div style={{display: isClicked ? "flex" : "none"}} className={styles.navDropdownItems}>
                 {dropdownElements}
