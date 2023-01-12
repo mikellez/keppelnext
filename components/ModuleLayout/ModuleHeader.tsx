@@ -13,6 +13,7 @@ const headerStyle: CSSProperties = {
     display: "flex",
     position: "relative",
     marginBottom: "2em",
+    alignItems: "center"
 };
 
 const headerName: CSSProperties = {
@@ -32,7 +33,7 @@ const headerSideElement: CSSProperties = {
 };
 
 const besideHeaderName: CSSProperties = {
-    marginTop: "1.5em",
+    // marginTop: "1.5em",
     marginLeft: "1.5em",
 };
 

@@ -1,6 +1,6 @@
 import React, { MouseEventHandler, useState, useEffect } from "react";
 import Modal from 'react-modal';
-import { EventInfo, dateFormat, toPeriodString, getUser, UserInfo } from "./ScheduleTemplate";
+import { EventInfo, dateFormat, toPeriodString, UserInfo } from "./ScheduleTemplate";
 import EventModalUser from "./EventModalUser";
 import { GrClose } from "react-icons/gr";
 import styles from "../../styles/Schedule.module.scss"
@@ -20,13 +20,17 @@ export default function EventModal(props: ModalProps) {
     useEffect(() => {
         if (props.event) {
             const users : UserInfo[] = [];
-            props.event.extendedProps.assignedTo.forEach((id) => {
-                getUser(id).then((x) => {
-                    if(x != null) {
-                        users.push(x)
-                    }   
-                });
-            });
+            const noOfAssigned = props.event.extendedProps.assignedIds.length;
+                for (let i = 0; i  < noOfAssigned; i++) {
+                    users.push({
+                        id: props.event.extendedProps.assignedIds[i],
+                        email: props.event.extendedProps.assignedEmails[i],
+                        fname: props.event.extendedProps.assignedFnames[i],
+                        lname: props.event.extendedProps.assignedLnames[i],
+                        username: props.event.extendedProps.assignedUsernames[i],
+                        role: props.event.extendedProps.assignedRoles[i],
+                    });
+                }
             setAssignedUsers(users);
         }
     }, [props.event]);
@@ -38,7 +42,9 @@ export default function EventModal(props: ModalProps) {
                 key={user.id} 
                 serial={index + 1} 
                 role={user.role} 
-                name={user.name} 
+                fname={user.fname}
+                lname={user.lname}
+                username={user.username} 
                 id={user.id} 
                 email={user.email} 
             />

@@ -5,21 +5,27 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import EventModal from "./EventModal";
 import axios from "axios";
 import styles from "../../styles/Schedule.module.scss";
+import { BsCalendar4Week, BsListUl } from "react-icons/bs";
 
 interface ScheduleTemplateInfo extends PropsWithChildren {
     title: string;
     header: string;
     schedules?: ScheduleInfo[];
     timeline?: number;
-}
+};
 
 export interface PlantInfo {
     plant_id: number;
     plant_name: string;
     plant_description: string;
-}
+};
 
 export interface ScheduleInfo {
+    assigned_fnames: string[];
+    assigned_lnames: string[];
+    assigned_roles: string[];
+    assigned_emails: string[];
+    assigned_usernames: string[];
     assigned_ids: number[];
     calendar_dates: string[];
     checklist_id: number;
@@ -29,9 +35,8 @@ export interface ScheduleInfo {
     plant: string;
     remarks: string;
     schedule_id: number;
-    start_date: Date;
-    username: string;
-}
+    start_date: Date;  
+};
 
 export interface EventInfo {
     title: string;
@@ -43,15 +48,22 @@ export interface EventInfo {
         startDate: Date;
         endDate: Date;
         recurringPeriod: number;
-        assignedTo: number[];
+        assignedIds: number[];
+        assignedEmails: string[];
+        assignedFnames: string[];
+        assignedLnames: string[];
+        assignedUsernames: string[];
+        assignedRoles: string[];
         remarks: string;
     };
-}
+};
 
 export interface UserInfo {
     id: number;
     email: string;
-    name: string;
+    fname: string;
+    lname: string;
+    username: string;
     role: string
 };
 
@@ -63,7 +75,7 @@ export function dateFormat(date: Date): string {
         month: "2-digit",
         day: "2-digit",
     });
-}
+};
 
 // Function to convert a recurring period to string format
 export function toPeriodString(period: number): string {
@@ -84,24 +96,7 @@ export function toPeriodString(period: number): string {
             return "Yearly";
         default:
             return "NA";
-    }
-}
-
-export async function getUser(id : number)  {
-    return await axios.get(`/api/getUser/${id}`)
-    .then(res => {
-        return {
-            id: id, 
-            email: res.data.user_email, 
-            name: res.data.first_name + " " + res.data.last_name,
-            role: res.data.role_name
-        } as UserInfo
-    })
-    .catch(err => {
-        console.log(err.message)
-        return null;
-    })
-
+    };
 };
 
 export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
@@ -131,7 +126,12 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                             startDate: new Date(item.start_date),
                             endDate: new Date(item.end_date),
                             recurringPeriod: item.period,
-                            assignedTo: item.assigned_ids,
+                            assignedIds: item.assigned_ids,
+                            assignedEmails: item.assigned_emails,
+                            assignedFnames: item.assigned_fnames,
+                            assignedLnames: item.assigned_lnames,
+                            assignedUsernames: item.assigned_usernames,
+                            assignedRoles: item.assigned_usernames,
                             remarks: item.remarks,
                         },
                     };
@@ -153,13 +153,13 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 title={props.title}
                 header={props.header}
                 leftChildren={
-                    <div style={{ display: "flex" }} id="top-toggle">
+                    <div className={styles.eventModalHeader}>
                         <label className={styles.toggle}>
-                            <input type="checkbox" id="swap-view" />
+                            <input type="checkbox" onChange={() => setToggleCalendarOrListView(prev => !prev)} />
                             <span className={styles.slider}></span>
                         </label>
                         <div style={{ marginLeft: "10px" }} id="top-toggle-img">
-                            <img src="../../calendar-view-icon.svg" width="24" alt="Calendar" />
+                            {toggleCalendarOrListView ? <BsCalendar4Week size={20} /> : <BsListUl size={20} />}
                         </div>
                     </div>
                 }
@@ -204,9 +204,13 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                         checklistId: info.event._def.extendedProps.checklistId,
                                         startDate: info.event._def.extendedProps.startDate,
                                         endDate: info.event._def.extendedProps.endDate,
-                                        recurringPeriod:
-                                            info.event._def.extendedProps.recurringPeriod,
-                                        assignedTo: info.event._def.extendedProps.assignedTo,
+                                        recurringPeriod: info.event._def.extendedProps.recurringPeriod,
+                                        assignedIds: info.event._def.extendedProps.assignedIds,
+                                        assignedEmails: info.event._def.extendedProps.assignedEmails,
+                                        assignedFnames: info.event._def.extendedProps.assignedFnames,
+                                        assignedLnames: info.event._def.extendedProps.assignedLnames,
+                                        assignedUsernames: info.event._def.extendedProps.assignedUsernames,
+                                        assignedRoles: info.event._def.extendedProps.assignedRoles,
                                         remarks: info.event._def.extendedProps.remarks,
                                     },
                                 };

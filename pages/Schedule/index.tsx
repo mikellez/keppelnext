@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import ScheduleTemplate, { ScheduleInfo, PlantInfo } from '../../components/Schedule/ScheduleTemplate';
 import axios from 'axios';
+import { MdOutlineLocationOn } from "react-icons/md"
+import styles from "../../styles/Schedule.module.scss";
 
 
 async function getSchedules(id : number) {
@@ -62,7 +64,8 @@ export default function Schedule() {
 
   	return (
 		<ScheduleTemplate title="View Schedule" header="View Schedule" schedules={scheduleList}>
-				<div className="form-group">
+				<div className={"form-group" && styles.eventModalHeader} style={{gap: "0.3rem"}}>
+					<MdOutlineLocationOn size={30} />
 					<select className="form-control" onChange={changePlant}>
 						{plantList.length > 1 && <option value={0}>View all Plants</option>}
 						{plantOptions}

@@ -19,7 +19,11 @@ const makeScheduleDict = (arr) => {
             ),
             checklist_id: item["checklist_template_id"],
             assigned_ids: item["scheduler_userids_for_email"],
-            username: item["username"],
+            assigned_usernames: item["username"].split(","),
+            assigned_fnames: item["fname"].split(","),
+            assigned_lnames: item["lname"].split(","),
+            assigned_roles: item["roles"].split(","),
+            assigned_emails: item["user_emails"].split(","),
             remarks: item["remarks"],
         });
     });
@@ -32,17 +36,24 @@ const getViewSchedules = async(req, res, next) => {
     if (req.params.plant_id === '0') {
         if (req.user.role_id === 0 || req.user.role_id === 4) {
             queryS.push(`SELECT SC.SCHEDULE_ID, SC.CHECKLIST_TEMPLATE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
-            SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL, STRING_AGG(DISTINCT(U.user_email), ' ,') AS USERNAME, PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS
+            SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL, STRING_AGG(DISTINCT(U.user_email), ' ,') AS USERNAME,
+			STRING_AGG(U.user_email, ' ,') AS USER_EMAILS,
+		  STRING_AGG(UA.role_name, ' ,') AS ROLES,
+		  STRING_AGG(U.first_name, ' ,') AS FNAME,
+		  STRING_AGG(U.last_name, ' ,') AS LNAME,
+			PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS
             FROM 
             KEPPEL.SCHEDULE_CHECKLIST  as SC,
             KEPPEL.USERS AS U,
+			KEPPEL.USER_ACCESS AS UA,
             KEPPEL.PLANT_MASTER  AS PM,
             KEPPEL.CHECKLIST_TEMPLATES AS CT,
             KEPPEL.USER_PLANT AS UP
             WHERE
             U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
             SC.PLANT_ID = PM.PLANT_ID AND 
-            CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND 
+            CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
+			UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
             SC.PLANT_ID =ANY(SELECT DISTINCT(PLANT_ID) FROM KEPPEL.USER_PLANT WHERE USER_ID = ${req.user.id} OR ${req.user.id} = ANY(SC.SCHEDULER_USERIDS_FOR_EMAIL))
             AND
             SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1) 
@@ -52,25 +63,38 @@ const getViewSchedules = async(req, res, next) => {
             queryS.push(`SELECT 
             SC.SCHEDULE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
           SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL,
-          PM.PLANT_NAME, CT.CHL_NAME,SC.CHECKLIST_TEMPLATE_ID, STRING_AGG(U.user_name, ' ,') AS USERNAME, SC.REMARKS
+          PM.PLANT_NAME, CT.CHL_NAME,SC.CHECKLIST_TEMPLATE_ID, STRING_AGG(U.user_name, ' ,') AS USERNAME,
+		  STRING_AGG(U.user_email, ' ,') AS USER_EMAILS,
+		  STRING_AGG(UA.role_name, ' ,') AS ROLES,
+		  STRING_AGG(U.first_name, ' ,') AS FNAME,
+		  STRING_AGG(U.last_name, ' ,') AS LNAME,
+		  SC.REMARKS
           FROM 
           KEPPEL.SCHEDULE_CHECKLIST  as SC,
           KEPPEL.PLANT_MASTER  AS PM,
           KEPPEL.CHECKLIST_TEMPLATES AS CT,
-          KEPPEL.USERS AS U
+          KEPPEL.USERS AS U,
+		  KEPPEL.USER_ACCESS AS UA
           WHERE
           SC.PLANT_ID = PM.PLANT_ID AND 
           CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
-          U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
+          U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL)AND
+		  UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
           SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1)
           GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
         };
     } else {
         queryS.push(`SELECT SC.SCHEDULE_ID, SC.CHECKLIST_TEMPLATE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
-        SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL, STRING_AGG(DISTINCT(U.user_email), ' ,') AS USERNAME, PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS
+        SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL, STRING_AGG(DISTINCT(U.user_email), ' ,') AS USERNAME,
+		STRING_AGG(U.user_email, ' ,') AS USER_EMAILS,
+		  STRING_AGG(UA.role_name, ' ,') AS ROLES,
+		  STRING_AGG(U.first_name, ' ,') AS FNAME,
+		  STRING_AGG(U.last_name, ' ,') AS LNAME,
+		PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS
         FROM 
         KEPPEL.SCHEDULE_CHECKLIST  as SC,
         KEPPEL.USERS AS U,
+		KEPPEL.USER_ACCESS AS UA,
         KEPPEL.PLANT_MASTER  AS PM,
         KEPPEL.CHECKLIST_TEMPLATES AS CT,
         KEPPEL.USER_PLANT AS UP
@@ -78,6 +102,7 @@ const getViewSchedules = async(req, res, next) => {
         U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
         SC.PLANT_ID = PM.PLANT_ID AND 
         CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND 
+		UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
         SC.PLANT_ID = ${req.params.plant_id}
         AND
         SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1) 
@@ -113,20 +138,7 @@ const getPlants = async(req, res, next) => {
     }
 };
 
-// Get details of a user via user id
-const getUser = async(req, res, next) => {
-    db.query(`SELECT U.first_name, U.last_name, U.user_email, UA.role_name 
-        FROM keppel.users U JOIN keppel.user_access UA ON UA.user_id = U.user_id 
-        WHERE U.user_id = $1::integer`, [req.params.user_id], (err, result) => {
-        if (err) throw err;
-        if (result) {
-            res.status(200).send(result.rows[0]);
-        }; 
-    })
-}
-
 module.exports = {
     getViewSchedules, 
     getPlants,
-    getUser
 };

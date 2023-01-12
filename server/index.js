@@ -66,8 +66,6 @@ app.prepare().then(() => {
   
   server.get("/api/schedule/:plant_id", checkIfLoggedIn, controllers.schedule.getViewSchedules);
   server.get("/api/getPlants", checkIfLoggedIn, controllers.schedule.getPlants);
-  server.get("/api/getUser/:user_id", checkIfLoggedIn, controllers.schedule.getUser);
- 
 
 
   // NO API ROUTE

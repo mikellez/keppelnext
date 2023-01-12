@@ -26,7 +26,7 @@ export default function EventModalUser(props: UserProps) {
                     borderRadius: "5px"
                 }}
             >
-                {props.serial}. {props.name}
+                {props.serial}. {props.fname} {props.lname}
                 <div className={styles.modalUserArrow}>
                     {displayTooltip ? <SlArrowUp onClick={handleClick} /> : <SlArrowDown onClick={handleClick} />}
                 </div>
