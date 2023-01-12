@@ -6,6 +6,8 @@ import EventModal from "./EventModal";
 import axios from "axios";
 import styles from "../../styles/Schedule.module.scss";
 import { BsCalendar4Week, BsListUl } from "react-icons/bs";
+import { TableNode } from '@table-library/react-table-library/types/table';
+import ScheduleTable from "./ScheduleTable";
 
 interface ScheduleTemplateInfo extends PropsWithChildren {
     title: string;
@@ -20,7 +22,7 @@ export interface PlantInfo {
     plant_description: string;
 };
 
-export interface ScheduleInfo {
+export interface ScheduleInfo extends TableNode {
     assigned_fnames: string[];
     assigned_lnames: string[];
     assigned_roles: string[];
@@ -224,7 +226,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     </>
                 ) : (
                     // Render list view
-                    <></>
+                    <ScheduleTable schedules={props.schedules}/>
                 )}
             </ModuleContent>
         </ModuleMain>
