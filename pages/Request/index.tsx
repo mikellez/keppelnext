@@ -9,6 +9,7 @@ import { useTheme } from '@table-library/react-table-library/theme';
 import { getTheme } from '@table-library/react-table-library/baseline';
 
 import axios from 'axios';
+import Link from 'next/link';
 
 interface Request extends TableNode {
 	request_id: string;
@@ -40,7 +41,7 @@ const COLUMNS: any[] = [
 ];
 
 async function getRequests() {
-	return await axios.get<Request[]>("/api/request/getRequests/")
+	return await axios.get<Request[]>("/api/request/")
 	.then((response) => {
 		response.data.forEach((s) => {
 			s.created_date = new Date(s.created_date)
@@ -93,7 +94,7 @@ export default function Request() {
   	return (
 		<ModuleMain>
 			<ModuleHeader title="Request" header="Request">
-				<a href="./Request/New" className="btn btn-primary">New Request</a>
+				<Link href="./Request/New" className="btn btn-primary">New Request</Link>
 				<a className="btn btn-primary">Export CSV</a>
 			</ModuleHeader>
 			<ModuleContent>

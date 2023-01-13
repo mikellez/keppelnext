@@ -9,7 +9,7 @@ const previewContainer: CSSProperties = {
 	padding: "1em",
 	border: "6px solid " + greyFill,
 	borderRadius: "8px",
-	display:"block", flex:1, height: "50%"
+	display:"block", height: "100%", flex:"1 1 auto"
 }
 
 const centerTransform: CSSProperties = {

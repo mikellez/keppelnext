@@ -11,17 +11,24 @@ import { SubmitHandler } from 'react-hook-form/dist/types';
 
 import { CMMSBaseType, CMMSUser } from '../../types/common/interfaces'
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
+import Link from 'next/link'
 
 type FormValues = {
 	requestTypeID: number;
 	faultTypeID: number;
 	description: string;
 	plantLocationID: number;
-	linkedAssetIDs: number[];
+	taggedAssetID: number;
 	image: File;
 }
 
 const r: CMMSBaseType[] = [
+	{id:1, name:"OPERATIONS"},
+	{id:2, name:"MAINTENANCE"},
+	{id:3, name:"EXTERNAL"},
+]
+
+const f: CMMSBaseType[] = [
 	{id:1, name:"COOLING TOWER"},
 	{id:2, name:"CONDENSATION"},
 	{id:3, name:"CHW SUPPLY TEMPERTURE ANOMALY"},
@@ -31,12 +38,6 @@ const r: CMMSBaseType[] = [
 	{id:7, name:"CHILLER TRIP"},
 	{id:8, name:"OTHERS"},
 	{id:9, name:"CHANGE OF PARTS"},
-]
-
-const f: CMMSBaseType[] = [
-	{id:1, name:"OPERATIONS"},
-	{id:2, name:"MAINTENANCE"},
-	{id:3, name:"EXTERNAL"},
 ]
 
 async function getAssets(plant_id: number)
@@ -67,7 +68,8 @@ export default function RequesttNew(props: NewRequestProps) {
 	const {
 		register,
 		handleSubmit,
-		formState
+		formState,
+		control
 	} = useForm<FormValues>();
 
 	const formSubmit: SubmitHandler<FormValues> = (data) => {
@@ -118,11 +120,19 @@ export default function RequesttNew(props: NewRequestProps) {
 		updateAssetLists(parseInt(e.target.value));
 	};
 
+	const getOptions = () => {
+		return availableAssets.map((asset: CMMSBaseType) => {
+			return {value:asset.id, label:asset.name}
+		});
+	}
+
+	const options2 = Array.from(Array(5000).keys()).map((x) => {return {value:x, label:x}})
+
 	return (
 		<ModuleMain>
 			<form onSubmit={handleSubmit(formSubmit)}>
 			<ModuleHeader title="New Request" header="Create New Request">
-				<a href="/Request" className="btn btn-secondary">Back</a>
+				<Link href="/Request" className="btn btn-secondary">Back</Link>
 			</ModuleHeader>
 			<ModuleContent includeGreyContainer grid>
 				<div className={formStyles.halfContainer}>
@@ -156,6 +166,9 @@ export default function RequesttNew(props: NewRequestProps) {
 						<textarea className="form-control" id="formControlDescription" rows={6} {...register("description")}/>
 					</div>
 
+				</div>
+				<div className={formStyles.halfContainer} style={{gridRow: "span 3", display:"flex", flexDirection:"column", height:"100%"}}>
+
 					<div className="form-group">
 						<label className='form-label'>Plant Location</label>
 						<select className="form-control" id="formControlLocation" {...register("plantLocationID", {onChange: plantChange})}>
@@ -165,25 +178,49 @@ export default function RequesttNew(props: NewRequestProps) {
 						</select>
 					</div>
 
-				</div>
-				<div className={formStyles.halfContainer} style={{gridRow: "span 3"}}>
-					<div className="form-group" style={{display:"flex", flexDirection:"column", height:"50%"}}>
-						<label className="form-label">Linked Assets:</label>
-						<select multiple className="form-control" id="formControlLinkedAssets" {...register("linkedAssetIDs")}
-							style={{display:"block", flex:1, height: "50%"}}>
+					<div className="form-group">
+						<label className="form-label">Tag Asset:</label>
+
+						<select className="form-control" id="formControlTagAsset" {...register("taggedAssetID")}>
 							{
 								availableAssets.map((asset: CMMSBaseType) => {
 									return <option key={asset.id} value={asset.id}>{asset.name}</option>
 								})
 							}
 						</select>
+
+						{/* <WindowedSelect isMulti options={options2} windowThreshold={1} components={Option} filterOption={createFilter({ ignoreAccents: false })}/>
+						 */}
+						{/* <Controller
+							control={control}
+							defaultValue={options2.map(c => c.value)}
+							name="linkedAssetIDs"
+							render={
+								(
+									{
+										field: { onChange, value, ref }
+									}
+								) => {
+
+									return <Select
+										ref={ref}
+										value={options2.filter(c => value.includes(c.value))}
+										onChange={val => onChange(val.map(c => c.value))}
+										options={options2}
+										isMulti
+									/>
+								}
+							}
+						/> */}
 					</div>
 
-					<div className="form-group" style={{display:"flex", flexDirection:"column", height:"50%"}}>
+					<div className="form-group">
 						<label className="form-label">Images</label>
 						<input className="form-control" type="file" accept="image/jpeg,image/png,image/gif" id="formFile" {...register("image", {onChange:onFileSelected})}/>
-						<ImagePreview previewObjURL={previewedFile}/>
 					</div>
+
+					<ImagePreview previewObjURL={previewedFile}/>
+
 				</div>
 
 				<ModuleDivider/>

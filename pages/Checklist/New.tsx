@@ -1,6 +1,7 @@
 import formStyles from '../../styles/formStyles.module.css'
 
 import React, { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 import { ModuleContent, ModuleDivider, ModuleHeader, ModuleMain } from '../../components'
 
@@ -8,7 +9,7 @@ export default function ChecklistNew() {
 	return (
 		<ModuleMain>
 			<ModuleHeader title="New Checklist" header="Create New Checklist">
-				<a href="/Checklist" className="btn btn-secondary">Back</a>
+				<Link href="/Checklist" className="btn btn-secondary">Back</Link>
 			</ModuleHeader>
 			<ModuleContent includeGreyContainer grid>
 				<div className={formStyles.halfContainer}>

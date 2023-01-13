@@ -1,8 +1,9 @@
 import styles from '../styles/Login.module.css'
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/router';
 import { SubmitHandler } from 'react-hook-form/dist/types';
 
 type FormValues = {
@@ -18,17 +19,18 @@ function Login() {
 	} = useForm<FormValues>();
 
 	const { isSubmitting, errors } = formState;
+	const router = useRouter();
 
-	const formSubmit: SubmitHandler<FormValues> = (data) => {
+	const formSubmit: SubmitHandler<FormValues> = async (data) => {
 		console.log(data);
-		axios.post("/api/login", data)
+		await axios.post("/api/login", data)
 		.then((response) => {
 			console.log("success", response);
-			window.location.href = '/';
+			router.push("/Dashboard");
 		}).catch((e) => {
 			console.log("error", e);
 			alert("login fail")
-		})
+		});
 	};
 
 	return <div>
@@ -49,7 +51,13 @@ function Login() {
 							<div className={styles.loginErrorInfoText}>Please enter your password</div>
 						)}
 					</div>
-					<button type="submit" disabled={isSubmitting} className="btn btn-primary">Login</button>
+					<button type="submit" disabled={isSubmitting} className="btn btn-primary">
+						{
+							isSubmitting && <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"
+							style={{marginRight: "0.5rem"}}/>
+						}
+						Login
+					</button>
 				</form>
 			</div>
 		</div>

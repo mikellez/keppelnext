@@ -39,13 +39,23 @@ const getRequests = async (req, res, next) => {
 }
 
 const createRequest = async (req, res, next) => {
+
+	const { requestTypeID, faultTypeID, description, plantLocationID, taggedAssetID, image } = req.body;
+
 	db.query(`INSERT INTO keppel.request(
 			fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype
-		) VALUES ($1,$2,$3,$4,$5,$6,$7,)
-
-		)`, []);
+		) VALUES (
+			$1,$2,$3,$4,$5,$6,$7,NOW(),1,$8,$9
+		)`, [
+			faultTypeID, description, plantLocationID, requestTypeID, req.user.id, req.user.role_id, taggedAssetID, null, null
+		], (err, result) => {
+			if(err) return res.status(500).json({msg: err});
+	
+			res.status(200).json(result);
+		});
 }
 
 module.exports = {
-		getRequests
+	getRequests,
+	createRequest
 }

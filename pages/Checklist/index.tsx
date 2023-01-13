@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import Link from 'next/link';
 
 import { ModuleContent, ModuleHeader, ModuleMain } from '../../components'
 
@@ -84,7 +85,7 @@ export default function Checklist() {
 	return (
 		<ModuleMain>
 			<ModuleHeader title="Checklist" header="Checklist">
-				<a href="/Checklist/New" className="btn btn-primary">New Checklist</a>
+				<Link href="/Checklist/New" className="btn btn-primary">New Checklist</Link>
 				<button className="btn btn-primary">Export CSV</button>
 			</ModuleHeader>
 			<ModuleContent>
