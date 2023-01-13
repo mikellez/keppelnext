@@ -29,7 +29,7 @@ export default function TopBar() {
 				}
 			}>
 				<NavBar />
-				<a href="/"><Image src="/keppellogo.png" alt="Keppell Logo" width={225} height={28}/></a>
+				<Link href="/Dashboard"><Image src="/keppellogo.png" alt="Keppell Logo" width={225} height={28}/></Link>
 				<VscAccount size={28} style={{color:"#707070", marginLeft: "auto"}}/>
 				<DropdownMenu/>
 			</div>
