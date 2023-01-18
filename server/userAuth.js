@@ -9,7 +9,7 @@ module.exports = (server) => {
     server.use(session({
         secret: "secret",
         resave: true,
-        saveUninitialized: true
+        saveUninitialized: false
     }))
     server.use(passport.initialize());
     server.use(passport.session());
@@ -19,8 +19,6 @@ module.exports = (server) => {
         db.query("SELECT * FROM keppel.users WHERE LOWER(user_name) = LOWER($1::text)", [username], (err, result) => {
             if(err)							return callback(err);
             if(result.rows.length < 1)		return callback(null, false, { message: 'Incorrect username or password.' });
-
-            console.log(result.rows)
 
             bcrypt.compare(password, result.rows[0].user_pass.toString(), (bErr, bRes) => {
                 console.log(bErr);
@@ -39,7 +37,6 @@ module.exports = (server) => {
 
     passport.deserializeUser((id, cb) => {
         db.query(`SELECT * FROM keppel.user_access WHERE user_id = $1::integer`, [id], (err, result) => {
-            console.log(result.rows[0])
             if (err) return cb(err);
             const userInfo = {
                 id: result.rows[0].user_id,

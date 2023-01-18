@@ -19,7 +19,7 @@ type FormValues = {
 	description: string;
 	plantLocationID: number;
 	taggedAssetID: number;
-	image: File;
+	image: FileList;
 }
 
 const r: CMMSBaseType[] = [
@@ -42,12 +42,39 @@ const f: CMMSBaseType[] = [
 
 async function getAssets(plant_id: number)
 {
-	return await axios.get("http://localhost:3000/api/request/getAssets/" + plant_id)
+	return await axios.get("/api/asset/" + plant_id)
 	.then((response) => {
 		return response.data;
 	})
 	.catch((e) => {
 		console.log("error getting assets")
+		console.log(e);
+		return null;
+	});
+}
+
+async function createRequest(data: FormValues)
+{
+	const formData = new FormData();
+
+	formData.append("description", 			data.description);
+	formData.append("faultTypeID", 			data.faultTypeID.toString());
+	formData.append("plantLocationID",		data.plantLocationID.toString());
+	formData.append("requestTypeID", 		data.requestTypeID.toString());
+	formData.append("taggedAssetID", 		data.taggedAssetID.toString());
+	if(data.image.length > 0)
+		formData.append("image",			data.image[0])
+
+	return await axios.post("/api/request/",
+		formData,
+		{
+			headers: {"Content-Type": "multipart/form-data"}
+		}
+	).then((response) => {
+		return response.data;
+	})
+	.catch((e) => {
+		console.log("error creating request")
 		console.log(e);
 		return null;
 	});
@@ -72,8 +99,9 @@ export default function RequesttNew(props: NewRequestProps) {
 		control
 	} = useForm<FormValues>();
 
-	const formSubmit: SubmitHandler<FormValues> = (data) => {
+	const formSubmit: SubmitHandler<FormValues> = async (data) => {
 		console.log(data);
+		await createRequest(data);
 	};
 
 	useEffect(() => {
@@ -182,9 +210,10 @@ export default function RequesttNew(props: NewRequestProps) {
 						<label className="form-label">Tag Asset:</label>
 
 						<select className="form-control" id="formControlTagAsset" {...register("taggedAssetID")}>
+							<option key="-1" value="none">None</option>
 							{
 								availableAssets.map((asset: CMMSBaseType) => {
-									return <option key={asset.id} value={asset.id}>{asset.name}</option>
+									return <option key={asset.id + "|" + asset.name} value={asset.id}>{asset.name}</option>
 								})
 							}
 						</select>

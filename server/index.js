@@ -1,6 +1,7 @@
 const express = require("express");
 const next = require("next");
 const bodyParser = require("body-parser");
+const multer = require("multer");
 const passport = require("passport");
 const session = require("express-session");
 
@@ -16,6 +17,7 @@ const HOMEPAGE = "/QRCode";
 
 app.prepare().then(() => {
   const server = express();
+  const upload = multer();
   server.use(bodyParser.json());
   userAuth(server);
 
@@ -63,7 +65,9 @@ app.prepare().then(() => {
   });
 
   server.get("/api/request/", checkIfLoggedInAPI, controllers.request.getRequests);
-  server.post("/api/request/", checkIfLoggedInAPI, controllers.request.createRequest);
+  server.post("/api/request/", checkIfLoggedInAPI, upload.single("image"), controllers.request.createRequest);
+
+  server.get("/api/asset/:plant_id", checkIfLoggedInAPI, controllers.asset.getAssetsFromPlant);
   
   server.get("/api/schedule/:plant_id", checkIfLoggedInAPI, controllers.schedule.getViewSchedules);
   server.get("/api/getPlants", checkIfLoggedInAPI, controllers.schedule.getPlants);
