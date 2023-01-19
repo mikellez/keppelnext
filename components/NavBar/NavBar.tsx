@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import styles from '../../styles/Nav.module.scss'
-import { GrClose, GrSchedules, GrUserSettings, GrHistory, GrHostMaintenance } from "react-icons/gr";
+import { GrClose } from "react-icons/gr";
 import { BsList, BsHouseDoor } from 'react-icons/bs'
 import { TbChecklist } from "react-icons/tb";
-import { AiOutlineQrcode , AiOutlineControl } from "react-icons/ai";
+import { AiOutlineQrcode , AiOutlineControl, AiOutlineUser, AiOutlineSchedule, AiOutlinePhone, AiOutlineHistory } from "react-icons/ai";
 import { MdWorkOutline } from "react-icons/md";
 import { VscBook } from "react-icons/vsc";
 import NavDropdown from './NavDropdown';
@@ -100,11 +100,11 @@ export default function NavBar() {
                         <GrClose onClick={displayNav} size={25} style={{color:"#4D4D4D", marginLeft: "auto", cursor: "pointer"}} />
                     </div>
 
-                    <NavLink     name="Request"           onClick={displayNav} path="/Request" icon={<GrHostMaintenance />} />
+                    <NavLink     name="Request"           onClick={displayNav} path="/Request" icon={<AiOutlinePhone size={21} />} />
                     <NavLink     name="Asset"             onClick={displayNav} path="/Asset" icon={<BsHouseDoor size={21} />} />
                     <NavDropdown name="Schedule"          list={scheduleList.map(item => {
                         return {...item, onClick: displayNav}
-                    })} navOpen={navDisplay} icon={<GrSchedules />}/>
+                    })} navOpen={navDisplay} icon={<AiOutlineSchedule size={21} />}/>
                     <NavLink     name="Checklist"         onClick={displayNav} path="/Checklist" icon={<TbChecklist size={21}/>} />
                     <NavLink     name="E-Logbook"         onClick={displayNav} path="/Logbook" icon={<VscBook size={21} />} />
                     <NavLink     name="Generate QR Codes" onClick={displayNav} path="/QRCode" icon={<AiOutlineQrcode size={21}/>} />
@@ -112,10 +112,10 @@ export default function NavBar() {
                     <NavLink     name="Master"            onClick={displayNav} path="/Master" icon={<AiOutlineControl size={21} />} />
                     <NavDropdown name="User Management"   list={userManagementList.map(item => {
                         return {...item, onClick: displayNav}
-                    })} navOpen={navDisplay} icon={<GrUserSettings />} />
+                    })} navOpen={navDisplay} icon={<AiOutlineUser size={21} />} />
                     <NavDropdown name="Activity Log"      list={activityLogList.map(item => {
                         return {...item, onClick: displayNav}
-                    })} navOpen={navDisplay} icon={<GrHistory />} />
+                    })} navOpen={navDisplay} icon={<AiOutlineHistory size={21} />} />
                 </div>
             </div>
         </div>
