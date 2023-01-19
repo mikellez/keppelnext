@@ -7,6 +7,7 @@ export interface NavLinkInfo {
     name: string;
     path: string;
     onClick?: MouseEventHandler;
+    icon?: React.ReactNode;
 }
 
 export default function NavLink(props: NavLinkInfo) {
@@ -14,11 +15,15 @@ export default function NavLink(props: NavLinkInfo) {
     const router = useRouter();
 
     
-    return <Link
+    return (
+        <div className={styles.navItem + (router.pathname.includes(props.path) ? " " + styles.navItemSelected : "")} >
+            {props.icon}
+            <Link
                 href={props.path}
-                className={styles.navItem + (router.pathname.includes(props.path) ? " " + styles.navItemSelected : "")}
                 onClick={props.onClick}
-    >
-        <h6 className={styles.navItemText}>{props.name}</h6>
-    </Link>
+            >
+            <h6 className={styles.navItemText + (router.pathname.includes(props.path) ? " " + styles.navItemTextSelected : "")}>{props.name}</h6>
+            </Link>
+        </div> 
+    )
 }

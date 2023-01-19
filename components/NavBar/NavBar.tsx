@@ -2,8 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import styles from '../../styles/Nav.module.scss'
-import { GrClose } from "react-icons/gr";
-import { BsList } from 'react-icons/bs'
+import { GrClose, GrSchedules, GrUserSettings, GrHistory, GrHostMaintenance } from "react-icons/gr";
+import { BsList, BsHouseDoor } from 'react-icons/bs'
+import { TbChecklist } from "react-icons/tb";
+import { AiOutlineQrcode , AiOutlineControl } from "react-icons/ai";
+import { MdWorkOutline } from "react-icons/md";
+import { VscBook } from "react-icons/vsc";
 import NavDropdown from './NavDropdown';
 import NavLink, { NavLinkInfo } from './NavLink';
 import { MenuItem } from 'react-pro-sidebar';
@@ -96,22 +100,22 @@ export default function NavBar() {
                         <GrClose onClick={displayNav} size={25} style={{color:"#4D4D4D", marginLeft: "auto", cursor: "pointer"}} />
                     </div>
 
-                    <NavLink     name="Request"           onClick={displayNav} path="/Request" />
-                    <NavLink     name="Asset"             onClick={displayNav} path="/Asset" />
+                    <NavLink     name="Request"           onClick={displayNav} path="/Request" icon={<GrHostMaintenance />} />
+                    <NavLink     name="Asset"             onClick={displayNav} path="/Asset" icon={<BsHouseDoor size={21} />} />
                     <NavDropdown name="Schedule"          list={scheduleList.map(item => {
                         return {...item, onClick: displayNav}
-                    })} navOpen={navDisplay} />
-                    <NavLink     name="Checklist"         onClick={displayNav} path="/Checklist" />
-                    <NavLink     name="E-Logbook"         onClick={displayNav} path="/Logbook" />
-                    <NavLink     name="Generate QR Codes" onClick={displayNav} path="/QRCode" />
-                    <NavLink     name="Workflow"          onClick={displayNav} path="/Workflow" />
-                    <NavLink     name="Master"            onClick={displayNav} path="/Master" />
+                    })} navOpen={navDisplay} icon={<GrSchedules />}/>
+                    <NavLink     name="Checklist"         onClick={displayNav} path="/Checklist" icon={<TbChecklist size={21}/>} />
+                    <NavLink     name="E-Logbook"         onClick={displayNav} path="/Logbook" icon={<VscBook size={21} />} />
+                    <NavLink     name="Generate QR Codes" onClick={displayNav} path="/QRCode" icon={<AiOutlineQrcode size={21}/>} />
+                    <NavLink     name="Workflow"          onClick={displayNav} path="/Workflow" icon={<MdWorkOutline size={21} />} />
+                    <NavLink     name="Master"            onClick={displayNav} path="/Master" icon={<AiOutlineControl size={21} />} />
                     <NavDropdown name="User Management"   list={userManagementList.map(item => {
                         return {...item, onClick: displayNav}
-                    })} navOpen={navDisplay} />
+                    })} navOpen={navDisplay} icon={<GrUserSettings />} />
                     <NavDropdown name="Activity Log"      list={activityLogList.map(item => {
                         return {...item, onClick: displayNav}
-                    })} navOpen={navDisplay} />
+                    })} navOpen={navDisplay} icon={<GrHistory />} />
                 </div>
             </div>
         </div>
