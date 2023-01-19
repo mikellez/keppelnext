@@ -6,6 +6,7 @@ export * from "./ModuleLayout/ModuleHeader"
 export * from "./ModuleLayout/ModuleDivider"
 export * from "./ModuleLayout/ModuleContent"
 export * from "./ModuleLayout/ModuleFooter"
+export * from "./ModuleLayout/ModuleSimplePopup"
 
 export * from "./NavBar/NavBar"
 export * from "./NavBar/NavDropdown"
