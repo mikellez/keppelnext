@@ -15,11 +15,19 @@ const handle = app.getRequestHandler();
 
 const HOMEPAGE = "/QRCode";
 
+
 app.prepare().then(() => {
   const server = express();
   const upload = multer();
   server.use(bodyParser.json());
   userAuth(server);
+
+  // Prevent cache in browsers
+  server.use(function (req, res, next) {
+    res.set('Cache-control', 'no-cache, no-store');
+    next();
+  });
+  
 
   // ROUTES
 
