@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { ReactComponentElement, useEffect, useState } from 'react';
 import Link from 'next/link';
 import styles from '../../styles/Nav.module.scss'
 import { SlArrowDown } from 'react-icons/sl';
@@ -10,6 +10,7 @@ interface NavDropdownInfo {
     name: string;
     list: Array<NavLinkInfo>;
     navOpen?: boolean;
+    icon?: React.ReactNode;
 } 
 
 function NavDropdown(props: NavDropdownInfo) {
@@ -32,8 +33,11 @@ function NavDropdown(props: NavDropdownInfo) {
     return (
         <div>
             <div className={styles.navItem} onClick={() => {setIsClicked(prev => !prev)}}>
+                {props.icon}
                 <h6 className={styles.navItemText}>{props.name}</h6>
-                {isClicked ? <SlArrowUp style={arrowStyles}/> : <SlArrowDown style={arrowStyles}/>}
+                <div>
+                    {isClicked ? <SlArrowUp style={arrowStyles}/> : <SlArrowDown style={arrowStyles}/>}
+                </div>
             </div>
             <div style={{display: isClicked ? "flex" : "none"}} className={styles.navDropdownItems}>
                 {dropdownElements}

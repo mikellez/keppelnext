@@ -1,17 +1,54 @@
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
 import styles from '../../styles/Nav.module.scss'
 import { GrClose } from "react-icons/gr";
-import { BsList } from 'react-icons/bs'
+import { BsList, BsHouseDoor } from 'react-icons/bs'
+import { TbChecklist } from "react-icons/tb";
+import { AiOutlineQrcode , AiOutlineControl, AiOutlineUser, AiOutlineSchedule, AiOutlinePhone, AiOutlineHistory } from "react-icons/ai";
+import { MdWorkOutline } from "react-icons/md";
+import { VscBook } from "react-icons/vsc";
 import NavDropdown from './NavDropdown';
 import NavLink, { NavLinkInfo } from './NavLink';
-import { MenuItem } from 'react-pro-sidebar';
+import axios from 'axios';
 
 export default function NavBar() {
 
-    const [navDisplay, setNavDisplay] = useState(false);
-    const [isTransitioning, setTransitioning] = useState(false);
+    const [navDisplay, setNavDisplay] = useState<boolean>(false);
+    const [isTransitioning, setTransitioning] = useState<boolean>(false);
+    // Dropdown for schedule stored as a state
+    const [scheduleDropdown, setScheduleDropdown] = useState<NavLinkInfo[]>([{name: "View Schedule", path: "/Schedule"}]);
+
+    useEffect(() => {
+        setNav();
+    }, []);
+
+    // Get the user info from api
+    async function getUser() {
+        return await axios.get("/api/user")
+            .then(res => {
+                return res.data
+            })
+            .catch(err => console.log(err.message))
+    };
+
+    // Change the nav bar based on the user role id
+    async function setNav() {
+        await getUser().then((user) => {
+            switch(user.role_id) {
+                case 1:
+                    setScheduleDropdown([
+                        {name: "View Schedule", path: "/Schedule"},
+                        {name: "Create Schedule", path: "/Schedule/Create"},
+                        {name: "Manage Schedule", path: "/Schedule/Manage"}
+                    ])
+                    break;
+                case 2:
+                    setScheduleDropdown([
+                        {name: "View Schedule", path: "/Schedule"},
+                        {name: "Create Schedule", path: "/Schedule/Create"}
+                    ])
+            }
+        })
+    }
 
     // Display and hide nav by toggling the state
     function displayNav() {
@@ -56,22 +93,6 @@ export default function NavBar() {
         }
     ];
 
-    // Dropdown list for schedule
-    const scheduleList : NavLinkInfo[] = [
-        {
-            name: "View Schedule",
-            path: "/Schedule",
-        },
-        {
-            name: "Create Schedule",
-            path: "/Schedule/Create",
-        },
-        {
-            name: "Manage Schedule",
-            path: "/Schedule/Manage",
-        }
-    ];
-
     return (
         <div>
             <BsList onClick={displayNav} size={42} style={{color:"#707070", marginRight:"1em", cursor: "pointer"}}/>
@@ -96,22 +117,22 @@ export default function NavBar() {
                         <GrClose onClick={displayNav} size={25} style={{color:"#4D4D4D", marginLeft: "auto", cursor: "pointer"}} />
                     </div>
 
-                    <NavLink     name="Request"           onClick={displayNav} path="/Request" />
-                    <NavLink     name="Asset"             onClick={displayNav} path="/Asset" />
-                    <NavDropdown name="Schedule"          list={scheduleList.map(item => {
+                    <NavLink     name="Request"           onClick={displayNav} path="/Request" icon={<AiOutlinePhone size={21} />} />
+                    <NavLink     name="Asset"             onClick={displayNav} path="/Asset" icon={<BsHouseDoor size={21} />} />
+                    <NavDropdown name="Schedule"          list={scheduleDropdown.map(item => {
                         return {...item, onClick: displayNav}
-                    })} navOpen={navDisplay} />
-                    <NavLink     name="Checklist"         onClick={displayNav} path="/Checklist" />
-                    <NavLink     name="E-Logbook"         onClick={displayNav} path="/Logbook" />
-                    <NavLink     name="Generate QR Codes" onClick={displayNav} path="/QRCode" />
-                    <NavLink     name="Workflow"          onClick={displayNav} path="/Workflow" />
-                    <NavLink     name="Master"            onClick={displayNav} path="/Master" />
+                    })} navOpen={navDisplay} icon={<AiOutlineSchedule size={21} />}/>
+                    <NavLink     name="Checklist"         onClick={displayNav} path="/Checklist" icon={<TbChecklist size={21}/>} />
+                    <NavLink     name="E-Logbook"         onClick={displayNav} path="/Logbook" icon={<VscBook size={21} />} />
+                    <NavLink     name="Generate QR Codes" onClick={displayNav} path="/QRCode" icon={<AiOutlineQrcode size={21}/>} />
+                    <NavLink     name="Workflow"          onClick={displayNav} path="/Workflow" icon={<MdWorkOutline size={21} />} />
+                    <NavLink     name="Master"            onClick={displayNav} path="/Master" icon={<AiOutlineControl size={21} />} />
                     <NavDropdown name="User Management"   list={userManagementList.map(item => {
                         return {...item, onClick: displayNav}
-                    })} navOpen={navDisplay} />
+                    })} navOpen={navDisplay} icon={<AiOutlineUser size={21} />} />
                     <NavDropdown name="Activity Log"      list={activityLogList.map(item => {
                         return {...item, onClick: displayNav}
-                    })} navOpen={navDisplay} />
+                    })} navOpen={navDisplay} icon={<AiOutlineHistory size={21} />} />
                 </div>
             </div>
         </div>

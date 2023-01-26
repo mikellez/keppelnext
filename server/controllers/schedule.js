@@ -56,7 +56,7 @@ const getViewSchedules = async(req, res, next) => {
 			UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
             SC.PLANT_ID =ANY(SELECT DISTINCT(PLANT_ID) FROM KEPPEL.USER_PLANT WHERE USER_ID = ${req.user.id} OR ${req.user.id} = ANY(SC.SCHEDULER_USERIDS_FOR_EMAIL))
             AND
-            SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1) 
+            SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1 OR STATUS = 5) 
             
             GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
         } else {
@@ -80,7 +80,7 @@ const getViewSchedules = async(req, res, next) => {
           CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
           U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL)AND
 		  UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
-          SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1)
+          SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1 OR STATUS = 5)
           GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
         };
     } else {
@@ -105,7 +105,7 @@ const getViewSchedules = async(req, res, next) => {
 		UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
         SC.PLANT_ID = ${req.params.plant_id}
         AND
-        SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1) 
+        SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1 OR STATUS = 5) 
         
         GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`)
     }
@@ -122,19 +122,19 @@ const getViewSchedules = async(req, res, next) => {
 // Get plants based on the user role
 const getPlants = async(req, res, next) => {
     if (req.user.role_id === 0 || req.user.role_id === 4) {
+        db.query("SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) FROM keppel.user_access WHERE user_id = $1::integer)", [req.user.id], (err, result) => {
+            if (err) throw err;
+            if (result) {
+                res.status(200).send(result.rows);
+            }; 
+        })
+    } else {
         db.query(`SELECT * FROM keppel.plant_master`, (err, result) => {
             if (err) throw err;
             if (result) {
                 res.status(200).send(result.rows);
             };
         }); 
-    } else {
-        db.query("SELECT * FROM keppel.plant_master WHERE plant_id IN (SELECT plant_id FROM keppel.user_plant WHERE user_id = $1::integer)", [req.user.id], (err, result) => {
-            if (err) throw err;
-            if (result) {
-                res.status(200).send(result.rows);
-            }; 
-        })
     }
 };
 

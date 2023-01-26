@@ -171,59 +171,57 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
             <ModuleContent>
                 {toggleCalendarOrListView ? (
                     // Render Full calendar view
-                    <>
-                        <FullCalendar
-                            plugins={[dayGridPlugin]}
-                            initialView="dayGridMonth"
-                            headerToolbar={{
-                                left: "today",
-                                center: "title",
-                                right: "prevYear,prev,next,nextYear",
-                            }}
-                            aspectRatio={2}
-                            handleWindowResize={true}
-                            windowResizeDelay={1}
-                            stickyHeaderDates={true}
-                            selectable={true}
-                            unselectAuto={true}
-                            events={eventList}
-                            dayMaxEvents={2}
-                            eventDisplay="block"
-                            eventBackgroundColor="#FA9494"
-                            eventBorderColor="#FFFFFF"
-                            eventTextColor="#000000"
-                            displayEventTime={false}
-                            eventClick={() => setIsModalOpen(true)}
-                            eventMouseEnter={(info) => {
-                                document.body.style.cursor = "pointer";
+                    <FullCalendar
+                        plugins={[dayGridPlugin]}
+                        initialView="dayGridMonth"
+                        headerToolbar={{
+                            left: "today",
+                            center: "title",
+                            right: "prevYear,prev,next,nextYear",
+                        }}
+                        aspectRatio={2}
+                        handleWindowResize={true}
+                        windowResizeDelay={1}
+                        stickyHeaderDates={true}
+                        selectable={true}
+                        unselectAuto={true}
+                        events={eventList}
+                        dayMaxEvents={2}
+                        eventDisplay="block"
+                        eventBackgroundColor="#FA9494"
+                        eventBorderColor="#FFFFFF"
+                        eventTextColor="#000000"
+                        displayEventTime={false}
+                        eventClick={() => setIsModalOpen(true)}
+                        eventMouseEnter={(info) => {
+                            document.body.style.cursor = "pointer";
 
-                                const event = {
-                                    title: info.event._def.title,
-                                    start: info.event._instance?.range.start,
-                                    extendedProps: {
-                                        plant: info.event._def.extendedProps.plant,
-                                        scheduleId: info.event._def.extendedProps.scheduleId,
-                                        checklistId: info.event._def.extendedProps.checklistId,
-                                        startDate: info.event._def.extendedProps.startDate,
-                                        endDate: info.event._def.extendedProps.endDate,
-                                        recurringPeriod: info.event._def.extendedProps.recurringPeriod,
-                                        assignedIds: info.event._def.extendedProps.assignedIds,
-                                        assignedEmails: info.event._def.extendedProps.assignedEmails,
-                                        assignedFnames: info.event._def.extendedProps.assignedFnames,
-                                        assignedLnames: info.event._def.extendedProps.assignedLnames,
-                                        assignedUsernames: info.event._def.extendedProps.assignedUsernames,
-                                        assignedRoles: info.event._def.extendedProps.assignedRoles,
-                                        remarks: info.event._def.extendedProps.remarks,
-                                    },
-                                };
+                            const event = {
+                                title: info.event._def.title,
+                                start: info.event._instance?.range.start,
+                                extendedProps: {
+                                    plant: info.event._def.extendedProps.plant,
+                                    scheduleId: info.event._def.extendedProps.scheduleId,
+                                    checklistId: info.event._def.extendedProps.checklistId,
+                                    startDate: info.event._def.extendedProps.startDate,
+                                    endDate: info.event._def.extendedProps.endDate,
+                                    recurringPeriod: info.event._def.extendedProps.recurringPeriod,
+                                    assignedIds: info.event._def.extendedProps.assignedIds,
+                                    assignedEmails: info.event._def.extendedProps.assignedEmails,
+                                    assignedFnames: info.event._def.extendedProps.assignedFnames,
+                                    assignedLnames: info.event._def.extendedProps.assignedLnames,
+                                    assignedUsernames: info.event._def.extendedProps.assignedUsernames,
+                                    assignedRoles: info.event._def.extendedProps.assignedRoles,
+                                    remarks: info.event._def.extendedProps.remarks,
+                                },
+                            };
 
-                                setCurrentEvent(event);
-                            }}
-                            eventMouseLeave={() => {
-                                document.body.style.cursor = "default";
-                            }}
-                        />
-                    </>
+                            setCurrentEvent(event);
+                        }}
+                        eventMouseLeave={() => {
+                            document.body.style.cursor = "default";
+                        }}
+                    />
                 ) : (
                     // Render list view
                     <ScheduleTable schedules={props.schedules}/>

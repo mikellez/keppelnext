@@ -38,9 +38,11 @@
     margin: 0.2rem 0 0.2rem 0;
     padding: 0.3rem 2rem;
     border-left: rgba(0,0,0,0.2) solid 6px;
-    display: flex;
-    flex-direction: row;
+    // display: flex;
+    // flex-direction: row;
     align-items: center;
+    display: grid;
+    grid-template-columns: 20% auto 10%;
 }
 
 .navItemSelected {
@@ -60,8 +62,13 @@
 }
 
 .navItemText {
-   margin: auto 0 auto 0;
-   padding: 0.2rem 0 0.2rem 0;
+    margin: auto 0 auto 0;
+    padding: 0.2rem 0 0.2rem 0;
+    color: global.$gray;
+}
+
+.navItemTextSelected {
+    color: white;
 }
 
 .overlay {
