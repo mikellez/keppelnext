@@ -1,8 +1,7 @@
 import React from "react";
 import { ModuleContent, ModuleHeader, ModuleMain } from '../../../components';
 import CreateScheduleCard ,{ CreateScheduleCardProps } from "../../../components/Schedule/CreateScheduleCard";
-import { GiNewShoot } from 'react-icons/gi';
-import { RiDraftLine, RiCalendarCheckLine } from 'react-icons/ri';
+import { RiDraftLine, RiCalendarCheckLine, RiCalendarTodoLine } from 'react-icons/ri';
 import styles from "../../../styles/Schedule.module.scss";
 
 export default function CreateSchedule() {
@@ -10,8 +9,8 @@ export default function CreateSchedule() {
         {
             title: "New",
             text: "Start afresh with a blank calendar",
-            icon: <GiNewShoot size={60} />,
-            color: "#CFFDE1"
+            icon: <RiCalendarTodoLine size={60} />,
+            color: "#82CD47"
         },
         {
             title: "Approved",

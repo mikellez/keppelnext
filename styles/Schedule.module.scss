@@ -211,9 +211,11 @@
 
 .createCardBtn {
     color: "#121212";
-    border: 2px double #222222;
+    border-radius: 5px;
+    border: none;
     position: absolute;
-    bottom: 2rem;
+    bottom: 2rem; 
+    padding: 0.3rem 1rem;
 }
 
 .createCardBar {
