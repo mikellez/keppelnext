@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import ScheduleTemplate from '../../../components/Schedule/ScheduleTemplate';
-import { AiOutlineHistory, AiOutlineAudit, AiOutlineClockCircle,AiOutlineInfoCircle } from "react-icons/ai"
+import { AiOutlineHistory, AiOutlineAudit, AiOutlineClockCircle,AiOutlineInfoCircle } from "react-icons/ai";
+import TooltipBtn from '../../../components/Schedule/TooltipBtn';
 import styles from "../../../styles/Schedule.module.scss";
 import axios from 'axios';
 
@@ -27,13 +28,12 @@ export default function ManageSchedule() {
 			<select className="form-control">
 				{isHistory ? <option hidden>Completed Schedules</option> : <option hidden>Pending Schedules</option> }
 			</select>
-			<button className="btn btn-primary"><AiOutlineAudit size={21} /></button>
-			<button style={{
-				display: isHistory ? "block" : "none",
-			}} className="btn btn-primary"><AiOutlineInfoCircle size={21} /></button>
-			<button className="btn btn-primary" onClick={() => setIsHistory(prev => !prev)} >
+			<TooltipBtn text="Manage pending schedules"> <AiOutlineAudit size={21} /> </TooltipBtn>
+			{isHistory &&
+			<TooltipBtn text="Schdedule info"> <AiOutlineInfoCircle size={21} /> </TooltipBtn>}
+			<TooltipBtn onClick={() => setIsHistory(prev => !prev)} text={isHistory ? "View past schedules" : "View pending schedules"} >
 				{isHistory ? <AiOutlineClockCircle size={21} /> : <AiOutlineHistory size={21} />}
-			</button>
+			</TooltipBtn>
 		</ScheduleTemplate>
     )
 }

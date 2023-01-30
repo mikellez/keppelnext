@@ -9,6 +9,7 @@ import { BsCalendar4Week, BsListUl } from "react-icons/bs";
 import { TableNode } from '@table-library/react-table-library/types/table';
 import ScheduleTable from "./ScheduleTable";
 
+
 interface ScheduleTemplateInfo extends PropsWithChildren {
     title: string;
     header: string;
