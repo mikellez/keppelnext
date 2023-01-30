@@ -10,19 +10,22 @@ export default function CreateSchedule() {
             title: "New",
             text: "Start afresh with a blank calendar",
             icon: <RiCalendarTodoLine size={60} />,
-            color: "#82CD47"
+            color: "#82CD47",
+            path: "./Create/New"
         },
         {
             title: "Approved",
             text: "Work on the most recent approved schedule",
             icon: <RiCalendarCheckLine size={60} />,
-            color: "#FFB200"
+            color: "#FFB200",
+            path: "./Create/Approved"
         },
         {
             title: "Drafts",
             text: "Continue from your collection of drafts",
             icon: <RiDraftLine size={60} />,
-            color: "#91D8E4"
+            color: "#91D8E4",
+            path: "./Create/Draft"
         }
     ];
 
@@ -33,6 +36,7 @@ export default function CreateSchedule() {
             text={option.text}
             icon={option.icon}
             color={option.color}
+            path={option.path}
         />;
     });
 
