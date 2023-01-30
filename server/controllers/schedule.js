@@ -138,7 +138,17 @@ const getPlants = async(req, res, next) => {
     }
 };
 
+const getUserPlants = async(req, res, next) => {
+    db.query("SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) FROM keppel.user_access WHERE user_id = $1::integer)", [req.user.id], (err, result) => {
+        if (err) throw err;
+        if (result) {
+            res.status(200).send(result.rows);
+        }; 
+    });
+};
+
 module.exports = {
     getViewSchedules, 
     getPlants,
+    getUserPlants,
 };

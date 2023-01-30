@@ -6,11 +6,12 @@ import { ChangeEventHandler } from 'preact/compat';
 interface PlantSelectProps {
     onChange: React.ChangeEventHandler;
     accessControl?: boolean;
+    allPlants?: boolean;
 }
 
 // No access control for managers and engineers
-async function getPlants() {
-	return await axios.get<PlantInfo[]>("/api/getPlants")
+async function getPlants(url: string) {
+	return await axios.get<PlantInfo[]>(url)
 	.then(res => {
 		return res.data
 	})
@@ -23,12 +24,13 @@ export default function PlantSelect(props: PlantSelectProps) {
 
     // Calls an api on load to get the list of plants
 	useEffect(() => {
-        if (!props.accessControl) updatePlants();
+        const url = props.accessControl ? "/api/getUserPlants" : "/api/getPlants"
+        updatePlants(url);
 	}, []);
 
     // Get the plants for the dropdown
-	function updatePlants() {
-		getPlants().then(plants => {
+	function updatePlants(url: string) {
+		getPlants(url).then(plants => {
 			if (plants == null) {
 				return console.log("no plants");
 			}
@@ -41,7 +43,7 @@ export default function PlantSelect(props: PlantSelectProps) {
 
     return (
         <select className="form-control" onChange={props.onChange}>
-            <option hidden>Select plant</option>
+            {props.allPlants ? (plantList.length > 1 && <option value={0}>View all Plants</option>) : <option hidden>Select plant</option>}
             {plantOptions}
         </select>
     );

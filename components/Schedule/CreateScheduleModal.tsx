@@ -4,6 +4,7 @@ import { ModalProps } from './EventModal';
 import TooltipBtn from './TooltipBtn';
 import { GrClose } from 'react-icons/gr';
 import styles from "../../styles/Schedule.module.scss"
+import PlantSelect from './PlantSelect';
 
 
 interface CreateScheduleModalProps extends ModalProps {
@@ -41,9 +42,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                 </div>
                 <div className={styles.modalForm}>
                     <input type="text" className="form-control" placeholder="Schedule name"/>
-                    <select className="form-control">
-                        <option hidden>Select a plant</option>
-                    </select>
+                    <PlantSelect accessControl={true} onChange={() => {}}/>
                     <textarea className="form-control" rows={8} maxLength={500} placeholder="Description"></textarea>
                 </div>           
             </div>

@@ -71,7 +71,7 @@ export default function Schedule() {
 						{plantList.length > 1 && <option value={0}>View all Plants</option>}
 						{plantOptions}
 					</select> */}
-					<PlantSelect onChange={changePlant}/>
+					<PlantSelect onChange={changePlant} allPlants={true} />
 				</div>
 		</ScheduleTemplate>
   	);
