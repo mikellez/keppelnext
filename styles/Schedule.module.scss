@@ -177,3 +177,50 @@
     height: 70vh;
 }
 
+.createCardsContainer {
+    display: flex;
+    flex-direction: row;
+    gap: 10rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.createCard {
+    border: 0.1rem dotted #EAEAEA; 
+    background-color: #F7F7F7;
+    width: 20%;
+    min-height: 325px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    align-items: center;
+    padding: 2rem 0;
+    position: relative;
+}
+
+.createCard h5 {
+    margin: 1.7rem 0 0 0;
+}
+
+.createCardText {
+    text-align: center;
+    color: #73777B;
+    width: 60%;
+    font-size: 0.95rem;
+}
+
+.createCardBtn {
+    color: "#121212";
+    border: 2px double #222222;
+    position: absolute;
+    bottom: 2rem;
+}
+
+.createCardBar {
+    height: 0.9rem;
+    width: 3rem;
+    position: absolute;
+    right: 0;
+    top: 2rem;
+}
+
