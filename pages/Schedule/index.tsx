@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import ScheduleTemplate, { ScheduleInfo, PlantInfo } from '../../components/Schedule/ScheduleTemplate';
+import PlantSelect from '../../components/Schedule/PlantSelect';
 import axios from 'axios';
 import { MdOutlineLocationOn } from "react-icons/md"
 import styles from "../../styles/Schedule.module.scss";
@@ -13,13 +14,13 @@ async function getSchedules(id : number) {
 	.catch(err => console.log(err.message))
 };
 
-async function getPlants() {
-	return await axios.get<PlantInfo[]>("/api/getPlants")
-	.then(res => {
-		return res.data
-	})
-	.catch(err => console.log(err.message))
-};
+// async function getPlants() {
+// 	return await axios.get<PlantInfo[]>("/api/getPlants")
+// 	.then(res => {
+// 		return res.data
+// 	})
+// 	.catch(err => console.log(err.message))
+// };
 
 export default function Schedule() {
 	// Store the list of plants in a state for dropdown
@@ -30,7 +31,7 @@ export default function Schedule() {
 	// Calls an api on load to get the list of plants
 	useEffect(() => {
 		updateSchedules(0);
-		updatePlants();
+		// updatePlants();
 	}, []);
 
 	// Get the schedules to be rendered on the calendar
@@ -45,14 +46,14 @@ export default function Schedule() {
 	};
 	
 	// Get the plants for the dropdown
-	function updatePlants() {
-		getPlants().then(plants => {
-			if (plants == null) {
-				return console.log("no plants");
-			}
-			setPlantList(plants);
-		});
-	};
+	// function updatePlants() {
+	// 	getPlants().then(plants => {
+	// 		if (plants == null) {
+	// 			return console.log("no plants");
+	// 		}
+	// 		setPlantList(plants);
+	// 	});
+	// };
 
 	// Change the events according to plant on change of plant select
 	function changePlant(e : React.ChangeEvent<HTMLSelectElement>) {
@@ -60,20 +61,23 @@ export default function Schedule() {
 	};
 
 	// Plant dropdown options
-	const plantOptions = plantList.map(plant => <option key={plant.plant_id} value={plant.plant_id}>{plant.plant_name}</option>)
+	// const plantOptions = plantList.map(plant => <option key={plant.plant_id} value={plant.plant_id}>{plant.plant_name}</option>)
 
   	return (
 		<ScheduleTemplate title="View Schedule" header="View Schedule" schedules={scheduleList}>
 				<div className={"form-group" && styles.eventModalHeader} style={{gap: "0.3rem"}}>
 					<MdOutlineLocationOn size={30} />
-					<select className="form-control" onChange={changePlant}>
+					{/* <select className="form-control" onChange={changePlant}>
 						{plantList.length > 1 && <option value={0}>View all Plants</option>}
 						{plantOptions}
-					</select>
+					</select> */}
+					<PlantSelect onChange={changePlant}/>
 				</div>
 		</ScheduleTemplate>
   	);
 };
+
+
 
 
 

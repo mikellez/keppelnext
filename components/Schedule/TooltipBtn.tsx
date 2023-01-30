@@ -4,6 +4,7 @@ interface TooltipBtnProps extends PropsWithChildren {
     text?: string;
     onClick?: MouseEventHandler;
     style?: React.CSSProperties;
+    toolTip?: boolean;
 };
 
 export default function TooltipBtn(props: TooltipBtnProps) {
@@ -25,7 +26,7 @@ export default function TooltipBtn(props: TooltipBtnProps) {
                 top: -45,
                 left: -50,
             }}>
-                {props.text ? props.text : "Default Tooltip"}
+                {props.toolTip != false && (props.text ? props.text : "Default Tooltip")}
             </div>
             <button 
                 className="btn btn-primary"

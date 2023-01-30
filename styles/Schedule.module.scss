@@ -227,4 +227,11 @@
     top: 2rem;
 }
 
+.modalForm {
+    @extend .eventModalAssignedUsers;
+    gap: 0.8rem;
+    margin: 1.5rem 0;
+}
+
+
 // ------------------------------------------ Create Schedule Template Page -------------------------------------------
