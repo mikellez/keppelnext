@@ -5,12 +5,14 @@ interface ModuleFooterProps {
 }
 
 const footerStyle: CSSProperties = {
-	marginBottom: "4em"
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "right"
 }
 
 const footerSideElement: CSSProperties = { 
 	float: "right",
-	marginRight: "1em"
+	marginLeft: "1em"
 }
 
 export function ModuleFooter(props: ModuleFooterProps) {

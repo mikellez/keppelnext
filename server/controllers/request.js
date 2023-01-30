@@ -1,6 +1,6 @@
 const db = require("../../db");
 
-const getRequests = async (req, res, next) => {
+const fetchRequests = async (req, res, next) => {
 	db.query(`SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
 	rt.request, ro.role_name, sc.status,r.fault_description, rt.request as request_type,
 	pri.priority,
@@ -54,10 +54,19 @@ const createRequest = async (req, res, next) => {
 			if(err) return res.status(500).json({msg: err});
 	
 			res.status(200).json(result);
-		});
+		}
+	);
+}
+
+const fetchRequestTypes = async (req, res, next) => {
+	db.query(`SELECT * FROM keppel.request_type ORDER BY req_id ASC`, (err, result) => {
+		if(err) return res.status(500).json({msg: err});
+		res.status(200).json(result.rows);
+	})
 }
 
 module.exports = {
-	getRequests,
-	createRequest
+	fetchRequests,
+	createRequest,
+	fetchRequestTypes
 }

@@ -72,8 +72,11 @@ app.prepare().then(() => {
     );
   });
 
-  server.get("/api/request/", checkIfLoggedInAPI, controllers.request.getRequests);
+  server.get("/api/request/", checkIfLoggedInAPI, controllers.request.fetchRequests);
   server.post("/api/request/", checkIfLoggedInAPI, upload.single("image"), controllers.request.createRequest);
+  server.get("/api/request/types", checkIfLoggedInAPI, controllers.request.fetchRequestTypes);
+
+  server.get("/api/fault/types", checkIfLoggedInAPI, controllers.fault.fetchFaultTypes);
 
   server.get("/api/asset/:plant_id", checkIfLoggedInAPI, controllers.asset.getAssetsFromPlant);
   
