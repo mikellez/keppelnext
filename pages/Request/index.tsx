@@ -1,7 +1,9 @@
 
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, CSSProperties } from 'react'
 import { ModuleContent, ModuleHeader, ModuleMain } from '../../components'
+
+import { ThreeDots } from 'react-loading-icons'
 
 import { CompactTable } from '@table-library/react-table-library/compact';
 import { TableNode } from '@table-library/react-table-library/types/table';
@@ -51,12 +53,15 @@ async function getRequests() {
 	.catch((e) => {
 		console.log("error getting requests")
 		console.log(e);
-		return null;
+		throw new Error(e);
 	});
 }
 
 export default function Request() {
 	const [requestNodes, setRequestNodes] = useState<Request[]>([]);
+	const [isGetting, setGetting] = useState(true);
+	const [isGetFailed, setGetFailed] = useState(false);
+
 	const theme = useTheme([
 		getTheme(),
 		{
@@ -81,6 +86,8 @@ export default function Request() {
 	}, []);
 
 	function updateRequests() {
+		setGetting(true);
+
 		getRequests().then((r) => {
 			if(r == null)
 				return console.log("requests null");
@@ -88,6 +95,11 @@ export default function Request() {
 			console.log(r);
 
 			setRequestNodes(r);
+		}).catch((e) => {
+			setGetFailed(true);
+			return;
+		}).finally(() => {
+			setGetting(false);
 		});
 	}
 	
@@ -98,7 +110,12 @@ export default function Request() {
 				<a className="btn btn-primary">Export CSV</a>
 			</ModuleHeader>
 			<ModuleContent>
-				<CompactTable columns={COLUMNS} data={{nodes: requestNodes}} theme={theme} layout={{custom: true}}/>
+				{isGetting &&
+					<div style={{width: "100%", textAlign: "center"}}>
+						<ThreeDots fill="black"/>
+					</div>
+				}
+				{!isGetting && <CompactTable columns={COLUMNS} data={{nodes: requestNodes}} theme={theme} layout={{custom: true}}/>}
 			</ModuleContent>
 		</ModuleMain>
   	)
