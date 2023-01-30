@@ -5,10 +5,13 @@ import EventModalUser from "./EventModalUser";
 import { GrClose } from "react-icons/gr";
 import styles from "../../styles/Schedule.module.scss"
 
+interface CustomMouseEventHandler extends React.MouseEventHandler {
+    (event: React.MouseEvent | void): void
+}
 
 export interface ModalProps {
     isOpen: boolean;
-    closeModal: MouseEventHandler;
+    closeModal: CustomMouseEventHandler;
     event?: EventInfo;
 };
 

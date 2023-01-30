@@ -4,9 +4,10 @@ import axios from 'axios';
 import { ChangeEventHandler } from 'preact/compat';
 
 interface PlantSelectProps {
-    onChange: React.ChangeEventHandler;
+    onChange: React.ChangeEventHandler<HTMLSelectElement>;
     accessControl?: boolean;
     allPlants?: boolean;
+	name?: string;
 }
 
 // No access control for managers and engineers
@@ -42,7 +43,7 @@ export default function PlantSelect(props: PlantSelectProps) {
 	const plantOptions = plantList.map(plant => <option key={plant.plant_id} value={plant.plant_id}>{plant.plant_name}</option>)
 
     return (
-        <select className="form-control" onChange={props.onChange}>
+        <select className="form-control" onChange={props.onChange} name={props.name}>
             {props.allPlants ? (plantList.length > 1 && <option value={0}>View all Plants</option>) : <option hidden>Select plant</option>}
             {plantOptions}
         </select>
