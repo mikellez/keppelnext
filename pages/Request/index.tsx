@@ -10,6 +10,7 @@ import { TableNode } from '@table-library/react-table-library/types/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { getTheme } from '@table-library/react-table-library/baseline';
 
+import useSWR from 'swr';
 import axios from 'axios';
 import Link from 'next/link';
 
@@ -42,25 +43,28 @@ const COLUMNS: any[] = [
 	{ label: 'Requested By',		resize: true, renderCell: (item: Request) => item.fullname }
 ];
 
-async function getRequests() {
-	return await axios.get<Request[]>("/api/request/")
-	.then((response) => {
-		response.data.forEach((s) => {
-			s.created_date = new Date(s.created_date)
-		});
-		return response.data;
-	})
-	.catch((e) => {
-		console.log("error getting requests")
-		console.log(e);
-		throw new Error(e);
+const requestFetcher = (url: string) => axios.get<Request[]>(url).then((response) => {
+	response.data.forEach((s) => {
+		s.created_date = new Date(s.created_date)
 	});
-}
+	return response.data;
+})
+.catch((e) => {
+	console.log("error getting requests")
+	console.log(e);
+	throw new Error(e);
+});
 
 export default function Request() {
 	const [requestNodes, setRequestNodes] = useState<Request[]>([]);
-	const [isGetting, setGetting] = useState(true);
-	const [isGetFailed, setGetFailed] = useState(false);
+	const [isReady, setReady] = useState(false);
+
+	const {
+		data:			requestData,
+		error:			requestFetchError,
+		isValidating:	requestIsFetchValidating,
+		mutate:			requestMutate
+	} = useSWR<Request[], Error>("/api/request", requestFetcher, {revalidateOnFocus: false});
 
 	const theme = useTheme([
 		getTheme(),
@@ -82,40 +86,30 @@ export default function Request() {
 	]);
 
 	useEffect(() => {
-		updateRequests()
-	}, []);
+		if(requestIsFetchValidating) setReady(false);
 
-	function updateRequests() {
-		setGetting(true);
-
-		getRequests().then((r) => {
-			if(r == null)
-				return console.log("requests null");
-
-			console.log(r);
-
-			setRequestNodes(r);
-		}).catch((e) => {
-			setGetFailed(true);
-			return;
-		}).finally(() => {
-			setGetting(false);
-		});
-	}
+		if(requestData && !requestIsFetchValidating) {
+			setRequestNodes(requestData);
+			setReady(true);
+		}
+	}, [requestData, requestIsFetchValidating]);
 	
   	return (
 		<ModuleMain>
 			<ModuleHeader title="Request" header="Request">
+				<button onClick={() => requestMutate()} className="btn btn-primary">Refresh</button>
 				<Link href="./Request/New" className="btn btn-primary">New Request</Link>
 				<a className="btn btn-primary">Export CSV</a>
 			</ModuleHeader>
 			<ModuleContent>
-				{isGetting &&
+				{!isReady &&
 					<div style={{width: "100%", textAlign: "center"}}>
 						<ThreeDots fill="black"/>
 					</div>
 				}
-				{!isGetting && <CompactTable columns={COLUMNS} data={{nodes: requestNodes}} theme={theme} layout={{custom: true}}/>}
+				{requestFetchError && <div>{requestFetchError.toString()}</div>}
+				{requestFetchError && <div>error</div>}
+				{isReady && <CompactTable columns={COLUMNS} data={{nodes: requestNodes}} theme={theme} layout={{custom: true}}/>}
 			</ModuleContent>
 		</ModuleMain>
   	)
