@@ -96,21 +96,34 @@ app.prepare().then(() => {
   });
 
   // ---- NEXT JS ----
-
+  
   server.get("/Login", (req, res) => {
     if (req.user !== undefined) return res.redirect(HOMEPAGE);
     return handle(req, res);
   });
 
-  server.get("/Dashboard*", checkIfLoggedIn,  (req, res) => { return handle(req, res); });
-  server.get("/Request*", checkIfLoggedIn,    (req, res) => { return handle(req, res); });
-  server.get("/Asset*", checkIfLoggedIn,      (req, res) => { return handle(req, res); });
-  server.get("/Schedule*", checkIfLoggedIn,   (req, res) => { return handle(req, res); });
-  server.get("/Checklist*", checkIfLoggedIn,  (req, res) => { return handle(req, res); });
-  server.get("/Logbook*", checkIfLoggedIn,    (req, res) => { return handle(req, res); });
-  server.get("/QRCode*", checkIfLoggedIn,     (req, res) => { return handle(req, res); });
-  server.get("/Workflow*", checkIfLoggedIn,   (req, res) => { return handle(req, res); });
-  server.get("/Master*", checkIfLoggedIn,     (req, res) => { return handle(req, res); });
+  // these two routes are to prevent static pages from being directly accessible
+  // this is more of a bandaid solution but whatever >w<
+  //--------------------------
+    server.all("/_next/static/chunks/pages/(\\_app|Login|404|500)*", (req, res) => {
+      return handle(req, res);
+    });
+
+    server.all("/_next/static/chunks/pages/*", (req, res) => {
+      if (req.user === undefined) return res.redirect("/Login");
+      return handle(req, res);
+    });
+  // --------------------------
+
+  server.get("/Dashboard*",   checkIfLoggedIn, (req, res) => { return handle(req, res); });
+  server.get("/Request*",     checkIfLoggedIn, (req, res) => { return handle(req, res); });
+  server.get("/Asset*",       checkIfLoggedIn, (req, res) => { return handle(req, res); });
+  server.get("/Schedule*",    checkIfLoggedIn, (req, res) => { return handle(req, res); });
+  server.get("/Checklist*",   checkIfLoggedIn, (req, res) => { return handle(req, res); });
+  server.get("/Logbook*",     checkIfLoggedIn, (req, res) => { return handle(req, res); });
+  server.get("/QRCode*",      checkIfLoggedIn, (req, res) => { return handle(req, res); });
+  server.get("/Workflow*",    checkIfLoggedIn, (req, res) => { return handle(req, res); });
+  server.get("/Master*",      checkIfLoggedIn, (req, res) => { return handle(req, res); });
 
   server.get("*", (req, res) => {
     return handle(req, res);

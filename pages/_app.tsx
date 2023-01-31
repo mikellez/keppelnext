@@ -19,7 +19,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
 	console.log(asPath, route, pathname);
 
-	if(asPath === "/Login" || pathname === "/404")
+	if(asPath === "/Login" || pathname === "/404" || pathname === "/500")
 		return <div><Component {...pageProps} /></div>
 
 	return <div>
