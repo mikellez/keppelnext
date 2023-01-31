@@ -1,13 +1,14 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../styles/globals.css'
+import '../styles/globals.scss'
 import "../styles/index.scss";
+//import "nprogress/nprogress.css"
 
 import type { AppProps } from 'next/app'
 import { useEffect } from "react";
 import { useRouter } from 'next/router';
 import TopBar from '../components/TopBar/TopBar';
 import Footer from '../components/Footer';
-
+import nProgress from 'nprogress';
 
 export default function App({ Component, pageProps }: AppProps) {
 	const router = useRouter();
@@ -15,6 +16,20 @@ export default function App({ Component, pageProps }: AppProps) {
 
 	useEffect(() => {
 		require("bootstrap/dist/js/bootstrap.bundle.min.js");
+
+		const handleRouteStart = () => nProgress.start();
+		const handleRouteDone = () => nProgress.done();
+
+		router.events.on("routeChangeStart",		handleRouteStart);
+		router.events.on("routeChangeComplete",		handleRouteDone);
+		router.events.on("routeChangeError",		handleRouteDone);
+
+		return () => {
+			// unmounting
+			router.events.off("routeChangeStart",		handleRouteStart);
+			router.events.off("routeChangeComplete",	handleRouteDone);
+			router.events.off("routeChangeError",		handleRouteDone);
+		}
 	}, []);
 
 	console.log(asPath, route, pathname);
