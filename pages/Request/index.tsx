@@ -6,7 +6,8 @@ import { ModuleContent, ModuleHeader, ModuleMain } from '../../components'
 import { ThreeDots } from 'react-loading-icons'
 
 import { CompactTable } from '@table-library/react-table-library/compact';
-import { TableNode } from '@table-library/react-table-library/types/table';
+//import { TableNode } from '@table-library/react-table-library/types/table';
+import { Nullish } from '@table-library/react-table-library/types/common';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { getTheme } from '@table-library/react-table-library/baseline';
 
@@ -14,7 +15,13 @@ import useSWR from 'swr';
 import axios from 'axios';
 import Link from 'next/link';
 
-interface Request extends TableNode {
+type TableNode<T> = {
+    id: string;
+    nodes?: TableNode<T>[] | Nullish;
+    prop: T;
+};
+
+interface Request {
 	request_id: string;
 	created_date: Date;
 	fullname: string;
@@ -23,24 +30,23 @@ interface Request extends TableNode {
 	plant_name: string;
 	priority: string;
 	status: string;
-	nodes?: Request[] | null;
 }
 
 const COLUMNS: any[] = [
-	{ label: 'ID',					resize: true, renderCell: (item: Request) => item.request_id },
-	{ label: 'Fault Type',			resize: true, renderCell: (item: Request) => item.fault_name },
-	{ label: 'Location',			resize: true, renderCell: (item: Request) => item.plant_name },
-	{ label: 'Priority',			resize: true, renderCell: (item: Request) => item.priority == null ? "-" : item.priority },
-	{ label: 'Status',				resize: true, renderCell: (item: Request) => item.status },
-	{ label: 'Filter By Date',		resize: true, renderCell: (item: Request) =>
-		item.created_date.toLocaleDateString('en-US', {
+	{ label: 'ID',					resize: true, renderCell: (item: TableNode<Request>) => item.prop.request_id },
+	{ label: 'Fault Type',			resize: true, renderCell: (item: TableNode<Request>) => item.prop.fault_name },
+	{ label: 'Location',			resize: true, renderCell: (item: TableNode<Request>) => item.prop.plant_name },
+	{ label: 'Priority',			resize: true, renderCell: (item: TableNode<Request>) => item.prop.priority == null ? "-" : item.prop.priority },
+	{ label: 'Status',				resize: true, renderCell: (item: TableNode<Request>) => item.prop.status },
+	{ label: 'Filter By Date',		resize: true, renderCell: (item: TableNode<Request>) =>
+		item.prop.created_date.toLocaleDateString('en-US', {
 		  year: 'numeric',
 		  month: '2-digit',
 		  day: '2-digit',
 		}),
 	},
-	{ label: 'Asset Name',			resize: true, renderCell: (item: Request) => item.asset_name },
-	{ label: 'Requested By',		resize: true, renderCell: (item: Request) => item.fullname }
+	{ label: 'Asset Name',			resize: true, renderCell: (item: TableNode<Request>) => item.prop.asset_name },
+	{ label: 'Requested By',		resize: true, renderCell: (item: TableNode<Request>) => item.prop.fullname }
 ];
 
 const requestFetcher = (url: string) => axios.get<Request[]>(url).then((response) => {
@@ -56,7 +62,7 @@ const requestFetcher = (url: string) => axios.get<Request[]>(url).then((response
 });
 
 export default function Request() {
-	const [requestNodes, setRequestNodes] = useState<Request[]>([]);
+	const [requestNodes, setRequestNodes] = useState<TableNode<Request>[]>([]);
 	const [isReady, setReady] = useState(false);
 
 	const {
@@ -89,7 +95,14 @@ export default function Request() {
 		if(requestIsFetchValidating) setReady(false);
 
 		if(requestData && !requestIsFetchValidating) {
-			setRequestNodes(requestData);
+			setRequestNodes(
+				requestData.map((row: Request): TableNode<Request> => {
+					return {
+						id: row.request_id,
+						prop: row
+					}
+				})
+			);
 			setReady(true);
 		}
 	}, [requestData, requestIsFetchValidating]);
