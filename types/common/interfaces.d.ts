@@ -14,13 +14,6 @@ interface CMMSUser {
 	username?: string
 }
 
-// id: number;
-//     email: string;
-//     fname: string;
-//     lname: string;
-//     username: string;
-//     role: string
-
 interface CMMSRequest {
 	request_id: string;
 	created_date: Date;
