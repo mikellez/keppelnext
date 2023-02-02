@@ -17,12 +17,6 @@ interface ScheduleTemplateInfo extends PropsWithChildren {
     timeline?: number;
 };
 
-export interface PlantInfo {
-    plant_id: number;
-    plant_name: string;
-    plant_description: string;
-};
-
 export interface ScheduleInfo extends TableNode {
     assigned_fnames: string[];
     assigned_lnames: string[];

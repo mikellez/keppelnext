@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PlantInfo } from './ScheduleTemplate';
+import { CMMSPLant } from '../../types/common/interfaces';
 import axios from 'axios';
 import { ChangeEventHandler } from 'preact/compat';
 
@@ -12,7 +12,7 @@ interface PlantSelectProps {
 
 // No access control for managers and engineers
 async function getPlants(url: string) {
-	return await axios.get<PlantInfo[]>(url)
+	return await axios.get<CMMSPLant[]>(url)
 	.then(res => {
 		return res.data
 	})
@@ -21,7 +21,7 @@ async function getPlants(url: string) {
 
 export default function PlantSelect(props: PlantSelectProps) {
     // Store the list of plants in a state for dropdown
-	const [plantList, setPlantList] = useState<PlantInfo[]>([]);
+	const [plantList, setPlantList] = useState<CMMSPLant[]>([]);
 
     // Calls an api on load to get the list of plants
 	useEffect(() => {

@@ -31,4 +31,11 @@ interface CMMSFaultTypes {
 	fault_type: string
 }
 
-export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes }
+interface CMMSPlant {
+    plant_id: number;
+    plant_name: string;
+    plant_description: string;
+};
+
+
+export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes, CMMSPLant }
