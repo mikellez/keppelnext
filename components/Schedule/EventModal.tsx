@@ -1,6 +1,7 @@
 import React, { MouseEventHandler, useState, useEffect } from "react";
 import Modal from 'react-modal';
-import { EventInfo, dateFormat, toPeriodString, UserInfo } from "./ScheduleTemplate";
+import { dateFormat, toPeriodString } from "./ScheduleTemplate";
+import { CMMSScheduleEvent, CMMSUser } from "../../types/common/interfaces";
 import EventModalUser from "./EventModalUser";
 import { GrClose } from "react-icons/gr";
 import styles from "../../styles/Schedule.module.scss"
@@ -12,17 +13,17 @@ interface CustomMouseEventHandler extends React.MouseEventHandler {
 export interface ModalProps {
     isOpen: boolean;
     closeModal: CustomMouseEventHandler;
-    event?: EventInfo;
+    event?: CMMSScheduleEvent;
 };
 
 
 export default function EventModal(props: ModalProps) {
     // Store the assigned users as a state
-    const [assignedUsers, setAssignedUsers] = useState<UserInfo[]>([]);
+    const [assignedUsers, setAssignedUsers] = useState<CMMSUser[]>([]);
 
     useEffect(() => {
         if (props.event) {
-            const users : UserInfo[] = [];
+            const users : CMMSUser[] = [];
             const noOfAssigned = props.event.extendedProps.assignedIds.length;
                 for (let i = 0; i  < noOfAssigned; i++) {
                     users.push({
@@ -31,7 +32,7 @@ export default function EventModal(props: ModalProps) {
                         fname: props.event.extendedProps.assignedFnames[i],
                         lname: props.event.extendedProps.assignedLnames[i],
                         username: props.event.extendedProps.assignedUsernames[i],
-                        role: props.event.extendedProps.assignedRoles[i],
+                        role_name: props.event.extendedProps.assignedRoles[i],
                     });
                 }
             setAssignedUsers(users);
@@ -44,12 +45,12 @@ export default function EventModal(props: ModalProps) {
             <EventModalUser 
                 key={user.id} 
                 serial={index + 1} 
-                role={user.role} 
-                fname={user.fname}
-                lname={user.lname}
-                username={user.username} 
+                role_name={user.role_name} 
+                fname={user.fname as string}
+                lname={user.lname as string}
+                username={user.username as string} 
                 id={user.id} 
-                email={user.email} 
+                email={user.email as string} 
             />
         );  
     });

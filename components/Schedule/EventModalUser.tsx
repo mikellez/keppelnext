@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { UserInfo } from './ScheduleTemplate';
+import { CMMSUser } from '../../types/common/interfaces';
 import styles from "../../styles/Schedule.module.scss"
 import { SlArrowDown } from 'react-icons/sl';
 import { SlArrowUp} from 'react-icons/sl';
 
-interface UserProps extends UserInfo {
+interface UserProps extends CMMSUser {
     serial: number;
 };
 
@@ -32,7 +32,7 @@ export default function EventModalUser(props: UserProps) {
                 </div>
             </div>
             {displayTooltip && <div className={styles.modalUserTooltip}>
-                <p>Role: {props.role}</p>
+                <p>Role: {props.role_name}</p>
                 <p>Email: {props.email}</p>
             </div>}
         </div>

@@ -5,9 +5,13 @@ interface CMMSBaseType {
 
 interface CMMSUser {
 	id: number
-	role_id: number
+	role_id?: number
 	role_name: string
-	name: string
+	name?: string
+	email?: string
+	fname?: string
+	lname?: string
+	username?: string
 }
 
 interface CMMSRequest {
@@ -31,4 +35,31 @@ interface CMMSFaultTypes {
 	fault_type: string
 }
 
-export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes }
+interface CMMSPlant {
+    plant_id: number;
+    plant_name: string;
+    plant_description: string;
+};
+
+interface CMMSScheduleEvent {
+	title: string;
+    start?: Date;
+    extendedProps: {
+        plant: string;
+        scheduleId: number;
+        checklistId: number;
+        startDate: Date;
+        endDate: Date;
+        recurringPeriod: number;
+        assignedIds: number[];
+        assignedEmails: string[];
+        assignedFnames: string[];
+        assignedLnames: string[];
+        assignedUsernames: string[];
+        assignedRoles: string[];
+        remarks: string;
+    };
+};
+
+
+export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes, CMMSPLant, CMMSScheduleEvent }

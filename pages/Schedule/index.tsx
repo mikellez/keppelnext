@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import ScheduleTemplate, { ScheduleInfo, PlantInfo } from '../../components/Schedule/ScheduleTemplate';
+import ScheduleTemplate, { ScheduleInfo } from '../../components/Schedule/ScheduleTemplate';
+import { CMMSPLant } from '../../types/common/interfaces';
 import PlantSelect from '../../components/Schedule/PlantSelect';
 import axios from 'axios';
 import { MdOutlineLocationOn } from "react-icons/md"
@@ -14,24 +15,16 @@ async function getSchedules(id : number) {
 	.catch(err => console.log(err.message))
 };
 
-// async function getPlants() {
-// 	return await axios.get<PlantInfo[]>("/api/getPlants")
-// 	.then(res => {
-// 		return res.data
-// 	})
-// 	.catch(err => console.log(err.message))
-// };
 
 export default function Schedule() {
 	// Store the list of plants in a state for dropdown
-	const [plantList, setPlantList] = useState<PlantInfo[]>([]);
+	const [plantList, setPlantList] = useState<CMMSPLant[]>([]);
 	// Store the list of schedules in a state to be rendered on the calendar
 	const [scheduleList, setScheduleList] = useState<ScheduleInfo[]>([]);
 
 	// Calls an api on load to get the list of plants
 	useEffect(() => {
 		updateSchedules(0);
-		// updatePlants();
 	}, []);
 
 	// Get the schedules to be rendered on the calendar
@@ -44,33 +37,16 @@ export default function Schedule() {
 			setScheduleList(schedules);
 		});
 	};
-	
-	// Get the plants for the dropdown
-	// function updatePlants() {
-	// 	getPlants().then(plants => {
-	// 		if (plants == null) {
-	// 			return console.log("no plants");
-	// 		}
-	// 		setPlantList(plants);
-	// 	});
-	// };
 
 	// Change the events according to plant on change of plant select
 	function changePlant(e : React.ChangeEvent<HTMLSelectElement>) {
 		updateSchedules(parseInt(e.target.value));
 	};
 
-	// Plant dropdown options
-	// const plantOptions = plantList.map(plant => <option key={plant.plant_id} value={plant.plant_id}>{plant.plant_name}</option>)
-
   	return (
 		<ScheduleTemplate title="View Schedule" header="View Schedule" schedules={scheduleList}>
 				<div className={"form-group" && styles.eventModalHeader} style={{gap: "0.3rem"}}>
 					<MdOutlineLocationOn size={30} />
-					{/* <select className="form-control" onChange={changePlant}>
-						{plantList.length > 1 && <option value={0}>View all Plants</option>}
-						{plantOptions}
-					</select> */}
 					<PlantSelect onChange={changePlant} allPlants={true} />
 				</div>
 		</ScheduleTemplate>
