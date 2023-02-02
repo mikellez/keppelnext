@@ -8,6 +8,7 @@ import styles from "../../styles/Schedule.module.scss";
 import { BsCalendar4Week, BsListUl } from "react-icons/bs";
 import { TableNode } from '@table-library/react-table-library/types/table';
 import ScheduleTable from "./ScheduleTable";
+import { CMMSScheduleEvent } from "../../types/common/interfaces";
 
 
 interface ScheduleTemplateInfo extends PropsWithChildren {
@@ -33,35 +34,6 @@ export interface ScheduleInfo extends TableNode {
     remarks: string;
     schedule_id: number;
     start_date: Date;  
-};
-
-export interface EventInfo {
-    title: string;
-    start?: Date;
-    extendedProps: {
-        plant: string;
-        scheduleId: number;
-        checklistId: number;
-        startDate: Date;
-        endDate: Date;
-        recurringPeriod: number;
-        assignedIds: number[];
-        assignedEmails: string[];
-        assignedFnames: string[];
-        assignedLnames: string[];
-        assignedUsernames: string[];
-        assignedRoles: string[];
-        remarks: string;
-    };
-};
-
-export interface UserInfo {
-    id: number;
-    email: string;
-    fname: string;
-    lname: string;
-    username: string;
-    role: string
 };
 
 // Function to format Date to string
@@ -98,11 +70,11 @@ export function toPeriodString(period: number): string {
 
 export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     // Store the list of events in a state to be rendered on the calendar
-    const [eventList, setEventList] = useState<EventInfo[]>([]);
+    const [eventList, setEventList] = useState<CMMSScheduleEvent[]>([]);
     // Store the state of the view event modal
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     // Store the current event which will pop up as a modal in a state
-    const [currentEvent, setCurrentEvent] = useState<EventInfo>();
+    const [currentEvent, setCurrentEvent] = useState<CMMSScheduleEvent>();
     // Store the state of the view full calendar. when set to true, view is full calendar, otherwise is list view.
     const [toggleCalendarOrListView, setToggleCalendarOrListView] = useState<boolean>(true);
 
@@ -110,7 +82,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     useEffect(() => {
         setEventList([]);
         if (props.schedules) {
-            let newEvents: EventInfo[] = [];
+            let newEvents: CMMSScheduleEvent[] = [];
             props.schedules.forEach((item) => {
                 item.calendar_dates.forEach((date) => {
                     const event = {
