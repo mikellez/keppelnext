@@ -48,6 +48,20 @@ app.prepare().then(() => {
     next();
   }
 
+  // Server side access control
+  const restrictEng = ["/Schedule/Manage"];
+  const restrictOps = ["/Schedule/Create", "/Schedule/Manage", "/Schedule/Timeline/(.*)"];
+  function accessControl(req, res, next) {
+    if (req.user) {
+      if (req.user.role_id == 3 && restrictEng.includes(req.path)) {
+        res.redirect("/404");
+      } else if (req.user.role_id == 4 && restrictOps.includes(req.path)) {
+        res.redirect("/404");
+      }
+    }
+    next();
+  };
+
   // -----------------------------------
 
   server.post("/api/login", passport.authenticate("local", {}), (req, res) => {
@@ -119,15 +133,15 @@ app.prepare().then(() => {
     });
   // --------------------------
 
-  server.get("/Dashboard*",   checkIfLoggedIn, (req, res) => { return handle(req, res); });
-  server.get("/Request*",     checkIfLoggedIn, (req, res) => { return handle(req, res); });
-  server.get("/Asset*",       checkIfLoggedIn, (req, res) => { return handle(req, res); });
-  server.get("/Schedule*",    checkIfLoggedIn, (req, res) => { return handle(req, res); });
-  server.get("/Checklist*",   checkIfLoggedIn, (req, res) => { return handle(req, res); });
-  server.get("/Logbook*",     checkIfLoggedIn, (req, res) => { return handle(req, res); });
-  server.get("/QRCode*",      checkIfLoggedIn, (req, res) => { return handle(req, res); });
-  server.get("/Workflow*",    checkIfLoggedIn, (req, res) => { return handle(req, res); });
-  server.get("/Master*",      checkIfLoggedIn, (req, res) => { return handle(req, res); });
+  server.get("/Dashboard*",   checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
+  server.get("/Request*",     checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
+  server.get("/Asset*",       checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
+  server.get("/Schedule*",    checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
+  server.get("/Checklist*",   checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
+  server.get("/Logbook*",     checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
+  server.get("/QRCode*",      checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
+  server.get("/Workflow*",    checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
+  server.get("/Master*",      checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
 
   server.get("*", (req, res) => {
     return handle(req, res);

@@ -41,7 +41,7 @@ module.exports = (server) => {
             const userInfo = {
                 id: result.rows[0].user_id,
                 name: result.rows[0].first_name + " " + result.rows[0].last_name,
-                role_id: result.rows[0].role_id,
+                role_id: parseInt(result.rows[0].role_id),
                 role_name: result.rows[0].role_name
             };
             cb(null, userInfo);

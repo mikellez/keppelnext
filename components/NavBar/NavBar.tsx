@@ -10,6 +10,15 @@ import NavDropdown from './NavDropdown';
 import NavLink, { NavLinkInfo } from './NavLink';
 import axios from 'axios';
 
+// Get the user info from api
+export async function getUser() {
+    return await axios.get("/api/user")
+        .then(res => {
+            return res.data
+        })
+        .catch(err => console.log(err.message))
+};
+
 export default function NavBar() {
 
     const [navDisplay, setNavDisplay] = useState<boolean>(false);
@@ -21,15 +30,7 @@ export default function NavBar() {
         setNav();
     }, []);
 
-    // Get the user info from api
-    async function getUser() {
-        return await axios.get("/api/user")
-            .then(res => {
-                return res.data
-            })
-            .catch(err => console.log(err.message))
-    };
-
+    
     // Change the nav bar based on the user role id
     async function setNav() {
         await getUser().then((user) => {

@@ -4,6 +4,8 @@ import { AiOutlineHistory, AiOutlineAudit, AiOutlineClockCircle,AiOutlineInfoCir
 import TooltipBtn from '../../../components/Schedule/TooltipBtn';
 import styles from "../../../styles/Schedule.module.scss";
 import axios from 'axios';
+import { useRouter } from 'next/router';
+import { getUser } from '../../../components';
 
 interface TimelineInfo {
 	id: number;
@@ -14,6 +16,9 @@ export default function ManageSchedule() {
 	const [isHistory, setIsHistory] = useState<boolean>(false);
 	const [timelineDropdown, setTimelineDropdown] = useState<TimelineInfo[]>();
 
+	const router = useRouter();
+
+
 	async function getDropdown(isHistory : boolean) {
 		const apiUrl = isHistory ? "" : "";
 		return await axios.get(apiUrl)
@@ -22,9 +27,10 @@ export default function ManageSchedule() {
 			})
 			.catch(err => console.log(err.message))
 	};
+    
 
-    return (
-        <ScheduleTemplate title="Manage Schedule" header="Manage Schedule">
+	return (
+		<ScheduleTemplate title="Manage Schedule" header="Manage Schedule">
 			<select className="form-control">
 				{isHistory ? <option hidden>Completed Schedules</option> : <option hidden>Pending Schedules</option> }
 			</select>
@@ -35,5 +41,6 @@ export default function ManageSchedule() {
 				{isHistory ? <AiOutlineClockCircle size={21} /> : <AiOutlineHistory size={21} />}
 			</TooltipBtn>
 		</ScheduleTemplate>
-    )
+	);
+
 }

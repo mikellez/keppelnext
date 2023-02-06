@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ModuleContent, ModuleHeader, ModuleMain } from '../../../components';
 import CreateScheduleCard ,{ CreateScheduleCardProps } from "../../../components/Schedule/CreateScheduleCard";
 import { RiDraftLine, RiCalendarCheckLine, RiCalendarTodoLine } from 'react-icons/ri';
 import styles from "../../../styles/Schedule.module.scss";
 
+
 export default function CreateSchedule() {
+
     const createOptions: CreateScheduleCardProps[] = [
         {
             title: "New",
@@ -36,6 +38,7 @@ export default function CreateSchedule() {
         />;
     });
 
+
     return (
         <ModuleMain>
             <ModuleHeader title="Create Schedule" header="Create Schedule">
@@ -48,4 +51,6 @@ export default function CreateSchedule() {
             </ModuleContent>
         </ModuleMain>
     );
+
+    
 };
