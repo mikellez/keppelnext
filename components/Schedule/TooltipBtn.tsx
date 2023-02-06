@@ -14,7 +14,7 @@ export default function TooltipBtn(props: TooltipBtnProps) {
         <div style={{
             position: "relative"
         }}>
-            <div style={{
+            {props.toolTip != false && <div style={{
                 display: isHover ? "block" : "none",
                 position: "absolute",
                 fontSize: "0.7rem",
@@ -26,8 +26,8 @@ export default function TooltipBtn(props: TooltipBtnProps) {
                 top: -45,
                 left: -50,
             }}>
-                {props.toolTip != false && (props.text ? props.text : "Default Tooltip")}
-            </div>
+                {props.text ? props.text : "Default Tooltip"}
+            </div>}
             <button 
                 className="btn btn-primary"
                 style={{

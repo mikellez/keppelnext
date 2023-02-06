@@ -5,6 +5,8 @@ import TooltipBtn from './TooltipBtn';
 import { GrClose } from 'react-icons/gr';
 import styles from "../../styles/Schedule.module.scss"
 import PlantSelect from './PlantSelect';
+import ModuleSimplePopup from '../ModuleLayout/ModuleSimplePopup';
+import axios from 'axios';
 
 interface NewTimelineData {
     name: string,
@@ -16,9 +18,21 @@ interface CreateScheduleModalProps extends ModalProps {
     title: string;
 };
 
+
+async function createTimeline(data: NewTimelineData) {
+    return await axios.post("")
+        .then(res => {
+            return 
+        })
+        .catch(err => {
+            console.log(err);
+        })
+};
+
 export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     // Store new timeline data in a state
     const [newTimelineData, setNewTimelineData] = useState<NewTimelineData>();
+    const [isModalOpen, setIsModaOpen] = useState<boolean>(false);
 
     // Store the input field changes to state
     function changeNewTimelineData(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -34,6 +48,16 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     function closeModal() {
         props.closeModal();
         setNewTimelineData(undefined);
+    };
+
+    // Create a new timeline on form submit
+    function handleSubmit() {
+        // Check for unfilled form input
+        if (!newTimelineData?.name || !newTimelineData.description || !newTimelineData?.plantId) {
+            setIsModaOpen(true);
+        } else {
+            createTimeline(newTimelineData).then()
+        }
     };
 
     return (
@@ -89,8 +113,14 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                     bottom: "1.2rem",
                     right: "1.2rem",
                 }}>
-                    <TooltipBtn toolTip={false}> Confirm </TooltipBtn>
+                    <TooltipBtn toolTip={false} onClick={handleSubmit}> Confirm </TooltipBtn>
             </span>
+            <ModuleSimplePopup 
+                modalOpenState={isModalOpen} 
+                setModalOpenState={setIsModaOpen} 
+                title="Missing Details" 
+                text="Please ensure that you have filled in all the required entries." 
+            />
         </Modal>
     );
 };

@@ -8,6 +8,7 @@ const session = require("express-session");
 const userAuth = require("./userAuth");
 
 const controllers = require("./controllers");
+const { createTimeline } = require("./controllers/schedule");
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -83,6 +84,8 @@ app.prepare().then(() => {
   server.get("/api/schedule/:plant_id", checkIfLoggedInAPI, controllers.schedule.getViewSchedules);
   server.get("/api/getPlants", checkIfLoggedInAPI, controllers.schedule.getPlants);
   server.get("/api/getUserPlants", checkIfLoggedInAPI, controllers.schedule.getUserPlants);
+  server.route("/api/timeline/:id?", checkIfLoggedInAPI)
+    .post(createTimeline)
 
   // NO API ROUTE
   server.all("/api/*", (req, res) => {
