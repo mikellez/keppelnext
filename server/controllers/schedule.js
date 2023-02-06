@@ -147,8 +147,8 @@ const getUserPlants = async(req, res, next) => {
     });
 };
 
+// Create a new timeline
 const createTimeline = async(req, res, next) => {
-    console.log(req.body)
     db.query("INSERT INTO keppel.schedule_timelines (timeline_name, description, created_date, created_by, status, plant_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING timeline_id",
     [req.body.data.name, req.body.data.description, new Date(), 3, req.user.id, req.body.data.plantId],
     (err, found) => {
@@ -157,9 +157,47 @@ const createTimeline = async(req, res, next) => {
     })
 };
 
+// Get timeline details
+const getTimeline = async(req, res, next) => {
+    db.query("SELECT timeline_name, description, plant_id FROM keppel.schedule_timelines WHERE timeline_id = $1", 
+    [req.params.id],
+    (err, found) => {
+        if (err) throw err;
+        if (found) return res.status(200).json(found.rows[0])
+    })
+};
+
+// Get timeline specific schedules
+const getSchedulesTimeline = async(req, res, next) => {
+    db.query(`SELECT SC.SCHEDULE_ID, SC.CHECKLIST_TEMPLATE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
+    SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL, STRING_AGG(DISTINCT(U.user_email), ' ,') AS USERNAME, PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS, ST.status
+    FROM
+    KEPPEL.SCHEDULE_CHECKLIST  as SC,
+    KEPPEL.USERS AS U,
+    KEPPEL.PLANT_MASTER  AS PM,
+    KEPPEL.CHECKLIST_TEMPLATES AS CT,
+    KEPPEL.USER_PLANT AS UP,
+    KEPPEL.SCHEDULE_TIMELINES AS ST
+    WHERE
+    U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
+    SC.PLANT_ID = PM.PLANT_ID AND
+    CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
+    SC.timeline_id = $1 AND
+    SC.timeline_id = ST.timeline_id
+    GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID, ST.status)`, [req.params.id], (err, result) => {
+        if (err) throw err;
+        if (result) {
+            const response_dict = makeScheduleDict(result.rows);
+            res.status(200).send(response_dict);
+        };
+    })
+};
+
 module.exports = {
     getViewSchedules, 
     getPlants,
     getUserPlants,
     createTimeline,
+    getTimeline,
+    getSchedulesTimeline,
 };

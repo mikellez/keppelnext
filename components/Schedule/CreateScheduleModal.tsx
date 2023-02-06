@@ -9,7 +9,7 @@ import ModuleSimplePopup from '../ModuleLayout/ModuleSimplePopup';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 
-interface NewTimelineData {
+export interface TimelineData {
     name: string,
     plantId: number,
     description: string,
@@ -20,7 +20,7 @@ interface CreateScheduleModalProps extends ModalProps {
 };
 
 
-async function createTimeline(data: NewTimelineData) {
+async function createTimeline(data: TimelineData) {
     return await axios.post("/api/timeline", {data})
         .then(res => {
             return res.data
@@ -30,7 +30,7 @@ async function createTimeline(data: NewTimelineData) {
 
 export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     // Store new timeline data in a state
-    const [newTimelineData, setNewTimelineData] = useState<NewTimelineData>();
+    const [newTimelineData, setNewTimelineData] = useState<TimelineData>();
     const [isModalOpen, setIsModaOpen] = useState<boolean>(false);
 
     const router = useRouter()
@@ -41,14 +41,14 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
             return {
                 ...prevData,
                 [event.target.name]: event.target.name === "plantId" ? parseInt(event.target.value) : event.target.value,
-            } as NewTimelineData;
+            } as TimelineData;
         });
     };
 
     // Close modal and empty all input fields
     function closeModal() {
         props.closeModal();
-        setNewTimelineData({} as NewTimelineData);
+        setNewTimelineData({} as TimelineData);
     };
 
     // Create a new timeline on form submit

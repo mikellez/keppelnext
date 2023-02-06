@@ -100,7 +100,10 @@ app.prepare().then(() => {
   server.get("/api/getPlants", checkIfLoggedInAPI, controllers.schedule.getPlants);
   server.get("/api/getUserPlants", checkIfLoggedInAPI, controllers.schedule.getUserPlants);
   server.route("/api/timeline/:id?", checkIfLoggedInAPI)
+    .get(controllers.schedule.getTimeline)
     .post(controllers.schedule.createTimeline)
+  server.route("/api/timeline/schedules/:id")
+    .get(controllers.schedule.getSchedulesTimeline)
 
   // NO API ROUTE
   server.all("/api/*", (req, res) => {

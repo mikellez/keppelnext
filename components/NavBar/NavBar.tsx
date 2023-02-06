@@ -34,15 +34,17 @@ export default function NavBar() {
     // Change the nav bar based on the user role id
     async function setNav() {
         await getUser().then((user) => {
+            console.log(user.role_id)
             switch(user.role_id) {
                 case 1:
+                case 2:
                     setScheduleDropdown([
                         {name: "View Schedule", path: "/Schedule"},
                         {name: "Create Schedule", path: "/Schedule/Create"},
                         {name: "Manage Schedule", path: "/Schedule/Manage"}
                     ])
                     break;
-                case 2:
+                case 3:
                     setScheduleDropdown([
                         {name: "View Schedule", path: "/Schedule"},
                         {name: "Create Schedule", path: "/Schedule/Create"}
