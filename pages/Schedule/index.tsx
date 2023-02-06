@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import ScheduleTemplate, { ScheduleInfo } from '../../components/Schedule/ScheduleTemplate';
-import { CMMSPLant } from '../../types/common/interfaces';
+import { CMMSPlant } from '../../types/common/interfaces';
 import PlantSelect from '../../components/Schedule/PlantSelect';
 import axios from 'axios';
 import { MdOutlineLocationOn } from "react-icons/md"
@@ -18,7 +18,7 @@ async function getSchedules(id : number) {
 
 export default function Schedule() {
 	// Store the list of plants in a state for dropdown
-	const [plantList, setPlantList] = useState<CMMSPLant[]>([]);
+	const [plantList, setPlantList] = useState<CMMSPlant[]>([]);
 	// Store the list of schedules in a state to be rendered on the calendar
 	const [scheduleList, setScheduleList] = useState<ScheduleInfo[]>([]);
 

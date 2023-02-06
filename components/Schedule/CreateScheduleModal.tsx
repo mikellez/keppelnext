@@ -6,6 +6,7 @@ import { GrClose } from 'react-icons/gr';
 import styles from "../../styles/Schedule.module.scss"
 import PlantSelect from './PlantSelect';
 import ModuleSimplePopup from '../ModuleLayout/ModuleSimplePopup';
+import { useRouter } from 'next/router';
 import axios from 'axios';
 
 interface NewTimelineData {
@@ -20,19 +21,19 @@ interface CreateScheduleModalProps extends ModalProps {
 
 
 async function createTimeline(data: NewTimelineData) {
-    return await axios.post("")
+    return await axios.post("/api/timeline", {data})
         .then(res => {
-            return 
+            return res.data
         })
-        .catch(err => {
-            console.log(err);
-        })
+        .catch(err => console.log(err))
 };
 
 export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     // Store new timeline data in a state
     const [newTimelineData, setNewTimelineData] = useState<NewTimelineData>();
     const [isModalOpen, setIsModaOpen] = useState<boolean>(false);
+
+    const router = useRouter()
 
     // Store the input field changes to state
     function changeNewTimelineData(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -47,16 +48,18 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     // Close modal and empty all input fields
     function closeModal() {
         props.closeModal();
-        setNewTimelineData(undefined);
+        setNewTimelineData({} as NewTimelineData);
     };
 
     // Create a new timeline on form submit
     function handleSubmit() {
         // Check for unfilled form input
-        if (!newTimelineData?.name || !newTimelineData.description || !newTimelineData?.plantId) {
+        if (!newTimelineData?.name|| !newTimelineData?.description|| !newTimelineData?.plantId) {
             setIsModaOpen(true);
         } else {
-            createTimeline(newTimelineData).then()
+            createTimeline(newTimelineData).then(result => {
+                router.push("/Schedule/Timeline/" + result)
+            });
         }
     };
 
@@ -94,7 +97,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                         className="form-control" 
                         onChange={(e) => changeNewTimelineData(e)}
                         name="name"
-                        value={newTimelineData?.name}
+                        value={newTimelineData?.name ? newTimelineData.name : ""}
                         placeholder="Schedule name"/>
                     <PlantSelect accessControl={true} onChange={(e) => changeNewTimelineData(e)} name="plantId" />
                     <textarea 
@@ -104,7 +107,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                         maxLength={500} 
                         name="description"
                         onChange={(e) => changeNewTimelineData(e)}
-                        value={newTimelineData?.description}
+                        value={newTimelineData?.description ? newTimelineData.description : ""}
                         placeholder="Description"></textarea>
                 </div>           
             </div>

@@ -21,6 +21,7 @@ app.prepare().then(() => {
   const server = express();
   const upload = multer();
   server.use(bodyParser.json());
+  server.use(bodyParser.urlencoded({ extended: false }));
   userAuth(server);
 
   // Prevent cache in browsers
@@ -85,7 +86,7 @@ app.prepare().then(() => {
   server.get("/api/getPlants", checkIfLoggedInAPI, controllers.schedule.getPlants);
   server.get("/api/getUserPlants", checkIfLoggedInAPI, controllers.schedule.getUserPlants);
   server.route("/api/timeline/:id?", checkIfLoggedInAPI)
-    .post(createTimeline)
+    .post(controllers.schedule.createTimeline)
 
   // NO API ROUTE
   server.all("/api/*", (req, res) => {

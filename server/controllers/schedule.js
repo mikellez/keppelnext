@@ -148,9 +148,14 @@ const getUserPlants = async(req, res, next) => {
 };
 
 const createTimeline = async(req, res, next) => {
-    // db.query("INSERT INTO keppel.schedule_timelines (timeline_name, description, created_date, created_by, status, plant_id) VALUES ($1, $2, $3, $4, $5, $6)")
-    console.log(res.body.data);
-}
+    console.log(req.body)
+    db.query("INSERT INTO keppel.schedule_timelines (timeline_name, description, created_date, created_by, status, plant_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING timeline_id",
+    [req.body.data.name, req.body.data.description, new Date(), 3, req.user.id, req.body.data.plantId],
+    (err, found) => {
+        if (err) throw err;
+        if (found) return res.status(201).json(found.rows[0].timeline_id)
+    })
+};
 
 module.exports = {
     getViewSchedules, 

@@ -8,7 +8,6 @@ export interface CreateScheduleCardProps {
     text: string;
     icon: React.ReactNode; 
     color: string;
-    path: string; 
 };
 
 export default function CreateScheduleCard(props: CreateScheduleCardProps) {
