@@ -104,7 +104,7 @@ app.prepare().then(() => {
         .post(controllers.schedule.createTimeline)
     server.route("/api/timeline/schedules/:id")
         .get(controllers.schedule.getSchedulesTimeline)
-    server.get("api/timeline/status/:status", controllers.schedule.getTimelineByStatus);
+    server.get("/api/timeline/status/:status", checkIfLoggedInAPI, controllers.schedule.getTimelineByStatus);
 
     // NO API ROUTE
     server.all("/api/*", (req, res) => {

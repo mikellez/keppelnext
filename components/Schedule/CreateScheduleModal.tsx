@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import { CMMSTimeline } from '../../types/common/interfaces';
 import { ScheduleCreateOptions } from '../../pages/Schedule/Create';
+import { getTimeline } from '../../pages/Schedule/Timeline/[id]';
 
 interface CreateScheduleModalProps extends ModalProps {
     option: ScheduleCreateOptions
@@ -26,34 +27,45 @@ async function createTimeline(data: CMMSTimeline) {
 
 export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     // Store new timeline data in a state
-    const [newTimelineData, setNewTimelineData] = useState<CMMSTimeline>();
+    const [TimelineData, setTimelineData] = useState<CMMSTimeline>();
     const [isModalOpen, setIsModaOpen] = useState<boolean>(false);
 
-    const router = useRouter()
+    const router = useRouter();
 
     // Store the input field changes to state
-    function changeNewTimelineData(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
-        setNewTimelineData((prevData) => {
-            return {
-                ...prevData,
-                [event.target.name]: event.target.name === "plantId" ? parseInt(event.target.value) : event.target.value,
-            } as CMMSTimeline;
-        });
+    function changeTimelineData(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+        if (props.option === ScheduleCreateOptions.New) {
+            setTimelineData((prevData) => {
+                return {
+                    ...prevData,
+                    [event.target.name]: event.target.name === "plantId" ? parseInt(event.target.value) : event.target.value,
+                } as CMMSTimeline;
+            });
+        } else if (props.option === ScheduleCreateOptions.Drafts) {
+            
+        }
     };
+
+    function changeTimelineDataOnSelect(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+        getTimeline(parseInt(event.target.value)).then(result => {
+            if (result) setTimelineData(result)
+            console.log(result)
+        })
+    }
 
     // Close modal and empty all input fields
     function closeModal() {
         props.closeModal();
-        setNewTimelineData({} as CMMSTimeline);
+        setTimelineData({} as CMMSTimeline);
     };
 
     // Create a new timeline on form submit
     function handleSubmit() {
         // Check for unfilled form input
-        if (!newTimelineData?.name|| !newTimelineData?.description|| !newTimelineData?.plantId) {
+        if (!TimelineData?.name|| !TimelineData?.description|| !TimelineData?.plantId) {
             setIsModaOpen(true);
         } else {
-            createTimeline(newTimelineData).then(result => {
+            createTimeline(TimelineData).then(result => {
                 router.push("/Schedule/Timeline/" + result)
             });
         }
@@ -92,22 +104,23 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                         <input 
                             type="text" 
                             className="form-control" 
-                            onChange={(e) => changeNewTimelineData(e)}
+                            onChange={(e) => changeTimelineData(e)}
                             name="name"
-                            value={newTimelineData?.name ? newTimelineData.name : ""}
+                            value={TimelineData?.name ? TimelineData.name : ""}
                             placeholder="Schedule name"
                         />
                     }
                     {props.option === ScheduleCreateOptions.Drafts&&
                        <TimelineSelect
                             status={3}
-                            onChange={(e) => {}}
+                            onChange={(e) => {changeTimelineData(e)}}
+                            name="name"
                        />
                     }
                     {props.option === ScheduleCreateOptions.New && 
                         <PlantSelect 
                             accessControl={true} 
-                            onChange={(e) => changeNewTimelineData(e)} 
+                            onChange={(e) => changeTimelineData(e)} 
                             name="plantId" 
                         />
                     }
@@ -116,6 +129,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                             type="text" 
                             className="form-control"
                             placeholder="Plant"
+                            value={TimelineData?.plantName ? TimelineData.plantName : ""}
                             readOnly
                         />
                     }
@@ -125,8 +139,8 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                         rows={8} 
                         maxLength={500} 
                         name="description"
-                        onChange={(e) => changeNewTimelineData(e)}
-                        value={newTimelineData?.description ? newTimelineData.description : ""}
+                        onChange={(e) => changeTimelineData(e)}
+                        value={TimelineData?.description ? TimelineData.description : ""}
                         placeholder="Description"></textarea>
                 </div>           
             </div>

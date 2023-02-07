@@ -159,11 +159,21 @@ const createTimeline = async(req, res, next) => {
 
 // Get timeline details
 const getTimeline = async(req, res, next) => {
-    db.query("SELECT timeline_name, description, plant_id, status FROM keppel.schedule_timelines WHERE timeline_id = $1", 
+    db.query(`SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id as plantId, ST.status, PM.plant_name as plantName
+    FROM keppel.schedule_timelines ST 
+    JOIN keppel.plant_master PM 
+    ON ST.plant_id = PM.plant_id
+    WHERE timeline_id = $1`, 
     [req.params.id],
     (err, found) => {
         if (err) throw err;
-        if (found) return res.status(200).json(found.rows[0])
+        if (found) {
+            found.rows[0].plantName = found.rows[0].plantname;
+            found.rows[0].plantId = found.rows[0].plantid;
+            delete found.rows[0].plantname;
+            delete found.rows[0].plantid;
+            return res.status(200).json(found.rows[0])
+        }
     })
 };
 
@@ -199,11 +209,24 @@ const getSchedulesTimeline = async(req, res, next) => {
 };
 
 const getTimelineByStatus = (req, res, next) => {
-    db.query("SELECT timeline_name, description, plant_id FROM keppel.schedule_timelines WHERE status = $1", 
+    db.query(`SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id as plantId, PM.plant_name as plantName
+    FROM keppel.schedule_timelines ST 
+    JOIN keppel.plant_master PM 
+    ON ST.plant_id = PM.plant_id
+    WHERE status = $1`, 
     [req.params.status],
     (err, found) => {
         if (err) throw err;
-        if (found) return res.status(200).json(found.rows);
+        if (found) {
+            found.rows.map(timeline => {
+                timeline.plantId = timeline.plantid;
+                timeline.plantName = timeline.plantname;
+                delete timeline.plantid;
+                delete timeline.plantname;
+                return timeline
+            })
+            return res.status(200).json(found.rows)
+        };
     });
 };
 

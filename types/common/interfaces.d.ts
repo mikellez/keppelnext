@@ -62,8 +62,10 @@ interface CMMSScheduleEvent {
 };
 
 interface CMMSTimeline {
+	id?: number;
     name: string,
     plantId: number,
+	plantName?: string,
     description: string,
 	status?: number,
 };

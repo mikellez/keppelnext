@@ -9,7 +9,7 @@ import { CMMSTimeline } from '../../../types/common/interfaces';
 import { ThreeDots } from 'react-loading-icons'
 
 // Get timeline details
-async function getTimeline(id: number) {
+export async function getTimeline(id: number) {
     return await axios.get<CMMSTimeline>("/api/timeline/" + id)
         .then(res => {
             return res.data
