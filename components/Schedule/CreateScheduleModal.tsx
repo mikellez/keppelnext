@@ -38,7 +38,8 @@ async function editTimeline(data: CMMSTimeline, id: number) {
 export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     // Store new timeline data in a state
     const [TimelineData, setTimelineData] = useState<CMMSTimeline>();
-    const [isModalOpen, setIsModaOpen] = useState<boolean>(false);
+    const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
+    const [isWarningModalOpen, setIsWarningModaOpen] = useState<boolean>(false);
 
     const router = useRouter();
 
@@ -60,15 +61,20 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
 
     // Close modal and empty all input fields
     function closeModal() {
-        props.closeModal();
-        setTimelineData({} as CMMSTimeline);
+        // Warn users on closing modal if they have unsaved changes
+        if (TimelineData?.name || TimelineData?.description || TimelineData?.plantId) {
+            setIsWarningModaOpen(true);
+        } else {
+            props.closeModal();
+            setTimelineData({} as CMMSTimeline);
+        }
     };
 
     // Create a new timeline on form submit
     function handleSubmit() {
         // Check for unfilled form input
         if (!TimelineData?.name || !TimelineData?.description || !TimelineData?.plantId) {
-            setIsModaOpen(true);
+            setIsMissingDetailsModaOpen(true);
         } else {
             if (props.option === ScheduleCreateOptions.New) {
                 createTimeline(TimelineData).then(result => {
@@ -163,11 +169,28 @@ console.log(TimelineData)
                     <TooltipBtn toolTip={false} onClick={handleSubmit}> Confirm </TooltipBtn>
             </span>
             <ModuleSimplePopup 
-                modalOpenState={isModalOpen} 
-                setModalOpenState={setIsModaOpen} 
+                modalOpenState={isMissingDetailsModalOpen} 
+                setModalOpenState={setIsMissingDetailsModaOpen} 
                 title="Missing Details" 
                 text="Please ensure that you have filled in all the required entries." 
+                icon={SimpleIcon.Cross}
+            />
+            <ModuleSimplePopup 
+                modalOpenState={isWarningModalOpen} 
+                setModalOpenState={setIsWarningModaOpen} 
+                title="Unsaved Changes" 
+                text="Are you sure you want to discard this entry? Your progress will be lost." 
                 icon={SimpleIcon.Exclaim}
+                buttons={[
+                    <TooltipBtn 
+                        key="yes" 
+                        toolTip={false} 
+                        onClick= {() => {
+                            props.closeModal();
+                            setTimelineData({} as CMMSTimeline);
+                            setIsWarningModaOpen(false);
+                        }}
+                    >Yes</TooltipBtn>]}
             />
         </Modal>
     );
