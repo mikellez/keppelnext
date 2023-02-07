@@ -17,10 +17,20 @@ interface CreateScheduleModalProps extends ModalProps {
     option: ScheduleCreateOptions
 };
 
+// Create a new timeline
 async function createTimeline(data: CMMSTimeline) {
-    return await axios.post("/api/timeline", {data})
+    return await axios.post("/api/timeline", { data })
         .then(res => {
-            return res.data
+            return res.data;
+        })
+        .catch(err => console.log(err))
+};
+
+// Edit only certain timeline details
+async function editTimeline(data: CMMSTimeline, id: number) {
+    return await axios.patch("/api/timeline/" + id, { data })
+        .then(res => {
+            return res.data;
         })
         .catch(err => console.log(err))
 };
@@ -34,24 +44,19 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
 
     // Store the input field changes to state
     function changeTimelineData(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
-        if (props.option === ScheduleCreateOptions.New) {
-            setTimelineData((prevData) => {
-                return {
-                    ...prevData,
-                    [event.target.name]: event.target.name === "plantId" ? parseInt(event.target.value) : event.target.value,
-                } as CMMSTimeline;
-            });
-        } else if (props.option === ScheduleCreateOptions.Drafts) {
-            
-        }
+        setTimelineData((prevData) => {
+            return {
+                ...prevData,
+                [event.target.name]: event.target.name === "plantId" ? parseInt(event.target.value) : event.target.value,
+            } as CMMSTimeline;
+        });   
     };
 
     function changeTimelineDataOnSelect(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
         getTimeline(parseInt(event.target.value)).then(result => {
             if (result) setTimelineData(result)
-            console.log(result)
-        })
-    }
+        });
+    };
 
     // Close modal and empty all input fields
     function closeModal() {
@@ -62,15 +67,21 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     // Create a new timeline on form submit
     function handleSubmit() {
         // Check for unfilled form input
-        if (!TimelineData?.name|| !TimelineData?.description|| !TimelineData?.plantId) {
+        if (!TimelineData?.name || !TimelineData?.description || !TimelineData?.plantId) {
             setIsModaOpen(true);
         } else {
-            createTimeline(TimelineData).then(result => {
-                router.push("/Schedule/Timeline/" + result)
-            });
+            if (props.option === ScheduleCreateOptions.New) {
+                createTimeline(TimelineData).then(result => {
+                    router.push("/Schedule/Timeline/" + result);
+                });
+            } else if (props.option === ScheduleCreateOptions.Drafts) {
+                editTimeline(TimelineData, TimelineData.id as number).then(result => {
+                    router.push("/Schedule/Timeline/" + result);
+                });
+            }
         }
     };
-
+console.log(TimelineData)
     return (
         <Modal
             ariaHideApp={false}
@@ -113,7 +124,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                     {props.option === ScheduleCreateOptions.Drafts&&
                        <TimelineSelect
                             status={3}
-                            onChange={(e) => {changeTimelineData(e)}}
+                            onChange={(e) => {changeTimelineDataOnSelect(e)}}
                             name="name"
                        />
                     }

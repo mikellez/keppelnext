@@ -150,7 +150,7 @@ const getUserPlants = async(req, res, next) => {
 // Create a new timeline
 const createTimeline = async(req, res, next) => {
     db.query("INSERT INTO keppel.schedule_timelines (timeline_name, description, created_date, created_by, status, plant_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING timeline_id",
-    [req.body.data.name, req.body.data.description, new Date(), 3, req.user.id, req.body.data.plantId],
+    [req.body.data.name, req.body.data.description, new Date(), req.user.id, 3, req.body.data.plantId],
     (err, found) => {
         if (err) throw err;
         if (found) return res.status(201).json(found.rows[0].timeline_id)
@@ -208,6 +208,7 @@ const getSchedulesTimeline = async(req, res, next) => {
     })
 };
 
+// Get timeline by the status
 const getTimelineByStatus = (req, res, next) => {
     db.query(`SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id as plantId, PM.plant_name as plantName
     FROM keppel.schedule_timelines ST 
@@ -230,6 +231,16 @@ const getTimelineByStatus = (req, res, next) => {
     });
 };
 
+// Edit timeline details
+const editTimeline = (req, res, next) => {
+    db.query(`UPDATE keppel.schedule_timelines SET description = $1 WHERE timeline_id = $2 RETURNING timeline_id`,
+    [req.body.data.description, req.params.id], 
+    (err, found) => {
+        if (err) throw err;
+        if (found) return res.status(201).json(found.rows[0].timeline_id)
+    });
+};
+
 module.exports = {
     getViewSchedules, 
     getPlants,
@@ -238,4 +249,5 @@ module.exports = {
     getTimeline,
     getSchedulesTimeline,
     getTimelineByStatus,
+    editTimeline,
 };

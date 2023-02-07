@@ -106,6 +106,7 @@ app.prepare().then(() => {
     server.route("/api/timeline/:id?", checkIfLoggedInAPI)
         .get(controllers.schedule.getTimeline)
         .post(controllers.schedule.createTimeline)
+        .patch(controllers.schedule.editTimeline)
     server.route("/api/timeline/schedules/:id")
         .get(controllers.schedule.getSchedulesTimeline)
     server.get("/api/timeline/status/:status", checkIfLoggedInAPI, controllers.schedule.getTimelineByStatus);
