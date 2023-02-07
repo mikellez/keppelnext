@@ -5,22 +5,18 @@ import TooltipBtn from './TooltipBtn';
 import { GrClose } from 'react-icons/gr';
 import styles from "../../styles/Schedule.module.scss"
 import PlantSelect from './PlantSelect';
+import TimelineSelect from './TimelineSelect';
 import ModuleSimplePopup from '../ModuleLayout/ModuleSimplePopup';
 import { useRouter } from 'next/router';
 import axios from 'axios';
-
-export interface TimelineData {
-    name: string,
-    plantId: number,
-    description: string,
-};
+import { CMMSTimeline } from '../../types/common/interfaces';
+import { ScheduleCreateOptions } from '../../pages/Schedule/Create';
 
 interface CreateScheduleModalProps extends ModalProps {
-    title: string;
+    option: ScheduleCreateOptions
 };
 
-
-async function createTimeline(data: TimelineData) {
+async function createTimeline(data: CMMSTimeline) {
     return await axios.post("/api/timeline", {data})
         .then(res => {
             return res.data
@@ -30,7 +26,7 @@ async function createTimeline(data: TimelineData) {
 
 export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     // Store new timeline data in a state
-    const [newTimelineData, setNewTimelineData] = useState<TimelineData>();
+    const [newTimelineData, setNewTimelineData] = useState<CMMSTimeline>();
     const [isModalOpen, setIsModaOpen] = useState<boolean>(false);
 
     const router = useRouter()
@@ -41,14 +37,14 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
             return {
                 ...prevData,
                 [event.target.name]: event.target.name === "plantId" ? parseInt(event.target.value) : event.target.value,
-            } as TimelineData;
+            } as CMMSTimeline;
         });
     };
 
     // Close modal and empty all input fields
     function closeModal() {
         props.closeModal();
-        setNewTimelineData({} as TimelineData);
+        setNewTimelineData({} as CMMSTimeline);
     };
 
     // Create a new timeline on form submit
@@ -88,18 +84,41 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
         >
             <div>    
                 <div className={styles.eventModalHeader}>
-                    <h3>{props.title}</h3> 
+                    <h3>{"Create from " + props.option.toLocaleLowerCase()}</h3> 
                     <GrClose size={20} onClick={closeModal} className={styles.eventModalClose} /> 
                 </div>
                 <div className={styles.modalForm}>
-                    <input 
-                        type="text" 
-                        className="form-control" 
-                        onChange={(e) => changeNewTimelineData(e)}
-                        name="name"
-                        value={newTimelineData?.name ? newTimelineData.name : ""}
-                        placeholder="Schedule name"/>
-                    <PlantSelect accessControl={true} onChange={(e) => changeNewTimelineData(e)} name="plantId" />
+                    {props.option === ScheduleCreateOptions.New && 
+                        <input 
+                            type="text" 
+                            className="form-control" 
+                            onChange={(e) => changeNewTimelineData(e)}
+                            name="name"
+                            value={newTimelineData?.name ? newTimelineData.name : ""}
+                            placeholder="Schedule name"
+                        />
+                    }
+                    {props.option === ScheduleCreateOptions.Drafts&&
+                       <TimelineSelect
+                            status={3}
+                            onChange={(e) => {}}
+                       />
+                    }
+                    {props.option === ScheduleCreateOptions.New && 
+                        <PlantSelect 
+                            accessControl={true} 
+                            onChange={(e) => changeNewTimelineData(e)} 
+                            name="plantId" 
+                        />
+                    }
+                    {props.option === ScheduleCreateOptions.Drafts && 
+                        <input 
+                            type="text" 
+                            className="form-control"
+                            placeholder="Plant"
+                            readOnly
+                        />
+                    }
                     <textarea 
                         className="form-control" 
                         style={{resize: "none"}} 

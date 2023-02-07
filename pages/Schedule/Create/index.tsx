@@ -5,23 +5,29 @@ import { RiDraftLine, RiCalendarCheckLine, RiCalendarTodoLine } from 'react-icon
 import styles from "../../../styles/Schedule.module.scss";
 
 
+export enum ScheduleCreateOptions {
+    New = "New",
+    Approved = "Approved",
+    Drafts = "Drafts",
+}
+
 export default function CreateSchedule() {
 
     const createOptions: CreateScheduleCardProps[] = [
         {
-            title: "New",
+            title: ScheduleCreateOptions.New,
             text: "Start afresh with a blank calendar",
             icon: <RiCalendarTodoLine size={60} />,
             color: "#82CD47",
         },
         {
-            title: "Approved",
+            title: ScheduleCreateOptions.Approved,
             text: "Work on the most recent approved schedule",
             icon: <RiCalendarCheckLine size={60} />,
             color: "#FFB200",
         },
         {
-            title: "Drafts",
+            title: ScheduleCreateOptions.Drafts,
             text: "Continue from your collection of drafts",
             icon: <RiDraftLine size={60} />,
             color: "#91D8E4",

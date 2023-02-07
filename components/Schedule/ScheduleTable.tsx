@@ -23,7 +23,7 @@ const COLUMNS : any[] = [
             assignedUsers.push(<EventModalUser 
             key={item.assigned_ids[i]}
             serial={i + 1} 
-            role={item.assigned_roles[i]} 
+            role_name={item.assigned_roles[i]} 
             fname={item.assigned_fnames[i]}
             lname={item.assigned_lnames[i]}
             username={item.assigned_usernames[i]} 

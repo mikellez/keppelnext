@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import CreateScheduleModal from './CreateScheduleModal';
 import styles from "../../styles/Schedule.module.scss";
+import { ScheduleCreateOptions } from '../../pages/Schedule/Create';
 
 export interface CreateScheduleCardProps {
-    title: string;
+    title: ScheduleCreateOptions;
     text: string;
     icon: React.ReactNode; 
     color: string;
@@ -28,7 +29,7 @@ export default function CreateScheduleCard(props: CreateScheduleCardProps) {
         <CreateScheduleModal 
             isOpen={displayModal} 
             closeModal={() => setDisplayModal(false)}
-            title={"Create from " + props.title.toLocaleLowerCase()}
+            option={props.title}
         />
         </>
     );

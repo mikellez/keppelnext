@@ -61,5 +61,12 @@ interface CMMSScheduleEvent {
     };
 };
 
+interface CMMSTimeline {
+    name: string,
+    plantId: number,
+    description: string,
+	status?: number,
+};
 
-export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes, CMMSPlant, CMMSScheduleEvent }
+
+export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes, CMMSPlant, CMMSScheduleEvent, CMMSTimeline };

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CMMSPlant } from '../../types/common/interfaces';
 import axios from 'axios';
-import { ChangeEventHandler } from 'preact/compat';
 
 interface PlantSelectProps {
     onChange: React.ChangeEventHandler<HTMLSelectElement>;
@@ -27,7 +26,7 @@ export default function PlantSelect(props: PlantSelectProps) {
 	useEffect(() => {
         const url = props.accessControl ? "/api/getUserPlants" : "/api/getPlants"
         updatePlants(url);
-	}, []);
+	}, [props.accessControl]);
 
     // Get the plants for the dropdown
 	function updatePlants(url: string) {

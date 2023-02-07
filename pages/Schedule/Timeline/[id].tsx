@@ -5,12 +5,12 @@ import TooltipBtn from '../../../components/Schedule/TooltipBtn';
 import styles from "../../styles/Schedule.module.scss";
 import axios from 'axios';
 import { useRouter } from 'next/router';
-import { TimelineData } from '../../../components/Schedule/CreateScheduleModal';
+import { CMMSTimeline } from '../../../types/common/interfaces';
 import { ThreeDots } from 'react-loading-icons'
 
 // Get timeline details
 async function getTimeline(id: number) {
-    return await axios.get<TimelineData>("/api/timeline/" + id)
+    return await axios.get<CMMSTimeline>("/api/timeline/" + id)
         .then(res => {
             return res.data
         })
@@ -39,11 +39,13 @@ export default function Timeline() {
             const id = parseInt(timelineId as string)
             getTimeline(id)
                 .then(result => {
-                    if (result) {
-                        // getSchedules(id).then(schedules => {
-                        //     if (schedules) setScheduleList(schedules);
+                    if (result && result.status === 3) {
+                        getSchedules(id).then(schedules => {
+                            if (schedules) {
+                                setScheduleList(schedules)
+                            };
                             setIsValid(true)
-                        // })
+                        })       
                     }
                     else setIsValid (false);
                     setTimeout(() => {

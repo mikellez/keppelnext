@@ -159,7 +159,7 @@ const createTimeline = async(req, res, next) => {
 
 // Get timeline details
 const getTimeline = async(req, res, next) => {
-    db.query("SELECT timeline_name, description, plant_id FROM keppel.schedule_timelines WHERE timeline_id = $1", 
+    db.query("SELECT timeline_name, description, plant_id, status FROM keppel.schedule_timelines WHERE timeline_id = $1", 
     [req.params.id],
     (err, found) => {
         if (err) throw err;
@@ -169,28 +169,42 @@ const getTimeline = async(req, res, next) => {
 
 // Get timeline specific schedules
 const getSchedulesTimeline = async(req, res, next) => {
-    db.query(`SELECT SC.SCHEDULE_ID, SC.CHECKLIST_TEMPLATE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
-    SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL, STRING_AGG(DISTINCT(U.user_email), ' ,') AS USERNAME, PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS, ST.status
-    FROM
-    KEPPEL.SCHEDULE_CHECKLIST  as SC,
-    KEPPEL.USERS AS U,
-    KEPPEL.PLANT_MASTER  AS PM,
-    KEPPEL.CHECKLIST_TEMPLATES AS CT,
-    KEPPEL.USER_PLANT AS UP,
-    KEPPEL.SCHEDULE_TIMELINES AS ST
-    WHERE
-    U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
-    SC.PLANT_ID = PM.PLANT_ID AND
-    CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
-    SC.timeline_id = $1 AND
-    SC.timeline_id = ST.timeline_id
-    GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID, ST.status)`, [req.params.id], (err, result) => {
+    db.query(`SELECT SC.SCHEDULE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
+        SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL,
+        PM.PLANT_NAME, CT.CHL_NAME,SC.CHECKLIST_TEMPLATE_ID, STRING_AGG(U.user_name, ' ,') AS USERNAME,
+        STRING_AGG(U.user_email, ' ,') AS USER_EMAILS,
+        STRING_AGG(UA.role_name, ' ,') AS ROLES,
+        STRING_AGG(U.first_name, ' ,') AS FNAME,
+        STRING_AGG(U.last_name, ' ,') AS LNAME,
+        SC.REMARKS
+        FROM 
+        KEPPEL.SCHEDULE_CHECKLIST  as SC,
+        KEPPEL.PLANT_MASTER  AS PM,
+        KEPPEL.CHECKLIST_TEMPLATES AS CT,
+        KEPPEL.USERS AS U,
+        KEPPEL.USER_ACCESS AS UA
+        WHERE
+        SC.PLANT_ID = PM.PLANT_ID AND 
+        CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
+        U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL)AND
+        UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
+        SC.timeline_id = $1 
+        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`, [req.params.id], (err, result) => {
         if (err) throw err;
         if (result) {
             const response_dict = makeScheduleDict(result.rows);
             res.status(200).send(response_dict);
         };
     })
+};
+
+const getTimelineByStatus = (req, res, next) => {
+    db.query("SELECT timeline_name, description, plant_id FROM keppel.schedule_timelines WHERE status = $1", 
+    [req.params.status],
+    (err, found) => {
+        if (err) throw err;
+        if (found) return res.status(200).json(found.rows);
+    });
 };
 
 module.exports = {
@@ -200,4 +214,5 @@ module.exports = {
     createTimeline,
     getTimeline,
     getSchedulesTimeline,
+    getTimelineByStatus,
 };
