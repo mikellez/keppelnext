@@ -6,7 +6,7 @@ import Modal from 'react-modal';
 import { IconType } from 'react-icons/lib';
 import { BsX, BsCheck2, BsExclamationTriangle, BsInfoCircle } from "react-icons/bs";
 
-enum SimpleIcon {
+export enum SimpleIcon {
 	Info,
 	Check,
 	Exclaim,
@@ -36,13 +36,13 @@ export default function ModuleSimplePopup(props: ModuleSimplePopupProps) {
 
 		// TODO icons 💀
 		if(props.icon === SimpleIcon.Check)
-			return <BsCheck2 size={122}/>;
+			return <BsCheck2 size={122} color="#1F8A70" />;
 		if(props.icon === SimpleIcon.Exclaim)
-			return <BsExclamationTriangle size={108}/>;
+			return <BsExclamationTriangle size={108} color="#FFB200" />;
 		if(props.icon === SimpleIcon.Cross)
-			return <BsX size={122}/>;
+			return <BsX size={122} color="#CD0404"/>;
 
-		return <BsInfoCircle size={108}/>;
+		return <BsInfoCircle size={108} color="#009EFF" />;
 	}
 
 	return (
@@ -77,7 +77,7 @@ export default function ModuleSimplePopup(props: ModuleSimplePopupProps) {
 			<div className={styles.centerContent}>
 				<div style={{height: "7.5em"}}>{getIcon()} </div>
 				<h2>{props.title}</h2>
-				<p>{props.text}</p>
+				<p className={styles.modalText}>{props.text}</p>
 				<div className={styles.footerButtons}>
 					{props.buttons}
 				</div>
