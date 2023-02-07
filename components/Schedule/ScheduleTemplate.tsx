@@ -6,17 +6,16 @@ import EventModal from "./EventModal";
 import axios from "axios";
 import styles from "../../styles/Schedule.module.scss";
 import { BsCalendar4Week, BsListUl } from "react-icons/bs";
-import { TableNode } from '@table-library/react-table-library/types/table';
+import { TableNode } from "@table-library/react-table-library/types/table";
 import ScheduleTable from "./ScheduleTable";
 import { CMMSScheduleEvent } from "../../types/common/interfaces";
-
 
 interface ScheduleTemplateInfo extends PropsWithChildren {
     title: string;
     header: string;
     schedules?: ScheduleInfo[];
     timeline?: number;
-};
+}
 
 export interface ScheduleInfo extends TableNode {
     assigned_fnames: string[];
@@ -28,13 +27,13 @@ export interface ScheduleInfo extends TableNode {
     calendar_dates: string[];
     checklist_id: number;
     checklist_name: string;
-    end_date: Date;
+    start_date: Date | string;
+    end_date: Date | string;
     period: number;
     plant: string;
     remarks: string;
     schedule_id: number;
-    start_date: Date;  
-};
+}
 
 // Function to format Date to string
 export function dateFormat(date: Date): string {
@@ -44,7 +43,7 @@ export function dateFormat(date: Date): string {
         month: "2-digit",
         day: "2-digit",
     });
-};
+}
 
 // Function to convert a recurring period to string format
 export function toPeriodString(period: number): string {
@@ -65,8 +64,8 @@ export function toPeriodString(period: number): string {
             return "Yearly";
         default:
             return "NA";
-    };
-};
+    }
+}
 
 export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     // Store the list of events in a state to be rendered on the calendar
@@ -87,13 +86,13 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 item.calendar_dates.forEach((date) => {
                     const event = {
                         title: item.checklist_name,
-                        start: new Date(date),
+                        start: item.start_date ? new Date(date) : "",
                         extendedProps: {
                             plant: item.plant,
                             scheduleId: item.schedule_id,
                             checklistId: item.checklist_id,
-                            startDate: new Date(item.start_date),
-                            endDate: new Date(item.end_date),
+                            startDate: item.start_date ? new Date(item.start_date) : "Rescheduled",
+                            endDate: item.end_date ? new Date(item.end_date) : "Rescheduled",
                             recurringPeriod: item.period,
                             assignedIds: item.assigned_ids,
                             assignedEmails: item.assigned_emails,
@@ -124,11 +123,18 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 leftChildren={
                     <div className={styles.eventModalHeader}>
                         <label className={styles.toggle}>
-                            <input type="checkbox" onChange={() => setToggleCalendarOrListView(prev => !prev)} />
+                            <input
+                                type="checkbox"
+                                onChange={() => setToggleCalendarOrListView((prev) => !prev)}
+                            />
                             <span className={styles.slider}></span>
                         </label>
                         <div style={{ marginLeft: "10px" }} id="top-toggle-img">
-                            {toggleCalendarOrListView ? <BsCalendar4Week size={20} /> : <BsListUl size={20} />}
+                            {toggleCalendarOrListView ? (
+                                <BsCalendar4Week size={20} />
+                            ) : (
+                                <BsListUl size={20} />
+                            )}
                         </div>
                     </div>
                 }
@@ -177,7 +183,8 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                     assignedEmails: info.event._def.extendedProps.assignedEmails,
                                     assignedFnames: info.event._def.extendedProps.assignedFnames,
                                     assignedLnames: info.event._def.extendedProps.assignedLnames,
-                                    assignedUsernames: info.event._def.extendedProps.assignedUsernames,
+                                    assignedUsernames:
+                                        info.event._def.extendedProps.assignedUsernames,
                                     assignedRoles: info.event._def.extendedProps.assignedRoles,
                                     remarks: info.event._def.extendedProps.remarks,
                                 },
@@ -191,7 +198,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     />
                 ) : (
                     // Render list view
-                    <ScheduleTable schedules={props.schedules}/>
+                    <ScheduleTable schedules={props.schedules} />
                 )}
             </ModuleContent>
         </ModuleMain>

@@ -43,13 +43,13 @@ interface CMMSPlant {
 
 interface CMMSScheduleEvent {
 	title: string;
-    start?: Date;
+    start?: Date | string;
     extendedProps: {
         plant: string;
         scheduleId: number;
         checklistId: number;
-        startDate: Date;
-        endDate: Date;
+        startDate: Date | string;
+        endDate: Date | string;
         recurringPeriod: number;
         assignedIds: number[];
         assignedEmails: string[];
