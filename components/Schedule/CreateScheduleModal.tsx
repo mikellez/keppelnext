@@ -6,7 +6,7 @@ import { GrClose } from 'react-icons/gr';
 import styles from "../../styles/Schedule.module.scss"
 import PlantSelect from './PlantSelect';
 import TimelineSelect from './TimelineSelect';
-import ModuleSimplePopup from '../ModuleLayout/ModuleSimplePopup';
+import ModuleSimplePopup, { SimpleIcon } from '../ModuleLayout/ModuleSimplePopup';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { CMMSTimeline } from '../../types/common/interfaces';
@@ -167,6 +167,7 @@ console.log(TimelineData)
                 setModalOpenState={setIsModaOpen} 
                 title="Missing Details" 
                 text="Please ensure that you have filled in all the required entries." 
+                icon={SimpleIcon.Exclaim}
             />
         </Modal>
     );

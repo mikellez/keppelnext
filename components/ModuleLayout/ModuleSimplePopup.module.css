@@ -2,6 +2,9 @@
 	margin: auto;
 	text-align: center;
 	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
 .footerButtons {
@@ -13,6 +16,11 @@
 
 .footerButtons > button {
 	margin-left: 0.4rem;
+}
+
+.modalText {
+	max-width: 75%;
+	text-align: center;
 }
 
 .modalContent {
@@ -31,6 +39,7 @@
 	border-radius: 8px;
 
 	opacity: 0;
+	display: flex;
 }
 
 .modalContentAfterOpen{
