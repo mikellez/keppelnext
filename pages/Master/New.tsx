@@ -83,7 +83,7 @@ function MultiFields({fields, onChange}: {fields: MasterField[], onChange: Funct
 		<div className={formStyles.halfContainer}>
 			{
 				fields.map((f) => {
-					return <Field label={f.column_label} name={f.column_name} onChange={(e) => {getValueOnChange(e, f.column_name)}} />
+					return <Field label={f.column_label} name={f.column_name} key={f.column_name} onChange={(e) => {getValueOnChange(e, f.column_name)}} />
 				})
 			}
 		</div>
