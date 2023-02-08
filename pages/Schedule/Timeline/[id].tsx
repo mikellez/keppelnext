@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ScheduleTemplate, { ScheduleInfo } from "../../../components/Schedule/ScheduleTemplate";
 import { FiSend, FiPlusSquare } from "react-icons/fi";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import TooltipBtn from "../../../components/Schedule/TooltipBtn";
 import styles from "../../styles/Schedule.module.scss";
 import axios from "axios";
@@ -70,13 +71,14 @@ export default function Timeline() {
                 header="Create Schedule"
                 schedules={scheduleList}
             >
+                <TooltipBtn text="Delete this draft">
+                    <RiDeleteBin6Line size={22} />
+                </TooltipBtn>
                 <TooltipBtn text="Submit for approval">
-                    {" "}
-                    <FiSend size={22} />{" "}
+                    <FiSend size={22} />
                 </TooltipBtn>
                 <TooltipBtn text="Schedule a maintenance">
-                    {" "}
-                    <FiPlusSquare size={22} />{" "}
+                    <FiPlusSquare size={22} />
                 </TooltipBtn>
             </ScheduleTemplate>
         );

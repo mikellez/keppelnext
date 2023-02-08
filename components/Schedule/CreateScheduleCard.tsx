@@ -37,6 +37,7 @@ export default function CreateScheduleCard(props: CreateScheduleCardProps) {
                 isOpen={displayModal}
                 closeModal={() => setDisplayModal(false)}
                 option={props.title as ScheduleCreateOptions}
+                title={"Create from " + props.title.toLocaleLowerCase()}
             />
         </>
     );
