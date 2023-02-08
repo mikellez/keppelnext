@@ -12,7 +12,7 @@ import axios from "axios";
 import TimelineSelect from "../../../components/Schedule/TimelineSelect";
 import { getSchedules } from "../Timeline/[id]";
 import CreateScheduleModal from "../../../components/Schedule/CreateScheduleModal";
-import ModuleSimplePopup from "../../../components/ModuleLayout/ModuleSimplePopup";
+import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 
 // Function to change the status of a timeline
 async function changeStatus(newStatus: number, timelineId: number) {
@@ -31,6 +31,7 @@ export default function ManageSchedule() {
     const [manageModal, setManageModal] = useState<boolean>(false);
     const [isPopup, setIsPopup] = useState<boolean>(false);
     const [timelineId, setTimelineId] = useState<number>();
+    const [remarks, setRemarks] = useState<string>("");
 
     async function setSchedules(id: number) {
         getSchedules(id).then((schedules) => {
@@ -42,11 +43,16 @@ export default function ManageSchedule() {
 
     // Called when the approve/reject buttons have been clicked
     function handleManage(newStatus: number) {
-        changeStatus(newStatus, timelineId as number).then(result => {
-            // Close and clear modal fields
-            setManageModal(false);
-            setTimelineId(0);
-        });
+        if (remarks === "" && newStatus != 1) {
+            //Prompt for remarks
+            setIsPopup(true);
+        } else {
+            changeStatus(newStatus, timelineId as number).then(result => {
+                // Close and clear modal fields
+                setManageModal(false);
+                setTimelineId(0);
+            });
+        }
     };
 
     return (
@@ -100,11 +106,17 @@ export default function ManageSchedule() {
                 closeModal={() => setManageModal(false)}
                 title={isHistory ? "Schedule Details" : "Manage Schedule"}
                 timelineId={timelineId}
+                isManage
             >{!isHistory && 
                 <div>
                     <label>
                         <p>Remarks</p>
-                        <textarea className="form-control" rows={2} maxLength={150} style={{resize: "none"}} ></textarea>
+                        <textarea 
+                        className="form-control" 
+                        rows={2} maxLength={150} 
+                        style={{resize: "none"}}
+                        onChange={(e) => setRemarks(e.target.value)}
+                        ></textarea>
                     </label>
                     <div className={styles.createScheduleModalBtnContainer}>
                         <TooltipBtn toolTip={false} onClick={() => handleManage(1)}> Approve </TooltipBtn>
@@ -113,13 +125,13 @@ export default function ManageSchedule() {
                 </div>
             }</CreateScheduleModal>
 
-            {/* <ModuleSimplePopup 
+            <ModuleSimplePopup 
                 modalOpenState={isPopup} 
                 setModalOpenState={setIsPopup} 
-                title={} 
-                text={}
-                icon={}
-            /> */}
+                title="Missing Remarks" 
+                text="Please write some remarks so that the engineers know why the schedule is rejected."
+                icon={SimpleIcon.Exclaim}
+            />
 
         </ScheduleTemplate>
     );
