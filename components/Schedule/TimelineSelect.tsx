@@ -41,7 +41,7 @@ export default function TimelineSelect(props: TimelineSelectProps) {
     ));
 
     return (
-        <select className="form-control" onChange={props.onChange} name={props.name}>
+        <select className="form-select" onChange={props.onChange} name={props.name}>
             <option hidden>Select schedule</option>
             {timelineOptions}
         </select>

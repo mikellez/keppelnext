@@ -42,7 +42,7 @@ export default function PlantSelect(props: PlantSelectProps) {
 	const plantOptions = plantList.map(plant => <option key={plant.plant_id} value={plant.plant_id}>{plant.plant_name}</option>)
 
     return (
-        <select className="form-control" onChange={props.onChange} name={props.name}>
+        <select className="form-select" onChange={props.onChange} name={props.name}>
             {props.allPlants ? (plantList.length > 1 && <option value={0}>View all Plants</option>) : <option hidden>Select plant</option>}
             {plantOptions}
         </select>
