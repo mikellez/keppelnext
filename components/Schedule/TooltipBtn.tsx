@@ -5,6 +5,7 @@ interface TooltipBtnProps extends PropsWithChildren {
     onClick?: MouseEventHandler;
     style?: React.CSSProperties;
     toolTip?: boolean;
+    disabled?: boolean;
 };
 
 export default function TooltipBtn(props: TooltipBtnProps) {
@@ -40,6 +41,7 @@ export default function TooltipBtn(props: TooltipBtnProps) {
                 onClick={props.onClick}
                 onMouseEnter={() => setIsHover(true)}
                 onMouseLeave={() => setIsHover(false)}
+                disabled={props.disabled}
                 > 
                 { props.children } 
             </button>

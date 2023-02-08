@@ -43,7 +43,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     const [TimelineData, setTimelineData] = useState<CMMSTimeline>();
     const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
     const [isWarningModalOpen, setIsWarningModaOpen] = useState<boolean>(false);
-    const [isEditable, setIsEditable] = useState<boolean>();
+    const [isManageModal, setIsManageModal] = useState<boolean>();
 
     const router = useRouter();
 
@@ -73,12 +73,12 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     // Close modal and empty all input fields
     function closeModal() {
         // Warn users on closing modal if they have unsaved changes
-        if ((TimelineData?.name || TimelineData?.description || TimelineData?.plantId) && isEditable) {
+        if ((TimelineData?.name || TimelineData?.description || TimelineData?.plantId) && !isManageModal) {
             setIsWarningModaOpen(true);
         } else {
-            props.closeModal();
-            setTimelineData({} as CMMSTimeline);
+            props.closeModal();   
         }
+        if (!isManageModal) setTimelineData({} as CMMSTimeline);
     }
 
     // Create a new timeline on form submit
@@ -105,7 +105,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
             getTimeline(props.timelineId).then((result) => {
                 if (result) setTimelineData(result);
             });
-        setIsEditable(Object.values(ScheduleCreateOptions).includes(
+        setIsManageModal(!Object.values(ScheduleCreateOptions).includes(
             props.option as ScheduleCreateOptions
         ));
     }, [props.timelineId, props.option]);
@@ -133,7 +133,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
         >
             <div>
                 <div className={styles.eventModalHeader}>
-                    {isEditable ? (
+                    {!isManageModal ? (
                         <h3>{"Create from " + props.option.toLocaleLowerCase()}</h3>
                     ) : (
                         <h3>{props.option}</h3>
@@ -142,7 +142,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                 </div>
                 <div className={styles.modalForm}>
                     {(props.option === ScheduleCreateOptions.New ||
-                        !isEditable) && (
+                        isManageModal) && (
                         <input
                             type="text"
                             className="form-control"
@@ -150,7 +150,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                             name="name"
                             value={TimelineData?.name ? TimelineData.name : ""}
                             placeholder="Schedule name"
-                            readOnly={!isEditable}
+                            readOnly={isManageModal}
                         />
                     )}
                     {props.option === ScheduleCreateOptions.Drafts && (
@@ -169,7 +169,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                             name="plantId"
                         />
                     )}
-                    {(props.option === ScheduleCreateOptions.Drafts || !isEditable) && (
+                    {(props.option === ScheduleCreateOptions.Drafts || isManageModal) && (
                         <input
                             type="text"
                             className="form-control"
@@ -217,7 +217,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                 text="Please ensure that you have filled in all the required entries."
                 icon={SimpleIcon.Cross}
             />
-            {isEditable && <ModuleSimplePopup 
+            {!isManageModal && <ModuleSimplePopup 
                 modalOpenState={isWarningModalOpen} 
                 setModalOpenState={setIsWarningModaOpen} 
                 title="Unsaved Changes" 

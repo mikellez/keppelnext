@@ -64,11 +64,14 @@ export default function ManageSchedule() {
             <TooltipBtn text="Manage pending schedules">
                 <AiOutlineAudit size={21} />
             </TooltipBtn>
-            <TooltipBtn onClick={() => setDisplayModal(true)} text="Schdedule info">
+            <TooltipBtn onClick={() => setDisplayModal(true)} text="Schdedule info" disabled={!timelineId}>
                 <AiOutlineInfoCircle size={21} />
             </TooltipBtn>
             <TooltipBtn
-                onClick={() => setIsHistory((prev) => !prev)}
+                onClick={() => {
+                    setIsHistory((prev) => !prev);
+                    setTimelineId(0);
+                }}
                 text={isHistory ? "View pending schedules" : "View past schedules"}
             >
                 {isHistory ? <AiOutlineClockCircle size={21} /> : <AiOutlineHistory size={21} />}
