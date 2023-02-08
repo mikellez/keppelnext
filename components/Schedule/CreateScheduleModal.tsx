@@ -43,6 +43,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     const [TimelineData, setTimelineData] = useState<CMMSTimeline>();
     const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
     const [isWarningModalOpen, setIsWarningModaOpen] = useState<boolean>(false);
+    const [isEditable, setIsEditable] = useState<boolean>();
 
     const router = useRouter();
 
@@ -72,7 +73,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     // Close modal and empty all input fields
     function closeModal() {
         // Warn users on closing modal if they have unsaved changes
-        if (TimelineData?.name || TimelineData?.description || TimelineData?.plantId) {
+        if ((TimelineData?.name || TimelineData?.description || TimelineData?.plantId) && isEditable) {
             setIsWarningModaOpen(true);
         } else {
             props.closeModal();
@@ -104,7 +105,10 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
             getTimeline(props.timelineId).then((result) => {
                 if (result) setTimelineData(result);
             });
-    }, [props.timelineId]);
+        setIsEditable(Object.values(ScheduleCreateOptions).includes(
+            props.option as ScheduleCreateOptions
+        ));
+    }, [props.timelineId, props.option]);
 
     return (
         <Modal
@@ -129,9 +133,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
         >
             <div>
                 <div className={styles.eventModalHeader}>
-                    {Object.values(ScheduleCreateOptions).includes(
-                        props.option as ScheduleCreateOptions
-                    ) ? (
+                    {isEditable ? (
                         <h3>{"Create from " + props.option.toLocaleLowerCase()}</h3>
                     ) : (
                         <h3>{props.option}</h3>
@@ -140,9 +142,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                 </div>
                 <div className={styles.modalForm}>
                     {(props.option === ScheduleCreateOptions.New ||
-                        !Object.values(ScheduleCreateOptions).includes(
-                            props.option as ScheduleCreateOptions
-                        )) && (
+                        !isEditable) && (
                         <input
                             type="text"
                             className="form-control"
@@ -150,11 +150,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                             name="name"
                             value={TimelineData?.name ? TimelineData.name : ""}
                             placeholder="Schedule name"
-                            readOnly={
-                                !Object.values(ScheduleCreateOptions).includes(
-                                    props.option as ScheduleCreateOptions
-                                )
-                            }
+                            readOnly={!isEditable}
                         />
                     )}
                     {props.option === ScheduleCreateOptions.Drafts && (
@@ -173,10 +169,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                             name="plantId"
                         />
                     )}
-                    {(props.option === ScheduleCreateOptions.Drafts ||
-                        !Object.values(ScheduleCreateOptions).includes(
-                            props.option as ScheduleCreateOptions
-                        )) && (
+                    {(props.option === ScheduleCreateOptions.Drafts || !isEditable) && (
                         <input
                             type="text"
                             className="form-control"
@@ -224,7 +217,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                 text="Please ensure that you have filled in all the required entries."
                 icon={SimpleIcon.Cross}
             />
-            <ModuleSimplePopup 
+            {isEditable && <ModuleSimplePopup 
                 modalOpenState={isWarningModalOpen} 
                 setModalOpenState={setIsWarningModaOpen} 
                 title="Unsaved Changes" 
@@ -240,7 +233,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                             setIsWarningModaOpen(false);
                         }}
                     >Yes</TooltipBtn>]}
-            />
+            />}
         </Modal>
     );
 }
