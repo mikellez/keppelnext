@@ -4,52 +4,26 @@ import React, { useState } from 'react'
 import axios from 'axios';
 
 import { ModuleMain, ModuleHeader, ModuleContent, ModuleFooter } from '../components/';
-import { QRAssetSelect, QRAssetSelectOption } from '../components/QR/QRAssetSelect';
-import QRPlantSelect from '../components/QR/QRPlantSelect';
-
-async function getAssets(plant_id: number)
-{
-	return await axios.get("http://localhost:3000/api/request/getAssets/" + plant_id)
-	.then((response) => {
-		return response.data;
-	})
-	.catch((e) => {
-		console.log("error getting assets")
-		console.log(e);
-		return null;
-	});
-}
+import { useAsset } from '../components/SWR';
 
 function QRCode() {
-	const [plantOptions, setPlantOptions] = useState<QRAssetSelectOption[]>([]);
+	const [selectedPlant, setSelectedPlant] = useState<number|null>(null)
 	const [selectedAssetIds, setSelectedAssetIds] = useState<number[]>([]);
 
-	function updateAssetLists(plant_id : number)
-	{
-		let options: QRAssetSelectOption[] = [];
-
-		getAssets(plant_id).then((data) => {
-			if(data === null)
-				return console.log("assets null");
-
-			for(let asset of data)
-				options.push({
-					key: asset.psa_id.toString() + asset.asset_name,
-					value: asset.psa_id,
-					text: asset.asset_name
-				});
-
-			setPlantOptions(options);
-		});
-	}
-
-	const plantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		updateAssetLists(parseInt(e.target.value));
-	};
+	const {
+		data,
+		error,
+		isValidating,
+		mutate
+ 	} = useAsset(selectedPlant);
 
 	const generateQR = () => {
         alert("selected values: " + selectedAssetIds.toString());
     }
+
+	function assetSelect(e: React.ChangeEvent<HTMLSelectElement>) {
+		setSelectedAssetIds(Array.from(e.target.options).filter(o => o.selected).map(o => parseInt(o.value)))
+	}
 
 	return (
 		<ModuleMain>
@@ -58,14 +32,24 @@ function QRCode() {
 				<div className={formStyles.halfContainer}>
 					<div className="form-group">
 						<label className='form-label'>Plant Location:</label>
-						<QRPlantSelect onSelect={plantChange}/>
+						<select className="form-select" required onChange={(e) => {setSelectedPlant(parseInt(e.target.value))}}>
+							<option value="" hidden>-- Please Select a Plant --</option>
+							<option value="2">Woodlands DHCS</option>
+							<option value="3">Biopolis</option>
+							<option value="4">Mediapolis</option>
+							<option value="1">Changi DHCS</option>
+						</select>
 					</div>
 					<br/>
 				</div>
 				<div className={formStyles.halfContainer}>
 					<div className="form-group">
 						<label className="form-label">Assets:</label>
-						<QRAssetSelect options={plantOptions} onSelect={setSelectedAssetIds}/>
+						<select className="form-select" multiple style={{height: "14em"}} onChange={assetSelect}>
+							{
+								data && data.map((asset) => <option key={asset.psa_id} value={asset.psa_id}>{asset.asset_name}</option>)
+							}
+						</select>
 					</div>
 				</div>
 			</ModuleContent>
