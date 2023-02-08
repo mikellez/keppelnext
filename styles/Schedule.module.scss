@@ -233,5 +233,22 @@
     margin: 1.5rem 0;
 }
 
+.modalForm label {
+    width: 100%;
+}
+
+.modalForm p {
+    margin: 0;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.createScheduleModalBtnContainer {
+    position: absolute;
+    bottom: 1.2rem;
+    right: 1.2rem;
+    display: flex;
+    gap: 1rem;
+}
 
 // ------------------------------------------ Create Schedule Template Page -------------------------------------------

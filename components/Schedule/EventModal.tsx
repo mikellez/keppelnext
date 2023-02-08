@@ -1,4 +1,4 @@
-import React, { MouseEventHandler, useState, useEffect } from "react";
+import React, { MouseEventHandler, useState, useEffect, PropsWithChildren } from "react";
 import Modal from "react-modal";
 import { dateFormat, toPeriodString } from "./ScheduleTemplate";
 import { CMMSScheduleEvent, CMMSUser } from "../../types/common/interfaces";
@@ -10,7 +10,7 @@ interface CustomMouseEventHandler extends React.MouseEventHandler {
     (event: React.MouseEvent | void): void;
 }
 
-export interface ModalProps {
+export interface ModalProps extends PropsWithChildren {
     isOpen: boolean;
     closeModal: CustomMouseEventHandler;
     event?: CMMSScheduleEvent;

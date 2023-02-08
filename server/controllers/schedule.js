@@ -237,8 +237,18 @@ const editTimeline = (req, res, next) => {
     [req.body.data.description, req.params.id], 
     (err, found) => {
         if (err) throw err;
-        if (found) return res.status(201).json(found.rows[0].timeline_id)
+        if (found) return res.status(200).json(found.rows[0].timeline_id)
     });
+};
+
+// Change the status of timeline (Approve/Reject) Note that reject becomes draft
+const changeTimelineStatus = (req, res, next) => {
+    db.query(`UPDATE keppel.schedule_timelines SET status = $1 WHERE timeline_id = $2 RETURNING timeline_id`, 
+    [req.params.status, req.params.id], 
+    (err, found) => {
+        if (err) throw err;
+        if (found) return res.status(200).json(found.rows[0].timeline_id)
+    })
 };
 
 module.exports = {
@@ -250,4 +260,5 @@ module.exports = {
     getSchedulesTimeline,
     getTimelineByStatus,
     editTimeline,
+    changeTimelineStatus,
 };

@@ -9,25 +9,28 @@ import {
 import TooltipBtn from "../../../components/Schedule/TooltipBtn";
 import styles from "../../../styles/Schedule.module.scss";
 import axios from "axios";
-import { useRouter } from "next/router";
-import { getUser } from "../../../components";
 import TimelineSelect from "../../../components/Schedule/TimelineSelect";
 import { getSchedules } from "../Timeline/[id]";
 import CreateScheduleModal from "../../../components/Schedule/CreateScheduleModal";
+import ModuleSimplePopup from "../../../components/ModuleLayout/ModuleSimplePopup";
 
-interface TimelineInfo {
-    id: number;
-    name: string;
-}
+// Function to change the status of a timeline
+async function changeStatus(newStatus: number, timelineId: number) {
+    return await axios.post(`/api/timeline/status/${newStatus}/${timelineId}`)
+        .then(res => {
+            return res.data;
+        })
+        .catch(err => {
+            console.log(err);
+        });
+};
 
 export default function ManageSchedule() {
     const [isHistory, setIsHistory] = useState<boolean>(false);
-    const [timelineDropdown, setTimelineDropdown] = useState<TimelineInfo[]>();
     const [scheduleList, setScheduleList] = useState<ScheduleInfo[]>([]);
-    const [displayModal, setDisplayModal] = useState<boolean>(false);
+    const [manageModal, setManageModal] = useState<boolean>(false);
+    const [isPopup, setIsPopup] = useState<boolean>(false);
     const [timelineId, setTimelineId] = useState<number>();
-
-    const router = useRouter();
 
     async function setSchedules(id: number) {
         getSchedules(id).then((schedules) => {
@@ -36,6 +39,16 @@ export default function ManageSchedule() {
             }
         });
     }
+
+    // Called when the approve/reject buttons have been clicked
+    function handleManage(newStatus: number) {
+        changeStatus(newStatus, timelineId as number).then(result => {
+            // Close and clear modal fields
+            setManageModal(false);
+            setTimelineId(0);
+        });
+    };
+
     return (
         <ScheduleTemplate title="Manage Schedule" header="Manage Schedule" schedules={scheduleList}>
             {isHistory ? (
@@ -61,12 +74,17 @@ export default function ManageSchedule() {
                     />
                 </div>
             )}
-            <TooltipBtn text="Manage pending schedules">
-                <AiOutlineAudit size={21} />
-            </TooltipBtn>
-            <TooltipBtn onClick={() => setDisplayModal(true)} text="Schdedule info" disabled={!timelineId}>
-                <AiOutlineInfoCircle size={21} />
-            </TooltipBtn>
+
+            {isHistory ? 
+                <TooltipBtn text="Schdedule info" onClick={() => setManageModal(true)}  disabled={!timelineId}>
+                    <AiOutlineInfoCircle size={21} />
+                </TooltipBtn> 
+                : 
+                <TooltipBtn text="Manage pending schedules" onClick={() => {setManageModal(true)}} disabled={!timelineId}>
+                    <AiOutlineAudit size={21} />
+                </TooltipBtn>
+            }
+
             <TooltipBtn
                 onClick={() => {
                     setIsHistory((prev) => !prev);
@@ -78,11 +96,31 @@ export default function ManageSchedule() {
             </TooltipBtn>
 
             <CreateScheduleModal
-                isOpen={displayModal}
-                closeModal={() => setDisplayModal(false)}
-                option="Scheduler Details"
+                isOpen={manageModal}
+                closeModal={() => setManageModal(false)}
+                title={isHistory ? "Schedule Details" : "Manage Schedule"}
                 timelineId={timelineId}
-            />
+            >{!isHistory && 
+                <div>
+                    <label>
+                        <p>Remarks</p>
+                        <textarea className="form-control" rows={2} maxLength={150} style={{resize: "none"}} ></textarea>
+                    </label>
+                    <div className={styles.createScheduleModalBtnContainer}>
+                        <TooltipBtn toolTip={false} onClick={() => handleManage(1)}> Approve </TooltipBtn>
+                        <TooltipBtn toolTip={false} onClick={() => handleManage(3)}> Reject </TooltipBtn>
+                    </div>
+                </div>
+            }</CreateScheduleModal>
+
+            {/* <ModuleSimplePopup 
+                modalOpenState={isPopup} 
+                setModalOpenState={setIsPopup} 
+                title={} 
+                text={}
+                icon={}
+            /> */}
+
         </ScheduleTemplate>
     );
 }
