@@ -12,6 +12,7 @@ import axios from "axios";
 import { CMMSTimeline } from "../../types/common/interfaces";
 import { ScheduleCreateOptions } from "../../pages/Schedule/Create";
 import { getTimeline } from "../../pages/Schedule/Timeline/[id]";
+import { getTimelinesByStatus } from "./TimelineSelect";
 
 interface CreateScheduleModalProps extends ModalProps {
     title?: string;
@@ -42,12 +43,8 @@ async function editTimeline(data: CMMSTimeline, id: number) {
 
 // Get the most approved timelines for each plant
 async function getApprovedTimeline(plantId: number) {
-    return await axios
-        .get<CMMSTimeline[]>("/api/timeline/status/1")
-        .then((res) => {
-            return res.data.filter(item => item.plantId === plantId)[0]
-        })
-        .catch((err) => console.log(err));
+    const timelines = await getTimelinesByStatus(1);
+    if (timelines) return timelines.filter(item => item.plantId === plantId)[0];
 }
 
 export default function CreateScheduleModal(props: CreateScheduleModalProps) {

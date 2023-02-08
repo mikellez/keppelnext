@@ -15,7 +15,7 @@ import CreateScheduleModal from "../../../components/Schedule/CreateScheduleModa
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 
 // Function to change the status of a timeline
-async function changeStatus(newStatus: number, timelineId: number) {
+export async function changeTimelineStatus(newStatus: number, timelineId: number) {
     return await axios.post(`/api/timeline/status/${newStatus}/${timelineId}`)
         .then(res => {
             return res.data;
@@ -47,7 +47,7 @@ export default function ManageSchedule() {
             //Prompt for remarks
             setIsPopup(true);
         } else {
-            changeStatus(newStatus, timelineId as number).then(result => {
+            changeTimelineStatus(newStatus, timelineId as number).then(result => {
                 // Close and clear modal fields
                 setManageModal(false);
                 setTimelineId(0);
