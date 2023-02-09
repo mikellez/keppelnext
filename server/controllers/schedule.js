@@ -1,5 +1,5 @@
 const db = require("../../db");
-const dateHandler = require("../dateHandler")
+const dateHandler = require("../dateHandler");
 
 // Function to get a schdeule dates
 const makeScheduleDict = (arr) => {
@@ -31,9 +31,9 @@ const makeScheduleDict = (arr) => {
 };
 
 // Get all schedules or plant specific schedules
-const getViewSchedules = async(req, res, next) => {
+const getViewSchedules = async (req, res, next) => {
     let queryS = [];
-    if (req.params.plant_id === '0') {
+    if (req.params.plant_id === "0") {
         if (req.user.role_id === 0 || req.user.role_id === 4) {
             queryS.push(`SELECT SC.SCHEDULE_ID, SC.CHECKLIST_TEMPLATE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
             SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL, STRING_AGG(DISTINCT(U.user_email), ' ,') AS USERNAME,
@@ -82,7 +82,7 @@ const getViewSchedules = async(req, res, next) => {
 		  UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
           SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1 OR STATUS = 5)
           GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
-        };
+        }
     } else {
         queryS.push(`SELECT SC.SCHEDULE_ID, SC.CHECKLIST_TEMPLATE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
         SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL, STRING_AGG(DISTINCT(U.user_email), ' ,') AS USERNAME,
@@ -107,79 +107,99 @@ const getViewSchedules = async(req, res, next) => {
         AND
         SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1 OR STATUS = 5) 
         
-        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`)
+        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
     }
-    console.log(queryS[0])
+    console.log(queryS[0]);
     db.query(queryS[0], (err, result) => {
         if (err) throw err;
         if (result) {
             const response_dict = makeScheduleDict(result.rows);
             res.status(200).send(response_dict);
-        };
+        }
     });
 };
 
 // Get plants based on the user role
-const getPlants = async(req, res, next) => {
+const getPlants = async (req, res, next) => {
     if (req.user.role_id === 0 || req.user.role_id === 4) {
-        db.query("SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) FROM keppel.user_access WHERE user_id = $1::integer)", [req.user.id], (err, result) => {
-            if (err) throw err;
-            if (result) {
-                res.status(200).send(result.rows);
-            }; 
-        })
+        db.query(
+            "SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) FROM keppel.user_access WHERE user_id = $1::integer)",
+            [req.user.id],
+            (err, result) => {
+                if (err) throw err;
+                if (result) {
+                    res.status(200).send(result.rows);
+                }
+            }
+        );
     } else {
         db.query(`SELECT * FROM keppel.plant_master`, (err, result) => {
             if (err) throw err;
             if (result) {
                 res.status(200).send(result.rows);
-            };
-        }); 
+            }
+        });
     }
 };
 
-const getUserPlants = async(req, res, next) => {
-    db.query("SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) FROM keppel.user_access WHERE user_id = $1::integer)", [req.user.id], (err, result) => {
-        if (err) throw err;
-        if (result) {
-            res.status(200).send(result.rows);
-        }; 
-    });
+const getUserPlants = async (req, res, next) => {
+    db.query(
+        "SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) FROM keppel.user_access WHERE user_id = $1::integer)",
+        [req.user.id],
+        (err, result) => {
+            if (err) throw err;
+            if (result) {
+                res.status(200).send(result.rows);
+            }
+        }
+    );
 };
 
 // Create a new timeline
-const createTimeline = async(req, res, next) => {
-    db.query("INSERT INTO keppel.schedule_timelines (timeline_name, description, created_date, created_by, status, plant_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING timeline_id",
-    [req.body.data.name, req.body.data.description, new Date(), req.user.id, 3, req.body.data.plantId],
-    (err, found) => {
-        if (err) throw err;
-        if (found) return res.status(201).json(found.rows[0].timeline_id)
-    })
+const createTimeline = async (req, res, next) => {
+    db.query(
+        "INSERT INTO keppel.schedule_timelines (timeline_name, description, created_date, created_by, status, plant_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING timeline_id",
+        [
+            req.body.data.name,
+            req.body.data.description,
+            new Date(),
+            req.user.id,
+            3,
+            req.body.data.plantId,
+        ],
+        (err, found) => {
+            if (err) throw err;
+            if (found) return res.status(201).json(found.rows[0].timeline_id);
+        }
+    );
 };
 
 // Get timeline details
-const getTimeline = async(req, res, next) => {
-    db.query(`SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id as plantId, ST.status, PM.plant_name as plantName
+const getTimeline = async (req, res, next) => {
+    db.query(
+        `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id as plantId, ST.status, PM.plant_name as plantName
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
-    WHERE timeline_id = $1`, 
-    [req.params.id],
-    (err, found) => {
-        if (err) throw err;
-        if (found) {
-            found.rows[0].plantName = found.rows[0].plantname;
-            found.rows[0].plantId = found.rows[0].plantid;
-            delete found.rows[0].plantname;
-            delete found.rows[0].plantid;
-            return res.status(200).json(found.rows[0])
+    WHERE timeline_id = $1`,
+        [req.params.id],
+        (err, found) => {
+            if (err) throw err;
+            if (found) {
+                found.rows[0].plantName = found.rows[0].plantname;
+                found.rows[0].plantId = found.rows[0].plantid;
+                delete found.rows[0].plantname;
+                delete found.rows[0].plantid;
+                return res.status(200).json(found.rows[0]);
+            }
         }
-    })
+    );
 };
 
 // Get timeline specific schedules
-const getSchedulesTimeline = async(req, res, next) => {
-    db.query(`SELECT SC.SCHEDULE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
+const getSchedulesTimeline = async (req, res, next) => {
+    db.query(
+        `SELECT SC.SCHEDULE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
         SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL,
         PM.PLANT_NAME, CT.CHL_NAME,SC.CHECKLIST_TEMPLATE_ID, STRING_AGG(U.user_name, ' ,') AS USERNAME,
         STRING_AGG(U.user_email, ' ,') AS USER_EMAILS,
@@ -199,60 +219,82 @@ const getSchedulesTimeline = async(req, res, next) => {
         U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL)AND
         UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
         SC.timeline_id = $1 
-        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`, [req.params.id], (err, result) => {
-        if (err) throw err;
-        if (result) {
-            const response_dict = makeScheduleDict(result.rows);
-            res.status(200).send(response_dict);
-        };
-    })
+        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`,
+        [req.params.id],
+        (err, result) => {
+            if (err) throw err;
+            if (result) {
+                const response_dict = makeScheduleDict(result.rows);
+                res.status(200).send(response_dict);
+            }
+        }
+    );
 };
 
 // Get timeline by the status
 const getTimelineByStatus = (req, res, next) => {
-    db.query(`SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id as plantId, PM.plant_name as plantName
+    db.query(
+        `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id as plantId, PM.plant_name as plantName
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
-    WHERE status = $1`, 
-    [req.params.status],
-    (err, found) => {
-        if (err) throw err;
-        if (found) {
-            found.rows.map(timeline => {
-                timeline.plantId = timeline.plantid;
-                timeline.plantName = timeline.plantname;
-                delete timeline.plantid;
-                delete timeline.plantname;
-                return timeline
-            })
-            return res.status(200).json(found.rows)
-        };
-    });
+    WHERE status = $1`,
+        [req.params.status],
+        (err, found) => {
+            if (err) throw err;
+            if (found) {
+                found.rows.map((timeline) => {
+                    timeline.plantId = timeline.plantid;
+                    timeline.plantName = timeline.plantname;
+                    delete timeline.plantid;
+                    delete timeline.plantname;
+                    return timeline;
+                });
+                return res.status(200).json(found.rows);
+            }
+        }
+    );
 };
 
 // Edit timeline details
 const editTimeline = (req, res, next) => {
-    db.query(`UPDATE keppel.schedule_timelines SET description = $1 WHERE timeline_id = $2 RETURNING timeline_id`,
-    [req.body.data.description, req.params.id], 
-    (err, found) => {
-        if (err) throw err;
-        if (found) return res.status(200).json(found.rows[0].timeline_id)
-    });
+    db.query(
+        `UPDATE keppel.schedule_timelines SET description = $1 WHERE timeline_id = $2 RETURNING timeline_id`,
+        [req.body.data.description, req.params.id],
+        (err, found) => {
+            if (err) throw err;
+            if (found) return res.status(200).json(found.rows[0].timeline_id);
+        }
+    );
 };
 
 // Change the status of timeline (Approve/Reject) Note that reject becomes draft
 const changeTimelineStatus = (req, res, next) => {
-    db.query(`UPDATE keppel.schedule_timelines SET status = $1 WHERE timeline_id = $2 RETURNING timeline_id`, 
-    [req.params.status, req.params.id], 
-    (err, found) => {
-        if (err) throw err;
-        if (found) return res.status(200).json(found.rows[0].timeline_id)
-    })
+    db.query(
+        `UPDATE keppel.schedule_timelines SET status = $1 WHERE timeline_id = $2 RETURNING timeline_id`,
+        [req.params.status, req.params.id],
+        (err, found) => {
+            if (err) throw err;
+            if (found) return res.status(200).json(found.rows[0].timeline_id);
+        }
+    );
+};
+
+// Delete a timeline in draft
+const deleteTimeline = async (req, res, next) => {
+    db.query(
+        `DELETE FROM keppel.schedule_timelines WHERE timeline_id = $1;`,
+        // DELETE FROM keppel.schedule_checklist WHERE timeline_id = $1; remeber to delete from schedule. this cant work here bc of multiple querying
+        [req.params.id],
+        (err, found) => {
+            if (err) throw err;
+            return res.status(204).send("success");
+        }
+    );
 };
 
 module.exports = {
-    getViewSchedules, 
+    getViewSchedules,
     getPlants,
     getUserPlants,
     createTimeline,
@@ -261,4 +303,5 @@ module.exports = {
     getTimelineByStatus,
     editTimeline,
     changeTimelineStatus,
+    deleteTimeline,
 };
