@@ -22,7 +22,7 @@ const tableInfo = {
 			column_name: "system_name"
 		}]
 	},
-	fault_type: {
+	fault_types: {
 		internalName: "fault_types",
 		name: "Fault Type",
 		id: "fault_id",
@@ -60,7 +60,6 @@ const fetchMasterInfo = async (req, res, next) => {
 			});
 		}
 
-		console.log(result);
 		return res.status(200).json(
 			{
 				rows: result.rows,
@@ -73,12 +72,40 @@ const fetchMasterTypeEntry = async (req, res, next) => {
 	return res.status(200).json(tableInfo)
 };
 
-const postMasterTypeEntry = async (req, res, next) => {
-	
+const createMasterTypeEntry = async (req, res, next) => {
+	return res.status(200).json(tableInfo)
+};
+
+const deleteMasterTypeEntry = async (req, res, next) => {
+	const { type, id } = req.params
+
+	if(!type || !id)
+		res.status(400).send()
+
+	if(!(type in tableInfo))
+		res.status(400).send("type does not exist")
+
+	const query = `DELETE FROM keppel.${tableInfo[type].internalName} WHERE ${tableInfo[type].id}=$1;`
+
+	db.query(query, [id], (err1, result) => {
+		if (err1) {
+			// throw err;
+			return res.status(500).send({
+				msg: err1,
+			});
+		}
+		if (result.rowCount === 0) {
+			return res.status(400).send({
+				msg: "id does not exist",
+			});
+		}
+		return res.status(200).json(result.rows[0]);
+	});
 };
 
 module.exports = {
 	fetchMasterInfo,
 	fetchMasterTypeEntry,
-	postMasterTypeEntry
+	createMasterTypeEntry,
+	deleteMasterTypeEntry
 }

@@ -8,6 +8,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { FieldErrorsImpl, SubmitHandler } from 'react-hook-form/dist/types';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import axios from 'axios';
+import LoadingIcon from '../../components/LoadingIcon';
 
 /*
 	FormValues: {
@@ -186,8 +187,7 @@ export default function New(props: NewMasterEntryProps) {
 				<span style={{color: "red"}}>Please fill in all required fields</span>}
 				<button type="submit" className="btn btn-primary">
 				{
-					isSubmitting && <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"
-					style={{marginRight: "0.5rem"}}/>
+					isSubmitting && <LoadingIcon/>
 				}
 				Submit</button>
 			</ModuleFooter></form>

@@ -8,6 +8,9 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { CMMSTimeline } from "../../../types/common/interfaces";
 import { ThreeDots } from "react-loading-icons";
+import { changeTimelineStatus } from "../Manage";
+import ModuleSimplePopup, { SimpleIcon} from "../../../components/ModuleLayout/ModuleSimplePopup";
+import { getTimelinesByStatus } from "../../../components/Schedule/TimelineSelect";
 
 // Get timeline details
 export async function getTimeline(id: number) {
@@ -44,7 +47,11 @@ export default function Timeline() {
     const timelineId = router.query.id;
     const [isValid, setIsValid] = useState<boolean>();
     const [isLoading, setIsLoading] = useState<boolean>();
+    const [timelineData, setTimelineData] = useState<CMMSTimeline>();
     const [scheduleList, setScheduleList] = useState<ScheduleInfo[]>([]);
+    const [submitModal, setSubmitModal] = useState<boolean>(false);
+    const [emptyModal, setEmptyModal] = useState<boolean>(false);
+    const [invalidModal, setInvalidModal] = useState<boolean>(false);
 
     useEffect(() => {
         setIsLoading(true);
@@ -52,6 +59,7 @@ export default function Timeline() {
             const id = parseInt(timelineId as string);
             getTimeline(id).then((result) => {
                 if (result && result.status === 3) {
+                    setTimelineData(result);
                     getSchedules(id).then((schedules) => {
                         if (schedules) {
                             setScheduleList(schedules);
@@ -65,6 +73,29 @@ export default function Timeline() {
             });
         }
     }, [timelineId]);
+
+    function submitTimeline() {
+        if (scheduleList.length === 0) {
+            setEmptyModal(true);
+        } else {
+            changeTimelineStatus(4, parseInt(timelineId as string)).then(result => {
+                setSubmitModal(true);
+            });
+            getTimelinesByStatus(4).then(result => {
+                if (result) {
+                    const pendingTimeline = result.filter(item => item.plantId === timelineData?.plantId)[0];
+                    if (pendingTimeline) setInvalidModal(true);
+                    return;
+                };
+                changeTimelineStatus(4, parseInt(timelineId as string)).then(result => {
+                    setSubmitModal(true);
+                    setTimeout(() => {
+                        router.replace("/Schedule/Create")
+                    }, 500);
+                });
+            })
+        }
+    }
 
     if (isLoading) {
         return (
@@ -91,12 +122,37 @@ export default function Timeline() {
                 >
                     <RiDeleteBin6Line size={22} />
                 </TooltipBtn>
-                <TooltipBtn text="Submit for approval">
+                <TooltipBtn text="Submit for approval" onClick={submitTimeline} >
                     <FiSend size={22} />
                 </TooltipBtn>
                 <TooltipBtn text="Schedule a maintenance">
                     <FiPlusSquare size={22} />
                 </TooltipBtn>
+
+                <ModuleSimplePopup 
+                    modalOpenState={submitModal} 
+                    setModalOpenState={setSubmitModal} 
+                    title="Sucess"
+                    text="Your schedule has been submitted for your supervisor's approval."
+                    icon={SimpleIcon.Check}
+                />
+
+                <ModuleSimplePopup 
+                    modalOpenState={emptyModal} 
+                    setModalOpenState={setEmptyModal}
+                    title="Empty Schedule"
+                    text="You cannot submit an empty schedule for approval. Please schedule a maintenance."
+                    icon={SimpleIcon.Cross}
+                />
+
+                <ModuleSimplePopup 
+                    modalOpenState={invalidModal} 
+                    setModalOpenState={setInvalidModal}
+                    title="Queue Full"
+                    text="There is already another schedule that is pending for approval."
+                    icon={SimpleIcon.Exclaim}
+                />
+
             </ScheduleTemplate>
         );
     }

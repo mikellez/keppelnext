@@ -101,8 +101,13 @@ app.prepare().then(() => {
     server.get("/api/asset/:plant_id", checkIfLoggedInAPI, controllers.asset.getAssetsFromPlant);
 
     server.get("/api/master/new", checkIfLoggedInAPI, controllers.master.fetchMasterTypeEntry);
-    server.post("/api/master/new", checkIfLoggedInAPI, controllers.master.postMasterTypeEntry);
+    server.post("/api/master/new", checkIfLoggedInAPI, controllers.master.createMasterTypeEntry);
     server.get("/api/master/:type", checkIfLoggedInAPI, controllers.master.fetchMasterInfo);
+    server.delete(
+        "/api/master/:type/:id",
+        checkIfLoggedInAPI,
+        controllers.master.deleteMasterTypeEntry
+    );
 
     server.get(
         "/api/schedule/:plant_id",
