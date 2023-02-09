@@ -16,7 +16,6 @@ const handle = app.getRequestHandler();
 
 const HOMEPAGE = "/QRCode";
 
-
 app.prepare().then(() => {
     const server = express();
     const upload = multer();
@@ -26,10 +25,9 @@ app.prepare().then(() => {
 
     // Prevent cache in browsers
     server.use(function (req, res, next) {
-        res.set('Cache-control', 'no-cache, no-store');
+        res.set("Cache-control", "no-cache, no-store");
         next();
     });
-  
 
     // ROUTES
 
@@ -53,14 +51,17 @@ app.prepare().then(() => {
     const restrictOps = ["/Schedule/Create", "/Schedule/Manage"];
     function accessControl(req, res, next) {
         if (req.user) {
-        if (req.user.role_id == 3 && restrictEng.includes(req.path)) {
-            res.redirect("/404");
-        } else if (req.user.role_id == 4 && (restrictOps.includes(req.path) || req.path.startsWith("/Schedule/Timeline"))) {
-            res.redirect("/404");
-        }
+            if (req.user.role_id == 3 && restrictEng.includes(req.path)) {
+                res.redirect("/404");
+            } else if (
+                req.user.role_id == 4 &&
+                (restrictOps.includes(req.path) || req.path.startsWith("/Schedule/Timeline"))
+            ) {
+                res.redirect("/404");
+            }
         }
         next();
-    };
+    }
 
     // -----------------------------------
 
@@ -72,24 +73,27 @@ app.prepare().then(() => {
         if (req.user === undefined) return res.status(400).json("you are not logged in");
 
         req.logout((err) => {
-        if (err) return res.status(500).send(err);
-        return res.status(200).send();
+            if (err) return res.status(500).send(err);
+            return res.status(200).send();
         });
     });
 
     server.get("/api/user", checkIfLoggedInAPI, (req, res) => {
-        res.status(200).json(
-        {
-            id:req.user.id,
-            name:req.user.name,
+        res.status(200).json({
+            id: req.user.id,
+            name: req.user.name,
             role_id: req.user.role_id,
-            role_name:req.user.role_name
-        }
-        );
+            role_name: req.user.role_name,
+        });
     });
 
     server.get("/api/request/", checkIfLoggedInAPI, controllers.request.fetchRequests);
-    server.post("/api/request/", checkIfLoggedInAPI, upload.single("image"), controllers.request.createRequest);
+    server.post(
+        "/api/request/",
+        checkIfLoggedInAPI,
+        upload.single("image"),
+        controllers.request.createRequest
+    );
     server.get("/api/request/types", checkIfLoggedInAPI, controllers.request.fetchRequestTypes);
 
     server.get("/api/fault/types", checkIfLoggedInAPI, controllers.fault.fetchFaultTypes);
@@ -99,20 +103,30 @@ app.prepare().then(() => {
     server.get("/api/master/new", checkIfLoggedInAPI, controllers.master.fetchMasterTypeEntry);
     server.post("/api/master/new", checkIfLoggedInAPI, controllers.master.createMasterTypeEntry);
     server.get("/api/master/:type", checkIfLoggedInAPI, controllers.master.fetchMasterInfo);
-    server.delete("/api/master/:type/:id", checkIfLoggedInAPI, controllers.master.deleteMasterTypeEntry);
-    
-    server.get("/api/schedule/:plant_id", checkIfLoggedInAPI, controllers.schedule.getViewSchedules);
+    server.delete(
+        "/api/master/:type/:id",
+        checkIfLoggedInAPI,
+        controllers.master.deleteMasterTypeEntry
+    );
+
+    server.get(
+        "/api/schedule/:plant_id",
+        checkIfLoggedInAPI,
+        controllers.schedule.getViewSchedules
+    );
     server.get("/api/getPlants", checkIfLoggedInAPI, controllers.schedule.getPlants);
     server.get("/api/getUserPlants", checkIfLoggedInAPI, controllers.schedule.getUserPlants);
-    server.route("/api/timeline/:id?", checkIfLoggedInAPI)
+    server
+        .route("/api/timeline/:id?", checkIfLoggedInAPI)
         .get(controllers.schedule.getTimeline)
         .post(controllers.schedule.createTimeline)
         .patch(controllers.schedule.editTimeline)
-    server.route("/api/timeline/schedules/:id")
-        .get(controllers.schedule.getSchedulesTimeline)
-    server.route("/api/timeline/status/:status/:id?", checkIfLoggedInAPI)
+        .delete(controllers.schedule.deleteTimeline);
+    server.route("/api/timeline/schedules/:id").get(controllers.schedule.getSchedulesTimeline);
+    server
+        .route("/api/timeline/status/:status/:id?", checkIfLoggedInAPI)
         .get(controllers.schedule.getTimelineByStatus)
-        .post(controllers.schedule.changeTimelineStatus)
+        .post(controllers.schedule.changeTimelineStatus);
 
     // NO API ROUTE
     server.all("/api/*", (req, res) => {
@@ -126,7 +140,7 @@ app.prepare().then(() => {
     });
 
     // ---- NEXT JS ----
-    
+
     server.get("/Login", (req, res) => {
         if (req.user !== undefined) return res.redirect(HOMEPAGE);
         return handle(req, res);
@@ -135,25 +149,43 @@ app.prepare().then(() => {
     // these two routes are to prevent static pages from being directly accessible
     // this is more of a bandaid solution but whatever >w<
     //--------------------------
-        server.all("/_next/static/chunks/pages/(\\_app|Login|404|500)*", (req, res) => {
+    server.all("/_next/static/chunks/pages/(\\_app|Login|404|500)*", (req, res) => {
         return handle(req, res);
-        });
+    });
 
-        server.all("/_next/static/chunks/pages/*", (req, res) => {
+    server.all("/_next/static/chunks/pages/*", (req, res) => {
         if (req.user === undefined) return res.redirect("/Login");
         return handle(req, res);
-        });
+    });
     // --------------------------
 
-    server.get("/Dashboard*",   checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
-    server.get("/Request*",     checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
-    server.get("/Asset*",       checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
-    server.get("/Schedule*",    checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
-    server.get("/Checklist*",   checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
-    server.get("/Logbook*",     checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
-    server.get("/QRCode*",      checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
-    server.get("/Workflow*",    checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
-    server.get("/Master*",      checkIfLoggedIn, accessControl, (req, res) => { return handle(req, res); });
+    server.get("/Dashboard*", checkIfLoggedIn, accessControl, (req, res) => {
+        return handle(req, res);
+    });
+    server.get("/Request*", checkIfLoggedIn, accessControl, (req, res) => {
+        return handle(req, res);
+    });
+    server.get("/Asset*", checkIfLoggedIn, accessControl, (req, res) => {
+        return handle(req, res);
+    });
+    server.get("/Schedule*", checkIfLoggedIn, accessControl, (req, res) => {
+        return handle(req, res);
+    });
+    server.get("/Checklist*", checkIfLoggedIn, accessControl, (req, res) => {
+        return handle(req, res);
+    });
+    server.get("/Logbook*", checkIfLoggedIn, accessControl, (req, res) => {
+        return handle(req, res);
+    });
+    server.get("/QRCode*", checkIfLoggedIn, accessControl, (req, res) => {
+        return handle(req, res);
+    });
+    server.get("/Workflow*", checkIfLoggedIn, accessControl, (req, res) => {
+        return handle(req, res);
+    });
+    server.get("/Master*", checkIfLoggedIn, accessControl, (req, res) => {
+        return handle(req, res);
+    });
 
     server.get("*", (req, res) => {
         return handle(req, res);

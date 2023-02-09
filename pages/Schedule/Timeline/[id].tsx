@@ -15,11 +15,14 @@ import { getTimelinesByStatus } from "../../../components/Schedule/TimelineSelec
 // Get timeline details
 export async function getTimeline(id: number) {
     return await axios
-        .get<CMMSTimeline>("/api/timeline/" + id)
+        .get<CMMSTimeline>("/api/timeline/status/3/" + id)
         .then((res) => {
             return res.data;
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+            console.log(err.response);
+            return err.response.status;
+        });
 }
 
 // Get timeline specific schedules
@@ -29,13 +32,24 @@ export async function getSchedules(id: number) {
         .then((res) => {
             return res.data;
         })
+        .catch((err) => {
+            console.log(err.status)
+        });
+}
+
+// Delete a timeline
+async function deleteTimeline(id: number) {
+    return await axios
+        .delete("/api/timeline/" + id)
+        .then((res) => {
+            return res.data;
+        })
         .catch((err) => console.log(err));
 }
 
 export default function Timeline() {
     const router = useRouter();
     const timelineId = router.query.id;
-    const [isValid, setIsValid] = useState<boolean>();
     const [isLoading, setIsLoading] = useState<boolean>();
     const [timelineData, setTimelineData] = useState<CMMSTimeline>();
     const [scheduleList, setScheduleList] = useState<ScheduleInfo[]>([]);
@@ -54,15 +68,15 @@ export default function Timeline() {
                         if (schedules) {
                             setScheduleList(schedules);
                         }
-                        setIsValid(true);
                     });
-                } else setIsValid(false);
+                } 
+                else router.replace("/404");
                 setTimeout(() => {
                     setIsLoading(false);
                 }, 1000);
             });
         }
-    }, [timelineId]);
+    }, [timelineId, router]);
 
     function submitTimeline() {
         if (scheduleList.length === 0) {
@@ -93,16 +107,23 @@ export default function Timeline() {
                 <ThreeDots fill="black" />
             </div>
         );
-    } else if (isValid == false) {
-        router.replace("/404");
-    } else if (isLoading == false && isValid == true) {
+    } 
+    else if (isLoading == false 
+        ) {
         return (
             <ScheduleTemplate
                 title="Draft Schedule"
                 header="Create Schedule"
                 schedules={scheduleList}
             >
-                <TooltipBtn text="Delete this draft">
+                <TooltipBtn
+                    text="Delete this draft"
+                    onClick={() => {
+                        return deleteTimeline(parseInt(timelineId as string)).then((res) => {
+                            router.replace("/Schedule/Create");
+                        });
+                    }}
+                >
                     <RiDeleteBin6Line size={22} />
                 </TooltipBtn>
                 <TooltipBtn text="Submit for approval" onClick={submitTimeline} >
