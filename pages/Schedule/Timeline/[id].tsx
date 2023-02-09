@@ -37,6 +37,16 @@ export async function getSchedules(id: number) {
         });
 }
 
+// Delete a timeline
+async function deleteTimeline(id: number) {
+    return await axios
+        .delete("/api/timeline/" + id)
+        .then((res) => {
+            return res.data;
+        })
+        .catch((err) => console.log(err));
+}
+
 export default function Timeline() {
     const router = useRouter();
     const timelineId = router.query.id;
@@ -106,7 +116,14 @@ export default function Timeline() {
                 header="Create Schedule"
                 schedules={scheduleList}
             >
-                <TooltipBtn text="Delete this draft">
+                <TooltipBtn
+                    text="Delete this draft"
+                    onClick={() => {
+                        return deleteTimeline(parseInt(timelineId as string)).then((res) => {
+                            router.replace("/Schedule/Create");
+                        });
+                    }}
+                >
                     <RiDeleteBin6Line size={22} />
                 </TooltipBtn>
                 <TooltipBtn text="Submit for approval" onClick={submitTimeline} >

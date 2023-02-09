@@ -3,6 +3,11 @@ interface CMMSBaseType {
 	name: string
 }
 
+interface CMMSAsset {
+	psa_id: number
+	asset_name: string
+}
+
 interface CMMSUser {
 	id: number
 	role_id?: number
@@ -71,4 +76,4 @@ interface CMMSTimeline {
 };
 
 
-export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes, CMMSPlant, CMMSScheduleEvent, CMMSTimeline };
+export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes, CMMSPlant, CMMSScheduleEvent, CMMSTimeline, CMMSAsset };
