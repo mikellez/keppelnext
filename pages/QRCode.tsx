@@ -1,14 +1,22 @@
 import formStyles from '../styles/formStyles.module.css'
+import styles from '../styles/QRCode.module.css'
 
-import React, { useState } from 'react'
-import axios from 'axios';
+import React, { useState, useRef } from 'react'
 
-import { ModuleMain, ModuleHeader, ModuleContent, ModuleFooter } from '../components/';
+import { ModuleMain, ModuleHeader, ModuleContent, ModuleFooter, ModuleDivider } from '../components/';
 import { useAsset } from '../components/SWR';
+import { useQRCode } from 'next-qrcode';
+import { CMMSAsset } from '../types/common/interfaces';
+
+import ReactToPrint from 'react-to-print';
 
 function QRCode() {
 	const [selectedPlant, setSelectedPlant] = useState<number|null>(null)
-	const [selectedAssetIds, setSelectedAssetIds] = useState<number[]>([]);
+	const [selectedAssets, setSelectedAssets] = useState<CMMSAsset[]>([]);
+	
+	const qrRef = useRef() as React.RefObject<HTMLDivElement>
+
+	const { SVG } = useQRCode();
 
 	const {
 		data,
@@ -18,11 +26,12 @@ function QRCode() {
  	} = useAsset(selectedPlant);
 
 	const generateQR = () => {
-        alert("selected values: " + selectedAssetIds.toString());
+        //alert("selected values: " + selectedAssetIds.toString());
     }
 
 	function assetSelect(e: React.ChangeEvent<HTMLSelectElement>) {
-		setSelectedAssetIds(Array.from(e.target.options).filter(o => o.selected).map(o => parseInt(o.value)))
+		if(data)
+			setSelectedAssets(Array.from(e.target.options).filter(o => o.selected).map(o => data[parseInt(o.value)]))
 	}
 
 	return (
@@ -47,14 +56,45 @@ function QRCode() {
 						<label className="form-label">Assets:</label>
 						<select className="form-select" multiple style={{height: "14em"}} onChange={assetSelect}>
 							{
-								data && data.map((asset) => <option key={asset.psa_id} value={asset.psa_id}>{asset.asset_name}</option>)
+								data && data.map((asset, i) => <option key={asset.psa_id} value={i}>{asset.asset_name}</option>)
 							}
 						</select>
 					</div>
 				</div>
+
+				<ModuleDivider style={{gridColumn: "span 2"}}/>
+
+				<div className={styles.qrList} ref={qrRef}>
+					{
+						selectedAssets.map((asset) => {
+							return (
+								<div key={asset.psa_id}>
+									<SVG
+										text={window.location.origin + "/" + asset.psa_id}
+										options={{
+											level: 'H',
+											margin: 0,
+											scale: 5,
+											width: 150,
+											color: {
+												dark: '#000000',
+												light: '#ffffff',
+											}
+										}}
+									/>
+									<div className={styles.label}>{asset.asset_name}</div>
+								</div>
+							)
+						})
+					}
+				</div>
+				
 			</ModuleContent>
 			<ModuleFooter>
-				<button className="btn btn-primary" onClick={generateQR}>Generate QR Code</button>
+				<ReactToPrint
+					trigger={() => <button className="btn btn-primary">Print</button>}
+					content={() => qrRef.current}
+				/>
 			</ModuleFooter>
 		</ModuleMain>
 	)

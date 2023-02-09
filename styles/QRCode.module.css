@@ -1,0 +1,36 @@
+@media print {
+    .qrList {
+        display: grid !important;
+        grid-template-columns: 30% 30% 30%;
+        page-break-inside: avoid !important;
+
+        background-color: blue;
+    }
+
+    .qrList > * {
+        display: block;
+        page-break-inside: avoid !important;
+    }
+}
+
+.qrList {
+    display: flex;
+    flex-wrap: wrap;
+
+    justify-content: space-around;
+
+    grid-column: span 2;
+}
+
+.qrList > * {
+    width: 14rem;
+    margin: 1rem;
+}
+
+.qrList > * > div {
+    text-align: center;
+}
+
+.label {
+    width: 100%;
+}
