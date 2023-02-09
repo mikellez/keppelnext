@@ -114,7 +114,7 @@ const getViewSchedules = async(req, res, next) => {
         if (err) throw err;
         if (result) {
             const response_dict = makeScheduleDict(result.rows);
-            res.status(200).send(response_dict);
+            return res.status(200).send(response_dict);
         };
     });
 };
@@ -132,7 +132,7 @@ const getPlants = async(req, res, next) => {
         db.query(`SELECT * FROM keppel.plant_master`, (err, result) => {
             if (err) throw err;
             if (result) {
-                res.status(200).send(result.rows);
+                return res.status(200).send(result.rows);
             };
         }); 
     }
@@ -142,7 +142,7 @@ const getUserPlants = async(req, res, next) => {
     db.query("SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) FROM keppel.user_access WHERE user_id = $1::integer)", [req.user.id], (err, result) => {
         if (err) throw err;
         if (result) {
-            res.status(200).send(result.rows);
+            return res.status(200).send(result.rows);
         }; 
     });
 };
@@ -159,7 +159,7 @@ const createTimeline = async(req, res, next) => {
 
 // Get timeline details
 const getTimeline = async(req, res, next) => {
-    db.query(`SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id as plantId, ST.status, PM.plant_name as plantName
+    db.query(`SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, ST.status, PM.plant_name
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
@@ -167,13 +167,13 @@ const getTimeline = async(req, res, next) => {
     [req.params.id],
     (err, found) => {
         if (err) throw err;
-        if (found) {
-            found.rows[0].plantName = found.rows[0].plantname;
-            found.rows[0].plantId = found.rows[0].plantid;
+        if (found.rows.length != 0) {
+            found.rows[0].plantName = found.rows[0].plant_name;
+            found.rows[0].plantId = found.rows[0].plant_id;
             delete found.rows[0].plantname;
             delete found.rows[0].plantid;
             return res.status(200).json(found.rows[0])
-        }
+        } else return res.status(404).json({message: "No timeline found"})
     })
 };
 
@@ -203,31 +203,42 @@ const getSchedulesTimeline = async(req, res, next) => {
         if (err) throw err;
         if (result) {
             const response_dict = makeScheduleDict(result.rows);
-            res.status(200).send(response_dict);
+            return res.status(200).send(response_dict);
         };
     })
 };
 
 // Get timeline by the status
 const getTimelineByStatus = (req, res, next) => {
-    db.query(`SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id as plantId, PM.plant_name as plantName
+    idRegex = new RegExp("^\\d+$", "m");
+    if (req.params.id && !idRegex.test(req.params.id)) return res.status(404).json({message: "Invalid timeline id provided"});
+    
+    const queryS = req.params.id ? `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
-    WHERE status = $1`, 
+    WHERE status = $1 AND
+    timeline_id = ${req.params.id}` 
+    : 
+    `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name
+    FROM keppel.schedule_timelines ST 
+    JOIN keppel.plant_master PM 
+    ON ST.plant_id = PM.plant_id
+    WHERE status = $1`;
+    db.query(queryS, 
     [req.params.status],
     (err, found) => {
         if (err) throw err;
-        if (found) {
+        if (found.rows.length != 0) {
             found.rows.map(timeline => {
-                timeline.plantId = timeline.plantid;
-                timeline.plantName = timeline.plantname;
+                timeline.plantId = timeline.plant_id;
+                timeline.plantName = timeline.plant_name;
                 delete timeline.plantid;
                 delete timeline.plantname;
                 return timeline
             })
             return res.status(200).json(found.rows)
-        };
+        } else return res.status(404).json({message: "No timeline found"})
     });
 };
 

@@ -15,11 +15,14 @@ import { getTimelinesByStatus } from "../../../components/Schedule/TimelineSelec
 // Get timeline details
 export async function getTimeline(id: number) {
     return await axios
-        .get<CMMSTimeline>("/api/timeline/" + id)
+        .get<CMMSTimeline>("/api/timeline/status/3/" + id)
         .then((res) => {
             return res.data;
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+            console.log(err.response);
+            return err.response.status;
+        });
 }
 
 // Get timeline specific schedules
@@ -29,13 +32,14 @@ export async function getSchedules(id: number) {
         .then((res) => {
             return res.data;
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+            console.log(err.status)
+        });
 }
 
 export default function Timeline() {
     const router = useRouter();
     const timelineId = router.query.id;
-    const [isValid, setIsValid] = useState<boolean>();
     const [isLoading, setIsLoading] = useState<boolean>();
     const [timelineData, setTimelineData] = useState<CMMSTimeline>();
     const [scheduleList, setScheduleList] = useState<ScheduleInfo[]>([]);
@@ -54,15 +58,15 @@ export default function Timeline() {
                         if (schedules) {
                             setScheduleList(schedules);
                         }
-                        setIsValid(true);
                     });
-                } else setIsValid(false);
+                } 
+                else router.replace("/404");
                 setTimeout(() => {
                     setIsLoading(false);
                 }, 1000);
             });
         }
-    }, [timelineId]);
+    }, [timelineId, router]);
 
     function submitTimeline() {
         if (scheduleList.length === 0) {
@@ -93,9 +97,9 @@ export default function Timeline() {
                 <ThreeDots fill="black" />
             </div>
         );
-    } else if (isValid == false) {
-        router.replace("/404");
-    } else if (isLoading == false && isValid == true) {
+    } 
+    else if (isLoading == false 
+        ) {
         return (
             <ScheduleTemplate
                 title="Draft Schedule"
