@@ -8,7 +8,51 @@ import { useAsset } from '../components/SWR';
 import { useQRCode } from 'next-qrcode';
 import { CMMSAsset } from '../types/common/interfaces';
 
-import ReactToPrint from 'react-to-print';
+function saveSvg(svgEl: SVGSVGElement, name: string) {
+	svgEl.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+	var svgData = svgEl.outerHTML;
+	var preface = '<?xml version="1.0" standalone="no"?>\r\n';
+	var svgBlob = new Blob([preface, svgData], {type:"image/svg+xml;charset=utf-8"});
+	var svgUrl = URL.createObjectURL(svgBlob);
+	var downloadLink = document.createElement("a");
+	downloadLink.href = svgUrl;
+	downloadLink.download = name;
+	document.body.appendChild(downloadLink);
+	downloadLink.click();
+	document.body.removeChild(downloadLink);
+}
+
+function QRImg({asset}: {asset: CMMSAsset}) {
+	const { SVG } = useQRCode();
+
+	function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
+		const svg = e.currentTarget.querySelector("svg");
+
+		if(!svg)
+			return;
+
+		saveSvg(svg, asset.asset_name + ".svg")
+	}
+
+	return (
+		<button className={"btn btn-secondary " + styles.btnQr} onClick={downloadQR}>
+			<SVG 
+				text={window.location.origin + "/" + asset.psa_id}
+				options={{
+					level: 'H',
+					margin: 0,
+					scale: 5,
+					width: 150,
+					color: {
+						dark: '#000000',
+						light: '#ffffff',
+					}
+				}}
+			/>
+			<div className={styles.label}>{asset.asset_name}</div>
+		</button>
+	)
+}
 
 function QRCode() {
 	const [selectedPlant, setSelectedPlant] = useState<number|null>(null)
@@ -16,18 +60,12 @@ function QRCode() {
 	
 	const qrRef = useRef() as React.RefObject<HTMLDivElement>
 
-	const { SVG } = useQRCode();
-
 	const {
 		data,
 		error,
 		isValidating,
 		mutate
  	} = useAsset(selectedPlant);
-
-	const generateQR = () => {
-        //alert("selected values: " + selectedAssetIds.toString());
-    }
 
 	function assetSelect(e: React.ChangeEvent<HTMLSelectElement>) {
 		if(data)
@@ -61,41 +99,19 @@ function QRCode() {
 						</select>
 					</div>
 				</div>
+			</ModuleContent>
 
-				<ModuleDivider style={{gridColumn: "span 2"}}/>
-
+			<ModuleContent>
 				<div className={styles.qrList} ref={qrRef}>
 					{
 						selectedAssets.map((asset) => {
 							return (
-								<div key={asset.psa_id}>
-									<SVG
-										text={window.location.origin + "/" + asset.psa_id}
-										options={{
-											level: 'H',
-											margin: 0,
-											scale: 5,
-											width: 150,
-											color: {
-												dark: '#000000',
-												light: '#ffffff',
-											}
-										}}
-									/>
-									<div className={styles.label}>{asset.asset_name}</div>
-								</div>
+								<QRImg key={asset.psa_id} asset={asset}/>
 							)
 						})
 					}
 				</div>
-				
 			</ModuleContent>
-			<ModuleFooter>
-				<ReactToPrint
-					trigger={() => <button className="btn btn-primary">Print</button>}
-					content={() => qrRef.current}
-				/>
-			</ModuleFooter>
 		</ModuleMain>
 	)
 }
