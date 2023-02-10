@@ -3,65 +3,32 @@ import Link from 'next/link';
 
 import { ModuleContent, ModuleHeader, ModuleMain } from '../../components'
 
-import { CompactTable } from '@table-library/react-table-library/compact';
-import { TableNode } from '@table-library/react-table-library/types/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { getTheme } from '@table-library/react-table-library/baseline';
 
-import axios from 'axios';
+import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library';
+import { useChecklist } from '../../components/SWR';
+import { CMMSChecklist } from '../../types/common/interfaces';
+import { Nullish } from '@table-library/react-table-library/types/common';
+import { ThreeDots } from 'react-loading-icons';
 
-interface Checklist extends TableNode {
-	checklist_id: number;
-	created_date: Date;
-	chl_name: string;
-	description: string;
-	status_id: number;
-	createdbyuser: string;
-	assigneduser: string;
-	signoffuser: string;
-	plant_id: number
-	plant_name: string;
-	completeremarks_req: string;
-	linkedassets: string;
-	linkedassetids: string;
-	chl_type: string;
-	history: string;
-	nodes?: Checklist[] | null;
-}
-
-const COLUMNS: any[] = [
-	{ label: 'ID',					resize: true, renderCell: (item: Checklist) => item.checklist_id },
-	{ label: 'Details',				resize: true, renderCell: (item: Checklist) => item.chl_name },
-	{ label: 'Status',				resize: true, renderCell: (item: Checklist) => item.status_id },
-	{ label: 'Created On',			resize: true, renderCell: (item: Checklist) =>
-		item.created_date.toLocaleDateString('en-US', {
-		  year: 'numeric',
-		  month: '2-digit',
-		  day: '2-digit',
-		}),
-	},
-	{ label: 'Assigned To',			resize: true, renderCell: (item: Checklist) => item.assigneduser },
-	{ label: 'Signed Off By',		resize: true, renderCell: (item: Checklist) => item.signoffuser },
-	{ label: 'Created By',			resize: true, renderCell: (item: Checklist) => item.createdbyuser }
-];
-
-async function getChecklists() {
-	return await axios.get<Checklist[]>("http://localhost:3000/api/checklist/getTemplateChecklist/17")
-	.then((response) => {
-		response.data.forEach((s) => {
-			s.created_date = new Date(s.created_date)
-		});
-		return response.data;
-	})
-	.catch((e) => {
-		console.log("error getting checklists")
-		console.log(e);
-		return null;
-	});
-}
+type TableNode<T> = {
+    id: string;
+    nodes?: TableNode<T>[] | Nullish;
+    prop: CMMSChecklist;
+};
 
 export default function Checklist() {
-	const [checklistNodes, setChecklistNodes] = useState<Checklist[]>([]);
+	const [checklistNodes, setChecklistNodes] = useState<TableNode<CMMSChecklist>[]>([]);
+	const [isReady, setReady] = useState(false);
+
+	const {
+		data,
+		error,
+		isValidating,
+		mutate
+	} = useChecklist("template");
+
 	const theme = useTheme([
 		getTheme(),
 		{
@@ -70,26 +37,77 @@ export default function Checklist() {
 	]);
 	
 	useEffect(() => {
-		updateRequests()
-	}, []);
+		if(isValidating) setReady(false);
 
-	function updateRequests() {
-		getChecklists().then((c) => {
-			if(c == null)
-				return console.log("checklists null");
+		if(data && !isValidating) {
+			setChecklistNodes(
+				data.map((row: CMMSChecklist): TableNode<CMMSChecklist> => {
+					return {
+						id: row.checklist_id.toString(),
+						prop: row
+					}
+				})
+			);
+			setReady(true);
+		}
+	}, [data, isValidating]);
 
-			setChecklistNodes(c);
-		});
-	}
-	
 	return (
 		<ModuleMain>
 			<ModuleHeader title="Checklist" header="Checklist">
 				<Link href="/Checklist/New" className="btn btn-primary">New Checklist</Link>
 				<button className="btn btn-primary">Export CSV</button>
 			</ModuleHeader>
+
 			<ModuleContent>
-				<CompactTable columns={COLUMNS} data={{nodes: checklistNodes}} theme={theme} layout={{custom: true}}/>
+				{!isReady &&
+					<div style={{width: "100%", textAlign: "center"}}>
+						<ThreeDots fill="black"/>
+					</div>
+				}
+				{error && <div>{error.toString()}</div>}
+				{error && <div>error</div>}
+				{
+				isReady && 
+				<Table data={{nodes: checklistNodes}} theme={theme} layout={{custom: true}}>
+					{
+						(tableList) => (
+							<>
+								<Header>
+									<HeaderRow>
+										<HeaderCell resize >ID</HeaderCell>
+										<HeaderCell resize >Details</HeaderCell>
+										<HeaderCell resize >Status</HeaderCell>
+										<HeaderCell resize >Created On</HeaderCell>
+										<HeaderCell resize >Assigned To</HeaderCell>
+										<HeaderCell resize >Signed Off By</HeaderCell>
+										<HeaderCell resize >Created By</HeaderCell>
+									</HeaderRow>
+								</Header>
+
+								<Body>
+									{
+										tableList.map((item) => {
+											let checklistNode = item as TableNode<CMMSChecklist>;
+											return (
+												<Row key={item.id} item={checklistNode}>
+													<Cell>{checklistNode.prop.checklist_id}</Cell>
+													<Cell>{checklistNode.prop.description}</Cell>
+													<Cell>{checklistNode.prop.status_id}</Cell>
+													<Cell>{checklistNode.prop.created_date.toString()}</Cell>
+													<Cell>{checklistNode.prop.assigneduser}</Cell>
+													<Cell>{checklistNode.prop.signoffuser}</Cell>
+													<Cell>{checklistNode.prop.createdbyuser}</Cell>
+												</Row>
+											)
+										})
+									}
+								</Body>
+							</>
+						)
+					}
+				</Table>
+				}
 			</ModuleContent>
 		</ModuleMain>
   	)

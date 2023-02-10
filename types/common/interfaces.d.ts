@@ -75,5 +75,22 @@ interface CMMSTimeline {
 	status?: number,
 };
 
+interface CMMSChecklist {
+	checklist_id: number;
+	chl_name: string;
+	description: string;
+	status_id: number;
+	createdbyuser: string;
+	assigneduser: string;
+	signoffuser: string;
+	plant_name: string;
+	plant_id: number;
+	linkedassets: string | null;
+	linkedassetids: string | null;
+	chl_type: "Template";
+	created_date: Date;
+	history: string;
+}
 
-export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes, CMMSPlant, CMMSScheduleEvent, CMMSTimeline, CMMSAsset };
+
+export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes, CMMSPlant, CMMSScheduleEvent, CMMSTimeline, CMMSAsset, CMMSChecklist };

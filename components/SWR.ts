@@ -2,7 +2,7 @@
 import useSWR from 'swr';
 import axios from 'axios';
 
-import { CMMSAsset, CMMSRequest } from '../types/common/interfaces'; 
+import { CMMSAsset, CMMSRequest, CMMSChecklist } from '../types/common/interfaces'; 
 
 function useRequest() {
 	const requestFetcher = (url: string) => axios.get<CMMSRequest[]>(url).then((response) => {
@@ -26,7 +26,16 @@ function useAsset(plant_id: number|null) {
 	return useSWR<CMMSAsset[], Error>(plant_id ? ["/api/asset/", plant_id.toString()] : null, assetFetcher, {revalidateOnFocus: false});
 }
 
+function useChecklist(checklist_type: "template") {
+	const checklistFetcher = (url: string) => axios.get<CMMSChecklist[]>(url + checklist_type).then((response) => response.data).catch((e) => {
+		throw new Error(e);
+	})
+
+	return useSWR<CMMSChecklist[], Error>(["/api/checklist/"], checklistFetcher, {revalidateOnFocus: false});
+}
+
 export {
     useRequest,
-	useAsset
+	useAsset,
+	useChecklist
 }

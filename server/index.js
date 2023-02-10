@@ -96,6 +96,8 @@ app.prepare().then(() => {
     );
     server.get("/api/request/types", checkIfLoggedInAPI, controllers.request.fetchRequestTypes);
 
+    server.get("/api/checklist/template", checkIfLoggedInAPI, controllers.checklist.getTemplateChecklists);
+
     server.get("/api/fault/types", checkIfLoggedInAPI, controllers.fault.fetchFaultTypes);
 
     server.get("/api/asset/:plant_id", checkIfLoggedInAPI, controllers.asset.getAssetsFromPlant);
