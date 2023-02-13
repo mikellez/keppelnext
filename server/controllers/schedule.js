@@ -247,8 +247,8 @@ const getTimelineByStatus = (req, res, next) => {
             found.rows.map(timeline => {
                 timeline.plantId = timeline.plant_id;
                 timeline.plantName = timeline.plant_name;
-                delete timeline.plantid;
-                delete timeline.plantname;
+                delete timeline.plant_id;
+                delete timeline.plant_name;
                 return timeline
             })
             return res.status(200).json(found.rows)
