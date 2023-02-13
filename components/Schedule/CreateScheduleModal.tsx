@@ -74,7 +74,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
         event: React.ChangeEvent<HTMLSelectElement>
     ) {
         getTimeline(parseInt(event.target.value)).then((result) => {
-            if (result) setTimelineData(result[0]);
+            if (result) setTimelineData(result);
         });
     };
 
@@ -123,7 +123,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                 if (result) setTimelineData(result);
             });
     }, [props.timelineId, props.option]);
-    console.log(timelineData)
+
     return (
         <Modal
             ariaHideApp={false}

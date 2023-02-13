@@ -13,11 +13,11 @@ import ModuleSimplePopup, { SimpleIcon} from "../../../components/ModuleLayout/M
 import { getTimelinesByStatus } from "../../../components/Schedule/TimelineSelect";
 
 // Get timeline details
-export async function getTimeline(id: number) {
+export async function getTimeline(id: number): Promise<CMMSTimeline> {
     return await axios
-        .get<CMMSTimeline>("/api/timeline/status/3/" + id)
+        .get("/api/timeline/status/3/" + id)
         .then((res) => {
-            return res.data;
+            return res.data[0];
         })
         .catch((err) => {
             console.log(err.response);

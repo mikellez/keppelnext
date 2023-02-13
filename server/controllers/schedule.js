@@ -227,14 +227,14 @@ const getTimelineByStatus = (req, res, next) => {
     idRegex = new RegExp("^\\d+$", "m");
     if (req.params.id && !idRegex.test(req.params.id)) return res.status(404).json({message: "Invalid timeline id provided"});
     
-    const queryS = req.params.id ? `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name
+    const queryS = req.params.id ? `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name, ST.status
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
     WHERE status = $1 AND
     timeline_id = ${req.params.id}` 
     : 
-    `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name
+    `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name, ST.status
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
