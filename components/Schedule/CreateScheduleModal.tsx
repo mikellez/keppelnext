@@ -49,7 +49,7 @@ async function getApprovedTimeline(plantId: number) {
 
 export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     // Store new timeline data in a state
-    const [TimelineData, setTimelineData] = useState<CMMSTimeline>();
+    const [timelineData, setTimelineData] = useState<CMMSTimeline>();
     const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
     const [isWarningModalOpen, setIsWarningModaOpen] = useState<boolean>(false);
 
@@ -89,7 +89,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     // Close modal and empty all input fields
     function closeModal() {
         // Warn users on closing modal if they have unsaved changes
-        if ((TimelineData?.name || TimelineData?.description || TimelineData?.plantId) && !props.isManage && props.option != ScheduleCreateOptions.Drafts) {
+        if ((timelineData?.name || timelineData?.description || timelineData?.plantId) && !props.isManage && props.option != ScheduleCreateOptions.Drafts) {
             setIsWarningModaOpen(true);
         } else {
             props.closeModal();   
@@ -100,15 +100,15 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     // Create a new timeline on form submit
     function handleSubmit() {
         // Check for unfilled form input
-        if (!TimelineData?.name || !TimelineData?.description || !TimelineData?.plantId) {
+        if (!timelineData?.name || !timelineData?.description || !timelineData?.plantId) {
             setIsMissingDetailsModaOpen(true);
         } else {
             if (props.option === ScheduleCreateOptions.New) {
-                createTimeline(TimelineData).then((result) => {
+                createTimeline(timelineData).then((result) => {
                     router.push("/Schedule/Timeline/" + result);
                 });
             } else if (props.option === ScheduleCreateOptions.Drafts) {
-                editTimeline(TimelineData, TimelineData.id as number).then((result) => {
+                editTimeline(timelineData, timelineData.id as number).then((result) => {
                     router.push("/Schedule/Timeline/" + result);
                 });
             } else if (props.option === ScheduleCreateOptions.Approved) {
@@ -163,7 +163,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                                 className="form-control" 
                                 onChange={(e) => changeTimelineData(e)}
                                 name="name"
-                                value={TimelineData?.name ? TimelineData.name : ""}
+                                value={timelineData?.name ? timelineData.name : ""}
                                 style={{ backgroundColor: props.isManage ? "#B2B2B2" : "white" }}
                                 // placeholder="Schedule name"
                                 readOnly={props.isManage}
@@ -198,7 +198,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                                 className="form-control"
                                 style={{ backgroundColor: "#B2B2B2" }}
                                 // placeholder="Plant"
-                                value={TimelineData?.plantName ? TimelineData.plantName : ""}
+                                value={timelineData?.plantName ? timelineData.plantName : ""}
                                 readOnly
                             />
                         )}
@@ -213,7 +213,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                             maxLength={250}
                             name="description"
                             onChange={(e) => changeTimelineData(e)}
-                            value={TimelineData?.description ? TimelineData.description : ""}
+                            value={timelineData?.description ? timelineData.description : ""}
                             // placeholder="Description"
                             readOnly={props.isManage}
                         ></textarea>
@@ -232,8 +232,6 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                     </TooltipBtn>
                 </span>
             )}
-
-            
 
             <ModuleSimplePopup
                 modalOpenState={isMissingDetailsModalOpen}

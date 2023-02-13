@@ -8,7 +8,12 @@ export default function Footer() {
         <footer className={styles.footerMain}>
             <div className={styles.footerLine}>
                     <AiOutlineCopyrightCircle />
-                    <p  className={styles.footerCopyrightText}>2022 Copyright: <strong>Azendian Solutions Pte Ltd</strong></p>
+                    <p  className={styles.footerCopyrightText}>
+                        2022 Copyright:
+                        <strong>
+                            <a href="https://azendian.com/"> Azendian Solutions Pte Ltd</a>
+                        </strong>
+                    </p>
             </div>
             <div className={styles.footerLine}>
                 <AzendianLogo size={30} />
