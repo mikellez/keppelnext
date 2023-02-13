@@ -13,6 +13,10 @@ body {
   box-sizing: border-box;
 }
 
+.nav-tabs:hover {
+  cursor: pointer;
+}
+
 .form-group {
   margin-bottom:1rem;
 }

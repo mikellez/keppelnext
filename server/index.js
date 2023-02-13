@@ -105,10 +105,11 @@ app.prepare().then(() => {
     server.get("/api/master/new", checkIfLoggedInAPI, controllers.master.fetchMasterTypeEntry);
     server.post("/api/master/new", checkIfLoggedInAPI, controllers.master.createMasterTypeEntry);
     server.get("/api/master/:type", checkIfLoggedInAPI, controllers.master.fetchMasterInfo);
+    server.get("/api/master/:type/:id", checkIfLoggedInAPI, controllers.master.fetchMasterTypeSingle);
     server.delete(
         "/api/master/:type/:id",
         checkIfLoggedInAPI,
-        controllers.master.deleteMasterTypeEntry
+        controllers.master.deleteMasterTypeSingle
     );
 
     server.get(

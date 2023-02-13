@@ -10,11 +10,12 @@ import { ModuleMain, ModuleHeader, ModuleContent } from '../../components'
 import { Nullish } from '@table-library/react-table-library/types/common';
 import useSWR from 'swr';
 import axios from 'axios';
-import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library';
+import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell, OnClick } from '@table-library/react-table-library';
 
 import { BsTrashFill, BsPencilSquare } from 'react-icons/bs';
 import ModuleSimplePopup from '../../components/ModuleLayout/ModuleSimplePopup';
 import LoadingIcon from '../../components/LoadingIcon';
+import Modal from 'react-modal';
 
 type TableNode<T> = {
     id: string;
@@ -80,11 +81,12 @@ function useMaster(type: string) {
 	return useSWR<CMMSMaster, Error>(["/api/master/", type], requestFetcher, {revalidateOnFocus: false});
 }
 
-function MasterActions({id, onClickDelete, onClickEdit}:
+function MasterActions({id, onClickDelete, onClickEdit, editHref}:
 	{
 		id: number|string,
 		onClickDelete?: React.MouseEventHandler<HTMLButtonElement>,
 		onClickEdit?: React.MouseEventHandler<HTMLButtonElement>
+		editHref: string
 	}) {
 
 	return (
@@ -96,7 +98,8 @@ function MasterActions({id, onClickDelete, onClickEdit}:
 			marginLeft: "10%",
 		}}>
 			<button onClick={onClickDelete} name={"" + id} style={{all: "unset", cursor: "pointer"}}><BsTrashFill /></button>
-			<button onClick={onClickEdit} name={"" + id} style={{all: "unset", cursor: "pointer"}}><BsPencilSquare /></button>
+			{/* <button onClick={onClickEdit} name={"" + id} style={{all: "unset", cursor: "pointer"}}><BsPencilSquare /></button> */}
+			<Link href={editHref} style={{all: "unset", cursor: "pointer"}}><BsPencilSquare /></Link>
 		</div>
 	)
 }
@@ -113,6 +116,8 @@ export default function Master() {
 
 	const [isDeleteSuccess, setDeleteSuccess] = useState<boolean>(false);
 	const [isDeleteFailed, setDeleteFailed] = useState<boolean>(false);
+
+	const [isEditModalOpen, setEditModalOpen] = useState<boolean>(false);
 
 	const {
 		data,
@@ -148,16 +153,7 @@ export default function Master() {
 			Table: "--data-table-library_grid-template-columns:  " + columnSizes + "",
 			HeaderRow: `
 				background-color: #eaf5fd;
-			`,
-			Row: `
-				&:nth-of-type(odd) {
-					background-color: #d2e9fb;
-				}
-
-				&:nth-of-type(even) {
-					background-color: #eaf5fd;
-				}
-			`,
+			`
 		},
 	]);
 
@@ -171,6 +167,18 @@ export default function Master() {
 		mutate();
 		switchColumns(activeTabIndex)
 	})
+
+	const editRow: OnClick = (item, event) => {
+		const checklistRow = item as TableNode<CMMSMasterData>;
+
+		console.log(checklistRow, event);
+		setEditModalOpen(true);
+
+	}
+
+	const closeEdit = () => {
+		setEditModalOpen(false);
+	}
 
 	useEffect(() => {
 		
@@ -200,6 +208,30 @@ export default function Master() {
 				<button onClick={() => refreshData()} className="btn btn-primary">Refresh</button>
 				<Link href="./Master/New" className="btn btn-primary">New Entry</Link>
 			</ModuleHeader>
+
+			{/* <Modal
+				isOpen={isEditModalOpen}
+				ariaHideApp={false}
+				onRequestClose={closeEdit}
+				style={{
+					overlay: {
+						zIndex: 10000,
+						margin: "auto",
+						width: "100%",
+						height: "100%",
+						backgroundColor: "rgba(0,0,0,0.4)",
+					},
+					content: {
+						backgroundColor: "#F0F0F0",
+						height: "50%",
+						width: "50%",
+						margin: "auto",
+						border: "2px solid #393E46",
+					},
+				}}
+        	>
+				<p>test</p>
+			</Modal> */}
 
 			<ModuleSimplePopup
 				modalOpenState={isModalOpen}
@@ -270,16 +302,16 @@ export default function Master() {
 								<Body>
 									{
 										tableList.map((item) => (
-											<Row
-												key={item.id}
-												item={item}
-											>
+											<Row key={item.id} item={item} onClick={editRow}>
 												{
 													tableList.length !== 0 && Object.keys(tableList[0].prop).map((k) => {
 														return <Cell key={item.prop[k]}>{item.prop[k]}</Cell>
 													})
 												}
-												<Cell><MasterActions id={item.id} onClickDelete={onDeleteClick} /></Cell>
+												<Cell><MasterActions id={item.id}
+													onClickDelete={onDeleteClick}
+													editHref={"/Master/Edit?type=" + indexedColumn[activeTabIndex] + "&id=" + item.id}
+												/></Cell>
 											</Row>
 										))
 									}
