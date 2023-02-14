@@ -15,15 +15,16 @@ import { getTimelinesByStatus } from "../../../components/Schedule/TimelineSelec
 // Get timeline details
 export async function getTimeline(id: number): Promise<CMMSTimeline> {
     return await axios
-        .get("/api/timeline/status/3/" + id)
+        .get("/api/timeline/" + id)
         .then((res) => {
-            return res.data[0];
+            return res.data;
         })
         .catch((err) => {
             console.log(err.response);
             return err.response.status;
         });
-}
+};
+
 
 // Get timeline specific schedules
 export async function getSchedules(id: number) {
@@ -47,6 +48,19 @@ async function deleteTimeline(id: number) {
         .catch((err) => console.log(err));
 }
 
+async function validateTimeline(id: number) {
+    const currentTimeline = await getTimeline(id);
+    if (!currentTimeline) return;
+
+    const validTimelines = await getTimelinesByStatus(3, true);
+
+    if (validTimelines) {
+        for (const timeline of validTimelines) {
+            if (timeline.id === currentTimeline.id) return timeline;
+        }
+    }
+}
+
 export default function Timeline() {
     const router = useRouter();
     const timelineId = router.query.id;
@@ -61,16 +75,16 @@ export default function Timeline() {
         setIsLoading(true);
         if (timelineId) {
             const id = parseInt(timelineId as string);
-            getTimeline(id).then((result) => {
-                if (result && result.status === 3) {
+            validateTimeline(id).then(result => {
+                if (!result) router.replace("/404")
+                else {
                     setTimelineData(result);
                     getSchedules(id).then((schedules) => {
                         if (schedules) {
                             setScheduleList(schedules);
                         }
                     });
-                } 
-                else router.replace("/404");
+                }
                 setTimeout(() => {
                     setIsLoading(false);
                 }, 1000);

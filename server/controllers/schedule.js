@@ -183,8 +183,8 @@ const getTimeline = async(req, res, next) => {
         if (found.rows.length != 0) {
             found.rows[0].plantName = found.rows[0].plant_name;
             found.rows[0].plantId = found.rows[0].plant_id;
-            delete found.rows[0].plantname;
-            delete found.rows[0].plantid;
+            delete found.rows[0].plant_name;
+            delete found.rows[0].plant_id;
             return res.status(200).json(found.rows[0])
         } else return res.status(404).json({message: "No timeline found"})
     })
@@ -232,7 +232,7 @@ const getTimelineByStatus = (req, res, next) => {
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
     WHERE status = $1 AND
-    timeline_id = ${req.params.id}` 
+    created_by = ${req.user.id}` 
     : 
     `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name, ST.status
     FROM keppel.schedule_timelines ST 
