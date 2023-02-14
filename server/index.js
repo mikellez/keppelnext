@@ -148,7 +148,7 @@ app.prepare().then(() => {
         checkIfLoggedInAPI,
         controllers.schedule.getOpsAndEngineers
     );
-    server.get("/api/insertSchedule", checkIfLoggedInAPI, controllers.schedule.insertSchedule);
+    server.post("/api/insertSchedule", checkIfLoggedInAPI, controllers.schedule.insertSchedule);
 
     // NO API ROUTE
     server.all("/api/*", (req, res) => {
