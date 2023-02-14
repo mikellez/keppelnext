@@ -4,6 +4,7 @@ import axios from "axios";
 
 interface ChecklistSelectProps {
     onChange: React.ChangeEventHandler<HTMLSelectElement>;
+    name?: string;
 }
 
 // Axios call to get all checklist templates
@@ -38,7 +39,7 @@ const ChecklistSelect = (props: ChecklistSelectProps) => {
     ));
 
     return (
-        <select className="form-select" onChange={props.onChange}>
+        <select className="form-select" onChange={props.onChange} name={props.name}>
             <option hidden>Select checklist</option>
             {checklistOptions}
         </select>

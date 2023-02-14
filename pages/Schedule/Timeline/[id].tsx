@@ -11,6 +11,7 @@ import { ThreeDots } from "react-loading-icons";
 import { changeTimelineStatus } from "../Manage";
 import ModuleSimplePopup, { SimpleIcon} from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { getTimelinesByStatus } from "../../../components/Schedule/TimelineSelect";
+import ScheduleModal from "../../../components/Schedule/ScheduleModal";
 
 // Get timeline details
 export async function getTimeline(id: number): Promise<CMMSTimeline> {
@@ -70,6 +71,7 @@ export default function Timeline() {
     const [submitModal, setSubmitModal] = useState<boolean>(false);
     const [emptyModal, setEmptyModal] = useState<boolean>(false);
     const [invalidModal, setInvalidModal] = useState<boolean>(false);
+    const [scheduleModal, setScheduleModal] = useState<boolean>(false);
 
     useEffect(() => {
         setIsLoading(true);
@@ -140,10 +142,12 @@ export default function Timeline() {
                 >
                     <RiDeleteBin6Line size={22} />
                 </TooltipBtn>
+
                 <TooltipBtn text="Submit for approval" onClick={submitTimeline} >
                     <FiSend size={22} />
                 </TooltipBtn>
-                <TooltipBtn text="Schedule a maintenance">
+
+                <TooltipBtn text="Schedule a maintenance" onClick={() => {setScheduleModal(true)}}>
                     <FiPlusSquare size={22} />
                 </TooltipBtn>
 
@@ -169,6 +173,13 @@ export default function Timeline() {
                     title="Queue Full"
                     text="There is already another schedule that is pending for approval."
                     icon={SimpleIcon.Exclaim}
+                />
+
+                <ScheduleModal 
+                    isOpen={scheduleModal} 
+                    closeModal={() => setScheduleModal(false)} 
+                    title="Schedule Maintenance"
+                    timeline={timelineData as CMMSTimeline}
                 />
 
             </ScheduleTemplate>
