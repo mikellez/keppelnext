@@ -3,6 +3,7 @@ import Modal from "react-modal";
 import ModuleModal, { ModalProps } from "../ModuleLayout/ModuleModal";
 import { CMMSTimeline, CMMSSchedule } from "../../types/common/interfaces";
 import ChecklistSelect from "../Checklist/ChecklistSelect";
+import RecurrenceSelect from "./RecurrenceSelect";
 import styles from "../../styles/Schedule.module.scss";
 
 interface ScheduleMaintenanceModalProps extends ModalProps {
@@ -19,7 +20,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
     // Update the state of newSchedule on change of input fields
     function updateSchedule(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement>) {
         setNewSchedule(prev => {
-            const value = event.target.type === "date" ? new Date(event.target.value) : event.target.name === "checklistId" ? parseInt(event.target.value) : event.target.value
+            const value = event.target.type === "date" ? new Date(event.target.value) : (event.target.name === "checklistId" || event.target.name === "recurringPeriod") ? parseInt(event.target.value) : event.target.value
             return {
                 ...prev,
                 [event.target.name]: value,
@@ -53,7 +54,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                                             type="date" 
                                             min={minDate} 
                                             name="startDate"
-                                            value={newSchedule.startDate ? newSchedule.startDate.toISOString().slice(0, 10) : minDate}
+                                            value={newSchedule.startDate ? newSchedule.startDate.toISOString().slice(0, 10) : today.toISOString().slice(0, 10)}
                                             onChange={updateSchedule}
                                         />
                                     </td>
@@ -66,14 +67,21 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                                             type="date" 
                                             min={minDate} 
                                             name="endDate"
-                                            value={newSchedule.endDate ? newSchedule.endDate.toISOString().slice(0, 10) : minDate}
+                                            value={newSchedule.endDate ? newSchedule.endDate.toISOString().slice(0, 10) : today.toISOString().slice(0, 10)}
                                             onChange={updateSchedule}
                                         />
                                     </td>
                                 </tr>
                                 <tr className={styles.eventModalTableRow}>
                                     <th>Recurring Period:</th>
-                                    <td></td>
+                                    <td>
+                                        <RecurrenceSelect 
+                                            startDate={newSchedule.startDate}
+                                            endDate={newSchedule.endDate}
+                                            name="recurringPeriod" 
+                                            onChange={updateSchedule}
+                                        />
+                                    </td>
                                 </tr>
                                 <tr className={styles.eventModalTableRow}>
                                     <th>Assigned To:</th>
