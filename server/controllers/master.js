@@ -76,14 +76,45 @@ const createMasterTypeEntry = async (req, res, next) => {
 	return res.status(200).json(tableInfo)
 };
 
-const deleteMasterTypeEntry = async (req, res, next) => {
+const fetchMasterTypeSingle = async (req, res, next) => {
 	const { type, id } = req.params
 
 	if(!type || !id)
-		res.status(400).send()
+		return res.status(400).send()
 
 	if(!(type in tableInfo))
-		res.status(400).send("type does not exist")
+		return res.status(400).send("type does not exist")
+
+	const query = `SELECT * FROM keppel.${tableInfo[type].internalName} WHERE ${tableInfo[type].id}=$1`
+
+	db.query(query, [id], (err1, result) => {
+		if (err1) {
+			// throw err;
+			return res.status(500).send({
+				msg: err1,
+			});
+		}
+		if (result.rows.length === 0) {
+			return res.status(400).send({
+				msg: "id does not exist",
+			});
+		}
+		return res.status(200).json({
+			name:tableInfo[type].name,
+			fields:tableInfo[type].fields,
+			data:result.rows[0]
+		});
+	});
+}
+
+const deleteMasterTypeSingle = async (req, res, next) => {
+	const { type, id } = req.params
+
+	if(!type || !id)
+		return res.status(400).send()
+
+	if(!(type in tableInfo))
+		return res.status(400).send("type does not exist")
 
 	const query = `DELETE FROM keppel.${tableInfo[type].internalName} WHERE ${tableInfo[type].id}=$1;`
 
@@ -107,5 +138,6 @@ module.exports = {
 	fetchMasterInfo,
 	fetchMasterTypeEntry,
 	createMasterTypeEntry,
-	deleteMasterTypeEntry
+	fetchMasterTypeSingle,
+	deleteMasterTypeSingle
 }

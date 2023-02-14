@@ -9,6 +9,8 @@ import { FieldErrorsImpl, SubmitHandler } from 'react-hook-form/dist/types';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import axios from 'axios';
 import LoadingIcon from '../../components/LoadingIcon';
+import { CMMSMasterField, CMMSMasterSubmission, CMMSMasterTables } from '../../types/common/interfaces';
+import { MultiFields } from '../../components/Master/MultiField';
 
 /*
 	FormValues: {
@@ -22,95 +24,11 @@ import LoadingIcon from '../../components/LoadingIcon';
 
 type FormValues = {
 	type: string;
-	entries: MasterSubmission;
-}
-
-interface MasterSubmission {
-	[column_name: string]: string;
-}
-
-interface MasterField {
-	column_label: string
-	column_name: string
-}
-
-interface MasterTables {
-	[tableName: string]: {
-		internalName: string
-		id: string
-		name: string
-		fields: MasterField[]
-	}
+	entries: CMMSMasterSubmission;
 }
 
 interface NewMasterEntryProps {
-	tables: MasterTables
-}
-
-interface FieldProps {
-	label: string
-	name: string
-	onChange: React.ChangeEventHandler<HTMLInputElement>
-}
-
-function MultiFields({fields, onChange}: {fields: MasterField[], onChange: Function}) {
-	const toProps = (ac: any,a: MasterField) => ({...ac,[a.column_name]:undefined});
-	const [entries, setEntries] = useState<MasterSubmission>(fields.reduce(toProps,{}))
-	
-	useEffect(() => {
-		console.log("fields changed", fields, fields.reduce(toProps,{}))
-		setEntries(fields.reduce(toProps,{}));
-
-		onChange({
-			target: {
-				value: fields.reduce(toProps,{})
-			}
-		});
-	}, [fields])
-
-	const getValueOnChange = (e: React.ChangeEvent<HTMLInputElement>, column_name: string) => {
-		let newEntries = entries;
-		newEntries[column_name] = e.target.value;
-		setEntries(newEntries);
-
-		onChange({
-			target: {
-				value: entries
-			}
-		});
-	}
-
-	return (
-		<div className={formStyles.halfContainer}>
-			{
-				fields.map((f) => {
-					return <Field label={f.column_label} name={f.column_name} key={f.column_name} onChange={(e) => {getValueOnChange(e, f.column_name)}} />
-				})
-			}
-		</div>
-	)
-}
-
-function Field(props: FieldProps) {
-	const [value, setValue] = useState<string>("")
-
-	useEffect(() => {
-		setValue("");
-	}, [props.name])
-
-	return (
-		<div className="form-group">
-			<label className='form-label'>{props.label}</label>
-			<input className="form-control"
-				type="text"
-				onChange={(e) => {
-					setValue(e.target.value)
-					props.onChange(e);
-				}}
-				value={value}
-			/>
-		</div>
-	)
+	tables: CMMSMasterTables
 }
 
 export default function New(props: NewMasterEntryProps) {
@@ -203,7 +121,7 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 		}
 	}
 
-	const masterCreateInfo = await axios.get<MasterTables>("http://localhost:3001/api/master/new", headers);
+	const masterCreateInfo = await axios.get<CMMSMasterTables>("http://localhost:3001/api/master/new", headers);
 
 	let props: NewMasterEntryProps = { tables: masterCreateInfo.data }
 

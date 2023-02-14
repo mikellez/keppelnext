@@ -92,5 +92,22 @@ interface CMMSChecklist {
 	history: string;
 }
 
+interface CMMSMasterSubmission {
+	[column_name: string]: string;
+}
 
-export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes, CMMSPlant, CMMSScheduleEvent, CMMSTimeline, CMMSAsset, CMMSChecklist };
+interface CMMSMasterField {
+	column_label: string
+	column_name: string
+}
+
+interface CMMSMasterTables {
+	[tableName: string]: {
+		internalName: string
+		id: string
+		name: string
+		fields: CMMSMasterField[]
+	}
+}
+
+export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes, CMMSPlant, CMMSScheduleEvent, CMMSTimeline, CMMSAsset, CMMSChecklist, CMMSMasterSubmission, CMMSMasterField, CMMSMasterTables };

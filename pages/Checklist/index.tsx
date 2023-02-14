@@ -6,7 +6,7 @@ import { ModuleContent, ModuleHeader, ModuleMain } from '../../components'
 import { useTheme } from '@table-library/react-table-library/theme';
 import { getTheme } from '@table-library/react-table-library/baseline';
 
-import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library';
+import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell, OnClick } from '@table-library/react-table-library';
 import { useChecklist } from '../../components/SWR';
 import { CMMSChecklist } from '../../types/common/interfaces';
 import { Nullish } from '@table-library/react-table-library/types/common';
@@ -15,12 +15,13 @@ import { ThreeDots } from 'react-loading-icons';
 type TableNode<T> = {
     id: string;
     nodes?: TableNode<T>[] | Nullish;
-    prop: CMMSChecklist;
+    prop: T;
 };
 
 export default function Checklist() {
 	const [checklistNodes, setChecklistNodes] = useState<TableNode<CMMSChecklist>[]>([]);
 	const [isReady, setReady] = useState(false);
+	const [activeTabIndex, setActiveTabIndex] = useState(0);
 
 	const {
 		data,
@@ -35,6 +36,17 @@ export default function Checklist() {
 			Table: "--data-table-library_grid-template-columns:  5em calc(90% - 40em) 7em 8em 10em 10em 10%;",
 		},
 	]);
+
+	const switchColumns = (index: number) => {
+		//setReady(false);
+		setActiveTabIndex(index);
+	};
+
+	const editRow: OnClick = (item, event) => {
+		const checklistRow = item as TableNode<CMMSChecklist>;
+
+		console.log(checklistRow, event)
+	}
 	
 	useEffect(() => {
 		if(isValidating) setReady(false);
@@ -60,6 +72,11 @@ export default function Checklist() {
 			</ModuleHeader>
 
 			<ModuleContent>
+				<ul className="nav nav-tabs">
+					<li onClick={() => {activeTabIndex !== 0 && switchColumns(0)}} className={"nav-link" + ((activeTabIndex === 0) ? " active" : "" )}> <span style={{all:"unset"}} >Pending</span></li>
+					<li onClick={() => {activeTabIndex !== 1 && switchColumns(1)}} className={"nav-link" + ((activeTabIndex === 1) ? " active" : "" )}> <span style={{all:"unset"}} >For Review</span></li>
+					<li onClick={() => {activeTabIndex !== 2 && switchColumns(2)}} className={"nav-link" + ((activeTabIndex === 2) ? " active" : "" )}> <span style={{all:"unset"}} >Approved</span></li>
+				</ul>
 				{!isReady &&
 					<div style={{width: "100%", textAlign: "center"}}>
 						<ThreeDots fill="black"/>
