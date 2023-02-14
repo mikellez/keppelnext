@@ -143,6 +143,11 @@ app.prepare().then(() => {
         .route("/api/timeline/status/:status/:id?", checkIfLoggedInAPI)
         .get(controllers.schedule.getTimelineByStatus)
         .post(controllers.schedule.changeTimelineStatus);
+    server.get(
+        "/api/getAssignedUsers/:plant_id",
+        checkIfLoggedInAPI,
+        controllers.schedule.getOpsAndEngineers
+    );
 
     // NO API ROUTE
     server.all("/api/*", (req, res) => {

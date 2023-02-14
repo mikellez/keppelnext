@@ -37,6 +37,7 @@
 		"react-loading-icons": "^1.1.0",
 		"react-modal": "^3.16.1",
 		"react-pro-sidebar": "^1.0.0-alpha.7",
+		"react-select": "^5.7.0",
 		"react-to-print": "^2.14.11",
 		"sass": "^1.57.1",
 		"sharp": "^0.31.3",

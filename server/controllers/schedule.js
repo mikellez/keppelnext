@@ -115,7 +115,7 @@ const getViewSchedules = async (req, res, next) => {
         if (result) {
             const response_dict = makeScheduleDict(result.rows);
             return res.status(200).send(response_dict);
-        };
+        }
     });
 };
 
@@ -137,18 +137,22 @@ const getPlants = async (req, res, next) => {
             if (err) throw err;
             if (result) {
                 return res.status(200).send(result.rows);
-            };
-        }); 
+            }
+        });
     }
 };
 
-const getUserPlants = async(req, res, next) => {
-    db.query("SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) FROM keppel.user_access WHERE user_id = $1::integer)", [req.user.id], (err, result) => {
-        if (err) throw err;
-        if (result) {
-            return res.status(200).send(result.rows);
-        }; 
-    });
+const getUserPlants = async (req, res, next) => {
+    db.query(
+        "SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) FROM keppel.user_access WHERE user_id = $1::integer)",
+        [req.user.id],
+        (err, result) => {
+            if (err) throw err;
+            if (result) {
+                return res.status(200).send(result.rows);
+            }
+        }
+    );
 };
 
 // Create a new timeline
@@ -171,23 +175,25 @@ const createTimeline = async (req, res, next) => {
 };
 
 // Get timeline details
-const getTimeline = async(req, res, next) => {
-    db.query(`SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, ST.status, PM.plant_name
+const getTimeline = async (req, res, next) => {
+    db.query(
+        `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, ST.status, PM.plant_name
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
-    WHERE timeline_id = $1`, 
-    [req.params.id],
-    (err, found) => {
-        if (err) throw err;
-        if (found.rows.length != 0) {
-            found.rows[0].plantName = found.rows[0].plant_name;
-            found.rows[0].plantId = found.rows[0].plant_id;
-            delete found.rows[0].plant_name;
-            delete found.rows[0].plant_id;
-            return res.status(200).json(found.rows[0])
-        } else return res.status(404).json({message: "No timeline found"})
-    })
+    WHERE timeline_id = $1`,
+        [req.params.id],
+        (err, found) => {
+            if (err) throw err;
+            if (found.rows.length != 0) {
+                found.rows[0].plantName = found.rows[0].plant_name;
+                found.rows[0].plantId = found.rows[0].plant_id;
+                delete found.rows[0].plant_name;
+                delete found.rows[0].plant_id;
+                return res.status(200).json(found.rows[0]);
+            } else return res.status(404).json({ message: "No timeline found" });
+        }
+    );
 };
 
 // Get timeline specific schedules
@@ -213,46 +219,48 @@ const getSchedulesTimeline = async (req, res, next) => {
         U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL)AND
         UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
         SC.timeline_id = $1 
-        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`, [req.params.id], (err, result) => {
-        if (err) throw err;
-        if (result) {
-            const response_dict = makeScheduleDict(result.rows);
-            return res.status(200).send(response_dict);
-        };
-    })
+        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`,
+        [req.params.id],
+        (err, result) => {
+            if (err) throw err;
+            if (result) {
+                const response_dict = makeScheduleDict(result.rows);
+                return res.status(200).send(response_dict);
+            }
+        }
+    );
 };
 
 // Get timeline by the status
 const getTimelineByStatus = (req, res, next) => {
     idRegex = new RegExp("^\\d+$", "m");
-    if (req.params.id && !idRegex.test(req.params.id)) return res.status(404).json({message: "Invalid timeline id provided"});
-    
-    const queryS = req.params.id ? `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name, ST.status
+    if (req.params.id && !idRegex.test(req.params.id))
+        return res.status(404).json({ message: "Invalid timeline id provided" });
+
+    const queryS = req.params.id
+        ? `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name, ST.status
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
     WHERE status = $1 AND
-    created_by = ${req.user.id}` 
-    : 
-    `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name, ST.status
+    created_by = ${req.user.id}`
+        : `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name, ST.status
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
     WHERE status = $1`;
-    db.query(queryS, 
-    [req.params.status],
-    (err, found) => {
+    db.query(queryS, [req.params.status], (err, found) => {
         if (err) throw err;
         if (found.rows.length != 0) {
-            found.rows.map(timeline => {
+            found.rows.map((timeline) => {
                 timeline.plantId = timeline.plant_id;
                 timeline.plantName = timeline.plant_name;
                 delete timeline.plant_id;
                 delete timeline.plant_name;
-                return timeline
-            })
-            return res.status(200).json(found.rows)
-        } else return res.status(404).json({message: "No timeline found"})
+                return timeline;
+            });
+            return res.status(200).json(found.rows);
+        } else return res.status(404).json({ message: "No timeline found" });
     });
 };
 
@@ -293,6 +301,31 @@ const deleteTimeline = async (req, res, next) => {
     );
 };
 
+// Get assigned-to users
+const getOpsAndEngineers = async (req, res, next) => {
+    db.query(
+        `SELECT u.user_id as id, r.role_id, role_name, concat( concat(u.first_name , ' ') , u.last_name) AS name, user_email as email, first_name as fname, last_name as lname, user_name as username
+        FROM keppel.user_role ur, keppel.role r, keppel.role_parent rp, keppel.users u 
+        LEFT JOIN keppel.user_plant up ON up.user_id = u.user_id
+            WHERE rp.role_id = r.role_id
+                and rp.role_parent_id = ur.role_parent_id
+                and u.user_id = ur.user_id
+                and (r.role_name = 'Operation Specialist' or r.role_name = 'Engineer' or r.role_name = 'Manager')
+                and up.plant_id =  $1;`,
+        [req.params.plant_id],
+        (err, result) => {
+            if (err) throw err;
+            if (result.rows.length == 0) {
+                return res.status(201).send({
+                    success: false,
+                    msg: "No Operators added",
+                });
+            }
+            return res.status(200).send(result.rows);
+        }
+    );
+};
+
 module.exports = {
     getViewSchedules,
     getPlants,
@@ -304,4 +337,5 @@ module.exports = {
     editTimeline,
     changeTimelineStatus,
     deleteTimeline,
+    getOpsAndEngineers,
 };
