@@ -123,7 +123,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                 if (result) setTimelineData(result);
             });
     }, [props.timelineId, props.option]);
-    console.log(timelineData)
+
     return (
         <Modal
             ariaHideApp={false}
