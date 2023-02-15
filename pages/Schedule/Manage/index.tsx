@@ -13,6 +13,7 @@ import TimelineSelect from "../../../components/Schedule/TimelineSelect";
 import { getSchedules } from "../Timeline/[id]";
 import CreateScheduleModal from "../../../components/Schedule/CreateScheduleModal";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
+import { useRouter } from "next/router";
 
 // Function to change the status of a timeline
 export async function changeTimelineStatus(newStatus: number, timelineId: number) {
@@ -30,8 +31,13 @@ export default function ManageSchedule() {
     const [scheduleList, setScheduleList] = useState<ScheduleInfo[]>([]);
     const [manageModal, setManageModal] = useState<boolean>(false);
     const [isPopup, setIsPopup] = useState<boolean>(false);
+    const [status, setStatus] = useState<number>(0);
+    const [confirmModal, setConfirmModal] = useState<boolean>(false);
+    const [outcomeModal, setOutcomeModal] = useState<boolean>(false);
     const [timelineId, setTimelineId] = useState<number>();
     const [remarks, setRemarks] = useState<string>("");
+
+    const router = useRouter();
 
     async function setSchedules(id: number) {
         getSchedules(id).then((schedules) => {
@@ -51,9 +57,26 @@ export default function ManageSchedule() {
                 // Close and clear modal fields
                 setManageModal(false);
                 setTimelineId(0);
+                setOutcomeModal(true);
+                setTimeout(() => {
+                    router.push("/Schedule/");
+                }, 1000)
+                
             });
         }
     };
+
+    //
+    function handleClick(newStatus: number) {
+        if (remarks === "" && newStatus != 1) {
+            //Prompt for remarks
+            setIsPopup(true);
+        } else {
+            // Prompt for confirm
+            setConfirmModal(true)
+            setStatus(newStatus);
+        }
+    }
 
     return (
         <ScheduleTemplate title="Manage Schedule" header="Manage Schedule" schedules={scheduleList}>
@@ -119,8 +142,8 @@ export default function ManageSchedule() {
                         ></textarea>
                     </label>
                     <div className={styles.createScheduleModalBtnContainer}>
-                        <TooltipBtn toolTip={false} onClick={() => handleManage(1)}> Approve </TooltipBtn>
-                        <TooltipBtn toolTip={false} onClick={() => handleManage(3)}> Reject </TooltipBtn>
+                        <TooltipBtn toolTip={false} onClick={() => handleClick(1) }> Approve </TooltipBtn>
+                        <TooltipBtn toolTip={false} onClick={() => handleClick(3) }> Reject </TooltipBtn>
                     </div>
                 </div>
             }</CreateScheduleModal>
@@ -131,6 +154,31 @@ export default function ManageSchedule() {
                 title="Missing Remarks" 
                 text="Please write some remarks so that the engineers know why the schedule is rejected."
                 icon={SimpleIcon.Exclaim}
+            />
+
+            <ModuleSimplePopup 
+                modalOpenState={isPopup} 
+                setModalOpenState={setIsPopup} 
+                title="Missing Remarks" 
+                text="Please write some remarks so that the engineers know why the schedule is rejected."
+                icon={SimpleIcon.Exclaim}
+            />
+
+            <ModuleSimplePopup
+                modalOpenState={confirmModal} 
+                setModalOpenState={setConfirmModal} 
+                title="Confirm Action" 
+                text="Are you sure? This action cannot be undone."
+                icon={SimpleIcon.Info}
+                buttons={<TooltipBtn toolTip={false} onClick={() => handleManage(status)}  >Confirm</TooltipBtn>}
+            />
+
+            <ModuleSimplePopup
+                modalOpenState={outcomeModal} 
+                setModalOpenState={setOutcomeModal} 
+                title={status === 1 ? "Approved" : status === 3 ? "Rejected" : ""}
+                text={status === 1 ? "Schedule has been successfully approved." : status === 3 ? "Schedule has been rejected." : ""}
+                icon={SimpleIcon.Check}
             />
 
         </ScheduleTemplate>
