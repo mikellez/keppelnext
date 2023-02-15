@@ -8,6 +8,7 @@ import styles from "../../styles/Schedule.module.scss";
 
 interface ScheduleTableProps {
     schedules?: ScheduleInfo[];
+    viewRescheduled?: boolean
 }
 
 const COLUMNS: any[] = [
@@ -60,10 +61,13 @@ export default function ScheduleTable(props: ScheduleTableProps) {
     const [ScheduleNodes, setScheduleNodes] = useState<ScheduleInfo[]>([]);
     useEffect(() => {
         if (props.schedules) {
-            setScheduleNodes(props.schedules);
-            console.log(props.schedules);
+            let schedules = props.schedules;
+            if (!props.viewRescheduled) {
+                schedules = schedules.filter(schedule => schedule.end_date != null)
+            }
+            setScheduleNodes(schedules);
         }
-    }, [props.schedules]);
+    }, [props.schedules, props.viewRescheduled]);
 
     const theme = useTheme([
         getTheme(),

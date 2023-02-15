@@ -204,7 +204,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     />
                 ) : (
                     // Render list view
-                    <ScheduleTable schedules={props.schedules} />
+                    <ScheduleTable schedules={props.schedules} viewRescheduled={router.pathname === "/Schedule/Manage"} />
                 )}
             </ModuleContent>
         </ModuleMain>

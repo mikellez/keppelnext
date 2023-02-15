@@ -18,7 +18,8 @@ export interface ModalProps extends PropsWithChildren {
     isOpen: boolean;
     closeModal: CustomMouseEventHandler;
     event?: CMMSScheduleEvent;
-    delete?: boolean
+    delete?: boolean;
+    
 }
 
 // Delete individual schedules during the draft phase
