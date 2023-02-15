@@ -7,17 +7,20 @@ interface TimelineSelectProps {
     userCreated?: boolean;
     status: number;
     name: string;
+    optionTitle?: string;
 }
 // Get timeline by status
 export async function getTimelinesByStatus(status: number, userCreated: boolean = false) {
-    const url = userCreated ? "/api/timeline/status/" + status + "/1" :  "/api/timeline/status/" + status
+    const url = userCreated
+        ? "/api/timeline/status/" + status + "/1"
+        : "/api/timeline/status/" + status;
     return await axios
         .get<CMMSTimeline[]>(url)
         .then((res) => {
             return res.data;
         })
         .catch((err) => console.log(err.message));
-};
+}
 
 export default function TimelineSelect(props: TimelineSelectProps) {
     // Store the list of timelines in a state for dropdown
@@ -29,7 +32,7 @@ export default function TimelineSelect(props: TimelineSelectProps) {
                 setTimelineList(result);
             } else {
                 console.log("no timelines");
-                setTimelineList([])
+                setTimelineList([]);
             }
         });
     }, [props.status, props.userCreated]);
@@ -42,12 +45,10 @@ export default function TimelineSelect(props: TimelineSelectProps) {
     ));
 
     return (
-        <select
-            className="form-select"
-            onChange={props.onChange}
-            name={props.name}
-        >
-            <option hidden>Select schedule</option>
+        <select className="form-select" onChange={props.onChange} name={props.name}>
+            <option hidden>
+                {!props.optionTitle ? "Select schedule" : "Select " + props.optionTitle}
+            </option>
             {timelineOptions}
         </select>
     );

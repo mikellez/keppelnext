@@ -269,8 +269,8 @@ const getTimelineByStatus = (req, res, next) => {
 // Edit timeline details
 const editTimeline = (req, res, next) => {
     db.query(
-        `UPDATE keppel.schedule_timelines SET description = $1 WHERE timeline_id = $2 RETURNING timeline_id`,
-        [req.body.data.description, req.params.id],
+        `UPDATE keppel.schedule_timelines SET timeline_name = $1, description = $2 WHERE timeline_id = $3 RETURNING timeline_id`,
+        [req.body.data.name, req.body.data.description, req.params.id],
         (err, found) => {
             if (err) throw err;
             if (found) return res.status(200).json(found.rows[0].timeline_id);

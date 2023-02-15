@@ -44,7 +44,7 @@ async function editTimeline(data: CMMSTimeline, id: number) {
 // Get the most approved timelines for each plant
 async function getApprovedTimeline(plantId: number) {
     const timelines = await getTimelinesByStatus(1);
-    if (timelines) return timelines.filter(item => item.plantId === plantId)[0];
+    if (timelines) return timelines.filter((item) => item.plantId === plantId)[0];
 }
 
 export default function CreateScheduleModal(props: CreateScheduleModalProps) {
@@ -70,29 +70,29 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
         });
     }
 
-    function changeTimelineDataOnTimelineSelect(
-        event: React.ChangeEvent<HTMLSelectElement>
-    ) {
+    function changeTimelineDataOnTimelineSelect(event: React.ChangeEvent<HTMLSelectElement>) {
         getTimeline(parseInt(event.target.value)).then((result) => {
             if (result) setTimelineData(result);
         });
-    };
+    }
 
-    function changeTimelineDataOnPlantSelect(
-        event: React.ChangeEvent<HTMLSelectElement>
-    ) {
-        getApprovedTimeline(parseInt(event.target.value)).then(result => {
+    function changeTimelineDataOnPlantSelect(event: React.ChangeEvent<HTMLSelectElement>) {
+        getApprovedTimeline(parseInt(event.target.value)).then((result) => {
             if (result) setTimelineData(result);
-        })
-    };
+        });
+    }
 
     // Close modal and empty all input fields
     function closeModal() {
         // Warn users on closing modal if they have unsaved changes
-        if ((timelineData?.name || timelineData?.description || timelineData?.plantId) && !props.isManage && props.option != ScheduleCreateOptions.Drafts) {
+        if (
+            (timelineData?.name || timelineData?.description || timelineData?.plantId) &&
+            !props.isManage &&
+            props.option != ScheduleCreateOptions.Drafts
+        ) {
             setIsWarningModaOpen(true);
         } else {
-            props.closeModal();   
+            props.closeModal();
         }
         if (!props.isManage) setTimelineData({} as CMMSTimeline);
     }
@@ -145,31 +145,15 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                 },
             }}
         >
-            <div style={{height: "100%", padding: "1rem"}}>
+            <div style={{ height: "100%", padding: "1rem" }}>
                 <div className={styles.eventModalHeader}>
-                        <h3>{props.title}</h3>
+                    <h3>{props.title}</h3>
                     <GrClose size={20} onClick={closeModal} className={styles.eventModalClose} />
                 </div>
 
                 <div className={styles.modalForm}>
-
-                    <label>
-                        <p>Schedule Name</p>
-                        {(props.option != ScheduleCreateOptions.Drafts ||
-                            props.isManage) && (
-                            <input
-                                type="text"
-                                maxLength={80}
-                                className="form-control" 
-                                onChange={(e) => changeTimelineData(e)}
-                                name="name"
-                                value={timelineData?.name ? timelineData.name : ""}
-                                style={{ backgroundColor: props.isManage ? "#B2B2B2" : "white" }}
-                                // placeholder="Schedule name"
-                                readOnly={props.isManage}
-                            />
-                        )}
-                        {props.option === ScheduleCreateOptions.Drafts && (
+                    {props.option === ScheduleCreateOptions.Drafts && (
+                        <label>
                             <TimelineSelect
                                 status={3}
                                 onChange={(e) => {
@@ -177,23 +161,54 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                                 }}
                                 name="name"
                                 userCreated={true}
+                                optionTitle="existing drafts"
                             />
-                        )}
+                        </label>
+                    )}
+                    {props.option === ScheduleCreateOptions.Approved && (
+                        <label>
+                            <PlantSelect
+                                accessControl={true}
+                                onChange={(e) => {
+                                    if (props.option != ScheduleCreateOptions.Approved)
+                                        return changeTimelineData(e);
+                                    return changeTimelineDataOnPlantSelect(e);
+                                }}
+                                name="plantId"
+                            />
+                        </label>
+                    )}
+                    <label>
+                        <p>Schedule Name</p>
+                        <input
+                            type="text"
+                            maxLength={80}
+                            className="form-control"
+                            onChange={(e) => changeTimelineData(e)}
+                            name="name"
+                            value={timelineData?.name ? timelineData.name : ""}
+                            style={{ backgroundColor: props.isManage ? "#B2B2B2" : "white" }}
+                            // placeholder="Schedule name"
+                            readOnly={props.isManage}
+                        />
                     </label>
 
                     <label>
                         <p>Plant</p>
-                        {(props.option === ScheduleCreateOptions.New || props.option === ScheduleCreateOptions.Approved) && (
+                        {props.option === ScheduleCreateOptions.New && (
                             <PlantSelect
                                 accessControl={true}
                                 onChange={(e) => {
-                                    if (props.option != ScheduleCreateOptions.Approved) return changeTimelineData(e);
+                                    if (props.option != ScheduleCreateOptions.Approved)
+                                        return changeTimelineData(e);
                                     return changeTimelineDataOnPlantSelect(e);
                                 }}
                                 name="plantId"
                             />
                         )}
-                        {(props.option === ScheduleCreateOptions.Drafts || props.isManage) && (
+                        {(props.option === ScheduleCreateOptions.Drafts ||
+                            props.option === ScheduleCreateOptions.Approved ||
+                            props.isManage) && (
                             <input
                                 type="text"
                                 className="form-control"
@@ -209,7 +224,10 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                         <p>Description</p>
                         <textarea
                             className="form-control"
-                            style={{ resize: "none", backgroundColor: props.isManage ? "#B2B2B2" : "white" }}
+                            style={{
+                                resize: "none",
+                                backgroundColor: props.isManage ? "#B2B2B2" : "white",
+                            }}
                             rows={3}
                             maxLength={250}
                             name="description"
@@ -223,14 +241,13 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                     {props.children}
 
                     {!props.isManage && (
-                    <span className={styles.createScheduleModalBtnContainer} >
-                        <TooltipBtn toolTip={false} onClick={handleSubmit}>
-                            Confirm
-                        </TooltipBtn>
-                    </span>
-            )}
+                        <span className={styles.createScheduleModalBtnContainer}>
+                            <TooltipBtn toolTip={false} onClick={handleSubmit}>
+                                Confirm
+                            </TooltipBtn>
+                        </span>
+                    )}
                 </div>
-            
             </div>
 
             {/* {!props.isManage && (
@@ -249,24 +266,28 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                 icon={SimpleIcon.Cross}
             />
 
-            {(!props.isManage) && <ModuleSimplePopup 
-                modalOpenState={isWarningModalOpen} 
-                setModalOpenState={setIsWarningModaOpen} 
-                title="Unsaved Changes" 
-                text="Are you sure you want to discard this entry? Your progress will be lost." 
-                icon={SimpleIcon.Exclaim}
-                buttons={[
-                    <TooltipBtn 
-                        key="yes" 
-                        toolTip={false} 
-                        onClick= {() => {
-                            props.closeModal();
-                            setTimelineData({} as CMMSTimeline);
-                            setIsWarningModaOpen(false);
-                        }}
-                    >Yes</TooltipBtn>]}
-            />}
-
+            {!props.isManage && (
+                <ModuleSimplePopup
+                    modalOpenState={isWarningModalOpen}
+                    setModalOpenState={setIsWarningModaOpen}
+                    title="Unsaved Changes"
+                    text="Are you sure you want to discard this entry? Your progress will be lost."
+                    icon={SimpleIcon.Exclaim}
+                    buttons={[
+                        <TooltipBtn
+                            key="yes"
+                            toolTip={false}
+                            onClick={() => {
+                                props.closeModal();
+                                setTimelineData({} as CMMSTimeline);
+                                setIsWarningModaOpen(false);
+                            }}
+                        >
+                            Yes
+                        </TooltipBtn>,
+                    ]}
+                />
+            )}
         </Modal>
     );
 }
