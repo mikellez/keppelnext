@@ -145,7 +145,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                 },
             }}
         >
-            <div>
+            <div style={{height: "100%", padding: "1rem"}}>
                 <div className={styles.eventModalHeader}>
                         <h3>{props.title}</h3>
                     <GrClose size={20} onClick={closeModal} className={styles.eventModalClose} />
@@ -221,18 +221,25 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                     </label>
 
                     {props.children}
-                    
+
+                    {!props.isManage && (
+                    <span className={styles.createScheduleModalBtnContainer} >
+                        <TooltipBtn toolTip={false} onClick={handleSubmit}>
+                            Confirm
+                        </TooltipBtn>
+                    </span>
+            )}
                 </div>
             
             </div>
 
-            {!props.isManage && (
+            {/* {!props.isManage && (
                 <span className={styles.createScheduleModalBtnContainer} >
                     <TooltipBtn toolTip={false} onClick={handleSubmit}>
                         Confirm
                     </TooltipBtn>
                 </span>
-            )}
+            )} */}
 
             <ModuleSimplePopup
                 modalOpenState={isMissingDetailsModalOpen}

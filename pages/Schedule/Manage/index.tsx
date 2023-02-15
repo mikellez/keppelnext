@@ -63,7 +63,7 @@ export default function ManageSchedule() {
                         status={5}
                         onChange={(e) => {
                             setTimelineId(parseInt(e.target.value));
-                            if (timelineId) setSchedules(timelineId);
+                            setSchedules(parseInt(e.target.value));
                         }}
                         name="name"
                     />
@@ -74,7 +74,7 @@ export default function ManageSchedule() {
                         status={4}
                         onChange={(e) => {
                             setTimelineId(parseInt(e.target.value));
-                            if (timelineId) setSchedules(timelineId);
+                            setSchedules(parseInt(e.target.value));
                         }}
                         name="name"
                     />
@@ -108,7 +108,7 @@ export default function ManageSchedule() {
                 timelineId={timelineId}
                 isManage
             >{!isHistory && 
-                <div>
+                <div style={{display: "flex", flexDirection: "column", gap: "1rem"}}>
                     <label>
                         <p>Remarks</p>
                         <textarea 

@@ -125,11 +125,6 @@ app.prepare().then(() => {
         controllers.master.deleteMasterTypeSingle
     );
 
-    server.get(
-        "/api/schedule/:plant_id",
-        checkIfLoggedInAPI,
-        controllers.schedule.getViewSchedules
-    );
     server.get("/api/getPlants", checkIfLoggedInAPI, controllers.schedule.getPlants);
     server.get("/api/getUserPlants", checkIfLoggedInAPI, controllers.schedule.getUserPlants);
     server
@@ -149,11 +144,13 @@ app.prepare().then(() => {
         controllers.schedule.getOpsAndEngineers
     );
     server.post("/api/insertSchedule", checkIfLoggedInAPI, controllers.schedule.insertSchedule);
-    server.delete(
-        "api/schedule/:scheduleId",
-        checkIfLoggedInAPI,
-        controllers.schedule.deleteSchedule
-    );
+    server.route("/api/schedule/:id", checkIfLoggedInAPI)
+        .delete(
+            controllers.schedule.deleteSchedule
+        )
+        .get(
+            controllers.schedule.getViewSchedules
+        );
 
     // NO API ROUTE
     server.all("/api/*", (req, res) => {

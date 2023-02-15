@@ -37,7 +37,7 @@ export async function getSchedules(id: number) {
         .catch((err) => {
             console.log(err.status)
         });
-}
+};
 
 // Delete a timeline
 async function deleteTimeline(id: number) {
@@ -47,8 +47,9 @@ async function deleteTimeline(id: number) {
             return res.data;
         })
         .catch((err) => console.log(err));
-}
+};
 
+// Check if the timeline is valid for the user
 async function validateTimeline(id: number) {
     const currentTimeline = await getTimeline(id);
     if (!currentTimeline) return;
@@ -60,7 +61,7 @@ async function validateTimeline(id: number) {
             if (timeline.id === currentTimeline.id) return timeline;
         }
     }
-}
+};
 
 export default function Timeline() {
     const router = useRouter();

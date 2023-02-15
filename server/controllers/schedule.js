@@ -8,6 +8,7 @@ const makeScheduleDict = (arr) => {
     arr.forEach((item) => {
         newArr.push({
             schedule_id: item["schedule_id"],
+            timeline_id: item["timeline_id"],
             checklist_name: item["chl_name"],
             plant: item["plant_name"],
             start_date: item["start_date"],
@@ -34,7 +35,7 @@ const makeScheduleDict = (arr) => {
 // Get all schedules or plant specific schedules
 const getViewSchedules = async (req, res, next) => {
     let queryS = [];
-    if (req.params.plant_id === "0") {
+    if (req.params.id === "0") {
         if (req.user.role_id === 0 || req.user.role_id === 4) {
             queryS.push(`SELECT SC.SCHEDULE_ID, SC.CHECKLIST_TEMPLATE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
             SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL, STRING_AGG(DISTINCT(U.user_email), ' ,') AS USERNAME,
@@ -42,7 +43,7 @@ const getViewSchedules = async (req, res, next) => {
 		  STRING_AGG(UA.role_name, ' ,') AS ROLES,
 		  STRING_AGG(U.first_name, ' ,') AS FNAME,
 		  STRING_AGG(U.last_name, ' ,') AS LNAME,
-			PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS
+			PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS, SC.TIMELINE_ID
             FROM 
             KEPPEL.SCHEDULE_CHECKLIST  as SC,
             KEPPEL.USERS AS U,
@@ -69,7 +70,7 @@ const getViewSchedules = async (req, res, next) => {
 		  STRING_AGG(UA.role_name, ' ,') AS ROLES,
 		  STRING_AGG(U.first_name, ' ,') AS FNAME,
 		  STRING_AGG(U.last_name, ' ,') AS LNAME,
-		  SC.REMARKS
+		  SC.REMARKS, SC.TIMELINE_ID
           FROM 
           KEPPEL.SCHEDULE_CHECKLIST  as SC,
           KEPPEL.PLANT_MASTER  AS PM,
@@ -91,7 +92,7 @@ const getViewSchedules = async (req, res, next) => {
 		  STRING_AGG(UA.role_name, ' ,') AS ROLES,
 		  STRING_AGG(U.first_name, ' ,') AS FNAME,
 		  STRING_AGG(U.last_name, ' ,') AS LNAME,
-		PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS
+		PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS, SC.TIMELINE_ID
         FROM 
         KEPPEL.SCHEDULE_CHECKLIST  as SC,
         KEPPEL.USERS AS U,
@@ -104,7 +105,7 @@ const getViewSchedules = async (req, res, next) => {
         SC.PLANT_ID = PM.PLANT_ID AND 
         CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND 
 		UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
-        SC.PLANT_ID = ${req.params.plant_id}
+        SC.PLANT_ID = ${req.params.id}
         AND
         SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1 OR STATUS = 5) 
         
@@ -207,7 +208,7 @@ const getSchedulesTimeline = async (req, res, next) => {
         STRING_AGG(UA.role_name, ' ,') AS ROLES,
         STRING_AGG(U.first_name, ' ,') AS FNAME,
         STRING_AGG(U.last_name, ' ,') AS LNAME,
-        SC.REMARKS
+        SC.REMARKS, SC.TIMELINE_ID
         FROM 
         KEPPEL.SCHEDULE_CHECKLIST  as SC,
         KEPPEL.PLANT_MASTER  AS PM,
@@ -314,10 +315,10 @@ const deleteTimeline = async (req, res, next) => {
 const deleteSchedule = async (req, res, next) => {
     db.query(
         `DELETE FROM KEPPEL.SCHEDULE_CHECKLIST WHERE SCHEDULE_ID = $1`,
-        [req.params.scheduleId],
+        [req.params.id],
         (err) => {
             if (err) console.log(err.message);
-            else res.send("Successfully deleted");
+            else res.status(204).send("Successfully deleted");
         }
     );
 };

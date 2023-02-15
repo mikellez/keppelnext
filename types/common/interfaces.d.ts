@@ -53,6 +53,7 @@ interface CMMSScheduleEvent {
         plant: string;
         scheduleId: number;
         checklistId: number;
+		timelineId: number;
         startDate: Date | string;
         endDate: Date | string;
         recurringPeriod: number;

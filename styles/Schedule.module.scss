@@ -230,7 +230,8 @@
 .modalForm {
     @extend .eventModalAssignedUsers;
     gap: 0.8rem;
-    margin: 1.5rem 0;
+    margin: 1.5rem 0 0 ;
+    height: 90%;
 }
 
 .modalForm label {
@@ -244,11 +245,11 @@
 }
 
 .createScheduleModalBtnContainer {
-    position: absolute;
-    bottom: 1.2rem;
-    right: 1.2rem;
     display: flex;
     gap: 1rem;
+    align-self: flex-end;
+    margin: auto 0 1rem;
+    float: right;
 }
 
 // ------------------------------------------ Create Schedule Template Page -------------------------------------------
