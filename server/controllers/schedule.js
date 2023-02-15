@@ -291,11 +291,19 @@ const changeTimelineStatus = (req, res, next) => {
 // Delete a timeline in draft
 const deleteTimeline = async (req, res, next) => {
     db.query(
-        `DELETE FROM keppel.schedule_timelines WHERE timeline_id = $1;`,
-        // DELETE FROM keppel.schedule_checklist WHERE timeline_id = $1; remeber to delete from schedule. this cant work here bc of multiple querying
+        `DELETE FROM keppel.schedule_checklist WHERE timeline_id = $1;`,
         [req.params.id],
-        (err, found) => {
+        (err) => {
             if (err) throw err;
+            else {
+                db.query(
+                    `DELETE FROM keppel.schedule_timelines WHERE timeline_id = $1;`,
+                    [req.params.id],
+                    (err) => {
+                        if (err) throw err;
+                    }
+                );
+            }
             return res.status(204).send("success");
         }
     );
