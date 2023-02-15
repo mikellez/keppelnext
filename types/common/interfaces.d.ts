@@ -83,6 +83,9 @@ interface CMMSSchedule {
 	assignedIds: number[];
 	remarks: string[];
 	plantId: number;
+	timelineId: number;
+	reminderRecurrence: number;
+	prevId?: number;
 }
 
 interface CMMSChecklist {

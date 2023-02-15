@@ -1,17 +1,36 @@
 import React, { useEffect, useState } from "react";
-import Modal from "react-modal";
 import ModuleModal, { ModalProps } from "../ModuleLayout/ModuleModal";
 import { CMMSTimeline, CMMSSchedule } from "../../types/common/interfaces";
 import ChecklistSelect from "../Checklist/ChecklistSelect";
 import RecurrenceSelect from "./RecurrenceSelect";
+import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
+import TooltipBtn from "./TooltipBtn";
 import styles from "../../styles/Schedule.module.scss";
+import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
+import { useRouter } from "next/router";
+import axios from "axios";
 
 interface ScheduleMaintenanceModalProps extends ModalProps {
     timeline: CMMSTimeline
 };
 
+// Makes a post request to schedule a new maintenance
+async function ScheduleMaintenance(schedule: CMMSSchedule) {
+    return await axios.post("/api/insertSchedule", { schedule })
+        .then(res => {
+            console.log(res);
+        })
+        .catch(err => {
+            console.log(err);
+        })
+}
+
 export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModalProps) {
     const [newSchedule, setNewSchedule] = useState<CMMSSchedule>({} as CMMSSchedule);
+    const [successModal, setSuccessModal] = useState<boolean>(false);
+    const [failureModal, setFailureModal] = useState<boolean>(false);
+
+    const router = useRouter();
 
     // Set the min date to to tomorrow
     const today = new Date();
@@ -20,7 +39,11 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
     // Update the state of newSchedule on change of input fields
     function updateSchedule(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement>) {
         setNewSchedule(prev => {
-            const value = event.target.type === "date" ? new Date(event.target.value) : (event.target.name === "checklistId" || event.target.name === "recurringPeriod") ? parseInt(event.target.value) : event.target.value
+            const value = event.target.type === "date" ? 
+            new Date(event.target.value) : 
+            (event.target.name === "checklistId" || event.target.name === "recurringPeriod" || event.target.name === "reminderRecurrence") ? 
+            parseInt(event.target.value) : 
+            event.target.value
             return {
                 ...prev,
                 [event.target.name]: value,
@@ -28,11 +51,22 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
         })
     };
 
-    useEffect(() => {
-        setNewSchedule({ plantId: props.timeline.plantId } as CMMSSchedule)
-    }, [props.timeline]);
+    // Submit the new schedule for maintenance on submit click
+    function handleSubmit() {
+        ScheduleMaintenance(newSchedule).then(result => {
+            setSuccessModal(true);
+            setTimeout(() => {
+                router.replace("/Schedule/Timeline/" + props.timeline.id);
+            }, 1000);
+        });
+    };
 
-    console.log(newSchedule)
+    useEffect(() => {
+        setNewSchedule({ 
+            plantId: props.timeline.plantId, 
+            timelineId: props.timeline.id,
+        } as CMMSSchedule)
+    }, [props.timeline]);
 
     return (
         <ModuleModal isOpen={props.isOpen} title={props.title} closeModal={props.closeModal}>
@@ -54,7 +88,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                                             type="date" 
                                             min={minDate} 
                                             name="startDate"
-                                            value={newSchedule.startDate ? newSchedule.startDate.toISOString().slice(0, 10) : today.toISOString().slice(0, 10)}
+                                            value={newSchedule.startDate ? newSchedule.startDate.toISOString().slice(0, 10) : minDate}
                                             onChange={updateSchedule}
                                         />
                                     </td>
@@ -67,7 +101,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                                             type="date" 
                                             min={minDate} 
                                             name="endDate"
-                                            value={newSchedule.endDate ? newSchedule.endDate.toISOString().slice(0, 10) : today.toISOString().slice(0, 10)}
+                                            value={newSchedule.endDate ? newSchedule.endDate.toISOString().slice(0, 10) : minDate}
                                             onChange={updateSchedule}
                                         />
                                     </td>
@@ -84,8 +118,31 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                                     </td>
                                 </tr>
                                 <tr className={styles.eventModalTableRow}>
+                                    <th>Reminder Frequency:</th>
+                                    <td>
+                                        <select className="form-select" name="reminderRecurrence" onChange={updateSchedule} >
+                                            <option hidden>Select the Reminder Frequency</option>
+                                            <option value={1}>1 Day Before</option>
+                                            <option value={0}>No Reminders</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr className={styles.eventModalTableRow}>
                                     <th>Assigned To:</th>
-                                    <td></td>
+                                    <td><AssignToSelect
+                                        onChange={(value, action) => {
+                                            setNewSchedule(prev => {
+                                                const newData = {...prev};
+                                                const ids: number[] = [];
+                                                value.forEach((option: AssignedUserOption) => {
+                                                   ids.push(option.value)
+                                                })
+                                                newData.assignedIds = ids;
+                                                return newData;
+                                            }) 
+                                        }}
+                                        plantId={props.timeline.plantId}
+                                     /></td>
                                 </tr>
                                 <tr className={styles.eventModalTableRow}>
                                     <th>Remarks:</th>
@@ -101,6 +158,23 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                                 </tr>
                             </tbody>
                         </table>
+                        <TooltipBtn toolTip={false} onClick={handleSubmit}>Create</TooltipBtn>
+
+                        <ModuleSimplePopup 
+                            modalOpenState={successModal} 
+                            setModalOpenState={setSuccessModal} 
+                            title="Success"
+                            text="New maintanace successfully scheduled!"
+                            icon={SimpleIcon.Check}
+                        />
+
+                        <ModuleSimplePopup 
+                            modalOpenState={failureModal} 
+                            setModalOpenState={setFailureModal} 
+                            title="Incomplete Maintenance"
+                            text="Please fill in the missing details of the maintenance."
+                            icon={SimpleIcon.Cross}
+                        />
         </ModuleModal>
     )
 }

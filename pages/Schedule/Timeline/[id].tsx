@@ -74,6 +74,7 @@ export default function Timeline() {
     const [scheduleModal, setScheduleModal] = useState<boolean>(false);
 
     useEffect(() => {
+        setScheduleModal(false);
         setIsLoading(true);
         if (timelineId) {
             const id = parseInt(timelineId as string);

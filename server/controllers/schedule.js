@@ -1,4 +1,5 @@
 const db = require("../../db");
+const moment = require("moment");
 const dateHandler = require("../dateHandler");
 
 // Function to get a schdeule dates
@@ -330,19 +331,20 @@ const insertSchedule = async (req, res, next) => {
     db.query(
         `INSERT INTO keppel.schedule_checklist
         (checklist_template_id, remarks, start_date, end_date, recurrence_period, reminder_recurrence, scheduler_history, user_id, scheduler_userids_for_email, plant_id, timeline_id, prev_schedule_id) 
-        VALUES ($1, $2, $3, $4, $5, $6, CONCAT('created by',$7::varchar), $8, ARRAY [$9], $10, $11, $12);`,
+        VALUES ($1, $2, $3, $4, $5, $6, CONCAT('created by',$7::varchar), $8, $9::int[], $10, $11, $12);`,
         [
             req.body.schedule.checklistId,
             req.body.schedule.remarks,
-            req.body.schedule.startDate,
-            req.body.schedule.endDate,
+            moment(req.body.schedule.startDate).format("YYYY-MM-DD HH:mm:ss"),
+            moment(req.body.schedule.endDate).format("YYYY-MM-DD HH:mm:ss"),
             req.body.schedule.recurringPeriod,
             req.body.schedule.reminderRecurrence,
             req.user.id,
             req.user.id,
             req.body.schedule.assignedIds,
+            req.body.schedule.plantId,
             req.body.schedule.timelineId,
-            "",
+            req.body.schedule.prevId,
         ],
         (err, result) => {
             if (err) throw err;
