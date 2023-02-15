@@ -310,6 +310,18 @@ const deleteTimeline = async (req, res, next) => {
     );
 };
 
+// Delete a schedule in a timeline
+const deleteSchedule = async (req, res, next) => {
+    db.query(
+        `DELETE FROM KEPPEL.SCHEDULE_CHECKLIST WHERE SCHEDULE_ID = $1`,
+        [req.params.scheduleId],
+        (err) => {
+            if (err) console.log(err.message);
+            else res.send("Successfully deleted");
+        }
+    );
+};
+
 // Get assigned-to users
 const getOpsAndEngineers = async (req, res, next) => {
     db.query(
@@ -372,6 +384,7 @@ module.exports = {
     editTimeline,
     changeTimelineStatus,
     deleteTimeline,
+    deleteSchedule,
     getOpsAndEngineers,
     insertSchedule,
 };

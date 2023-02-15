@@ -149,6 +149,11 @@ app.prepare().then(() => {
         controllers.schedule.getOpsAndEngineers
     );
     server.post("/api/insertSchedule", checkIfLoggedInAPI, controllers.schedule.insertSchedule);
+    server.delete(
+        "api/schedule/:scheduleId",
+        checkIfLoggedInAPI,
+        controllers.schedule.deleteSchedule
+    );
 
     // NO API ROUTE
     server.all("/api/*", (req, res) => {
