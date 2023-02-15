@@ -72,6 +72,7 @@ export default function Timeline() {
     const [emptyModal, setEmptyModal] = useState<boolean>(false);
     const [invalidModal, setInvalidModal] = useState<boolean>(false);
     const [scheduleModal, setScheduleModal] = useState<boolean>(false);
+    const [deleteModal, setDeleteModal] = useState<boolean>(false);
 
     useEffect(() => {
         setScheduleModal(false);
@@ -99,21 +100,17 @@ export default function Timeline() {
         if (scheduleList.length === 0) {
             setEmptyModal(true);
         } else {
-            changeTimelineStatus(4, parseInt(timelineId as string)).then(result => {
-                setSubmitModal(true);
-            });
             getTimelinesByStatus(4).then(result => {
-                if (result) {
-                    const pendingTimeline = result.filter(item => item.plantId === timelineData?.plantId)[0];
-                    if (pendingTimeline) setInvalidModal(true);
-                    return;
-                };
-                changeTimelineStatus(4, parseInt(timelineId as string)).then(result => {
-                    setSubmitModal(true);
-                    setTimeout(() => {
-                        router.replace("/Schedule/Create")
-                    }, 500);
-                });
+                if (result && result.filter(item => item.plantId === timelineData?.plantId)[0]) {
+                    setInvalidModal(true);
+                } else {
+                    changeTimelineStatus(4, parseInt(timelineId as string)).then(result => {
+                        setSubmitModal(true);
+                        setTimeout(() => {
+                            router.replace("/Schedule/Create")
+                        }, 500);
+                    });
+                }
             })
         }
     }
@@ -136,9 +133,7 @@ export default function Timeline() {
                 <TooltipBtn
                     text="Delete this draft"
                     onClick={() => {
-                        return deleteTimeline(parseInt(timelineId as string)).then((res) => {
-                            router.replace("/Schedule/Create");
-                        });
+                        setDeleteModal(true);
                     }}
                 >
                     <RiDeleteBin6Line size={22} />
@@ -182,6 +177,20 @@ export default function Timeline() {
                     title="Schedule Maintenance"
                     timeline={timelineData as CMMSTimeline}
                 />
+
+                <ModuleSimplePopup 
+                    modalOpenState={deleteModal} 
+                    setModalOpenState={setDeleteModal}
+                    title="Delete Schedule"
+                    text="Are you sure you want to delete this schedule? This action cannot be undone"
+                    icon={SimpleIcon.Exclaim}
+                    buttons={ <TooltipBtn toolTip={false} onClick={() => {
+                        return deleteTimeline(parseInt(timelineId as string)).then((res) => {
+                            router.replace("/Schedule/Create");
+                        });
+                    }} >Confirm</TooltipBtn> }
+                />
+
 
             </ScheduleTemplate>
         );

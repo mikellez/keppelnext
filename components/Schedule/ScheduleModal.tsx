@@ -53,12 +53,25 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
 
     // Submit the new schedule for maintenance on submit click
     function handleSubmit() {
-        ScheduleMaintenance(newSchedule).then(result => {
+        // Check for missing entries
+        if (!newSchedule.checklistId || 
+            !newSchedule.startDate || 
+            !newSchedule.endDate || 
+            !newSchedule.checklistId ||
+            !newSchedule.recurringPeriod ||
+            !newSchedule.reminderRecurrence ||
+            !newSchedule.assignedIds ||
+            !newSchedule.remarks
+        ) {
+            setFailureModal(true);
+        } else {
+            ScheduleMaintenance(newSchedule).then(result => {
             setSuccessModal(true);
             setTimeout(() => {
                 router.replace("/Schedule/Timeline/" + props.timeline.id);
             }, 1000);
-        });
+            });
+        }
     };
 
     useEffect(() => {
@@ -172,7 +185,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                             modalOpenState={failureModal} 
                             setModalOpenState={setFailureModal} 
                             title="Incomplete Maintenance"
-                            text="Please fill in the missing details of the maintenance."
+                            text="Please fill in the missing details for the maintenance."
                             icon={SimpleIcon.Cross}
                         />
         </ModuleModal>
