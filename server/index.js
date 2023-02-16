@@ -106,6 +106,7 @@ app.prepare().then(() => {
     server.post("/api/master/new", checkIfLoggedInAPI, controllers.master.createMasterTypeEntry);
     server.get("/api/master/:type", checkIfLoggedInAPI, controllers.master.fetchMasterInfo);
     server.get("/api/master/:type/:id", checkIfLoggedInAPI, controllers.master.fetchMasterTypeSingle);
+    server.post("/api/master/:type/:id", checkIfLoggedInAPI, controllers.master.updateMasterTypeSingle);
     server.delete(
         "/api/master/:type/:id",
         checkIfLoggedInAPI,
