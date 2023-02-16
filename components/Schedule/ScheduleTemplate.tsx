@@ -18,7 +18,7 @@ interface ScheduleTemplateInfo extends PropsWithChildren {
     timeline?: number;
 }
 
-export interface ScheduleInfo extends TableNode {
+export interface ScheduleInfo {
     assigned_fnames: string[];
     assigned_lnames: string[];
     assigned_roles: string[];

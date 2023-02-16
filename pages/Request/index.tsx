@@ -15,7 +15,7 @@ import { useRequest } from '../../components/SWR';
 import { CMMSRequest } from '../../types/common/interfaces'; 
 import Link from 'next/link';
 
-type TableNode<T> = {
+export type TableNode<T> = {
     id: string;
     nodes?: TableNode<T>[] | Nullish;
     prop: T;
