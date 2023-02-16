@@ -54,16 +54,16 @@ async function getApprovedTimeline(plantId: number) {
 async function checkScheduleList(scheduleList: CMMSSchedule[]) {
     for (let i = 0; i < scheduleList.length; i++) {
         if (
-            !scheduleList[i].assignedIds || 
+            !scheduleList[i].assignedIds ||
             scheduleList[i].assignedIds.length === 0 ||
             !scheduleList[i].recurringPeriod ||
-            !scheduleList[i].startDate || 
+            !scheduleList[i].startDate ||
             !scheduleList[i].endDate ||
             !scheduleList[i].remarks ||
             scheduleList[i].remarks === "" ||
             scheduleList[i].recurringPeriod === -1
         ) {
-            return scheduleList[i].scheduleId; 
+            return scheduleList[i].scheduleId;
         }
     }
     return -1;
@@ -97,18 +97,18 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
         getTimeline(parseInt(event.target.value)).then((result) => {
             if (result) setTimelineData(result);
         });
-    };
+    }
 
     function changeTimelineDataOnPlantSelect(event: React.ChangeEvent<HTMLSelectElement>) {
         getApprovedTimeline(parseInt(event.target.value)).then((result) => {
             if (result) {
-                setTimelineData(result)
-                getSchedules(result.id as number).then(schedules => {
+                setTimelineData(result);
+                getSchedules(result.id as number).then((schedules) => {
                     if (schedules) {
                         const newSchedules = [] as CMMSSchedule[];
                         const today = new Date();
-                        const minDate = new Date (today.setDate(today.getDate() + 1));
-                        schedules.forEach(item => {
+                        const minDate = new Date(today.setDate(today.getDate() + 1));
+                        schedules.forEach((item) => {
                             newSchedules.push({
                                 checklistId: item.checklist_id,
                                 checklistName: item.checklist_name,
@@ -124,40 +124,41 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                         });
                         setScheduleList(newSchedules);
                     }
-                })
-            };
+                });
+            }
         });
-    };
+    }
 
     function changeScheduleList(event: React.ChangeEvent<HTMLInputElement>) {
-        const meta = event.target.name.split("-")
+        const meta = event.target.name.split("-");
         const scheduleId = parseInt(meta[0]);
         const field = meta[1];
-        setScheduleList(prevList => {
-            return prevList.map(schedule => {
+        setScheduleList((prevList) => {
+            return prevList.map((schedule) => {
                 if (schedule.scheduleId === scheduleId) {
                     if (field === "startDate" || field === "endDate") schedule.recurringPeriod = -1;
                     return {
-                        ...schedule, 
-                        [field]: field === "recurringPeriod" ? 
-                            parseInt(event.target.value) : 
-                            (field === "startDate" || field === "endDate") ? 
-                            new Date(event.target.value) : 
-                            event.target.value,
+                        ...schedule,
+                        [field]:
+                            field === "recurringPeriod"
+                                ? parseInt(event.target.value)
+                                : field === "startDate" || field === "endDate"
+                                ? new Date(event.target.value)
+                                : event.target.value,
                     };
                 } else {
                     return schedule;
-                };
-            })
-        })
-    };
+                }
+            });
+        });
+    }
 
     // Close modal and empty all input fields
     function closeModal() {
         props.closeModal();
         setScheduleList([]);
         if (!props.isManage) setTimelineData({} as CMMSTimeline);
-    };
+    }
 
     // Create a new timeline on form submit
     function handleSubmit() {
@@ -174,69 +175,65 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                     router.push("/Schedule/Timeline/" + result);
                 });
             } else if (props.option === ScheduleCreateOptions.Approved) {
-                checkScheduleList(scheduleList).then(result => {
+                checkScheduleList(scheduleList).then((result) => {
                     if (result != -1) {
-                        setScheduleList(prevList => {
-                            return prevList.map(s => {
+                        setScheduleList((prevList) => {
+                            return prevList.map((s) => {
                                 if (s.scheduleId === result) {
-                                    return {...s, isComplete: false};
+                                    return { ...s, isComplete: false };
                                 }
-                                return {...s, isComplete: true};
-                            })
-                        })
+                                return { ...s, isComplete: true };
+                            });
+                        });
                         setIsMissingDetailsModaOpen(true);
                     } else {
-                        createTimeline(timelineData).then(result => {
-                            console.log(result)
-                            setScheduleList(prevList => {
-                                return prevList.map(s => {
+                        createTimeline(timelineData).then((result) => {
+                            setScheduleList((prevList) => {
+                                return prevList.map((s) => {
                                     s.timelineId = result;
                                     return s;
-                                })
-                            })
-                            setTimeout(() => {
-                                scheduleList.forEach((schedule, index) => {
-                                    console.log(schedule)
-                                    scheduleMaintenance(schedule).then(res => console.log(res));
-                                })
-                            }, 1000)
-                            setTimeout(() => {
-                                router.push("/Schedule/Timeline/" + result);
-                            }, 1500) 
-                        })
+                                });
+                            });
+                            scheduleList.forEach((schedule) => {
+                                scheduleMaintenance(schedule);
+                            });
+                            router.push("/Schedule/Timeline/" + result);
+                        });
                     }
-                })
+                });
             }
         }
-    };
+    }
 
-    const scheduleInputElements = scheduleList?.map(schedule => {
+    const scheduleInputElements = scheduleList?.map((schedule) => {
         const startDate = new Date(schedule.startDate);
-        const endDate = new Date(schedule.endDate)
-        return <ApprovedScheduleInput 
-            key={schedule.scheduleId}
-            scheduleId={schedule.scheduleId as number} 
-            onChange={changeScheduleList}
-            onAssignedChange={(value, action) => {
-                const scheduleId = parseInt(action.name as string) 
-                const idList = value ? value.map(option => option.value) : [];
-                setScheduleList(prevList => {
-                    return prevList.map(schedule => {
-                        if (schedule.scheduleId === scheduleId) {
-                            return {...schedule, assignedIds: idList}
-                        } 
-                        return schedule;
-                    })
-                })
-            }}
-            checklistName={schedule.checklistName as string} 
-            startDate={startDate}
-            endDate={endDate}
-            remarks={schedule.remarks}
-            plantId={timelineData?.plantId as number}
-            isComplete={schedule.isComplete}
-        />
-    })
+        const endDate = new Date(schedule.endDate);
+        return (
+            <ApprovedScheduleInput
+                key={schedule.scheduleId}
+                scheduleId={schedule.scheduleId as number}
+                onChange={changeScheduleList}
+                onAssignedChange={(value, action) => {
+                    const scheduleId = parseInt(action.name as string);
+                    const idList = value ? value.map((option) => option.value) : [];
+                    setScheduleList((prevList) => {
+                        return prevList.map((schedule) => {
+                            if (schedule.scheduleId === scheduleId) {
+                                return { ...schedule, assignedIds: idList };
+                            }
+                            return schedule;
+                        });
+                    });
+                }}
+                checklistName={schedule.checklistName as string}
+                startDate={startDate}
+                endDate={endDate}
+                remarks={schedule.remarks}
+                plantId={timelineData?.plantId as number}
+                isComplete={schedule.isComplete}
+            />
+        );
+    });
 
     useEffect(() => {
         if (props.timelineId)
@@ -293,8 +290,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                                 onChange={(e) => {
                                     if (props.option != ScheduleCreateOptions.Approved) {
                                         changeTimelineData(e);
-                                    }
-                                    else changeTimelineDataOnPlantSelect(e);
+                                    } else changeTimelineDataOnPlantSelect(e);
                                 }}
                                 name="plantId"
                             />
@@ -321,7 +317,8 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                             <PlantSelect
                                 accessControl={true}
                                 onChange={(e) => {
-                                    if (props.option != ScheduleCreateOptions.Approved) changeTimelineData(e);
+                                    if (props.option != ScheduleCreateOptions.Approved)
+                                        changeTimelineData(e);
                                     else changeTimelineDataOnPlantSelect(e);
                                 }}
                                 name="plantId"
@@ -359,22 +356,22 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                         ></textarea>
                     </label>
 
-                    
-                    {(props.option === ScheduleCreateOptions.Approved && scheduleInputElements.length != 0) &&
-                        <table className="table table-sm">
-                            <thead className={styles.scheduleTableHead}>
-                                <tr><th>Checklist Name</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Recurrence</th>
-                                <th>Assigned To</th>
-                                <th>Remarks</th></tr>
-                            </thead>
-                            <tbody>
-                               { scheduleInputElements }
-                            </tbody>
-                        </table>
-                    }
+                    {props.option === ScheduleCreateOptions.Approved &&
+                        scheduleInputElements.length != 0 && (
+                            <table className="table table-sm">
+                                <thead className={styles.scheduleTableHead}>
+                                    <tr>
+                                        <th>Checklist Name</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Recurrence</th>
+                                        <th>Assigned To</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>{scheduleInputElements}</tbody>
+                            </table>
+                        )}
 
                     {props.children}
 
