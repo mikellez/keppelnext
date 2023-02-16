@@ -77,16 +77,19 @@ interface CMMSTimeline {
 };
 
 interface CMMSSchedule {
+	scheduleId?: number;
 	checklistId: number;
+	checklistName?: string;
 	startDate: Date;
-	endDate: Date,
+	endDate: Date;
 	recurringPeriod: number;
 	assignedIds: number[];
-	remarks: string[];
+	remarks: string;
 	plantId: number;
 	timelineId: number;
 	reminderRecurrence: number;
 	prevId?: number;
+	isComplete?: boolean;
 }
 
 interface CMMSChecklist {

@@ -15,7 +15,7 @@ interface ScheduleMaintenanceModalProps extends ModalProps {
 };
 
 // Makes a post request to schedule a new maintenance
-async function ScheduleMaintenance(schedule: CMMSSchedule) {
+export async function scheduleMaintenance(schedule: CMMSSchedule) {
     return await axios.post("/api/insertSchedule", { schedule })
         .then(res => {
             console.log(res);
@@ -25,16 +25,16 @@ async function ScheduleMaintenance(schedule: CMMSSchedule) {
         })
 }
 
+// Set the min date to to tomorrow
+const today = new Date();
+export const minDate = new Date (today.setDate(today.getDate() + 1)).toISOString().slice(0, 10);
+
 export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModalProps) {
     const [newSchedule, setNewSchedule] = useState<CMMSSchedule>({} as CMMSSchedule);
     const [successModal, setSuccessModal] = useState<boolean>(false);
     const [failureModal, setFailureModal] = useState<boolean>(false);
 
     const router = useRouter();
-
-    // Set the min date to to tomorrow
-    const today = new Date();
-    const minDate = new Date (today.setDate(today.getDate() + 1)).toISOString().slice(0, 10);
 
     // Update the state of newSchedule on change of input fields
     function updateSchedule(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement>) {
@@ -44,8 +44,10 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
             (event.target.name === "checklistId" || event.target.name === "recurringPeriod" || event.target.name === "reminderRecurrence") ? 
             parseInt(event.target.value) : 
             event.target.value
+            const tmp = {...prev};
+            if (event.target.name === "startDate" || event.target.name === "endDate") tmp.recurringPeriod = -1;
             return {
-                ...prev,
+                ...tmp,
                 [event.target.name]: value,
             }
         })
@@ -59,13 +61,15 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
             !newSchedule.endDate || 
             !newSchedule.checklistId ||
             !newSchedule.recurringPeriod ||
+            newSchedule.recurringPeriod === -1 ||
             !newSchedule.reminderRecurrence ||
             !newSchedule.assignedIds ||
+            newSchedule.assignedIds.length === 0 ||
             !newSchedule.remarks
         ) {
             setFailureModal(true);
         } else {
-            ScheduleMaintenance(newSchedule).then(result => {
+            scheduleMaintenance(newSchedule).then(result => {
             setSuccessModal(true);
             setTimeout(() => {
                 router.replace("/Schedule/Timeline/" + props.timeline.id);

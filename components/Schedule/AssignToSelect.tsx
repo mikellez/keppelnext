@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Select, { ActionMeta, MultiValue } from "react-select";
+import Select, { ActionMeta, MultiValue, StylesConfig } from "react-select";
 import makeAnimated from "react-select/animated";
 import { CMMSUser } from "../../types/common/interfaces";
 
 interface AssignToSelectProps {
     onChange: (value: MultiValue<AssignedUserOption>, action: ActionMeta<AssignedUserOption>) => void;
     plantId: number;
+    style?: React.CSSProperties;
+    name?: string;
 };
 
 export interface AssignedUserOption {
@@ -29,6 +31,11 @@ const AssignToSelect = (props: AssignToSelectProps) => {
     const [assignedUsers, setAssignedUsers] = useState<CMMSUser[]>([]);
     const animatedComponents = makeAnimated();
 
+    const customStyles: StylesConfig<AssignedUserOption, true> = {
+        control: (base) => ({...base, ...props.style}),
+        menu: (base) => ({...base, ...props.style}),
+    }
+
     // Calls an api to get the list of assigned users upon change of plant id
     useEffect(() => {
         getAssignedUsers(props.plantId).then((user) => {
@@ -47,12 +54,13 @@ const AssignToSelect = (props: AssignToSelectProps) => {
     return (
         <Select
             isMulti
-            name="Assigned Users"
+            name={props.name}
             options={assignedUserOptions}
             components={animatedComponents}
             className="basic-multi-select"
             classNamePrefix="select"
             onChange={props.onChange}
+            styles={customStyles}
         />
     );
 };

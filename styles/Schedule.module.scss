@@ -252,4 +252,17 @@
     float: right;
 }
 
-// ------------------------------------------ Create Schedule Template Page -------------------------------------------
+.approvedScheduleInputContainer {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.scheduleTableHead {
+    font-size: 12px;
+}
+
+.approvedScheduleInputRow td {
+    vertical-align: middle;
+}
+

@@ -6,7 +6,7 @@ import axios from 'axios';
 import { MdOutlineLocationOn } from "react-icons/md"
 import styles from "../../styles/Schedule.module.scss";
 
-
+// Get schedules by plant id
 async function getSchedules(id : number) {
 	return await axios.get<ScheduleInfo[]>(`/api/schedule/${id}`)
 	.then(res => {

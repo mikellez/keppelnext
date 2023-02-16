@@ -27,7 +27,7 @@ export async function getTimeline(id: number): Promise<CMMSTimeline> {
 };
 
 
-// Get timeline specific schedules
+// Get schedules by timeline id
 export async function getSchedules(id: number) {
     return axios
         .get<ScheduleInfo[]>("/api/timeline/schedules/" + id)
