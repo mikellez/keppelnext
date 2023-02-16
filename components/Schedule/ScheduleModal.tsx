@@ -82,6 +82,8 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
         setNewSchedule({ 
             plantId: props.timeline.plantId, 
             timelineId: props.timeline.id,
+            startDate: new Date(minDate),
+            endDate: new Date(minDate),
         } as CMMSSchedule)
     }, [props.timeline]);
 

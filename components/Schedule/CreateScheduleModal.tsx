@@ -17,6 +17,7 @@ import { getSchedules } from "../../pages/Schedule/Timeline/[id]";
 import { ScheduleInfo } from "./ScheduleTemplate";
 import ApprovedScheduleInput from "./ApprovedScheduleInput";
 import { scheduleMaintenance } from "./ScheduleModal";
+import { minDate } from "./ScheduleModal";
 
 interface CreateScheduleModalProps extends ModalProps {
     title?: string;
@@ -106,16 +107,14 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                 getSchedules(result.id as number).then(schedules => {
                     if (schedules) {
                         const newSchedules = [] as CMMSSchedule[];
-                        const today = new Date();
-                        const minDate = new Date (today.setDate(today.getDate() + 1));
                         schedules.forEach(item => {
                             newSchedules.push({
                                 checklistId: item.checklist_id,
                                 checklistName: item.checklist_name,
                                 remarks: item.remarks,
                                 plantId: parseInt(event.target.value),
-                                startDate: minDate,
-                                endDate: minDate,
+                                startDate: new Date(minDate),
+                                endDate: new Date(minDate),
                                 timelineId: timelineData?.id as number,
                                 scheduleId: item.schedule_id,
                                 isComplete: true,
