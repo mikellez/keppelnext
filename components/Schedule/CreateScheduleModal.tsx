@@ -257,6 +257,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                     backgroundColor: "#F0F0F0",
                     height: "60%",
                     width: "60%",
+                    minWidth: "800px",
                     margin: "auto",
                     border: "2px solid #393E46",
                 },
@@ -357,15 +358,15 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
 
                     {props.option === ScheduleCreateOptions.Approved &&
                         scheduleInputElements.length != 0 && (
-                            <table className="table table-sm">
+                            <table className="table table-sm table-responsive">
                                 <thead className={styles.scheduleTableHead}>
                                     <tr>
-                                        <th>Checklist Name</th>
-                                        <th>Start Date</th>
-                                        <th>End Date</th>
-                                        <th>Recurrence</th>
-                                        <th>Assigned To</th>
-                                        <th>Remarks</th>
+                                        <th style={{width: "15%"}}>Checklist Name</th>
+                                        <th style={{width: "8%"}}>Start Date</th>
+                                        <th style={{width: "8%"}}>End Date</th>
+                                        <th style={{width: "15%"}}>Recurrence</th>
+                                        <th style={{width: "29%"}}>Assigned To</th>
+                                        <th style={{width: "20%"}}>Remarks</th>
                                     </tr>
                                 </thead>
                                 <tbody>{scheduleInputElements}</tbody>
@@ -376,7 +377,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
 
                     {!props.isManage && (
                         <span className={styles.createScheduleModalBtnContainer}>
-                            <TooltipBtn toolTip={false} onClick={handleSubmit}>
+                            <TooltipBtn toolTip={false} onClick={handleSubmit} style={{marginBottom: "1rem"}} >
                                 Confirm
                             </TooltipBtn>
                         </span>

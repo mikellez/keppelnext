@@ -34,9 +34,9 @@ export default function ApprovedScheduleInput(props: ApprovedScheduleInputProps)
                 borderBottom: !props.isComplete ? "2px solid #FF0000" : "#ddd",
             }}
         >
-            <td style={{width: "18%"}}><p style={inputRowStyles}>{props.checklistName}</p></td>
+            <td ><p style={inputRowStyles}>{props.checklistName}</p></td>
 
-            <td style={{width: "8%"}}><input 
+            <td><input 
                 className="form-control" 
                 name={props.scheduleId + "-startDate"} 
                 min={minDate}
@@ -46,17 +46,17 @@ export default function ApprovedScheduleInput(props: ApprovedScheduleInputProps)
                 style={inputRowStyles}
             /></td>
 
-            <td style={{width: "8%"}}><input 
+            <td><input 
                 className="form-control" 
                 name={props.scheduleId + "-endDate"}
                 min={minDate}
                 value={props.endDate.toISOString().slice(0, 10)} 
                 type="date" 
                 onChange={props.onChange} 
-                style={inputRowStyles}
+                style={{...inputRowStyles}}
             /></td>
 
-            <td style={{width: "17%"}}><RecurrenceSelect 
+            <td><RecurrenceSelect 
                 startDate={props.startDate} 
                 endDate={props.endDate} 
                 name={props.scheduleId + "-recurringPeriod"}
@@ -64,14 +64,14 @@ export default function ApprovedScheduleInput(props: ApprovedScheduleInputProps)
                 style={inputRowStyles} 
             /></td>
 
-            <td style={{width: "29%"}}><AssignToSelect 
+            <td ><AssignToSelect 
                 plantId={props.plantId}  
                 onChange={props.onAssignedChange}
                 style={inputRowStyles}
                 name={props.scheduleId.toString()}
             /></td>
 
-            <td style={{width: "20%"}}><input 
+            <td><input 
                 className="form-control" 
                 name={props.scheduleId + "-remarks"}
                 value={props.remarks} 
