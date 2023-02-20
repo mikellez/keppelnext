@@ -5,7 +5,7 @@ import { dateFormat, toPeriodString } from "./ScheduleTemplate";
 import { CMMSScheduleEvent, CMMSUser } from "../../types/common/interfaces";
 import EventModalUser from "./EventModalUser";
 import { GrClose } from "react-icons/gr";
-import TooltipBtn from "./TooltipBtn";
+import TooltipBtn from "../TooltipBtn";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import styles from "../../styles/Schedule.module.scss";
 import axios from "axios";

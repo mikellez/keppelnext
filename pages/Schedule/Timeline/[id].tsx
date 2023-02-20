@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import ScheduleTemplate, { ScheduleInfo } from "../../../components/Schedule/ScheduleTemplate";
 import { FiSend, FiPlusSquare } from "react-icons/fi";
 import { RiDeleteBin6Line } from "react-icons/ri";
-import TooltipBtn from "../../../components/Schedule/TooltipBtn";
+import TooltipBtn from "../../../components/TooltipBtn";
 import styles from "../../styles/Schedule.module.scss";
 import axios from "axios";
 import { useRouter } from "next/router";

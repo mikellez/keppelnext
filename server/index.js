@@ -110,6 +110,7 @@ app.prepare().then(() => {
     server.get("/api/fault/types", checkIfLoggedInAPI, controllers.fault.fetchFaultTypes);
 
     server.get("/api/asset/:plant_id", checkIfLoggedInAPI, controllers.asset.getAssetsFromPlant);
+    server.get("/api/asset", checkIfLoggedIn, controllers.asset.getAssetHierarchy);
 
     server.get("/api/master/new", checkIfLoggedInAPI, controllers.master.fetchMasterTypeEntry);
     server.post("/api/master/new", checkIfLoggedInAPI, controllers.master.createMasterTypeEntry);

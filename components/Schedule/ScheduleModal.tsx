@@ -4,7 +4,7 @@ import { CMMSTimeline, CMMSSchedule } from "../../types/common/interfaces";
 import ChecklistSelect from "../Checklist/ChecklistSelect";
 import RecurrenceSelect from "./RecurrenceSelect";
 import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
-import TooltipBtn from "./TooltipBtn";
+import TooltipBtn from "../TooltipBtn";
 import styles from "../../styles/Schedule.module.scss";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";

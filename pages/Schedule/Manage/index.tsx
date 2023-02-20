@@ -6,7 +6,7 @@ import {
     AiOutlineClockCircle,
     AiOutlineInfoCircle,
 } from "react-icons/ai";
-import TooltipBtn from "../../../components/Schedule/TooltipBtn";
+import TooltipBtn from "../../../components/TooltipBtn";
 import styles from "../../../styles/Schedule.module.scss";
 import axios from "axios";
 import TimelineSelect from "../../../components/Schedule/TimelineSelect";

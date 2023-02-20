@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
 import { ModalProps } from "./EventModal";
-import TooltipBtn from "./TooltipBtn";
+import TooltipBtn from "../TooltipBtn";
 import { GrClose } from "react-icons/gr";
 import styles from "../../styles/Schedule.module.scss";
 import PlantSelect from "./PlantSelect";
