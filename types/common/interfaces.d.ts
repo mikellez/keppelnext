@@ -53,6 +53,7 @@ interface CMMSScheduleEvent {
         plant: string;
         scheduleId: number;
         checklistId: number;
+		timelineId: number;
         startDate: Date | string;
         endDate: Date | string;
         recurringPeriod: number;
@@ -74,6 +75,22 @@ interface CMMSTimeline {
     description: string,
 	status?: number,
 };
+
+interface CMMSSchedule {
+	scheduleId?: number;
+	checklistId: number;
+	checklistName?: string;
+	startDate: Date;
+	endDate: Date;
+	recurringPeriod: number;
+	assignedIds: number[];
+	remarks: string;
+	plantId: number;
+	timelineId: number;
+	reminderRecurrence: number;
+	prevId?: number;
+	isComplete?: boolean;
+}
 
 interface CMMSChecklist {
 	checklist_id: number;
@@ -110,4 +127,4 @@ interface CMMSMasterTables {
 	}
 }
 
-export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes, CMMSPlant, CMMSScheduleEvent, CMMSTimeline, CMMSAsset, CMMSChecklist, CMMSMasterSubmission, CMMSMasterField, CMMSMasterTables };
+export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes, CMMSPlant, CMMSScheduleEvent, CMMSTimeline, CMMSSchedule, CMMSAsset, CMMSChecklist, CMMSMasterSubmission, CMMSMasterField, CMMSMasterTables };

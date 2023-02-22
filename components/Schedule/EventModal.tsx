@@ -1,10 +1,14 @@
-import React, { MouseEventHandler, useState, useEffect, PropsWithChildren } from "react";
+import React, { useState, useEffect, PropsWithChildren } from "react";
 import Modal from "react-modal";
+import { useRouter } from "next/router";
 import { dateFormat, toPeriodString } from "./ScheduleTemplate";
 import { CMMSScheduleEvent, CMMSUser } from "../../types/common/interfaces";
 import EventModalUser from "./EventModalUser";
 import { GrClose } from "react-icons/gr";
+import TooltipBtn from "../TooltipBtn";
+import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import styles from "../../styles/Schedule.module.scss";
+import axios from "axios";
 
 interface CustomMouseEventHandler extends React.MouseEventHandler {
     (event: React.MouseEvent | void): void;
@@ -14,13 +18,38 @@ export interface ModalProps extends PropsWithChildren {
     isOpen: boolean;
     closeModal: CustomMouseEventHandler;
     event?: CMMSScheduleEvent;
+    delete?: boolean;
+    
 }
+
+// Delete individual schedules during the draft phase
+async function deleteSchedule(id: number) {
+    return await axios.delete("/api/schedule/" + id).then(res => {
+        return res;
+    })
+    .catch(err => console.log(err));
+};
 
 export default function EventModal(props: ModalProps) {
     // Store the assigned users as a state
     const [assignedUsers, setAssignedUsers] = useState<CMMSUser[]>([]);
+    const [deleteModal, setDeleteModal] = useState<boolean>(false);
+
+    const router = useRouter();
+
+    function handleDelete() {
+        if (props.event) {
+            deleteSchedule(props.event.extendedProps.scheduleId).then(result => {
+                setDeleteModal(true);
+                setTimeout(() => { 
+                    router.replace("/Schedule/Timeline/" + props.event?.extendedProps.timelineId);
+                }, 1000);
+            });
+        }   
+    };
 
     useEffect(() => {
+        setDeleteModal(false);
         if (props.event) {
             const users: CMMSUser[] = [];
             const noOfAssigned = props.event.extendedProps.assignedIds.length;
@@ -76,115 +105,72 @@ export default function EventModal(props: ModalProps) {
                 },
             }}
         >
-            {props.event ? (
-                <div>
-                    {/* Display event details on event select */}
-                    <div className={styles.eventModalHeader}>
-                        <h4 className={styles.eventModalTitle}>{props.event.title}</h4>
-                        <GrClose
-                            onClick={props.closeModal}
-                            size={20}
-                            className={styles.eventModalClose}
-                        />
-                    </div>
-                    <div>
-                        <table className={styles.eventModalTable}>
-                            <tbody>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>Schedule ID:</th>
-                                    <td>{props.event.extendedProps.scheduleId}</td>
-                                </tr>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>Checklist ID:</th>
-                                    <td>{props.event.extendedProps.checklistId}</td>
-                                </tr>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>Plant:</th>
-                                    <td>{props.event.extendedProps.plant}</td>
-                                </tr>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>Start Date:</th>
-                                    <td>
-                                        {dateFormat(props.event.extendedProps.startDate as Date)}
-                                    </td>
-                                </tr>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>End Date:</th>
-                                    <td>{dateFormat(props.event.extendedProps.endDate as Date)}</td>
-                                </tr>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>Recurring Period:</th>
-                                    <td>
-                                        {toPeriodString(props.event.extendedProps.recurringPeriod)}
-                                    </td>
-                                </tr>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>Assigned To:</th>
-                                    <td className={styles.eventModalAssignedUsers}>
-                                        {assignedUserElement}
-                                    </td>
-                                </tr>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>Remarks:</th>
-                                    <td>{props.event.extendedProps.remarks}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+            {props.event && <div>
+                {/* Display event details on event select */}
+                <div className={styles.eventModalHeader}>
+                    <h4 className={styles.eventModalTitle}>{props.event.title}</h4>
+                    <GrClose
+                        onClick={props.closeModal}
+                        size={20}
+                        className={styles.eventModalClose}
+                    />
                 </div>
-            ) : (
                 <div>
-                    {/* Edit event details to create a new schedule */}
-                    <div className={styles.eventModalHeader}>
-                        <h4 className={styles.eventModalTitle}>New Schedule</h4>
-                        <GrClose
-                            onClick={props.closeModal}
-                            size={20}
-                            className={styles.eventModalClose}
-                        />
-                    </div>
-                    <div>
-                        <table className={styles.eventModalTable}>
-                            <tbody>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>Checklist ID:</th>
-                                    <td></td>
-                                </tr>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>Plant:</th>
-                                    <td></td>
-                                </tr>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>Start Date:</th>
-                                    <td>
-                                        <input type="date" />
-                                    </td>
-                                </tr>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>End Date:</th>
-                                    <td>
-                                        <input type="date" />
-                                    </td>
-                                </tr>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>Recurring Period:</th>
-                                    <td></td>
-                                </tr>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>Assigned To:</th>
-                                    <td></td>
-                                </tr>
-                                <tr className={styles.eventModalTableRow}>
-                                    <th>Remarks:</th>
-                                    <td>
-                                        <textarea></textarea>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <table className={styles.eventModalTable}>
+                        <tbody>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Schedule ID:</th>
+                                <td>{props.event.extendedProps.scheduleId}</td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Checklist ID:</th>
+                                <td>{props.event.extendedProps.checklistId}</td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Plant:</th>
+                                <td>{props.event.extendedProps.plant}</td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Start Date:</th>
+                                <td>
+                                    {dateFormat(props.event.extendedProps.startDate as Date)}
+                                </td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>End Date:</th>
+                                <td>{dateFormat(props.event.extendedProps.endDate as Date)}</td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Recurring Period:</th>
+                                <td>
+                                    {toPeriodString(props.event.extendedProps.recurringPeriod)}
+                                </td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Assigned To:</th>
+                                <td className={styles.eventModalAssignedUsers}>
+                                    {assignedUserElement}
+                                </td>
+                            </tr>
+                            <tr className={styles.eventModalTableRow}>
+                                <th>Remarks:</th>
+                                <td>{props.event.extendedProps.remarks}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            )}
+                {props.delete && 
+                <TooltipBtn toolTip={false} onClick={handleDelete} >Delete</TooltipBtn>}
+            </div>}
+            
+            <ModuleSimplePopup 
+                modalOpenState={deleteModal} 
+                setModalOpenState={setDeleteModal} 
+                title="Maintenance Deleted"
+                text="Schedule Maintenance has been successfully deleted."
+                icon={SimpleIcon.Check}
+            />
         </Modal>
     );
 }
+

@@ -4,6 +4,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import EventModal from "./EventModal";
 import axios from "axios";
+import { useRouter } from "next/router";
 import styles from "../../styles/Schedule.module.scss";
 import { BsCalendar4Week, BsListUl } from "react-icons/bs";
 import { TableNode } from "@table-library/react-table-library/types/table";
@@ -17,7 +18,7 @@ interface ScheduleTemplateInfo extends PropsWithChildren {
     timeline?: number;
 }
 
-export interface ScheduleInfo extends TableNode {
+export interface ScheduleInfo {
     assigned_fnames: string[];
     assigned_lnames: string[];
     assigned_roles: string[];
@@ -33,6 +34,7 @@ export interface ScheduleInfo extends TableNode {
     plant: string;
     remarks: string;
     schedule_id: number;
+    timeline_id: number;
 }
 
 // Function to format Date to string
@@ -77,6 +79,8 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     // Store the state of the view full calendar. when set to true, view is full calendar, otherwise is list view.
     const [toggleCalendarOrListView, setToggleCalendarOrListView] = useState<boolean>(true);
 
+    const router = useRouter();
+
     // Add events to be displayed on the calendar
     useEffect(() => {
         setEventList([]);
@@ -100,6 +104,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                             assignedLnames: item.assigned_lnames,
                             assignedUsernames: item.assigned_usernames,
                             assignedRoles: item.assigned_usernames,
+                            timelineId: item.timeline_id,
                             remarks: item.remarks,
                         },
                     };
@@ -116,6 +121,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 isOpen={isModalOpen}
                 closeModal={() => setIsModalOpen(false)}
                 event={currentEvent}
+                delete={router.pathname === `/Schedule/Timeline/[id]`}
             />
             <ModuleHeader
                 title={props.title}
@@ -176,6 +182,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                     plant: info.event._def.extendedProps.plant,
                                     scheduleId: info.event._def.extendedProps.scheduleId,
                                     checklistId: info.event._def.extendedProps.checklistId,
+                                    timelineId: info.event._def.extendedProps.timelineId,
                                     startDate: info.event._def.extendedProps.startDate,
                                     endDate: info.event._def.extendedProps.endDate,
                                     recurringPeriod: info.event._def.extendedProps.recurringPeriod,
@@ -183,8 +190,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                     assignedEmails: info.event._def.extendedProps.assignedEmails,
                                     assignedFnames: info.event._def.extendedProps.assignedFnames,
                                     assignedLnames: info.event._def.extendedProps.assignedLnames,
-                                    assignedUsernames:
-                                        info.event._def.extendedProps.assignedUsernames,
+                                    assignedUsernames: info.event._def.extendedProps.assignedUsernames,
                                     assignedRoles: info.event._def.extendedProps.assignedRoles,
                                     remarks: info.event._def.extendedProps.remarks,
                                 },
@@ -198,7 +204,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     />
                 ) : (
                     // Render list view
-                    <ScheduleTable schedules={props.schedules} />
+                    <ScheduleTable schedules={props.schedules} viewRescheduled={router.pathname === "/Schedule/Manage"} />
                 )}
             </ModuleContent>
         </ModuleMain>

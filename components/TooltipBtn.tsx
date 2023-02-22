@@ -26,6 +26,7 @@ export default function TooltipBtn(props: TooltipBtnProps) {
                 textAlign: "center",
                 top: -45,
                 left: -50,
+                color: "#000000"
             }}>
                 {props.text ? props.text : "Default Tooltip"}
             </div>}

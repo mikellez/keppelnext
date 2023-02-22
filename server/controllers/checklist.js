@@ -1,8 +1,8 @@
 const db = require("../../db");
 
 const getTemplateChecklists = async (req, res, next) => {
-	db.query(
-		`SELECT cl.checklist_id, cl.chl_name, cl.description, cl.status_id,
+    db.query(
+        `SELECT cl.checklist_id, cl.chl_name, cl.description, cl.status_id,
 			concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
 			concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
 			concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
@@ -31,18 +31,25 @@ const getTemplateChecklists = async (req, res, next) => {
 		AND (cl.chl_type = 'Template')
 		AND (cl.status_id is null or cl.status_id = 1 or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6)
 		ORDER BY cl.checklist_id DESC;
-		`, [
-			req.user.id
-		],
-		(err, result) => {
-			if (err)						return res.status(400).json({msg: err1});
-			if (result.rows.length == 0)	return res.status(201).json({msg: "No checklist"});
-			
-			return res.status(200).send(result.rows);
-		}
-	);
+		`,
+        [req.user.id],
+        (err, result) => {
+            if (err) return res.status(400).json({ msg: err1 });
+            if (result.rows.length == 0) return res.status(201).json({ msg: "No checklist" });
+
+            return res.status(200).send(result.rows);
+        }
+    );
+};
+
+const getChecklistTemplateNames = async (req, res, next) => {
+    db.query(`SELECT * from keppel.checklist_templates`, (err, result) => {
+        if (err) throw err;
+        if (result) return res.status(200).send(result.rows);
+    });
 };
 
 module.exports = {
-	getTemplateChecklists
-}
+    getTemplateChecklists,
+    getChecklistTemplateNames,
+};

@@ -96,11 +96,21 @@ app.prepare().then(() => {
     );
     server.get("/api/request/types", checkIfLoggedInAPI, controllers.request.fetchRequestTypes);
 
-    server.get("/api/checklist/template", checkIfLoggedInAPI, controllers.checklist.getTemplateChecklists);
+    server.get(
+        "/api/checklist/template",
+        checkIfLoggedInAPI,
+        controllers.checklist.getTemplateChecklists
+    );
+    server.get(
+        "/api/checklist/templateNames",
+        checkIfLoggedInAPI,
+        controllers.checklist.getChecklistTemplateNames
+    );
 
     server.get("/api/fault/types", checkIfLoggedInAPI, controllers.fault.fetchFaultTypes);
 
     server.get("/api/asset/:plant_id", checkIfLoggedInAPI, controllers.asset.getAssetsFromPlant);
+    server.get("/api/asset", checkIfLoggedIn, controllers.asset.getAssetHierarchy);
 
     server.get("/api/master/new", checkIfLoggedInAPI, controllers.master.fetchMasterTypeEntry);
     server.post("/api/master/new", checkIfLoggedInAPI, controllers.master.createMasterTypeEntry);
@@ -113,11 +123,6 @@ app.prepare().then(() => {
         controllers.master.deleteMasterTypeSingle
     );
 
-    server.get(
-        "/api/schedule/:plant_id",
-        checkIfLoggedInAPI,
-        controllers.schedule.getViewSchedules
-    );
     server.get("/api/getPlants", checkIfLoggedInAPI, controllers.schedule.getPlants);
     server.get("/api/getUserPlants", checkIfLoggedInAPI, controllers.schedule.getUserPlants);
     server
@@ -131,6 +136,19 @@ app.prepare().then(() => {
         .route("/api/timeline/status/:status/:id?", checkIfLoggedInAPI)
         .get(controllers.schedule.getTimelineByStatus)
         .post(controllers.schedule.changeTimelineStatus);
+    server.get(
+        "/api/getAssignedUsers/:plant_id",
+        checkIfLoggedInAPI,
+        controllers.schedule.getOpsAndEngineers
+    );
+    server.post("/api/insertSchedule", checkIfLoggedInAPI, controllers.schedule.insertSchedule);
+    server.route("/api/schedule/:id", checkIfLoggedInAPI)
+        .delete(
+            controllers.schedule.deleteSchedule
+        )
+        .get(
+            controllers.schedule.getViewSchedules
+        );
 
     // NO API ROUTE
     server.all("/api/*", (req, res) => {
