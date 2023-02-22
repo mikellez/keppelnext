@@ -8,7 +8,9 @@ import TooltipBtn from '../../components/TooltipBtn';
 import { RiFileAddLine } from 'react-icons/ri';
 import Link from 'next/link';
 import axios from 'axios';
-import { ValueGetterParams } from 'ag-grid-enterprise';
+import { GridApi, ValueGetterParams } from 'ag-grid-enterprise';
+import { GrSearch } from "react-icons/gr"
+import styles from "../../styles/Asset.module.scss";
 
 const getAssets = async () => {
 	return await axios.get("/api/asset")
@@ -22,6 +24,8 @@ const getAssets = async () => {
 
 const Asset = () => {
 	const [rowData, setRowData] = useState(); // Set rowData to Array of Objects, one Object per Row
+	// Store gridApi as a state, this is very useful
+	const [gridApi, setGridApi] = useState<GridApi>();
 	// Each Column Definition results in one Column.
 	const [columnDefs, setColumnDefs] = useState([
 		{
@@ -146,6 +150,13 @@ const Asset = () => {
 				</Link>
 			</ModuleHeader>
 			<ModuleContent>
+				<div className={styles.gridSearch}>
+				<input type="text" placeholder="Seach..." onChange={(e) => {
+				if (gridApi) gridApi.setQuickFilter(e.target.value)
+			}} />
+			<GrSearch size={20} style={{color: "#C70F2B"}} />
+				</div>
+			
 			<div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
 				<AgGridReact
 					rowData={rowData}
@@ -153,6 +164,7 @@ const Asset = () => {
 						defaultColDef: {
 							suppressMenu: true,
 							resizable: true,
+							filter: true,
 						},
 						columnDefs: columnDefs,
 						animateRows: true,
@@ -164,6 +176,11 @@ const Asset = () => {
 						rowSelection: "multiple",
 						groupDisplayType: "singleColumn",
 						groupAllowUnbalanced: true,
+						cacheQuickFilter: true,
+						editType: "fullRow",
+					}}
+					onGridReady={params => {
+						setGridApi(params.api)
 					}}
 				>
 				</AgGridReact>
