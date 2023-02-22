@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { ModuleMain, ModuleHeader, ModuleContent } from '../../components';
 import { AgGridReact } from 'ag-grid-react';
+import 'ag-grid-enterprise'
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import TooltipBtn from '../../components/TooltipBtn';
 import { RiFileAddLine } from 'react-icons/ri';
 import Link from 'next/link';
 import axios from 'axios';
+import { ValueGetterParams } from 'ag-grid-enterprise';
 
 const getAssets = async () => {
 	return await axios.get("/api/asset")
@@ -36,7 +38,7 @@ const Asset = () => {
 			field: "system_asset",
 			hide: true,
 			rowGroup: true,
-			valueGetter: function (params) {
+			valueGetter: function (params: ValueGetterParams) {
 				if (params.data.system_name != params.data.system_asset) {
 					return params.data.system_asset;
 				} else {
@@ -49,7 +51,7 @@ const Asset = () => {
 			field: "parent_asset",
 			hide: true,
 			rowGroup: true,
-			valueGetter: function (params) {
+			valueGetter: function (params: ValueGetterParams) {
 				if (params.data.parent_asset != params.data.asset_type) {
 					//then return
 					return params.data.parent_asset;
@@ -63,7 +65,7 @@ const Asset = () => {
 			field: "psa.system_asset_lvl5",
 			hide: true,
 			rowGroup: true,
-			valueGetter: function (params) {
+			valueGetter: function (params: ValueGetterParams) {
 				if (params.data.system_asset_lvl5 != "") {
 					if (params.data.system_asset_lvl5 != params.data.parent_asset) {
 						return params.data.system_asset_lvl5;
@@ -77,7 +79,7 @@ const Asset = () => {
 			field: "psa.system_asset_lvl6",
 			hide: true,
 			rowGroup: true,
-			valueGetter: function (params) {
+			valueGetter: function (params: ValueGetterParams) {
 				if (params.data.system_asset_lvl6 != "") {
 					if (params.data.system_asset_lvl6 != params.data.parent_asset) {
 						return params.data.system_asset_lvl6;
@@ -137,7 +139,7 @@ const Asset = () => {
 		getAssets().then(data => {
 			setRowData(data)
 		})
-	})
+	}, [])
 
   	return (
 		<ModuleMain>
@@ -150,7 +152,19 @@ const Asset = () => {
 			<div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
 				<AgGridReact
 					rowData={rowData}
-					columnDefs={columnDefs}>
+					gridOptions={{
+						defaultColDef: {
+							suppressMenu: true,
+						},
+						columnDefs: columnDefs,
+						animateRows: true,
+						autoGroupColumnDef: {
+							cellRendererParams: {
+								suppressCount: true,
+							}
+						},
+					}}
+				>
 				</AgGridReact>
 			</div>
 			</ModuleContent>
