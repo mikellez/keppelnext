@@ -53,7 +53,6 @@ const Asset = () => {
 			rowGroup: true,
 			valueGetter: function (params: ValueGetterParams) {
 				if (params.data.parent_asset != params.data.asset_type) {
-					//then return
 					return params.data.parent_asset;
 				} else {
 					return null;
@@ -89,13 +88,11 @@ const Asset = () => {
 				}
 			},
 		},
-	
 		{
 			field: "psa.system_asset_lvl7",
 			hide: true,
 			rowGroup: false,
 		},
-	
 		{
 			headerName: "Tag Name",
 			field: "plant_asset_instrument",
@@ -155,14 +152,18 @@ const Asset = () => {
 					gridOptions={{
 						defaultColDef: {
 							suppressMenu: true,
+							resizable: true,
 						},
 						columnDefs: columnDefs,
 						animateRows: true,
 						autoGroupColumnDef: {
 							cellRendererParams: {
 								suppressCount: true,
-							}
+							},
 						},
+						rowSelection: "multiple",
+						groupDisplayType: "singleColumn",
+						groupAllowUnbalanced: true,
 					}}
 				>
 				</AgGridReact>
