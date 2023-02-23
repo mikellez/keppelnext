@@ -34,7 +34,6 @@ export default function NavBar() {
     // Change the nav bar based on the user role id
     async function setNav() {
         await getUser().then((user) => {
-            console.log(user.role_id)
             switch(user.role_id) {
                 case 1:
                 case 2:
