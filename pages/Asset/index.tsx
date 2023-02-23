@@ -181,18 +181,17 @@ const Asset = () => {
   	return (
 		<ModuleMain>
 			<ModuleHeader header="Asset Management" >
-				<Link href="/Asset/New">
-					<TooltipBtn text="Create new asset"><RiFileAddLine size={20} /></TooltipBtn>
-				</Link>
-			</ModuleHeader>
-			<ModuleContent>
 				<div className={styles.gridSearch}>
 					<input type="text" placeholder="Seach..." onChange={(e) => {
 						if (gridApi) gridApi.setQuickFilter(e.target.value)
 					}} />
 					<AiOutlineSearch size={20} color="#3C4048" />
 				</div>
-			
+				<Link href="/Asset/New">
+					<TooltipBtn text="Create new asset"><RiFileAddLine size={20} /></TooltipBtn>
+				</Link>
+			</ModuleHeader>
+			<ModuleContent>
 				<div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
 					<AgGridReact
 						rowData={rowData}
@@ -200,6 +199,9 @@ const Asset = () => {
 						onRowSelected={onRowSelected}
 						defaultColDef={defaultColDef}
 						columnDefs={columnDefs}
+						onGridReady={(params) => {
+							setGridApi(params.api)
+						}}
 					>
 					</AgGridReact>
 				</div>
