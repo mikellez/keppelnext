@@ -18,6 +18,12 @@ type TableNode<T> = {
     prop: T;
 };
 
+const indexedColumn: ("template" | "record" | "approved")[] = [
+	"template",
+	"record",
+	"approved"
+]
+
 export default function Checklist() {
 	const [checklistNodes, setChecklistNodes] = useState<TableNode<CMMSChecklist>[]>([]);
 	const [isReady, setReady] = useState(false);
@@ -28,7 +34,7 @@ export default function Checklist() {
 		error,
 		isValidating,
 		mutate
-	} = useChecklist("template");
+	} = useChecklist(indexedColumn[activeTabIndex]);
 
 	const theme = useTheme([
 		getTheme(),
@@ -38,7 +44,7 @@ export default function Checklist() {
 	]);
 
 	const switchColumns = (index: number) => {
-		//setReady(false);
+		setReady(false);
 		setActiveTabIndex(index);
 	};
 
@@ -48,10 +54,10 @@ export default function Checklist() {
 		console.log(checklistRow, event)
 	}
 	
-	useEffect(() => {
-		if(isValidating) setReady(false);
+	useEffect(() => {console.log(activeTabIndex)}, [activeTabIndex]);
 
-		if(data && !isValidating) {
+	useEffect(() => {
+		if(!isReady && data && !isValidating) {
 			setChecklistNodes(
 				data.map((row: CMMSChecklist): TableNode<CMMSChecklist> => {
 					return {

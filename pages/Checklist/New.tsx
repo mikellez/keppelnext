@@ -3,7 +3,7 @@ import formStyles from '../../styles/formStyles.module.css'
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-import { ModuleContent, ModuleDivider, ModuleHeader, ModuleMain } from '../../components'
+import { ModuleContent, ModuleDivider, ModuleHeader, ModuleMain, ModuleFooter } from '../../components'
 
 export default function ChecklistNew() {
 	return (
@@ -26,7 +26,7 @@ export default function ChecklistNew() {
 
 					<div className="form-group">
 						<label className='form-label'>Plant Location</label>
-						<select className="form-control" id="formControlLocation"/>
+						<select className="form-select" id="formControlLocation"/>
 					</div>
 
 				</div>
@@ -44,17 +44,17 @@ export default function ChecklistNew() {
 					
 					<div className="form-group">
 						<label className='form-label'>Assigned To</label>
-						<select className="form-control" id="formControlAssigned"/>
+						<select className="form-select" id="formControlAssigned"/>
 					</div>
 
 					<div className="form-group">
 						<label className='form-label'>Created By</label>
-						<select className="form-control" id="formControlCreated"/>
+						<select className="form-select" id="formControlCreated"/>
 					</div>
 					
 					<div className="form-group">
 						<label className='form-label'>Sign Off By</label>
-						<select className="form-control" id="formControlSignOff"/>
+						<select className="form-select" id="formControlSignOff"/>
 					</div>
 				</div>
 
@@ -65,6 +65,15 @@ export default function ChecklistNew() {
 				</ModuleHeader>
 				checklist add stuff go here
 			</ModuleContent>
+			<ModuleFooter>
+				{/*(errors.type || errors.entries) && 
+				<span style={{color: "red"}}>Please fill in all required fields</span>*/}
+				<button type="submit" className="btn btn-primary">
+				{
+					//isSubmitting && <LoadingIcon/>
+				}
+				Submit</button>
+			</ModuleFooter>
 		</ModuleMain>
   	)
 }

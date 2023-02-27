@@ -96,21 +96,20 @@ app.prepare().then(() => {
     );
     server.get("/api/request/types", checkIfLoggedInAPI, controllers.request.fetchRequestTypes);
 
-    server.get(
-        "/api/checklist/template",
-        checkIfLoggedInAPI,
-        controllers.checklist.getTemplateChecklists
-    );
+    server.get("/api/checklist/template", checkIfLoggedInAPI, controllers.checklist.fetchTemplateChecklists);
+    server.get("/api/checklist/record", checkIfLoggedInAPI, controllers.checklist.fetchForReviewChecklists);
+    server.get("/api/checklist/approved", checkIfLoggedInAPI, controllers.checklist.fetchApprovedChecklists);
+    
     server.get(
         "/api/checklist/templateNames",
         checkIfLoggedInAPI,
-        controllers.checklist.getChecklistTemplateNames
+        controllers.checklist.fetchChecklistTemplateNames
     );
 
     server.get("/api/fault/types", checkIfLoggedInAPI, controllers.fault.fetchFaultTypes);
 
     server.get("/api/asset/:plant_id", checkIfLoggedInAPI, controllers.asset.getAssetsFromPlant);
-    server.get("/api/asset", checkIfLoggedIn, controllers.asset.getAssetHierarchy);
+    server.get("/api/asset", checkIfLoggedInAPI, controllers.asset.getAssetHierarchy);
 
     server.get("/api/master/new", checkIfLoggedInAPI, controllers.master.fetchMasterTypeEntry);
     server.post("/api/master/new", checkIfLoggedInAPI, controllers.master.createMasterTypeEntry);

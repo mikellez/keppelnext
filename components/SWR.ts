@@ -26,12 +26,12 @@ function useAsset(plant_id: number|null) {
 	return useSWR<CMMSAsset[], Error>(plant_id ? ["/api/asset/", plant_id.toString()] : null, assetFetcher, {revalidateOnFocus: false});
 }
 
-function useChecklist(checklist_type: "template") {
+function useChecklist(checklist_type: "template" | "record" | "approved") {
 	const checklistFetcher = (url: string) => axios.get<CMMSChecklist[]>(url + checklist_type).then((response) => response.data).catch((e) => {
 		throw new Error(e);
 	})
 
-	return useSWR<CMMSChecklist[], Error>(["/api/checklist/"], checklistFetcher, {revalidateOnFocus: false});
+	return useSWR<CMMSChecklist[], Error>(["/api/checklist/", checklist_type], checklistFetcher, {revalidateOnFocus: false});
 }
 
 export {
