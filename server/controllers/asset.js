@@ -20,6 +20,7 @@ const getAssetsFromPlant = async (req, res, next) => {
 		});
 }
 
+// Get all assets for AG Grid
 const getAssetHierarchy = async (req, res, next) => {
     db.query(`
     SELECT 
@@ -76,7 +77,7 @@ const getAssetHierarchy = async (req, res, next) => {
     psa.psa_id`, (err, result) => {
         if (err) {
             return res.status(400).send({
-                msg: err
+                msg: "err"
             });
         }
         if (result.rows.length == 0) {

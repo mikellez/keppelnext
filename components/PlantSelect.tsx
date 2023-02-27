@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { CMMSPlant } from "../../types/common/interfaces";
+import { CMMSPlant } from "../types/common/interfaces";
 import axios from "axios";
 
 interface PlantSelectProps {

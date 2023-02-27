@@ -267,7 +267,7 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 	const f: CMMSFaultTypes[]		= values[2].data;
 
 	let props: NewRequestProps = { user: u, requestTypes: r, faultTypes: f }
-
+	
 	return {
 		props: props
 	}

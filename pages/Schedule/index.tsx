@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import ScheduleTemplate, { ScheduleInfo } from '../../components/Schedule/ScheduleTemplate';
 import { CMMSPlant } from '../../types/common/interfaces';
-import PlantSelect from '../../components/Schedule/PlantSelect';
+import PlantSelect from '../../components/PlantSelect';
 import axios from 'axios';
 import { MdOutlineLocationOn } from "react-icons/md"
 import styles from "../../styles/Schedule.module.scss";
