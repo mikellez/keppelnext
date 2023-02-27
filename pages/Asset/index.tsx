@@ -9,9 +9,10 @@ import { RiFileAddLine } from 'react-icons/ri';
 import Link from 'next/link';
 import axios from 'axios';
 import { GridApi, ValueGetterParams } from 'ag-grid-enterprise';
-import { RowSelectedEvent, ColDef, IRowNode, GridOptions } from 'ag-grid-community';
+import { ColDef, IRowNode, GridOptions, RowDoubleClickedEvent } from 'ag-grid-community';
 import { AiOutlineSearch } from "react-icons/ai"
 import styles from "../../styles/Asset.module.scss";
+import { useRouter } from 'next/router';
 
 // Get request to fetch all the assets from db
 const getAssets = async () => {
@@ -30,6 +31,10 @@ const Asset = () => {
 	const [gridApi, setGridApi] = useState<GridApi>();
 	// Store selected row in a state
 	const [selectedRow, setSelectedRow] = useState<IRowNode>();
+
+	// React router
+	const router = useRouter()
+
 	// Each Column Definition results in one Column.
 	const [columnDefs, setColumnDefs] = useState<ColDef[]>([
 		{
@@ -141,9 +146,19 @@ const Asset = () => {
 	  ]);
 
 	
-	const onRowSelected = useCallback((event: RowSelectedEvent) => {
-		if (event.node.isSelected() && event.node.data) setSelectedRow(event.node);
-	}, []);
+	// const onRowSelected = useCallback((event: RowSelectedEvent) => {
+	// 	if (event.node.isSelected() && event.node.data) setSelectedRow(event.node);
+	// }, []);
+
+	const handleDoubleClicked = useCallback((event: RowDoubleClickedEvent) => {
+		if (event.node.data) {
+			// setSelectedRow(event.node);
+			console.log(event.node.data)
+			setTimeout(() => {
+				router.push("/Asset/Details/" + event.node.data.psa_id);
+			}, 1000);		
+		}
+	}, [])
 
 	// Grid customisations
 	const gridOptions = useMemo<GridOptions>(() => {
@@ -196,12 +211,13 @@ const Asset = () => {
 					<AgGridReact
 						rowData={rowData}
 						gridOptions={gridOptions}
-						onRowSelected={onRowSelected}
+						// onRowSelected={onRowSelected}
 						defaultColDef={defaultColDef}
 						columnDefs={columnDefs}
 						onGridReady={(params) => {
 							setGridApi(params.api)
 						}}
+						onRowDoubleClicked={handleDoubleClicked}
 					>
 					</AgGridReact>
 				</div>
