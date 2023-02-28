@@ -18,3 +18,38 @@
 .gridSearch input:focus {
     outline: none;
 }
+
+.assetDetails {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+}
+
+.assetTable { 
+    width: 700px;
+    border-collapse: separate; 
+    border-spacing: 10px;
+   
+}
+
+.assetTable th {
+    text-align: left;
+    vertical-align: top;
+}
+
+.assetTable td {
+    text-align: left;
+    vertical-align: top;
+}
+
+.assetImage {
+    display: block;
+    height: 400px;
+    width: 400px;
+    object-fit: contain;
+    margin: auto;
+
+}
+
+
+

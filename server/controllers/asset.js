@@ -111,7 +111,10 @@ const getAssetDetails = async (req, res, next) => {
     pm.plant_id,
     sm.system_id,
     sa.system_asset_id,
-    psa.psa_id
+    psa.psa_id,
+    psa.system_asset_lvl5,
+    psa.system_asset_lvl6,
+    psa.system_asset_lvl7
     FROM keppel.plant_system_assets psa
     INNER JOIN keppel.plant_master pm ON pm.plant_id = psa.plant_id
     INNER JOIN keppel.system_master sm ON sm.system_id = psa.system_id_lvl3
