@@ -69,6 +69,23 @@ export default function AssetDetails() {
                                 <td>{assetDetail.asset_name ? assetDetail.asset_name : "-"}</td>
                             </tr>
                             <tr>
+                                <th>Asset Hierarchy</th>
+                                <td>
+                                    {assetDetail.plant_name +
+                                        "->" +
+                                        assetDetail.system_name +
+                                        "->" +
+                                        assetDetail.system_asset +
+                                        "->" +
+                                        // if(lvl5) add
+                                        // if(lvl6) add
+                                        // if(lvl7) add +
+                                        assetDetail.parent_asset +
+                                        "->" +
+                                        assetDetail.asset_name}
+                                </td>
+                            </tr>
+                            <tr>
                                 <th>Description</th>
                                 <td>
                                     {assetDetail.asset_description
