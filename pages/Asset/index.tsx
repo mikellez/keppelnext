@@ -157,7 +157,7 @@ const Asset = () => {
             // Implementation for open in the same tab
             router.push("/Asset/Details/" + event.node.data.psa_id);
         }
-    }, []);
+    }, [router]);
 
     // Grid customisations
     const gridOptions = useMemo<GridOptions>(() => {

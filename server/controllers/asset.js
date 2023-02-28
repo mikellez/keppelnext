@@ -128,8 +128,22 @@ const getAssetDetails = async (req, res, next) => {
     );
 };
 
+const getAssetHistory = async (req, res, next) => {
+    const id = parseInt(req.params.id);
+    if (id === NaN) return res.status(400).json("Invalid asset id");
+    const queryS = `SELECT * FROM (SELECT requesthistory as history FROM keppel.request WHERE psa_id = ${id}
+    UNION 
+    SELECT history FROM keppel.checklist_master WHERE linkedassetids LIKE '%${id}%') AS H
+    WHERE H.history IS NOT NULL`;
+    db.query(queryS, (err, found) => {
+        if (err) throw err;
+        else return res.status(200).json(found.rows)
+    });
+};
+
 module.exports = {
     getAssetsFromPlant,
     getAssetHierarchy,
     getAssetDetails,
+    getAssetHistory,
 };
