@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useTransition } from 'react';
 import styles from '../../styles/Nav.module.scss'
 import { GrClose } from "react-icons/gr";
 import { BsList, BsHouseDoor } from 'react-icons/bs'
@@ -6,52 +6,29 @@ import { TbChecklist } from "react-icons/tb";
 import { AiOutlineQrcode , AiOutlineControl, AiOutlineUser, AiOutlineSchedule, AiOutlinePhone, AiOutlineHistory } from "react-icons/ai";
 import { MdWorkOutline } from "react-icons/md";
 import { VscBook } from "react-icons/vsc";
-import NavDropdown from './NavDropdown';
+import NavDropdown, { NavDropdownLink } from './NavDropdown';
 import NavLink, { NavLinkInfo } from './NavLink';
-import axios from 'axios';
-
-// Get the user info from api
-export async function getUser() {
-    return await axios.get("/api/user")
-        .then(res => {
-            return res.data
-        })
-        .catch(err => console.log(err.message))
-};
+import { useCurrentUser } from '../SWR';
+import { useRouter } from 'next/router';
 
 export default function NavBar() {
 
     const [navDisplay, setNavDisplay] = useState<boolean>(false);
     const [isTransitioning, setTransitioning] = useState<boolean>(false);
-    // Dropdown for schedule stored as a state
-    const [scheduleDropdown, setScheduleDropdown] = useState<NavLinkInfo[]>([{name: "View Schedule", path: "/Schedule"}]);
 
-    useEffect(() => {
-        setNav();
-    }, []);
+    const {
+		data,
+		error,
+	} = useCurrentUser();
 
+    const router = useRouter();
     
-    // Change the nav bar based on the user role id
-    async function setNav() {
-        await getUser().then((user) => {
-            console.log(user.role_id)
-            switch(user.role_id) {
-                case 1:
-                case 2:
-                    setScheduleDropdown([
-                        {name: "View Schedule", path: "/Schedule"},
-                        {name: "Create Schedule", path: "/Schedule/Create"},
-                        {name: "Manage Schedule", path: "/Schedule/Manage"}
-                    ])
-                    break;
-                case 3:
-                    setScheduleDropdown([
-                        {name: "View Schedule", path: "/Schedule"},
-                        {name: "Create Schedule", path: "/Schedule/Create"}
-                    ])
-            }
+    useEffect(() => {
+        router.events.on("routeChangeStart", () => {
+            if(navDisplay)
+                setNavDisplay(false);
         })
-    }
+    }, [router]);
 
     // Display and hide nav by toggling the state
     function displayNav() {
@@ -68,33 +45,9 @@ export default function NavBar() {
         setNavDisplay(prev => !prev);
     };
 
-    // Dropdown list for user management
-    const userManagementList : NavLinkInfo[] = [
-        {
-            name: "User Management",
-            path: ""
-        },
-        {
-            name: "Access Control",
-            path: ""
-        },
-        {
-            name: "Add New User",
-            path: ""
-        },
-        {
-            name: "Password Policy",
-            path: ""
-        }
-    ];
-
-    // Dropdown list for activity log
-    const activityLogList : NavLinkInfo[] = [
-        {
-            name: "Account Activity Log",
-            path: ""
-        }
-    ];
+    useEffect(() => {
+        console.log(data)
+    }, [data])
 
     return (
         <div>
@@ -106,8 +59,7 @@ export default function NavBar() {
                     opacity:    navDisplay ? "100%"     : "0%",
                     zIndex: 5
                 }
-            }>
-            </div>
+            }></div>
             <div className={styles.navMain} style={
                 {
                     //display: navDisplay ? "block" : "none",
@@ -120,22 +72,29 @@ export default function NavBar() {
                         <GrClose onClick={displayNav} size={25} style={{color:"#4D4D4D", marginLeft: "auto", cursor: "pointer"}} />
                     </div>
 
-                    <NavLink     name="Request"           onClick={displayNav} path="/Request" icon={<AiOutlinePhone size={21} />} />
-                    <NavLink     name="Asset"             onClick={displayNav} path="/Asset" icon={<BsHouseDoor size={21} />} />
-                    <NavDropdown name="Schedule"          list={scheduleDropdown.map(item => {
-                        return {...item, onClick: displayNav}
-                    })} navOpen={navDisplay} icon={<AiOutlineSchedule size={21} />}/>
-                    <NavLink     name="Checklist"         onClick={displayNav} path="/Checklist" icon={<TbChecklist size={21}/>} />
-                    <NavLink     name="E-Logbook"         onClick={displayNav} path="/Logbook" icon={<VscBook size={21} />} />
-                    <NavLink     name="Generate QR Codes" onClick={displayNav} path="/QRCode" icon={<AiOutlineQrcode size={21}/>} />
-                    <NavLink     name="Workflow"          onClick={displayNav} path="/Workflow" icon={<MdWorkOutline size={21} />} />
-                    <NavLink     name="Master"            onClick={displayNav} path="/Master" icon={<AiOutlineControl size={21} />} />
-                    <NavDropdown name="User Management"   list={userManagementList.map(item => {
-                        return {...item, onClick: displayNav}
-                    })} navOpen={navDisplay} icon={<AiOutlineUser size={21} />} />
-                    <NavDropdown name="Activity Log"      list={activityLogList.map(item => {
-                        return {...item, onClick: displayNav}
-                    })} navOpen={navDisplay} icon={<AiOutlineHistory size={21} />} />
+                    <NavLink     name="Request"           path="/Request" icon={<AiOutlinePhone size={21} />} />
+                    <NavLink     name="Asset"             path="/Asset" icon={<BsHouseDoor size={21} />} />
+                    <NavDropdown name="Schedule"          path="/Schedule" navOpen={navDisplay} icon={<AiOutlineSchedule size={21} />}>
+                        <NavDropdownLink href="/Schedule" >View Schedules</NavDropdownLink>
+                        <NavDropdownLink href="/Schedule/Create" >Create Schedule</NavDropdownLink>
+                        {data && (data.role_id === 1 || data.role_id === 2 ) &&
+                            <NavDropdownLink href="/Schedule/Manage" >Manage Schedules</NavDropdownLink>
+                        }
+                    </NavDropdown>
+                    <NavLink     name="Checklist"         path="/Checklist" icon={<TbChecklist size={21}/>} />
+                    <NavLink     name="E-Logbook"         path="/Logbook" icon={<VscBook size={21} />} />
+                    <NavLink     name="Generate QR Codes" path="/QRCode" icon={<AiOutlineQrcode size={21}/>} />
+                    <NavLink     name="Workflow"          path="/Workflow" icon={<MdWorkOutline size={21} />} />
+                    <NavLink     name="Master"            path="/Master" icon={<AiOutlineControl size={21} />} />
+                    <NavDropdown name="User Management"   path="/User" navOpen={navDisplay} icon={<AiOutlineUser size={21} />}>
+                        <NavDropdownLink href="/">User Management</NavDropdownLink>
+                        <NavDropdownLink href="/">Access Control</NavDropdownLink>
+                        <NavDropdownLink href="/">Add New User</NavDropdownLink>
+                        <NavDropdownLink href="/">Password Policy</NavDropdownLink>
+                    </NavDropdown>
+                    <NavDropdown name="Activity Log"      path="/Activity" navOpen={navDisplay} icon={<AiOutlineHistory size={21} />}>
+                        <NavDropdownLink href="/">Account Activity Log</NavDropdownLink>
+                    </NavDropdown>
                 </div>
             </div>
         </div>

@@ -34,8 +34,24 @@ function useChecklist(checklist_type: "template" | "record" | "approved") {
 	return useSWR<CMMSChecklist[], Error>(["/api/checklist/", checklist_type], checklistFetcher, {revalidateOnFocus: false});
 }
 
+function useCurrentUser() {
+	interface CMMSCurrentUser {
+		id: number,
+		name: string,
+		role_id: number,
+		role_name: string
+	}
+
+	const userFetcher = (url: string) => axios.get<CMMSCurrentUser>(url).then((response) => response.data).catch((e) => {
+		throw new Error(e);
+	})
+
+	return useSWR<CMMSCurrentUser, Error>("/api/user", userFetcher, {revalidateOnFocus: false, revalidateOnReconnect: false})
+}
+
 export {
     useRequest,
 	useAsset,
-	useChecklist
+	useChecklist,
+	useCurrentUser
 }
