@@ -2,11 +2,12 @@ import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import { ModuleMain, ModuleHeader, ModuleContent } from "../../../components";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { CMMSAssetDetails, CMMSAssetHistory } from "../../../types/common/interfaces";
+import { CMMSAssetDetails, CMMSAssetRequestHistory, CMMSAssetChecklistHistory } from "../../../types/common/interfaces";
 import styles from "../../../styles/Asset.module.scss";
 import { ThreeDots } from 'react-loading-icons';
 import Image from "next/image";
 import AssetRequestHistory from "../../../components/Asset/AssetRequestHistory";
+import AssetChecklistHistory from "../../../components/Asset/AssetChecklistHistory";
 
 
 // Get asset detail by psa id
@@ -47,7 +48,8 @@ const checkBase64 = (s: string): boolean => {
 
 export default function AssetDetails() {
     const [assetDetail, setAssetDetail] = useState<CMMSAssetDetails>({} as CMMSAssetDetails);
-    const [assetRequestHistory, setAssetRequestHistory] = useState<CMMSAssetHistory[]>();
+    const [assetRequestHistory, setAssetRequestHistory] = useState<CMMSAssetRequestHistory[]>();
+    const [assetChecklistHistory, setAssetChecklistHistory] = useState<CMMSAssetChecklistHistory[]>();
     const [imgIsErr, setImgIsErr] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -60,10 +62,13 @@ export default function AssetDetails() {
             const id = parseInt(psa_id as string);
             getAsset(id).then((result) => {
                 if (!result || result.length == 0) router.replace("/404");
-                getAssetHistory(id).then(history => {
-                    setAssetDetail(result[0]);
-                    setImgIsErr(!result[0].uploaded_image);
-                    if (history) setAssetRequestHistory(history);
+                getAssetHistory(id).then(rhistory => {
+                    getAssetHistory(id, "checklist").then(chistory => {
+                        setAssetDetail(result[0]);
+                        setImgIsErr(!result[0].uploaded_image);
+                        if (rhistory) setAssetRequestHistory(rhistory);
+                        if (chistory) setAssetChecklistHistory(chistory);
+                    })
                 })
             });
         }
@@ -159,7 +164,8 @@ export default function AssetDetails() {
                             )}
                         </div>
                     </div>
-                    {assetRequestHistory && <AssetRequestHistory history={assetRequestHistory as CMMSAssetHistory[]} />}
+                    {assetRequestHistory && <AssetRequestHistory history={assetRequestHistory as CMMSAssetRequestHistory[]} />}
+                    {assetChecklistHistory && <AssetChecklistHistory history={assetChecklistHistory as CMMSAssetChecklistHistory[]} />}
                 </>
                 }
             </ModuleContent>

@@ -32,7 +32,7 @@ interface CMMSAssetDetails extends CMMSAsset {
     system_asset_lvl7?: string;
 }
 
-interface CMMSAssetHistory {
+interface CMMSAssetRequestHistory {
 	status: string;
 	action: string;
 	date: string;
@@ -42,6 +42,15 @@ interface CMMSAssetHistory {
 	priority: string;
 	faultType: string;
 }
+
+interface CMMSAssetChecklistHistory {
+	action: string;
+	date: string;
+	name: string;
+	status: string;
+	checklistId: string;
+	checklistName: string;
+}	
 
 interface CMMSUser {
 	id: number
@@ -174,7 +183,8 @@ export {
 	CMMSSchedule, 
 	CMMSAsset, 
 	CMMSAssetDetails, 
-	CMMSAssetHistory,
+	CMMSAssetRequestHistory,
+	CMMSAssetChecklistHistory,
 	CMMSChecklist, 
 	CMMSMasterSubmission, 
 	CMMSMasterField, 

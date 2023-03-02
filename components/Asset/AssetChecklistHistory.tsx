@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { CMMSAssetRequestHistory } from "../../types/common/interfaces";
+import { CMMSAssetChecklistHistory } from "../../types/common/interfaces";
 import styles from "../../styles/Asset.module.scss"
 import { CompactTable } from "@table-library/react-table-library/compact";
 import { TableNode } from "../../pages/Request";
@@ -7,45 +7,40 @@ import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 
 interface AssetHistoryProps {
-    history: CMMSAssetRequestHistory[];
+    history: CMMSAssetChecklistHistory[];
 }
 
 const COLUMNS: any[] = [
     { 
         label: 'Status', 
-        renderCell: (item: TableNode<CMMSAssetRequestHistory>) => item.prop.status,
+        renderCell: (item: TableNode<CMMSAssetChecklistHistory>) => item.prop.status,
         
     },
     { 
         label: 'Action', 
-        renderCell: (item: TableNode<CMMSAssetRequestHistory>) => item.prop.action 
+        renderCell: (item: TableNode<CMMSAssetChecklistHistory>) => item.prop.action 
     },
     { 
         label: 'Date', 
-        renderCell: (item: TableNode<CMMSAssetRequestHistory>) => item.prop.date 
+        renderCell: (item: TableNode<CMMSAssetChecklistHistory>) => item.prop.date 
     },
     { 
         label: 'Role', 
-        renderCell: (item: TableNode<CMMSAssetRequestHistory>) => item.prop.role 
+        renderCell: (item: TableNode<CMMSAssetChecklistHistory>) => item.prop.name
     },
     { 
-        label: 'Name', 
-        renderCell: (item: TableNode<CMMSAssetRequestHistory>) => item.prop.name 
+        label: 'Checklist ID', 
+        renderCell: (item: TableNode<CMMSAssetChecklistHistory>) => item.prop.checklistId
     },
     { 
-        label: 'Case ID', 
-        renderCell: (item: TableNode<CMMSAssetRequestHistory>) => item.prop.caseId 
-    },
-    { 
-        label: 'Fault Type', 
-        renderCell: (item: TableNode<CMMSAssetRequestHistory>) => item.prop.faultType,  
+        label: 'Checklist Name', 
+        renderCell: (item: TableNode<CMMSAssetChecklistHistory>) => item.prop.checklistName
     },
 ];
 
+export default function AssetChecklistHistory(props: AssetHistoryProps) {
+    const [data, setData] = useState<TableNode<CMMSAssetChecklistHistory>[]>();
 
-export default function AssetHistory(props: AssetHistoryProps) {
-    const [data, setData] = useState<TableNode<CMMSAssetRequestHistory>[]>();
-    
     const theme = useTheme([
         getTheme(),
         {   Table: `
@@ -70,13 +65,12 @@ export default function AssetHistory(props: AssetHistoryProps) {
             
         }
     ])
-    
     useEffect(() => {
         if (props) {
             setData(props.history.map(row => {
                 return {
                     prop: row,
-                    id: row.caseId + row.status + row.date + row.action,
+                    id: row.checklistId + row.status + row.date + row.action,
                 }
             }))
         }  
@@ -84,7 +78,7 @@ export default function AssetHistory(props: AssetHistoryProps) {
 
     return (
         <div>
-            <h4 className={styles.assetDetailsHeader}>Request History</h4>
+            <h4 className={styles.assetDetailsHeader}>Checklist History</h4>
             {data && 
                 <CompactTable 
                     columns={COLUMNS} 

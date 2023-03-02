@@ -154,7 +154,7 @@ const getAssetHistory = async (req, res, next) => {
                     return {
                         status: tmp[0],
                         action: tmp[1],
-                        date: tmp[2],
+                        date: tmp[2].slice(0, -3),
                         role: tmp[3],
                         name: tmp[4],
                         caseId: tmp[5],
@@ -166,10 +166,35 @@ const getAssetHistory = async (req, res, next) => {
         });
 
     } else if (req.params.type === "checklist") {
-        const queryS = `SELECT requesthistory as history FROM keppel.request WHERE psa_id = ${id}`;
-        db.query(queryS, (err, found) => {
+        const queryS = `SELECT cm.checklist_id, cm.chl_name, cm.history 
+        FROM keppel.checklist_master AS cm
+        LEFT JOIN keppel.status_cm AS s ON cm.status_id = s.status_id
+        WHERE linkedassetids LIKE concat(concat('%', $1::text), '%') AND history IS NOT NULL`;
+
+        db.query(queryS, [req.params.id], (err, found) => {
             if (err) throw err;
-            else return res.status(200).json(found.rows)
+            if (found.rows.length === 0) return res.status(200).json("no history");
+            else { 
+                const historyArr = [];
+                found.rows.forEach(row => {
+                    const tmp = row.history.split(",");
+                    tmp.forEach(item => {
+                        item += "_" + row.checklist_id + "_" + row.chl_name;
+                        historyArr.push(item);
+                    })
+                })
+                return res.status(200).json(historyArr.map(row => {
+                    const tmp = row.split("_");
+                    return {
+                        action: tmp[0],
+                        status: tmp[1],
+                        date: tmp[2].slice(0, -3),
+                        name: tmp[3],
+                        checklistId: tmp[5],
+                        checklistName: tmp[6],
+                    }
+                }))
+            }
         });
     }
     
