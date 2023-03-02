@@ -8,7 +8,7 @@ import { ThreeDots } from 'react-loading-icons';
 import Image from "next/image";
 import AssetRequestHistory from "../../../components/Asset/AssetRequestHistory";
 import AssetChecklistHistory from "../../../components/Asset/AssetChecklistHistory";
-
+import AssetHierachy from "../../../components/Asset/AssetHierachy";
 
 // Get asset detail by psa id
 const getAsset = async (id: number) => {
@@ -24,6 +24,7 @@ const getAsset = async (id: number) => {
         });
 };
 
+// Fetch asset history
 const getAssetHistory = async (id: number, type: string = "request") => {
     const url =  "/api/asset/history/" + type + "/"
     const history =  await axios
@@ -101,6 +102,7 @@ export default function AssetDetails() {
                                         {/* {assetDetail.plant_name} 
                                         {assetDetail.system_name} 
                                         {assetDetail.system_asset}  */}
+                                        {assetDetail && <AssetHierachy asset={assetDetail} />}
                                     </td>
                                 </tr>
                                 <tr>

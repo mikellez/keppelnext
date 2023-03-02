@@ -55,5 +55,26 @@
     text-decoration: underline;
 }
 
+.assetHierachy {
+    display: flex;
+    flex-direction: column;
+}
+
+.assetHierachy p {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.assetHierachy :nth-child(1) {
+    text-decoration: underline;
+}
+
+.assetHierachy :last-child {
+    font-weight: 700;
+}
+
 
 
