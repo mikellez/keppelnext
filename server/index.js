@@ -15,7 +15,7 @@ const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-const HOMEPAGE = "/QRCode";
+const HOMEPAGE = "/Dashboard";
 
 app.prepare().then(() => {
     const server = express();
@@ -51,14 +51,18 @@ app.prepare().then(() => {
 
     // Server side access control
     const restrictEng = ["/Schedule/Manage"];
-    const restrictOps = ["/Schedule/Create", "/Schedule/Manage"];
+    const restrictOps = ["/Schedule/Create", "/Schedule/Manage", "/Asset/New"];
     function accessControl(req, res, next) {
         if (req.user) {
             if (req.user.role_id == 3 && restrictEng.includes(req.path)) {
                 res.redirect("/404");
             } else if (
                 req.user.role_id == 4 &&
-                (restrictOps.includes(req.path) || req.path.startsWith("/Schedule/Timeline"))
+                (
+                    restrictOps.includes(req.path) || 
+                    req.path.startsWith("/Schedule/Timeline") || 
+                    req.path.startsWith("/Asset/Edit")
+                )
             ) {
                 res.redirect("/404");
             }

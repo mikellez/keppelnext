@@ -8,7 +8,7 @@ const apiLimiter = rateLimit({
 });
 
 const loginLimiter = rateLimit({
-	windowMs: 10 * 60 * 1000, // 15 minutes
+	windowMs: 10 * 60 * 1000, // 10 minutes
 	max: 10, 
 	standardHeaders: true, 
 	legacyHeaders: false, 
