@@ -2,16 +2,16 @@ import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import { ModuleMain, ModuleHeader, ModuleContent } from "../../../components";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { CMMSAssetDetails } from "../../../types/common/interfaces";
+import { CMMSAssetDetails, CMMSAssetHistory } from "../../../types/common/interfaces";
 import styles from "../../../styles/Asset.module.scss";
 import { ThreeDots } from 'react-loading-icons';
 import Image from "next/image";
-import AssetHistory from "../../../components/Asset/AssetHistory";
+import AssetRequestHistory from "../../../components/Asset/AssetRequestHistory";
 
 
 // Get asset detail by psa id
-const getAsset = async (id: number, use: string = "general") => {
-    const url = use === "general" ? "/api/assetDetails/" : use === "history" ? "/api/asset/history/" : ""
+const getAsset = async (id: number) => {
+    const url =  "/api/assetDetails/" 
     return await axios
         .get(url + id)
         .then((res) => {
@@ -23,39 +23,31 @@ const getAsset = async (id: number, use: string = "general") => {
         });
 };
 
+const getAssetHistory = async (id: number, type: string = "request") => {
+    const url =  "/api/asset/history/" + type + "/"
+    const history =  await axios
+        .get(url + id)
+        .then((res) => {
+            return res.data;
+        })
+        .catch((err) => {
+            console.log(err.response);
+            return err.response.status;
+        });
+
+    if (history && history != "no history") {
+        return history
+    }
+}
+
 const checkBase64 = (s: string): boolean => {
     const base64 = new RegExp("data:image")
     return base64.test(s);
 }
 
-// interface State {
-//     hasError: boolean;
-// }
-
-// class ImgErrorBoundary extends React.Component<{children?: ReactNode}, State> {
-//     public state: State = {
-//         hasError: false
-//     }
-
-//     public static getDerivedStateFromError(_: Error): State {
-//         return { hasError: true };
-//     }
-
-//     public componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-//         console.error(error, errorInfo);
-//     }
-
-//     public render() {
-//         if(this.state.hasError)
-//             return <h1>could not display image</h1>
-
-//         return this.props.children;
-//     }
-// }
-
 export default function AssetDetails() {
     const [assetDetail, setAssetDetail] = useState<CMMSAssetDetails>({} as CMMSAssetDetails);
-    const [assetHistory, setAssetHistory] = useState<{history: string}[]>();
+    const [assetRequestHistory, setAssetRequestHistory] = useState<CMMSAssetHistory[]>();
     const [imgIsErr, setImgIsErr] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -68,10 +60,10 @@ export default function AssetDetails() {
             const id = parseInt(psa_id as string);
             getAsset(id).then((result) => {
                 if (!result || result.length == 0) router.replace("/404");
-                getAsset(id, "history").then(history => {
+                getAssetHistory(id).then(history => {
                     setAssetDetail(result[0]);
                     setImgIsErr(!result[0].uploaded_image);
-                    setAssetHistory(history);
+                    if (history) setAssetRequestHistory(history);
                 })
             });
         }
@@ -82,7 +74,7 @@ export default function AssetDetails() {
 
     return (
         <ModuleMain>
-            <ModuleHeader header="Asset Detail"></ModuleHeader>
+            <ModuleHeader header="Asset Details"></ModuleHeader>
             <ModuleContent>
                 {isLoading ? 
                     <div style={{ width: "100%", textAlign: "center" }}>
@@ -90,6 +82,7 @@ export default function AssetDetails() {
                     </div> 
                 : 
                 <>
+                    <h4 className={styles.assetDetailsHeader}>Overview</h4>
                     <div className={styles.assetDetails}>
                         <table className={styles.assetTable}>
                             <tbody>
@@ -155,7 +148,6 @@ export default function AssetDetails() {
                         </table>
                         <div>
                             {!imgIsErr && (
-                                // <ImgErrorBoundary>
                                 <Image
                                     src={checkBase64(assetDetail.uploaded_image as string) ? assetDetail.uploaded_image as string : ""} 
                                     width={400} 
@@ -164,11 +156,10 @@ export default function AssetDetails() {
                                     onError={() => setImgIsErr(true)}
                                     className={styles.assetImage}
                                 />
-                                // </ImgErrorBoundary>
                             )}
                         </div>
                     </div>
-                    {assetHistory?.length != 0 && <AssetHistory history={assetHistory} />}
+                    {assetRequestHistory && <AssetRequestHistory history={assetRequestHistory as CMMSAssetHistory[]} />}
                 </>
                 }
             </ModuleContent>

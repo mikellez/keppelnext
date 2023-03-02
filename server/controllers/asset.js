@@ -128,17 +128,51 @@ const getAssetDetails = async (req, res, next) => {
     );
 };
 
+// Get the history of an asset instrument for either request or checklist
 const getAssetHistory = async (req, res, next) => {
-    const id = parseInt(req.params.id);
-    if (id === NaN) return res.status(400).json("Invalid asset id");
-    const queryS = `SELECT * FROM (SELECT requesthistory as history FROM keppel.request WHERE psa_id = ${id}
-    UNION 
-    SELECT history FROM keppel.checklist_master WHERE linkedassetids LIKE '%${id}%') AS H
-    WHERE H.history IS NOT NULL`;
-    db.query(queryS, (err, found) => {
-        if (err) throw err;
-        else return res.status(200).json(found.rows)
-    });
+    if (req.params.type === "request") {
+        const queryS = `SELECT rt.request_id, pt.priority, ft.fault_type, requesthistory 
+        FROM keppel.request AS rt
+        LEFT JOIN keppel.priority AS pt ON pt.p_id = rt.priority_id
+        LEFT JOIN keppel.fault_types AS ft ON ft.fault_id = rt.fault_id
+        WHERE psa_id = $1 AND requesthistory IS NOT NULL`;
+        db.query(queryS, [req.params.id], (err, found) => {
+            if (err) throw err;
+            if (found.rows.length === 0) {
+                return res.status(200).json("no history");
+            } else {
+                const historyArr = [];
+                found.rows.forEach(row => {
+                    const tmp = row.requesthistory.split("!");
+                    tmp.forEach(tmpItem => {
+                        tmpItem += "_" + row.request_id  + "_" + row.priority + "_" + row.fault_type;
+                        historyArr.push(tmpItem)
+                    })
+                })
+                return res.status(200).json(historyArr.map(row => {
+                    const tmp = row.split("_");
+                    return {
+                        status: tmp[0],
+                        action: tmp[1],
+                        date: tmp[2],
+                        role: tmp[3],
+                        name: tmp[4],
+                        caseId: tmp[5],
+                        priority: tmp[6],
+                        faultType: tmp[7],
+                    }
+                }))
+            }
+        });
+
+    } else if (req.params.type === "checklist") {
+        const queryS = `SELECT requesthistory as history FROM keppel.request WHERE psa_id = ${id}`;
+        db.query(queryS, (err, found) => {
+            if (err) throw err;
+            else return res.status(200).json(found.rows)
+        });
+    }
+    
 };
 
 module.exports = {

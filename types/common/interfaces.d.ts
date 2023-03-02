@@ -32,6 +32,17 @@ interface CMMSAssetDetails extends CMMSAsset {
     system_asset_lvl7?: string;
 }
 
+interface CMMSAssetHistory {
+	status: string;
+	action: string;
+	date: string;
+	role: string;
+	name: string;
+	caseId: string;
+	priority: string;
+	faultType: string;
+}
+
 interface CMMSUser {
 	id: number
 	role_id?: number
@@ -151,4 +162,21 @@ interface CMMSMasterTables {
 	}
 }
 
-export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes, CMMSPlant, CMMSScheduleEvent, CMMSTimeline, CMMSSchedule, CMMSAsset, CMMSAssetDetails, CMMSChecklist, CMMSMasterSubmission, CMMSMasterField, CMMSMasterTables };
+export { 
+	CMMSBaseType, 
+	CMMSUser, 
+	CMMSRequest, 
+	CMMSRequestTypes, 
+	CMMSFaultTypes, 
+	CMMSPlant, 
+	CMMSScheduleEvent, 
+	CMMSTimeline, 
+	CMMSSchedule, 
+	CMMSAsset, 
+	CMMSAssetDetails, 
+	CMMSAssetHistory,
+	CMMSChecklist, 
+	CMMSMasterSubmission, 
+	CMMSMasterField, 
+	CMMSMasterTables 
+};
