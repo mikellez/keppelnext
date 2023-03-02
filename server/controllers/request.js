@@ -53,7 +53,7 @@ const createRequest = async (req, res, next) => {
 		], (err, result) => {
 			if(err) return res.status(500).json({msg: err});
 	
-			res.status(200).json(result);
+			res.status(200).json("success");
 		}
 	);
 }

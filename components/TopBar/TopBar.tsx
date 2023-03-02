@@ -5,6 +5,42 @@ import DropdownMenu from './DropdownMenu';
 import NavBar from '../NavBar/NavBar';
 import colours from '../../styles/colours.module.scss'
 import Link from 'next/link';
+import { useCurrentUser } from '../SWR';
+import useComponentVisible from './useComponentVisible';
+
+function ProfileInfo() {
+	const {
+		data,
+		error
+	} = useCurrentUser()
+
+    const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(false);
+
+	const toggleDropdown = (): void => {
+		if(isComponentVisible)	setIsComponentVisible(false);
+		else					setIsComponentVisible(true);
+	}
+
+	return <>
+		<VscAccount size={28} style={{color:"#707070", marginLeft: "auto", cursor: "pointer"}} onClick={toggleDropdown}/>
+		{ isComponentVisible &&
+		<div ref={ref} style={{
+			position: "fixed",
+			right: "5em",
+			top: "5em",
+
+			padding: "1em",
+
+			backgroundColor: "white",
+			border: "1px rgb(200,200,200) solid",
+			borderRadius: "4px"
+		}}>
+			{data?.name}
+			{data?.role_name}
+		</div>
+		}
+	</>
+}
 
 export default function TopBar() {
 
@@ -30,7 +66,9 @@ export default function TopBar() {
 			}>
 				<NavBar />
 				<Link href="/Dashboard"><Image src="/keppellogo.png" alt="Keppell Logo" width={225} height={28}/></Link>
-				<VscAccount size={28} style={{color:"#707070", marginLeft: "auto"}}/>
+
+				<ProfileInfo/>
+
 				<DropdownMenu/>
 			</div>
 		</div>

@@ -14,16 +14,16 @@ export default function NavLink(props: NavLinkInfo) {
     
     const router = useRouter();
 
-    
     return (
-        <div className={styles.navItem + (router.pathname.includes(props.path) ? " " + styles.navItemSelected : "")} >
-            {props.icon}
-            <Link
-                href={props.path}
-                onClick={props.onClick}
-            >
-            <h6 className={styles.navItemText + (router.pathname.includes(props.path) ? " " + styles.navItemTextSelected : "")}>{props.name}</h6>
-            </Link>
-        </div> 
+        <Link
+            href={props.path}
+            onClick={props.onClick}
+        >
+            <div className={styles.navItem + (router.pathname.includes(props.path) ? " " + styles.navItemSelected : "")} >
+                {props.icon}
+                
+                <h6 className={styles.navItemText + (router.pathname.includes(props.path) ? " " + styles.navItemTextSelected : "")}>{props.name}</h6>
+            </div> 
+        </Link>
     )
 }

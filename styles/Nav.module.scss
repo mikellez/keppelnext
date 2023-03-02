@@ -35,7 +35,7 @@
 .navItem {
     color: global.$gray;
     background-color: #f7f7f7;
-    margin: 0.2rem 0 0.2rem 0;
+    margin: 0.4rem 0 0 0;
     padding: 0.3rem 2rem;
     border-left: rgba(0,0,0,0.2) solid 6px;
     // display: flex;
@@ -83,18 +83,33 @@
 
 .navDropdownItems {
     flex-direction: column;
+    color: global.$gray;
 }
 
 .navDropdownItem {
     color: global.$gray;
     padding: 0.2rem 2rem;
-    border-radius: 5%;
     display: flex;
     flex-direction: row;
     align-items: center;
     font-size: 0.9rem;
+    
+    background-color: #f7f7f7;
+    padding: 0.3rem 5.5rem;
+    border-left: rgba(0,0,0,0.2) solid 6px;
 }
 
 .navDropdownItem:hover {
     color: global.$primary;
+    border-color: global.$primary;
+}
+
+.navDropdownSelected {
+    background-color: global.$primary;
+    color: white;
+}
+
+.navDropdownSelected:hover {
+    color: white;
+    border-left: rgba(0,0,0,0.2) solid 6px;
 }
