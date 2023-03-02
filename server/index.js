@@ -9,7 +9,7 @@ const userAuth = require("./userAuth");
 
 const controllers = require("./controllers");
 const { createTimeline } = require("./controllers/schedule");
-const { limiter } = require("./rateLimiter");
+const { apiLimiter, loginLimiter } = require("./rateLimiter");
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -23,7 +23,8 @@ app.prepare().then(() => {
     server.use(bodyParser.json());
     server.use(bodyParser.urlencoded({ extended: false }));
     userAuth(server);
-    server.use("/api", limiter);
+    server.use("/api/login", loginLimiter);
+    server.use("/api/*", apiLimiter);
 
     // Prevent cache in browsers
     server.use(function (req, res, next) {
