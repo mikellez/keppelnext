@@ -4,7 +4,7 @@ import { ModalProps } from "./EventModal";
 import TooltipBtn from "../TooltipBtn";
 import { GrClose } from "react-icons/gr";
 import styles from "../../styles/Schedule.module.scss";
-import PlantSelect from "./PlantSelect";
+import PlantSelect from "../PlantSelect";
 import TimelineSelect from "./TimelineSelect";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";

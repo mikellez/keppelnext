@@ -110,6 +110,8 @@ app.prepare().then(() => {
 
     server.get("/api/asset/:plant_id", checkIfLoggedInAPI, controllers.asset.getAssetsFromPlant);
     server.get("/api/asset", checkIfLoggedInAPI, controllers.asset.getAssetHierarchy);
+    server.get("/api/assetDetails/:psa_id", checkIfLoggedInAPI, controllers.asset.getAssetDetails);
+    server.get("/api/asset/history/:type/:id", checkIfLoggedInAPI, controllers.asset.getAssetHistory);
 
     server.get("/api/master/new", checkIfLoggedInAPI, controllers.master.fetchMasterTypeEntry);
     server.post("/api/master/new", checkIfLoggedInAPI, controllers.master.createMasterTypeEntry);
@@ -141,13 +143,10 @@ app.prepare().then(() => {
         controllers.schedule.getOpsAndEngineers
     );
     server.post("/api/insertSchedule", checkIfLoggedInAPI, controllers.schedule.insertSchedule);
-    server.route("/api/schedule/:id", checkIfLoggedInAPI)
-        .delete(
-            controllers.schedule.deleteSchedule
-        )
-        .get(
-            controllers.schedule.getViewSchedules
-        );
+    server
+        .route("/api/schedule/:id", checkIfLoggedInAPI)
+        .delete(controllers.schedule.deleteSchedule)
+        .get(controllers.schedule.getViewSchedules);
 
     // NO API ROUTE
     server.all("/api/*", (req, res) => {

@@ -3,7 +3,7 @@
     gap: 0.5rem;
     align-items: center;
     margin-bottom: 0.8rem;
-    border: 1px solid #000000;
+    border: 1px solid #B2B2B2;
     border-radius: 5px;
     width: fit-content;
     padding: 0.3rem;
@@ -18,3 +18,63 @@
 .gridSearch input:focus {
     outline: none;
 }
+
+.assetDetails {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+}
+
+.assetTable { 
+    width: 700px;
+    border-collapse: separate; 
+    border-spacing: 10px;
+}
+
+.assetTable th {
+    text-align: left;
+    vertical-align: top;
+    padding-right: 25px;
+}
+
+.assetTable td {
+    text-align: left;
+    vertical-align: top;
+}
+
+.assetImage {
+    display: block;
+    // height: 400px;
+    // width: 400px;
+    object-fit: contain;
+    margin: auto;
+}
+
+.assetDetailsHeader {
+    margin: 10px 0;
+    text-decoration: underline;
+}
+
+.assetHierachy {
+    display: flex;
+    flex-direction: column;
+}
+
+.assetHierachy p {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.assetHierachy :nth-child(1) {
+    text-decoration: underline;
+}
+
+.assetHierachy :last-child {
+    font-weight: 700;
+}
+
+
+

@@ -8,6 +8,50 @@ interface CMMSAsset {
 	asset_name: string
 }
 
+interface CMMSAssetDetails extends CMMSAsset {
+    plant_name: string;
+    system_name: string;
+    system_asset: string;
+    parent_asset: string;
+    asset_type: string;
+    asset_description?: string;
+    asset_location?: string;
+    brand?: string;
+    model_number?: string;
+    technical_specs?: string;
+    manufacture_country?: string;
+    warranty?: string;
+    remarks?: string;
+    uploaded_image?: string;
+    uploaded_files?: string;
+    plant_id: number;
+    system_id: number;
+    system_asset_id: number;
+    system_asset_lvl5?: string;
+    system_asset_lvl6?: string;
+    system_asset_lvl7?: string;
+}
+
+interface CMMSAssetRequestHistory {
+	status: string;
+	action: string;
+	date: string;
+	role: string;
+	name: string;
+	caseId: string;
+	priority: string;
+	faultType: string;
+}
+
+interface CMMSAssetChecklistHistory {
+	action: string;
+	date: string;
+	name: string;
+	status: string;
+	checklistId: string;
+	checklistName: string;
+}	
+
 interface CMMSUser {
 	id: number
 	role_id?: number
@@ -127,4 +171,22 @@ interface CMMSMasterTables {
 	}
 }
 
-export { CMMSBaseType, CMMSUser, CMMSRequest, CMMSRequestTypes, CMMSFaultTypes, CMMSPlant, CMMSScheduleEvent, CMMSTimeline, CMMSSchedule, CMMSAsset, CMMSChecklist, CMMSMasterSubmission, CMMSMasterField, CMMSMasterTables };
+export { 
+	CMMSBaseType, 
+	CMMSUser, 
+	CMMSRequest, 
+	CMMSRequestTypes, 
+	CMMSFaultTypes, 
+	CMMSPlant, 
+	CMMSScheduleEvent, 
+	CMMSTimeline, 
+	CMMSSchedule, 
+	CMMSAsset, 
+	CMMSAssetDetails, 
+	CMMSAssetRequestHistory,
+	CMMSAssetChecklistHistory,
+	CMMSChecklist, 
+	CMMSMasterSubmission, 
+	CMMSMasterField, 
+	CMMSMasterTables 
+};

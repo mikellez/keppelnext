@@ -39,7 +39,13 @@ const tableInfo = {
 			column_label: "Name",
 			column_name: "asset_type"
 		}]
-	}
+	},
+	asset_instrument: {
+		internalName: "plant_system_assets",
+		name: "Asset Instrument",
+		id: "psa_id",
+		fields: [{}]
+	},
 }
 
 const fetchMasterInfo = async (req, res, next) => {
