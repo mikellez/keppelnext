@@ -76,6 +76,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
     const [isWarningModalOpen, setIsWarningModaOpen] = useState<boolean>(false);
     const [scheduleList, setScheduleList] = useState<CMMSSchedule[]>([]);
+    const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
 
     const router = useRouter();
 
@@ -174,6 +175,8 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                     router.push("/Schedule/Timeline/" + result);
                 });
             } else if (props.option === ScheduleCreateOptions.Approved) {
+                // Disable submit button
+                setDisableSubmit(true);
                 checkScheduleList(scheduleList).then((result) => {
                     if (result != -1) {
                         setScheduleList((prevList) => {
@@ -185,7 +188,10 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                             });
                         });
                         setIsMissingDetailsModaOpen(true);
+                         // Enable submit button
+                        setDisableSubmit(false);
                     } else {
+                        
                         createTimeline(timelineData).then((result) => {
                             setScheduleList((prevList) => {
                                 return prevList.map((s) => {
@@ -377,7 +383,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
 
                     {!props.isManage && (
                         <span className={styles.createScheduleModalBtnContainer}>
-                            <TooltipBtn toolTip={false} onClick={handleSubmit} style={{marginBottom: "1rem"}} >
+                            <TooltipBtn toolTip={false} onClick={handleSubmit} style={{marginBottom: "1rem"}} disabled={disableSubmit} >
                                 Confirm
                             </TooltipBtn>
                         </span>
