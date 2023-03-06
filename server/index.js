@@ -15,7 +15,7 @@ const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-const HOMEPAGE = "/Dashboard";
+// const HOMEPAGE = "/Dashboard";
 
 app.prepare().then(() => {
     const server = express();
@@ -50,18 +50,18 @@ app.prepare().then(() => {
     }
 
     // Server side access control
-    // Dashboard path
-    function homepage(role_id) {
-        switch (role_id) {
-            case 1: 
-            case 2:
-                return "/Dashboard/Manager";
-            case 3: 
-                return "/Dashboard/Engineer";
-            case 4:
-                return "/Dashboard/Specialist";
-        }
-    } 
+    // // Dashboard path
+    // function homepage(role_id) {
+    //     switch (role_id) {
+    //         case 1: 
+    //         case 2:
+    //             return "/Dashboard/Manager";
+    //         case 3: 
+    //             return "/Dashboard/Engineer";
+    //         case 4:
+    //             return "/Dashboard/Specialist";
+    //     }
+    // } 
 
     const restrictEng = ["/Schedule/Manage", "/Dashboard/Manager"];
     const restrictOps = ["/Schedule/Create", "/Schedule/Manage", "/Asset/New", "/Dashboard/Engineer", "/Dashboard/Manager"];
@@ -89,7 +89,7 @@ app.prepare().then(() => {
     // -----------------------------------
 
     server.post("/api/login", passport.authenticate("local", {}), (req, res) => {
-        return res.status(200).json({msg: "success", homepage: homepage(req.user.role_id)});
+        return res.status(200).json({msg: "success", homepage: controllers.dashboard.homepage(req.user.role_id)});
     });
 
     server.post("/api/logout", (req, res) => {
@@ -109,7 +109,7 @@ app.prepare().then(() => {
             role_name: req.user.role_name,
         });
     });
-
+    server.get("/api/dashboard/", checkIfLoggedInAPI, controllers.dashboard.getDashboardPath);
     server.get("/api/request/", checkIfLoggedInAPI, controllers.request.fetchRequests);
     server.post(
         "/api/request/",
@@ -179,13 +179,13 @@ app.prepare().then(() => {
     // HOME PAGE
     server.get("/", (req, res) => {
         if (req.user === undefined) return res.redirect("/Login");
-        return res.redirect(homepage(role_id));
+        return res.redirect(controllers.dashboard.homepage(role_id));
     });
 
     // ---- NEXT JS ----
 
     server.get("/Login", (req, res) => {
-        if (req.user !== undefined) return res.redirect(homepage(req.user.role_id));
+        if (req.user !== undefined) return res.redirect(controllers.dashboard.homepage(req.user.role_id));
         return handle(req, res);
     });
 

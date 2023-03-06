@@ -13,6 +13,7 @@ import nProgress from 'nprogress';
 export default function App({ Component, pageProps }: AppProps) {
 	const router = useRouter();
 	const { asPath, route, pathname } = router;
+	
 
 	useEffect(() => {
 		require("bootstrap/dist/js/bootstrap.bundle.min.js");
@@ -37,19 +38,21 @@ export default function App({ Component, pageProps }: AppProps) {
 	if(asPath === "/Login" || pathname === "/404" || pathname === "/500")
 		return <div><Component {...pageProps} /></div>
 
-	return <div>
-		<TopBar />
-		<div style={
-				{
-					position: "relative",
-					minHeight: "calc(100vh - 4rem)"
-				}
-			// minheight -4rem due to top bar height of 4 rem
-			}>
-			<div style={{paddingBottom: "12rem"}}>
-				<Component {...pageProps} />
+	return (
+		<div>
+			<TopBar />
+			<div style={
+					{
+						position: "relative",
+						minHeight: "calc(100vh - 4rem)"
+					}
+				// minheight -4rem due to top bar height of 4 rem
+				}>
+				<div style={{paddingBottom: "12rem"}}>
+					<Component {...pageProps} />
+				</div>
+				<Footer />
 			</div>
-			<Footer />
 		</div>
-	</div>
+	)
 }
