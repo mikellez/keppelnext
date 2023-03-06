@@ -50,8 +50,21 @@ app.prepare().then(() => {
     }
 
     // Server side access control
-    const restrictEng = ["/Schedule/Manage"];
-    const restrictOps = ["/Schedule/Create", "/Schedule/Manage", "/Asset/New"];
+    // Dashboard path
+    function homepage(role_id) {
+        switch (role_id) {
+            case 1: 
+            case 2:
+                return "/Dashboard/Manager";
+            case 3: 
+                return "/Dashboard/Engineer";
+            case 4:
+                return "/Dashboard/Specialist";
+        }
+    } 
+
+    const restrictEng = ["/Schedule/Manage", "Dashboard/Manager"];
+    const restrictOps = ["/Schedule/Create", "/Schedule/Manage", "/Asset/New", "Dashboard/Engineer", "Dashboard/Manager"];
     function accessControl(req, res, next) {
         if (req.user) {
             if (req.user.role_id == 3 && restrictEng.includes(req.path)) {
@@ -73,7 +86,7 @@ app.prepare().then(() => {
     // -----------------------------------
 
     server.post("/api/login", passport.authenticate("local", {}), (req, res) => {
-        return res.status(200).json("success");
+        return res.status(200).json({msg: "success", homepage: homepage(req.user.role_id)});
     });
 
     server.post("/api/logout", (req, res) => {
@@ -163,13 +176,13 @@ app.prepare().then(() => {
     // HOME PAGE
     server.get("/", (req, res) => {
         if (req.user === undefined) return res.redirect("/Login");
-        return res.redirect(HOMEPAGE);
+        return res.redirect(homepage(role_id));
     });
 
     // ---- NEXT JS ----
 
     server.get("/Login", (req, res) => {
-        if (req.user !== undefined) return res.redirect(HOMEPAGE);
+        if (req.user !== undefined) return res.redirect(homepage(req.user.role_id));
         return handle(req, res);
     });
 

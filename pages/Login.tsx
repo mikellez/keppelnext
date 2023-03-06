@@ -26,7 +26,7 @@ function Login() {
 		await axios.post("/api/login", data)
 		.then((response) => {
 			console.log("success", response);
-			router.push("/Dashboard");
+			router.push(response.data.homepage);
 		}).catch((e) => {
 			console.log("error", e);
 			alert("login fail")
