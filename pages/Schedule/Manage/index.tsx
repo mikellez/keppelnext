@@ -180,7 +180,6 @@ export default function ManageSchedule() {
                 text={status === 1 ? "Schedule has been successfully approved." : status === 3 ? "Schedule has been rejected." : ""}
                 icon={SimpleIcon.Check}
             />
-
         </ScheduleTemplate>
     );
 }
