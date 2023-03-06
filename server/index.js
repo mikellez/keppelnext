@@ -63,8 +63,9 @@ app.prepare().then(() => {
         }
     } 
 
-    const restrictEng = ["/Schedule/Manage", "Dashboard/Manager"];
-    const restrictOps = ["/Schedule/Create", "/Schedule/Manage", "/Asset/New", "Dashboard/Engineer", "Dashboard/Manager"];
+    const restrictEng = ["/Schedule/Manage", "/Dashboard/Manager"];
+    const restrictOps = ["/Schedule/Create", "/Schedule/Manage", "/Asset/New", "/Dashboard/Engineer", "/Dashboard/Manager"];
+    const restrictManager = ["/Dashboard/Engineer", "/Dashboard/Specialist"]
     function accessControl(req, res, next) {
         if (req.user) {
             if (req.user.role_id == 3 && restrictEng.includes(req.path)) {
@@ -77,6 +78,8 @@ app.prepare().then(() => {
                     req.path.startsWith("/Asset/Edit")
                 )
             ) {
+                res.redirect("/404");
+            } else if (req.user.role_id = 2 && restrictManager.includes(req.path)) {
                 res.redirect("/404");
             }
         }
