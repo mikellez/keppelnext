@@ -50,6 +50,7 @@ export default function TopBar() {
 	const router = useRouter();
 
 	const getDashboard = () => {
+		if (router.pathname.startsWith("/Dashboard")) return;
 		axios.get("/api/dashboard/")
 			.then(res => {
 				router.push(res.data.homepage)
