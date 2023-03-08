@@ -36,20 +36,6 @@ app.prepare().then(() => {
         next();
     }
 
-    // Server side access control
-    // // Dashboard path
-    // function homepage(role_id) {
-    //     switch (role_id) {
-    //         case 1: 
-    //         case 2:
-    //             return "/Dashboard/Manager";
-    //         case 3: 
-    //             return "/Dashboard/Engineer";
-    //         case 4:
-    //             return "/Dashboard/Specialist";
-    //     }
-    // } 
-
     const restrictEng = ["/Schedule/Manage", "/Dashboard/Manager"];
     const restrictOps = ["/Schedule/Create", "/Schedule/Manage", "/Asset/New", "/Dashboard/Engineer", "/Dashboard/Manager"];
     const restrictManager = ["/Dashboard/Engineer", "/Dashboard/Specialist"]
@@ -80,13 +66,13 @@ app.prepare().then(() => {
     // HOME PAGE
     server.get("/", (req, res) => {
         if (req.user === undefined) return res.redirect("/Login");
-        return res.redirect(controllers.dashboard.homepage(role_id));
+        return res.redirect("/Dashboard");
     });
 
     // ---- NEXT JS ----
 
     server.get("/Login", (req, res) => {
-        if (req.user !== undefined) return res.redirect(controllers.dashboard.homepage(req.user.role_id));
+        if (req.user !== undefined) return res.redirect("/Dashboard");
         return handle(req, res);
     });
 
