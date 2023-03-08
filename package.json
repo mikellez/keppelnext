@@ -7,7 +7,8 @@
 		"debug": "nodemon --inspect server/index.js",
 		"build": "next build",
 		"start": "NODE_ENV=production node server/index.js",
-		"lint": "next lint"
+		"lint": "next lint",
+		"genApiDoc": "apidoc -i server -o apidoc"
 	},
 	"dependencies": {
 		"@fullcalendar/core": "^6.0.2",
@@ -51,5 +52,13 @@
 		"@types/node": "^18.11.17",
 		"@types/nprogress": "^0.2.0",
 		"@types/react-modal": "^3.13.1"
+	},
+	"apidoc": {
+		"title": "Keppel Next",
+		"name": "Keppel Next",
+		"header": {
+			"title": "Introduction",
+			"filename": "./docHeader.md"
+		}
 	}
 }

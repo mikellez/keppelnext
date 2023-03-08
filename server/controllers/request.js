@@ -1,5 +1,10 @@
 const db = require("../../db");
 
+/** Express router providing user related routes
+ * @module controllers/request
+ * @requires db
+ */
+
 const fetchRequests = async (req, res, next) => {
 	db.query(`SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
 	rt.request, ro.role_name, sc.status,r.fault_description, rt.request as request_type,
@@ -32,7 +37,7 @@ const fetchRequests = async (req, res, next) => {
 		(ua.role_name != 'Operation Specialist')
 	)
 	order by r.created_date desc, r.status_id desc;`, (err, result) => {
-		if(err) return res.status(500).json({msg: err});
+		if(err) return res.status(500).json({errormsg: err});
 
 		res.status(200).json(result.rows);
 	});
@@ -51,7 +56,7 @@ const createRequest = async (req, res, next) => {
 		)`, [
 			faultTypeID, description, plantLocationID, requestTypeID, req.user.id, req.user.role_id, taggedAssetID, fileBuffer, fileType
 		], (err, result) => {
-			if(err) return res.status(500).json({msg: err});
+			if(err) return res.status(500).json({errormsg: err});
 	
 			res.status(200).json("success");
 		}
@@ -60,7 +65,7 @@ const createRequest = async (req, res, next) => {
 
 const fetchRequestTypes = async (req, res, next) => {
 	db.query(`SELECT * FROM keppel.request_type ORDER BY req_id ASC`, (err, result) => {
-		if(err) return res.status(500).json({msg: err});
+		if(err) return res.status(500).json({errormsg: err});
 		res.status(200).json(result.rows);
 	})
 }
