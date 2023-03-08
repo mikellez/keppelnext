@@ -3,7 +3,7 @@ import styles from '../../styles/Nav.module.scss'
 import { GrClose } from "react-icons/gr";
 import { BsList, BsHouseDoor } from 'react-icons/bs'
 import { TbChecklist } from "react-icons/tb";
-import { AiOutlineQrcode , AiOutlineControl, AiOutlineUser, AiOutlineSchedule, AiOutlinePhone, AiOutlineHistory } from "react-icons/ai";
+import { AiOutlineQrcode , AiOutlineControl, AiOutlineUser, AiOutlineSchedule, AiOutlinePhone, AiOutlineHistory, AiOutlineDashboard } from "react-icons/ai";
 import { MdWorkOutline } from "react-icons/md";
 import { VscBook } from "react-icons/vsc";
 import NavDropdown, { NavDropdownLink } from './NavDropdown';
@@ -79,6 +79,7 @@ export default function NavBar() {
                         <GrClose onClick={displayNav} size={25} style={{color:"#4D4D4D", marginLeft: "auto", cursor: "pointer"}} />
                     </div>
 
+                    <NavLink     name="Dashboard"         path="/Dashboard"     icon={<AiOutlineDashboard size={21} />} />
                     <NavLink     name="Request"           path="/Request"       icon={<AiOutlinePhone size={21} />} />
                     <NavLink     name="Asset"             path="/Asset"         icon={<BsHouseDoor size={21} />} />
                     <NavDropdown name="Schedule"          path="/Schedule" navOpen={navDisplay} icon={<AiOutlineSchedule size={21} />}>
