@@ -45,10 +45,10 @@ export default function Schedule() {
 
   	return (
 		<ScheduleTemplate title="View Schedule" header="View Schedule" schedules={scheduleList}>
-				<div className={"form-group" && styles.eventModalHeader} style={{gap: "0.3rem"}}>
-					<MdOutlineLocationOn size={30} />
-					<PlantSelect onChange={changePlant} allPlants={true} />
-				</div>
+			<div className={"form-group" && styles.eventModalHeader} style={{gap: "0.3rem"}}>
+				<MdOutlineLocationOn size={30} />
+				<PlantSelect onChange={changePlant} allPlants={true} />
+			</div>
 		</ScheduleTemplate>
   	);
 };

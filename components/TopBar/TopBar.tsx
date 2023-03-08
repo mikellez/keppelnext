@@ -49,17 +49,6 @@ export default function TopBar() {
 
 	const router = useRouter();
 
-	const getDashboard = () => {
-		if (router.pathname.startsWith("/Dashboard")) return;
-		axios.get("/api/dashboard/")
-			.then(res => {
-				router.push(res.data.homepage)
-			})
-			.catch(err => {
-				console.log(err);
-			})
-	};
-
 	return (
 		<div>
 			<div style={
@@ -81,9 +70,11 @@ export default function TopBar() {
 				}
 			}>
 				<NavBar />
-				<div onClick={getDashboard} style={{ cursor: "pointer" }}>
-					<Image src="/keppellogo.png" alt="Keppell Logo" width={225} height={28}/>
-				</div>
+				<Link href="/Dashboard">
+					<div style={{ cursor: "pointer" }}>
+						<Image src="/keppellogo.png" alt="Keppell Logo" width={225} height={28}/>
+					</div>
+				</Link>
 
 				<ProfileInfo/>
 

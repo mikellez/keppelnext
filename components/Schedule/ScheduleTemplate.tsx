@@ -16,7 +16,7 @@ interface ScheduleTemplateInfo extends PropsWithChildren {
     header: string;
     schedules?: ScheduleInfo[];
     timeline?: number;
-    children?: ReactNode[];
+    children?: ReactNode;
 }
 
 export interface ScheduleInfo {
@@ -148,7 +148,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     </div>
                 }
             >
-                {props.children?.filter(item => (item.props.modalOpenState != false && item.props.isOpen != false))}
+                {props.children}
             </ModuleHeader>
             <ModuleContent>
                 {toggleCalendarOrListView ? (
