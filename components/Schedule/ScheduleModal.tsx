@@ -33,6 +33,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
     const [newSchedule, setNewSchedule] = useState<CMMSSchedule>({} as CMMSSchedule);
     const [successModal, setSuccessModal] = useState<boolean>(false);
     const [failureModal, setFailureModal] = useState<boolean>(false);
+    const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
 
     const router = useRouter();
 
@@ -55,6 +56,8 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
 
     // Submit the new schedule for maintenance on submit click
     function handleSubmit() {
+        // Disable submit button
+        setDisableSubmit(true);
         // Check for missing entries
         if (!newSchedule.checklistId || 
             !newSchedule.startDate || 
@@ -62,18 +65,21 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
             !newSchedule.checklistId ||
             !newSchedule.recurringPeriod ||
             newSchedule.recurringPeriod === -1 ||
-            !newSchedule.reminderRecurrence ||
+            (!newSchedule.reminderRecurrence && newSchedule.reminderRecurrence != 0) ||
             !newSchedule.assignedIds ||
             newSchedule.assignedIds.length === 0 ||
             !newSchedule.remarks
         ) {
             setFailureModal(true);
+            // Enable submit button
+            setDisableSubmit(false);
         } else {
             scheduleMaintenance(newSchedule).then(result => {
-            setSuccessModal(true);
-            setTimeout(() => {
-                router.replace("/Schedule/Timeline/" + props.timeline.id);
-            }, 1000);
+                
+                setSuccessModal(true);
+                setTimeout(() => {
+                    router.replace("/Schedule/Timeline/" + props.timeline.id);
+                }, 1000);
             });
         }
     };
@@ -177,7 +183,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                                 </tr>
                             </tbody>
                         </table>
-                        <TooltipBtn toolTip={false} onClick={handleSubmit}>Create</TooltipBtn>
+                        <TooltipBtn toolTip={false} onClick={handleSubmit} disabled={disableSubmit}>Create</TooltipBtn>
 
                         <ModuleSimplePopup 
                             modalOpenState={successModal} 

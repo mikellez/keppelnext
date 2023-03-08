@@ -2,17 +2,23 @@ const express = require("express");
 const next = require("next");
 const bodyParser = require("body-parser");
 const userAuth = require("./userAuth");
+
+const controllers = require("./controllers");
+const { apiLimiter, loginLimiter } = require("./rateLimiter");
+
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-const HOMEPAGE = "/QRCode";
+// const HOMEPAGE = "/Dashboard";
 
 app.prepare().then(() => {
     const server = express();
     server.use(bodyParser.json());
     server.use(bodyParser.urlencoded({ extended: false }));
     userAuth(server);
+    server.use("/api/login", loginLimiter);
+    server.use("/api/*", apiLimiter);
 
     // Prevent cache in browsers
     server.use(function (req, res, next) {
@@ -31,16 +37,36 @@ app.prepare().then(() => {
     }
 
     // Server side access control
-    const restrictEng = ["/Schedule/Manage"];
-    const restrictOps = ["/Schedule/Create", "/Schedule/Manage"];
+    // // Dashboard path
+    // function homepage(role_id) {
+    //     switch (role_id) {
+    //         case 1: 
+    //         case 2:
+    //             return "/Dashboard/Manager";
+    //         case 3: 
+    //             return "/Dashboard/Engineer";
+    //         case 4:
+    //             return "/Dashboard/Specialist";
+    //     }
+    // } 
+
+    const restrictEng = ["/Schedule/Manage", "/Dashboard/Manager"];
+    const restrictOps = ["/Schedule/Create", "/Schedule/Manage", "/Asset/New", "/Dashboard/Engineer", "/Dashboard/Manager"];
+    const restrictManager = ["/Dashboard/Engineer", "/Dashboard/Specialist"]
     function accessControl(req, res, next) {
         if (req.user) {
             if (req.user.role_id == 3 && restrictEng.includes(req.path)) {
                 res.redirect("/404");
             } else if (
                 req.user.role_id == 4 &&
-                (restrictOps.includes(req.path) || req.path.startsWith("/Schedule/Timeline"))
+                (
+                    restrictOps.includes(req.path) || 
+                    req.path.startsWith("/Schedule/Timeline") || 
+                    req.path.startsWith("/Asset/Edit")
+                )
             ) {
+                res.redirect("/404");
+            } else if (req.user.role_id = 2 && restrictManager.includes(req.path)) {
                 res.redirect("/404");
             }
         }
@@ -54,13 +80,13 @@ app.prepare().then(() => {
     // HOME PAGE
     server.get("/", (req, res) => {
         if (req.user === undefined) return res.redirect("/Login");
-        return res.redirect(HOMEPAGE);
+        return res.redirect(controllers.dashboard.homepage(role_id));
     });
 
     // ---- NEXT JS ----
 
     server.get("/Login", (req, res) => {
-        if (req.user !== undefined) return res.redirect(HOMEPAGE);
+        if (req.user !== undefined) return res.redirect(controllers.dashboard.homepage(req.user.role_id));
         return handle(req, res);
     });
 

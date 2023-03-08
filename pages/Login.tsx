@@ -1,5 +1,5 @@
 import styles from '../styles/Login.module.css'
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useContext } from 'react'
 import Image from 'next/image'
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
@@ -26,7 +26,7 @@ function Login() {
 		await axios.post("/api/login", data)
 		.then((response) => {
 			console.log("success", response);
-			router.push("/Dashboard");
+			router.push(response.data.homepage);
 		}).catch((e) => {
 			console.log("error", e);
 			alert("login fail")

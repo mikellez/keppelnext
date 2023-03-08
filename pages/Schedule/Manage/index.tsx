@@ -156,15 +156,7 @@ export default function ManageSchedule() {
                 icon={SimpleIcon.Exclaim}
             />
 
-            <ModuleSimplePopup 
-                modalOpenState={isPopup} 
-                setModalOpenState={setIsPopup} 
-                title="Missing Remarks" 
-                text="Please write some remarks so that the engineers know why the schedule is rejected."
-                icon={SimpleIcon.Exclaim}
-            />
-
-            <ModuleSimplePopup
+           <ModuleSimplePopup
                 modalOpenState={confirmModal} 
                 setModalOpenState={setConfirmModal} 
                 title="Confirm Action" 
@@ -180,7 +172,6 @@ export default function ManageSchedule() {
                 text={status === 1 ? "Schedule has been successfully approved." : status === 3 ? "Schedule has been rejected." : ""}
                 icon={SimpleIcon.Check}
             />
-
         </ScheduleTemplate>
     );
 }

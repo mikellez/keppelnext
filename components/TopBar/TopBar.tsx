@@ -7,6 +7,9 @@ import colours from '../../styles/colours.module.scss'
 import Link from 'next/link';
 import { useCurrentUser } from '../SWR';
 import useComponentVisible from './useComponentVisible';
+import axios from 'axios';
+import { useRouter } from 'next/router';
+import { useContext } from 'react';
 
 function ProfileInfo() {
 	const {
@@ -44,6 +47,19 @@ function ProfileInfo() {
 
 export default function TopBar() {
 
+	const router = useRouter();
+
+	const getDashboard = () => {
+		if (router.pathname.startsWith("/Dashboard")) return;
+		axios.get("/api/dashboard/")
+			.then(res => {
+				router.push(res.data.homepage)
+			})
+			.catch(err => {
+				console.log(err);
+			})
+	};
+
 	return (
 		<div>
 			<div style={
@@ -65,7 +81,9 @@ export default function TopBar() {
 				}
 			}>
 				<NavBar />
-				<Link href="/Dashboard"><Image src="/keppellogo.png" alt="Keppell Logo" width={225} height={28}/></Link>
+				<div onClick={getDashboard} style={{ cursor: "pointer" }}>
+					<Image src="/keppellogo.png" alt="Keppell Logo" width={225} height={28}/>
+				</div>
 
 				<ProfileInfo/>
 
