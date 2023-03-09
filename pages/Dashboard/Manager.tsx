@@ -1,11 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ModuleContent, ModuleFooter, ModuleHeader, ModuleMain } from "../../components";
 import styles from "../../styles/Dashboard.module.scss";
 import DashboardBox from "../../components/Dashboard/DashboardBox";
 import PlantSelect from "../../components/PlantSelect";
+import { CMMSDashboardData } from "../../types/common/interfaces";
+import axios from "axios";
+
+async function fetchData(type: string, plant: number) {
+    const url = `/api/dashboard/${type}/${plant}`;
+    return await axios.get<CMMSDashboardData[]>(url)
+        .then(res => {
+            return res.data
+        })
+        .catch(err => console.log(err))
+};
 
 export default function ManagerDashboad() {
-    const [plant, setPlant] = useState<number>();
+    const [plant, setPlant] = useState<number>(0);
+    const [checklistData, setChecklistData] = useState<CMMSDashboardData[]>();
+    const [requestData, setRequestData] = useState<CMMSDashboardData[]>();
+
+    useEffect(() => {
+        fetchData("checklist", plant).then(result => {
+            if (result) setChecklistData(result)
+        });
+        fetchData("request", plant).then(result => {
+            if (result) setRequestData(result)
+        });
+    }, [plant])
+
+    console.log(requestData)
+    console.log(checklistData)
 
     return (
         <ModuleMain>

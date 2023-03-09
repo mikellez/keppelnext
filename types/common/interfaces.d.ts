@@ -171,6 +171,12 @@ interface CMMSMasterTables {
 	}
 }
 
+interface CMMSDashboardData {
+	status_id: string;
+	status: string;
+	count: number;
+}
+
 export { 
 	CMMSBaseType, 
 	CMMSUser, 
@@ -188,5 +194,6 @@ export {
 	CMMSChecklist, 
 	CMMSMasterSubmission, 
 	CMMSMasterField, 
-	CMMSMasterTables 
+	CMMSMasterTables,
+	CMMSDashboardData,
 };

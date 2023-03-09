@@ -208,6 +208,9 @@ router
     .delete(controllers.schedule.deleteSchedule)
     .get(controllers.schedule.getViewSchedules);
 
+
+router.get("/dashboard/:type/:plant?", checkIfLoggedInAPI, controllers.dashboard.getDashboardData);
+
 // NO API ROUTE
 router.all("/*", (req, res) => {
     return res.status(404).send("no route");
