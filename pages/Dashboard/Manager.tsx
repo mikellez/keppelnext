@@ -9,7 +9,7 @@ import axios from "axios";
 
 async function fetchData(type: string, plant: number) : Promise<CMMSDashboardData[]> {
     const url = `/api//${type}/status/${plant}`;
-    const colors = ["#03C988", "#7D1935", "#C74B50", "#810CA8", "#282A3A", "#FB2576"]
+    const colors = ["#03C988", "#FFAC41", "#C74B50", "#810CA8", "#282A3A", "#FB2576"]
     return await axios.get(url)
         .then(res => {
             if (res) {
