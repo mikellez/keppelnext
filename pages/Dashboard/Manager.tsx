@@ -4,13 +4,23 @@ import styles from "../../styles/Dashboard.module.scss";
 import DashboardBox from "../../components/Dashboard/DashboardBox";
 import PlantSelect from "../../components/PlantSelect";
 import { CMMSDashboardData } from "../../types/common/interfaces";
+import PChart from "../../components/Dashboard/PChart";
 import axios from "axios";
 
-async function fetchData(type: string, plant: number) {
+async function fetchData(type: string, plant: number) : Promise<CMMSDashboardData[]> {
     const url = `/api//${type}/status/${plant}`;
-    return await axios.get<CMMSDashboardData[]>(url)
+    const colors = ["#03C988", "#7D1935", "#C74B50", "#810CA8", "#282A3A", "#FB2576"]
+    return await axios.get(url)
         .then(res => {
-            return res.data
+            if (res) {
+                return res.data.map((item : any, index: number) => {
+                    return {
+                        ...item,
+                        count: parseInt(item.count),
+                        fill: colors[index],
+                    }
+                })
+            } 
         })
         .catch(err => console.log(err))
 };
@@ -29,13 +39,12 @@ export default function ManagerDashboad() {
         });
     }, [plant])
 
-    console.log(requestData)
-    console.log(checklistData)
-
     const pendingRequest = requestData?.filter(data => data.status_id === 1)[0];
     const closedRequest = requestData?.filter(data => data.status_id === 4)[0];
     const pendingChecklist = checklistData?.filter(data => data.status_id === 1)[0];
     const completedChecklist = checklistData?.filter(data => data.status_id === 4)[0];
+
+    console.log(requestData)
 
     return (
         <ModuleMain>
@@ -57,13 +66,18 @@ export default function ManagerDashboad() {
                         <p className={styles.dashboardCompletedNumber}>{completedChecklist ? completedChecklist.count : 0}</p>
                     </DashboardBox>
                     <DashboardBox title="Total Requests" style={{gridArea: "e"}}>
-
+                        {
+                            requestData && requestData.length > 0 ? <PChart data={requestData} /> : 
+                            <p className={styles.dashboardNoChart}>No requests</p>
+                        }
                     </DashboardBox>
                     <DashboardBox title="Total Checklists" style={{gridArea: "f"}}>
-
+                        {
+                            checklistData && checklistData.length > 0 ? <PChart data={checklistData} /> : 
+                            <p className={styles.dashboardNoChart}>No requests</p>
+                        }
                     </DashboardBox>
                     <DashboardBox title="Change of Parts Requested" style={{gridArea: "g"}}>
-
                     </DashboardBox>
                 </div>
             </ModuleContent>

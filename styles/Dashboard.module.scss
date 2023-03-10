@@ -48,3 +48,10 @@
     @extend .dashboardNumber;
     color: #367E18;
 }
+
+.dashboardNoChart {
+    position: absolute;
+    top: 50%;
+    font-size: 20px;
+    color: #BBBBBB;
+}

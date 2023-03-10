@@ -175,6 +175,7 @@ interface CMMSDashboardData {
 	status_id: number;
 	status: string;
 	count: number;
+	fill: string;
 }
 
 export { 
