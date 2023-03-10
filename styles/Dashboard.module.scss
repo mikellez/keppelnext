@@ -22,9 +22,29 @@
     background-color: #EEEEEE;
     border-radius: 5px;
     padding: 12px;
-    min-height: 200px;
+    // min-height: 200px;
+}
+
+.dashboardSection div {
+    display: flex;
+    justify-content: center;
 }
 
 .dashboardSection h5 {
     margin: auto;
+}
+
+.dashboardNumber {
+    font-size: 60px;
+    font-weight: 500;
+}
+
+.dashboardPendingdNumber {
+    @extend .dashboardNumber;
+    color: #C21010;
+}
+
+.dashboardCompletedNumber {
+    @extend .dashboardNumber;
+    color: #367E18;
 }

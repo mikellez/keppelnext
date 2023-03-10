@@ -10,7 +10,7 @@ export default function DashboardBox(props: DashboardBoxProps) {
     return (
         <div className={styles.dashboardSection} style={props.style}>
             <h5>{props.title}</h5>
-            {props.children}
+            <div>{props.children}</div>
         </div>
     );
 };

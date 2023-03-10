@@ -172,7 +172,7 @@ interface CMMSMasterTables {
 }
 
 interface CMMSDashboardData {
-	status_id: string;
+	status_id: number;
 	status: string;
 	count: number;
 }
