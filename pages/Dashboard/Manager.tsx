@@ -7,7 +7,7 @@ import { CMMSDashboardData } from "../../types/common/interfaces";
 import axios from "axios";
 
 async function fetchData(type: string, plant: number) {
-    const url = `/api/dashboard/${type}/${plant}`;
+    const url = `/api//${type}/status/${plant}`;
     return await axios.get<CMMSDashboardData[]>(url)
         .then(res => {
             return res.data

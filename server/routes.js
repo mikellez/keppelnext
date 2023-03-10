@@ -135,6 +135,7 @@ router.post("/request/", checkIfLoggedInAPI, upload.single("image"), controllers
  * @apiSuccess {string} -.request Name of the request type
  */
 router.get("/request/types", checkIfLoggedInAPI, controllers.request.fetchRequestTypes);
+router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
 
 router.get("/checklist/template", checkIfLoggedInAPI, controllers.checklist.fetchTemplateChecklists);
 router.get("/checklist/record", checkIfLoggedInAPI, controllers.checklist.fetchForReviewChecklists);
@@ -145,6 +146,8 @@ router.get(
     checkIfLoggedInAPI,
     controllers.checklist.fetchChecklistTemplateNames
 );
+
+router.get("/checklist/status/:plant", checkIfLoggedInAPI, controllers.checklist.fetchChecklistStatus);
 
 /**
  * @api {get} /fault/type Get Fault Types
@@ -207,9 +210,6 @@ router
     .route("/schedule/:id", checkIfLoggedInAPI)
     .delete(controllers.schedule.deleteSchedule)
     .get(controllers.schedule.getViewSchedules);
-
-
-router.get("/dashboard/:type/:plant?", checkIfLoggedInAPI, controllers.dashboard.getDashboardData);
 
 // NO API ROUTE
 router.all("/*", (req, res) => {

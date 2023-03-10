@@ -70,8 +70,24 @@ const fetchRequestTypes = async (req, res, next) => {
 	})
 }
 
+const fetchRequestStatus = async (req, res, next) => {
+    const sql = req.params.plant != 0 ? `SELECT S.STATUS, R.STATUS_ID, COUNT(R.STATUS_ID) FROM KEPPEL.REQUEST R
+    JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = R.STATUS_ID
+    WHERE R.PLANT_ID = ${req.params.plant}
+    GROUP BY(R.STATUS_ID, S.STATUS)` : 
+    `SELECT S.STATUS, R.STATUS_ID, COUNT(R.STATUS_ID) FROM KEPPEL.REQUEST R
+    JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = R.STATUS_ID
+    GROUP BY(R.STATUS_ID, S.STATUS)`;
+
+    db.query(sql, (err, result) => {
+        if (err) return res.status(500).send("Error in fetching request for dashboard");
+        return res.status(200).send(result.rows);
+    });
+};
+
 module.exports = {
 	fetchRequests,
 	createRequest,
-	fetchRequestTypes
+	fetchRequestTypes,
+	fetchRequestStatus
 }
