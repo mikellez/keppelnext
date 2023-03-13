@@ -78,7 +78,7 @@ export default function ManageSchedule() {
         }
     }
 
-    return (
+    return (<>
         <ScheduleTemplate title="Manage Schedule" header="Manage Schedule" schedules={scheduleList}>
             {isHistory ? (
                 <div style={{ width: "150px" }}>
@@ -123,64 +123,55 @@ export default function ManageSchedule() {
             >
                 {isHistory ? <AiOutlineClockCircle size={21} /> : <AiOutlineHistory size={21} />}
             </TooltipBtn>
-
-            <CreateScheduleModal
-                isOpen={manageModal}
-                closeModal={() => setManageModal(false)}
-                title={isHistory ? "Schedule Details" : "Manage Schedule"}
-                timelineId={timelineId}
-                isManage
-            >{!isHistory && 
-                <div style={{display: "flex", flexDirection: "column", gap: "1rem"}}>
-                    <label>
-                        <p>Remarks</p>
-                        <textarea 
-                        className="form-control" 
-                        rows={2} maxLength={150} 
-                        style={{resize: "none"}}
-                        onChange={(e) => setRemarks(e.target.value)}
-                        ></textarea>
-                    </label>
-                    <div className={styles.createScheduleModalBtnContainer}>
-                        <TooltipBtn toolTip={false} onClick={() => handleClick(1) }> Approve </TooltipBtn>
-                        <TooltipBtn toolTip={false} onClick={() => handleClick(3) }> Reject </TooltipBtn>
-                    </div>
-                </div>
-            }</CreateScheduleModal>
-
-            <ModuleSimplePopup 
-                modalOpenState={isPopup} 
-                setModalOpenState={setIsPopup} 
-                title="Missing Remarks" 
-                text="Please write some remarks so that the engineers know why the schedule is rejected."
-                icon={SimpleIcon.Exclaim}
-            />
-
-            <ModuleSimplePopup 
-                modalOpenState={isPopup} 
-                setModalOpenState={setIsPopup} 
-                title="Missing Remarks" 
-                text="Please write some remarks so that the engineers know why the schedule is rejected."
-                icon={SimpleIcon.Exclaim}
-            />
-
-            <ModuleSimplePopup
-                modalOpenState={confirmModal} 
-                setModalOpenState={setConfirmModal} 
-                title="Confirm Action" 
-                text="Are you sure? This action cannot be undone."
-                icon={SimpleIcon.Info}
-                buttons={<TooltipBtn toolTip={false} onClick={() => handleManage(status)}  >Confirm</TooltipBtn>}
-            />
-
-            <ModuleSimplePopup
-                modalOpenState={outcomeModal} 
-                setModalOpenState={setOutcomeModal} 
-                title={status === 1 ? "Approved" : status === 3 ? "Rejected" : ""}
-                text={status === 1 ? "Schedule has been successfully approved." : status === 3 ? "Schedule has been rejected." : ""}
-                icon={SimpleIcon.Check}
-            />
-
         </ScheduleTemplate>
-    );
+
+        <CreateScheduleModal
+            isOpen={manageModal}
+            closeModal={() => setManageModal(false)}
+            title={isHistory ? "Schedule Details" : "Manage Schedule"}
+            timelineId={timelineId}
+            isManage
+        >{!isHistory && 
+            <div style={{display: "flex", flexDirection: "column", gap: "1rem"}}>
+                <label>
+                    <p>Remarks</p>
+                    <textarea 
+                    className="form-control" 
+                    rows={2} maxLength={150} 
+                    style={{resize: "none"}}
+                    onChange={(e) => setRemarks(e.target.value)}
+                    ></textarea>
+                </label>
+                <div className={styles.createScheduleModalBtnContainer}>
+                    <TooltipBtn toolTip={false} onClick={() => handleClick(1) }> Approve </TooltipBtn>
+                    <TooltipBtn toolTip={false} onClick={() => handleClick(3) }> Reject </TooltipBtn>
+                </div>
+            </div>
+        }</CreateScheduleModal>
+
+        <ModuleSimplePopup 
+            modalOpenState={isPopup} 
+            setModalOpenState={setIsPopup} 
+            title="Missing Remarks" 
+            text="Please write some remarks so that the engineers know why the schedule is rejected."
+            icon={SimpleIcon.Exclaim}
+        />
+
+        <ModuleSimplePopup
+            modalOpenState={confirmModal} 
+            setModalOpenState={setConfirmModal} 
+            title="Confirm Action" 
+            text="Are you sure? This action cannot be undone."
+            icon={SimpleIcon.Info}
+            buttons={<TooltipBtn toolTip={false} onClick={() => handleManage(status)}  >Confirm</TooltipBtn>}
+        />
+
+        <ModuleSimplePopup
+            modalOpenState={outcomeModal} 
+            setModalOpenState={setOutcomeModal} 
+            title={status === 1 ? "Approved" : status === 3 ? "Rejected" : ""}
+            text={status === 1 ? "Schedule has been successfully approved." : status === 3 ? "Schedule has been rejected." : ""}
+            icon={SimpleIcon.Check}
+        />
+    </>);
 }

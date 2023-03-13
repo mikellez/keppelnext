@@ -3,7 +3,7 @@ import styles from '../../styles/Nav.module.scss'
 import { GrClose } from "react-icons/gr";
 import { BsList, BsHouseDoor } from 'react-icons/bs'
 import { TbChecklist } from "react-icons/tb";
-import { AiOutlineQrcode , AiOutlineControl, AiOutlineUser, AiOutlineSchedule, AiOutlinePhone, AiOutlineHistory } from "react-icons/ai";
+import { AiOutlineQrcode , AiOutlineControl, AiOutlineUser, AiOutlineSchedule, AiOutlinePhone, AiOutlineHistory, AiOutlineDashboard } from "react-icons/ai";
 import { MdWorkOutline } from "react-icons/md";
 import { VscBook } from "react-icons/vsc";
 import NavDropdown, { NavDropdownLink } from './NavDropdown';
@@ -24,11 +24,18 @@ export default function NavBar() {
     const router = useRouter();
     
     useEffect(() => {
-        router.events.on("routeChangeStart", () => {
-            if(navDisplay)
-                setNavDisplay(false);
-        })
-    }, [router]);
+        console.log(router.events)
+
+        const closeOnRouteChange = () => {
+            setNavDisplay(false);
+        }
+
+        router.events.on("routeChangeStart", closeOnRouteChange);
+
+        return () => {
+            router.events.off("routeChangeStart", closeOnRouteChange);
+        }
+    }, []);
 
     // Display and hide nav by toggling the state
     function displayNav() {
@@ -72,8 +79,9 @@ export default function NavBar() {
                         <GrClose onClick={displayNav} size={25} style={{color:"#4D4D4D", marginLeft: "auto", cursor: "pointer"}} />
                     </div>
 
-                    <NavLink     name="Request"           path="/Request" icon={<AiOutlinePhone size={21} />} />
-                    <NavLink     name="Asset"             path="/Asset" icon={<BsHouseDoor size={21} />} />
+                    <NavLink     name="Dashboard"         path="/Dashboard"     icon={<AiOutlineDashboard size={21} />} />
+                    <NavLink     name="Request"           path="/Request"       icon={<AiOutlinePhone size={21} />} />
+                    <NavLink     name="Asset"             path="/Asset"         icon={<BsHouseDoor size={21} />} />
                     <NavDropdown name="Schedule"          path="/Schedule" navOpen={navDisplay} icon={<AiOutlineSchedule size={21} />}>
                         <NavDropdownLink href="/Schedule" >View Schedules</NavDropdownLink>
                         <NavDropdownLink href="/Schedule/Create" >Create Schedule</NavDropdownLink>
@@ -81,11 +89,11 @@ export default function NavBar() {
                             <NavDropdownLink href="/Schedule/Manage" >Manage Schedules</NavDropdownLink>
                         }
                     </NavDropdown>
-                    <NavLink     name="Checklist"         path="/Checklist" icon={<TbChecklist size={21}/>} />
-                    <NavLink     name="E-Logbook"         path="/Logbook" icon={<VscBook size={21} />} />
-                    <NavLink     name="Generate QR Codes" path="/QRCode" icon={<AiOutlineQrcode size={21}/>} />
-                    <NavLink     name="Workflow"          path="/Workflow" icon={<MdWorkOutline size={21} />} />
-                    <NavLink     name="Master"            path="/Master" icon={<AiOutlineControl size={21} />} />
+                    <NavLink     name="Checklist"         path="/Checklist"     icon={<TbChecklist size={21}/>} />
+                    <NavLink     name="E-Logbook"         path="/Logbook"       icon={<VscBook size={21} />} />
+                    <NavLink     name="Generate QR Codes" path="/QRCode"        icon={<AiOutlineQrcode size={21}/>} />
+                    <NavLink     name="Workflow"          path="/Workflow"      icon={<MdWorkOutline size={21} />} />
+                    <NavLink     name="Master"            path="/Master"        icon={<AiOutlineControl size={21} />} />
                     <NavDropdown name="User Management"   path="/User" navOpen={navDisplay} icon={<AiOutlineUser size={21} />}>
                         <NavDropdownLink href="/">User Management</NavDropdownLink>
                         <NavDropdownLink href="/">Access Control</NavDropdownLink>

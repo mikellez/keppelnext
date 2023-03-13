@@ -126,28 +126,33 @@ export default function Timeline() {
     else if (isLoading == false 
         ) {
         return (
-            <ScheduleTemplate
-                title="Draft Schedule"
-                header="Create Schedule"
-                schedules={scheduleList}
-            >
-                <TooltipBtn
-                    text="Delete this draft"
-                    onClick={() => {
-                        setDeleteModal(true);
-                    }}
+            <>
+                <ScheduleTemplate
+                    title="Draft Schedule"
+                    header="Create Schedule"
+                    schedules={scheduleList}
                 >
-                    <RiDeleteBin6Line size={22} />
-                </TooltipBtn>
+                    <TooltipBtn
+                        text="Delete this draft"
+                        onClick={() => {
+                            setDeleteModal(true);
+                        }}
+                    >
+                        <RiDeleteBin6Line size={22} />
+                    </TooltipBtn>
 
-                <TooltipBtn text="Submit for approval" onClick={submitTimeline} >
-                    <FiSend size={22} />
-                </TooltipBtn>
+                    <TooltipBtn text="Submit for approval" onClick={submitTimeline} >
+                        <FiSend size={22} />
+                    </TooltipBtn>
 
-                <TooltipBtn text="Schedule a maintenance" onClick={() => {setScheduleModal(true)}}>
-                    <FiPlusSquare size={22} />
-                </TooltipBtn>
+                    <TooltipBtn text="Schedule a maintenance" onClick={() => {setScheduleModal(true)}}>
+                        <FiPlusSquare size={22} />
+                    </TooltipBtn>
 
+                    
+
+
+                </ScheduleTemplate>
                 <ModuleSimplePopup 
                     modalOpenState={submitModal} 
                     setModalOpenState={setSubmitModal} 
@@ -191,9 +196,7 @@ export default function Timeline() {
                         });
                     }} >Confirm</TooltipBtn> }
                 />
-
-
-            </ScheduleTemplate>
+            </>
         );
     }
 }

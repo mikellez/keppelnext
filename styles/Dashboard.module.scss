@@ -1,0 +1,57 @@
+.dashboardMain {
+    display: grid;
+    grid-template-areas: 
+    "a b c d g" 
+    "e e f f g";
+    gap: 10px;
+}
+
+@media only screen and (max-width: 1200px) {
+    .dashboardMain {
+        grid-template-areas: "a b" "c d" "e f" "g g";
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .dashboardMain {
+        grid-template-areas: "a" "b" "c" "d" "e" "f" "g";
+    }
+}
+
+.dashboardSection {
+    background-color: #EEEEEE;
+    border-radius: 5px;
+    padding: 12px;
+    // min-height: 200px;
+}
+
+.dashboardSection div {
+    display: flex;
+    justify-content: center;
+}
+
+.dashboardSection h5 {
+    margin: auto;
+}
+
+.dashboardNumber {
+    font-size: 60px;
+    font-weight: 500;
+}
+
+.dashboardPendingdNumber {
+    @extend .dashboardNumber;
+    color: #C21010;
+}
+
+.dashboardCompletedNumber {
+    @extend .dashboardNumber;
+    color: #367E18;
+}
+
+.dashboardNoChart {
+    position: absolute;
+    top: 50%;
+    font-size: 20px;
+    color: #BBBBBB;
+}

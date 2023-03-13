@@ -7,6 +7,9 @@ import colours from '../../styles/colours.module.scss'
 import Link from 'next/link';
 import { useCurrentUser } from '../SWR';
 import useComponentVisible from './useComponentVisible';
+import axios from 'axios';
+import { useRouter } from 'next/router';
+import { useContext } from 'react';
 
 function ProfileInfo() {
 	const {
@@ -44,6 +47,8 @@ function ProfileInfo() {
 
 export default function TopBar() {
 
+	const router = useRouter();
+
 	return (
 		<div>
 			<div style={
@@ -65,7 +70,11 @@ export default function TopBar() {
 				}
 			}>
 				<NavBar />
-				<Link href="/Dashboard"><Image src="/keppellogo.png" alt="Keppell Logo" width={225} height={28}/></Link>
+				<Link href="/Dashboard">
+					<div style={{ cursor: "pointer" }}>
+						<Image src="/keppellogo.png" alt="Keppell Logo" width={225} height={28}/>
+					</div>
+				</Link>
 
 				<ProfileInfo/>
 

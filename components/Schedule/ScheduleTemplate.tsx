@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useState, useEffect } from "react";
+import React, { PropsWithChildren, useState, useEffect, ReactNode } from "react";
 import { ModuleContent, ModuleHeader, ModuleMain } from "../";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -16,6 +16,7 @@ interface ScheduleTemplateInfo extends PropsWithChildren {
     header: string;
     schedules?: ScheduleInfo[];
     timeline?: number;
+    children?: ReactNode;
 }
 
 export interface ScheduleInfo {
@@ -80,6 +81,8 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     const [toggleCalendarOrListView, setToggleCalendarOrListView] = useState<boolean>(true);
 
     const router = useRouter();
+
+    console.log(props.children)
 
     // Add events to be displayed on the calendar
     useEffect(() => {

@@ -7,14 +7,15 @@ interface PlantSelectProps {
     accessControl?: boolean;
     allPlants?: boolean;
     name?: string;
+    default?: boolean;
 }
 
 // No access control for managers and engineers
-async function getPlants(url: string) {
+export async function getPlants(url: string) {
     return await axios
         .get<CMMSPlant[]>(url)
         .then((res) => {
-            return res.data;
+            return res.data.sort((a, b) => a.plant_id - b.plant_id);
         })
         .catch((err) => console.log(err.message));
 }
@@ -40,18 +41,27 @@ export default function PlantSelect(props: PlantSelectProps) {
     }
 
     // Plant dropdown options
-    const plantOptions = plantList.map((plant) => (
-        <option key={plant.plant_id} value={plant.plant_id}>
-            {plant.plant_name}
-        </option>
-    ));
+    const plantOptions = plantList.map((plant, index) => {
+        // if (props.default) {
+        //     return (
+        //         <option key={plant.plant_id} value={plant.plant_id} selected={index == 0}>
+        //             {plant.plant_name}
+        //         </option>
+        //     );
+        // }
+        return (
+            <option key={plant.plant_id} value={plant.plant_id}>
+                {plant.plant_name}
+            </option>
+        );
+    });
 
     return (
         <select className="form-select" onChange={props.onChange} name={props.name}>
             {props.allPlants ? (
                 plantList.length > 1 && <option value={0}>View all Plants</option>
             ) : (
-                <option hidden>Select plant</option>
+                !props.default && <option hidden>Select plant</option>
             )}
             {plantOptions}
         </select>
