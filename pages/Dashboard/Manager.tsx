@@ -5,25 +5,7 @@ import DashboardBox from "../../components/Dashboard/DashboardBox";
 import PlantSelect from "../../components/PlantSelect";
 import { CMMSDashboardData } from "../../types/common/interfaces";
 import PChart from "../../components/Dashboard/PChart";
-import axios from "axios";
-
-async function fetchData(type: string, plant: number) : Promise<CMMSDashboardData[]> {
-    const url = `/api//${type}/status/${plant}`;
-    const colors = ["#03C988", "#FFAC41", "#C74B50", "#810CA8", "#282A3A", "#FB2576"]
-    return await axios.get(url)
-        .then(res => {
-            if (res) {
-                return res.data.map((item : any, index: number) => {
-                    return {
-                        ...item,
-                        count: parseInt(item.count),
-                        fill: colors[index],
-                    }
-                })
-            } 
-        })
-        .catch(err => console.log(err))
-};
+import { fetchData } from ".";
 
 export default function ManagerDashboad() {
     const [plant, setPlant] = useState<number>(0);

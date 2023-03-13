@@ -5,6 +5,25 @@ import axios from "axios";
 import ManagerDashboad from "./Manager";
 import EngineerDashboad from "./Engineer";
 import SpecialistDashboad from "./Specialist";
+import { CMMSDashboardData } from "../../types/common/interfaces";
+
+export async function fetchData(type: string, plant: number) : Promise<CMMSDashboardData[]> {
+    const url = `/api//${type}/status/${plant}`;
+    const colors = ["#03C988", "#FFAC41", "#C74B50", "#810CA8", "#282A3A", "#FB2576"]
+    return await axios.get(url)
+        .then(res => {
+            if (res) {
+                return res.data.map((item : any, index: number) => {
+                    return {
+                        ...item,
+                        count: parseInt(item.count),
+                        fill: colors[index],
+                    }
+                })
+            } 
+        })
+        .catch(err => console.log(err))
+};
 
 export default function Dashboad({role_id}: {role_id: number}) {
 	if(role_id === 1 || role_id === 2)
