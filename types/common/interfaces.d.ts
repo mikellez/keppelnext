@@ -152,6 +152,11 @@ interface CMMSChecklist {
 	created_date: Date;
 	history: string;
 }
+interface CMMSActivitylog {
+	name_id: string;
+	activity_id:string;
+	date_id: number;
+}
 
 interface CMMSMasterSubmission {
 	[column_name: string]: string;
@@ -188,5 +193,6 @@ export {
 	CMMSChecklist, 
 	CMMSMasterSubmission, 
 	CMMSMasterField, 
-	CMMSMasterTables 
+	CMMSMasterTables,
+	CMMSActivitylog
 };

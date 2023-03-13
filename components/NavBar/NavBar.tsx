@@ -93,7 +93,7 @@ export default function NavBar() {
                         <NavDropdownLink href="/">Password Policy</NavDropdownLink>
                     </NavDropdown>
                     <NavDropdown name="Activity Log"      path="/Activity" navOpen={navDisplay} icon={<AiOutlineHistory size={21} />}>
-                        <NavDropdownLink href="/">Account Activity Log</NavDropdownLink>
+                        <NavDropdownLink href="/Activity/Account_log">Account Activity Log</NavDropdownLink>
                     </NavDropdown>
                 </div>
             </div>
