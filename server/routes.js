@@ -211,6 +211,11 @@ router
     .delete(controllers.schedule.deleteSchedule)
     .get(controllers.schedule.getViewSchedules);
 
+router.get("/activity/account_log", checkIfLoggedInAPI, controllers.activity.getEventtHistory);
+
+
+
+
 // NO API ROUTE
 router.all("/*", (req, res) => {
     return res.status(404).send("no route");

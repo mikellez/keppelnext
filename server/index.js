@@ -92,6 +92,10 @@ app.prepare().then(() => {
     server.get("/Dashboard*", checkIfLoggedIn, accessControl, (req, res) => {
         return handle(req, res);
     });
+    
+    server.get("/Activity*", checkIfLoggedIn, accessControl, (req, res) => {
+        return handle(req, res);
+    });
     server.get("/Request*", checkIfLoggedIn, accessControl, (req, res) => {
         return handle(req, res);
     });
@@ -116,6 +120,8 @@ app.prepare().then(() => {
     server.get("/Master*", checkIfLoggedIn, accessControl, (req, res) => {
         return handle(req, res);
     });
+
+
 
     server.get("*", (req, res) => {
         return handle(req, res);

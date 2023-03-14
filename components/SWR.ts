@@ -2,7 +2,7 @@
 import useSWR from 'swr';
 import axios from 'axios';
 
-import { CMMSAsset, CMMSRequest, CMMSChecklist } from '../types/common/interfaces'; 
+import { CMMSAsset, CMMSRequest, CMMSChecklist, CMMSActivitylog } from '../types/common/interfaces'; 
 
 function useRequest() {
 	const requestFetcher = (url: string) => axios.get<CMMSRequest[]>(url).then((response) => {
@@ -33,6 +33,13 @@ function useChecklist(checklist_type: "template" | "record" | "approved") {
 
 	return useSWR<CMMSChecklist[], Error>(["/api/checklist/", checklist_type], checklistFetcher, {revalidateOnFocus: false});
 }
+function useAccountlog() {
+	const accountlogFetcher = (url: string) => axios.get<CMMSActivitylog[]>(url).then((response) => response.data).catch((e) => {
+		throw new Error(e);
+	})
+
+	return useSWR<CMMSActivitylog[], Error>("/api/activity/account_log", accountlogFetcher, {revalidateOnFocus: false});
+}
 
 function useCurrentUser() {
 	interface CMMSCurrentUser {
@@ -53,5 +60,6 @@ export {
     useRequest,
 	useAsset,
 	useChecklist,
-	useCurrentUser
+	useCurrentUser,
+	useAccountlog
 }

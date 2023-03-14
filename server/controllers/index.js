@@ -5,3 +5,4 @@ exports.asset			= require("./asset");
 exports.fault			= require("./fault");
 exports.master			= require("./master");
 exports.dashboard       = require("./dashboard");
+exports.activity        = require("./activity")
