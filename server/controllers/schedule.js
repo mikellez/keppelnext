@@ -11,6 +11,7 @@ const makeScheduleDict = (arr) => {
             timeline_id: item["timeline_id"],
             checklist_name: item["chl_name"],
             plant: item["plant_name"],
+            plantId: item["plant_id"],
             start_date: item["start_date"],
             end_date: item["end_date"],
             period: item["recurrence_period"],
@@ -43,7 +44,7 @@ const getViewSchedules = async (req, res, next) => {
 		  STRING_AGG(UA.role_name, ' ,') AS ROLES,
 		  STRING_AGG(U.first_name, ' ,') AS FNAME,
 		  STRING_AGG(U.last_name, ' ,') AS LNAME,
-			PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS, SC.TIMELINE_ID
+			PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, SC.REMARKS, SC.TIMELINE_ID
             FROM 
             KEPPEL.SCHEDULE_CHECKLIST  as SC,
             KEPPEL.USERS AS U,
@@ -65,7 +66,7 @@ const getViewSchedules = async (req, res, next) => {
             queryS.push(`SELECT 
             SC.SCHEDULE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
           SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL,
-          PM.PLANT_NAME, CT.CHL_NAME,SC.CHECKLIST_TEMPLATE_ID, STRING_AGG(U.user_name, ' ,') AS USERNAME,
+          PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME,SC.CHECKLIST_TEMPLATE_ID, STRING_AGG(U.user_name, ' ,') AS USERNAME,
 		  STRING_AGG(U.user_email, ' ,') AS USER_EMAILS,
 		  STRING_AGG(UA.role_name, ' ,') AS ROLES,
 		  STRING_AGG(U.first_name, ' ,') AS FNAME,
@@ -92,7 +93,7 @@ const getViewSchedules = async (req, res, next) => {
 		  STRING_AGG(UA.role_name, ' ,') AS ROLES,
 		  STRING_AGG(U.first_name, ' ,') AS FNAME,
 		  STRING_AGG(U.last_name, ' ,') AS LNAME,
-		PM.PLANT_NAME, CT.CHL_NAME, SC.REMARKS, SC.TIMELINE_ID
+		PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, SC.REMARKS, SC.TIMELINE_ID
         FROM 
         KEPPEL.SCHEDULE_CHECKLIST  as SC,
         KEPPEL.USERS AS U,
@@ -203,7 +204,7 @@ const getSchedulesTimeline = async (req, res, next) => {
     db.query(
         `SELECT SC.SCHEDULE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
         SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL,
-        PM.PLANT_NAME, CT.CHL_NAME,SC.CHECKLIST_TEMPLATE_ID, STRING_AGG(U.user_name, ' ,') AS USERNAME,
+        PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME,SC.CHECKLIST_TEMPLATE_ID, STRING_AGG(U.user_name, ' ,') AS USERNAME,
         STRING_AGG(U.user_email, ' ,') AS USER_EMAILS,
         STRING_AGG(UA.role_name, ' ,') AS ROLES,
         STRING_AGG(U.first_name, ' ,') AS FNAME,

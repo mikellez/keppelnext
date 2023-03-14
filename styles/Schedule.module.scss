@@ -6,6 +6,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    // position: sticky;
 }
 
 .eventModalTitle {
@@ -45,6 +46,12 @@
     margin: 0.2rem 0;
     display: flex;
     align-items: center;
+}
+
+.eventModalButtonContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .modalUserArrow {
