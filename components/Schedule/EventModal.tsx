@@ -43,8 +43,8 @@ export default function EventModal(props: ModalProps) {
     const [deleteModal, setDeleteModal] = useState<boolean>(false);
     const [editMode, setEditMode] = useState<boolean>(false);
     const [newSchedule, setNewSchedule] = useState<NewScheduleInfo>({} as NewScheduleInfo);
-    const [isChanged, setIsChanged] = useState<boolean>(false);
 
+    // Get the current user
     const {
 		data,
 		error,
@@ -73,22 +73,11 @@ export default function EventModal(props: ModalProps) {
         setNewSchedule(prev => {
             return {
                 ...prev,
-                [e.target.name] : e.target.value
+                [e.target.name] : e.target.name == "date" ?  new Date(e.target.value) : e.target.value 
             }
         })
-        if (
-            (newSchedule.remarks === props.event?.extendedProps.remarks &&
-            newSchedule.date === props.event.extendedProps.date &&
-            newSchedule.assignedIds.sort() == props.event.extendedProps.assignedIds.sort()) ||
-            newSchedule.assignedIds.length == 0 ||
-            !newSchedule.date || newSchedule.date == null
-            ) {
-            setIsChanged(false);
-        } else {
-            setIsChanged(true);
-        }
     }
-
+   
     useEffect(() => {
         setNewSchedule({
             checklistId: props.event?.extendedProps.checklistId as number,
@@ -250,7 +239,17 @@ export default function EventModal(props: ModalProps) {
                         >
                             {editMode ? "Cancel" : "Edit"}
                         </TooltipBtn>
-                        {editMode && <TooltipBtn toolTip={false} disabled={!isChanged} style={{backgroundColor: "#EB1D36"}}>Confirm</TooltipBtn>}
+                        {editMode && <TooltipBtn 
+                            toolTip={false} 
+                            style={{backgroundColor: "#EB1D36"}}
+                            disabled={
+                                (newSchedule.remarks == props.event.extendedProps.remarks &&
+                                newSchedule.date == props.event.extendedProps.date &&
+                                newSchedule.assignedIds.sort().join("") == props.event.extendedProps.assignedIds.sort().join("")) ||
+                                newSchedule.assignedIds.length == 0 ||
+                                !newSchedule.date || newSchedule.date == null
+                            }
+                            >Confirm</TooltipBtn>}
                     </div>
                 }
             </div>}
