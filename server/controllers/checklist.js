@@ -138,10 +138,10 @@ const fetchChecklistStatus = async (req, res, next) => {
     const sql = req.params.plant != 0 ? `SELECT S.STATUS, CM.STATUS_ID, COUNT(CM.STATUS_ID) FROM KEPPEL.CHECKLIST_MASTER CM
     JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
     WHERE CM.PLANT_ID = ${req.params.plant}
-    GROUP BY(CM.STATUS_ID, S.STATUS)` : 
+    GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)` : 
     `SELECT S.STATUS, CM.STATUS_ID, COUNT(CM.STATUS_ID) FROM KEPPEL.CHECKLIST_MASTER CM
     JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
-    GROUP BY(CM.STATUS_ID, S.STATUS)`;
+    GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)`;
 
     db.query(sql, (err, result) => {
         if (err) return res.status(500).send("Error in fetching request for dashboard");

@@ -33,6 +33,7 @@ export interface ScheduleInfo {
     end_date: Date | string;
     period: number;
     plant: string;
+    plantId: number;
     remarks: string;
     schedule_id: number;
     timeline_id: number;
@@ -67,8 +68,29 @@ export function toPeriodString(period: number): string {
             return "Yearly";
         default:
             return "NA";
-    }
-}
+    };
+};
+
+export function toPeriodNum(period: string): number {
+    switch (period) {
+        case "Daily":
+            return 1;
+        case "Weekly":
+            return 7;
+        case "Fortnightly":
+            return 14;
+        case "Monthly":
+            return 30;
+        case "Quarterly":
+            return 90;
+        case "Semi-Annually":
+            return 180;
+        case "Yearly":
+            return 365;
+        default:
+            return 0;
+    };
+};
 
 export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     // Store the list of events in a state to be rendered on the calendar
@@ -82,22 +104,22 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
 
     const router = useRouter();
 
-    console.log(props.children)
-
     // Add events to be displayed on the calendar
     useEffect(() => {
         setEventList([]);
         if (props.schedules) {
             let newEvents: CMMSScheduleEvent[] = [];
             props.schedules.forEach((item) => {
-                item.calendar_dates.forEach((date) => {
+                item.calendar_dates.forEach((date, index) => {
                     const event = {
                         title: item.checklist_name,
                         start: item.start_date ? new Date(date) : "",
                         extendedProps: {
                             plant: item.plant,
+                            plantId: item.plantId,
                             scheduleId: item.schedule_id,
                             checklistId: item.checklist_id,
+                            date: new Date(item.calendar_dates[index]),
                             startDate: item.start_date ? new Date(item.start_date) : "Rescheduled",
                             endDate: item.end_date ? new Date(item.end_date) : "Rescheduled",
                             recurringPeriod: item.period,
@@ -124,6 +146,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 isOpen={isModalOpen}
                 closeModal={() => setIsModalOpen(false)}
                 event={currentEvent}
+                edit={router.pathname === `/Schedule`}
                 delete={router.pathname === `/Schedule/Timeline/[id]`}
             />
             <ModuleHeader
@@ -177,15 +200,16 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                         eventClick={() => setIsModalOpen(true)}
                         eventMouseEnter={(info) => {
                             document.body.style.cursor = "pointer";
-
                             const event = {
                                 title: info.event._def.title,
                                 start: info.event._instance?.range.start,
                                 extendedProps: {
                                     plant: info.event._def.extendedProps.plant,
+                                    plantId: info.event._def.extendedProps.plantId,
                                     scheduleId: info.event._def.extendedProps.scheduleId,
                                     checklistId: info.event._def.extendedProps.checklistId,
                                     timelineId: info.event._def.extendedProps.timelineId,
+                                    date: info.event._def.extendedProps.date,
                                     startDate: info.event._def.extendedProps.startDate,
                                     endDate: info.event._def.extendedProps.endDate,
                                     recurringPeriod: info.event._def.extendedProps.recurringPeriod,

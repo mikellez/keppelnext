@@ -25,8 +25,12 @@ export default function ManagerDashboad() {
     const closedRequest = requestData?.filter(data => data.status_id === 4)[0];
     const pendingChecklist = checklistData?.filter(data => data.status_id === 1)[0];
     const completedChecklist = checklistData?.filter(data => data.status_id === 4)[0];
-
-    console.log(requestData)
+    const totalRequest = requestData?.reduce((accumulator, currentValue) => { 
+        return accumulator + currentValue.count 
+    }, 0)
+    const totalChecklist = checklistData?.reduce((accumulator, currentValue) => { 
+        return accumulator + currentValue.count 
+    }, 0)
 
     return (
         <ModuleMain>
@@ -47,13 +51,13 @@ export default function ManagerDashboad() {
                     <DashboardBox title="Completed Checklists" style={{gridArea: "d"}}>
                         <p className={styles.dashboardCompletedNumber}>{completedChecklist ? completedChecklist.count : 0}</p>
                     </DashboardBox>
-                    <DashboardBox title="Total Requests" style={{gridArea: "e"}}>
+                    <DashboardBox title={"Total Requests: " + totalRequest} style={{gridArea: "e"}}>
                         {
                             requestData && requestData.length > 0 ? <PChart data={requestData} /> : 
                             <p className={styles.dashboardNoChart}>No requests</p>
                         }
                     </DashboardBox>
-                    <DashboardBox title="Total Checklists" style={{gridArea: "f"}}>
+                    <DashboardBox title={"Total Requests: " + totalChecklist} style={{gridArea: "f"}}>
                         {
                             checklistData && checklistData.length > 0 ? <PChart data={checklistData} /> : 
                             <p className={styles.dashboardNoChart}>No requests</p>

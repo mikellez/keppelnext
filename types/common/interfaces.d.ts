@@ -95,9 +95,11 @@ interface CMMSScheduleEvent {
     start?: Date | string;
     extendedProps: {
         plant: string;
+		plantId?: number;
         scheduleId: number;
         checklistId: number;
 		timelineId: number;
+		date?:  Date | string;
         startDate: Date | string;
         endDate: Date | string;
         recurringPeriod: number;
