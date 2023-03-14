@@ -7,8 +7,8 @@ import { useTheme } from '@table-library/react-table-library/theme';
 import { getTheme } from '@table-library/react-table-library/baseline';
 
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell, OnClick } from '@table-library/react-table-library';
-import { useChecklist } from '../../components/SWR';
-import { CMMSChecklist } from '../../types/common/interfaces';
+import { useAccountlog, } from '../../components/SWR';
+import { CMMSActivitylog } from '../../types/common/interfaces';
 import { Nullish } from '@table-library/react-table-library/types/common';
 
 type TableNode<T> = {
@@ -17,23 +17,18 @@ type TableNode<T> = {
     prop: T;
 };
 
-const indexedColumn: ("template" | "record" | "approved")[] = [
-	"template",
-	"record",
-	"approved"
-]
 
-export default function Checklist() {
-	const [checklistNodes, setChecklistNodes] = useState<TableNode<CMMSChecklist>[]>([]);
+export default function AccountLog() {
+	const [ActivityNodes, setActivityNodes] = useState<TableNode<CMMSActivitylog>[]>([]);
 	const [isReady, setReady] = useState(false);
-	const [activeTabIndex, setActiveTabIndex] = useState(0);
 
 	const {
 		data,
 		error,
 		isValidating,
 		mutate
-	} = useChecklist(indexedColumn[activeTabIndex]);
+	} = useAccountlog();
+	console.log(data)
 
 	const theme = useTheme([
 		getTheme(),
@@ -41,30 +36,23 @@ export default function Checklist() {
 			Table: "--data-table-library_grid-template-columns:  5em calc(90% - 40em) 7em 8em 10em 10em 10%;",
 		},
 	]);
-
-	const switchColumns = (index: number) => {
-		setReady(false);
-		setActiveTabIndex(index);
-	};
-
-	const editRow: OnClick = (item, event) => {
-		const checklistRow = item as TableNode<CMMSChecklist>;
-
-		console.log(checklistRow, event)
-	}
 	
-	useEffect(() => {console.log(activeTabIndex)}, [activeTabIndex]);
-
+	
 	useEffect(() => {
 		if(!isReady && data && !isValidating) {
-			setChecklistNodes(
-				data.map((row: CMMSChecklist): TableNode<CMMSChecklist> => {
-					return {
-						id: row.checklist_id.toString(),
-						prop: row
-					}
+			setActivityNodes(
+				data.map((row: CMMSActivitylog): TableNode<CMMSActivitylog> => {
+				  return {
+					id: row.user_id,
+					nodes: null,
+					prop: {
+					user_id: row.user_id,
+					description: row.description,
+					event_time: row.event_time,
+					},
+				  };
 				})
-			);
+			  )			  
 			setReady(true);
 		}
 	}, [data, isValidating]);
@@ -73,41 +61,38 @@ export default function Checklist() {
 		<ModuleMain>
 			<ModuleHeader title="Activity Log" header="Activity Log">
 				<button className="btn btn-primary">Export CSV</button>
-			</ModuleHeader>				
-				{
-				isReady && 
-				<Table data={{nodes: checklistNodes}} theme={theme} layout={{custom: true}}>
+			</ModuleHeader>
+			<ModuleContent>
+				<Table data={{nodes: ActivityNodes}} theme={theme}>
 					{
 						(tableList) => (
 							<>
 								<Header>
 									<HeaderRow>
-										<HeaderCell resize >Name</HeaderCell>
-										<HeaderCell resize >Activity</HeaderCell>
-										<HeaderCell resize >Date</HeaderCell>
-										
-									</HeaderRow>
+											<HeaderCell resize>User ID</HeaderCell>
+											<HeaderCell resize>Activity</HeaderCell>
+											<HeaderCell resize>Date & Time</HeaderCell>
+										</HeaderRow>
 								</Header>
 
 								<Body>
-									{
-										tableList.map((item) => {
-											let checklistNode = item as TableNode<CMMSChecklist>;
-											return (
-												<Row key={item.id} item={checklistNode}>
-													<Cell>{checklistNode.prop.checklist_id}</Cell>
-													<Cell>{checklistNode.prop.description}</Cell>
-													<Cell>{checklistNode.prop.status_id}</Cell>
-												</Row>
-											)
-										})
-									}
-								</Body>
+									{tableList.map((item) => {
+										let ActivityNodes = item as TableNode<CMMSActivitylog>;
+										return (
+										<Row key={item.id} item={ActivityNodes}>
+											<Cell>{ActivityNodes.prop.user_id}</Cell>
+											<Cell>{ActivityNodes.prop.description}</Cell>
+											<Cell>{new Date(ActivityNodes.prop.event_time).toLocaleString()}</Cell>
+										</Row>
+										  
+										);
+									})}
+									</Body>
 							</>
 						)
 					}
 				</Table>
-				}
+			</ModuleContent>
 		</ModuleMain>
   	)
 }

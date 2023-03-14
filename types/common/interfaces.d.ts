@@ -152,10 +152,11 @@ interface CMMSChecklist {
 	created_date: Date;
 	history: string;
 }
+
 interface CMMSActivitylog {
-	name_id: string;
-	activity_id:string;
-	date_id: number;
+	user_id: string;
+	description:string;
+	event_time: string;
 }
 
 interface CMMSMasterSubmission {
