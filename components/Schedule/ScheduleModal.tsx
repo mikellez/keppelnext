@@ -109,9 +109,9 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
             console.log(newSchedule);
             editDraftSchedule(newSchedule).then((result) => {
                 setSuccessEditModal(true);
-                // setTimeout(() => {
-                //     router.replace("/Schedule/Timeline/" + props.scheduleEvent?.timelineId);
-                // }, 1000);
+                setTimeout(() => {
+                    router.replace("/Schedule/Timeline/" + props.scheduleEvent?.timelineId);
+                }, 1000);
             });
         }
     }
