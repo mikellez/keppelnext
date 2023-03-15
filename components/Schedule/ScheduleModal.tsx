@@ -48,6 +48,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
     const [successEditModal, setSuccessEditModal] = useState<boolean>(false);
     const [failureModal, setFailureModal] = useState<boolean>(false);
     const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
+    const [invalidDateCheck, setInvalidDateCheck] = useState<boolean>(false);
 
     const router = useRouter();
 
@@ -56,7 +57,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
         event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement>
     ) {
         setNewSchedule((prev) => {
-            const value =
+            let value =
                 event.target.type === "date"
                     ? new Date(event.target.value)
                     : event.target.name === "checklistId" ||
@@ -65,8 +66,26 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                     ? parseInt(event.target.value)
                     : event.target.value;
             const tmp = { ...prev };
-            if (event.target.name === "startDate" || event.target.name === "endDate")
+            // Resets recurring period input and check validity of start and end date whenever a start/end date is changed
+            if (event.target.name === "startDate") {
                 tmp.recurringPeriod = -1;
+                if (prev.endDate < value) {
+                    setInvalidDateCheck(true);
+                    setDisableSubmit(true);
+                } else {
+                    setInvalidDateCheck(false);
+                    setDisableSubmit(false);
+                }
+            } else if (event.target.name === "endDate") {
+                tmp.recurringPeriod = -1;
+                if (value < prev.startDate) {
+                    setInvalidDateCheck(true);
+                    setDisableSubmit(true);
+                } else {
+                    setInvalidDateCheck(false);
+                    setDisableSubmit(false);
+                }
+            }
             return {
                 ...tmp,
                 [event.target.name]: value,
@@ -249,10 +268,19 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                     </tr>
                 </tbody>
             </table>
-            <TooltipBtn toolTip={false} onClick={handleSubmit} disabled={disableSubmit}>
-                {props.timeline && <div>Create</div>}
-                {props.scheduleEvent && <div>Update</div>}
-            </TooltipBtn>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <div>
+                    {invalidDateCheck && (
+                        <p className={styles.invalidDateBox}>
+                            Please ensure that the start date is before the end date.
+                        </p>
+                    )}
+                </div>
+                <TooltipBtn toolTip={false} onClick={handleSubmit} disabled={disableSubmit}>
+                    {props.timeline && <div>Create</div>}
+                    {props.scheduleEvent && <div>Update</div>}
+                </TooltipBtn>
+            </div>
 
             <ModuleSimplePopup
                 modalOpenState={successModal}
