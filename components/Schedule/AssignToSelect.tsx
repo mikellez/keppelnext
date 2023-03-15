@@ -9,6 +9,7 @@ interface AssignToSelectProps {
     plantId: number;
     style?: React.CSSProperties;
     name?: string;
+    defaultIds?: number[];
 };
 
 export interface AssignedUserOption {
@@ -28,40 +29,58 @@ async function getAssignedUsers(plantId: number) {
 
 const AssignToSelect = (props: AssignToSelectProps) => {
     // Store assigned users in a state for dropdown
-    const [assignedUsers, setAssignedUsers] = useState<CMMSUser[]>([]);
+    // const [assignedUsers, setAssignedUsers] = useState<CMMSUser[]>([]);
+    const [defaultOptions, setDefaultOptions] = useState<AssignedUserOption[]>([]);
+    const [options, setOptions] = useState<AssignedUserOption[]>([]);
+    const [isReady, setIsReady] = useState<boolean>();
     const animatedComponents = makeAnimated();
 
     const customStyles: StylesConfig<AssignedUserOption, true> = {
         control: (base) => ({...base, ...props.style}),
         menu: (base) => ({...base, ...props.style}),
     }
-
+    
     // Calls an api to get the list of assigned users upon change of plant id
     useEffect(() => {
-        getAssignedUsers(props.plantId).then((user) => {
-            if (user == null) {
+        setIsReady(false);
+        getAssignedUsers(props.plantId).then((users) => {
+            if (users == null) {
                 return console.log("no users");
             }
-            setAssignedUsers(user);
-        });
-    }, [props.plantId]);
+            // setAssignedUsers(users);
+            setOptions(users.map((user) => {
+                return { value: user.id, label: user.name + " | " + user.email };
+            }));
 
-    // Assigned users dropdown
-    const assignedUserOptions: AssignedUserOption[] = assignedUsers.map((user) => {
-        return { value: user.id, label: user.name + " | " + user.email };
-    });
+            if (props.defaultIds) {
+                setDefaultOptions(users.filter(user => props.defaultIds?.includes(user.id)).map((user) => {
+                    return { value: user.id, label: user.name + " | " + user.email };
+                }));
+            }
+
+            setIsReady(true);
+        });
+    }, [props.plantId, props.defaultIds]);
+
+    // // Assigned users dropdown
+    // const assignedUserOptions: AssignedUserOption[] = assignedUsers.map((user) => {
+    //     return { value: user.id, label: user.name + " | " + user.email };
+    // });
 
     return (
-        <Select
-            isMulti
-            name={props.name}
-            options={assignedUserOptions}
-            components={animatedComponents}
-            className="basic-multi-select"
-            classNamePrefix="select"
-            onChange={props.onChange}
-            styles={customStyles}
-        />
+        <div>
+           {isReady && <Select
+                isMulti
+                name={props.name}
+                options={options}
+                components={animatedComponents}
+                className="basic-multi-select"
+                classNamePrefix="select"
+                onChange={props.onChange}
+                styles={customStyles}
+                defaultValue={defaultOptions}
+            />}
+        </div>
     );
 };
 

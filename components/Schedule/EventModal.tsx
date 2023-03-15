@@ -7,7 +7,7 @@ import EventModalUser from "./EventModalUser";
 import { useCurrentUser } from "../SWR";
 import { GrClose } from "react-icons/gr";
 import TooltipBtn from "../TooltipBtn";
-import AssignToSelect from "./AssignToSelect";
+import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import styles from "../../styles/Schedule.module.scss";
 import axios from "axios";
@@ -206,7 +206,20 @@ export default function EventModal(props: ModalProps) {
                             <tr className={styles.eventModalTableRow}>
                                 <th>Assigned To:</th>
                                 {editMode ?
-                                    <td><AssignToSelect plantId={3} onChange={() => {}} /></td> 
+                                    <td><AssignToSelect 
+                                        plantId={3} 
+                                        onChange={(value, action) => {
+                                            setNewSchedule(prev => {
+                                                const newData = {...prev};
+                                                const ids: number[] = [];
+                                                value.forEach((option: AssignedUserOption) => {
+                                                   ids.push(option.value)
+                                                })
+                                                newData.assignedIds = ids;
+                                                return newData;
+                                            }) 
+                                        }} 
+                                        defaultIds={props.event.extendedProps.assignedIds} /></td> 
                                     :
                                     <td className={styles.eventModalAssignedUsers}>
                                         {assignedUserElement}
@@ -230,7 +243,7 @@ export default function EventModal(props: ModalProps) {
                     </table>
                 </div>
                 {props.delete && <TooltipBtn toolTip={false} onClick={handleDelete} >Delete</TooltipBtn>}
-                {(props.edit &&  data?.role_id as number < 4) && 
+                {(props.edit &&  data?.role_id as number < 4 && props.event.extendedProps.recurringPeriod > 1) && 
                     <div className={styles.eventModalButtonContainer}>
                         <TooltipBtn 
                             toolTip={false} 
