@@ -7,7 +7,7 @@ import EventModalUser from "./EventModalUser";
 import { useCurrentUser } from "../SWR";
 import { GrClose } from "react-icons/gr";
 import TooltipBtn from "../TooltipBtn";
-import AssignToSelect from "./AssignToSelect";
+import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import styles from "../../styles/Schedule.module.scss";
 import axios from "axios";
@@ -215,7 +215,23 @@ export default function EventModal(props: ModalProps) {
                                     <th>Assigned To:</th>
                                     {editMode ? (
                                         <td>
-                                            <AssignToSelect plantId={3} onChange={() => {}} />
+                                            <AssignToSelect
+                                                plantId={3}
+                                                onChange={(value, action) => {
+                                                    setNewSchedule((prev) => {
+                                                        const newData = { ...prev };
+                                                        const ids: number[] = [];
+                                                        value.forEach(
+                                                            (option: AssignedUserOption) => {
+                                                                ids.push(option.value);
+                                                            }
+                                                        );
+                                                        newData.assignedIds = ids;
+                                                        return newData;
+                                                    });
+                                                }}
+                                                defaultIds={props.event.extendedProps.assignedIds}
+                                            />
                                         </td>
                                     ) : (
                                         <td className={styles.eventModalAssignedUsers}>
@@ -241,58 +257,49 @@ export default function EventModal(props: ModalProps) {
                             </tbody>
                         </table>
                     </div>
-                    {props.deleteEditDraft && (
-                        <div style={{ display: "flex" }}>
-                            <TooltipBtn
-                                toolTip={false}
-                                onClick={handleDelete}
-                                style={{ marginRight: "10px" }}
-                            >
-                                Delete
-                            </TooltipBtn>
-                            <TooltipBtn
-                                toolTip={false}
-                                onClick={handleDelete}
-                                style={{ marginLeft: "10px" }}
-                            >
-                                Edit
-                            </TooltipBtn>
-                        </div>
+                    {props.delete && (
+                        <TooltipBtn toolTip={false} onClick={handleDelete}>
+                            Delete
+                        </TooltipBtn>
                     )}
-                    {props.edit && (data?.role_id as number) < 4 && (
-                        <div className={styles.eventModalButtonContainer}>
-                            <TooltipBtn
-                                toolTip={false}
-                                onClick={() => setEditMode((prev) => !prev)}
-                                style={{
-                                    backgroundColor: editMode ? "#9EB23B" : "#B2B2B2",
-                                    color: "#000000",
-                                    border: "none",
-                                }}
-                            >
-                                {editMode ? "Cancel" : "Edit"}
-                            </TooltipBtn>
-                            {editMode && (
+                    {props.edit &&
+                        (data?.role_id as number) < 4 &&
+                        props.event.extendedProps.recurringPeriod > 1 && (
+                            <div className={styles.eventModalButtonContainer}>
                                 <TooltipBtn
                                     toolTip={false}
-                                    style={{ backgroundColor: "#EB1D36" }}
-                                    disabled={
-                                        (newSchedule.remarks == props.event.extendedProps.remarks &&
-                                            newSchedule.date == props.event.extendedProps.date &&
-                                            newSchedule.assignedIds.sort().join("") ==
-                                                props.event.extendedProps.assignedIds
-                                                    .sort()
-                                                    .join("")) ||
-                                        newSchedule.assignedIds.length == 0 ||
-                                        !newSchedule.date ||
-                                        newSchedule.date == null
-                                    }
+                                    onClick={() => setEditMode((prev) => !prev)}
+                                    style={{
+                                        backgroundColor: editMode ? "#9EB23B" : "#B2B2B2",
+                                        color: "#000000",
+                                        border: "none",
+                                    }}
                                 >
-                                    Confirm
+                                    {editMode ? "Cancel" : "Edit"}
                                 </TooltipBtn>
-                            )}
-                        </div>
-                    )}
+                                {editMode && (
+                                    <TooltipBtn
+                                        toolTip={false}
+                                        style={{ backgroundColor: "#EB1D36" }}
+                                        disabled={
+                                            (newSchedule.remarks ==
+                                                props.event.extendedProps.remarks &&
+                                                newSchedule.date ==
+                                                    props.event.extendedProps.date &&
+                                                newSchedule.assignedIds.sort().join("") ==
+                                                    props.event.extendedProps.assignedIds
+                                                        .sort()
+                                                        .join("")) ||
+                                            newSchedule.assignedIds.length == 0 ||
+                                            !newSchedule.date ||
+                                            newSchedule.date == null
+                                        }
+                                    >
+                                        Confirm
+                                    </TooltipBtn>
+                                )}
+                            </div>
+                        )}
                 </div>
             )}
 
