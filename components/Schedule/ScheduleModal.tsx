@@ -146,7 +146,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                 endDate: new Date(minDate),
             } as CMMSSchedule);
         }
-    }, [props.timeline]);
+    }, [props.timeline, props.scheduleEvent]);
 
     return (
         <ModuleModal isOpen={props.isOpen} title={props.title} closeModal={props.closeModal}>
