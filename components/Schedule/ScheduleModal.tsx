@@ -11,14 +11,25 @@ import { useRouter } from "next/router";
 import axios from "axios";
 
 interface ScheduleMaintenanceModalProps extends ModalProps {
-    timeline?: CMMSTimeline;
-    scheduleEvent?: CMMSSchedule;
+    timeline?: CMMSTimeline; // use to add schedule in draft
+    scheduleEvent?: CMMSSchedule; // used to update schedule in draft
 }
 
 // Makes a post request to schedule a new maintenance
 export async function scheduleMaintenance(schedule: CMMSSchedule) {
     return await axios
         .post("/api/insertSchedule", { schedule })
+        .then((res) => {
+            console.log(res);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+}
+
+async function editDraftSchedule(schedule: CMMSSchedule) {
+    return await axios
+        .patch("/api/updateSchedule", { schedule })
         .then((res) => {
             console.log(res);
         })
@@ -34,6 +45,7 @@ export const minDate = new Date(today.setDate(today.getDate() + 1)).toISOString(
 export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModalProps) {
     const [newSchedule, setNewSchedule] = useState<CMMSSchedule>({} as CMMSSchedule);
     const [successModal, setSuccessModal] = useState<boolean>(false);
+    const [successEditModal, setSuccessEditModal] = useState<boolean>(false);
     const [failureModal, setFailureModal] = useState<boolean>(false);
     const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
 
@@ -82,12 +94,24 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
             setFailureModal(true);
             // Enable submit button
             setDisableSubmit(false);
-        } else {
+        }
+        // adding a schedule checklist
+        else if (props.timeline) {
             scheduleMaintenance(newSchedule).then((result) => {
                 setSuccessModal(true);
                 setTimeout(() => {
                     router.replace("/Schedule/Timeline/" + props.timeline?.id);
                 }, 1000);
+            });
+        }
+        // updating a schedule checklist
+        else if (props.scheduleEvent) {
+            console.log(newSchedule);
+            editDraftSchedule(newSchedule).then((result) => {
+                setSuccessEditModal(true);
+                // setTimeout(() => {
+                //     router.replace("/Schedule/Timeline/" + props.scheduleEvent?.timelineId);
+                // }, 1000);
             });
         }
     }
@@ -226,14 +250,23 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                 </tbody>
             </table>
             <TooltipBtn toolTip={false} onClick={handleSubmit} disabled={disableSubmit}>
-                Create
+                {props.timeline && <div>Create</div>}
+                {props.scheduleEvent && <div>Update</div>}
             </TooltipBtn>
 
             <ModuleSimplePopup
                 modalOpenState={successModal}
                 setModalOpenState={setSuccessModal}
                 title="Success"
-                text="New maintanace successfully scheduled!"
+                text="New maintenance successfully scheduled!"
+                icon={SimpleIcon.Check}
+            />
+
+            <ModuleSimplePopup
+                modalOpenState={successEditModal}
+                setModalOpenState={setSuccessEditModal}
+                title="Success"
+                text="Maintenance successfully updated!"
                 icon={SimpleIcon.Check}
             />
 

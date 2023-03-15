@@ -375,6 +375,46 @@ const insertSchedule = async (req, res, next) => {
     );
 };
 
+const updateSchedule = async (req, res, next) => {
+    db.query(
+        `
+    UPDATE keppel.schedule_checklist SET
+        checklist_template_id = $1,
+        remarks = $2,
+        start_date = $3, 
+        end_date = $4, 
+        recurrence_period = $5, 
+        reminder_recurrence = $6, 
+        scheduler_history = CONCAT('created by',$7::varchar), 
+        user_id = $8, 
+        scheduler_userids_for_email = $9::int[], 
+        plant_id = $10, 
+        timeline_id = $11, 
+        prev_schedule_id = $12, 
+        status = 3 
+    WHERE schedule_id = $13;`,
+        [
+            req.body.schedule.checklistId,
+            req.body.schedule.remarks,
+            moment(req.body.schedule.startDate).format("YYYY-MM-DD HH:mm:ss"),
+            moment(req.body.schedule.endDate).format("YYYY-MM-DD HH:mm:ss"),
+            req.body.schedule.recurringPeriod,
+            req.body.schedule.reminderRecurrence,
+            req.user.id,
+            req.user.id,
+            req.body.schedule.assignedIds,
+            req.body.schedule.plantId,
+            req.body.schedule.timelineId,
+            req.body.schedule.prevId,
+            req.body.schedule.scheduleId,
+        ],
+        (err, result) => {
+            if (err) throw err;
+            if (result) return res.status(200).send("success");
+        }
+    );
+};
+
 module.exports = {
     getViewSchedules,
     getPlants,
@@ -389,4 +429,5 @@ module.exports = {
     deleteSchedule,
     getOpsAndEngineers,
     insertSchedule,
+    updateSchedule,
 };
