@@ -2,7 +2,12 @@ import React, { useState, useEffect, PropsWithChildren } from "react";
 import Modal from "react-modal";
 import { useRouter } from "next/router";
 import { dateFormat, toPeriodString } from "./ScheduleTemplate";
-import { CMMSScheduleEvent, CMMSUser, CMMSSchedule } from "../../types/common/interfaces";
+import {
+    CMMSScheduleEvent,
+    CMMSUser,
+    CMMSSchedule,
+    CMMSTimeline,
+} from "../../types/common/interfaces";
 import EventModalUser from "./EventModalUser";
 import { useCurrentUser } from "../SWR";
 import { GrClose } from "react-icons/gr";
@@ -12,6 +17,7 @@ import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup
 import styles from "../../styles/Schedule.module.scss";
 import axios from "axios";
 import { ChangeEvent, TargetedEvent } from "preact/compat";
+import ScheduleModal from "./ScheduleModal";
 
 interface CustomMouseEventHandler extends React.MouseEventHandler {
     (event: React.MouseEvent | void): void;
@@ -22,7 +28,7 @@ export interface ModalProps extends PropsWithChildren {
     closeModal: CustomMouseEventHandler;
     event?: CMMSScheduleEvent;
     deleteEditDraft?: boolean;
-    edit?: boolean;
+    editSingle?: boolean;
 }
 
 interface NewScheduleInfo extends CMMSSchedule {
@@ -42,9 +48,11 @@ async function deleteSchedule(id: number) {
 export default function EventModal(props: ModalProps) {
     // Store the assigned users as a state
     const [assignedUsers, setAssignedUsers] = useState<CMMSUser[]>([]);
-    const [deleteModal, setDeleteModal] = useState<boolean>(false);
+    const [editDeleteModal, setEditDeleteModal] = useState<boolean>(false);
     const [editMode, setEditMode] = useState<boolean>(false);
     const [newSchedule, setNewSchedule] = useState<NewScheduleInfo>({} as NewScheduleInfo);
+    const [scheduleModal, setScheduleModal] = useState<boolean>(false);
+    const [scheduleObject, setScheduleObject] = useState<CMMSSchedule>();
 
     // Get the current user
     const { data, error } = useCurrentUser();
@@ -60,7 +68,7 @@ export default function EventModal(props: ModalProps) {
     function handleDelete() {
         if (props.event) {
             deleteSchedule(props.event.extendedProps.scheduleId).then((result) => {
-                setDeleteModal(true);
+                setEditDeleteModal(true);
                 setTimeout(() => {
                     router.replace("/Schedule/Timeline/" + props.event?.extendedProps.timelineId);
                 }, 1000);
@@ -94,7 +102,7 @@ export default function EventModal(props: ModalProps) {
             prevId: props.event?.extendedProps.scheduleId,
         });
 
-        setDeleteModal(false);
+        setEditDeleteModal(false);
 
         if (props.event) {
             const users: CMMSUser[] = [];
@@ -110,6 +118,21 @@ export default function EventModal(props: ModalProps) {
                 });
             }
             setAssignedUsers(users);
+
+            setScheduleObject({
+                scheduleId: props.event.extendedProps.scheduleId,
+                checklistId: props.event.extendedProps.checklistId,
+                checklistName: props.event.title,
+                startDate: new Date(props.event.extendedProps.startDate),
+                endDate: new Date(props.event.extendedProps.endDate),
+                recurringPeriod: props.event.extendedProps.recurringPeriod,
+                assignedIds: props.event.extendedProps.assignedIds,
+                remarks: props.event.extendedProps.remarks,
+                plantId: props.event.extendedProps.plantId as number,
+                plantName: props.event?.extendedProps.plant,
+                timelineId: props.event.extendedProps.timelineId,
+                reminderRecurrence: 1,
+            });
         }
     }, [props.event]);
 
@@ -216,7 +239,9 @@ export default function EventModal(props: ModalProps) {
                                     {editMode ? (
                                         <td>
                                             <AssignToSelect
-                                                plantId={3}
+                                                plantId={
+                                                    props.event.extendedProps.plantId as number
+                                                }
                                                 onChange={(value, action) => {
                                                     setNewSchedule((prev) => {
                                                         const newData = { ...prev };
@@ -257,12 +282,27 @@ export default function EventModal(props: ModalProps) {
                             </tbody>
                         </table>
                     </div>
-                    {props.delete && (
-                        <TooltipBtn toolTip={false} onClick={handleDelete}>
-                            Delete
-                        </TooltipBtn>
+                    {props.deleteEditDraft && (
+                        <div style={{ display: "flex" }}>
+                            <TooltipBtn
+                                toolTip={false}
+                                onClick={() => {
+                                    setScheduleModal(true);
+                                }}
+                                style={{ marginRight: "10px" }}
+                            >
+                                Edit
+                            </TooltipBtn>
+                            <TooltipBtn
+                                toolTip={false}
+                                onClick={handleDelete}
+                                style={{ marginLeft: "10px" }}
+                            >
+                                Delete
+                            </TooltipBtn>
+                        </div>
                     )}
-                    {props.edit &&
+                    {props.editSingle &&
                         (data?.role_id as number) < 4 &&
                         props.event.extendedProps.recurringPeriod > 1 && (
                             <div className={styles.eventModalButtonContainer}>
@@ -304,11 +344,18 @@ export default function EventModal(props: ModalProps) {
             )}
 
             <ModuleSimplePopup
-                modalOpenState={deleteModal}
-                setModalOpenState={setDeleteModal}
+                modalOpenState={editDeleteModal}
+                setModalOpenState={setEditDeleteModal}
                 title="Maintenance Deleted"
                 text="Schedule Maintenance has been successfully deleted."
                 icon={SimpleIcon.Check}
+            />
+
+            <ScheduleModal
+                isOpen={scheduleModal}
+                closeModal={() => setScheduleModal(false)}
+                title="Schedule Maintenance"
+                scheduleEvent={scheduleObject}
             />
         </Modal>
     );

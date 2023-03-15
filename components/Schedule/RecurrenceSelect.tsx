@@ -6,6 +6,7 @@ interface RecurrenceSelectProps {
     name?: string;
     onChange: React.ChangeEventHandler<HTMLSelectElement>;
     style?: React.CSSProperties;
+    value?: number;
 }
 
 interface recurrencePeriod {
@@ -67,6 +68,7 @@ export default function RecurrenceSelect(props: RecurrenceSelectProps) {
             onChange={props.onChange}
             name={props.name}
             style={props.style}
+            value={props.value}
         >
             <option hidden>Select a Recurrence Period</option>
             {options}

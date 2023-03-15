@@ -146,7 +146,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 isOpen={isModalOpen}
                 closeModal={() => setIsModalOpen(false)}
                 event={currentEvent}
-                edit={router.pathname === `/Schedule`}
+                editSingle={router.pathname === `/Schedule`}
                 deleteEditDraft={router.pathname === `/Schedule/Timeline/[id]`}
             />
             <ModuleHeader
