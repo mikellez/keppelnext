@@ -99,7 +99,7 @@ interface CMMSScheduleEvent {
         scheduleId: number;
         checklistId: number;
 		timelineId: number;
-		date?:  Date | string;
+		date?:  Date;
         startDate: Date | string;
         endDate: Date | string;
         recurringPeriod: number;
@@ -110,6 +110,10 @@ interface CMMSScheduleEvent {
         assignedUsernames: string[];
         assignedRoles: string[];
         remarks: string;
+		exclusionList?: number[];
+		isSingle?: boolean; 
+		index?: number;
+		status?: number;
     };
 };
 
@@ -126,6 +130,7 @@ interface CMMSSchedule {
 	scheduleId?: number;
 	checklistId: number;
 	checklistName?: string;
+	date?: Date;
 	startDate: Date;
 	endDate: Date;
 	recurringPeriod: number;
@@ -137,6 +142,8 @@ interface CMMSSchedule {
 	reminderRecurrence: number;
 	prevId?: number;
 	isComplete?: boolean;
+	status?: number; 
+	index?: number;
 }
 
 interface CMMSChecklist {

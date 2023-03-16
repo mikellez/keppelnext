@@ -6,12 +6,15 @@ import {
     AiOutlineClockCircle,
     AiOutlineInfoCircle,
 } from "react-icons/ai";
+import { HiOutlineSwitchHorizontal } from "react-icons/hi";
 import TooltipBtn from "../../../components/TooltipBtn";
 import styles from "../../../styles/Schedule.module.scss";
 import axios from "axios";
 import TimelineSelect from "../../../components/Schedule/TimelineSelect";
+import EventSelect from "../../../components/Schedule/EventSelect";
 import { getSchedules } from "../Timeline/[id]";
 import CreateScheduleModal from "../../../components/Schedule/CreateScheduleModal";
+
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
 
@@ -26,6 +29,26 @@ export async function changeTimelineStatus(newStatus: number, timelineId: number
         });
 };
 
+async function getScheduleById(id: number) {
+    return await axios.get<ScheduleInfo[]>("/api/schedule/event/" + id)
+        .then(res => {
+            return res.data
+        })
+        .catch(err => console.log(err))
+};
+
+export async function manageSingleEvent(schedule: ScheduleInfo, action: string) {
+    return await axios({
+        url: "/api/event/",
+        method: "patch",
+        data: {schedule: schedule, action: action}
+    })
+    .then(res => {
+        return res.data
+    })
+    .catch(err => console.log(err))
+}
+
 export default function ManageSchedule() {
     const [isHistory, setIsHistory] = useState<boolean>(false);
     const [scheduleList, setScheduleList] = useState<ScheduleInfo[]>([]);
@@ -36,6 +59,7 @@ export default function ManageSchedule() {
     const [outcomeModal, setOutcomeModal] = useState<boolean>(false);
     const [timelineId, setTimelineId] = useState<number>();
     const [remarks, setRemarks] = useState<string>("");
+    const [eventMode, setEventMode] = useState<boolean>(false);
 
     const router = useRouter();
 
@@ -52,7 +76,7 @@ export default function ManageSchedule() {
         if (remarks === "" && newStatus != 1) {
             //Prompt for remarks
             setIsPopup(true);
-        } else {
+        } else if (!eventMode) {
             changeTimelineStatus(newStatus, timelineId as number).then(result => {
                 // Close and clear modal fields
                 setManageModal(false);
@@ -63,6 +87,14 @@ export default function ManageSchedule() {
                 }, 1000)
                 
             });
+        } else if (eventMode) {
+            const action = newStatus === 1 ? "approve" : newStatus === 3 ? "reject" : "";
+            manageSingleEvent(scheduleList[0], action).then(result => {
+                setOutcomeModal(true);
+                setTimeout(() => {
+                    router.push("/Schedule/");
+                }, 1000)
+            })
         }
     };
 
@@ -80,7 +112,7 @@ export default function ManageSchedule() {
 
     return (<>
         <ScheduleTemplate title="Manage Schedule" header="Manage Schedule" schedules={scheduleList}>
-            {isHistory ? (
+            {isHistory ? 
                 <div style={{ width: "150px" }}>
                     <TimelineSelect
                         status={5}
@@ -91,7 +123,19 @@ export default function ManageSchedule() {
                         name="name"
                     />
                 </div>
-            ) : (
+            :   eventMode ? 
+                <div>
+                    <EventSelect onChange={(e) => {
+                        const tmp = e.target.value.split("-");
+                        getScheduleById(parseInt(tmp[1])).then(result => {
+                            if (result) {
+                                setScheduleList(result);
+                                setTimelineId(parseInt(tmp[0]));
+                            }
+                        })
+                    }} />
+                </div>
+                :
                 <div style={{ width: "150px" }}>
                     <TimelineSelect
                         status={4}
@@ -102,8 +146,16 @@ export default function ManageSchedule() {
                         name="name"
                     />
                 </div>
-            )}
-
+            
+            }
+            {!isHistory && 
+                <TooltipBtn onClick={() => {
+                    setEventMode(prev => !prev);
+                    setScheduleList([]);
+                    setTimelineId(0);
+                }}>
+                    <HiOutlineSwitchHorizontal size={20} />
+                </TooltipBtn>}
             {isHistory ? 
                 <TooltipBtn text="Schdedule info" onClick={() => setManageModal(true)}  disabled={!timelineId}>
                     <AiOutlineInfoCircle size={21} />

@@ -8,6 +8,7 @@ import TooltipBtn from "../TooltipBtn";
 import styles from "../../styles/Schedule.module.scss";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
+import { ThreeDots } from 'react-loading-icons';
 import axios from "axios";
 
 interface ScheduleMaintenanceModalProps extends ModalProps {
@@ -48,6 +49,8 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
     const [successEditModal, setSuccessEditModal] = useState<boolean>(false);
     const [failureModal, setFailureModal] = useState<boolean>(false);
     const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
+    const [invalidDateCheck, setInvalidDateCheck] = useState<boolean>(false);
+    const [isReady, setIsReady] = useState<boolean>(false);
 
     const router = useRouter();
 
@@ -56,7 +59,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
         event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement>
     ) {
         setNewSchedule((prev) => {
-            const value =
+            let value =
                 event.target.type === "date"
                     ? new Date(event.target.value)
                     : event.target.name === "checklistId" ||
@@ -65,8 +68,26 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                     ? parseInt(event.target.value)
                     : event.target.value;
             const tmp = { ...prev };
-            if (event.target.name === "startDate" || event.target.name === "endDate")
+            // Resets recurring period input and check validity of start and end date whenever a start/end date is changed
+            if (event.target.name === "startDate") {
                 tmp.recurringPeriod = -1;
+                if (prev.endDate < value) {
+                    setInvalidDateCheck(true);
+                    setDisableSubmit(true);
+                } else {
+                    setInvalidDateCheck(false);
+                    setDisableSubmit(false);
+                }
+            } else if (event.target.name === "endDate") {
+                tmp.recurringPeriod = -1;
+                if (value < prev.startDate) {
+                    setInvalidDateCheck(true);
+                    setDisableSubmit(true);
+                } else {
+                    setInvalidDateCheck(false);
+                    setDisableSubmit(false);
+                }
+            }
             return {
                 ...tmp,
                 [event.target.name]: value,
@@ -117,7 +138,9 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
     }
 
     useEffect(() => {
+        setIsReady(false);
         if (props.scheduleEvent) {
+            console.log(props.scheduleEvent)
             setNewSchedule(props.scheduleEvent);
         } else {
             setNewSchedule({
@@ -125,158 +148,180 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                 timelineId: props.timeline?.id,
                 startDate: new Date(minDate),
                 endDate: new Date(minDate),
+                status: 3,
             } as CMMSSchedule);
         }
-    }, [props.timeline]);
+
+        setTimeout(() => {
+            setIsReady(true); 
+        }, 1000)
+        
+    }, [props.timeline, props.scheduleEvent]);
 
     return (
-        <ModuleModal isOpen={props.isOpen} title={props.title} closeModal={props.closeModal}>
-            <table className={styles.eventModalTable}>
-                <tbody>
-                    <tr className={styles.eventModalTableRow}>
-                        <th>Checklist Name:</th>
-                        <td>
-                            <ChecklistSelect
-                                onChange={updateSchedule}
-                                name="checklistId"
-                                value={newSchedule.checklistId}
-                            />
-                        </td>
-                    </tr>
-                    <tr className={styles.eventModalTableRow}>
-                        <th>Plant:</th>
-                        {props.timeline && <td>{props.timeline?.plantName}</td>}
-                        {props.scheduleEvent && <td>{props.scheduleEvent?.plantName}</td>}
-                    </tr>
-                    <tr className={styles.eventModalTableRow}>
-                        <th>Start Date:</th>
-                        <td>
-                            <input
-                                className="form-control"
-                                type="date"
-                                min={minDate}
-                                name="startDate"
-                                value={
-                                    newSchedule.startDate
-                                        ? newSchedule.startDate.toISOString().slice(0, 10)
-                                        : minDate
-                                }
-                                onChange={updateSchedule}
-                            />
-                        </td>
-                    </tr>
-                    <tr className={styles.eventModalTableRow}>
-                        <th>End Date:</th>
-                        <td>
-                            <input
-                                className="form-control"
-                                type="date"
-                                min={minDate}
-                                name="endDate"
-                                value={
-                                    newSchedule.endDate
-                                        ? newSchedule.endDate.toISOString().slice(0, 10)
-                                        : minDate
-                                }
-                                onChange={updateSchedule}
-                            />
-                        </td>
-                    </tr>
-                    <tr className={styles.eventModalTableRow}>
-                        <th>Recurring Period:</th>
-                        <td>
-                            <RecurrenceSelect
-                                startDate={newSchedule.startDate}
-                                endDate={newSchedule.endDate}
-                                name="recurringPeriod"
-                                onChange={updateSchedule}
-                                value={newSchedule.recurringPeriod}
-                            />
-                        </td>
-                    </tr>
-                    <tr className={styles.eventModalTableRow}>
-                        <th>Reminder Frequency:</th>
-                        <td>
-                            <select
-                                className="form-select"
-                                name="reminderRecurrence"
-                                onChange={updateSchedule}
-                                value={newSchedule.reminderRecurrence}
-                            >
-                                <option hidden>Select the Reminder Frequency</option>
-                                <option value={1}>1 Day Before</option>
-                                <option value={0}>No Reminders</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr className={styles.eventModalTableRow}>
-                        <th>Assigned To:</th>
-                        <td>
-                            <AssignToSelect
-                                onChange={(value, action) => {
-                                    setNewSchedule((prev) => {
-                                        const newData = { ...prev };
-                                        const ids: number[] = [];
-                                        value.forEach((option: AssignedUserOption) => {
-                                            ids.push(option.value);
+        <div>
+            <ModuleModal isOpen={props.isOpen} title={props.title} closeModal={props.closeModal}>
+            {isReady ? 
+            <div>
+                <table className={styles.eventModalTable}>
+                    <tbody>
+                        <tr className={styles.eventModalTableRow}>
+                            <th>Checklist Name:</th>
+                            <td>
+                                <ChecklistSelect
+                                    onChange={updateSchedule}
+                                    name="checklistId"
+                                    value={newSchedule.checklistId}
+                                />
+                            </td>
+                        </tr>
+                        <tr className={styles.eventModalTableRow}>
+                            <th>Plant:</th>
+                            {props.timeline && <td>{props.timeline?.plantName}</td>}
+                            {props.scheduleEvent && <td>{props.scheduleEvent?.plantName}</td>}
+                        </tr>
+                        <tr className={styles.eventModalTableRow}>
+                            <th>Start Date:</th>
+                            <td>
+                                <input
+                                    className="form-control"
+                                    type="date"
+                                    min={minDate}
+                                    name="startDate"
+                                    value={
+                                        newSchedule.startDate
+                                            ? newSchedule.startDate.toISOString().slice(0, 10)
+                                            : minDate
+                                    }
+                                    onChange={updateSchedule}
+                                />
+                            </td>
+                        </tr>
+                        <tr className={styles.eventModalTableRow}>
+                            <th>End Date:</th>
+                            <td>
+                                <input
+                                    className="form-control"
+                                    type="date"
+                                    min={minDate}
+                                    name="endDate"
+                                    value={
+                                        newSchedule.endDate
+                                            ? newSchedule.endDate.toISOString().slice(0, 10)
+                                            : minDate
+                                    }
+                                    onChange={updateSchedule}
+                                />
+                            </td>
+                        </tr>
+                        <tr className={styles.eventModalTableRow}>
+                            <th>Recurring Period:</th>
+                            <td>
+                                <RecurrenceSelect
+                                    startDate={newSchedule.startDate}
+                                    endDate={newSchedule.endDate}
+                                    name="recurringPeriod"
+                                    onChange={updateSchedule}
+                                    value={newSchedule.recurringPeriod}
+                                />
+                            </td>
+                        </tr>
+                        <tr className={styles.eventModalTableRow}>
+                            <th>Reminder Frequency:</th>
+                            <td>
+                                <select
+                                    className="form-select"
+                                    name="reminderRecurrence"
+                                    onChange={updateSchedule}
+                                    value={newSchedule.reminderRecurrence}
+                                >
+                                    <option hidden>Select the Reminder Frequency</option>
+                                    <option value={1}>1 Day Before</option>
+                                    <option value={0}>No Reminders</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr className={styles.eventModalTableRow}>
+                            <th>Assigned To:</th>
+                            <td>
+                                <AssignToSelect
+                                    onChange={(value, action) => {
+                                        setNewSchedule((prev) => {
+                                            const newData = { ...prev };
+                                            const ids: number[] = [];
+                                            value.forEach((option: AssignedUserOption) => {
+                                                ids.push(option.value);
+                                            });
+                                            newData.assignedIds = ids;
+                                            return newData;
                                         });
-                                        newData.assignedIds = ids;
-                                        return newData;
-                                    });
-                                }}
-                                plantId={
-                                    props.timeline
-                                        ? (props.timeline?.plantId as number)
-                                        : props.scheduleEvent
-                                        ? (props.scheduleEvent.plantId as number)
-                                        : 0 //error
-                                }
-                                defaultIds={props.scheduleEvent?.assignedIds}
-                            />
-                        </td>
-                    </tr>
-                    <tr className={styles.eventModalTableRow}>
-                        <th>Remarks:</th>
-                        <td>
-                            <textarea
-                                className="form-control"
-                                maxLength={100}
-                                name="remarks"
-                                value={newSchedule.remarks}
-                                onChange={updateSchedule}
-                            ></textarea>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <TooltipBtn toolTip={false} onClick={handleSubmit} disabled={disableSubmit}>
-                {props.timeline && <div>Create</div>}
-                {props.scheduleEvent && <div>Update</div>}
-            </TooltipBtn>
-
+                                    }}
+                                    plantId={
+                                        props.timeline
+                                            ? (props.timeline?.plantId as number)
+                                            : props.scheduleEvent
+                                            ? (props.scheduleEvent.plantId as number)
+                                            : 0 //error
+                                    }
+                                    defaultIds={props.scheduleEvent?.assignedIds}
+                                />
+                            </td>
+                        </tr>
+                        <tr className={styles.eventModalTableRow}>
+                            <th>Remarks:</th>
+                            <td>
+                                <textarea
+                                    className="form-control"
+                                    maxLength={100}
+                                    name="remarks"
+                                    value={newSchedule.remarks}
+                                    onChange={updateSchedule}
+                                ></textarea>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <div>
+                        {invalidDateCheck && (
+                            <p className={styles.invalidDateBox}>
+                                Please ensure that the start date is before the end date.
+                            </p>
+                        )}
+                    </div>
+                    <TooltipBtn toolTip={false} onClick={handleSubmit} disabled={disableSubmit}>
+                        {props.timeline && <div>Create</div>}
+                        {props.scheduleEvent && <div>Update</div>}
+                    </TooltipBtn>
+                </div>
+            </div> : 
+            <div style={{ width: "100%", textAlign: "center" }}>
+                <ThreeDots fill="black" />
+            </div>}
+            </ModuleModal>
             <ModuleSimplePopup
-                modalOpenState={successModal}
-                setModalOpenState={setSuccessModal}
-                title="Success"
-                text="New maintenance successfully scheduled!"
-                icon={SimpleIcon.Check}
-            />
+                    modalOpenState={successModal}
+                    setModalOpenState={setSuccessModal}
+                    title="Success"
+                    text="New maintenance successfully scheduled!"
+                    icon={SimpleIcon.Check}
+                />
 
-            <ModuleSimplePopup
-                modalOpenState={successEditModal}
-                setModalOpenState={setSuccessEditModal}
-                title="Success"
-                text="Maintenance successfully updated!"
-                icon={SimpleIcon.Check}
-            />
+                <ModuleSimplePopup
+                    modalOpenState={successEditModal}
+                    setModalOpenState={setSuccessEditModal}
+                    title="Success"
+                    text="Maintenance successfully updated!"
+                    icon={SimpleIcon.Check}
+                />
 
-            <ModuleSimplePopup
-                modalOpenState={failureModal}
-                setModalOpenState={setFailureModal}
-                title="Incomplete Maintenance"
-                text="Please fill in the missing details for the maintenance."
-                icon={SimpleIcon.Cross}
-            />
-        </ModuleModal>
+                <ModuleSimplePopup
+                    modalOpenState={failureModal}
+                    setModalOpenState={setFailureModal}
+                    title="Incomplete Maintenance"
+                    text="Please fill in the missing details for the maintenance."
+                    icon={SimpleIcon.Cross}
+                />
+        </div>
     );
 }
