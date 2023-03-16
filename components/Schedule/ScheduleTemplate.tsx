@@ -37,6 +37,9 @@ export interface ScheduleInfo {
     remarks: string;
     schedule_id: number;
     timeline_id: number;
+    exclusionList: number[];
+    isSingle: boolean;
+    index?: number;
 }
 
 // Function to format Date to string

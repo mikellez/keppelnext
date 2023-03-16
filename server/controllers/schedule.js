@@ -28,6 +28,9 @@ const makeScheduleDict = (arr) => {
             assigned_roles: item["roles"].split(","),
             assigned_emails: item["user_emails"].split(","),
             remarks: item["remarks"],
+            exclusionList: item["exclusion_list"],
+            isSingle: item["index"] != null ? true : false,
+            index: item["index"]
         });
     });
     return newArr;
@@ -71,7 +74,7 @@ const getViewSchedules = async (req, res, next) => {
 		  STRING_AGG(UA.role_name, ' ,') AS ROLES,
 		  STRING_AGG(U.first_name, ' ,') AS FNAME,
 		  STRING_AGG(U.last_name, ' ,') AS LNAME,
-		  SC.REMARKS, SC.TIMELINE_ID
+		  SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX
           FROM 
           KEPPEL.SCHEDULE_CHECKLIST  as SC,
           KEPPEL.PLANT_MASTER  AS PM,
@@ -93,7 +96,8 @@ const getViewSchedules = async (req, res, next) => {
 		  STRING_AGG(UA.role_name, ' ,') AS ROLES,
 		  STRING_AGG(U.first_name, ' ,') AS FNAME,
 		  STRING_AGG(U.last_name, ' ,') AS LNAME,
-		PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, SC.REMARKS, SC.TIMELINE_ID
+		PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, 
+        SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX
         FROM 
         KEPPEL.SCHEDULE_CHECKLIST  as SC,
         KEPPEL.USERS AS U,
@@ -112,7 +116,7 @@ const getViewSchedules = async (req, res, next) => {
         
         GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
     }
-    console.log(queryS[0]);
+    // console.log(queryS[0]);
     db.query(queryS[0], (err, result) => {
         if (err) throw err;
         if (result) {
@@ -209,7 +213,7 @@ const getSchedulesTimeline = async (req, res, next) => {
         STRING_AGG(UA.role_name, ' ,') AS ROLES,
         STRING_AGG(U.first_name, ' ,') AS FNAME,
         STRING_AGG(U.last_name, ' ,') AS LNAME,
-        SC.REMARKS, SC.TIMELINE_ID
+        SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX
         FROM 
         KEPPEL.SCHEDULE_CHECKLIST  as SC,
         KEPPEL.PLANT_MASTER  AS PM,
@@ -375,6 +379,175 @@ const insertSchedule = async (req, res, next) => {
     );
 };
 
+const manageSingleEvent = (req, res, next) => {
+    if (req.body.action === "approve") {
+        db.query(
+            "UPDATE KEPPEL.SCHEDULE_CHECKLIST SET STATUS = 1 WHERE SCHEDULE_ID = $1 RETURNING INDEX, PREV_SCHEDULE_ID",
+            [req.body.schedule.schedule_id],
+            (err, found) => {
+                if (err) throw err;
+                // console.log(found.rows);
+                db.query(
+                    `UPDATE KEPPEL.SCHEDULE_CHECKLIST 
+            SET EXCLUSION_LIST = ARRAY_APPEND(EXCLUSION_LIST, ${found.rows[0].index}) 
+            WHERE SCHEDULE_ID = ${found.rows[0].prev_schedule_id}; 
+
+            SELECT SC.SCHEDULE_ID, 
+            CT.CHL_NAME, 
+            STRING_AGG(DISTINCT(U.user_email), ' ,') AS EMAILS, 
+            U1.USER_EMAIL
+            FROM KEPPEL.SCHEDULE_CHECKLIST SC
+            JOIN KEPPEL.USERS U1 ON SC.USER_ID = U1.USER_ID,
+            KEPPEL.USERS U,
+            KEPPEL.CHECKLIST_TEMPLATES CT
+            WHERE 
+            SC.CHECKLIST_TEMPLATE_ID = CT.CHECKLIST_ID AND
+            U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
+            SC.SCHEDULE_ID = ${found.rows[0].prev_schedule_id}
+            GROUP BY (SC.SCHEDULE_ID, CT.CHL_NAME, U1.USER_EMAIL)`,
+                    (err, found) => {
+                        if (err) throw err;
+                        // mailer()
+                        return res.status(200).send("event approved");
+                    }
+                );
+            }
+        );
+    } else if (req.body.action === "reject") {
+        db.query(
+            "UPDATE KEPPEL.SCHEDULE_CHECKLIST SET STATUS = 2 WHERE SCHEDULE_ID = $1",
+            [req.body.schedule.scheduleId],
+            (err, found) => {
+                if (err) throw err;
+                return res.status(200).send("event rejected");
+            }
+        );
+    } else if (req.body.action === "edit") {
+        const data = req.body.scheduleData
+        db.query(
+            `UPDATE KEPPEL.SCHEDULE_CHECKLIST 
+            SET START_DATE = $1,
+            END_DATE = $2,
+            REMARKS = $3,
+            SCHEDULER_USERIDS_FOR_EMAIL = ARRAY [${data.userIds}]
+            WHERE SCHEDULE_ID = $4`,
+            [data.startDate, data.endDate, data.remarks, req.params.schedule_id],
+            (err, found) => {
+                if (err) throw err;
+                return res.status(200).send("event edited");
+            }
+        );
+    } else {
+        return res.status(404).send("Invalid management action");
+    }
+};
+
+const createSingleEvent = (req, res, next) => {
+    const data = req.body.scheduleData;
+        db.query(
+            `INSERT INTO KEPPEL.SCHEDULE_CHECKLIST 
+            (
+                CHECKLIST_TEMPLATE_ID, 
+                REMARKS, 
+                START_DATE, 
+                END_DATE, 
+                RECURRENCE_PERIOD, 
+                REMINDER_RECURRENCE, 
+                SCHEDULER_HISTORY,
+                USER_ID,
+                SCHEDULER_USERIDS_FOR_EMAIL,
+                PLANT_ID,
+                PREV_SCHEDULE_ID,
+                TIMELINE_ID,
+                STATUS,
+                INDEX
+            )
+            VALUES ($1, $2, $3, $4, 0, 1, $5, $6, ARRAY [${data.userIds}], $7, $8, $9, 4, $10)`,
+            [
+                data.checklistId,
+                data.remarks,
+                data.startDate,
+                data.endDate,
+                `PENDING_previous date: ${data.prevDate}_created by ${data.userId}`,
+                data.userId,
+                data.plantId,
+                req.params.schedule_id,
+                data.timelineId,
+                req.params.index,
+            ],
+            (err) => {
+                if (err) throw err;
+                return res.send("event changed");
+            }
+        );
+};
+
+const getPendingSingleEvents = (req, res, next) => {
+    db.query(
+        `SELECT 
+        ST.TIMELINE_ID,
+        ST.TIMELINE_NAME,
+        ST.DESCRIPTION,
+        ST.PLANT_ID,
+        SC.SCHEDULE_ID,
+        CT.CHL_NAME
+        FROM KEPPEL.SCHEDULE_TIMELINES ST
+        JOIN KEPPEL.SCHEDULE_CHECKLIST SC ON ST.TIMELINE_ID = SC.TIMELINE_ID
+        JOIN KEPPEL.CHECKLIST_TEMPLATES CT ON CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID
+        WHERE SC.INDEX IS NOT NULL AND SC.STATUS = 4`,
+        (err, found) => {
+            if (err) throw err;
+            if (found.rows.length === 0) return res.status(404).send("no pending schedules");
+            // const response_dict = makeScheduleDict(found.rows);
+            // return res.send(response_dict);
+            return res.send(found.rows.map(item => {
+                return {
+                    id: item.timeline_id,
+                    name: item.timeline_name,
+                    plantId: item.plant_id,
+                    description: item.description,
+                    scheduleId: item.schedule_id,
+                    checklistName:item.chl_name,
+                }
+            }));
+        }
+    );
+};
+
+const getScheduleById = (req, res, next) => {
+    db.query(
+        `SELECT SC.SCHEDULE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
+        SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL,
+        PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME,SC.CHECKLIST_TEMPLATE_ID, STRING_AGG(U.user_name, ' ,') AS USERNAME,
+        STRING_AGG(U.user_email, ' ,') AS USER_EMAILS,
+        STRING_AGG(UA.role_name, ' ,') AS ROLES,
+        STRING_AGG(U.first_name, ' ,') AS FNAME,
+        STRING_AGG(U.last_name, ' ,') AS LNAME,
+        SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX
+        FROM 
+        KEPPEL.SCHEDULE_CHECKLIST  as SC,
+        KEPPEL.PLANT_MASTER  AS PM,
+        KEPPEL.CHECKLIST_TEMPLATES AS CT,
+        KEPPEL.USERS AS U,
+        KEPPEL.USER_ACCESS AS UA
+        WHERE
+        SC.PLANT_ID = PM.PLANT_ID AND 
+        CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
+        U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL)AND
+        UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
+        SC.SCHEDULE_ID = $1
+        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`,
+        [req.params.id],
+        (err, result) => {
+            if (err) throw err;
+            if (result) {
+                const response_dict = makeScheduleDict(result.rows);
+                return res.status(200).send(response_dict);
+            }
+        }
+    );
+};
+
 module.exports = {
     getViewSchedules,
     getPlants,
@@ -389,4 +562,8 @@ module.exports = {
     deleteSchedule,
     getOpsAndEngineers,
     insertSchedule,
+    manageSingleEvent,
+    createSingleEvent,
+    getPendingSingleEvents,
+    getScheduleById,
 };

@@ -110,6 +110,8 @@ interface CMMSScheduleEvent {
         assignedUsernames: string[];
         assignedRoles: string[];
         remarks: string;
+		exclusionList?: number[];
+		isSingle?: boolean; 
     };
 };
 

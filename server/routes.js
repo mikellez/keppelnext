@@ -211,6 +211,15 @@ router
     .delete(controllers.schedule.deleteSchedule)
     .get(controllers.schedule.getViewSchedules);
 
+router
+    .route("/event/:schedule_id?/:index?/", checkIfLoggedInAPI)
+    .get(controllers.schedule.getPendingSingleEvents)
+    .post(controllers.schedule.createSingleEvent)
+    .patch(controllers.schedule.manageSingleEvent)
+    .delete()
+
+router.get("/schedule/event/:id", checkIfLoggedInAPI, controllers.schedule.getScheduleById);
+
 router.get("/activity/account_log", checkIfLoggedInAPI, controllers.activity.getEventtHistory);
 
 
