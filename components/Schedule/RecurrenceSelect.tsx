@@ -44,9 +44,8 @@ export default function RecurrenceSelect(props: RecurrenceSelectProps) {
                         props.startDate.getMonth(),
                         props.startDate.getDate()
                     )) /
-                    (24 * 60 * 60 * 1000) +
-                1;
-
+                    (24 * 60 * 60 * 1000);
+                    
             // Add the relevant recurrence period to the state
             recurrencePeriodList.forEach((period) => {
                 if (days >= period.value) setValidPeriods((prev) => [...prev, period]);

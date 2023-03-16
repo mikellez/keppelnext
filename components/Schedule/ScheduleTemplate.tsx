@@ -31,6 +31,8 @@ export interface ScheduleInfo {
     checklist_name: string;
     start_date: Date;
     end_date: Date;
+    prev_start_date?: Date;
+    prev_end_date?: Date;
     period: number;
     plant: string;
     plantId: number;
@@ -124,8 +126,10 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                             scheduleId: item.schedule_id,
                             checklistId: item.checklist_id,
                             date: new Date(item.calendar_dates[index]),
-                            startDate: item.start_date ? new Date(item.start_date) : "Rescheduled",
-                            endDate: item.end_date ? new Date(item.end_date) : "Rescheduled",
+                            startDate: item.isSingle ? new Date(item.prev_start_date as Date) : item.start_date ? new Date(item.start_date) : "Rescheduled",
+                            endDate: item.isSingle ? new Date(item.prev_end_date as Date) : item.end_date ? new Date(item.end_date) : "Rescheduled",
+                            // prevStartDate: item.prev_start_date,
+                            // prevEndDate: item.prev_end_date,
                             recurringPeriod: item.period,
                             assignedIds: item.assigned_ids,
                             assignedEmails: item.assigned_emails,

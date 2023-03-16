@@ -101,18 +101,18 @@ export default function Timeline() {
         if (scheduleList.length === 0) {
             setEmptyModal(true);
         } else {
-            getTimelinesByStatus(4).then(result => {
-                if (result && result.filter(item => item.plantId === timelineData?.plantId)[0]) {
-                    setInvalidModal(true);
-                } else {
+            // getTimelinesByStatus(4).then(result => {
+            //     if (result && result.filter(item => item.plantId === timelineData?.plantId)[0]) {
+            //         setInvalidModal(true);
+            //     } else {
                     changeTimelineStatus(4, parseInt(timelineId as string)).then(result => {
                         setSubmitModal(true);
                         setTimeout(() => {
                             router.replace("/Schedule/Create")
                         }, 500);
                     });
-                }
-            })
+            //     }
+            // })
         }
     }
 

@@ -32,7 +32,7 @@ async function editDraftSchedule(schedule: CMMSSchedule) {
     return await axios
         .patch("/api/updateSchedule", { schedule })
         .then((res) => {
-            console.log(res);
+            return res.data;
         })
         .catch((err) => {
             console.log(err);
@@ -127,8 +127,9 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
         }
         // updating a schedule checklist
         else if (props.scheduleEvent) {
-            console.log(newSchedule);
+            // console.log(newSchedule);
             editDraftSchedule(newSchedule).then((result) => {
+                console.log(result)
                 setSuccessEditModal(true);
                 setTimeout(() => {
                     router.replace("/Schedule/Timeline/" + props.scheduleEvent?.timelineId);
@@ -140,7 +141,6 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
     useEffect(() => {
         setIsReady(false);
         if (props.scheduleEvent) {
-            console.log(props.scheduleEvent)
             setNewSchedule(props.scheduleEvent);
         } else {
             setNewSchedule({
@@ -154,8 +154,8 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
 
         setTimeout(() => {
             setIsReady(true); 
-        }, 1000)
-        
+        }, 3000)
+
     }, [props.timeline, props.scheduleEvent]);
 
     return (

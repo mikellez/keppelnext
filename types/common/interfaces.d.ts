@@ -102,6 +102,8 @@ interface CMMSScheduleEvent {
 		date?:  Date;
         startDate: Date | string;
         endDate: Date | string;
+		// prevStartDate?: Date | string;
+        // prevEndDate?: Date | string;
         recurringPeriod: number;
         assignedIds: number[];
         assignedEmails: string[];

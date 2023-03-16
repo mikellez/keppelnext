@@ -138,6 +138,7 @@ export default function EventModal(props: ModalProps) {
                 reminderRecurrence: 1,
                 prevId: props.event.extendedProps.scheduleId,
                 index: props.event.extendedProps.index,
+                scheduleId: props.event.extendedProps.scheduleId,
             });
 
             // setScheduleObject({
