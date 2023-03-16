@@ -602,4 +602,9 @@ module.exports = {
     deleteSchedule,
     getOpsAndEngineers,
     insertSchedule,
+    manageSingleEvent,
+    createSingleEvent,
+    getPendingSingleEvents,
+    getScheduleById,
+    updateSchedule
 };

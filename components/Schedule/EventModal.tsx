@@ -293,8 +293,7 @@ export default function EventModal(props: ModalProps) {
                                 </tbody>
                             </table>
                         </div>
-                        <div style={{ display: "flex", justifyContent: "space-between" }}>
-                            <div></div>
+                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
                             {props.deleteEditDraft && (
                                 <div style={{ display: "flex" }}>
                                     <TooltipBtn
