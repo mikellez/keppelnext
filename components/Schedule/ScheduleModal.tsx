@@ -136,6 +136,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
     }
 
     useEffect(() => {
+        console.log(newSchedule)
         if (props.scheduleEvent) {
             setNewSchedule(props.scheduleEvent);
         } else {
@@ -144,6 +145,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                 timelineId: props.timeline?.id,
                 startDate: new Date(minDate),
                 endDate: new Date(minDate),
+                status: 3,
             } as CMMSSchedule);
         }
     }, [props.timeline, props.scheduleEvent]);

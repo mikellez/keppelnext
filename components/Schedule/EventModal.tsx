@@ -1,7 +1,7 @@
 import React, { useState, useEffect, PropsWithChildren } from "react";
 import Modal from "react-modal";
 import { useRouter } from "next/router";
-import { dateFormat, toPeriodString } from "./ScheduleTemplate";
+import { dateFormat, ScheduleInfo, toPeriodString } from "./ScheduleTemplate";
 import {
     CMMSScheduleEvent,
     CMMSUser,
@@ -16,8 +16,7 @@ import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import styles from "../../styles/Schedule.module.scss";
 import axios from "axios";
-import { ChangeEvent, TargetedEvent } from "preact/compat";
-import ScheduleModal from "./ScheduleModal";
+import ScheduleModal, { scheduleMaintenance } from "./ScheduleModal";
 
 interface CustomMouseEventHandler extends React.MouseEventHandler {
     (event: React.MouseEvent | void): void;
@@ -31,7 +30,7 @@ export interface ModalProps extends PropsWithChildren {
     editSingle?: boolean;
 }
 
-interface NewScheduleInfo extends CMMSSchedule {
+export interface NewScheduleInfo extends CMMSSchedule {
     date: Date;
 }
 
@@ -43,7 +42,7 @@ async function deleteSchedule(id: number) {
             return res;
         })
         .catch((err) => console.log(err));
-}
+};
 
 export default function EventModal(props: ModalProps) {
     // Store the assigned users as a state
@@ -63,7 +62,7 @@ export default function EventModal(props: ModalProps) {
         props.closeModal();
         setEditMode(false);
         setNewSchedule({} as NewScheduleInfo);
-    }
+    };
 
     function handleDelete() {
         if (props.event) {
@@ -74,7 +73,7 @@ export default function EventModal(props: ModalProps) {
                 }, 1000);
             });
         }
-    }
+    };
 
     function updateSchedule(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
         setNewSchedule((prev) => {
@@ -84,24 +83,29 @@ export default function EventModal(props: ModalProps) {
                     e.target.name == "date" ? new Date(e.target.value) : e.target.value,
             };
         });
-    }
+    };
+
+    function submitEvent() {
+        const schedule: CMMSSchedule = {
+            checklistId: newSchedule.checklistId,
+            startDate: newSchedule.date,
+            endDate: newSchedule.date,
+            recurringPeriod: newSchedule.recurringPeriod,
+            assignedIds: newSchedule.assignedIds,
+            remarks: newSchedule.remarks,
+            plantId: newSchedule.plantId,
+            timelineId: newSchedule.timelineId,
+            reminderRecurrence: 1,
+            prevId: newSchedule.prevId,
+            status: 4, 
+            index: newSchedule.index,
+        }
+        scheduleMaintenance(schedule).then(result => {
+            console.log(result);
+        })
+    };
 
     useEffect(() => {
-        setNewSchedule({
-            checklistId: props.event?.extendedProps.checklistId as number,
-            checklistName: props.event?.title,
-            startDate: props.event?.extendedProps.startDate as Date,
-            endDate: props.event?.extendedProps.endDate as Date,
-            date: props.event?.extendedProps.date as Date,
-            recurringPeriod: props.event?.extendedProps.recurringPeriod as number,
-            assignedIds: props.event?.extendedProps.assignedIds as number[],
-            remarks: props.event?.extendedProps.remarks as string,
-            plantId: props.event?.extendedProps.plantId as number,
-            timelineId: props.event?.extendedProps.timelineId as number,
-            reminderRecurrence: 1,
-            prevId: props.event?.extendedProps.scheduleId,
-        });
-
         setEditDeleteModal(false);
 
         if (props.event) {
@@ -118,6 +122,23 @@ export default function EventModal(props: ModalProps) {
                 });
             }
             setAssignedUsers(users);
+
+            setNewSchedule({
+                checklistId: props.event.extendedProps.checklistId,
+                checklistName: props.event.title,
+                startDate: new Date(props.event.extendedProps.startDate),
+                endDate: new Date(props.event.extendedProps.endDate),
+                date: props.event.extendedProps.date as Date,
+                recurringPeriod: props.event.extendedProps.recurringPeriod,
+                assignedIds: props.event.extendedProps.assignedIds,
+                remarks: props.event.extendedProps.remarks,
+                plantId: props.event.extendedProps.plantId as number,
+                plantName: props.event.extendedProps.plant,
+                timelineId: props.event.extendedProps.timelineId,
+                reminderRecurrence: 1,
+                prevId: props.event.extendedProps.scheduleId,
+                index: props.event.extendedProps.index,
+            });
 
             setScheduleObject({
                 scheduleId: props.event.extendedProps.scheduleId,
@@ -301,7 +322,7 @@ export default function EventModal(props: ModalProps) {
                                         onClick={() => {
                                             setScheduleModal(true);
                                             closeModal();
-                                            console.log(scheduleObject);
+                                            // console.log(scheduleObject);
                                         }}
                                         style={{ marginRight: "10px" }}
                                     >
@@ -318,7 +339,8 @@ export default function EventModal(props: ModalProps) {
                             )}
                             {props.editSingle &&
                                 (data?.role_id as number) < 4 &&
-                                props.event.extendedProps.recurringPeriod > 1 && (
+                                (props.event.extendedProps.recurringPeriod > 1 || 
+                                    props.event.extendedProps.isSingle) && (
                                     <div className={styles.eventModalButtonContainer}>
                                         <TooltipBtn
                                             toolTip={false}
@@ -348,6 +370,7 @@ export default function EventModal(props: ModalProps) {
                                                     !newSchedule.date ||
                                                     newSchedule.date == null
                                                 }
+                                                onClick={submitEvent}
                                             >
                                                 Confirm
                                             </TooltipBtn>
@@ -365,12 +388,12 @@ export default function EventModal(props: ModalProps) {
                 text="Schedule Maintenance has been successfully deleted."
                 icon={SimpleIcon.Check}
             />
-            <ScheduleModal
+            {newSchedule.checklistId && <ScheduleModal
                 isOpen={scheduleModal}
                 closeModal={() => setScheduleModal(false)}
                 title="Schedule Maintenance"
-                scheduleEvent={scheduleObject}
-            />
+                scheduleEvent={newSchedule}
+            />}
         </div>
     );
 }

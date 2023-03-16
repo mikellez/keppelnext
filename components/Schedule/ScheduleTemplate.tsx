@@ -29,8 +29,8 @@ export interface ScheduleInfo {
     calendar_dates: string[];
     checklist_id: number;
     checklist_name: string;
-    start_date: Date | string;
-    end_date: Date | string;
+    start_date: Date;
+    end_date: Date;
     period: number;
     plant: string;
     plantId: number;
@@ -40,6 +40,7 @@ export interface ScheduleInfo {
     exclusionList: number[];
     isSingle: boolean;
     index?: number;
+    status?: number;
 }
 
 // Function to format Date to string
@@ -134,9 +135,15 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                             assignedRoles: item.assigned_usernames,
                             timelineId: item.timeline_id,
                             remarks: item.remarks,
+                            index: item.index,
+                            isSingle: item.isSingle,
+                            exclusionList: item.exclusionList,
+                            status: item.status,
                         },
                     };
-                    newEvents.push(event);
+                    if (!item.exclusionList || !item.exclusionList.includes(index)) {
+                        newEvents.push(event);
+                    }
                 });
                 setEventList(newEvents);
             });
@@ -224,6 +231,10 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                         info.event._def.extendedProps.assignedUsernames,
                                     assignedRoles: info.event._def.extendedProps.assignedRoles,
                                     remarks: info.event._def.extendedProps.remarks,
+                                    index: info.event._def.extendedProps.index,
+                                    exclusionList: info.event._def.extendedProps.exclusionList,
+                                    isSingle: info.event._def.extendedProps.isSingle,
+                                    status: info.event._def.extendedProps.status,
                                 },
                             };
 
