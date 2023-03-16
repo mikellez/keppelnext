@@ -130,6 +130,7 @@ interface CMMSSchedule {
 	scheduleId?: number;
 	checklistId: number;
 	checklistName?: string;
+	date?: Date;
 	startDate: Date;
 	endDate: Date;
 	recurringPeriod: number;
