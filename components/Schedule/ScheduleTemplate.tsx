@@ -43,6 +43,7 @@ export interface ScheduleInfo {
     isSingle: boolean;
     index?: number;
     status?: number;
+    // prev_schedule_id?: number;
 }
 
 // Function to format Date to string
@@ -139,10 +140,11 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                             assignedRoles: item.assigned_usernames,
                             timelineId: item.timeline_id,
                             remarks: item.remarks,
-                            index: item.index,
+                            index: index,
                             isSingle: item.isSingle,
                             exclusionList: item.exclusionList,
                             status: item.status,
+                            // prevId: item.prev_schedule_id,
                         },
                     };
                     if (!item.exclusionList || !item.exclusionList.includes(index)) {
@@ -231,14 +233,14 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                     assignedEmails: info.event._def.extendedProps.assignedEmails,
                                     assignedFnames: info.event._def.extendedProps.assignedFnames,
                                     assignedLnames: info.event._def.extendedProps.assignedLnames,
-                                    assignedUsernames:
-                                        info.event._def.extendedProps.assignedUsernames,
+                                    assignedUsernames: info.event._def.extendedProps.assignedUsernames,
                                     assignedRoles: info.event._def.extendedProps.assignedRoles,
                                     remarks: info.event._def.extendedProps.remarks,
                                     index: info.event._def.extendedProps.index,
                                     exclusionList: info.event._def.extendedProps.exclusionList,
                                     isSingle: info.event._def.extendedProps.isSingle,
                                     status: info.event._def.extendedProps.status,
+                                    // prevId: info.event._def.extendedProps.prevId,
                                 },
                             };
 

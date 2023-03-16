@@ -16,7 +16,7 @@ import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import styles from "../../styles/Schedule.module.scss";
 import axios from "axios";
-import ScheduleModal, { scheduleMaintenance } from "./ScheduleModal";
+import ScheduleModal, { scheduleMaintenance, scheduleValidator } from "./ScheduleModal";
 
 interface CustomMouseEventHandler extends React.MouseEventHandler {
     (event: React.MouseEvent | void): void;
@@ -51,6 +51,9 @@ export default function EventModal(props: ModalProps) {
     const [editMode, setEditMode] = useState<boolean>(false);
     const [newSchedule, setNewSchedule] = useState<CMMSSchedule>({} as CMMSSchedule);
     const [scheduleModal, setScheduleModal] = useState<boolean>(false);
+    const [submitModal, setSubmitModal] = useState<boolean>(false);
+    const [failureModal, setFailureModal] = useState<boolean>(false);
+    const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
     // const [scheduleObject, setScheduleObject] = useState<CMMSSchedule>();
 
     // Get the current user
@@ -86,6 +89,7 @@ export default function EventModal(props: ModalProps) {
     };
 
     function submitEvent() {
+        setDisableSubmit(true);
         const schedule: CMMSSchedule = {
             checklistId: newSchedule.checklistId,
             startDate: newSchedule.date as Date,
@@ -100,13 +104,29 @@ export default function EventModal(props: ModalProps) {
             status: 4, 
             index: newSchedule.index,
         }
-        scheduleMaintenance(schedule).then(result => {
-            console.log(result);
-        })
+        
+        if (scheduleValidator(schedule)) {
+            scheduleMaintenance(schedule).then(result => {
+                setSubmitModal(true);
+                setTimeout(() => {
+                    setSubmitModal(false);
+                    setDisableSubmit(false);
+                }, 1000)
+            })
+            
+        } else {
+            setFailureModal(true);
+            setDisableSubmit(false);
+            setTimeout(() => {
+                setFailureModal(false);
+            }, 1000)
+        } 
     };
 
     useEffect(() => {
         setEditDeleteModal(false);
+        setSubmitModal(false);
+        setDisableSubmit(false);
 
         if (props.event) {
             const users: CMMSUser[] = [];
@@ -359,7 +379,7 @@ export default function EventModal(props: ModalProps) {
                                                 toolTip={false}
                                                 style={{ backgroundColor: "#EB1D36" }}
                                                 disabled={
-                                                    (newSchedule.remarks ==
+                                                    ((newSchedule.remarks ==
                                                         props.event.extendedProps.remarks &&
                                                         newSchedule.date ==
                                                             props.event.extendedProps.date &&
@@ -369,7 +389,7 @@ export default function EventModal(props: ModalProps) {
                                                                 .join("")) ||
                                                     newSchedule.assignedIds.length == 0 ||
                                                     !newSchedule.date ||
-                                                    newSchedule.date == null
+                                                    newSchedule.date == null) && disableSubmit
                                                 }
                                                 onClick={submitEvent}
                                             >
@@ -389,6 +409,20 @@ export default function EventModal(props: ModalProps) {
                 text="Schedule Maintenance has been successfully deleted."
                 icon={SimpleIcon.Check}
             />
+            <ModuleSimplePopup
+                modalOpenState={submitModal}
+                setModalOpenState={setSubmitModal}
+                title="Submitted"
+                text="Changes to event has to been sent for approval."
+                icon={SimpleIcon.Check}
+            />
+             <ModuleSimplePopup
+                    modalOpenState={failureModal}
+                    setModalOpenState={setFailureModal}
+                    title="Incomplete Maintenance"
+                    text="Please fill in the missing details for the maintenance."
+                    icon={SimpleIcon.Cross}
+                />
             {<ScheduleModal
                 isOpen={scheduleModal}
                 closeModal={() => setScheduleModal(false)}

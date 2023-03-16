@@ -22,6 +22,12 @@ export async function getTimelinesByStatus(status: number, userCreated: boolean 
         .catch((err) => console.log(err.message));
 }
 
+function compareWords(a: string, b:string) {
+    if (a > b) return 1;
+    if (a < b) return -1;
+    return 0;
+};
+
 export default function TimelineSelect(props: TimelineSelectProps) {
     // Store the list of timelines in a state for dropdown
     const [timelineList, setTimelineList] = useState<CMMSTimeline[]>([]);
@@ -29,9 +35,10 @@ export default function TimelineSelect(props: TimelineSelectProps) {
     useEffect(() => {
         getTimelinesByStatus(props.status, props.userCreated).then((result) => {
             if (result) {
+                result.sort((a, b) => compareWords(a.plantName as string, b.plantName as string))
                 setTimelineList(result);
             } else {
-                console.log("no timelines");
+                // console.log("no timelines");
                 setTimelineList([]);
             }
         });
@@ -40,7 +47,7 @@ export default function TimelineSelect(props: TimelineSelectProps) {
     // Timeline dropdown options
     const timelineOptions = timelineList.map((timeline) => (
         <option key={timeline.id} value={timeline.id}>
-            {timeline.name}
+            {`${timeline.name} (${timeline.plantName})`}
         </option>
     ));
 

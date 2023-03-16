@@ -39,6 +39,21 @@ async function editDraftSchedule(schedule: CMMSSchedule) {
         });
 }
 
+export function scheduleValidator(schedule: CMMSSchedule) {
+    return !(
+        !schedule.checklistId ||
+        !schedule.startDate ||
+        !schedule.endDate ||
+        !schedule.checklistId ||
+        !schedule.recurringPeriod ||
+        schedule.recurringPeriod === -1 ||
+        (!schedule.reminderRecurrence && schedule.reminderRecurrence != 0) ||
+        !schedule.assignedIds ||
+        schedule.assignedIds.length === 0 ||
+        !schedule.remarks
+    )
+}
+
 // Set the min date to to tomorrow
 const today = new Date();
 export const minDate = new Date(today.setDate(today.getDate() + 1)).toISOString().slice(0, 10);
@@ -188,11 +203,11 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                                     type="date"
                                     min={minDate}
                                     name="startDate"
-                                    value={
-                                        newSchedule.startDate
-                                            ? newSchedule.startDate.toISOString().slice(0, 10)
-                                            : minDate
-                                    }
+                                    // value={
+                                    //     newSchedule.startDate
+                                    //         ? newSchedule.startDate.toISOString().slice(0, 10)
+                                    //         : minDate
+                                    // }
                                     onChange={updateSchedule}
                                 />
                             </td>
