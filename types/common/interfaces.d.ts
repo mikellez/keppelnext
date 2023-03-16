@@ -134,6 +134,7 @@ interface CMMSSchedule {
 	assignedIds: number[];
 	remarks: string;
 	plantId: number;
+	plantName? : string;
 	timelineId: number;
 	reminderRecurrence: number;
 	prevId?: number;

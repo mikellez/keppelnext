@@ -3,7 +3,7 @@ const controllers = require("./controllers");
 const session = require("express-session");
 const multer = require("multer");
 
-const express = require('express');
+const express = require("express");
 
 const router = express.Router();
 
@@ -35,7 +35,7 @@ const upload = multer();
  * @apiGroup User
  * @apiBody {string} username User's username to login
  * @apiBody {string} password User's password to login
- * 
+ *
  * @apiUse SuccessCMMSUser
  */
 router.post("/login", passport.authenticate("local", {}), (req, res) => {
@@ -46,17 +46,17 @@ router.post("/login", passport.authenticate("local", {}), (req, res) => {
  * @api {post} /logout Log out
  * @apiDescription Logs out currently logged in user.
  * This is the only route that can be accessed without any authentication
- * 
+ *
  * @apiName Logout
  * @apiGroup User
- * 
+ *
  * @apiSuccess {string} - "success"
  */
 router.post("/logout", (req, res) => {
-    if (req.user === undefined) return res.status(400).json({errormsg: "you are not logged in"});
+    if (req.user === undefined) return res.status(400).json({ errormsg: "you are not logged in" });
 
     req.logout((err) => {
-        if (err) return res.status(500).json({errormsg: err});
+        if (err) return res.status(500).json({ errormsg: err });
         return res.status(200).json("success");
     });
 });
@@ -66,9 +66,9 @@ router.post("/logout", (req, res) => {
  * @apiDescription Gets information about the currently logged in user
  * @apiName User
  * @apiGroup User
- * 
+ *
  * @apiUse SuccessCMMSUser
- * 
+ *
  */
 router.get("/user", checkIfLoggedInAPI, (req, res) => {
     res.status(200).json({
@@ -84,7 +84,7 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
  * @apiDescription Gets all requests
  * @apiName GetAllRequests
  * @apiGroup Request
- * 
+ *
  * @apiSuccess {Object[]} - Array of all requests, sorted by creation date
  * @apiSuccess {number} -.request_id Request ID
  * @apiSuccess {string} -.fault_name Type of the fault request
@@ -112,24 +112,29 @@ router.get("/request/", checkIfLoggedInAPI, controllers.request.fetchRequests);
  * @apiDescription Creates a request
  * @apiName CreateRequest
  * @apiGroup Request
- * 
+ *
  * @apiBody {number} requestTypeID ID of the request type
  * @apiBody {number} faultTypeID ID of the fault type
  * @apiBody {number} plantLocationID ID of the plant location
  * @apiBody {number} taggedAssetID ID of the asset that is being reported on
  * @apiBody {string} description Description of the created request
  * @apiBody {Object} [image] Image of the asset that is being reported on
- * 
+ *
  * @apiSuccess {string} - "success"
  */
-router.post("/request/", checkIfLoggedInAPI, upload.single("image"), controllers.request.createRequest);
+router.post(
+    "/request/",
+    checkIfLoggedInAPI,
+    upload.single("image"),
+    controllers.request.createRequest
+);
 
 /**
  * @api {get} /request/type Get Request Types
  * @apiDescription Gets request types
  * @apiName GetRequestTypes
  * @apiGroup Request
- * 
+ *
  * @apiSuccess {Object[]} - Array containing the different request types and their corresponding ID
  * @apiSuccess {number} -.req_id ID of the request type
  * @apiSuccess {string} -.request Name of the request type
@@ -137,9 +142,17 @@ router.post("/request/", checkIfLoggedInAPI, upload.single("image"), controllers
 router.get("/request/types", checkIfLoggedInAPI, controllers.request.fetchRequestTypes);
 router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
 
-router.get("/checklist/template", checkIfLoggedInAPI, controllers.checklist.fetchTemplateChecklists);
+router.get(
+    "/checklist/template",
+    checkIfLoggedInAPI,
+    controllers.checklist.fetchTemplateChecklists
+);
 router.get("/checklist/record", checkIfLoggedInAPI, controllers.checklist.fetchForReviewChecklists);
-router.get("/checklist/approved", checkIfLoggedInAPI, controllers.checklist.fetchApprovedChecklists);
+router.get(
+    "/checklist/approved",
+    checkIfLoggedInAPI,
+    controllers.checklist.fetchApprovedChecklists
+);
 
 router.get(
     "/checklist/templateNames",
@@ -147,14 +160,18 @@ router.get(
     controllers.checklist.fetchChecklistTemplateNames
 );
 
-router.get("/checklist/status/:plant", checkIfLoggedInAPI, controllers.checklist.fetchChecklistStatus);
+router.get(
+    "/checklist/status/:plant",
+    checkIfLoggedInAPI,
+    controllers.checklist.fetchChecklistStatus
+);
 
 /**
  * @api {get} /fault/type Get Fault Types
  * @apiDescription Gets fault types
  * @apiName GetFaultTypes
  * @apiGroup Fault
- * 
+ *
  * @apiSuccess {Object[]} - Array containing the different fault types and their corresponding ID
  * @apiSuccess {number} -.fault_id ID of the fault type
  * @apiSuccess {string} -.fault_type Name of the fault type
@@ -171,7 +188,7 @@ router.get("/asset/history/:type/:id", checkIfLoggedInAPI, controllers.asset.get
  * @apiDescription Gets table information/metadata. Mainly used for the creation of new entries in those tables
  * @apiName GetMasterTypeEntry
  * @apiGroup Master
- * 
+ *
  * @apiSuccess {Object[]}  Array containing the different request types and their corresponding ID
  * @apiSuccess {number} -.req_id ID of the request type
  * @apiSuccess {string} -.request Name of the request type
@@ -181,11 +198,7 @@ router.post("/master/new", checkIfLoggedInAPI, controllers.master.createMasterTy
 router.get("/master/:type", checkIfLoggedInAPI, controllers.master.fetchMasterInfo);
 router.get("/master/:type/:id", checkIfLoggedInAPI, controllers.master.fetchMasterTypeSingle);
 router.post("/master/:type/:id", checkIfLoggedInAPI, controllers.master.updateMasterTypeSingle);
-router.delete(
-    "/master/:type/:id",
-    checkIfLoggedInAPI,
-    controllers.master.deleteMasterTypeSingle
-);
+router.delete("/master/:type/:id", checkIfLoggedInAPI, controllers.master.deleteMasterTypeSingle);
 
 router.get("/getPlants", checkIfLoggedInAPI, controllers.schedule.getPlants);
 router.get("/getUserPlants", checkIfLoggedInAPI, controllers.schedule.getUserPlants);
@@ -206,6 +219,7 @@ router.get(
     controllers.schedule.getOpsAndEngineers
 );
 router.post("/insertSchedule", checkIfLoggedInAPI, controllers.schedule.insertSchedule);
+router.patch("/updateSchedule", checkIfLoggedInAPI, controllers.schedule.updateSchedule);
 router
     .route("/schedule/:id", checkIfLoggedInAPI)
     .delete(controllers.schedule.deleteSchedule)
@@ -221,9 +235,6 @@ router
 router.get("/schedule/event/:id", checkIfLoggedInAPI, controllers.schedule.getScheduleById);
 
 router.get("/activity/account_log", checkIfLoggedInAPI, controllers.activity.getEventtHistory);
-
-
-
 
 // NO API ROUTE
 router.all("/*", (req, res) => {

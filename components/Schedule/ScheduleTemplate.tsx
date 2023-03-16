@@ -71,8 +71,8 @@ export function toPeriodString(period: number): string {
             return "Yearly";
         default:
             return "NA";
-    };
-};
+    }
+}
 
 export function toPeriodNum(period: string): number {
     switch (period) {
@@ -92,8 +92,8 @@ export function toPeriodNum(period: string): number {
             return 365;
         default:
             return 0;
-    };
-};
+    }
+}
 
 export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     // Store the list of events in a state to be rendered on the calendar
@@ -149,8 +149,8 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 isOpen={isModalOpen}
                 closeModal={() => setIsModalOpen(false)}
                 event={currentEvent}
-                edit={router.pathname === `/Schedule`}
-                delete={router.pathname === `/Schedule/Timeline/[id]`}
+                editSingle={router.pathname === `/Schedule`}
+                deleteEditDraft={router.pathname === `/Schedule/Timeline/[id]`}
             />
             <ModuleHeader
                 title={props.title}
@@ -220,7 +220,8 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                     assignedEmails: info.event._def.extendedProps.assignedEmails,
                                     assignedFnames: info.event._def.extendedProps.assignedFnames,
                                     assignedLnames: info.event._def.extendedProps.assignedLnames,
-                                    assignedUsernames: info.event._def.extendedProps.assignedUsernames,
+                                    assignedUsernames:
+                                        info.event._def.extendedProps.assignedUsernames,
                                     assignedRoles: info.event._def.extendedProps.assignedRoles,
                                     remarks: info.event._def.extendedProps.remarks,
                                 },
@@ -234,7 +235,10 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     />
                 ) : (
                     // Render list view
-                    <ScheduleTable schedules={props.schedules} viewRescheduled={router.pathname === "/Schedule/Manage"} />
+                    <ScheduleTable
+                        schedules={props.schedules}
+                        viewRescheduled={router.pathname === "/Schedule/Manage"}
+                    />
                 )}
             </ModuleContent>
         </ModuleMain>
