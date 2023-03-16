@@ -200,6 +200,8 @@ router.get("/master/:type/:id", checkIfLoggedInAPI, controllers.master.fetchMast
 router.post("/master/:type/:id", checkIfLoggedInAPI, controllers.master.updateMasterTypeSingle);
 router.delete("/master/:type/:id", checkIfLoggedInAPI, controllers.master.deleteMasterTypeSingle);
 
+router.get("/plants", checkIfLoggedInAPI, controllers.schedule.getPlants);
+
 router.get("/getPlants", checkIfLoggedInAPI, controllers.schedule.getPlants);
 router.get("/getUserPlants", checkIfLoggedInAPI, controllers.schedule.getUserPlants);
 router
