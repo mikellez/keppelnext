@@ -127,8 +127,8 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                             scheduleId: item.schedule_id,
                             checklistId: item.checklist_id,
                             date: new Date(item.calendar_dates[index]),
-                            startDate: item.start_date ? new Date(item.start_date) : "Rescheduled",
-                            endDate: item.end_date ? new Date(item.end_date) : "Rescheduled",
+                            startDate: item.start_date ? new Date(item.start_date.toString().slice(0, 10)) : "Rescheduled",
+                            endDate: item.end_date ? new Date(item.end_date.toString().slice(0, 10)) : "Rescheduled",
                             // prevStartDate: item.prev_start_date,
                             // prevEndDate: item.prev_end_date,
                             recurringPeriod: item.period,
@@ -243,7 +243,6 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                     // prevId: info.event._def.extendedProps.prevId,
                                 },
                             };
-
                             setCurrentEvent(event);
                         }}
                         eventMouseLeave={() => {
