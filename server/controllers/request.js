@@ -85,6 +85,10 @@ const fetchRequestStatus = async (req, res, next) => {
     });
 };
 
+const fetchRequestPriority = async (req, res, next) => {
+	db.query(`SELECT `)
+};
+
 module.exports = {
 	fetchRequests,
 	createRequest,

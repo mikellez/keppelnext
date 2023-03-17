@@ -57,7 +57,7 @@ export default function ManagerDashboad() {
                             <p className={styles.dashboardNoChart}>No requests</p>
                         }
                     </DashboardBox>
-                    <DashboardBox title={"Total Requests: " + totalChecklist} style={{gridArea: "f"}}>
+                    <DashboardBox title={"Total Checklists: " + totalChecklist} style={{gridArea: "f"}}>
                         {
                             checklistData && checklistData.length > 0 ? <PChart data={checklistData} /> : 
                             <p className={styles.dashboardNoChart}>No requests</p>

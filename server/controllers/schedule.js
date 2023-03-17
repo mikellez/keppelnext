@@ -14,8 +14,8 @@ const makeScheduleDict = (arr) => {
             plantId: item["plant_id"],
             start_date: item["start_date"],
             end_date: item["end_date"],
-            prev_start_date: item["prev_start_date"],
-            prev_end_date: item["prev_end_date"],
+            // prev_start_date: item["prev_start_date"],
+            // prev_end_date: item["prev_end_date"],
             period: item["recurrence_period"],
             calendar_dates: dateHandler.getDateRange(
                 item["start_date"],
@@ -39,6 +39,27 @@ const makeScheduleDict = (arr) => {
     return newArr;
 };
 
+const updateDates = async (scheduleList) => {
+    for (let i = 0; i < scheduleList.length; i++) {
+        if (scheduleList[i].isSingle) {
+            const result = await db.query(`SELECT 
+                SC.START_DATE, 
+                SC.END_DATE,
+                SC.RECURRENCE_PERIOD
+                FROM 
+                KEPPEL.SCHEDULE_CHECKLIST SC
+                WHERE 
+                SC.SCHEDULE_ID = GET_ROOT_ID(${scheduleList[i].schedule_id})`);
+
+            scheduleList[i].start_date = result.rows[0].start_date;
+            scheduleList[i].end_date = result.rows[0].end_date;
+            scheduleList[i].period = result.rows[0].recurrence_period;
+        }
+        
+    };
+    return scheduleList;
+};
+
 // Get all schedules or plant specific schedules
 const getViewSchedules = async (req, res, next) => {
     let queryS = [];
@@ -50,12 +71,9 @@ const getViewSchedules = async (req, res, next) => {
 		  STRING_AGG(UA.role_name, ' ,') AS ROLES,
 		  STRING_AGG(U.first_name, ' ,') AS FNAME,
 		  STRING_AGG(U.last_name, ' ,') AS LNAME,
-			PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, SC.REMARKS, SC.TIMELINE_ID, SC.STATUS, SC.PREV_SCHEDULE_ID,
-            (SC2.START_DATE  + interval '8 hour' ) as PREV_START_DATE, (SC2.END_DATE  + interval '8 hour' ) as PREV_END_DATE
+			PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, SC.REMARKS, SC.TIMELINE_ID, SC.STATUS, SC.PREV_SCHEDULE_ID
             FROM 
-            KEPPEL.SCHEDULE_CHECKLIST  as SC
-            LEFT JOIN KEPPEL.SCHEDULE_CHECKLIST as SC2
-            ON SC.PREV_SCHEDULE_ID = SC2.SCHEDULE_ID,
+            KEPPEL.SCHEDULE_CHECKLIST  as SCD,
             KEPPEL.USERS AS U,
 			KEPPEL.USER_ACCESS AS UA,
             KEPPEL.PLANT_MASTER  AS PM,
@@ -66,12 +84,13 @@ const getViewSchedules = async (req, res, next) => {
             SC.PLANT_ID = PM.PLANT_ID AND 
             CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
 			UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
+            U.USER_ID = UA.USER_ID AND
             SC.PLANT_ID =ANY(SELECT DISTINCT(PLANT_ID) FROM KEPPEL.USER_PLANT WHERE USER_ID = ${req.user.id} OR ${req.user.id} = ANY(SC.SCHEDULER_USERIDS_FOR_EMAIL))
             AND
             SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1 OR STATUS = 5) AND
             (SC.STATUS = 1 OR SC.STATUS = 5)
             
-            GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID, SC2.START_DATE, SC2.END_DATE)`);
+            GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
         } else {
             queryS.push(`SELECT 
             DISTINCT SC.SCHEDULE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
@@ -81,12 +100,9 @@ const getViewSchedules = async (req, res, next) => {
 		  STRING_AGG(UA.role_name, ' ,') AS ROLES,
 		  STRING_AGG(U.first_name, ' ,') AS FNAME,
 		  STRING_AGG(U.last_name, ' ,') AS LNAME,
-		  SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID,
-          (SC2.START_DATE  + interval '8 hour' ) as PREV_START_DATE, (SC2.END_DATE  + interval '8 hour' ) as PREV_END_DATE
+		  SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
           FROM 
-          KEPPEL.SCHEDULE_CHECKLIST  as SC
-            LEFT JOIN KEPPEL.SCHEDULE_CHECKLIST as SC2
-            ON SC.PREV_SCHEDULE_ID = SC2.SCHEDULE_ID,
+          KEPPEL.SCHEDULE_CHECKLIST  as SC,
           KEPPEL.PLANT_MASTER  AS PM,
           KEPPEL.CHECKLIST_TEMPLATES AS CT,
           KEPPEL.USERS AS U,
@@ -96,9 +112,10 @@ const getViewSchedules = async (req, res, next) => {
           CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
           U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL)AND
 		  UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
+          U.USER_ID = UA.USER_ID AND
           SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1 OR STATUS = 5) AND
           (SC.STATUS = 1 OR SC.STATUS = 5)
-          GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID, SC2.START_DATE, SC2.END_DATE)`);
+          GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
         }
     } else {
         queryS.push(`SELECT DISTINCT SC.SCHEDULE_ID, SC.CHECKLIST_TEMPLATE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
@@ -108,35 +125,34 @@ const getViewSchedules = async (req, res, next) => {
 		  STRING_AGG(U.first_name, ' ,') AS FNAME,
 		  STRING_AGG(U.last_name, ' ,') AS LNAME,
 		PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, 
-        SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID,
-        (SC2.START_DATE  + interval '8 hour' ) as PREV_START_DATE, (SC2.END_DATE  + interval '8 hour' ) as PREV_END_DATE
+        SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
         FROM 
-        KEPPEL.SCHEDULE_CHECKLIST  as SC
-            LEFT JOIN KEPPEL.SCHEDULE_CHECKLIST as SC2
-            ON SC.PREV_SCHEDULE_ID = SC2.SCHEDULE_ID,
+        KEPPEL.SCHEDULE_CHECKLIST  as SC,
         KEPPEL.USERS AS U,
 		KEPPEL.USER_ACCESS AS UA,
         KEPPEL.PLANT_MASTER  AS PM,
-        KEPPEL.CHECKLIST_TEMPLATES AS CT,
-        KEPPEL.USER_PLANT AS UP
+        KEPPEL.CHECKLIST_TEMPLATES AS CT
         WHERE
         U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
         SC.PLANT_ID = PM.PLANT_ID AND 
         CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND 
 		UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
+        U.USER_ID = UA.USER_ID AND
         SC.PLANT_ID = ${req.params.id}
         AND
         SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1 OR STATUS = 5) AND
         (SC.STATUS = 1 OR SC.STATUS = 5)
         
-        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID, SC2.START_DATE, SC2.END_DATE)`);
+        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
     }
     // console.log(queryS[0]);
-    db.query(queryS[0], (err, result) => {
+    db.query(queryS[0], (err, schedules) => {
         if (err) throw err;
-        if (result) {
-            const response_dict = makeScheduleDict(result.rows);
-            return res.status(200).send(response_dict);
+        if (schedules) {
+            const response_dict = makeScheduleDict(schedules.rows);
+            updateDates(response_dict).then(result => {
+                return res.status(200).send(result);
+            }).catch(err => console.log(err))
         }
     });
 };
@@ -228,12 +244,9 @@ const getSchedulesTimeline = async (req, res, next) => {
         STRING_AGG(UA.role_name, ' ,') AS ROLES,
         STRING_AGG(U.first_name, ' ,') AS FNAME,
         STRING_AGG(U.last_name, ' ,') AS LNAME,
-        SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID,
-        (SC2.START_DATE  + interval '8 hour' ) as PREV_START_DATE, (SC2.END_DATE  + interval '8 hour' ) as PREV_END_DATE
+        SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
         FROM 
-        KEPPEL.SCHEDULE_CHECKLIST  as SC
-            LEFT JOIN KEPPEL.SCHEDULE_CHECKLIST as SC2
-            ON SC.PREV_SCHEDULE_ID = SC2.SCHEDULE_ID,
+        KEPPEL.SCHEDULE_CHECKLIST  as SC,
         KEPPEL.PLANT_MASTER  AS PM,
         KEPPEL.CHECKLIST_TEMPLATES AS CT,
         KEPPEL.USERS AS U,
@@ -244,16 +257,18 @@ const getSchedulesTimeline = async (req, res, next) => {
         U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL)AND
         UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
         SC.timeline_id = $1 
-        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID, SC2.END_DATE, SC2.START_DATE)`,
+        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`,
         [req.params.id],
-        (err, result) => {
+        (err, schedules) => {
             if (err) throw err;
-            if (result) {
-                const response_dict = makeScheduleDict(result.rows);
-                return res.status(200).send(response_dict);
+            if (schedules) {
+                const response_dict = makeScheduleDict(schedules.rows);
+                updateDates(response_dict).then(result => {
+                    return res.status(200).send(result);
+                }).catch(err => console.log(err))
             }
         }
-    );
+    )
 };
 
 // Get timeline by the status
@@ -577,12 +592,9 @@ const getScheduleById = (req, res, next) => {
         STRING_AGG(UA.role_name, ' ,') AS ROLES,
         STRING_AGG(U.first_name, ' ,') AS FNAME,
         STRING_AGG(U.last_name, ' ,') AS LNAME,
-        SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID,
-        (SC2.START_DATE  + interval '8 hour' ) as PREV_START_DATE, (SC2.END_DATE  + interval '8 hour' ) as PREV_END_DATE
+        SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
         FROM 
-        KEPPEL.SCHEDULE_CHECKLIST  as SC
-            LEFT JOIN KEPPEL.SCHEDULE_CHECKLIST as SC2
-            ON SC.PREV_SCHEDULE_ID = SC2.SCHEDULE_ID,
+        KEPPEL.SCHEDULE_CHECKLIST  as SC,
         KEPPEL.PLANT_MASTER  AS PM,
         KEPPEL.CHECKLIST_TEMPLATES AS CT,
         KEPPEL.USERS AS U,
@@ -593,13 +605,15 @@ const getScheduleById = (req, res, next) => {
         U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL)AND
         UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
         SC.SCHEDULE_ID = $1
-        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID, SC2.END_DATE, SC2.START_DATE)`,
+        GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`,
         [req.params.id],
-        (err, result) => {
+        (err, schedules) => {
             if (err) throw err;
-            if (result) {
-                const response_dict = makeScheduleDict(result.rows);
-                return res.status(200).send(response_dict);
+            if (schedules) {
+                const response_dict = makeScheduleDict(schedules.rows);           
+                updateDates(response_dict).then(result => {
+                    return res.status(200).send(result);
+                }).catch(err => console.log(err))
             }
         }
     );

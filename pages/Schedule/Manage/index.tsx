@@ -153,7 +153,9 @@ export default function ManageSchedule() {
                     setEventMode(prev => !prev);
                     setScheduleList([]);
                     setTimelineId(0);
-                }}>
+                }}
+                text={!eventMode ? "View Single Event": "View Schedules"}
+                >
                     <HiOutlineSwitchHorizontal size={20} />
                 </TooltipBtn>}
             {isHistory ? 

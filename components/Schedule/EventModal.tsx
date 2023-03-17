@@ -108,9 +108,11 @@ export default function EventModal(props: ModalProps) {
         if (scheduleValidator(schedule)) {
             scheduleMaintenance(schedule).then(result => {
                 setSubmitModal(true);
+                // router.push("/Schedule");
                 setTimeout(() => {
                     setSubmitModal(false);
                     setDisableSubmit(false);
+                    closeModal();
                 }, 1000)
             })
             
@@ -122,6 +124,23 @@ export default function EventModal(props: ModalProps) {
             }, 1000)
         } 
     };
+
+    // Start and end dates of the schedule
+    const startDate = new Date(props.event?.extendedProps.startDate as Date);
+    const endDate = new Date(props.event?.extendedProps.endDate as Date);
+    const period = props.event?.extendedProps.recurringPeriod as number;
+
+    // plus minus recurrence period from the day of the event
+    let date = new Date(props.event?.extendedProps.date as Date);
+    const upper = new Date(date.setDate(date.getDate() + period));
+    date = new Date(props.event?.extendedProps.date as Date);
+    const lower = new Date(date.setDate(date.getDate() - period));
+
+    // compare with today and the schedule date ranges
+    let today = new Date();
+    const upperStr = upper >= endDate ? endDate : upper;
+    today = new Date();
+    const lowerStr = lower <= today ? new Date(today.setDate(today.getDate() + 1)) : lower <= startDate ? startDate : lower;
 
     useEffect(() => {
         setEditDeleteModal(false);
@@ -255,6 +274,8 @@ export default function EventModal(props: ModalProps) {
                                                         .slice(0, 10)}
                                                     name="date"
                                                     onChange={updateSchedule}
+                                                    min={lowerStr.toISOString().slice(0, 10)}
+                                                    max={upperStr.toISOString().slice(0, 10)}
                                                 />
                                             </td>
                                         ) : (
@@ -360,6 +381,7 @@ export default function EventModal(props: ModalProps) {
                             )}
                             {props.editSingle &&
                                 (data?.role_id as number) < 4 &&
+                                props.event.extendedProps.date as Date> new Date() &&
                                 (props.event.extendedProps.recurringPeriod > 1 || 
                                     props.event.extendedProps.isSingle) && (
                                     <div className={styles.eventModalButtonContainer}>

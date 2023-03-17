@@ -203,11 +203,11 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                                     type="date"
                                     min={minDate}
                                     name="startDate"
-                                    // value={
-                                    //     newSchedule.startDate
-                                    //         ? newSchedule.startDate.toISOString().slice(0, 10)
-                                    //         : minDate
-                                    // }
+                                    value={
+                                        newSchedule.startDate
+                                            ? newSchedule.startDate.toISOString().slice(0, 10)
+                                            : minDate
+                                    }
                                     onChange={updateSchedule}
                                 />
                             </td>
