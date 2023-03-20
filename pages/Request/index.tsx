@@ -10,7 +10,7 @@ import { CompactTable, RowOptions} from '@table-library/react-table-library/comp
 import { Nullish } from '@table-library/react-table-library/types/common';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { getTheme } from '@table-library/react-table-library/baseline';
-
+import { MdEdit } from 'react-icons/md';
 import { useRequest } from '../../components/SWR';
 import { CMMSRequest } from '../../types/common/interfaces'; 
 import Link from 'next/link';
@@ -36,7 +36,12 @@ const COLUMNS: any[] = [
 		}),
 	},
 	{ label: 'Asset Name',			resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.asset_name },
-	{ label: 'Requested By',		resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.fullname }
+	{ label: 'Requested By',		resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.fullname },
+	{ label: '',		resize: true, renderCell: () => <MdEdit
+		style={{
+			cursor: "pointer",
+		}}
+	/> }
 ];
 
 
@@ -64,7 +69,7 @@ export default function Request() {
 	const theme = useTheme([
 		getTheme(),
 		{
-			Table: "--data-table-library_grid-template-columns:  5em 15% 7em 5em 8em 8em calc(75% - 33em) 10%;",
+			Table: "--data-table-library_grid-template-columns:  5em 15% 7em 5em 8em 8em calc(75% - 37em) 10% 4em;",
 			HeaderRow: `
 				background-color: #eaf5fd;
 			`,
