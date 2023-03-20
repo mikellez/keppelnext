@@ -20,6 +20,8 @@ import RequiredIcon from "../../components/RequiredIcon";
 import PlantSelect from "../PlantSelect";
 import { PropsWithChildren } from "preact/compat";
 import { useRouter } from "next/router";
+import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
+import { MultiValue, ActionMeta } from "react-select";
 
 type FormValues = {
     requestTypeID: number;
@@ -202,16 +204,6 @@ export default function RequestContainer(props: RequestContainerProps) {
                             {...register("description")}
                         />
                     </div>
-                </div>
-                <div
-                    className={formStyles.halfContainer}
-                    style={{
-                        gridRow: "span 3",
-                        display: "flex",
-                        flexDirection: "column",
-                        height: "100%",
-                    }}
-                >
                     <div className="form-group">
                         <label className="form-label">
                             <RequiredIcon /> Plant Location
@@ -228,11 +220,13 @@ export default function RequestContainer(props: RequestContainerProps) {
                         <label className="form-label">
                             <RequiredIcon /> Tag Asset:
                         </label>
+                        {/* {!plantId && <select className="form-control" disabled></select>} */}
 
                         <select
                             className="form-control"
                             id="formControlTagAsset"
                             {...register("taggedAssetID", { required: true })}
+                            disabled={!plantId}
                         >
                             <option hidden key={0} value={""}>
                                 Select asset
@@ -246,7 +240,16 @@ export default function RequestContainer(props: RequestContainerProps) {
                             })}
                         </select>
                     </div>
-
+                </div>
+                <div
+                    className={formStyles.halfContainer}
+                    style={{
+                        // gridRow: "span 3",
+                        display: "flex",
+                        flexDirection: "column",
+                        height: "100%",
+                    }}
+                >
                     <div className="form-group">
                         <label className="form-label">Image</label>
                         <input
@@ -259,11 +262,27 @@ export default function RequestContainer(props: RequestContainerProps) {
                     </div>
 
                     <ImagePreview previewObjURL={previewedFile} />
+
+                    <div className="form-group">
+                        <label className="form-label">Assign to:</label>
+
+                        {/* {!plantId && <select className="form-control" disabled></select>} */}
+                        {/* {plantId && ( */}
+                        <AssignToSelect onChange={() => {}} plantId={plantId as number} />
+                        {/* )} */}
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Priority</label>
+                        <input
+                            className="form-control"
+                            type="text"
+                            value={props.requestData.user.name}
+                        />
+                    </div>
                 </div>
 
-                <ModuleDivider />
-
-                <div className={formStyles.halfContainer}>
+                {/* <div className={formStyles.halfContainer}>
                     <div className="form-group">
                         <label className="form-label">Reported By</label>
                         <input
@@ -283,7 +302,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                             value={props.requestData.user.name}
                         />
                     </div>
-                </div>
+                </div> */}
             </ModuleContent>
             <ModuleFooter>
                 {(errors.requestTypeID ||
