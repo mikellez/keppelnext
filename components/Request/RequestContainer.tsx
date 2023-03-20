@@ -96,8 +96,8 @@ export default function RequestContainer(props: RequestContainerProps) {
 
     const formSubmit: SubmitHandler<FormValues> = async (data) => {
         console.log(data);
-        // await createRequest(data, plantId as number);
-        // router.push("/Request/");
+        await createRequest(data, plantId as number);
+        router.push("/Request/");
     };
 
     useEffect(() => {
@@ -233,10 +233,9 @@ export default function RequestContainer(props: RequestContainerProps) {
                             className="form-control"
                             id="formControlTagAsset"
                             {...register("taggedAssetID", { required: true })}
-
                         >
                             <option hidden key={0} value={""}>
-                                Select asset 
+                                Select asset
                             </option>
                             {availableAssets.map((asset: CMMSBaseType) => {
                                 return (
