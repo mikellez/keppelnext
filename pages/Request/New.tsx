@@ -19,7 +19,7 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import Link from "next/link";
 import RequestContainer from "../../components/Request/RequestContainer";
 
-interface RequestProps {
+export interface RequestProps {
     user: CMMSUser;
     requestTypes: CMMSRequestTypes[];
     faultTypes: CMMSFaultTypes[];

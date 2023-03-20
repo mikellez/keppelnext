@@ -10,10 +10,12 @@ import { CompactTable, RowOptions} from '@table-library/react-table-library/comp
 import { Nullish } from '@table-library/react-table-library/types/common';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { getTheme } from '@table-library/react-table-library/baseline';
-import { MdEdit } from 'react-icons/md';
+// import { MdEdit } from 'react-icons/md';
+import { AiOutlineForm } from 'react-icons/ai';
 import { useRequest } from '../../components/SWR';
 import { CMMSRequest } from '../../types/common/interfaces'; 
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import styles from "../../styles/Request.module.scss";
 
 export type TableNode<T> = {
@@ -22,40 +24,41 @@ export type TableNode<T> = {
     prop: T;
 };
 
-const COLUMNS: any[] = [
-	{ label: 'ID',					resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.request_id },
-	{ label: 'Fault Type',			resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.fault_name },
-	{ label: 'Location',			resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.plant_name },
-	{ label: 'Priority',			resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.priority == null ? "-" : item.prop.priority },
-	{ label: 'Status',				resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.status },
-	{ label: 'Filter By Date',		resize: true, renderCell: (item: TableNode<CMMSRequest>) =>
-		item.prop.created_date.toLocaleDateString('en-US', {
-		  year: 'numeric',
-		  month: '2-digit',
-		  day: '2-digit',
-		}),
-	},
-	{ label: 'Asset Name',			resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.asset_name },
-	{ label: 'Requested By',		resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.fullname },
-	{ label: '',		resize: true, 
-		renderCell: (item: TableNode<CMMSRequest>) => 
-			<Link href={`/Request/Edit/${item.prop.request_id}`}>
-				<MdEdit
-					style={{
-						cursor: "pointer"
-					}}
-				/> 
-			</Link>
-	}
-];
-
-
-
 export default function Request() {
 	const [requestNodes, setRequestNodes] = useState<TableNode<CMMSRequest>[]>([]);
 	const [isReady, setReady] = useState(false);
 	const [ids, setIds] = React.useState<string[]>([]);
 
+	const router = useRouter();
+
+	const COLUMNS: any[] = [
+		{ label: 'ID',					resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.request_id },
+		{ label: 'Fault Type',			resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.fault_name },
+		{ label: 'Location',			resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.plant_name },
+		{ label: 'Priority',			resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.priority == null ? "-" : item.prop.priority },
+		{ label: 'Status',				resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.status },
+		{ label: 'Filter By Date',		resize: true, renderCell: (item: TableNode<CMMSRequest>) =>
+			item.prop.created_date.toLocaleDateString('en-US', {
+			  year: 'numeric',
+			  month: '2-digit',
+			  day: '2-digit',
+			}),
+		},
+		{ label: 'Asset Name',			resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.asset_name },
+		{ label: 'Requested By',		resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.fullname },
+		{ label: '',		resize: true, 
+			renderCell: (item: TableNode<CMMSRequest>) => 
+					<div
+						className={styles.editIcon}
+						onClick={() => {
+							router.push(`/Request/Edit/${item.prop.request_id}`);
+							setReady(false)
+						}}
+					>
+						<AiOutlineForm size={18} />
+					</div>	
+		}
+	];
 	const handleExpand = (item: TableNode<CMMSRequest>) => {
 		if (ids.includes(item.id)) {
 			setIds(ids.filter((id) => id !== item.id));
