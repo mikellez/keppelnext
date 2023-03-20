@@ -37,11 +37,16 @@ const COLUMNS: any[] = [
 	},
 	{ label: 'Asset Name',			resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.asset_name },
 	{ label: 'Requested By',		resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.fullname },
-	{ label: '',		resize: true, renderCell: () => <MdEdit
-		style={{
-			cursor: "pointer",
-		}}
-	/> }
+	{ label: '',		resize: true, 
+		renderCell: (item: TableNode<CMMSRequest>) => 
+			<Link href={`/Request/Edit/${item.prop.request_id}`}>
+				<MdEdit
+					style={{
+						cursor: "pointer"
+					}}
+				/> 
+			</Link>
+	}
 ];
 
 
@@ -69,7 +74,7 @@ export default function Request() {
 	const theme = useTheme([
 		getTheme(),
 		{
-			Table: "--data-table-library_grid-template-columns:  5em 15% 7em 5em 8em 8em calc(75% - 37em) 10% 4em;",
+			Table: "--data-table-library_grid-template-columns:  5em 15% 7em 5em 8em 8em calc(75% - 35em) 10% 2em;",
 			HeaderRow: `
 				background-color: #eaf5fd;
 			`,

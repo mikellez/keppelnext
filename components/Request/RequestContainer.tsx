@@ -88,7 +88,7 @@ export default function RequestContainer(props: RequestContainerProps) {
     const [availableAssets, setAvailableAssets] = useState<CMMSBaseType[]>([]);
     const [plantId, setPlantId] = useState<number>();
 
-    const { register, handleSubmit, formState, control } = useForm<FormValues>();
+    const { register, handleSubmit, formState, control, resetField } = useForm<FormValues>();
 
     const { isSubmitting, errors } = formState;
 
@@ -96,8 +96,8 @@ export default function RequestContainer(props: RequestContainerProps) {
 
     const formSubmit: SubmitHandler<FormValues> = async (data) => {
         console.log(data);
-        await createRequest(data, plantId as number);
-        router.push("/Request/");
+        // await createRequest(data, plantId as number);
+        // router.push("/Request/");
     };
 
     useEffect(() => {
@@ -142,6 +142,7 @@ export default function RequestContainer(props: RequestContainerProps) {
     const plantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setPlantId(parseInt(e.target.value));
         updateAssetLists(parseInt(e.target.value));
+        resetField("taggedAssetID");
     };
 
     return (
@@ -232,7 +233,11 @@ export default function RequestContainer(props: RequestContainerProps) {
                             className="form-control"
                             id="formControlTagAsset"
                             {...register("taggedAssetID", { required: true })}
+
                         >
+                            <option hidden key={0} value={""}>
+                                Select asset 
+                            </option>
                             {availableAssets.map((asset: CMMSBaseType) => {
                                 return (
                                     <option key={asset.id + "|" + asset.name} value={asset.id}>
