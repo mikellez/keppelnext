@@ -5,7 +5,7 @@ import { ModuleContent, ModuleHeader, ModuleMain } from '../../components'
 
 import { ThreeDots } from 'react-loading-icons'
 
-import { CompactTable } from '@table-library/react-table-library/compact';
+import { CompactTable, RowOptions} from '@table-library/react-table-library/compact';
 //import { TableNode } from '@table-library/react-table-library/types/table';
 import { Nullish } from '@table-library/react-table-library/types/common';
 import { useTheme } from '@table-library/react-table-library/theme';
@@ -14,6 +14,7 @@ import { getTheme } from '@table-library/react-table-library/baseline';
 import { useRequest } from '../../components/SWR';
 import { CMMSRequest } from '../../types/common/interfaces'; 
 import Link from 'next/link';
+import styles from "../../styles/Request.module.scss";
 
 export type TableNode<T> = {
     id: string;
@@ -43,6 +44,15 @@ const COLUMNS: any[] = [
 export default function Request() {
 	const [requestNodes, setRequestNodes] = useState<TableNode<CMMSRequest>[]>([]);
 	const [isReady, setReady] = useState(false);
+	const [ids, setIds] = React.useState<string[]>([]);
+
+	const handleExpand = (item: TableNode<CMMSRequest>) => {
+		if (ids.includes(item.id)) {
+			setIds(ids.filter((id) => id !== item.id));
+		} else {
+			setIds(ids.concat(item.id));
+		}
+	};
 
 	const {
 		data:			requestData,
@@ -69,6 +79,66 @@ export default function Request() {
 			`,
 		},
 	]);
+
+	const ROW_PROPS = {
+		onClick: handleExpand,
+	};
+
+	const ROW_OPTIONS: RowOptions = {
+		renderAfterRow: (item: any) => {
+			return (
+				<>
+					{ids.includes(item.id) && (
+					<tr style={{ display: "flex", gridColumn: "1 / -1" }}>
+						<td style={{ flex: "1" }}>
+						<ul
+							style={{
+							margin: "0",
+							padding: "0",
+							backgroundColor: "#FFFFFF",
+							color: "#7F8487"
+							}}
+						>
+							<li className={styles.tableDropdownListItem}>
+								<p><strong>Fault Description</strong></p>
+								<p>{item.prop.fault_description}</p>
+							</li>
+							<li className={styles.tableDropdownListItem}>
+								<p><strong>Assigned To</strong></p>
+								<p>{item.prop.assigned_user_name.trim() === "" ? "UNASSIGNED" : item.prop.assigned_user_name}</p>
+							</li>
+							<li className={styles.tableDropdownListItem}>
+								<p className={styles.tableDropdownListItemHeader}><strong>Fault File</strong></p>
+								{item.prop.uploaded_file ? <img
+									src={URL.createObjectURL(new Blob([new Uint8Array(item.prop.uploaded_file.data)]))} 
+									alt="" 
+									className={styles.tableDropdownImg}
+								/> :
+								<p>
+									No File
+								</p>
+								}
+							</li>
+							<li className={styles.tableDropdownListItem}>
+								<p className={styles.tableDropdownListItemHeader}><strong>Completion File</strong></p>
+								{item.prop.completion_file ? <img
+									src={URL.createObjectURL(new Blob([new Uint8Array(item.prop.completion_file.data)]))} 
+									alt="" 
+									className={styles.tableDropdownImg}
+								/> :
+								<p>
+									No File
+								</p>
+								}
+							</li>
+						</ul>
+						</td>
+					</tr>
+					)}
+				</>
+			)
+		},
+	  };
 
 	useEffect(() => {
 		if(requestIsFetchValidating) setReady(false);
@@ -101,7 +171,14 @@ export default function Request() {
 				}
 				{requestFetchError && <div>{requestFetchError.toString()}</div>}
 				{requestFetchError && <div>error</div>}
-				{isReady && <CompactTable columns={COLUMNS} data={{nodes: requestNodes}} theme={theme} layout={{custom: true}}/>}
+				{isReady && <CompactTable 
+					columns={COLUMNS} 
+					data={{nodes: requestNodes}} 
+					theme={theme} 
+					layout={{custom: true}}
+					rowProps={ROW_PROPS}
+        			rowOptions={ROW_OPTIONS}
+				/>}
 			</ModuleContent>
 		</ModuleMain>
   	)

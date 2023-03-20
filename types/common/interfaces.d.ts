@@ -72,6 +72,8 @@ interface CMMSRequest {
 	plant_name: string;
 	priority: string;
 	status: string;
+	assigned_user_name: string;
+	fault_description: string;
 }
 
 interface CMMSRequestTypes {
