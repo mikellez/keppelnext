@@ -8,12 +8,13 @@ const db = require("../../db");
 const fetchRequests = async (req, res, next) => {
 	db.query(`SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
 	rt.request, ro.role_name, sc.status,r.fault_description, rt.request as request_type,
-	pri.priority,
+	pri.priority, 
 	CASE 
 		WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
 		ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
 	END AS fullname,
-	r.created_date,tmp1.asset_name, r.uploadfilemimetype , r.complete_comments,
+	r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
+	r.complete_comments,
 	concat( concat(au.first_name,' '), au.last_name) as assigned_user_name, r.associatedrequestid
 	, r.requesthistory, r.rejection_comments
 	FROM    
