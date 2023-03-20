@@ -140,8 +140,8 @@ export default function RequestContainer(props: RequestContainerProps) {
     };
 
     const plantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        updateAssetLists(parseInt(e.target.value));
         setPlantId(parseInt(e.target.value));
+        updateAssetLists(parseInt(e.target.value));
     };
 
     return (
@@ -160,7 +160,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                             <option hidden key={0} value={""}>
                                 Select request type
                             </option>
-                            {requestTypes?.map((rType: CMMSRequestTypes) => {
+                            {requestTypes.map((rType: CMMSRequestTypes) => {
                                 return (
                                     <option key={rType.req_id} value={rType.req_id}>
                                         {rType.request}
@@ -182,7 +182,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                             <option hidden key={0} value={""}>
                                 Select fault type
                             </option>
-                            {faultTypes?.map((fType: CMMSFaultTypes) => {
+                            {faultTypes.map((fType: CMMSFaultTypes) => {
                                 return (
                                     <option key={fType.fault_id} value={fType.fault_id}>
                                         {fType.fault_type}
@@ -233,7 +233,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                             id="formControlTagAsset"
                             {...register("taggedAssetID", { required: true })}
                         >
-                            {availableAssets?.map((asset: CMMSBaseType) => {
+                            {availableAssets.map((asset: CMMSBaseType) => {
                                 return (
                                     <option key={asset.id + "|" + asset.name} value={asset.id}>
                                         {asset.name}
