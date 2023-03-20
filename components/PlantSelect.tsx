@@ -4,10 +4,10 @@ import axios from "axios";
 
 interface PlantSelectProps {
     onChange: React.ChangeEventHandler<HTMLSelectElement>;
-    accessControl?: boolean;
-    allPlants?: boolean;
+    accessControl?: boolean; //plant select restricted to user
+    allPlants?: boolean; // true : "view all plants", false: "Select a plant"
     name?: string;
-    default?: boolean;
+    default?: boolean; // true:
 }
 
 // No access control for managers and engineers
@@ -58,11 +58,9 @@ export default function PlantSelect(props: PlantSelectProps) {
 
     return (
         <select className="form-select" onChange={props.onChange} name={props.name}>
-            {props.allPlants ? (
-                plantList.length > 1 && <option value={0}>View all Plants</option>
-            ) : (
-                !props.default && <option hidden>Select plant</option>
-            )}
+            {props.allPlants
+                ? plantList.length > 1 && <option value={0}>View all Plants</option>
+                : !props.default && <option hidden>Select plant</option>}
             {plantOptions}
         </select>
     );
