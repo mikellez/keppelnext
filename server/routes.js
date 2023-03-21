@@ -140,7 +140,8 @@ router.post(
  * @apiSuccess {string} -.request Name of the request type
  */
 router.get("/request/types", checkIfLoggedInAPI, controllers.request.fetchRequestTypes);
-router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
+// router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
+router.get("/request/counts/:field/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestCounts);
 
 router.get(
     "/checklist/template",
@@ -160,11 +161,12 @@ router.get(
     controllers.checklist.fetchChecklistTemplateNames
 );
 
-router.get(
-    "/checklist/status/:plant",
-    checkIfLoggedInAPI,
-    controllers.checklist.fetchChecklistStatus
-);
+// router.get(
+//     "/checklist/status/:plant",
+//     checkIfLoggedInAPI,
+//     controllers.checklist.fetchChecklistStatus
+// );
+router.get("/checklist/counts/:field/:plant", checkIfLoggedInAPI, controllers.checklist.fetchChecklistCounts);
 
 /**
  * @api {get} /fault/type Get Fault Types

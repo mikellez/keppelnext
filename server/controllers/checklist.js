@@ -133,18 +133,46 @@ const fetchChecklistTemplateNames = async (req, res, next) => {
     });
 };
 
-const fetchChecklistStatus = async (req, res, next) => {
+// const fetchChecklistStatus = async (req, res, next) => {
 
-    const sql = req.params.plant != 0 ? `SELECT S.STATUS, CM.STATUS_ID, COUNT(CM.STATUS_ID) FROM KEPPEL.CHECKLIST_MASTER CM
-    JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
-    WHERE CM.PLANT_ID = ${req.params.plant}
-    GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)` : 
-    `SELECT S.STATUS, CM.STATUS_ID, COUNT(CM.STATUS_ID) FROM KEPPEL.CHECKLIST_MASTER CM
-    JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
-    GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)`;
+//     const sql = req.params.plant != 0 ? `SELECT S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
+//     JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
+//     WHERE CM.PLANT_ID = ${req.params.plant}
+//     GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)` : 
+//     `SELECT  S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
+//     JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
+//     GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)`;
 
-    db.query(sql, (err, result) => {
-        if (err) return res.status(500).send("Error in fetching request for dashboard");
+//     db.query(sql, (err, result) => {
+//         if (err) return res.status(500).send("Error in fetching checklist for dashboard");
+//         return res.status(200).send(result.rows);
+//     });
+// };
+
+const fetchChecklistCounts = (req, res, next) => {
+	let sql;
+	switch(req.params.field) {
+		case "status":
+			sql = req.params.plant != 0 ? `SELECT S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
+				JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
+				WHERE CM.PLANT_ID = ${req.params.plant}
+				GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)` : 
+				`SELECT  S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
+				JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
+				GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)`;
+			break;
+		case "fault":
+			
+			break;
+		case "priority":
+			
+			break;
+		default:
+			return res.status(404).send(`Invalid checklist type of ${req.params.field}`);
+
+	};
+	db.query(sql, (err, result) => {
+        if (err) return res.status(500).send(`Error in fetching checklist ${req.params.field} for dashboard`);
         return res.status(200).send(result.rows);
     });
 };
@@ -154,5 +182,6 @@ module.exports = {
 	fetchForReviewChecklists,
 	fetchApprovedChecklists,
     fetchChecklistTemplateNames,
-	fetchChecklistStatus,
+	// fetchChecklistStatus,
+	fetchChecklistCounts
 };

@@ -46,7 +46,7 @@ export default function Request() {
 		},
 		{ label: 'Asset Name',			resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.asset_name },
 		{ label: 'Requested By',		resize: true, renderCell: (item: TableNode<CMMSRequest>) => item.prop.fullname },
-		{ label: '',		resize: true, 
+		{ label: '',
 			renderCell: (item: TableNode<CMMSRequest>) => 
 					<div
 						className={styles.editIcon}

@@ -13,23 +13,23 @@ export default function ManagerDashboad() {
     const [requestData, setRequestData] = useState<CMMSDashboardData[]>();
 
     useEffect(() => {
-        fetchData("checklist", plant).then(result => {
+        fetchData("checklist", plant, "status").then(result => {
             if (result) setChecklistData(result)
         });
-        fetchData("request", plant).then(result => {
+        fetchData("request", plant, "status").then(result => {
             if (result) setRequestData(result)
         });
     }, [plant])
 
-    const pendingRequest = requestData?.filter(data => data.status_id === 1)[0];
-    const closedRequest = requestData?.filter(data => data.status_id === 4)[0];
-    const pendingChecklist = checklistData?.filter(data => data.status_id === 1)[0];
-    const completedChecklist = checklistData?.filter(data => data.status_id === 4)[0];
+    const pendingRequest = requestData?.filter(data => data.id === 1)[0];
+    const closedRequest = requestData?.filter(data => data.id === 4)[0];
+    const pendingChecklist = checklistData?.filter(data => data.id === 1)[0];
+    const completedChecklist = checklistData?.filter(data => data.id === 4)[0];
     const totalRequest = requestData?.reduce((accumulator, currentValue) => { 
-        return accumulator + currentValue.count 
+        return accumulator + currentValue.value 
     }, 0)
     const totalChecklist = checklistData?.reduce((accumulator, currentValue) => { 
-        return accumulator + currentValue.count 
+        return accumulator + currentValue.value 
     }, 0)
 
     return (
@@ -40,16 +40,16 @@ export default function ManagerDashboad() {
             <ModuleContent>
                 <div className={styles.dashboardMain}>
                     <DashboardBox title="Pending Requests" style={{gridArea: "a"}}>
-                        <p className={styles.dashboardPendingdNumber}>{pendingRequest ? pendingRequest.count : 0}</p>
+                        <p className={styles.dashboardPendingdNumber}>{pendingRequest ? pendingRequest.value : 0}</p>
                     </DashboardBox>
                     <DashboardBox title="Closed Requests" style={{gridArea: "b"}}>
-                        <p className={styles.dashboardCompletedNumber}>{closedRequest ? closedRequest.count : 0}</p>
+                        <p className={styles.dashboardCompletedNumber}>{closedRequest ? closedRequest.value : 0}</p>
                     </DashboardBox>
                     <DashboardBox title="Pending Checklists" style={{gridArea: "c"}}>
-                        <p className={styles.dashboardPendingdNumber}>{pendingChecklist ? pendingChecklist.count : 0}</p>
+                        <p className={styles.dashboardPendingdNumber}>{pendingChecklist ? pendingChecklist.value : 0}</p>
                     </DashboardBox>
                     <DashboardBox title="Completed Checklists" style={{gridArea: "d"}}>
-                        <p className={styles.dashboardCompletedNumber}>{completedChecklist ? completedChecklist.count : 0}</p>
+                        <p className={styles.dashboardCompletedNumber}>{completedChecklist ? completedChecklist.value : 0}</p>
                     </DashboardBox>
                     <DashboardBox title={"Total Requests: " + totalRequest} style={{gridArea: "e"}}>
                         {
