@@ -168,6 +168,7 @@ router.get(
 //     controllers.checklist.fetchChecklistStatus
 // );
 router.get("/checklist/counts/:field/:plant", checkIfLoggedInAPI, controllers.checklist.fetchChecklistCounts);
+router.get("/checklist/csv", checkIfLoggedInAPI, controllers.checklist.createChecklistCSV);
 
 /**
  * @api {get} /fault/type Get Fault Types
@@ -240,6 +241,7 @@ router
 router.get("/schedule/event/:id", checkIfLoggedInAPI, controllers.schedule.getScheduleById);
 
 router.get("/activity/account_log", checkIfLoggedInAPI, controllers.activity.getEventtHistory);
+router.get("/activity/csv", checkIfLoggedInAPI, controllers.activity.createActivityCSV);
 
 // NO API ROUTE
 router.all("/*", (req, res) => {

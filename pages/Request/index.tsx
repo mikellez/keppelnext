@@ -26,17 +26,17 @@ export type TableNode<T> = {
     prop: T;
 };
 
-const downloadCSV = async () => {
+export const downloadCSV = async (type: string) => {
 	try {
 		const response = await axios({
-			url: "/api/request/csv",
+			url: `/api/${type}/csv`,
 			method: "get",
 			responseType: "arraybuffer",
 		});
 		const blob = new Blob([response.data])
 		const url = window.URL.createObjectURL(blob);
 		const temp_link = document.createElement("a");
-		temp_link.download = "request.csv";
+		temp_link.download = `${type}.csv`;
 		temp_link.href = url;
 		temp_link.click();
 		temp_link.remove();
@@ -195,7 +195,7 @@ export default function Request() {
 			<ModuleHeader title="Request" header="Request">
 				<button onClick={() => requestMutate()} className="btn btn-primary">Refresh</button>
 				<Link href="./Request/New" className="btn btn-primary">New Request</Link>
-				<a className="btn btn-primary" onClick={() => downloadCSV()}>Export CSV</a>
+				<a className="btn btn-primary" onClick={() => downloadCSV("request")}>Export CSV</a>
 			</ModuleHeader>
 			<ModuleContent>
 				{!isReady &&
