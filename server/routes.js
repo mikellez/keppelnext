@@ -142,6 +142,7 @@ router.post(
 router.get("/request/types", checkIfLoggedInAPI, controllers.request.fetchRequestTypes);
 // router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
 router.get("/request/counts/:field/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestCounts);
+router.get("/request/csv", controllers.request.createRequestCSV);
 
 router.get(
     "/checklist/template",
