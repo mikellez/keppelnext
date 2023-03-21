@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
+
 import {
     ModuleContent,
     ModuleDivider,
@@ -17,12 +18,10 @@ import {
 } from "../../../types/common/interfaces";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import Link from "next/link";
-import RequestContainer from "../../../components/Request/RequestContainer";
-import { RequestProps } from "../New";
+import RequestContainer, { RequestProps } from "../../../components/Request/RequestContainer";
 
-export default function EditRequestPage(props: RequestProps) {
+export default function RequestNew(props: RequestProps) {
     const router = useRouter();
-    const requestId = router.query.id;
 
     return (
         <ModuleMain>
@@ -32,11 +31,11 @@ export default function EditRequestPage(props: RequestProps) {
                 </Link>
             </ModuleHeader>
             <ModuleContent>
-                <RequestContainer isEdit={false} requestData={props} />
+                <RequestContainer requestData={props} />
             </ModuleContent>
         </ModuleMain>
     );
-};
+}
 
 export const getServerSideProps: GetServerSideProps = async (
     context: GetServerSidePropsContext

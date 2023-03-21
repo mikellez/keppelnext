@@ -65,15 +65,18 @@ interface CMMSUser {
 
 interface CMMSRequest {
 	request_id: string;
+	request_name?: string;
 	created_date: Date;
 	fullname: string;
 	fault_name: string;
 	asset_name: string;
 	plant_name: string;
+	plant_id?: number;
 	priority: string;
 	status: string;
 	assigned_user_name: string;
-	fault_description: string;
+	fault_description?: string;
+	image?: string;
 }
 
 interface CMMSRequestTypes {

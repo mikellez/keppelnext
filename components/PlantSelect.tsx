@@ -7,7 +7,9 @@ interface PlantSelectProps {
     accessControl?: boolean; //plant select restricted to user
     allPlants?: boolean; // true : "view all plants", false: "Select a plant"
     name?: string;
-    default?: boolean; // true:
+    default?: boolean; // true: able to view all plants but dont have "view all plants" option
+    disabled?: boolean; // set to true to disable plantselect
+    defaultPlant?: number; // to set a default plant using plant ID
 }
 
 // No access control for managers and engineers
@@ -57,7 +59,13 @@ export default function PlantSelect(props: PlantSelectProps) {
     });
 
     return (
-        <select className="form-select" onChange={props.onChange} name={props.name}>
+        <select
+            className="form-select"
+            onChange={props.onChange}
+            name={props.name}
+            disabled={props.disabled}
+            value={props.defaultPlant}
+        >
             {props.allPlants
                 ? plantList.length > 1 && <option value={0}>View all Plants</option>
                 : !props.default && <option hidden>Select plant</option>}

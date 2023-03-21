@@ -141,6 +141,8 @@ router.post(
  */
 router.get("/request/types", checkIfLoggedInAPI, controllers.request.fetchRequestTypes);
 router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
+router.get("/request/priority", checkIfLoggedInAPI, controllers.request.fetchRequestPriority);
+router.get("/request/:request_id", checkIfLoggedInAPI, controllers.request.fetchSpecificRequest);
 
 router.get(
     "/checklist/template",
@@ -232,7 +234,7 @@ router
     .get(controllers.schedule.getPendingSingleEvents)
     .post(controllers.schedule.createSingleEvent)
     .patch(controllers.schedule.manageSingleEvent)
-    .delete()
+    .delete();
 
 router.get("/schedule/event/:id", checkIfLoggedInAPI, controllers.schedule.getScheduleById);
 

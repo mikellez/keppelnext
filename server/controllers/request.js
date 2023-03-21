@@ -6,7 +6,8 @@ const db = require("../../db");
  */
 
 const fetchRequests = async (req, res, next) => {
-	db.query(`SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
+    db.query(
+        `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
 	rt.request, ro.role_name, sc.status,r.fault_description, rt.request as request_type,
 	pri.priority, 
 	CASE 
@@ -37,46 +38,60 @@ const fetchRequests = async (req, res, next) => {
 		(sc.status ='PENDING') or
 		(ua.role_name != 'Operation Specialist')
 	)
-	order by r.created_date desc, r.status_id desc;`, (err, result) => {
-		if(err) return res.status(500).json({errormsg: err});
+	order by r.created_date desc, r.status_id desc;`,
+        (err, result) => {
+            if (err) return res.status(500).json({ errormsg: err });
 
-		res.status(200).json(result.rows);
-	});
-}
+            res.status(200).json(result.rows);
+        }
+    );
+};
 
 const createRequest = async (req, res, next) => {
+    const { requestTypeID, faultTypeID, description, plantLocationID, taggedAssetID } = req.body;
+    const fileBuffer = req.file === undefined ? null : req.file.buffer;
+    const fileType = req.file === undefined ? null : req.file.mimetype;
 
-	const { requestTypeID, faultTypeID, description, plantLocationID, taggedAssetID } = req.body;
-	const fileBuffer	= (req.file === undefined) ? null : req.file.buffer;
-	const fileType		= (req.file === undefined) ? null : req.file.mimetype;
-
-	db.query(`INSERT INTO keppel.request(
+    db.query(
+        `INSERT INTO keppel.request(
 			fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype
 		) VALUES (
 			$1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9
-		)`, [
-			faultTypeID, description, plantLocationID, requestTypeID, req.user.id, req.user.role_id, taggedAssetID, fileBuffer, fileType
-		], (err, result) => {
-			if(err) return res.status(500).json({errormsg: err});
-	
-			res.status(200).json("success");
-		}
-	);
-}
+		)`,
+        [
+            faultTypeID,
+            description,
+            plantLocationID,
+            requestTypeID,
+            req.user.id,
+            req.user.role_id,
+            taggedAssetID,
+            fileBuffer,
+            fileType,
+        ],
+        (err, result) => {
+            if (err) return res.status(500).json({ errormsg: err });
+
+            res.status(200).json("success");
+        }
+    );
+};
 
 const fetchRequestTypes = async (req, res, next) => {
-	db.query(`SELECT * FROM keppel.request_type ORDER BY req_id ASC`, (err, result) => {
-		if(err) return res.status(500).json({errormsg: err});
-		res.status(200).json(result.rows);
-	})
-}
+    db.query(`SELECT * FROM keppel.request_type ORDER BY req_id ASC`, (err, result) => {
+        if (err) return res.status(500).json({ errormsg: err });
+        res.status(200).json(result.rows);
+    });
+};
 
 const fetchRequestStatus = async (req, res, next) => {
-    const sql = req.params.plant != 0 ? `SELECT S.STATUS, R.STATUS_ID, COUNT(R.STATUS_ID) FROM KEPPEL.REQUEST R
+    const sql =
+        req.params.plant != 0
+            ? `SELECT S.STATUS, R.STATUS_ID, COUNT(R.STATUS_ID) FROM KEPPEL.REQUEST R
     JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = R.STATUS_ID
     WHERE R.PLANT_ID = ${req.params.plant}
-    GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (status)` : 
-    `SELECT S.STATUS, R.STATUS_ID, COUNT(R.STATUS_ID) FROM KEPPEL.REQUEST R
+    GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (status)`
+            : `SELECT S.STATUS, R.STATUS_ID, COUNT(R.STATUS_ID) FROM KEPPEL.REQUEST R
     JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = R.STATUS_ID
     GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (status)`;
 
@@ -87,12 +102,31 @@ const fetchRequestStatus = async (req, res, next) => {
 };
 
 const fetchRequestPriority = async (req, res, next) => {
-	db.query(`SELECT `)
+    db.query(`SELECT * from keppel.priority`, (err, result) => {
+        if (err) return res.status(500).send("Error in priority");
+        return res.status(200).json(result.rows);
+    });
+};
+
+const fetchSpecificRequest = async (req, res, next) => {
+    const sql = `SELECT rt.request as request_name, r.req_id, ft.fault_type as fault_name, r.fault_id, r.fault_description, pm.plant_name, r.plant_id, psa.plant_asset_instrument as asset_name, r.psa_id, r.uploaded_file
+	FROM keppel.request AS r
+	JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
+	JOIN keppel.fault_types  AS ft ON ft.fault_id = r.fault_id
+	JOIN keppel.plant_master AS pm ON pm.plant_id = r.plant_id
+	JOIN keppel.plant_system_assets AS psa ON psa.psa_id = r.psa_id
+	WHERE request_id = ${req.params.request_id}`;
+    db.query(sql, (err, result) => {
+        if (err) return res.status(500).send("Error in fetching request");
+        return res.status(200).send(result.rows[0]);
+    });
 };
 
 module.exports = {
-	fetchRequests,
-	createRequest,
-	fetchRequestTypes,
-	fetchRequestStatus
-}
+    fetchRequests,
+    createRequest,
+    fetchRequestTypes,
+    fetchRequestStatus,
+    fetchSpecificRequest,
+    fetchRequestPriority,
+};

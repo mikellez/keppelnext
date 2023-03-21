@@ -77,7 +77,6 @@ const AssignToSelect = (props: AssignToSelectProps) => {
     // const assignedUserOptions: AssignedUserOption[] = assignedUsers.map((user) => {
     //     return { value: user.id, label: user.name + " | " + user.email };
     // });
-    console.log(isReady);
     return (
         <div>
             {/* {!props.plantId && <select className="form-control" disabled></select>} */}
@@ -92,7 +91,7 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                     onChange={props.onChange}
                     styles={customStyles}
                     defaultValue={defaultOptions}
-                    isDisabled={!props.plantId}
+                    // isDisabled={!props.plantId}
                 />
             )}
         </div>
