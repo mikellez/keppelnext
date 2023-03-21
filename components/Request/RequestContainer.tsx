@@ -85,10 +85,10 @@ export interface RequestProps {
 
 export interface AssignRequestProps {
     requestData: CMMSRequest;
-    priority: Priority[];
+    priority: CMMSRequestPriority[];
 }
 
-interface Priority {
+export interface CMMSRequestPriority {
     p_id: number;
     priority: string;
 }
@@ -108,8 +108,8 @@ export default function RequestContainer(props: RequestContainerProps) {
         props.assignRequestData?.requestData as CMMSRequest
     );
     console.log(assignRequestData);
-    const [priority, setPriority] = useState<Priority[]>(
-        props.assignRequestData?.priority as Priority[]
+    const [priority, setPriority] = useState<CMMSRequestPriority[]>(
+        props.assignRequestData?.priority as CMMSRequestPriority[]
     );
 
     const { register, handleSubmit, formState, control, resetField } = useForm<FormValues>();

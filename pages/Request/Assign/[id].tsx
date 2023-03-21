@@ -18,7 +18,10 @@ import {
 } from "../../../types/common/interfaces";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import Link from "next/link";
-import RequestContainer, { AssignRequestProps } from "../../../components/Request/RequestContainer";
+import RequestContainer, {
+    AssignRequestProps,
+    CMMSRequestPriority,
+} from "../../../components/Request/RequestContainer";
 
 export default function AssignRequestPage(props: AssignRequestProps) {
     return (
@@ -55,7 +58,7 @@ export const getServerSideProps: GetServerSideProps = async (
     const values = await Promise.all([getSpecificRequest, getPriority]);
 
     const requestData: CMMSRequest = values[0].data;
-    const priority: string[] = values[1].data;
+    const priority: CMMSRequestPriority[] = values[1].data;
 
     console.log(requestData);
     console.log(priority);
