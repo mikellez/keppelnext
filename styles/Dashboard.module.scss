@@ -1,57 +1,65 @@
 .dashboardMain {
-    display: grid;
-    grid-template-areas: 
-    "a b c d g" 
+  display: grid;
+  grid-template-areas:
+    "a b c d g"
     "e e f f g";
-    gap: 10px;
+  gap: 10px;
 }
 
 @media only screen and (max-width: 1200px) {
-    .dashboardMain {
-        grid-template-areas: "a b" "c d" "e f" "g g";
-    }
+  .dashboardMain {
+    grid-template-areas: "a b" "c d" "e f" "g g";
+  }
 }
 
 @media only screen and (max-width: 900px) {
-    .dashboardMain {
-        grid-template-areas: "a" "b" "c" "d" "e" "f" "g";
-    }
+  .dashboardMain {
+    grid-template-areas: "a" "b" "c" "d" "e" "f" "g";
+  }
 }
 
 .dashboardSection {
-    background-color: #EEEEEE;
-    border-radius: 5px;
-    padding: 12px;
-    // min-height: 200px;
+  background-color: #eeeeee;
+  border-radius: 5px;
+  padding: 12px;
+  // min-height: 200px;
 }
 
 .dashboardSection div {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
 }
 
-.dashboardSection h5 {
-    margin: auto;
+.dashboardHeader {
+  display: flex;
+}
+
+.dashboardHeader h5 {
+  margin-right: auto;
 }
 
 .dashboardNumber {
-    font-size: 60px;
-    font-weight: 500;
+  font-size: 60px;
+  font-weight: 500;
 }
 
 .dashboardPendingdNumber {
-    @extend .dashboardNumber;
-    color: #C21010;
+  @extend .dashboardNumber;
+  color: #c21010;
 }
 
 .dashboardCompletedNumber {
-    @extend .dashboardNumber;
-    color: #367E18;
+  @extend .dashboardNumber;
+  color: #367e18;
 }
 
 .dashboardNoChart {
-    position: absolute;
-    top: 50%;
-    font-size: 20px;
-    color: #BBBBBB;
+  position: absolute;
+  top: 50%;
+  font-size: 20px;
+  color: #bbbbbb;
+}
+
+.dashboardRequestButton {
+  width: 30%;
 }
