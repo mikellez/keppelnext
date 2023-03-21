@@ -19,6 +19,7 @@ import { CMMSRequest } from "../../types/common/interfaces";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import styles from "../../styles/Request.module.scss";
+import axios from "axios";
 import TooltipBtn from "../../components/TooltipBtn";
 import { FiRefreshCw } from "react-icons/fi";
 import { IoCreateOutline } from "react-icons/io5";
@@ -29,6 +30,25 @@ export type TableNode<T> = {
   id: string;
   nodes?: TableNode<T>[] | Nullish;
   prop: T;
+};
+
+export const downloadCSV = async (type: string) => {
+  try {
+    const response = await axios({
+      url: `/api/${type}/csv`,
+      method: "get",
+      responseType: "arraybuffer",
+    });
+    const blob = new Blob([response.data]);
+    const url = window.URL.createObjectURL(blob);
+    const temp_link = document.createElement("a");
+    temp_link.download = `${type}.csv`;
+    temp_link.href = url;
+    temp_link.click();
+    temp_link.remove();
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 export default function Request() {

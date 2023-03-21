@@ -1,4 +1,5 @@
 const db = require("../../db");
+const { generateCSV } = require("../csvGenerator");
 
 /** Express router providing user related routes
  * @module controllers/request
@@ -92,6 +93,7 @@ const fetchRequests = async (req, res, next) => {
 			au.last_name
 		)
 		ORDER BY r.created_date DESC, r.status_id DESC;`
+
 	db.query(sql, (err, result) => {
 		if(err) return res.status(500).json({errormsg: err});
 
@@ -232,6 +234,108 @@ const fetchRequestCounts = async (req, res, next) => {
     });
 };
 
+const createRequestCSV = (req, res, next) => {
+	const sql = (req.user.role_id === 1 || req.user.role_id === 2 || req.user.role_id === 3) ? 
+	`SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
+	rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
+	pri.priority, 
+	CASE 
+		WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
+		ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
+	END AS fullname,
+	r.created_date,tmp1.asset_name, 
+	r.complete_comments,
+	concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
+	, r.rejection_comments, r.status_id
+	FROM    
+		keppel.users u
+		JOIN keppel.user_access ua ON u.user_id = ua.user_id
+		JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
+		left JOIN keppel.users req_u ON r.user_id = req_u.user_id
+		left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
+		left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
+		left JOIN keppel.request_type rt ON rt.req_id = r.req_id
+		left JOIN keppel.priority pri ON pri.p_id = r.priority_id
+		left JOIN keppel.role ro ON ro.role_id = r.role_id
+		left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
+		left JOIN keppel.users au ON au.user_id = r.assigned_user_id
+		left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
+			from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
+			WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
+	GROUP BY (
+		r.request_id,
+		ft.fault_type,
+		pm.plant_name,
+		pm.plant_id,
+		rt.request,
+		ro.role_name,
+		sc.status,
+		pri.priority,
+		req_u.first_name,
+		tmp1.asset_name,
+		req_u.last_name,
+		au.first_name,
+		au.last_name
+	)
+	ORDER BY r.created_date DESC, r.status_id DESC;` :
+	`SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
+	rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
+	pri.priority, 
+	CASE 
+		WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
+		ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
+	END AS fullname,
+	r.created_date,tmp1.asset_name,
+	r.complete_comments,
+	concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
+	, r.rejection_comments, r.status_id
+	FROM    
+		keppel.users u
+		JOIN keppel.user_access ua ON u.user_id = ua.user_id
+		JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
+		left JOIN keppel.users req_u ON r.user_id = req_u.user_id
+		left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
+		left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
+		left JOIN keppel.request_type rt ON rt.req_id = r.req_id
+		left JOIN keppel.priority pri ON pri.p_id = r.priority_id
+		left JOIN keppel.role ro ON ro.role_id = r.role_id
+		left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
+		left JOIN keppel.users au ON au.user_id = r.assigned_user_id
+		left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
+			from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
+			WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
+	WHERE r.assigned_user_id = ${req.user.id} OR r.user_id = ${req.user.id}
+	GROUP BY (
+		r.request_id,
+		ft.fault_type,
+		pm.plant_name,
+		pm.plant_id,
+		rt.request,
+		ro.role_name,
+		sc.status,
+		pri.priority,
+		req_u.first_name,
+		tmp1.asset_name,
+		req_u.last_name,
+		au.first_name,
+		au.last_name
+	)
+	ORDER BY r.created_date DESC, r.status_id DESC;`
+
+	db.query(sql, (err, result) => {
+		if(err) return res.status(500).json({errormsg: err});
+		generateCSV(result.rows).then(buffer => {
+			res.set({
+				'Content-Type': 'text/csv',
+			})
+			return res.status(200).send(buffer);
+		})
+		.catch(error => {
+			res.status(500).send(`Error in generating csv file`);
+		});
+	});
+};
+
 module.exports = {
 	fetchRequests,
 	createRequest,
@@ -240,4 +344,5 @@ module.exports = {
 	// fetchRequestPriority,
 	// fetchRequestFaults,
 	fetchRequestCounts,
+	createRequestCSV
 }
