@@ -161,12 +161,6 @@ const fetchChecklistCounts = (req, res, next) => {
 				JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
 				GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)`;
 			break;
-		case "fault":
-			
-			break;
-		case "priority":
-			
-			break;
 		default:
 			return res.status(404).send(`Invalid checklist type of ${req.params.field}`);
 

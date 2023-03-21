@@ -10,8 +10,9 @@ import { CompactTable, RowOptions} from '@table-library/react-table-library/comp
 import { Nullish } from '@table-library/react-table-library/types/common';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { getTheme } from '@table-library/react-table-library/baseline';
-// import { MdEdit } from 'react-icons/md';
-import { AiOutlineForm } from 'react-icons/ai';
+
+import { RiShareBoxLine } from 'react-icons/ri';
+
 import { useRequest } from '../../components/SWR';
 import { CMMSRequest } from '../../types/common/interfaces'; 
 import Link from 'next/link';
@@ -55,7 +56,7 @@ export default function Request() {
 							setReady(false)
 						}}
 					>
-						<AiOutlineForm size={18} />
+						<RiShareBoxLine size={18} />
 					</div>	
 		}
 	];
