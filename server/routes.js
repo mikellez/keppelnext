@@ -142,7 +142,15 @@ router.post(
 router.get("/request/types", checkIfLoggedInAPI, controllers.request.fetchRequestTypes);
 router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
 router.get("/request/priority", checkIfLoggedInAPI, controllers.request.fetchRequestPriority);
+router.get("/request/csv", controllers.request.createRequestCSV);
+
 router.get("/request/:request_id", checkIfLoggedInAPI, controllers.request.fetchSpecificRequest);
+// router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
+router.get(
+    "/request/counts/:field/:plant",
+    checkIfLoggedInAPI,
+    controllers.request.fetchRequestCounts
+);
 
 router.get(
     "/checklist/template",
@@ -162,11 +170,17 @@ router.get(
     controllers.checklist.fetchChecklistTemplateNames
 );
 
+// router.get(
+//     "/checklist/status/:plant",
+//     checkIfLoggedInAPI,
+//     controllers.checklist.fetchChecklistStatus
+// );
 router.get(
-    "/checklist/status/:plant",
+    "/checklist/counts/:field/:plant",
     checkIfLoggedInAPI,
-    controllers.checklist.fetchChecklistStatus
+    controllers.checklist.fetchChecklistCounts
 );
+router.get("/checklist/csv", checkIfLoggedInAPI, controllers.checklist.createChecklistCSV);
 
 /**
  * @api {get} /fault/type Get Fault Types
@@ -239,6 +253,7 @@ router
 router.get("/schedule/event/:id", checkIfLoggedInAPI, controllers.schedule.getScheduleById);
 
 router.get("/activity/account_log", checkIfLoggedInAPI, controllers.activity.getEventtHistory);
+router.get("/activity/csv", checkIfLoggedInAPI, controllers.activity.createActivityCSV);
 
 // NO API ROUTE
 router.all("/*", (req, res) => {

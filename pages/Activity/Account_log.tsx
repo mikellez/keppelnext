@@ -10,6 +10,7 @@ import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell, OnClick } from '
 import { useAccountlog, } from '../../components/SWR';
 import { CMMSActivitylog } from '../../types/common/interfaces';
 import { Nullish } from '@table-library/react-table-library/types/common';
+import { downloadCSV } from '../Request';
 
 type TableNode<T> = {
     id: string;
@@ -60,7 +61,7 @@ export default function AccountLog() {
 	return (
 		<ModuleMain>
 			<ModuleHeader title="Activity Log" header="Activity Log">
-				<button className="btn btn-primary">Export CSV</button>
+				<button className="btn btn-primary" onClick={() => downloadCSV("activity")}>Export CSV</button>
 			</ModuleHeader>
 			<ModuleContent>
 				<Table data={{nodes: ActivityNodes}} theme={theme}>

@@ -196,9 +196,9 @@ interface CMMSMasterTables {
 }
 
 interface CMMSDashboardData {
-	status_id: number;
-	status: string;
-	count: number;
+	id: number;
+	name: string;
+	value: number;
 	fill: string;
 }
 

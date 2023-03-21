@@ -8,18 +8,44 @@ import { CompactTable, RowOptions } from "@table-library/react-table-library/com
 import { Nullish } from "@table-library/react-table-library/types/common";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
-// import { MdEdit } from 'react-icons/md';
-import { AiOutlineForm } from "react-icons/ai";
+
+import { RiShareBoxLine } from "react-icons/ri";
+
 import { useRequest } from "../../components/SWR";
 import { CMMSRequest } from "../../types/common/interfaces";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import styles from "../../styles/Request.module.scss";
+import axios from "axios";
+import TooltipBtn from "../../components/TooltipBtn";
+import { FiRefreshCw } from "react-icons/fi";
+import { IoCreateOutline } from "react-icons/io5";
+import { HiOutlineDownload } from "react-icons/hi";
+import { BsFileEarmark, BsFileEarmarkPlus } from "react-icons/bs";
 
 export type TableNode<T> = {
     id: string;
     nodes?: TableNode<T>[] | Nullish;
     prop: T;
+};
+
+export const downloadCSV = async (type: string) => {
+    try {
+        const response = await axios({
+            url: `/api/${type}/csv`,
+            method: "get",
+            responseType: "arraybuffer",
+        });
+        const blob = new Blob([response.data]);
+        const url = window.URL.createObjectURL(blob);
+        const temp_link = document.createElement("a");
+        temp_link.download = `${type}.csv`;
+        temp_link.href = url;
+        temp_link.click();
+        temp_link.remove();
+    } catch (e) {
+        console.log(e);
+    }
 };
 
 export default function Request() {
@@ -78,7 +104,6 @@ export default function Request() {
         },
         {
             label: "",
-            resize: true,
             renderCell: (item: TableNode<CMMSRequest>) => (
                 <div
                     className={styles.editIcon}
@@ -87,7 +112,7 @@ export default function Request() {
                         setReady(false);
                     }}
                 >
-                    <AiOutlineForm size={18} />
+                    <RiShareBoxLine size={18} />
                 </div>
             ),
         },
@@ -229,13 +254,19 @@ export default function Request() {
     return (
         <ModuleMain>
             <ModuleHeader title="Request" header="Request">
-                <button onClick={() => requestMutate()} className="btn btn-primary">
-                    Refresh
-                </button>
-                <Link href="./Request/New" className="btn btn-primary">
-                    New Request
+                <TooltipBtn onClick={() => requestMutate()} text="Refresh">
+                    <FiRefreshCw size={20} />
+                </TooltipBtn>
+                <Link href="./Request/New">
+                    <TooltipBtn text="New Request">
+                        <BsFileEarmarkPlus href="./Request/New" size={20} />
+                    </TooltipBtn>
                 </Link>
-                <a className="btn btn-primary">Export CSV</a>
+                <a>
+                    <TooltipBtn text="Export CSV" onClick={() => downloadCSV("request")}>
+                        <HiOutlineDownload size={20} />
+                    </TooltipBtn>
+                </a>
             </ModuleHeader>
             <ModuleContent>
                 {!isReady && (

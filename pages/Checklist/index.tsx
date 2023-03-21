@@ -11,6 +11,7 @@ import { useChecklist } from '../../components/SWR';
 import { CMMSChecklist } from '../../types/common/interfaces';
 import { Nullish } from '@table-library/react-table-library/types/common';
 import { ThreeDots } from 'react-loading-icons';
+import { downloadCSV } from '../Request';
 
 type TableNode<T> = {
     id: string;
@@ -74,7 +75,7 @@ export default function Checklist() {
 		<ModuleMain>
 			<ModuleHeader title="Checklist" header="Checklist">
 				<Link href="/Checklist/New" className="btn btn-primary">New Checklist</Link>
-				<button className="btn btn-primary">Export CSV</button>
+				<button className="btn btn-primary" onClick={() => downloadCSV("checklist")}>Export CSV</button>
 			</ModuleHeader>
 
 			<ModuleContent>
