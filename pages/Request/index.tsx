@@ -265,7 +265,7 @@ export default function Request() {
           </TooltipBtn>
         </Link>
         <a>
-          <TooltipBtn text="Export CSV">
+          <TooltipBtn text="Export CSV" onClick={() => downloadCSV("request")}>
             <HiOutlineDownload size={20} />
           </TooltipBtn>
         </a>
