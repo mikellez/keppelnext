@@ -18,11 +18,31 @@ import { CMMSRequest } from '../../types/common/interfaces';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import styles from "../../styles/Request.module.scss";
+import axios from 'axios';
 
 export type TableNode<T> = {
     id: string;
     nodes?: TableNode<T>[] | Nullish;
     prop: T;
+};
+
+const downloadCSV = async () => {
+	try {
+		const response = await axios({
+			url: "/api/request/csv",
+			method: "get",
+			responseType: "arraybuffer",
+		});
+		const blob = new Blob([response.data])
+		const url = window.URL.createObjectURL(blob);
+		const temp_link = document.createElement("a");
+		temp_link.download = "request.csv";
+		temp_link.href = url;
+		temp_link.click();
+		temp_link.remove();
+	} catch (e) {
+		console.log(e)
+	}
 };
 
 export default function Request() {
@@ -175,7 +195,7 @@ export default function Request() {
 			<ModuleHeader title="Request" header="Request">
 				<button onClick={() => requestMutate()} className="btn btn-primary">Refresh</button>
 				<Link href="./Request/New" className="btn btn-primary">New Request</Link>
-				<a className="btn btn-primary">Export CSV</a>
+				<a className="btn btn-primary" onClick={() => downloadCSV()}>Export CSV</a>
 			</ModuleHeader>
 			<ModuleContent>
 				{!isReady &&

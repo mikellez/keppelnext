@@ -11,12 +11,11 @@ async function generateCSV(data) {
         for (heading in data[row]) {
             tmp.push(data[row][heading])
         }
-        dataStr += "/n" + tmp.toString();
+        dataStr +=  "\n" + tmp.toString();
     }
     memStream.write(dataStr);
     memStream.end(); // important -- you have to end the stream before storing it as a buffer
     const buffer = await getStream.buffer(memStream);
-    console.log(buffer);
     return buffer;
 };
 
