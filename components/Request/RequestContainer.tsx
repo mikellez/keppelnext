@@ -45,7 +45,7 @@ async function getAssets(plant_id: number) {
             console.log(e);
             return null;
         });
-}
+};
 
 async function createRequest(data: FormValues, plantId: number) {
     const formData = new FormData();
@@ -69,7 +69,24 @@ async function createRequest(data: FormValues, plantId: number) {
             console.log(e);
             return null;
         });
-}
+};
+
+async function updateRequest(id: string, priority: CMMSRequestPriority, assignedUser: AssignedUserOption) {
+    return await axios({
+        method: "patch",
+        url: "/api/request/" + id,
+        data: {
+            priority: priority,
+            assignedUser: assignedUser,
+        }
+    })
+    .then(res => {
+        return res.data;
+    })
+    .catch(err => {
+        console.log(err);
+    })
+};
 
 export interface RequestContainerProps extends PropsWithChildren {
     requestData?: RequestProps; // if not null, use data for creating new request (populate the dropdowns in create request page)
@@ -89,51 +106,52 @@ export interface AssignRequestProps {
 }
 
 export interface CMMSRequestPriority {
-    p_id: number;
-    priority: string;
+    p_id?: number;
+    priority?: string;
 }
 
 export default function RequestContainer(props: RequestContainerProps) {
     const [selectedFile, setSelectedFile] = useState<File>();
     const [previewedFile, setPreviewedFile] = useState<string>();
-    const [requestTypes, setRequestTypes] = useState<CMMSRequestTypes[]>(
-        props.requestData?.requestTypes as CMMSRequestTypes[]
-    );
-    const [faultTypes, setFaultTypes] = useState<CMMSFaultTypes[]>(
-        props.requestData?.faultTypes as CMMSFaultTypes[]
-    );
+    const requestTypes = props.requestData?.requestTypes as CMMSRequestTypes[];
+    const faultTypes = props.requestData?.faultTypes as CMMSFaultTypes[];
     const [availableAssets, setAvailableAssets] = useState<CMMSAsset[]>([]);
     const [plantId, setPlantId] = useState<number>();
-    const [assignRequestData, setAssignRequestData] = useState<CMMSRequest>(
-        props.assignRequestData?.requestData as CMMSRequest
-    );
-    console.log(assignRequestData);
-    const [priority, setPriority] = useState<CMMSRequestPriority[]>(
-        props.assignRequestData?.priority as CMMSRequestPriority[]
-    );
+    const assignRequestData = props.assignRequestData?.requestData as CMMSRequest;
+    const priorityList = props.assignRequestData?.priority as CMMSRequestPriority[];
+    const { register, handleSubmit, formState, control, resetField, setValue } =
+        useForm<FormValues>();
 
-    const { register, handleSubmit, formState, control, resetField } = useForm<FormValues>();
+    const [prioritySelected, setPrioritySelected] = useState<CMMSRequestPriority>();
+    const [assignedUsers, setAssignedUsers] = useState<AssignedUserOption>();
 
     const { isSubmitting, errors } = formState;
 
     const router = useRouter();
 
     const formSubmit: SubmitHandler<FormValues> = async (data) => {
+        console.log(data);
+
         if (props.requestData) {
-            console.log(data);
+            // console.log("Creating new request");
             await createRequest(data, plantId as number);
         } else if (props.assignRequestData) {
-            //update database here
-            console.log("update database");
+            // console.log("Assigning request");
+            const { id } = router.query;
+            await updateRequest(id as string, prioritySelected as CMMSRequestPriority, assignedUsers as AssignedUserOption);
         }
-        // router.push("/Request/");
+        router.push("/Request/");
     };
 
     useEffect(() => {
         console.log(props.assignRequestData);
         console.log(props.requestData);
+
         if (props.assignRequestData) {
             setPlantId(assignRequestData.plant_id);
+            setValue("requestTypeID", -1);
+            setValue("faultTypeID", -1);
+            setValue("taggedAssetID", -1);
         }
         if (!selectedFile) {
             setPreviewedFile(undefined);
@@ -205,7 +223,9 @@ export default function RequestContainer(props: RequestContainerProps) {
                                     );
                                 })}
                             {props.assignRequestData && (
-                                <option selected> {assignRequestData.request_name} </option>
+                                <option value={-1} selected>
+                                    {assignRequestData.request_name}
+                                </option>
                             )}
                         </select>
                     </div>
@@ -232,7 +252,9 @@ export default function RequestContainer(props: RequestContainerProps) {
                                     );
                                 })}
                             {props.assignRequestData && (
-                                <option selected> {assignRequestData.fault_name} </option>
+                                <option value={-1} selected>
+                                    {assignRequestData.fault_name}
+                                </option>
                             )}
                         </select>
                     </div>
@@ -276,7 +298,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                             className="form-control"
                             id="formControlTagAsset"
                             {...register("taggedAssetID", { required: true })}
-                            disabled={props.assignRequestData ? true : false}
+                            disabled={props.assignRequestData || !plantId ? true : false}
                         >
                             <option hidden key={0} value={""}>
                                 Select asset
@@ -293,7 +315,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                                     );
                                 })}
                             {props.assignRequestData && (
-                                <option selected> {assignRequestData.asset_name} </option>
+                                <option value={-1}>{assignRequestData.asset_name}</option>
                             )}
                         </select>
                     </div>
@@ -331,8 +353,13 @@ export default function RequestContainer(props: RequestContainerProps) {
 
                             {/* {!plantId && <select className="form-control" disabled></select>} */}
                             {/* {plantId && ( */}
-                            <AssignToSelect onChange={() => {}} plantId={plantId as number} />
-                            {/* )} */}
+                            <AssignToSelect
+                                plantId={plantId as number}
+                                isSingle={true}
+                                onChange={(value) => {
+                                    setAssignedUsers(value as AssignedUserOption);
+                                }}
+                            />
                         </div>
                     )}
 
@@ -343,9 +370,13 @@ export default function RequestContainer(props: RequestContainerProps) {
                                 Priority
                             </label>
                             <Select
-                                options={priority.map((priority) => {
+                                options={priorityList.map((priority) => {
                                     return { value: priority.p_id, label: priority.priority };
                                 })}
+                                onChange={(value) => {
+                                    const priority = { p_id: value?.value, priority: value?.label };
+                                    setPrioritySelected(priority);
+                                }}
                             />
                         </div>
                     )}

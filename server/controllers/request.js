@@ -1,5 +1,6 @@
 const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
+const moment = require('moment');
 
 /** Express router providing user related routes
  * @module controllers/request
@@ -106,12 +107,13 @@ const createRequest = async (req, res, next) => {
     const { requestTypeID, faultTypeID, description, plantLocationID, taggedAssetID } = req.body;
     const fileBuffer = req.file === undefined ? null : req.file.buffer;
     const fileType = req.file === undefined ? null : req.file.mimetype;
-
+	const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+	const history = `PENDING_Request Created_${today}_${req.user.role_name}_${req.user.name}`;
     db.query(
         `INSERT INTO keppel.request(
-			fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype
+			fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory
 		) VALUES (
-			$1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9
+			$1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10
 		)`,
         [
             faultTypeID,
@@ -123,6 +125,7 @@ const createRequest = async (req, res, next) => {
             taggedAssetID,
             fileBuffer,
             fileType,
+			history
         ],
         (err, result) => {
             if (err) return res.status(500).json({ errormsg: err });
@@ -130,6 +133,28 @@ const createRequest = async (req, res, next) => {
             res.status(200).json("success");
         }
     );
+};
+
+const updateRequest = async (req, res, next) => {
+	const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
+    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+	const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;
+	db.query(`
+		UPDATE keppel.request SET 
+		assigned_user_id = $1,
+		priority_id = $2,
+		requesthistory = concat(requesthistory, $3::text),
+		status_id = 2
+		WHERE request_id = $4
+	`,[
+		req.body.assignedUser.value, 
+		req.body.priority.p_id,
+		history,
+		req.params.request_id
+	], (err) => {
+		if (err) console.log(err)
+		return res.status(200).json("Request successfully updated");
+	});
 };
 
 const fetchRequestTypes = async (req, res, next) => {
@@ -388,4 +413,5 @@ module.exports = {
     createRequestCSV,
     fetchSpecificRequest,
     fetchRequestPriority,
+	updateRequest,
 };
