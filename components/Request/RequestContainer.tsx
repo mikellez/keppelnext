@@ -140,7 +140,7 @@ export default function RequestContainer(props: RequestContainerProps) {
             const { id } = router.query;
             await updateRequest(id as string, prioritySelected as CMMSRequestPriority, assignedUsers as AssignedUserOption);
         }
-        // router.push("/Request/");
+        router.push("/Request/");
     };
 
     useEffect(() => {
