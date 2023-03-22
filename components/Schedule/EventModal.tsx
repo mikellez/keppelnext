@@ -42,7 +42,7 @@ async function deleteSchedule(id: number) {
             return res;
         })
         .catch((err) => console.log(err));
-};
+}
 
 export default function EventModal(props: ModalProps) {
     // Store the assigned users as a state
@@ -65,7 +65,7 @@ export default function EventModal(props: ModalProps) {
         props.closeModal();
         setEditMode(false);
         if (editMode) setNewSchedule({} as CMMSSchedule);
-    };
+    }
 
     function handleDelete() {
         if (props.event) {
@@ -76,7 +76,7 @@ export default function EventModal(props: ModalProps) {
                 }, 1000);
             });
         }
-    };
+    }
 
     function updateSchedule(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
         setNewSchedule((prev) => {
@@ -86,7 +86,7 @@ export default function EventModal(props: ModalProps) {
                     e.target.name == "date" ? new Date(e.target.value) : e.target.value,
             };
         });
-    };
+    }
 
     function submitEvent() {
         setDisableSubmit(true);
@@ -101,29 +101,28 @@ export default function EventModal(props: ModalProps) {
             timelineId: newSchedule.timelineId,
             reminderRecurrence: 1,
             prevId: newSchedule.prevId,
-            status: 4, 
+            status: 4,
             index: newSchedule.index,
-        }
-        
+        };
+
         if (scheduleValidator(schedule)) {
-            scheduleMaintenance(schedule).then(result => {
+            scheduleMaintenance(schedule).then((result) => {
                 setSubmitModal(true);
                 // router.push("/Schedule");
                 setTimeout(() => {
                     setSubmitModal(false);
                     setDisableSubmit(false);
                     closeModal();
-                }, 1000)
-            })
-            
+                }, 1000);
+            });
         } else {
             setFailureModal(true);
             setDisableSubmit(false);
             setTimeout(() => {
                 setFailureModal(false);
-            }, 1000)
-        } 
-    };
+            }, 1000);
+        }
+    }
 
     // Start and end dates of the schedule
     const startDate = new Date(props.event?.extendedProps.startDate as Date);
@@ -140,7 +139,12 @@ export default function EventModal(props: ModalProps) {
     let today = new Date();
     const upperStr = upper >= endDate ? endDate : upper;
     today = new Date();
-    const lowerStr = lower <= today ? new Date(today.setDate(today.getDate() + 1)) : lower <= startDate ? startDate : lower;
+    const lowerStr =
+        lower <= today
+            ? new Date(today.setDate(today.getDate() + 1))
+            : lower <= startDate
+            ? startDate
+            : lower;
 
     useEffect(() => {
         setEditDeleteModal(false);
@@ -318,11 +322,15 @@ export default function EventModal(props: ModalProps) {
                                                         setNewSchedule((prev) => {
                                                             const newData = { ...prev };
                                                             const ids: number[] = [];
-                                                            value.forEach(
-                                                                (option: AssignedUserOption) => {
-                                                                    ids.push(option.value);
-                                                                }
-                                                            );
+                                                            if (Array.isArray(value)) {
+                                                                value?.forEach(
+                                                                    (
+                                                                        option: AssignedUserOption
+                                                                    ) => {
+                                                                        ids.push(option.value);
+                                                                    }
+                                                                );
+                                                            }
                                                             newData.assignedIds = ids;
                                                             return newData;
                                                         });
@@ -381,8 +389,8 @@ export default function EventModal(props: ModalProps) {
                             )}
                             {props.editSingle &&
                                 (data?.role_id as number) < 4 &&
-                                props.event.extendedProps.date as Date> new Date() &&
-                                (props.event.extendedProps.recurringPeriod > 1 || 
+                                (props.event.extendedProps.date as Date) > new Date() &&
+                                (props.event.extendedProps.recurringPeriod > 1 ||
                                     props.event.extendedProps.isSingle) && (
                                     <div className={styles.eventModalButtonContainer}>
                                         <TooltipBtn
@@ -409,9 +417,10 @@ export default function EventModal(props: ModalProps) {
                                                             props.event.extendedProps.assignedIds
                                                                 .sort()
                                                                 .join("")) ||
-                                                    newSchedule.assignedIds.length == 0 ||
-                                                    !newSchedule.date ||
-                                                    newSchedule.date == null) && disableSubmit
+                                                        newSchedule.assignedIds.length == 0 ||
+                                                        !newSchedule.date ||
+                                                        newSchedule.date == null) &&
+                                                    disableSubmit
                                                 }
                                                 onClick={submitEvent}
                                             >
@@ -438,19 +447,21 @@ export default function EventModal(props: ModalProps) {
                 text="Changes to event has to been sent for approval."
                 icon={SimpleIcon.Check}
             />
-             <ModuleSimplePopup
-                    modalOpenState={failureModal}
-                    setModalOpenState={setFailureModal}
-                    title="Incomplete Maintenance"
-                    text="Please fill in the missing details for the maintenance."
-                    icon={SimpleIcon.Cross}
+            <ModuleSimplePopup
+                modalOpenState={failureModal}
+                setModalOpenState={setFailureModal}
+                title="Incomplete Maintenance"
+                text="Please fill in the missing details for the maintenance."
+                icon={SimpleIcon.Cross}
+            />
+            {
+                <ScheduleModal
+                    isOpen={scheduleModal}
+                    closeModal={() => setScheduleModal(false)}
+                    title="Schedule Maintenance"
+                    scheduleEvent={newSchedule}
                 />
-            {<ScheduleModal
-                isOpen={scheduleModal}
-                closeModal={() => setScheduleModal(false)}
-                title="Schedule Maintenance"
-                scheduleEvent={newSchedule}
-            />}
+            }
         </div>
     );
 }

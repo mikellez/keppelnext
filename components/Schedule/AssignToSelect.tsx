@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Select, { ActionMeta, MultiValue, StylesConfig } from "react-select";
+import Select, { ActionMeta, MultiValue, SingleValue, StylesConfig } from "react-select";
 import makeAnimated from "react-select/animated";
 import { CMMSUser } from "../../types/common/interfaces";
 
 interface AssignToSelectProps {
     onChange: (
-        value: MultiValue<AssignedUserOption>,
+        value: MultiValue<AssignedUserOption> | SingleValue<AssignedUserOption>,
         action: ActionMeta<AssignedUserOption>
     ) => void;
     plantId?: number;
     style?: React.CSSProperties;
     name?: string;
     defaultIds?: number[];
+    isSingle?: boolean;
 }
 
 export interface AssignedUserOption {
@@ -82,7 +83,7 @@ const AssignToSelect = (props: AssignToSelectProps) => {
             {/* {!props.plantId && <select className="form-control" disabled></select>} */}
             {isReady && (
                 <Select
-                    isMulti
+                    isMulti={props.isSingle ? false : true}
                     name={props.name}
                     options={options}
                     components={animatedComponents}
