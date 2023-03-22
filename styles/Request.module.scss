@@ -1,27 +1,35 @@
 .tableDropdownListItem {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .tableDropdownListItemHeader {
-    font-size: 17px;
+  font-size: 17px;
 }
 
 .tableDropdownListItem p {
-    margin: 0;
-    font-size: 15px;
+  margin: 0;
+  font-size: 15px;
 }
 
 .tableDropdownImg {
-    width: 100px;
-    height: 100px;
+  width: 100px;
+  height: 100px;
+  cursor: pointer;
 }
 
 .editIcon {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .editIcon:hover {
-    color: #C70F2B;
+  color: #c70f2b;
 }
 
+.imageModal {
+  width: fit-content !important;
+  height: fit-content !important;
+  background-color: transparent !important;
+  position: relative;
+  top: 15%;
+}

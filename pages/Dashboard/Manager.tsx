@@ -11,8 +11,10 @@ import PlantSelect from "../../components/PlantSelect";
 import { CMMSDashboardData } from "../../types/common/interfaces";
 import PChart from "../../components/Dashboard/PChart";
 import { fetchData } from ".";
+import { ThreeDots } from "react-loading-icons";
 
 export default function ManagerDashboad() {
+  const [isReady, setIsReady] = useState<boolean>(false);
   const [plant, setPlant] = useState<number>(0);
   const [field, setField] = useState<string>("status");
   const [request, setRequest] = useState<{
@@ -32,6 +34,9 @@ export default function ManagerDashboad() {
         pendingRequest: result?.filter((data) => data.id === 1)[0],
         closedRequest: result?.filter((data) => data.id === 4)[0],
       });
+      setTimeout(() => {
+        setIsReady(true);
+      }, 500);
     });
   }, [plant, field]);
 
@@ -49,6 +54,14 @@ export default function ManagerDashboad() {
   const totalChecklist = checklistData?.reduce((accumulator, currentValue) => {
     return accumulator + currentValue.value;
   }, 0);
+
+  if (!isReady) {
+    return (
+      <div style={{ width: "100%", textAlign: "center" }}>
+        <ThreeDots fill="black" />
+      </div>
+    );
+  }
 
   return (
     <ModuleMain>
