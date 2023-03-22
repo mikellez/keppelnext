@@ -45,7 +45,7 @@ async function getAssets(plant_id: number) {
             console.log(e);
             return null;
         });
-}
+};
 
 async function createRequest(data: FormValues, plantId: number) {
     const formData = new FormData();
@@ -69,7 +69,24 @@ async function createRequest(data: FormValues, plantId: number) {
             console.log(e);
             return null;
         });
-}
+};
+
+async function updateRequest(id: string, priority: CMMSRequestPriority, assignedUser: AssignedUserOption) {
+    return await axios({
+        method: "patch",
+        url: "/api/request/" + id,
+        data: {
+            priority: priority,
+            assignedUser: assignedUser,
+        }
+    })
+    .then(res => {
+        return res.data;
+    })
+    .catch(err => {
+        console.log(err);
+    })
+};
 
 export interface RequestContainerProps extends PropsWithChildren {
     requestData?: RequestProps; // if not null, use data for creating new request (populate the dropdowns in create request page)
@@ -116,14 +133,14 @@ export default function RequestContainer(props: RequestContainerProps) {
         console.log(data);
 
         if (props.requestData) {
-            console.log("Creating new request");
+            // console.log("Creating new request");
             await createRequest(data, plantId as number);
         } else if (props.assignRequestData) {
-            console.log("Assigning request");
-            console.log(prioritySelected);
-            console.log(assignedUsers);
+            // console.log("Assigning request");
+            const { id } = router.query;
+            await updateRequest(id as string, prioritySelected as CMMSRequestPriority, assignedUsers[0] as AssignedUserOption);
         }
-        router.push("/Request/");
+        // router.push("/Request/");
     };
 
     useEffect(() => {

@@ -144,7 +144,9 @@ router.get("/request/types", checkIfLoggedInAPI, controllers.request.fetchReques
 router.get("/request/priority", checkIfLoggedInAPI, controllers.request.fetchRequestPriority);
 router.get("/request/csv", checkIfLoggedInAPI, controllers.request.createRequestCSV);
 
-router.get("/request/:request_id", checkIfLoggedInAPI, controllers.request.fetchSpecificRequest);
+router.route("/request/:request_id", checkIfLoggedInAPI)
+    .get(controllers.request.fetchSpecificRequest)
+    .patch(controllers.request.updateRequest)
 // router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
 router.get(
     "/request/counts/:field/:plant",
