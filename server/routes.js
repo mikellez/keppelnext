@@ -140,9 +140,9 @@ router.post(
  * @apiSuccess {string} -.request Name of the request type
  */
 router.get("/request/types", checkIfLoggedInAPI, controllers.request.fetchRequestTypes);
-router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
+// router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
 router.get("/request/priority", checkIfLoggedInAPI, controllers.request.fetchRequestPriority);
-router.get("/request/csv", controllers.request.createRequestCSV);
+router.get("/request/csv", checkIfLoggedInAPI, controllers.request.createRequestCSV);
 
 router.get("/request/:request_id", checkIfLoggedInAPI, controllers.request.fetchSpecificRequest);
 // router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
