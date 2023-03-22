@@ -123,7 +123,7 @@ export default function RequestContainer(props: RequestContainerProps) {
         useForm<FormValues>();
 
     const [prioritySelected, setPrioritySelected] = useState<CMMSRequestPriority>();
-    const [assignedUsers, setAssignedUsers] = useState<AssignedUserOption[]>();
+    const [assignedUsers, setAssignedUsers] = useState<AssignedUserOption>();
 
     const { isSubmitting, errors } = formState;
 
@@ -138,7 +138,7 @@ export default function RequestContainer(props: RequestContainerProps) {
         } else if (props.assignRequestData) {
             // console.log("Assigning request");
             const { id } = router.query;
-            await updateRequest(id as string, prioritySelected as CMMSRequestPriority, assignedUsers[0] as AssignedUserOption);
+            await updateRequest(id as string, prioritySelected as CMMSRequestPriority, assignedUsers as AssignedUserOption);
         }
         // router.push("/Request/");
     };
@@ -354,12 +354,12 @@ export default function RequestContainer(props: RequestContainerProps) {
                             {/* {!plantId && <select className="form-control" disabled></select>} */}
                             {/* {plantId && ( */}
                             <AssignToSelect
-                                onChange={(value) => {
-                                    setAssignedUsers([...value]);
-                                }}
                                 plantId={plantId as number}
+                                isSingle={true}
+                                onChange={(value) => {
+                                    setAssignedUsers(value as AssignedUserOption);
+                                }}
                             />
-                            {/* )} */}
                         </div>
                     )}
 
