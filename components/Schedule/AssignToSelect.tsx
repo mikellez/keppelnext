@@ -46,8 +46,6 @@ const AssignToSelect = (props: AssignToSelectProps) => {
 
     // Calls an api to get the list of assigned users upon change of plant id
     useEffect(() => {
-        // setIsReady(false);
-
         if (props.plantId) {
             getAssignedUsers(props.plantId).then((users) => {
                 if (users == null) {
@@ -75,8 +73,7 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                         .then(() => {
                             setIsReady(true);
                         });
-                } 
-                else { 
+                } else {
                     setIsReady(true);
                 }
             });
@@ -90,7 +87,6 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                 return { value: user.id, label: user.name + " | " + user.email };
             });
     }
-    console.log(isReady)
 
     // // Assigned users dropdown
     // const assignedUserOptions: AssignedUserOption[] = assignedUsers.map((user) => {
@@ -112,7 +108,7 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                     defaultValue={props.isSingle ? defaultOptions[0] : defaultOptions}
                     // isDisabled={!props.plantId}
                 />
-            )} 
+            )}
         </div>
     );
 };
