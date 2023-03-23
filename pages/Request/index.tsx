@@ -34,6 +34,30 @@ export type TableNode<T> = {
   prop: T;
 };
 
+export const getColor = (status: string) => {
+  switch (status) {
+    case "PENDING":
+      return "#b306ec";
+    case "ASSIGNED":
+      return "blue";
+    case "COMPLETED":
+    case "WORK DONE":
+    case "APPROVED":
+      return "#0ebd05";
+    case "HIGH":
+      return "#C74B50";
+    case "MEDIUM":
+      return "#FFAC41";
+    case "LOW":
+      return "#03C988";
+    case "REJECTED":
+    case "CANCELLED":
+      return "red";
+    default:
+      return "#757575";
+  }
+};
+
 export const downloadCSV = async (type: string) => {
   try {
     const response = await axios({
@@ -82,13 +106,22 @@ export default function Request() {
     {
       label: "Priority",
       resize: true,
-      renderCell: (item: TableNode<CMMSRequest>) =>
-        item.prop.priority == null ? "-" : item.prop.priority,
+      renderCell: (item: TableNode<CMMSRequest>) => (
+        <span
+          style={{ color: getColor(item.prop.priority), fontWeight: "bold" }}
+        >
+          {item.prop.priority == null ? "-" : item.prop.priority}
+        </span>
+      ),
     },
     {
       label: "Status",
       resize: true,
-      renderCell: (item: TableNode<CMMSRequest>) => item.prop.status,
+      renderCell: (item: TableNode<CMMSRequest>) => (
+        <span style={{ color: getColor(item.prop.status), fontWeight: "bold" }}>
+          {item.prop.status}
+        </span>
+      ),
     },
     {
       label: "Filter By Date",
@@ -113,7 +146,7 @@ export default function Request() {
     {
       label: "",
       renderCell: (item: TableNode<CMMSRequest>) => (
-        <div className={styles.iconsDiv}>
+        <div className={styles.iconsDiv} title={"Assign"}>
           <div
             className={styles.editIcon}
             onClick={() => {
@@ -123,13 +156,14 @@ export default function Request() {
           >
             <AiOutlineUserAdd size={18} />
           </div>
-          <div className={styles.editIcon}>
+          <div className={styles.editIcon} title={"Create Corrective Request"}>
             <HiOutlineLink size={18} />
           </div>
         </div>
       ),
     },
   ];
+
   const handleExpand = (item: TableNode<CMMSRequest>) => {
     if (ids.includes(item.id)) {
       setIds(ids.filter((id) => id !== item.id));
@@ -149,7 +183,7 @@ export default function Request() {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns:  5em 15% 7em 5em 8em 8em calc(75% - 37em) 10% 4em;",
+        "--data-table-library_grid-template-columns:  5em 15% 7em 6em 8em 8em calc(75% - 38em) 10% 4em;",
       HeaderRow: `
 				background-color: #eaf5fd;
 			`,
@@ -176,18 +210,7 @@ export default function Request() {
           {ids.includes(item.id) && (
             <tr style={{ display: "flex", gridColumn: "1 / -1" }}>
               <td style={{ flex: "1" }}>
-                <ul
-                  style={{
-                    margin: "0",
-                    padding: "0",
-                    backgroundColor: "#FFFFFF",
-                    color: "#7F8487",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginLeft: "5rem",
-                    marginRight: "2.25rem",
-                  }}
-                >
+                <ul className={styles.tableUL}>
                   <li className={styles.tableDropdownListItem}>
                     <p>
                       <strong>Fault Description</strong>

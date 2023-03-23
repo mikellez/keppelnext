@@ -20,7 +20,7 @@ import { useChecklist } from "../../components/SWR";
 import { CMMSChecklist } from "../../types/common/interfaces";
 import { Nullish } from "@table-library/react-table-library/types/common";
 import { ThreeDots } from "react-loading-icons";
-import { downloadCSV } from "../Request";
+import { downloadCSV, getColor } from "../Request";
 import { HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../components/TooltipBtn";
 import { BsFileEarmarkPlus } from "react-icons/bs";
@@ -159,7 +159,16 @@ export default function Checklist() {
                       <Row key={item.id} item={checklistNode}>
                         <Cell>{checklistNode.prop.checklist_id}</Cell>
                         <Cell>{checklistNode.prop.description}</Cell>
-                        <Cell>{checklistNode.prop.status_id}</Cell>
+                        <Cell>
+                          <span
+                            style={{
+                              color: getColor(checklistNode.prop.status),
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {checklistNode.prop.status}
+                          </span>
+                        </Cell>
                         <Cell>
                           {checklistNode.prop.created_date.toString()}
                         </Cell>

@@ -17,14 +17,15 @@ export default function PChart(props: ChartProps) {
   //   console.log(props.data);
   return (
     <div style={{ fontSize: "12px", paddingBottom: "5px" }}>
-      <ResponsiveContainer width={300} height={300}>
+      <ResponsiveContainer width={400} height={300}>
         <PieChart>
           <Legend
             verticalAlign="bottom"
             height={36}
             iconSize={10}
             iconType="square"
-            align="center"
+            className=""
+            width={400}
           />
           <Tooltip />
           <Pie

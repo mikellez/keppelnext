@@ -1,3 +1,27 @@
+.tableUL {
+  padding: 0;
+  background-color: #ffffff;
+  color: #7f8487;
+  display: grid;
+  grid-template-columns: 21rem 12rem 19rem 7rem;
+  gap: 4rem;
+  margin: 0 4.25rem 0 5rem;
+}
+
+@media only screen and (max-width: 1440px) {
+  .tableUL {
+    grid-template-columns: 20rem 12rem 7rem 7rem;
+    gap: 2rem;
+  }
+}
+
+@media only screen and (max-width: 992px) {
+  .tableUL {
+    margin-left: 5rem;
+    grid-template-columns: 18rem 12rem;
+  }
+}
+
 .tableDropdownListItem {
   display: flex;
   flex-direction: column;
@@ -11,6 +35,7 @@
   margin: 0;
   font-size: 15px;
   max-width: 20rem;
+  text-align: justify;
 }
 
 .tableDropdownImg {
