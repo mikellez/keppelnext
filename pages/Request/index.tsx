@@ -123,7 +123,12 @@ export default function Request() {
           >
             <AiOutlineUserAdd size={18} />
           </div>
-          <div className={styles.editIcon}>
+          <div className={styles.editIcon}
+            onClick={() => {
+              router.push(`/Request/CorrectiveRequest/${item.prop.request_id}`);
+              setReady(false);
+            }}
+          >
             <HiOutlineLink size={18} />
           </div>
         </div>

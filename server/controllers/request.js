@@ -111,9 +111,9 @@ const createRequest = async (req, res, next) => {
 	const history = `PENDING_Request Created_${today}_${req.user.role_name}_${req.user.name}`;
     db.query(
         `INSERT INTO keppel.request(
-			fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory
+			fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid
 		) VALUES (
-			$1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10
+			$1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11
 		)`,
         [
             faultTypeID,
@@ -125,7 +125,8 @@ const createRequest = async (req, res, next) => {
             taggedAssetID,
             fileBuffer,
             fileType,
-			history
+			history,
+			req.body.linkedRequestId
         ],
         (err, result) => {
             if (err) return res.status(500).json({ errormsg: err });

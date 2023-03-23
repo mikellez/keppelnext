@@ -69,7 +69,10 @@ interface CMMSRequest {
 	created_date: Date;
 	fullname: string;
 	fault_name: string;
+	fault_id?: number;
 	asset_name: string;
+	psa_id?: number;
+	req_id?: number;
 	plant_name: string;
 	plant_id?: number;
 	priority: string;
