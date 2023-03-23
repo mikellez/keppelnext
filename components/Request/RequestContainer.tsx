@@ -436,28 +436,6 @@ export default function RequestContainer(props: RequestContainerProps) {
                         </div>
                     )}
                 </div>
-
-                {/* <div className={formStyles.halfContainer}>
-                    <div className="form-group">
-                        <label className="form-label">Reported By</label>
-                        <input
-                            className="form-control"
-                            type="text"
-                            disabled
-                            value={props.requestData.user.role_name}
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Reporter Name</label>
-                        <input
-                            className="form-control"
-                            type="text"
-                            disabled
-                            value={props.requestData.user.name}
-                        />
-                    </div>
-                </div> */}
             </ModuleContent>
             <ModuleFooter>
                 {(errors.requestTypeID ||

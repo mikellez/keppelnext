@@ -147,7 +147,7 @@ router.get("/request/csv", checkIfLoggedInAPI, controllers.request.createRequest
 router.route("/request/:request_id", checkIfLoggedInAPI)
     .get(controllers.request.fetchSpecificRequest)
     .patch(controllers.request.updateRequest)
-// router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
+
 router.get(
     "/request/counts/:field/:plant",
     checkIfLoggedInAPI,
@@ -172,11 +172,6 @@ router.get(
     controllers.checklist.fetchChecklistTemplateNames
 );
 
-// router.get(
-//     "/checklist/status/:plant",
-//     checkIfLoggedInAPI,
-//     controllers.checklist.fetchChecklistStatus
-// );
 router.get(
     "/checklist/counts/:field/:plant",
     checkIfLoggedInAPI,

@@ -164,61 +164,6 @@ const fetchRequestTypes = async (req, res, next) => {
     });
 };
 
-// const fetchRequestStatus = async (req, res, next) => {
-//     const sql = req.params.plant != 0 ? `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
-//     JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = R.STATUS_ID
-//     WHERE R.PLANT_ID = ${req.params.plant}
-//     GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (status)` :
-//     `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
-//     JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = R.STATUS_ID
-//     GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (status)`;
-
-//     db.query(sql, (err, result) => {
-//         if (err) return res.status(500).send("Error in fetching request for dashboard");
-//         return res.status(200).send(result.rows);
-//     });
-// };
-
-// const fetchRequestPriority = async (req, res, next) => {
-// 	const sql = req.params.plant != 0 ? `SELECT P.PRIORITY AS NAME, R.PRIORITY_ID AS ID, COUNT(R.PRIORITY_ID) AS VALUE FROM
-// 	KEPPEL.REQUEST R
-// 	JOIN KEPPEL.PRIORITY P ON R.PRIORITY_ID = P.P_ID
-// 	WHERE R.STATUS_ID != 5 AND
-// 	R.STATUS_ID != 7 AND
-// 	R.PLANT_ID = ${req.params.plant}
-//     GROUP BY(P.PRIORITY, R.PRIORITY_ID) ORDER BY (status)` :
-//     `SELECT P.PRIORITY AS NAME, R.PRIORITY_ID AS ID, COUNT(R.PRIORITY_ID) AS VALUE FROM
-// 	KEPPEL.REQUEST R
-// 	JOIN KEPPEL.PRIORITY P ON R.PRIORITY_ID = P.P_ID
-// 	WHERE R.STATUS_ID != 5 AND R.STATUS_ID != 7
-// 	GROUP BY(P.PRIORITY, R.PRIORITY_ID)`;
-
-// 	db.query(sql, (err, result) => {
-//         if (err) return res.status(500).send("Error in fetching request priorities for dashboard");
-//         return res.status(200).send(result.rows);
-//     });
-// };
-
-// const fetchRequestFaults = async (req, res, next) => {
-// 	const sql = req.params.plant != 0 ? `SELECT FT.FAULT_TYPE AS NAME, R.FAULT_ID AS ID, COUNT(R.FAULT_ID) AS VALUE FROM
-// 	KEPPEL.REQUEST R
-// 	JOIN KEPPEL.FAULT_TYPES FT ON R.FAULT_ID = FT.FAULT_ID
-// 	WHERE R.STATUS_ID != 5 AND
-// 	R.STATUS_ID != 7 AND
-// 	R.PLANT_ID = ${req.params.plant}
-//     GROUP BY(FT.FAULT_TYPE) ORDER BY (status)` :
-//     `SELECT FT.FAULT_TYPE AS NAME, R.FAULT_ID AS ID, COUNT(R.FAULT_ID) AS VALUE FROM
-// 	KEPPEL.REQUEST R
-// 	JOIN KEPPEL.FAULT_TYPES FT ON R.FAULT_ID = FT.FAULT_ID
-// 	WHERE R.STATUS_ID != 5 AND R.STATUS_ID != 7
-// 	GROUP BY(FT.FAULT_TYPE)`;
-
-// 	db.query(sql, (err, result) => {
-//         if (err) return res.status(500).send("Error in fetching request faults for dashboard");
-//         return res.status(200).send(result.rows);
-//     });
-// };
-
 const fetchRequestCounts = async (req, res, next) => {
     let sql;
     switch (req.params.field) {
@@ -407,9 +352,6 @@ module.exports = {
     fetchRequests,
     createRequest,
     fetchRequestTypes,
-    // fetchRequestStatus,
-    // fetchRequestPriority,
-    // fetchRequestFaults,
     fetchRequestCounts,
     createRequestCSV,
     fetchSpecificRequest,
