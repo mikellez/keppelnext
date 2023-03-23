@@ -45,7 +45,7 @@ async function getAssets(plant_id: number) {
             console.log(e);
             return null;
         });
-};
+}
 
 async function createRequest(data: FormValues, plantId: number) {
     const formData = new FormData();
@@ -69,24 +69,28 @@ async function createRequest(data: FormValues, plantId: number) {
             console.log(e);
             return null;
         });
-};
+}
 
-async function updateRequest(id: string, priority: CMMSRequestPriority, assignedUser: AssignedUserOption) {
+async function updateRequest(
+    id: string,
+    priority: CMMSRequestPriority,
+    assignedUser: AssignedUserOption
+) {
     return await axios({
         method: "patch",
         url: "/api/request/" + id,
         data: {
             priority: priority,
             assignedUser: assignedUser,
-        }
+        },
     })
-    .then(res => {
-        return res.data;
-    })
-    .catch(err => {
-        console.log(err);
-    })
-};
+        .then((res) => {
+            return res.data;
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+}
 
 export interface RequestContainerProps extends PropsWithChildren {
     requestData?: RequestProps; // if not null, use data for creating new request (populate the dropdowns in create request page)
@@ -124,6 +128,7 @@ export default function RequestContainer(props: RequestContainerProps) {
 
     const [prioritySelected, setPrioritySelected] = useState<CMMSRequestPriority>();
     const [assignedUsers, setAssignedUsers] = useState<AssignedUserOption>();
+    const [isReady, setIsReady] = useState<boolean>();
 
     const { isSubmitting, errors } = formState;
 
@@ -138,12 +143,20 @@ export default function RequestContainer(props: RequestContainerProps) {
         } else if (props.assignRequestData) {
             // console.log("Assigning request");
             const { id } = router.query;
-            await updateRequest(id as string, prioritySelected as CMMSRequestPriority, assignedUsers as AssignedUserOption);
+            await updateRequest(
+                id as string,
+                prioritySelected as CMMSRequestPriority,
+                assignedUsers as AssignedUserOption
+            );
         }
         router.push("/Request/");
     };
+    console.log(prioritySelected);
+    console.log(isReady);
+    console.log([props.assignRequestData?.requestData.assigned_user_id]);
 
     useEffect(() => {
+        setIsReady(false);
         console.log(props.assignRequestData);
         console.log(props.requestData);
 
@@ -152,7 +165,14 @@ export default function RequestContainer(props: RequestContainerProps) {
             setValue("requestTypeID", -1);
             setValue("faultTypeID", -1);
             setValue("taggedAssetID", -1);
+            props.assignRequestData.priority.forEach((option) => {
+                if (option.p_id == props.assignRequestData?.requestData.priority_id) {
+                    setPrioritySelected(option);
+                }
+            });
         }
+        setIsReady(true);
+
         if (!selectedFile) {
             setPreviewedFile(undefined);
             return;
@@ -359,6 +379,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                                 onChange={(value) => {
                                     setAssignedUsers(value as AssignedUserOption);
                                 }}
+                                defaultIds={[props.assignRequestData.requestData.assigned_user_id]}
                             />
                         </div>
                     )}
@@ -369,15 +390,28 @@ export default function RequestContainer(props: RequestContainerProps) {
                                 <RequiredIcon />
                                 Priority
                             </label>
-                            <Select
-                                options={priorityList.map((priority) => {
-                                    return { value: priority.p_id, label: priority.priority };
-                                })}
-                                onChange={(value) => {
-                                    const priority = { p_id: value?.value, priority: value?.label };
-                                    setPrioritySelected(priority);
-                                }}
-                            />
+                            {isReady && (
+                                <Select
+                                    options={priorityList.map((priority) => {
+                                        return { value: priority.p_id, label: priority.priority };
+                                    })}
+                                    onChange={(value) => {
+                                        const priority = {
+                                            p_id: value?.value,
+                                            priority: value?.label,
+                                        };
+                                        setPrioritySelected(priority);
+                                    }}
+                                    defaultValue={
+                                        prioritySelected
+                                            ? {
+                                                  value: prioritySelected?.p_id,
+                                                  label: prioritySelected?.priority,
+                                              }
+                                            : null
+                                    }
+                                />
+                            )}
                         </div>
                     )}
                 </div>

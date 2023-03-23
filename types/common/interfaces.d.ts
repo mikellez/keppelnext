@@ -73,8 +73,10 @@ interface CMMSRequest {
 	plant_name: string;
 	plant_id?: number;
 	priority: string;
+	priority_id: number;
 	status: string;
 	assigned_user_name: string;
+	assigned_user_id: number;
 	fault_description?: string;
 	image?: string;
 }

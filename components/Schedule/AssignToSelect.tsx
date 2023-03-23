@@ -12,7 +12,7 @@ interface AssignToSelectProps {
     plantId?: number;
     style?: React.CSSProperties;
     name?: string;
-    defaultIds?: number[];
+    defaultIds?: number[]; //user_ids
     isSingle?: boolean;
 }
 
@@ -43,10 +43,13 @@ const AssignToSelect = (props: AssignToSelectProps) => {
         control: (base) => ({ ...base, ...props.style }),
         menu: (base) => ({ ...base, ...props.style }),
     };
+    console.log(props.isSingle);
+    console.log(defaultOptions[0]);
 
     // Calls an api to get the list of assigned users upon change of plant id
     useEffect(() => {
         setIsReady(false);
+        console.log("false");
 
         if (props.plantId) {
             getAssignedUsers(props.plantId).then((users) => {
@@ -59,20 +62,33 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                         return { value: user.id, label: user.name + " | " + user.email };
                     })
                 );
-
                 if (props.defaultIds) {
-                    setDefaultOptions(
-                        users
-                            .filter((user) => props.defaultIds?.includes(user.id))
-                            .map((user) => {
-                                return { value: user.id, label: user.name + " | " + user.email };
-                            })
-                    );
-                }
+                    // setDefaultOptions(
+                    //     users
+                    //         .filter((user) => props.defaultIds?.includes(user.id))
+                    //         .map((user) => {
+                    //             return { value: user.id, label: user.name + " | " + user.email };
+                    //         })
+                    // );
+                    console.log("set default");
+
+                    updateDefault(users)
+                        .then((result) => {
+                            return setDefaultOptions(result);
+                        })
+                        .then(() => setIsReady(true));
+                } else setIsReady(true);
             });
         }
-        setIsReady(true);
     }, [props.plantId, props.defaultIds]);
+
+    async function updateDefault(users: CMMSUser[]) {
+        return users
+            .filter((user) => props.defaultIds?.includes(user.id))
+            .map((user) => {
+                return { value: user.id, label: user.name + " | " + user.email };
+            });
+    }
 
     // // Assigned users dropdown
     // const assignedUserOptions: AssignedUserOption[] = assignedUsers.map((user) => {
@@ -91,7 +107,7 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                     classNamePrefix="select"
                     onChange={props.onChange}
                     styles={customStyles}
-                    defaultValue={defaultOptions}
+                    defaultValue={props.isSingle ? defaultOptions[0] : defaultOptions}
                     // isDisabled={!props.plantId}
                 />
             )}
