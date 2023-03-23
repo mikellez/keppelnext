@@ -36,20 +36,17 @@ const AssignToSelect = (props: AssignToSelectProps) => {
     // const [assignedUsers, setAssignedUsers] = useState<CMMSUser[]>([]);
     const [defaultOptions, setDefaultOptions] = useState<AssignedUserOption[]>([]);
     const [options, setOptions] = useState<AssignedUserOption[]>([]);
-    const [isReady, setIsReady] = useState<boolean>();
+    const [isReady, setIsReady] = useState<boolean>(false);
     const animatedComponents = makeAnimated();
 
     const customStyles: StylesConfig<AssignedUserOption, true> = {
         control: (base) => ({ ...base, ...props.style }),
         menu: (base) => ({ ...base, ...props.style }),
     };
-    console.log(props.isSingle);
-    console.log(defaultOptions[0]);
 
     // Calls an api to get the list of assigned users upon change of plant id
     useEffect(() => {
-        setIsReady(false);
-        console.log("false");
+        // setIsReady(false);
 
         if (props.plantId) {
             getAssignedUsers(props.plantId).then((users) => {
@@ -62,7 +59,7 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                         return { value: user.id, label: user.name + " | " + user.email };
                     })
                 );
-                if (props.defaultIds) {
+                if (props.defaultIds && props.defaultIds[0] != null) {
                     // setDefaultOptions(
                     //     users
                     //         .filter((user) => props.defaultIds?.includes(user.id))
@@ -70,14 +67,18 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                     //             return { value: user.id, label: user.name + " | " + user.email };
                     //         })
                     // );
-                    console.log("set default");
 
                     updateDefault(users)
                         .then((result) => {
                             return setDefaultOptions(result);
                         })
-                        .then(() => setIsReady(true));
-                } else setIsReady(true);
+                        .then(() => {
+                            setIsReady(true);
+                        });
+                } 
+                else { 
+                    setIsReady(true);
+                }
             });
         }
     }, [props.plantId, props.defaultIds]);
@@ -89,6 +90,7 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                 return { value: user.id, label: user.name + " | " + user.email };
             });
     }
+    console.log(isReady)
 
     // // Assigned users dropdown
     // const assignedUserOptions: AssignedUserOption[] = assignedUsers.map((user) => {
@@ -110,7 +112,7 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                     defaultValue={props.isSingle ? defaultOptions[0] : defaultOptions}
                     // isDisabled={!props.plantId}
                 />
-            )}
+            )} 
         </div>
     );
 };

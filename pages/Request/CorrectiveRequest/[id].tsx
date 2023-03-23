@@ -18,7 +18,6 @@ interface CorrenctiveRequestProps {
 };
 
 export default function CorrenctiveRequest(props: CorrenctiveRequestProps) {
-    console.log(props)
     return (
         <ModuleMain>
             <ModuleHeader title="New Request" header="Create New Request">

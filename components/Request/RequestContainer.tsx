@@ -150,7 +150,7 @@ export default function RequestContainer(props: RequestContainerProps) {
     const router = useRouter();
 
     const formSubmit: SubmitHandler<FormValues> = async (data) => {
-        console.log(data);
+        // console.log(data);
         if (props.linkedRequestData) {
             // console.log("Creating corrective request");
             const { id } = router.query;
@@ -169,14 +169,9 @@ export default function RequestContainer(props: RequestContainerProps) {
         }
         router.push("/Request/");
     };
-    console.log(prioritySelected);
-    console.log(isReady);
-    console.log([props.assignRequestData?.requestData.assigned_user_id]);
 
     useEffect(() => {
         setIsReady(false);
-        console.log(props.assignRequestData);
-        console.log(props.requestData);
 
         if (props.assignRequestData) {
             setPlantId(assignRequestData.plant_id);
@@ -310,8 +305,9 @@ export default function RequestContainer(props: RequestContainerProps) {
                             rows={6}
                             {...register("description")}
                             disabled={props.assignRequestData ? true : false}
+                            defaultValue={props.assignRequestData ? assignRequestData.fault_description : ""}
                         >
-                            {props.assignRequestData ? assignRequestData.fault_description : ""}
+                            
                         </textarea>
                     </div>
                     <div className="form-group">
@@ -342,6 +338,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                             id="formControlTagAsset"
                             {...register("taggedAssetID", { required: true })}
                             disabled={props.assignRequestData || !plantId ? true : false}
+                            // defaultValue={props.linkedRequestData?.psa_id}
                         >
                             <option hidden key={0} value={""}>
                                 Select asset
