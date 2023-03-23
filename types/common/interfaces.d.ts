@@ -82,6 +82,7 @@ interface CMMSRequest {
 	assigned_user_id: number;
 	fault_description?: string;
 	image?: string;
+	requesthistory?: string;
 }
 
 interface CMMSRequestTypes {

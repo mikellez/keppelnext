@@ -16,7 +16,7 @@ export interface ModalProps extends PropsWithChildren {
   hideHeader?: boolean;
 }
 
-export default function ModuleModal(props: ModalProps) {
+export function ModuleModal(props: ModalProps) {
   return (
     <Modal
       isOpen={props.isOpen}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, CSSProperties } from "react";
-import { ModuleContent, ModuleHeader, ModuleMain } from "../../components";
+import { ModuleContent, ModuleHeader, ModuleMain, ModuleModal } from "../../components";
 
 import { ThreeDots } from "react-loading-icons";
 
@@ -25,8 +25,12 @@ import { FiRefreshCw } from "react-icons/fi";
 import { IoCreateOutline } from "react-icons/io5";
 import { HiOutlineDownload, HiOutlineLink } from "react-icons/hi";
 import { BsFileEarmark, BsFileEarmarkPlus } from "react-icons/bs";
-import ModuleModal from "../../components/ModuleLayout/ModuleModal";
+import { AiOutlineHistory } from "react-icons/ai";
+// import ModuleModal from "../../components/ModuleLayout/ModuleModal";
 import { AiOutlineUserAdd } from "react-icons/ai";
+import Image from "next/image";
+import { useCurrentUser } from "../../components/SWR";
+import RequestHistory from "../../components/Request/RequestHistory";
 
 export type TableNode<T> = {
   id: string;
@@ -60,8 +64,10 @@ export default function Request() {
   const [isReady, setReady] = useState(false);
   const [modalSrc, setModalSrc] = useState<string | undefined>();
   const [ids, setIds] = React.useState<string[]>([]);
+  const [currentHistory, setCurrentHistory] = useState<string | undefined>();
 
   const router = useRouter();
+  const { data } = useCurrentUser();
 
   const COLUMNS: any[] = [
     {
@@ -116,6 +122,9 @@ export default function Request() {
         <div className={styles.iconsDiv}>
           <div
             className={styles.editIcon}
+            style={{
+              display: (data?.role_id == 1 || data?.role_id == 1 || data?.role_id == 1) ? "block" : "none",
+            }}
             onClick={() => {
               router.push(`/Request/Assign/${item.prop.request_id}`);
               setReady(false);
@@ -130,6 +139,14 @@ export default function Request() {
             }}
           >
             <HiOutlineLink size={18} />
+          </div>
+          <div 
+            className={styles.editIcon}
+            onClick={() => {
+              setCurrentHistory(item.prop.requesthistory);
+            }}
+          >
+            <AiOutlineHistory size={18} />
           </div>
         </div>
       ),
@@ -154,7 +171,7 @@ export default function Request() {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns:  5em 15% 7em 5em 8em 8em calc(75% - 37em) 10% 4em;",
+        "--data-table-library_grid-template-columns:  5em 15% 7em 5em 8em 8em calc(75% - 39em) 10% 6em;",
       HeaderRow: `
 				background-color: #eaf5fd;
 			`,
@@ -214,7 +231,7 @@ export default function Request() {
                       <strong>Fault File</strong>
                     </p>
                     {item.prop.uploaded_file ? (
-                      <img
+                      <Image
                         src={URL.createObjectURL(
                           new Blob([
                             new Uint8Array(item.prop.uploaded_file.data),
@@ -231,6 +248,7 @@ export default function Request() {
                             )
                           )
                         }
+                        width={200} height={200}
                       />
                     ) : (
                       <p>No File</p>
@@ -241,7 +259,7 @@ export default function Request() {
                       <strong>Completion File</strong>
                     </p>
                     {item.prop.completion_file ? (
-                      <img
+                      <Image
                         src={URL.createObjectURL(
                           new Blob([
                             new Uint8Array(item.prop.completion_file.data),
@@ -258,6 +276,7 @@ export default function Request() {
                             )
                           )
                         }
+                        width={200} height={200}
                       />
                     ) : (
                       <p>No File</p>
@@ -330,7 +349,14 @@ export default function Request() {
           hideHeader={true}
           className={styles.imageModal}
         >
-          <img src={modalSrc} alt="" />
+          <Image src={modalSrc as string} alt="" width={500} height={500} />
+        </ModuleModal>
+        <ModuleModal
+          isOpen={!!currentHistory}
+          closeModal={() => setCurrentHistory(undefined)}
+          closeOnOverlayClick={true}
+        >
+          <RequestHistory history={currentHistory} />
         </ModuleModal>
       </ModuleContent>
     </ModuleMain>
