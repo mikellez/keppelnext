@@ -125,8 +125,8 @@ const createRequest = async (req, res, next) => {
             taggedAssetID,
             fileBuffer,
             fileType,
-			history,
-			req.body.linkedRequestId
+            history,
+            req.body.linkedRequestId,
         ],
         (err, result) => {
             if (err) return res.status(500).json({ errormsg: err });
@@ -231,12 +231,13 @@ const fetchRequestPriority = async (req, res, next) => {
 
 const fetchSpecificRequest = async (req, res, next) => {
     const sql = `SELECT rt.request as request_name, r.req_id, ft.fault_type as fault_name, r.fault_id, r.fault_description, pm.plant_name, r.plant_id, 
-	psa.plant_asset_instrument as asset_name, r.psa_id, r.uploaded_file, r.assigned_user_id, r.priority_id
+	psa.plant_asset_instrument as asset_name, r.psa_id, r.uploaded_file, r.assigned_user_id, r.priority_id, u.user_email as assigned_user_email
 	FROM keppel.request AS r
 	JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
 	JOIN keppel.fault_types  AS ft ON ft.fault_id = r.fault_id
 	JOIN keppel.plant_master AS pm ON pm.plant_id = r.plant_id
 	JOIN keppel.plant_system_assets AS psa ON psa.psa_id = r.psa_id
+	LEFT JOIN keppel.users AS u ON r.assigned_user_id = u.user_id
 	WHERE request_id = ${req.params.request_id}`;
     db.query(sql, (err, result) => {
         if (err) return res.status(500).send("Error in fetching request");

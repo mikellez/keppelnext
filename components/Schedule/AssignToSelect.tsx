@@ -42,18 +42,19 @@ const AssignToSelect = (props: AssignToSelectProps) => {
         menu: (base) => ({ ...base, ...props.style }),
     };
 
-    const updateDefault = useCallback (async (users: CMMSUser[]) => {
-        return users
-            .filter((user) => props.defaultIds?.includes(user.id))
-            .map((user) => {
-                return { value: user.id, label: user.name + " | " + user.email };
-            });
-    }, [props.defaultIds])
+    const updateDefault = useCallback(
+        async (users: CMMSUser[]) => {
+            return users
+                .filter((user) => props.defaultIds?.includes(user.id))
+                .map((user) => {
+                    return { value: user.id, label: user.name + " | " + user.email };
+                });
+        },
+        [props.defaultIds]
+    );
 
     // Calls an api to get the list of assigned users upon change of plant id
     useEffect(() => {
-        // setIsReady(false);
-
         if (props.plantId) {
             getAssignedUsers(props.plantId).then((users) => {
                 if (users == null) {
@@ -73,8 +74,7 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                         .then(() => {
                             setIsReady(true);
                         });
-                } 
-                else { 
+                } else {
                     setIsReady(true);
                 }
             });
@@ -97,7 +97,7 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                     defaultValue={props.isSingle ? defaultOptions[0] : defaultOptions}
                     // isDisabled={!props.plantId}
                 />
-            )} 
+            )}
         </div>
     );
 };

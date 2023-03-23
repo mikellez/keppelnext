@@ -57,13 +57,15 @@ export const getServerSideProps: GetServerSideProps = async (
 
     const values = await Promise.all([getSpecificRequest, getPriority]);
 
+    console.log("vales", values);
     const requestData: CMMSRequest = values[0].data;
     const priority: CMMSRequestPriority[] = values[1].data;
 
-    console.log(requestData);
-    console.log(priority);
+    // console.log(requestData);
+    // console.log(priority);
 
     let props: AssignRequestProps = { requestData: requestData, priority: priority };
+    console.log(props);
     return {
         props: props,
     };
