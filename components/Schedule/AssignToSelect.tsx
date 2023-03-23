@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Select, { ActionMeta, MultiValue, SingleValue, StylesConfig } from "react-select";
 import makeAnimated from "react-select/animated";
@@ -32,8 +32,6 @@ async function getAssignedUsers(plantId: number) {
 }
 
 const AssignToSelect = (props: AssignToSelectProps) => {
-    // Store assigned users in a state for dropdown
-    // const [assignedUsers, setAssignedUsers] = useState<CMMSUser[]>([]);
     const [defaultOptions, setDefaultOptions] = useState<AssignedUserOption[]>([]);
     const [options, setOptions] = useState<AssignedUserOption[]>([]);
     const [isReady, setIsReady] = useState<boolean>(false);
@@ -43,6 +41,17 @@ const AssignToSelect = (props: AssignToSelectProps) => {
         control: (base) => ({ ...base, ...props.style }),
         menu: (base) => ({ ...base, ...props.style }),
     };
+
+    const updateDefault = useCallback(
+        async (users: CMMSUser[]) => {
+            return users
+                .filter((user) => props.defaultIds?.includes(user.id))
+                .map((user) => {
+                    return { value: user.id, label: user.name + " | " + user.email };
+                });
+        },
+        [props.defaultIds]
+    );
 
     // Calls an api to get the list of assigned users upon change of plant id
     useEffect(() => {
@@ -58,14 +67,6 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                     })
                 );
                 if (props.defaultIds && props.defaultIds[0] != null) {
-                    // setDefaultOptions(
-                    //     users
-                    //         .filter((user) => props.defaultIds?.includes(user.id))
-                    //         .map((user) => {
-                    //             return { value: user.id, label: user.name + " | " + user.email };
-                    //         })
-                    // );
-
                     updateDefault(users)
                         .then((result) => {
                             return setDefaultOptions(result);
@@ -78,20 +79,8 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                 }
             });
         }
-    }, [props.plantId, props.defaultIds]);
+    }, [props.plantId, props.defaultIds, updateDefault]);
 
-    async function updateDefault(users: CMMSUser[]) {
-        return users
-            .filter((user) => props.defaultIds?.includes(user.id))
-            .map((user) => {
-                return { value: user.id, label: user.name + " | " + user.email };
-            });
-    }
-
-    // // Assigned users dropdown
-    // const assignedUserOptions: AssignedUserOption[] = assignedUsers.map((user) => {
-    //     return { value: user.id, label: user.name + " | " + user.email };
-    // });
     return (
         <div>
             {/* {!props.plantId && <select className="form-control" disabled></select>} */}
