@@ -10,6 +10,7 @@
 .tableDropdownListItem p {
   margin: 0;
   font-size: 15px;
+  max-width: 20rem;
 }
 
 .tableDropdownImg {
@@ -32,4 +33,9 @@
   background-color: transparent !important;
   position: relative;
   top: 15%;
+}
+
+.iconsDiv {
+  display: flex;
+  gap: 0.5rem;
 }

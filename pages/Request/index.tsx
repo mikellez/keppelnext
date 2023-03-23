@@ -23,9 +23,10 @@ import axios from "axios";
 import TooltipBtn from "../../components/TooltipBtn";
 import { FiRefreshCw } from "react-icons/fi";
 import { IoCreateOutline } from "react-icons/io5";
-import { HiOutlineDownload } from "react-icons/hi";
+import { HiOutlineDownload, HiOutlineLink } from "react-icons/hi";
 import { BsFileEarmark, BsFileEarmarkPlus } from "react-icons/bs";
 import ModuleModal from "../../components/ModuleLayout/ModuleModal";
+import { AiOutlineUserAdd } from "react-icons/ai";
 
 export type TableNode<T> = {
   id: string;
@@ -112,14 +113,19 @@ export default function Request() {
     {
       label: "",
       renderCell: (item: TableNode<CMMSRequest>) => (
-        <div
-          className={styles.editIcon}
-          onClick={() => {
-            router.push(`/Request/Assign/${item.prop.request_id}`);
-            setReady(false);
-          }}
-        >
-          <RiShareBoxLine size={18} />
+        <div className={styles.iconsDiv}>
+          <div
+            className={styles.editIcon}
+            onClick={() => {
+              router.push(`/Request/Assign/${item.prop.request_id}`);
+              setReady(false);
+            }}
+          >
+            <AiOutlineUserAdd size={18} />
+          </div>
+          <div className={styles.editIcon}>
+            <HiOutlineLink size={18} />
+          </div>
         </div>
       ),
     },
@@ -143,7 +149,7 @@ export default function Request() {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns:  5em 15% 7em 5em 8em 8em calc(75% - 35em) 10% 2em;",
+        "--data-table-library_grid-template-columns:  5em 15% 7em 5em 8em 8em calc(75% - 37em) 10% 4em;",
       HeaderRow: `
 				background-color: #eaf5fd;
 			`,
