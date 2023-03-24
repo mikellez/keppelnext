@@ -207,8 +207,9 @@ export default function Request() {
   const theme = useTheme([
     getTheme(),
     {
-      Table:
-        "--data-table-library_grid-template-columns:  5em 15% 7em 5em 8em 8em calc(75% - 37em) 10% 4em;",
+      Table: `--data-table-library_grid-template-columns:  5em 15% 7em 6em 8em 8em calc(75% - 38em) 10% 4em;
+        overflow-x: hidden
+        `,
       HeaderRow: `
 				background-color: #eaf5fd;
 			`,
@@ -220,6 +221,10 @@ export default function Request() {
 				&:nth-of-type(even) {
 					background-color: #eaf5fd;
 				}
+
+        &:nth-of-type(n) {
+          cursor: pointer
+        }
 			`,
     },
   ]);
