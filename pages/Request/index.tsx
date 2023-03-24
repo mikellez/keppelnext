@@ -32,7 +32,6 @@ import Image from "next/image";
 import { useCurrentUser } from "../../components/SWR";
 import RequestHistory from "../../components/Request/RequestHistory";
 
-
 export type TableNode<T> = {
   id: string;
   nodes?: TableNode<T>[] | Nullish;
@@ -169,11 +168,12 @@ export default function Request() {
           >
             <AiOutlineUserAdd size={18} />
           </div>
-          <div className={styles.editIcon}
-          onClick={() => {
-            router.push(`/Request/CorrectiveRequest/${item.prop.request_id}`);
-            setReady(false);
-          }}
+          <div
+            className={styles.editIcon}
+            onClick={() => {
+              router.push(`/Request/CorrectiveRequest/${item.prop.request_id}`);
+              setReady(false);
+            }}
           >
             <HiOutlineLink size={18} />
           </div>
@@ -208,8 +208,9 @@ export default function Request() {
   const theme = useTheme([
     getTheme(),
     {
-      Table:
-        "--data-table-library_grid-template-columns:  5em 18% 8em 7em 8em 8em calc(72% - 42em) 10% 6em;",
+      Table: `--data-table-library_grid-template-columns:  5em 18% 8em 7em 8em 8em calc(72% - 42em) 10% 6em;
+        overflow-x: hidden
+        `,
       HeaderRow: `
 				background-color: #eaf5fd;
 			`,
@@ -221,6 +222,10 @@ export default function Request() {
 				&:nth-of-type(even) {
 					background-color: #eaf5fd;
 				}
+
+        &:nth-of-type(n) {
+          cursor: pointer
+        }
 			`,
     },
   ]);
@@ -363,14 +368,14 @@ export default function Request() {
         {requestFetchError && <div>error</div>}
         {isReady && (
           <>
-          <CompactTable
-            columns={COLUMNS}
-            data={{ nodes: requestNodes }}
-            theme={theme}
-            layout={{ custom: true }}
-            rowProps={ROW_PROPS}
-            rowOptions={ROW_OPTIONS}
-          />
+            <CompactTable
+              columns={COLUMNS}
+              data={{ nodes: requestNodes }}
+              theme={theme}
+              layout={{ custom: true }}
+              rowProps={ROW_PROPS}
+              rowOptions={ROW_OPTIONS}
+            />
           </>
         )}
         <ModuleModal
