@@ -12,12 +12,9 @@ import {
   CompactTable,
   RowOptions,
 } from "@table-library/react-table-library/compact";
-//import { TableNode } from '@table-library/react-table-library/types/table';
 import { Nullish } from "@table-library/react-table-library/types/common";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
-
-import { RiShareBoxLine } from "react-icons/ri";
 
 import { useRequest } from "../../components/SWR";
 import { CMMSRequest } from "../../types/common/interfaces";
@@ -27,11 +24,9 @@ import styles from "../../styles/Request.module.scss";
 import axios from "axios";
 import TooltipBtn from "../../components/TooltipBtn";
 import { FiRefreshCw } from "react-icons/fi";
-import { IoCreateOutline } from "react-icons/io5";
 import { HiOutlineDownload, HiOutlineLink } from "react-icons/hi";
-import { BsFileEarmark, BsFileEarmarkPlus } from "react-icons/bs";
+import { BsFileEarmarkPlus } from "react-icons/bs";
 import { AiOutlineHistory } from "react-icons/ai";
-// import ModuleModal from "../../components/ModuleLayout/ModuleModal";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import Image from "next/image";
 import { useCurrentUser } from "../../components/SWR";
@@ -173,7 +168,13 @@ export default function Request() {
           >
             <AiOutlineUserAdd size={18} />
           </div>
-          <div className={styles.editIcon}>
+          <div
+            className={styles.editIcon}
+            onClick={() => {
+              router.push(`/Request/CorrectiveRequest/${item.prop.request_id}`);
+              setReady(false);
+            }}
+          >
             <HiOutlineLink size={18} />
           </div>
           <div
@@ -207,7 +208,7 @@ export default function Request() {
   const theme = useTheme([
     getTheme(),
     {
-      Table: `--data-table-library_grid-template-columns:  5em 15% 7em 6em 8em 8em calc(75% - 38em) 10% 4em;
+      Table: `--data-table-library_grid-template-columns:  5em 18% 8em 7em 8em 8em calc(72% - 42em) 10% 6em;
         overflow-x: hidden
         `,
       HeaderRow: `
@@ -366,14 +367,16 @@ export default function Request() {
         {requestFetchError && <div>{requestFetchError.toString()}</div>}
         {requestFetchError && <div>error</div>}
         {isReady && (
-          <CompactTable
-            columns={COLUMNS}
-            data={{ nodes: requestNodes }}
-            theme={theme}
-            layout={{ custom: true }}
-            rowProps={ROW_PROPS}
-            rowOptions={ROW_OPTIONS}
-          />
+          <>
+            <CompactTable
+              columns={COLUMNS}
+              data={{ nodes: requestNodes }}
+              theme={theme}
+              layout={{ custom: true }}
+              rowProps={ROW_PROPS}
+              rowOptions={ROW_OPTIONS}
+            />
+          </>
         )}
         <ModuleModal
           isOpen={!!modalSrc}
