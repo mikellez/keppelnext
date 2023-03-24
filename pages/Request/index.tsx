@@ -152,7 +152,7 @@ export default function Request() {
     {
       label: "",
       renderCell: (item: TableNode<CMMSRequest>) => (
-        <div className={styles.iconsDiv} title={"Assign"}>
+        <div className={styles.iconsDiv}>
           <div
             className={styles.editIcon}
             style={{
@@ -166,7 +166,7 @@ export default function Request() {
               setReady(false);
             }}
           >
-            <AiOutlineUserAdd size={18} />
+            <AiOutlineUserAdd size={18} title={"Assign"} />
           </div>
           <div
             className={styles.editIcon}
@@ -175,7 +175,7 @@ export default function Request() {
               setReady(false);
             }}
           >
-            <HiOutlineLink size={18} />
+            <HiOutlineLink size={18} title={"Create Corrective Request"} />
           </div>
           <div
             className={styles.editIcon}
@@ -183,7 +183,7 @@ export default function Request() {
               setCurrentHistory(item.prop.requesthistory);
             }}
           >
-            <AiOutlineHistory size={18} />
+            <AiOutlineHistory size={18} title={"View History"} />
           </div>
         </div>
       ),
