@@ -12,12 +12,9 @@ import {
   CompactTable,
   RowOptions,
 } from "@table-library/react-table-library/compact";
-//import { TableNode } from '@table-library/react-table-library/types/table';
 import { Nullish } from "@table-library/react-table-library/types/common";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
-
-import { RiShareBoxLine } from "react-icons/ri";
 
 import { useRequest } from "../../components/SWR";
 import { CMMSRequest } from "../../types/common/interfaces";
@@ -27,11 +24,9 @@ import styles from "../../styles/Request.module.scss";
 import axios from "axios";
 import TooltipBtn from "../../components/TooltipBtn";
 import { FiRefreshCw } from "react-icons/fi";
-import { IoCreateOutline } from "react-icons/io5";
 import { HiOutlineDownload, HiOutlineLink } from "react-icons/hi";
-import { BsFileEarmark, BsFileEarmarkPlus } from "react-icons/bs";
+import { BsFileEarmarkPlus } from "react-icons/bs";
 import { AiOutlineHistory } from "react-icons/ai";
-// import ModuleModal from "../../components/ModuleLayout/ModuleModal";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import Image from "next/image";
 import { useCurrentUser } from "../../components/SWR";
@@ -157,7 +152,7 @@ export default function Request() {
     {
       label: "",
       renderCell: (item: TableNode<CMMSRequest>) => (
-        <div className={styles.iconsDiv} title={"Assign"}>
+        <div className={styles.iconsDiv}>
           <div
             className={styles.editIcon}
             style={{
@@ -171,10 +166,16 @@ export default function Request() {
               setReady(false);
             }}
           >
-            <AiOutlineUserAdd size={18} />
+            <AiOutlineUserAdd size={18} title={"Assign"} />
           </div>
-          <div className={styles.editIcon}>
-            <HiOutlineLink size={18} />
+          <div
+            className={styles.editIcon}
+            onClick={() => {
+              router.push(`/Request/CorrectiveRequest/${item.prop.request_id}`);
+              setReady(false);
+            }}
+          >
+            <HiOutlineLink size={18} title={"Create Corrective Request"} />
           </div>
           <div
             className={styles.editIcon}
@@ -182,7 +183,7 @@ export default function Request() {
               setCurrentHistory(item.prop.requesthistory);
             }}
           >
-            <AiOutlineHistory size={18} />
+            <AiOutlineHistory size={18} title={"View History"} />
           </div>
         </div>
       ),
@@ -207,8 +208,9 @@ export default function Request() {
   const theme = useTheme([
     getTheme(),
     {
-      Table:
-        "--data-table-library_grid-template-columns:  5em 15% 7em 5em 8em 8em calc(75% - 37em) 10% 4em;",
+      Table: `--data-table-library_grid-template-columns:  5em 18% 8em 7em 8em 8em calc(72% - 42em) 10% 6em;
+        overflow-x: hidden
+        `,
       HeaderRow: `
 				background-color: #eaf5fd;
 			`,
@@ -220,6 +222,10 @@ export default function Request() {
 				&:nth-of-type(even) {
 					background-color: #eaf5fd;
 				}
+
+        &:nth-of-type(n) {
+          cursor: pointer
+        }
 			`,
     },
   ]);
@@ -361,14 +367,16 @@ export default function Request() {
         {requestFetchError && <div>{requestFetchError.toString()}</div>}
         {requestFetchError && <div>error</div>}
         {isReady && (
-          <CompactTable
-            columns={COLUMNS}
-            data={{ nodes: requestNodes }}
-            theme={theme}
-            layout={{ custom: true }}
-            rowProps={ROW_PROPS}
-            rowOptions={ROW_OPTIONS}
-          />
+          <>
+            <CompactTable
+              columns={COLUMNS}
+              data={{ nodes: requestNodes }}
+              theme={theme}
+              layout={{ custom: true }}
+              rowProps={ROW_PROPS}
+              rowOptions={ROW_OPTIONS}
+            />
+          </>
         )}
         <ModuleModal
           isOpen={!!modalSrc}
