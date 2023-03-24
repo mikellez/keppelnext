@@ -7,6 +7,7 @@ export * from "./ModuleLayout/ModuleDivider"
 export * from "./ModuleLayout/ModuleContent"
 export * from "./ModuleLayout/ModuleFooter"
 export * from "./ModuleLayout/ModuleSimplePopup"
+export * from "./ModuleLayout/ModuleModal"
 
 export * from "./NavBar/NavBar"
 export * from "./NavBar/NavDropdown"

@@ -69,14 +69,20 @@ interface CMMSRequest {
   created_date: Date;
   fullname: string;
   fault_name: string;
+  fault_id?: number;
   asset_name: string;
+  psa_id?: number;
+  req_id?: number;
   plant_name: string;
   plant_id?: number;
   priority: string;
+  priority_id: number;
   status: string;
-  assigned_user_name: string;
+  assigned_user_email: string;
+  assigned_user_id: number;
   fault_description?: string;
   image?: string;
+  requesthistory?: string;
 }
 
 interface CMMSRequestTypes {

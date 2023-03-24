@@ -45,9 +45,9 @@ async function getAssets(plant_id: number) {
             console.log(e);
             return null;
         });
-};
+}
 
-async function createRequest(data: FormValues, plantId: number) {
+async function createRequest(data: FormValues, plantId: number, linkedRequestId?: string) {
     const formData = new FormData();
 
     formData.append("description", data.description);
@@ -56,6 +56,7 @@ async function createRequest(data: FormValues, plantId: number) {
     formData.append("requestTypeID", data.requestTypeID.toString());
     formData.append("taggedAssetID", data.taggedAssetID.toString());
     if (data.image.length > 0) formData.append("image", data.image[0]);
+    if (linkedRequestId) formData.append("linkedRequestId", linkedRequestId);
 
     return await axios
         .post("/api/request/", formData, {
@@ -69,29 +70,34 @@ async function createRequest(data: FormValues, plantId: number) {
             console.log(e);
             return null;
         });
-};
+}
 
-async function updateRequest(id: string, priority: CMMSRequestPriority, assignedUser: AssignedUserOption) {
+async function updateRequest(
+    id: string,
+    priority: CMMSRequestPriority,
+    assignedUser: AssignedUserOption
+) {
     return await axios({
         method: "patch",
         url: "/api/request/" + id,
         data: {
             priority: priority,
             assignedUser: assignedUser,
-        }
+        },
     })
-    .then(res => {
-        return res.data;
-    })
-    .catch(err => {
-        console.log(err);
-    })
-};
+        .then((res) => {
+            return res.data;
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+}
 
 export interface RequestContainerProps extends PropsWithChildren {
     requestData?: RequestProps; // if not null, use data for creating new request (populate the dropdowns in create request page)
     // isAssignRequest?: boolean; // true: assign request page (prefill page), false : create new request page
     assignRequestData?: AssignRequestProps; // if not null, use data for assigning request
+    linkedRequestData?: CMMSRequest;
 }
 
 export interface RequestProps {
@@ -110,49 +116,100 @@ export interface CMMSRequestPriority {
     priority?: string;
 }
 
+interface CMMSAssetOption extends CMMSAsset {
+    selected: boolean;
+}
+
 export default function RequestContainer(props: RequestContainerProps) {
     const [selectedFile, setSelectedFile] = useState<File>();
     const [previewedFile, setPreviewedFile] = useState<string>();
     const requestTypes = props.requestData?.requestTypes as CMMSRequestTypes[];
     const faultTypes = props.requestData?.faultTypes as CMMSFaultTypes[];
-    const [availableAssets, setAvailableAssets] = useState<CMMSAsset[]>([]);
+    const [availableAssets, setAvailableAssets] = useState<CMMSAssetOption[]>([]);
     const [plantId, setPlantId] = useState<number>();
     const assignRequestData = props.assignRequestData?.requestData as CMMSRequest;
     const priorityList = props.assignRequestData?.priority as CMMSRequestPriority[];
+
+    const defaultValues = props.linkedRequestData
+        ? {
+              requestTypeID: props.linkedRequestData.req_id,
+              taggedAssetID: props.linkedRequestData.psa_id,
+              faultTypeID: props.linkedRequestData.fault_id,
+              description: "[Corrective Request] " + props.linkedRequestData.fault_description,
+          }
+        : {};
+
     const { register, handleSubmit, formState, control, resetField, setValue } =
-        useForm<FormValues>();
+        useForm<FormValues>({ defaultValues });
 
     const [prioritySelected, setPrioritySelected] = useState<CMMSRequestPriority>();
     const [assignedUsers, setAssignedUsers] = useState<AssignedUserOption>();
+    const [isReady, setIsReady] = useState<boolean>();
+    const [assignNotFilled, setAssignNotFilled] = useState<boolean>(false);
 
     const { isSubmitting, errors } = formState;
 
     const router = useRouter();
 
+    console.log(props.assignRequestData);
     const formSubmit: SubmitHandler<FormValues> = async (data) => {
-        console.log(data);
-
-        if (props.requestData) {
+        // console.log(data);
+        if (props.linkedRequestData) {
+            // console.log("Creating corrective request");
+            const { id } = router.query;
+            await createRequest(data, plantId as number, id as string);
+        } else if (props.requestData) {
             // console.log("Creating new request");
             await createRequest(data, plantId as number);
         } else if (props.assignRequestData) {
             // console.log("Assigning request");
+            console.log(prioritySelected);
+            console.log(assignedUsers);
             const { id } = router.query;
-            await updateRequest(id as string, prioritySelected as CMMSRequestPriority, assignedUsers as AssignedUserOption);
+            // if priority and assign user dropdown are filled
+            if (prioritySelected && assignedUsers) {
+                await updateRequest(
+                    id as string,
+                    prioritySelected as CMMSRequestPriority,
+                    assignedUsers as AssignedUserOption
+                );
+            }
+            // if priority and assign user dropdown are not filled
+            else {
+                setAssignNotFilled(true);
+                return;
+            }
         }
         router.push("/Request/");
     };
 
     useEffect(() => {
-        console.log(props.assignRequestData);
-        console.log(props.requestData);
+        setIsReady(false);
 
         if (props.assignRequestData) {
             setPlantId(assignRequestData.plant_id);
             setValue("requestTypeID", -1);
             setValue("faultTypeID", -1);
             setValue("taggedAssetID", -1);
+            props.assignRequestData.priority.forEach((option) => {
+                if (option.p_id == props.assignRequestData?.requestData.priority_id) {
+                    setPrioritySelected(option);
+                }
+            });
+            setAssignedUsers({
+                value: props.assignRequestData?.requestData.assigned_user_id,
+                label: props.assignRequestData?.requestData.assigned_user_email,
+            });
         }
+        if (props.linkedRequestData) {
+            setPlantId(props.linkedRequestData.plant_id);
+            updateAssetLists(
+                props.linkedRequestData.plant_id as number,
+                props.linkedRequestData.psa_id
+            ); // asset dropdown according to default plant
+        }
+        setIsReady(true);
+
         if (!selectedFile) {
             setPreviewedFile(undefined);
             return;
@@ -162,7 +219,14 @@ export default function RequestContainer(props: RequestContainerProps) {
         setPreviewedFile(objectURL);
 
         return () => URL.revokeObjectURL(objectURL);
-    }, [selectedFile]);
+    }, [
+        selectedFile,
+        props.linkedRequestData,
+        assignRequestData?.plant_id,
+        props.assignRequestData,
+        setValue,
+        props.requestData,
+    ]);
 
     const onFileSelected = (e: React.ChangeEvent) => {
         const input = e.target as HTMLInputElement;
@@ -175,8 +239,8 @@ export default function RequestContainer(props: RequestContainerProps) {
         setSelectedFile(input.files[0]);
     };
 
-    const updateAssetLists = (plant_id: number) => {
-        let options: CMMSAsset[] = [];
+    const updateAssetLists = (plant_id: number, selected?: number) => {
+        let options: CMMSAssetOption[] = [];
 
         getAssets(plant_id).then((data) => {
             if (data === null) return console.log("assets null");
@@ -185,6 +249,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                 options.push({
                     psa_id: asset.psa_id,
                     asset_name: asset.asset_name,
+                    selected: selected === asset.psa_id,
                 });
 
             setAvailableAssets(options);
@@ -267,20 +332,21 @@ export default function RequestContainer(props: RequestContainerProps) {
                             rows={6}
                             {...register("description")}
                             disabled={props.assignRequestData ? true : false}
-                        >
-                            {props.assignRequestData ? assignRequestData.fault_description : ""}
-                        </textarea>
+                            defaultValue={
+                                props.assignRequestData ? assignRequestData.fault_description : ""
+                            }
+                        ></textarea>
                     </div>
                     <div className="form-group">
                         <label className="form-label">
                             <RequiredIcon /> Plant Location
                         </label>
 
-                        {props.assignRequestData ? (
+                        {props.assignRequestData || props.linkedRequestData ? (
                             <PlantSelect
                                 onChange={plantChange}
                                 disabled={props.assignRequestData ? true : false}
-                                defaultPlant={props.assignRequestData.requestData.plant_id}
+                                defaultPlant={plantId}
                             />
                         ) : (
                             <PlantSelect
@@ -299,16 +365,18 @@ export default function RequestContainer(props: RequestContainerProps) {
                             id="formControlTagAsset"
                             {...register("taggedAssetID", { required: true })}
                             disabled={props.assignRequestData || !plantId ? true : false}
+                            // defaultValue={props.linkedRequestData?.psa_id}
                         >
                             <option hidden key={0} value={""}>
                                 Select asset
                             </option>
                             {!props.assignRequestData &&
-                                availableAssets.map((asset: CMMSAsset) => {
+                                availableAssets.map((asset: CMMSAssetOption) => {
                                     return (
                                         <option
                                             key={asset.psa_id + "|" + asset.asset_name}
                                             value={asset.psa_id}
+                                            selected={asset.selected}
                                         >
                                             {asset.asset_name}
                                         </option>
@@ -359,6 +427,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                                 onChange={(value) => {
                                     setAssignedUsers(value as AssignedUserOption);
                                 }}
+                                defaultIds={[props.assignRequestData.requestData.assigned_user_id]}
                             />
                         </div>
                     )}
@@ -369,47 +438,42 @@ export default function RequestContainer(props: RequestContainerProps) {
                                 <RequiredIcon />
                                 Priority
                             </label>
-                            <Select
-                                options={priorityList.map((priority) => {
-                                    return { value: priority.p_id, label: priority.priority };
-                                })}
-                                onChange={(value) => {
-                                    const priority = { p_id: value?.value, priority: value?.label };
-                                    setPrioritySelected(priority);
-                                }}
-                            />
+                            {isReady && (
+                                <Select
+                                    options={priorityList.map((priority) => {
+                                        return { value: priority.p_id, label: priority.priority };
+                                    })}
+                                    onChange={(value) => {
+                                        const priority = {
+                                            p_id: value?.value,
+                                            priority: value?.label,
+                                        };
+                                        setPrioritySelected(priority);
+                                    }}
+                                    defaultValue={
+                                        prioritySelected
+                                            ? {
+                                                  value: prioritySelected?.p_id,
+                                                  label: prioritySelected?.priority,
+                                              }
+                                            : null
+                                    }
+                                />
+                            )}
                         </div>
                     )}
                 </div>
-
-                {/* <div className={formStyles.halfContainer}>
-                    <div className="form-group">
-                        <label className="form-label">Reported By</label>
-                        <input
-                            className="form-control"
-                            type="text"
-                            disabled
-                            value={props.requestData.user.role_name}
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Reporter Name</label>
-                        <input
-                            className="form-control"
-                            type="text"
-                            disabled
-                            value={props.requestData.user.name}
-                        />
-                    </div>
-                </div> */}
             </ModuleContent>
             <ModuleFooter>
-                {(errors.requestTypeID ||
-                    errors.faultTypeID ||
-                    // errors.plantLocationID ||
-                    errors.taggedAssetID) && (
+                {/* new request not filled */}
+                {(errors.requestTypeID || errors.faultTypeID || errors.taggedAssetID) && (
                     <span style={{ color: "red" }}>Please fill in all required fields</span>
+                )}
+                {/* assign request not filled */}
+                {props.assignRequestData && assignNotFilled && (
+                    <span style={{ color: "red" }}>
+                        Please assign a user and set priority for the request
+                    </span>
                 )}
                 <button type="submit" className="btn btn-primary">
                     {isSubmitting && (

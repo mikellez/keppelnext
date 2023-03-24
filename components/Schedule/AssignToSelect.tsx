@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Select, { ActionMeta, MultiValue, SingleValue, StylesConfig } from "react-select";
 import makeAnimated from "react-select/animated";
@@ -12,7 +12,7 @@ interface AssignToSelectProps {
     plantId?: number;
     style?: React.CSSProperties;
     name?: string;
-    defaultIds?: number[];
+    defaultIds?: number[]; //user_ids
     isSingle?: boolean;
 }
 
@@ -32,11 +32,9 @@ async function getAssignedUsers(plantId: number) {
 }
 
 const AssignToSelect = (props: AssignToSelectProps) => {
-    // Store assigned users in a state for dropdown
-    // const [assignedUsers, setAssignedUsers] = useState<CMMSUser[]>([]);
     const [defaultOptions, setDefaultOptions] = useState<AssignedUserOption[]>([]);
     const [options, setOptions] = useState<AssignedUserOption[]>([]);
-    const [isReady, setIsReady] = useState<boolean>();
+    const [isReady, setIsReady] = useState<boolean>(false);
     const animatedComponents = makeAnimated();
 
     const customStyles: StylesConfig<AssignedUserOption, true> = {
@@ -44,10 +42,19 @@ const AssignToSelect = (props: AssignToSelectProps) => {
         menu: (base) => ({ ...base, ...props.style }),
     };
 
+    const updateDefault = useCallback(
+        async (users: CMMSUser[]) => {
+            return users
+                .filter((user) => props.defaultIds?.includes(user.id))
+                .map((user) => {
+                    return { value: user.id, label: user.name + " | " + user.email };
+                });
+        },
+        [props.defaultIds]
+    );
+
     // Calls an api to get the list of assigned users upon change of plant id
     useEffect(() => {
-        setIsReady(false);
-
         if (props.plantId) {
             getAssignedUsers(props.plantId).then((users) => {
                 if (users == null) {
@@ -59,25 +66,21 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                         return { value: user.id, label: user.name + " | " + user.email };
                     })
                 );
-
-                if (props.defaultIds) {
-                    setDefaultOptions(
-                        users
-                            .filter((user) => props.defaultIds?.includes(user.id))
-                            .map((user) => {
-                                return { value: user.id, label: user.name + " | " + user.email };
-                            })
-                    );
+                if (props.defaultIds && props.defaultIds[0] != null) {
+                    updateDefault(users)
+                        .then((result) => {
+                            return setDefaultOptions(result);
+                        })
+                        .then(() => {
+                            setIsReady(true);
+                        });
+                } else {
+                    setIsReady(true);
                 }
             });
         }
-        setIsReady(true);
-    }, [props.plantId, props.defaultIds]);
+    }, [props.plantId, props.defaultIds, updateDefault]);
 
-    // // Assigned users dropdown
-    // const assignedUserOptions: AssignedUserOption[] = assignedUsers.map((user) => {
-    //     return { value: user.id, label: user.name + " | " + user.email };
-    // });
     return (
         <div>
             {/* {!props.plantId && <select className="form-control" disabled></select>} */}
@@ -91,7 +94,7 @@ const AssignToSelect = (props: AssignToSelectProps) => {
                     classNamePrefix="select"
                     onChange={props.onChange}
                     styles={customStyles}
-                    defaultValue={defaultOptions}
+                    defaultValue={props.isSingle ? defaultOptions[0] : defaultOptions}
                     // isDisabled={!props.plantId}
                 />
             )}

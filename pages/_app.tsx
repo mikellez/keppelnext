@@ -31,9 +31,9 @@ export default function App({ Component, pageProps }: AppProps) {
 			router.events.off("routeChangeComplete",	handleRouteDone);
 			router.events.off("routeChangeError",		handleRouteDone);
 		}
-	}, []);
+	}, [router.events]);
 
-	console.log(asPath, route, pathname);
+	// console.log(asPath, route, pathname);
 
 	if(asPath === "/Login" || pathname === "/404" || pathname === "/500")
 		return <div><Component {...pageProps} /></div>
