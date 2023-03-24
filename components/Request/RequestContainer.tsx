@@ -24,6 +24,7 @@ import { PropsWithChildren } from "preact/compat";
 import { useRouter } from "next/router";
 import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
 import Select, { ActionMeta, MultiValue, StylesConfig } from "react-select";
+import Image from "next/image";
 
 type FormValues = {
     requestTypeID: number;
@@ -182,7 +183,6 @@ export default function RequestContainer(props: RequestContainerProps) {
         }
         router.push("/Request/");
     };
-
     useEffect(() => {
         setIsReady(false);
 
@@ -410,7 +410,27 @@ export default function RequestContainer(props: RequestContainerProps) {
                         </div>
                     )}
 
-                    <ImagePreview previewObjURL={previewedFile} />
+                    {/* <ImagePreview previewObjURL={previewedFile} /> */}
+                    {props.assignRequestData &&
+                    props.assignRequestData.requestData.uploaded_file?.data ? (
+                        <div style={{ height: "100%", position: "relative" }}>
+                            <Image
+                                src={URL.createObjectURL(
+                                    new Blob([
+                                        new Uint8Array(
+                                            props.assignRequestData.requestData.uploaded_file?.data
+                                        ),
+                                    ])
+                                )}
+                                alt="File error"
+                                fill
+                                // width={200}
+                                // height={200}
+                            />
+                        </div>
+                    ) : (
+                        <ImagePreview previewObjURL={previewedFile} />
+                    )}
 
                     {props.assignRequestData && (
                         <div className="form-group">
