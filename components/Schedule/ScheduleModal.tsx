@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import ModuleModal, { ModalProps } from "../ModuleLayout/ModuleModal";
 import { CMMSTimeline, CMMSSchedule, CMMSScheduleEvent } from "../../types/common/interfaces";
 import ChecklistSelect from "../Checklist/ChecklistSelect";
 import RecurrenceSelect from "./RecurrenceSelect";
@@ -7,6 +6,7 @@ import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
 import TooltipBtn from "../TooltipBtn";
 import styles from "../../styles/Schedule.module.scss";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
+import { ModuleModal, ModalProps, } from "../";
 import { useRouter } from "next/router";
 import { ThreeDots } from "react-loading-icons";
 import axios from "axios";
