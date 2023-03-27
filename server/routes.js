@@ -149,7 +149,7 @@ router
     .get(controllers.request.fetchSpecificRequest)
     .patch(controllers.request.updateRequest);
 
-router.patch(
+router.get(
     "/request/:request_id/:status_id",
     checkIfLoggedInAPI,
     controllers.request.approveRejectRequest
