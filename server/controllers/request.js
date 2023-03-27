@@ -185,11 +185,11 @@ const fetchRequestCounts = async (req, res, next) => {
       sql =
         req.params.plant != 0
           ? `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
-				JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = R.STATUS_ID
+				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
 				WHERE R.PLANT_ID = ${req.params.plant}
 				GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (name)`
           : `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
-				JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = R.STATUS_ID
+				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
 				GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (name)`;
       break;
     case "fault":
@@ -246,16 +246,34 @@ const fetchRequestPriority = async (req, res, next) => {
 };
 
 const fetchSpecificRequest = async (req, res, next) => {
-  const sql = `SELECT rt.request as request_name, r.req_id, ft.fault_type as fault_name, r.fault_id, r.fault_description, pm.plant_name, r.plant_id, 
-	psa.plant_asset_instrument as asset_name, r.psa_id, r.uploaded_file, r.assigned_user_id, r.priority_id, u.user_email as assigned_user_email
-	FROM keppel.request AS r
-	JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
-	JOIN keppel.fault_types  AS ft ON ft.fault_id = r.fault_id
-	JOIN keppel.plant_master AS pm ON pm.plant_id = r.plant_id
-	JOIN keppel.plant_system_assets AS psa ON psa.psa_id = r.psa_id
-	LEFT JOIN keppel.users AS u ON r.assigned_user_id = u.user_id
-	WHERE request_id = ${req.params.request_id}`;
-  db.query(sql, (err, result) => {
+  const sql = `SELECT 
+  rt.request as request_name, 
+  r.req_id, 
+  ft.fault_type as fault_name, 
+  r.fault_id, 
+  r.fault_description, 
+  pm.plant_name, 
+  r.plant_id, 
+  psa.plant_asset_instrument as asset_name, 
+  r.psa_id, 
+  r.uploaded_file, 
+  r.assigned_user_id, 
+  r.priority_id, 
+  pr.priority,
+  r.status_id,
+  u.user_email as assigned_user_email,
+  r.uploaded_file,
+  r.completion_file,
+  r.complete_comments
+  FROM keppel.request AS r
+  JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
+  JOIN keppel.fault_types  AS ft ON ft.fault_id = r.fault_id
+  JOIN keppel.plant_master AS pm ON pm.plant_id = r.plant_id
+  JOIN keppel.plant_system_assets AS psa ON psa.psa_id = r.psa_id
+  LEFT JOIN keppel.priority AS pr ON r.priority_id = pr.p_id
+  LEFT JOIN keppel.users AS u ON r.assigned_user_id = u.user_id
+  WHERE request_id = $1`;
+  db.query(sql,[req.params.request_id], (err, result) => {
     if (err) return res.status(500).send("Error in fetching request");
     return res.status(200).send(result.rows[0]);
   });

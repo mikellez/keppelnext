@@ -1,8 +1,15 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { CMMSRequest } from "../../types/common/interfaces";
+import Image from "next/image";
+
+export enum RequestAction {
+    manage = 1,
+    complete = 2,
+};
 
 export interface RequestPreviewProps {
-    request: CMMSRequest
+    request: CMMSRequest,
+    action?: RequestAction;
 };
 
 export default function RequestPreview(props: RequestPreviewProps) {
@@ -41,7 +48,13 @@ export default function RequestPreview(props: RequestPreviewProps) {
                     </tr>
                     <tr>
                         <th>Fault Image</th>
-                        <td></td>
+                        <td>
+                            <Image src={URL.createObjectURL(
+                                new Blob([
+                                    new Uint8Array(props.request.uploaded_file.data)
+                                ])
+                            )} width={300} height={300} alt="Fault Image" />
+                        </td>
                     </tr>
                 </tbody>
             </table>

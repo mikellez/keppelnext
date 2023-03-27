@@ -78,6 +78,7 @@ interface CMMSRequest {
   priority: string;
   priority_id: number;
   status: string;
+  status_id?: number;
   assigned_user_email: string;
   assigned_user_id: number;
   fault_description?: string;

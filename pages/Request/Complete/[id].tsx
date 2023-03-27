@@ -7,7 +7,7 @@ import {
     ModuleMain,
 } from "../../../components";
 import Link from "next/link";
-import RequestPreview, { RequestPreviewProps } from "../../../components/Request/RequestPreview";
+import RequestPreview, { RequestPreviewProps, RequestAction } from "../../../components/Request/RequestPreview";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import axios from "axios";
 import { CMMSRequest } from "../../../types/common/interfaces";
@@ -40,7 +40,7 @@ export const getServerSideProps: GetServerSideProps = async (context: GetServerS
         "http://localhost:3001/api/request/" + context.params?.id,
     );
 
-    if (!getSpecificRequest.data) {
+    if (!getSpecificRequest.data || ![2, 5].includes(getSpecificRequest.data.status_id as number)) {
         return { 
             redirect: {
                 destination: "/404",
@@ -49,5 +49,5 @@ export const getServerSideProps: GetServerSideProps = async (context: GetServerS
         }
     }
     
-    return { props: {request: getSpecificRequest.data} };
+    return { props: {request: getSpecificRequest.data, action: RequestAction.complete} };
 };
