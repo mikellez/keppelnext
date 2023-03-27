@@ -19,6 +19,24 @@
     font-size: large;
 }
 
+.loginMessageContainer {
+    position:static;
+
+    background-color: rgba(255, 0, 0, .6);
+    color:white;
+
+    border-style: solid;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgba(0, 0, 0, .1);
+
+    margin-top: .5em;
+    padding: 1em;
+
+    text-align: center;
+    font-size: large;
+}
+
 .loginErrorInfoText {
     font-size: 70%;
     font-style: italic;

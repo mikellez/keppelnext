@@ -144,10 +144,16 @@ router.get("/request/types", checkIfLoggedInAPI, controllers.request.fetchReques
 router.get("/request/priority", checkIfLoggedInAPI, controllers.request.fetchRequestPriority);
 router.get("/request/csv", checkIfLoggedInAPI, controllers.request.createRequestCSV);
 
-router.route("/request/:request_id", checkIfLoggedInAPI)
+router
+    .route("/request/:request_id", checkIfLoggedInAPI)
     .get(controllers.request.fetchSpecificRequest)
-    .patch(controllers.request.updateRequest)
+    .patch(controllers.request.updateRequest);
 
+router.get(
+    "/request/:request_id/:status_id",
+    checkIfLoggedInAPI,
+    controllers.request.approveRejectRequest
+);
 router.get(
     "/request/counts/:field/:plant",
     checkIfLoggedInAPI,

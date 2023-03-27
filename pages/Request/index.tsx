@@ -316,6 +316,21 @@ export default function Request() {
                       <p>No File</p>
                     )}
                   </li>
+                  <li className={styles.tableDropdownListItem}>
+                    <Link
+                      href={`/Request/${
+                        data?.role_id === 1 || data?.role_id === 2
+                          ? "Manage"
+                          : "Complete"
+                      }/${item.id}`}
+                    >
+                      <strong>
+                        {data?.role_id === 1 || data?.role_id === 2
+                          ? "Manage"
+                          : "Complete"}
+                      </strong>
+                    </Link>
+                  </li>
                 </ul>
               </td>
             </tr>
