@@ -25,6 +25,7 @@ const headerSide: CSSProperties = {
     position: "absolute",
     right: 0,
     bottom: 0,
+    alignItems: "center"
 };
 
 const headerSideElement: CSSProperties = {
