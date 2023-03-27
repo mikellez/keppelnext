@@ -1,0 +1,50 @@
+import React from "react";
+import { CMMSRequest } from "../../types/common/interfaces";
+
+export interface RequestPreviewProps {
+    request: CMMSRequest
+};
+
+export default function RequestPreview(props: RequestPreviewProps) {
+
+    return (
+        <div>
+            <table>
+                <tbody>
+                    <tr>
+                        <th>Request Type</th>
+                        <td>{props.request.request_name}</td>
+                    </tr>
+                    <tr>
+                        <th>Priority</th>
+                        <td>{props.request.priority}</td>
+                    </tr>
+                    <tr>
+                        <th>Location</th>
+                        <td>{props.request.plant_name}</td>
+                    </tr>
+                    <tr>
+                        <th>Fault Type</th>
+                        <td>{props.request.fault_name}</td>
+                    </tr>
+                    <tr>
+                        <th>Fault Description</th>
+                        <td>{props.request.fault_description}</td>
+                    </tr>
+                    <tr>
+                        <th>Asset</th>
+                        <td>{props.request.asset_name}</td>
+                    </tr>
+                    <tr>
+                        <th>Assigned To</th>
+                        <td>{props.request.assigned_user_email}</td>
+                    </tr>
+                    <tr>
+                        <th>Fault Image</th>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    );
+};

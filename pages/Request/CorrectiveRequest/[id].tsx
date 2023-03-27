@@ -20,7 +20,7 @@ interface CorrenctiveRequestProps {
 export default function CorrenctiveRequest(props: CorrenctiveRequestProps) {
     return (
         <ModuleMain>
-            <ModuleHeader title="New Request" header="Create New Request">
+            <ModuleHeader header="Create Corrective Request">
                 <Link href="/Request" className="btn btn-secondary">
                     Back
                 </Link>
