@@ -81,7 +81,7 @@ interface CMMSRequest {
   assigned_user_email: string;
   assigned_user_id: number;
   fault_description?: string;
-  image?: string;
+  uploaded_file?: any;
   requesthistory?: string;
 }
 

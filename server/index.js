@@ -53,8 +53,8 @@ app.prepare().then(() => {
         req.user.role_id == 4 &&
         (restrictOps.includes(req.path) ||
           req.path.startsWith("/Schedule/Timeline") ||
-          req.path.startsWith("/Asset/Edit")) ||
-          req.path.startsWith("/Request/Assign")
+          req.path.startsWith("/Asset/Edit") ||
+          req.path.startsWith("/Request/Assign"))
       ) {
         res.redirect("/404");
       } else if ((req.user.role_id = 2 && restrictManager.includes(req.path))) {
