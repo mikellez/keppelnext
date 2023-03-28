@@ -14,6 +14,12 @@ interface AssetFormTemplateProps {
 }
 
 export default function AssetFormTemplate(props: AssetFormTemplateProps) {
+	const [systemId, setSystemId] = useState<string>('0');
+
+	function systemSelectChangeHandler(e: React.ChangeEvent<HTMLSelectElement>) {
+		console.log(e.target.value)
+		setSystemId(e.target.value)
+	}
 
     return (
         <ModuleMain>
@@ -29,11 +35,11 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
                     <label className='form-label'>
 						<RequiredIcon /> Select System
 					</label>
-                    <SystemSelect />
+                    <SystemSelect onChange={systemSelectChangeHandler} />
 					<label className='form-label'>
 						<RequiredIcon /> Select System Asset
 					</label>
-                    <SystemAsset />
+                    <SystemAsset systemId={systemId} />
 					<label className='form-label'>
 						<RequiredIcon /> Select Asset Type
 					</label>

@@ -200,9 +200,57 @@ const getAssetHistory = async (req, res, next) => {
     
 };
 
+const fetchSystems = async (req, res, next) => {
+    db.query(
+        `SELECT system_id, system_name FROM keppel.system_master`,
+        (err, result) => {
+            if (err) res.status(500);
+            else res.status(200).json(result.rows);
+        }
+    );
+};
+
+const fetchSystemAssets = async (req, res, next) => {
+    let q = `SELECT system_asset, system_asset_id from keppel.system_assets
+        where keppel.system_assets.system_id = ${req.params.system_id};`
+    db.query(q,
+        (err1, result) => {
+            if (err1) {
+                // throw err;
+                console.log(err1);
+                return res.status(400).send({
+                    msg: err1,
+                });
+            }
+            
+            return res.status(200).send(result.rows);
+        }
+    );
+}
+const fetch_asset_types = async (req, res, next) => {
+    let q = `SELECT * FROM keppel.asset_type
+    ORDER BY asset_type.asset_type ASC `
+    db.query(q,
+        (err1, result) => {
+            if (err1) {
+                // throw err;
+                console.log(err1);
+                return res.status(400).send({
+                    msg: err1,
+                });
+            }
+            
+            return res.status(200).send(result.rows);
+        }
+    );
+}
+
 module.exports = {
     getAssetsFromPlant,
     getAssetHierarchy,
     getAssetDetails,
     getAssetHistory,
+    fetchSystems,
+    fetchSystemAssets,
+    fetch_asset_types
 };
