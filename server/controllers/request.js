@@ -247,7 +247,6 @@ const fetchRequestPriority = async (req, res, next) => {
 };
 
 const fetchSpecificRequest = async (req, res, next) => {
-  console.log(req.user);
   const sql = `SELECT 
   rt.request as request_name, 
   r.req_id, 
@@ -278,7 +277,6 @@ const fetchSpecificRequest = async (req, res, next) => {
   WHERE request_id = $1`;
   db.query(sql, [req.params.request_id], (err, result) => {
     if (err) return res.status(500).send("Error in fetching request");
-    // if (req.query.restrict && result.rows[0].assigned_user_id != req.user.id) return res.status(404).json("Unauthorised user")
     return res.status(200).send(result.rows[0]);
   });
 };
@@ -388,14 +386,20 @@ const createRequestCSV = (req, res, next) => {
 };
 
 const approveRejectRequest = async (req, res, next) => {
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  const status = req.params.status_id == 4 ? "APPROVED" : "REJECTED";
+  const text = req.params.status_id == 4 ? "Approved" : "Rejected";
+  const history = `!${status}_${text} request_${today}_${req.user.role_name}_${req.user.name}`;
+  console.log(req.body);
   const sql = `
 	UPDATE keppel.request SET 
 	status_id = $1,
-	rejection_comments = $2
-	WHERE request_id = $3`;
+	rejection_comments = $2,
+	requesthistory = concat(requesthistory, $3::text)
+	WHERE request_id = $4`;
   db.query(
     sql,
-    [req.params.status_id, req.body.comments, req.params.request_id],
+    [req.params.status_id, req.body.comments, history, req.params.request_id],
     (err, result) => {
       if (err) return res.status(500).send("Error in updating status");
       return res.status(200).json("Request successfully updated");
@@ -406,16 +410,25 @@ const approveRejectRequest = async (req, res, next) => {
 const completeRequest = async (req, res, next) => {
   const fileBuffer = req.file === undefined ? null : req.file.buffer;
   const fileType = req.file === undefined ? null : req.file.mimetype;
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  const history = `!COMPLETED_Completed request_${today}_${req.user.role_name}_${req.user.name}`;
 
   const sql = `UPDATE keppel.request SET
 		complete_comments = $1,
 		completion_file = $2,
 		completedfilemimetype = $3,
-		status_id = 3
-		WHERE request_id = $4`;
+		status_id = 3,
+		requesthistory = concat(requesthistory, $4::text)
+		WHERE request_id = $5`;
   db.query(
     sql,
-    [req.body.complete_comments, fileBuffer, fileType, req.params.request_id],
+    [
+      req.body.complete_comments,
+      fileBuffer,
+      fileType,
+      history,
+      req.params.request_id,
+    ],
     (err, result) => {
       if (err) {
         console.log(err);
