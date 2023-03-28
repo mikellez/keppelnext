@@ -4,14 +4,73 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 import { ModuleContent, ModuleDivider, ModuleHeader, ModuleMain, ModuleFooter } from '../../components'
+import ChecklistTemplateCreator from '../../components/Checklist/ChecklistTemplateCreator'
+import { GetServerSideProps, GetServerSidePropsContext } from 'next'
+import { CMMSPlant } from '../../types/common/interfaces'
+import axios from 'axios'
+import { useAsset } from '../../components/SWR'
 
-export default function ChecklistNew() {
+import { useForm } from 'react-hook-form';
+import { SubmitHandler } from 'react-hook-form/dist/types';
+
+type FormValues = {
+	checklistSections: CheckSection[]
+}
+
+import { CheckSection } from '../../types/common/classes'
+import LoadingIcon from '../../components/LoadingIcon'
+
+export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
+
+	const [selectedPlantID, setSelectedPlantID] = useState<number | null>(null);
+	const [sections, setSections] = useState<CheckSection[]>([]);
+
+	const {
+		register,
+		handleSubmit,
+		formState
+	} = useForm<FormValues>();
+
+	const { isSubmitting, errors } = formState;
+
+	const formSubmit: SubmitHandler<FormValues> = async (data) => {
+		data.checklistSections = sections;
+		console.log(data);
+		await axios.post("/api/checklist/template", data)
+		.then((response) => {
+			console.log("success", response);
+		}).catch((e) => {
+			console.log("error", e);
+		});
+	};
+
+	const resetChecklist = () => {
+		setSections([]);
+	}
+
+	useEffect(() => {
+		console.log(plants)
+	}, []
+	);
+
+	const {
+		data,
+		error,
+		isValidating,
+		mutate
+	} = useAsset(selectedPlantID);
+
+	function handlePlantChange(e: React.ChangeEvent<HTMLSelectElement>) {
+		setSelectedPlantID(parseInt(e.target.value))
+		console.log(data);
+	}
+
 	return (
 		<ModuleMain>
 			<ModuleHeader title="New Checklist" header="Create New Checklist">
 				<Link href="/Checklist" className="btn btn-secondary">Back</Link>
 			</ModuleHeader>
-			<ModuleContent includeGreyContainer grid>
+			<form onSubmit={handleSubmit(formSubmit)}><ModuleContent includeGreyContainer grid>
 				<div className={formStyles.halfContainer}>
 
 					<div className="form-group">
@@ -26,21 +85,31 @@ export default function ChecklistNew() {
 
 					<div className="form-group">
 						<label className='form-label'>Plant Location</label>
-						<select className="form-select" id="formControlLocation"/>
+						<select className="form-select" id="formControlLocation" defaultValue={0} onChange={handlePlantChange}>
+							<option disabled hidden value={0}>- No Plant Selected -</option>
+							{
+								plants.map((p) => {
+									return <option key={p.plant_id} value={p.plant_id}>{p.plant_name}</option>
+								})
+							}
+						</select>
 					</div>
 
 				</div>
-				<div className={formStyles.halfContainer}>
+				
+				<div className={formStyles.halfContainer} style={{gridRow: "span 3"}}>
 					<div className="form-group" style={{display:"flex", flexDirection:"column", height:"100%"}}>
 						<label className="form-label">Linked Assets:</label>
 						<select multiple className="form-control" id="formControlLinkedAssets"
-							style={{display:"block", flex:1, height: "100%"}}/>
+							style={{display:"block", flex:1, height: "100%"}}>
+							{!data && <option disabled>Select a plant</option>}
+						</select>
 					</div>
 				</div>
 
-				<ModuleDivider style={{gridColumn: "span 2"}}/>
+				<ModuleDivider/>
 
-				<div className={formStyles.largeContainer}>
+				<div className={formStyles.halfContainer}>
 					
 					<div className="form-group">
 						<label className='form-label'>Assigned To</label>
@@ -61,19 +130,46 @@ export default function ChecklistNew() {
 			</ModuleContent>
 			<ModuleContent>
 				<ModuleHeader header="Add Checklists" headerSize="1.5rem">
-					<a className="btn btn-primary">Reset</a>
+					<button className="btn btn-primary" onClick={resetChecklist}>Reset</button>
 				</ModuleHeader>
-				checklist add stuff go here
+				
+				<ChecklistTemplateCreator sections={sections} setSections={setSections}/>
+
 			</ModuleContent>
 			<ModuleFooter>
 				{/*(errors.type || errors.entries) && 
 				<span style={{color: "red"}}>Please fill in all required fields</span>*/}
-				<button type="submit" className="btn btn-primary">
+				<button type="submit" className="btn btn-primary" disabled={isSubmitting}>
 				{
-					//isSubmitting && <LoadingIcon/>
+					isSubmitting && <LoadingIcon/>
 				}
 				Submit</button>
-			</ModuleFooter>
+			</ModuleFooter></form>
 		</ModuleMain>
   	)
+}
+
+export const getServerSideProps: GetServerSideProps = async(context: GetServerSidePropsContext) => {
+	const headers = {
+		withCredentials: true,
+		headers: {
+			Cookie: context.req.headers.cookie
+		}
+	}
+
+	const getPlants = axios.get<CMMSPlant[]>("http://localhost:3001/api/getUserPlants", headers);
+
+	const values = await Promise.all([getPlants])
+
+	const p: CMMSPlant[]				= values[0].data;
+
+	console.log(p);
+
+	let props: {
+		plants: CMMSPlant[]
+	} = { plants: p }
+	
+	return {
+		props: props
+	}
 }

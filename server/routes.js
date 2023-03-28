@@ -143,7 +143,7 @@ router.get("/request/types", checkIfLoggedInAPI, controllers.request.fetchReques
 // router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
 router.get("/request/priority", checkIfLoggedInAPI, controllers.request.fetchRequestPriority);
 router.get("/request/csv", checkIfLoggedInAPI, controllers.request.createRequestCSV);
-router.patch("/request/complete/:request_id", checkIfLoggedInAPI, controllers.request.completeRequest);
+router.patch("/request/complete/:request_id", checkIfLoggedInAPI, upload.single("completion_file"), controllers.request.completeRequest);
 router
     .route("/request/:request_id", checkIfLoggedInAPI)
     .get(controllers.request.fetchSpecificRequest)
@@ -189,6 +189,16 @@ router.get(
     controllers.checklist.fetchChecklistCounts
 );
 router.get("/checklist/csv", checkIfLoggedInAPI, controllers.checklist.createChecklistCSV);
+
+/**
+ * @api {post} /checklist/template Create Checklist Template
+ * @apiDescription Create a new checklist template for later submission as record
+ * @apiName CreateChecklistTemplate
+ * @apiGroup Checklist
+ * 
+ * @apiSuccess {string} - yeah
+ */
+router.post("/checklist/template", checkIfLoggedInAPI, controllers.checklist.submitNewChecklistTemplate);
 
 /**
  * @api {get} /fault/type Get Fault Types

@@ -84,6 +84,9 @@ interface CMMSRequest {
   fault_description?: string;
   uploaded_file?: any;
   requesthistory?: string;
+  complete_comments?: string;
+  completion_file?: any;
+  rejection_comments: string;
 }
 
 interface CMMSRequestTypes {

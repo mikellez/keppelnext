@@ -6,6 +6,7 @@ interface TooltipBtnProps extends PropsWithChildren {
   style?: React.CSSProperties;
   toolTip?: boolean;
   disabled?: boolean;
+  className?: string;
 }
 
 export default function TooltipBtn(props: TooltipBtnProps) {
@@ -38,7 +39,7 @@ export default function TooltipBtn(props: TooltipBtnProps) {
         </div>
       )}
       <button
-        className="btn btn-primary"
+        className={`btn btn-primary ${props.className}`}
         style={{
           ...props.style,
           display: "flex",

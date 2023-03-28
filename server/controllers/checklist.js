@@ -144,6 +144,18 @@ const fetchChecklistTemplateNames = async (req, res, next) => {
   });
 };
 
+const submitNewChecklistTemplate = async (req, res, next) => {
+	if(req.body.checklistSections === undefined)
+		return res.status(400).json("ayo?");
+
+	console.log(req.body.checklistSections);
+
+	return res.status(200).json({
+		msg: "awesome",
+		
+	})
+}
+
 const fetchChecklistCounts = (req, res, next) => {
   let sql;
   switch (req.params.field) {
@@ -195,6 +207,7 @@ module.exports = {
   fetchForReviewChecklists,
   fetchApprovedChecklists,
   fetchChecklistTemplateNames,
+	submitNewChecklistTemplate,
   fetchChecklistCounts,
   createChecklistCSV,
 };
