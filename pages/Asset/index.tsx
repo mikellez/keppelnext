@@ -53,60 +53,90 @@ const Asset = () => {
             hide: true,
             rowGroup: true,
             valueGetter: function (params: ValueGetterParams) {
-                if (params.data.system_name != params.data.system_asset) {
-                    return params.data.system_asset;
-                } else {
+                // if select up to system asset name with an asset tag
+                if (params.data.system_asset_name != '') {
+                    return params.data.system_asset_name;
+                }
+                else{
                     return null;
                 }
             },
         },
         //if parent asset same as system asset add the tagname else show parent
         {
-            field: "parent_asset",
+            field: "system_asset_name",
             hide: true,
             rowGroup: true,
             valueGetter: function (params: ValueGetterParams) {
-                if (params.data.parent_asset != params.data.asset_type) {
-                    return params.data.parent_asset;
-                } else {
+                // if select up to system asset name with an asset tag
+                if (params.data.system_asset_name_2 != '') {
+                    return params.data.system_asset_name_2;
+                }
+                else{
                     return null;
                 }
             },
         },
 
         {
+            // 2nd last option
             field: "psa.system_asset_lvl5",
             hide: true,
             rowGroup: true,
             valueGetter: function (params: ValueGetterParams) {
                 if (params.data.system_asset_lvl5 != "") {
-                    if (params.data.system_asset_lvl5 != params.data.parent_asset) {
-                        return params.data.system_asset_lvl5;
-                    } else {
-                        return null;
-                    }
+                    return params.data.system_asset_lvl5;
+                }
+                else{
+                    return null;
                 }
             },
         },
         {
+            // last option
             field: "psa.system_asset_lvl6",
             hide: true,
             rowGroup: true,
             valueGetter: function (params: ValueGetterParams) {
                 if (params.data.system_asset_lvl6 != "") {
-                    if (params.data.system_asset_lvl6 != params.data.parent_asset) {
-                        return params.data.system_asset_lvl6;
-                    } else {
-                        return null;
-                    }
+                    return params.data.system_asset_lvl6;
+                }
+                else{
+                    return null;
                 }
             },
         },
         {
+            // last option
             field: "psa.system_asset_lvl7",
             hide: true,
-            rowGroup: false,
+            rowGroup: true,
+            valueGetter: function (params: ValueGetterParams) {
+                if (params.data.system_asset_lvl7 != "") {
+                    return params.data.system_asset_lvl7;
+                }
+                else{
+                    return null;
+                }
+            },
         },
+        {
+            field: "asset_type",
+            hide: true,
+            rowGroup: true,
+            valueGetter: function (params: ValueGetterParams) {
+                // if select up to system asset name with an asset tag
+                if ( params.data.asset_type == params.data.parent_asset) {
+                    return null;
+                }
+                else if (params.data.asset_type != 'NA') {
+                    return params.data.asset_type;
+                }
+            },
+        },
+
+
+
         {
             headerName: "Tag Name",
             field: "plant_asset_instrument",
@@ -179,6 +209,7 @@ const Asset = () => {
     // Grid customisations
     const defaultColDef = useMemo<ColDef>(() => {
         return {
+            minWidth: 300,
             suppressMenu: true,
             resizable: true,
             filter: true,
