@@ -8,9 +8,9 @@ const moment = require("moment");
  */
 
 const fetchRequests = async (req, res, next) => {
-    const sql =
-        req.user.role_id === 1 || req.user.role_id === 2 || req.user.role_id === 3
-            ? `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
+  const sql =
+    req.user.role_id === 1 || req.user.role_id === 2 || req.user.role_id === 3
+      ? `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
 		rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
 		pri.priority, 
 		CASE 
@@ -52,7 +52,7 @@ const fetchRequests = async (req, res, next) => {
 			au.last_name
 		)
 		ORDER BY r.created_date DESC, r.status_id DESC;`
-            : `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
+      : `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
 		rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
 		pri.priority, 
 		CASE 
@@ -96,52 +96,58 @@ const fetchRequests = async (req, res, next) => {
 		)
 		ORDER BY r.created_date DESC, r.status_id DESC;`;
 
-    db.query(sql, (err, result) => {
-        if (err) return res.status(500).json({ errormsg: err });
+  db.query(sql, (err, result) => {
+    if (err) return res.status(500).json({ errormsg: err });
 
-        res.status(200).json(result.rows);
-    });
+    res.status(200).json(result.rows);
+  });
 };
 
 const createRequest = async (req, res, next) => {
-    const { requestTypeID, faultTypeID, description, plantLocationID, taggedAssetID } = req.body;
-    const fileBuffer = req.file === undefined ? null : req.file.buffer;
-    const fileType = req.file === undefined ? null : req.file.mimetype;
-    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
-    const history = `PENDING_Request Created_${today}_${req.user.role_name}_${req.user.name}`;
-    db.query(
-        `INSERT INTO keppel.request(
+  const {
+    requestTypeID,
+    faultTypeID,
+    description,
+    plantLocationID,
+    taggedAssetID,
+  } = req.body;
+  const fileBuffer = req.file === undefined ? null : req.file.buffer;
+  const fileType = req.file === undefined ? null : req.file.mimetype;
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  const history = `PENDING_Request Created_${today}_${req.user.role_name}_${req.user.name}`;
+  db.query(
+    `INSERT INTO keppel.request(
 			fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid
 		) VALUES (
 			$1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11
 		)`,
-        [
-            faultTypeID,
-            description,
-            plantLocationID,
-            requestTypeID,
-            req.user.id,
-            req.user.role_id,
-            taggedAssetID,
-            fileBuffer,
-            fileType,
-            history,
-            req.body.linkedRequestId,
-        ],
-        (err, result) => {
-            if (err) return res.status(500).json({ errormsg: err });
+    [
+      faultTypeID,
+      description,
+      plantLocationID,
+      requestTypeID,
+      req.user.id,
+      req.user.role_id,
+      taggedAssetID,
+      fileBuffer,
+      fileType,
+      history,
+      req.body.linkedRequestId,
+    ],
+    (err, result) => {
+      if (err) return res.status(500).json({ errormsg: err });
 
-            res.status(200).json("success");
-        }
-    );
+      res.status(200).json("success");
+    }
+  );
 };
 
 const updateRequest = async (req, res, next) => {
-    const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
-    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
-    const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;
-    db.query(
-        `
+  const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;
+  db.query(
+    `
 		UPDATE keppel.request SET 
 		assigned_user_id = $1,
 		priority_id = $2,
@@ -149,91 +155,100 @@ const updateRequest = async (req, res, next) => {
 		status_id = 2
 		WHERE request_id = $4
 	`,
-        [req.body.assignedUser.value, req.body.priority.p_id, history, req.params.request_id],
-        (err) => {
-            if (err) console.log(err);
-            return res.status(200).json("Request successfully updated");
-        }
-    );
+    [
+      req.body.assignedUser.value,
+      req.body.priority.p_id,
+      history,
+      req.params.request_id,
+    ],
+    (err) => {
+      if (err) console.log(err);
+      return res.status(200).json("Request successfully updated");
+    }
+  );
 };
 
 const fetchRequestTypes = async (req, res, next) => {
-    db.query(`SELECT * FROM keppel.request_type ORDER BY req_id ASC`, (err, result) => {
-        if (err) return res.status(500).json({ errormsg: err });
-        res.status(200).json(result.rows);
-    });
+  db.query(
+    `SELECT * FROM keppel.request_type ORDER BY req_id ASC`,
+    (err, result) => {
+      if (err) return res.status(500).json({ errormsg: err });
+      res.status(200).json(result.rows);
+    }
+  );
 };
 
 const fetchRequestCounts = async (req, res, next) => {
-    let sql;
-    switch (req.params.field) {
-        case "status":
-            sql =
-                req.params.plant != 0
-                    ? `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
+  let sql;
+  switch (req.params.field) {
+    case "status":
+      sql =
+        req.params.plant != 0
+          ? `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
 				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
 				WHERE R.PLANT_ID = ${req.params.plant}
 				GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (name)`
-                    : `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
+          : `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
 				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
 
 				GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (name)`;
-            break;
-        case "fault":
-            sql =
-                req.params.plant != 0
-                    ? `SELECT FT.FAULT_TYPE AS NAME, R.FAULT_ID AS ID, COUNT(R.FAULT_ID) AS VALUE FROM 
+      break;
+    case "fault":
+      sql =
+        req.params.plant != 0
+          ? `SELECT FT.FAULT_TYPE AS NAME, R.FAULT_ID AS ID, COUNT(R.FAULT_ID) AS VALUE FROM 
 				KEPPEL.REQUEST R 
 				JOIN KEPPEL.FAULT_TYPES FT ON R.FAULT_ID = FT.FAULT_ID
 				WHERE R.STATUS_ID != 5 AND 
 				R.STATUS_ID != 7 AND
 				R.PLANT_ID = ${req.params.plant}
 				GROUP BY(FT.FAULT_TYPE, R.FAULT_ID) ORDER BY (name)`
-                    : `SELECT FT.FAULT_TYPE AS NAME, R.FAULT_ID AS ID, COUNT(R.FAULT_ID) AS VALUE FROM 
+          : `SELECT FT.FAULT_TYPE AS NAME, R.FAULT_ID AS ID, COUNT(R.FAULT_ID) AS VALUE FROM 
 				KEPPEL.REQUEST R 
 				JOIN KEPPEL.FAULT_TYPES FT ON R.FAULT_ID = FT.FAULT_ID
 				WHERE R.STATUS_ID != 5 AND R.STATUS_ID != 7
 				GROUP BY(FT.FAULT_TYPE, R.FAULT_ID) ORDER BY (name)`;
-            break;
-        case "priority":
-            sql =
-                req.params.plant != 0
-                    ? `SELECT P.PRIORITY AS NAME, R.PRIORITY_ID AS ID, COUNT(R.PRIORITY_ID) AS VALUE FROM 
+      break;
+    case "priority":
+      sql =
+        req.params.plant != 0
+          ? `SELECT P.PRIORITY AS NAME, R.PRIORITY_ID AS ID, COUNT(R.PRIORITY_ID) AS VALUE FROM 
 				KEPPEL.REQUEST R 
 				JOIN KEPPEL.PRIORITY P ON R.PRIORITY_ID = P.P_ID
 				WHERE R.STATUS_ID != 5 AND 
 				R.STATUS_ID != 7 AND
 				R.PLANT_ID = ${req.params.plant}
 				GROUP BY(P.PRIORITY, R.PRIORITY_ID) ORDER BY (ID)`
-                    : `SELECT P.PRIORITY AS NAME, R.PRIORITY_ID AS ID, COUNT(R.PRIORITY_ID) AS VALUE FROM 
+          : `SELECT P.PRIORITY AS NAME, R.PRIORITY_ID AS ID, COUNT(R.PRIORITY_ID) AS VALUE FROM 
 				KEPPEL.REQUEST R 
 				JOIN KEPPEL.PRIORITY P ON R.PRIORITY_ID = P.P_ID
 				WHERE R.STATUS_ID != 5 AND R.STATUS_ID != 7
 				GROUP BY(P.PRIORITY, R.PRIORITY_ID) ORDER BY (ID)`;
-            break;
-        default:
-            return res.status(404).send(`Invalid request type of ${req.params.field}`);
-    }
-    db.query(sql, (err, result) => {
-        if (err)
-            return res
-                .status(500)
-                .send(`Error in fetching request ${req.params.field} for dashboard`);
-        return res.status(200).send(result.rows);
-    });
+      break;
+    default:
+      return res
+        .status(404)
+        .send(`Invalid request type of ${req.params.field}`);
+  }
+  db.query(sql, (err, result) => {
+    if (err)
+      return res
+        .status(500)
+        .send(`Error in fetching request ${req.params.field} for dashboard`);
+    return res.status(200).send(result.rows);
+  });
 };
 
 const fetchRequestPriority = async (req, res, next) => {
-    db.query(`SELECT * from keppel.priority`, (err, result) => {
-        if (err) return res.status(500).send("Error in priority");
-        return res.status(200).json(result.rows);
-    });
+  db.query(`SELECT * from keppel.priority`, (err, result) => {
+    if (err) return res.status(500).send("Error in priority");
+    return res.status(200).json(result.rows);
+  });
 };
 
 const fetchSpecificRequest = async (req, res, next) => {
-	console.log(req.user)
-    const sql =
-	`SELECT 
+  console.log(req.user);
+  const sql = `SELECT 
   rt.request as request_name, 
   r.req_id, 
   ft.fault_type as fault_name, 
@@ -251,7 +266,8 @@ const fetchSpecificRequest = async (req, res, next) => {
   u.user_email as assigned_user_email,
   r.uploaded_file,
   r.completion_file,
-  r.complete_comments
+  r.complete_comments,
+  r.rejection_comments
   FROM keppel.request AS r
   JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
   JOIN keppel.fault_types  AS ft ON ft.fault_id = r.fault_id
@@ -260,17 +276,17 @@ const fetchSpecificRequest = async (req, res, next) => {
   LEFT JOIN keppel.priority AS pr ON r.priority_id = pr.p_id
   LEFT JOIN keppel.users AS u ON r.assigned_user_id = u.user_id
   WHERE request_id = $1`;
-    db.query(sql, [req.params.request_id], (err, result) => {
-        if (err) return res.status(500).send("Error in fetching request");
-		// if (req.query.restrict && result.rows[0].assigned_user_id != req.user.id) return res.status(404).json("Unauthorised user") 
-        return res.status(200).send(result.rows[0]);
-    });
+  db.query(sql, [req.params.request_id], (err, result) => {
+    if (err) return res.status(500).send("Error in fetching request");
+    // if (req.query.restrict && result.rows[0].assigned_user_id != req.user.id) return res.status(404).json("Unauthorised user")
+    return res.status(200).send(result.rows[0]);
+  });
 };
 
 const createRequestCSV = (req, res, next) => {
-    const sql =
-        req.user.role_id === 1 || req.user.role_id === 2 || req.user.role_id === 3
-            ? `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
+  const sql =
+    req.user.role_id === 1 || req.user.role_id === 2 || req.user.role_id === 3
+      ? `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
 	rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
 	pri.priority, 
 	CASE 
@@ -312,7 +328,7 @@ const createRequestCSV = (req, res, next) => {
 		au.last_name
 	)
 	ORDER BY r.created_date DESC, r.status_id DESC;`
-            : `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
+      : `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
 	rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
 	pri.priority, 
 	CASE 
@@ -356,69 +372,69 @@ const createRequestCSV = (req, res, next) => {
 	)
 	ORDER BY r.created_date DESC, r.status_id DESC;`;
 
-    db.query(sql, (err, result) => {
-        if (err) return res.status(500).json({ errormsg: err });
-        generateCSV(result.rows)
-            .then((buffer) => {
-                res.set({
-                    "Content-Type": "text/csv",
-                });
-                return res.status(200).send(buffer);
-            })
-            .catch((error) => {
-                res.status(500).send(`Error in generating csv file`);
-            });
-    });
+  db.query(sql, (err, result) => {
+    if (err) return res.status(500).json({ errormsg: err });
+    generateCSV(result.rows)
+      .then((buffer) => {
+        res.set({
+          "Content-Type": "text/csv",
+        });
+        return res.status(200).send(buffer);
+      })
+      .catch((error) => {
+        res.status(500).send(`Error in generating csv file`);
+      });
+  });
 };
 
 const approveRejectRequest = async (req, res, next) => {
-    const sql = `
+  const sql = `
 	UPDATE keppel.request SET 
 	status_id = $1,
 	rejection_comments = $2
 	WHERE request_id = $3`;
-    db.query(
-        sql,
-        [req.params.status_id, req.body.comments, req.params.request_id],
-        (err, result) => {
-            if (err) return res.status(500).send("Error in updating status");
-            return res.status(200).json("Request successfully updated");
-        }
-    );
+  db.query(
+    sql,
+    [req.params.status_id, req.body.comments, req.params.request_id],
+    (err, result) => {
+      if (err) return res.status(500).send("Error in updating status");
+      return res.status(200).json("Request successfully updated");
+    }
+  );
 };
 
 const completeRequest = async (req, res, next) => {
-	const fileBuffer = req.file === undefined ? null : req.file.buffer;
-    const fileType = req.file === undefined ? null : req.file.mimetype;
+  const fileBuffer = req.file === undefined ? null : req.file.buffer;
+  const fileType = req.file === undefined ? null : req.file.mimetype;
 
-	const sql = `UPDATE keppel.request SET
+  const sql = `UPDATE keppel.request SET
 		complete_comments = $1,
 		completion_file = $2,
 		completedfilemimetype = $3,
 		status_id = 3
 		WHERE request_id = $4`;
-		db.query(
-			sql,
-			[req.body.complete_comments, fileBuffer , fileType, req.params.request_id],
-			(err, result) => {
-				if (err) {
-					console.log(err)
-					return res.status(500).send("Error in updating status");
-				}
-				return res.status(200).json("Request successfully updated");
-			}
-		);
+  db.query(
+    sql,
+    [req.body.complete_comments, fileBuffer, fileType, req.params.request_id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).send("Error in updating status");
+      }
+      return res.status(200).json("Request successfully updated");
+    }
+  );
 };
 
 module.exports = {
-    fetchRequests,
-    createRequest,
-    fetchRequestTypes,
-    fetchRequestCounts,
-    createRequestCSV,
-    fetchSpecificRequest,
-    fetchRequestPriority,
-    updateRequest,
-    approveRejectRequest,
-	completeRequest,
+  fetchRequests,
+  createRequest,
+  fetchRequestTypes,
+  fetchRequestCounts,
+  createRequestCSV,
+  fetchSpecificRequest,
+  fetchRequestPriority,
+  updateRequest,
+  approveRejectRequest,
+  completeRequest,
 };

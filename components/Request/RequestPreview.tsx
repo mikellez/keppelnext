@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { CMMSRequest } from "../../types/common/interfaces";
 import Image from "next/image";
+import styles from "../../styles/RequestPreview.module.css";
+import { ModuleModal } from "../ModuleLayout/ModuleModal";
 
 export enum RequestAction {
   manage = 1,
@@ -15,6 +17,8 @@ export interface RequestPreviewProps {
 export default function RequestPreview(props: RequestPreviewProps) {
   const [faultUrl, setFaultUrl] = useState("");
   const [completeUrl, setCompleteUrl] = useState("");
+  const [completionModal, setCompletionModal] = useState(false);
+  const [faultModal, setFaultModal] = useState(false);
 
   useEffect(() => {
     if (props.request.uploaded_file) {
@@ -33,7 +37,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
 
   return (
     <div>
-      <table>
+      <table className={styles.table}>
         <tbody>
           <tr>
             <th>Request Type</th>
@@ -53,7 +57,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
           </tr>
           <tr>
             <th>Fault Description</th>
-            <td>{props.request.fault_description}</td>
+            <td>{props.request.fault_description || "NIL"}</td>
           </tr>
           <tr>
             <th>Asset</th>
@@ -66,26 +70,88 @@ export default function RequestPreview(props: RequestPreviewProps) {
           <tr>
             <th>Fault Image</th>
             <td>
+              {faultUrl ? (
+                <span
+                  className={styles.viewImage}
+                  onClick={() => setFaultModal(true)}
+                >
+                  View Image
+                </span>
+              ) : (
+                "No File"
+              )}
               {faultUrl && (
-                <Image src={faultUrl} width={300} height={300} alt="Fault Image" />
+                <ModuleModal
+                  isOpen={faultModal}
+                  closeModal={() => {
+                    setFaultModal(false);
+                  }}
+                  className={styles.modal}
+                  closeOnOverlayClick={true}
+                  hideHeader
+                >
+                  <Image
+                    src={faultUrl}
+                    width={550}
+                    height={550}
+                    style={{ objectFit: "contain" }}
+                    alt="Fault Image"
+                  />
+                </ModuleModal>
               )}
             </td>
           </tr>
-          {props.action == RequestAction.manage && 
-          <>
-          <tr>
-            <th>Completion Comments</th>
-            <td>{props.request.complete_comments}</td>
-          </tr>
-          <tr>
-            <th>Completion Image</th>
-            <td>
-              {completeUrl && (
-                <Image src={completeUrl} width={300} height={300} alt="Fault Image" />
-              )}
-            </td>
-          </tr>
-          </>}
+          {props.request.rejection_comments && (
+            <tr>
+              <th>Rejection Comments</th>
+              <td>{props.request.rejection_comments}</td>
+            </tr>
+          )}
+          {props.action == RequestAction.manage && (
+            <>
+              <tr>
+                <th>Completion Comments</th>
+                <td style={{ color: "#73777B", fontWeight: "BOLD" }}>
+                  {props.request.complete_comments || "NIL"}
+                </td>
+              </tr>
+              <tr>
+                <th>Completion Image</th>
+                <td>
+                  {completeUrl ? (
+                    <span
+                      onClick={() => setCompletionModal(true)}
+                      className={styles.viewImage}
+                    >
+                      View Image
+                    </span>
+                  ) : (
+                    "No File"
+                  )}
+
+                  {completeUrl && (
+                    <ModuleModal
+                      isOpen={completionModal}
+                      closeModal={() => {
+                        setCompletionModal(false);
+                      }}
+                      className={styles.modal}
+                      closeOnOverlayClick={true}
+                      hideHeader
+                    >
+                      <Image
+                        src={completeUrl}
+                        width={550}
+                        height={550}
+                        style={{ objectFit: "contain" }}
+                        alt="Completion Image"
+                      />
+                    </ModuleModal>
+                  )}
+                </td>
+              </tr>
+            </>
+          )}
         </tbody>
       </table>
     </div>

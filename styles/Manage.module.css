@@ -1,0 +1,20 @@
+.comment {
+  display: flex;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.buttons {
+  display: flex;
+  margin-top: 2rem;
+}
+
+.approveBtn {
+  background-color: green;
+  border: 1px green solid;
+  margin-right: 2rem;
+}
+
+.approveBtn:hover {
+  background-color: darkgreen;
+}

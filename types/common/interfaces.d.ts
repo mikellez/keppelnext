@@ -86,6 +86,7 @@ interface CMMSRequest {
   requesthistory?: string;
   complete_comments?: string;
   completion_file?: any;
+  rejection_comments: string;
 }
 
 interface CMMSRequestTypes {
