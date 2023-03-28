@@ -6,6 +6,7 @@ import {
   ModuleHeader,
   ModuleMain,
 } from "../../../components";
+import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import Link from "next/link";
 import RequestPreview, {
   RequestPreviewProps,
@@ -45,6 +46,8 @@ const completeRequest = async (data: CompletionRequestInfo, id: string) => {
 export default function CompleteRequest(props: RequestPreviewProps) {
 
   const [completionData, setCompletionData] = useState<CompletionRequestInfo>({} as CompletionRequestInfo);
+  const [failureModal, setFailureModal] = useState<boolean>(false);
+  const [successModal, setSuccessModal] = useState<boolean>(false);
   const router = useRouter();
   const { id } = router.query;
 
@@ -83,48 +86,66 @@ export default function CompleteRequest(props: RequestPreviewProps) {
       completionData.complete_comments === "" ||
       !completionData.completion_file 
     ) {
-      console.log("Incomplete")
-
+      setFailureModal(true);
     } else {
       completeRequest(completionData, id as string)
-      .then(result => console.log(result))
+      .then(result => {
+        setSuccessModal(true)
+        router.push("/Request")
+      })
     }
   }
 
   return (
-    <ModuleMain>
-      <ModuleHeader title="New Request" header="Complete Request">
-        <TooltipBtn text="Download PDF">
-          <HiOutlineDownload size={20} />
-        </TooltipBtn>
-        <Link href="/Request" className="btn btn-secondary">
-          Back
-        </Link>
-      </ModuleHeader>
-      <ModuleContent>
-        <RequestPreview request={props.request} />
-        <div>
-          <input 
-            type="file" 
-            className="form-control" 
-            onChange={updateData} 
-            accept="image/jpeg,image/png"
-            name="completion_file"
-          />
-          <textarea 
-            className="form-control" 
-            onChange={updateData}
-            name="complete_comments"
-            value={completionData.complete_comments}
-          >
-
-          </textarea>
-          <TooltipBtn toolTip={false} onClick={submitRequest}>
-            Submit
+    <>
+      <ModuleMain>
+        <ModuleHeader title="New Request" header="Complete Request">
+          <TooltipBtn text="Download PDF">
+            <HiOutlineDownload size={20} />
           </TooltipBtn>
-        </div>
-      </ModuleContent>
-    </ModuleMain>
+          <Link href="/Request" className="btn btn-secondary">
+            Back
+          </Link>
+        </ModuleHeader>
+        <ModuleContent>
+          <RequestPreview request={props.request} />
+          <div>
+            <input 
+              type="file" 
+              className="form-control" 
+              onChange={updateData} 
+              accept="image/jpeg,image/png"
+              name="completion_file"
+            />
+            <textarea 
+              className="form-control" 
+              onChange={updateData}
+              name="complete_comments"
+              value={completionData.complete_comments}
+            >
+
+            </textarea>
+            <TooltipBtn toolTip={false} onClick={submitRequest}>
+              Submit
+            </TooltipBtn>
+          </div>
+        </ModuleContent>
+      </ModuleMain>
+      <ModuleSimplePopup
+        modalOpenState={failureModal}
+        setModalOpenState={setFailureModal}
+        text="Please ensure that you have an uploaded image and comments"
+        title="Incomplete Maintenance"
+        icon={SimpleIcon.Exclaim}
+      />
+      <ModuleSimplePopup
+        modalOpenState={successModal}
+        setModalOpenState={setSuccessModal}
+        text="Request has been completed"
+        title="Success"
+        icon={SimpleIcon.Check}
+      />
+    </>
   );
 }
 

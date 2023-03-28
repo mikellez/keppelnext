@@ -19,7 +19,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
       new Blob([new Uint8Array(props.request.uploaded_file.data)])
     );
     setUrl(imageUrl);
-  }, []);
+  }, [props.request.uploaded_file.data]);
 
   return (
     <div>
