@@ -396,7 +396,7 @@ const completeRequest = async (req, res, next) => {
 		WHERE request_id = $4`;
 		db.query(
 			sql,
-			[req.body.completed_comments, fileBuffer , fileType, req.params.request_id],
+			[req.body.complete_comments, fileBuffer , fileType, req.params.request_id],
 			(err, result) => {
 				if (err) {
 					console.log(err)

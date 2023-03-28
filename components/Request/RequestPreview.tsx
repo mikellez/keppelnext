@@ -13,13 +13,23 @@ export interface RequestPreviewProps {
 }
 
 export default function RequestPreview(props: RequestPreviewProps) {
-  const [url, setUrl] = useState("");
+  const [faultUrl, setFaultUrl] = useState("");
+  const [completeUrl, setCompleteUrl] = useState("");
+
   useEffect(() => {
-    const imageUrl = URL.createObjectURL(
-      new Blob([new Uint8Array(props.request.uploaded_file.data)])
-    );
-    setUrl(imageUrl);
-  }, [props.request.uploaded_file.data]);
+    if (props.request.uploaded_file) {
+      const imageUrl = URL.createObjectURL(
+        new Blob([new Uint8Array(props.request.uploaded_file.data)])
+      );
+      setFaultUrl(imageUrl);
+    }
+    if (props.request.completion_file) {
+      const imageUrl = URL.createObjectURL(
+        new Blob([new Uint8Array(props.request.completion_file.data)])
+      );
+      setCompleteUrl(imageUrl);
+    }
+  }, [props.request.uploaded_file, props.request.completion_file]);
 
   return (
     <div>
@@ -56,11 +66,26 @@ export default function RequestPreview(props: RequestPreviewProps) {
           <tr>
             <th>Fault Image</th>
             <td>
-              {url && (
-                <Image src={url} width={300} height={300} alt="Fault Image" />
+              {faultUrl && (
+                <Image src={faultUrl} width={300} height={300} alt="Fault Image" />
               )}
             </td>
           </tr>
+          {props.action == RequestAction.manage && 
+          <>
+          <tr>
+            <th>Completion Comments</th>
+            <td>{props.request.complete_comments}</td>
+          </tr>
+          <tr>
+            <th>Completion Image</th>
+            <td>
+              {completeUrl && (
+                <Image src={completeUrl} width={300} height={300} alt="Fault Image" />
+              )}
+            </td>
+          </tr>
+          </>}
         </tbody>
       </table>
     </div>
