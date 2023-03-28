@@ -26,14 +26,21 @@ const manageRequest = async (id: number, status: number) => {
 
 export default function CompleteRequest(props: RequestPreviewProps) {
     const [modal, setModal] = useState<boolean>(false);
+    const [failureModal, setFailureModal] = useState<boolean>(false);
+    const [comments, setComments] = useState<string>("");
     const router = useRouter();
     const { id } = router.query;
 
     const handleClick = (status: number) => {
-        manageRequest(parseInt(id as string), status).then(result => {
-            setModal(true);
-            router.push("/Request");
-        })
+        const statusId = parseInt(id as string)
+        if (statusId == 5 && comments == "") {
+            setFailureModal(true);
+        } else {
+            manageRequest(statusId, status).then(result => {
+                setModal(true);
+                router.push("/Request");
+            })
+        }
     };
 
     return (
@@ -49,6 +56,15 @@ export default function CompleteRequest(props: RequestPreviewProps) {
                 </ModuleHeader>
                 <ModuleContent>
                     <RequestPreview request={props.request} action={RequestAction.manage} />
+                    <label>Comments</label>
+                    <textarea
+                        className="form-control"
+                        onChange={(e) => {setComments(e.target.value)}}
+                        value={comments}
+                        rows={3}
+                        maxLength={250}
+                    >
+                    </textarea>
                     <TooltipBtn onClick={() => handleClick(4)} toolTip={false}>
                         Approve
                     </TooltipBtn>
@@ -63,6 +79,13 @@ export default function CompleteRequest(props: RequestPreviewProps) {
                 text="Your action has been successfully recorded"
                 title="Success"
                 icon={SimpleIcon.Check}
+            />
+            <ModuleSimplePopup
+                modalOpenState={failureModal}
+                setModalOpenState={setFailureModal}
+                text="Please provide your reasons for rejecting the completed request"
+                title="Missing comments"
+                icon={SimpleIcon.Exclaim}
             />
         </>
     );

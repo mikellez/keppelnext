@@ -18,6 +18,8 @@ import { CMMSRequest } from "../../../types/common/interfaces";
 import { HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../../components/TooltipBtn";
 import { useRouter } from "next/router";
+import { useCurrentUser } from "../../../components/SWR";
+import { ThreeDots } from 'react-loading-icons';
 
 interface CompletionRequestInfo {
   completion_file?: File;
@@ -48,8 +50,18 @@ export default function CompleteRequest(props: RequestPreviewProps) {
   const [completionData, setCompletionData] = useState<CompletionRequestInfo>({} as CompletionRequestInfo);
   const [failureModal, setFailureModal] = useState<boolean>(false);
   const [successModal, setSuccessModal] = useState<boolean>(false);
+  const [isReady, setIsReady] = useState<boolean>(false);
   const router = useRouter();
   const { id } = router.query;
+  const { data } = useCurrentUser();
+
+  useEffect(() => {
+    if (data?.id != props.request.assigned_user_id) {
+      router.push("/404");
+    } else {
+      setIsReady(true);
+    }
+  }, [])
 
   const updateData = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 
@@ -98,6 +110,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
 
   return (
     <>
+      {isReady ? 
       <ModuleMain>
         <ModuleHeader title="New Request" header="Complete Request">
           <TooltipBtn text="Download PDF">
@@ -130,7 +143,11 @@ export default function CompleteRequest(props: RequestPreviewProps) {
             </TooltipBtn>
           </div>
         </ModuleContent>
-      </ModuleMain>
+      </ModuleMain> :
+        <div style={{ width: "100%", textAlign: "center" }}>
+          <ThreeDots fill="black" />
+        </div> 
+      }
       <ModuleSimplePopup
         modalOpenState={failureModal}
         setModalOpenState={setFailureModal}
@@ -153,7 +170,7 @@ export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
   const getSpecificRequest = await axios.get<CMMSRequest>(
-    "http://localhost:3001/api/request/" + context.params?.id
+    "http://localhost:3001/api/request/" + context.params?.id  + "?restrict=true"
   );
 
   if (
