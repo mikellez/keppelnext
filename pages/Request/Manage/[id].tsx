@@ -16,8 +16,12 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../../components/TooltipBtn";
 
-const manageRequest = async (id: number, status: number) => {
-    return await axios.patch(`/api/request/${id}/${status}`)
+const manageRequest = async (id: number, status: number, comments?: string) => {
+    return await axios({
+        url: `/api/request/${id}/${status}`,
+        method: "patch",
+        data: {comments: comments},
+        })
         .then(res => {
             return res.data
         })
@@ -28,17 +32,31 @@ export default function CompleteRequest(props: RequestPreviewProps) {
     const [modal, setModal] = useState<boolean>(false);
     const [failureModal, setFailureModal] = useState<boolean>(false);
     const [comments, setComments] = useState<string>("");
+    const [disabled, setDisabled] = useState<boolean>(false);
     const router = useRouter();
     const { id } = router.query;
 
     const handleClick = (status: number) => {
-        const statusId = parseInt(id as string)
-        if (statusId == 5 && comments == "") {
+        setDisabled(true);
+        const requestId = parseInt(id as string)
+        if (status == 5 && comments == "") {
             setFailureModal(true);
-        } else {
-            manageRequest(statusId, status).then(result => {
+            setTimeout(() => {
+                setDisabled(false);
+            }, 1000)
+        } else if (status == 5) {
+            manageRequest(requestId, status, comments).then(result => {
                 setModal(true);
-                router.push("/Request");
+                setTimeout(() => {
+                    router.push("/Request");
+                }, 1000)
+            })
+        } else {
+            manageRequest(requestId, status).then(result => {
+                setModal(true);
+                setTimeout(() => {
+                    router.push("/Request");
+                }, 1000)       
             })
         }
     };
@@ -65,10 +83,10 @@ export default function CompleteRequest(props: RequestPreviewProps) {
                         maxLength={250}
                     >
                     </textarea>
-                    <TooltipBtn onClick={() => handleClick(4)} toolTip={false}>
+                    <TooltipBtn onClick={() => handleClick(4)} toolTip={false} disabled={disabled}>
                         Approve
                     </TooltipBtn>
-                    <TooltipBtn onClick={() => handleClick(5)} toolTip={false}>
+                    <TooltipBtn onClick={() => handleClick(5)} toolTip={false} disabled={disabled}>
                         Reject
                     </TooltipBtn>
                 </ModuleContent>
