@@ -325,9 +325,13 @@ export default function Request() {
                       }/${item.id}`}
                     >
                       <strong>
-                        {data?.role_id === 1 || data?.role_id === 2
-                          ? "Manage"
-                          : "Complete"}
+                        {(data?.role_id === 1 || data?.role_id === 2) &&
+                          item.prop.status_id === 3 &&
+                          "Manage"}
+                        {(data?.role_id === 3 || data?.role_id === 4) &&
+                          (item.prop.status_id === 2 ||
+                            item.prop.status_id === 5) &&
+                          "Complete"}
                       </strong>
                     </Link>
                   </li>
