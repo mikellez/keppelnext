@@ -164,6 +164,21 @@ interface CMMSSchedule {
   index?: number;
 }
 
+interface CMMSSystem {
+  system_id: number;
+  system_name: string;
+}
+
+interface CMMSSystemAsset {
+  system_asset_id: number;
+  system_asset: string;
+}
+
+interface CMMSAssetType {
+  asset_id: number;
+  asset_type: string;
+}
+
 interface CMMSChecklist {
   checklist_id: number;
   chl_name: string;
@@ -233,4 +248,7 @@ export {
   CMMSMasterTables,
   CMMSActivitylog,
   CMMSDashboardData,
+  CMMSSystem,
+  CMMSSystemAsset,
+  CMMSAssetType
 };

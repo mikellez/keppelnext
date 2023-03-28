@@ -2,7 +2,7 @@
 import useSWR from 'swr';
 import axios from 'axios';
 
-import { CMMSAsset, CMMSRequest, CMMSChecklist, CMMSActivitylog } from '../types/common/interfaces'; 
+import { CMMSAsset, CMMSRequest, CMMSChecklist, CMMSActivitylog, CMMSSystemAsset } from '../types/common/interfaces'; 
 
 function useRequest() {
 	const requestFetcher = (url: string) => axios.get<CMMSRequest[]>(url).then((response) => {
@@ -56,10 +56,21 @@ function useCurrentUser() {
 	return useSWR<CMMSCurrentUser, Error>("/api/user", userFetcher, {revalidateOnFocus: false, revalidateOnReconnect: false})
 }
 
+function useSystemAsset(system_id: number|null){
+	const systemAssetFetcher = (url: string) => axios.get<CMMSSystemAsset[]>(url + system_id).then((response) => response.data).catch((e) => {
+		throw new Error(e);
+	})
+
+	return useSWR<CMMSSystemAsset[], Error>(system_id ? ["/api/asset/system/", system_id] : null, systemAssetFetcher, {revalidateOnFocus: false});
+}
+
+
+
 export {
     useRequest,
 	useAsset,
 	useChecklist,
 	useCurrentUser,
-	useAccountlog
+	useAccountlog,
+	useSystemAsset
 }

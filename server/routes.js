@@ -160,6 +160,11 @@ router.get(
     controllers.request.fetchRequestCounts
 );
 
+router.get("/asset/systems", checkIfLoggedInAPI, controllers.asset.fetchSystems);
+router.get("/asset/fetch_asset_types", checkIfLoggedInAPI, controllers.asset.fetch_asset_types);
+
+router.get("/asset/system/:system_id", checkIfLoggedInAPI, controllers.asset.fetchSystemAssets);
+
 router.get(
     "/checklist/template",
     checkIfLoggedInAPI,
