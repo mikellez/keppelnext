@@ -384,6 +384,25 @@ const approveRejectRequest = async (req, res, next) => {
     );
 };
 
+const completeRequest = async (req, res, next) => {
+	res.send(req)
+	const fileBuffer = req.body.completion_file === undefined ? null : req.file.buffer;
+    const fileType = req.body.completion_file === undefined ? null : req.file.mimetype;
+	console.log(fileType, fileBuffer)
+	// const sql = `UPDATE keppel.request SET
+	// 	completion_file = $1,
+	// 	completed_comments = $2
+	// 	WHERE request_id = $3`;
+	// 	db.query(
+	// 		sql,
+	// 		[req.body.completion_file, req.body.completed_comments , req.params.request_id],
+	// 		(err, result) => {
+	// 			if (err) return res.status(500).send("Error in updating status");
+	// 			return res.status(200).json("Request successfully updated");
+	// 		}
+	// 	);
+};
+
 module.exports = {
     fetchRequests,
     createRequest,
@@ -394,4 +413,5 @@ module.exports = {
     fetchRequestPriority,
     updateRequest,
     approveRejectRequest,
+	completeRequest,
 };
