@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { CMMSRequest } from "../../types/common/interfaces";
 import Image from "next/image";
-import styles from "../../styles/RequestPreview.module.css";
+import styles from "../../styles/Request.module.scss";
 import { ModuleModal } from "../ModuleLayout/ModuleModal";
 
 export enum RequestAction {

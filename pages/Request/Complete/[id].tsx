@@ -22,6 +22,7 @@ import TooltipBtn from "../../../components/TooltipBtn";
 import { useRouter } from "next/router";
 import { useCurrentUser } from "../../../components/SWR";
 import { ThreeDots } from "react-loading-icons";
+import styles from "../../../styles/Request.module.scss";
 
 interface CompletionRequestInfo {
   completion_file?: File;
@@ -125,22 +126,36 @@ export default function CompleteRequest(props: RequestPreviewProps) {
           </ModuleHeader>
           <ModuleContent>
             <RequestPreview request={props.request} />
-            <div>
-              <input
-                type="file"
-                className="form-control"
-                onChange={updateData}
-                accept="image/jpeg,image/png"
-                name="completion_file"
-                style={{ width: "20rem" }}
-              />
-              <textarea
-                className="form-control"
-                onChange={updateData}
-                name="complete_comments"
-                value={completionData.complete_comments}
-                style={{ resize: "none", width: "30rem" }}
-              ></textarea>
+            <table className={styles.table}>
+              <tbody>
+                <tr>
+                  <th>Completion File</th>
+                  <td>
+                  <input
+                    type="file"
+                    className="form-control"
+                    onChange={updateData}
+                    accept="image/jpeg,image/png"
+                    name="completion_file"
+                    style={{ width: "20rem" }}
+                  />
+                  </td>
+                </tr>
+                <tr>
+                  <th>Completion Comments</th>
+                  <td>
+                  <textarea
+                    className="form-control"
+                    onChange={updateData}
+                    name="complete_comments"
+                    value={completionData.complete_comments}
+                    style={{ resize: "none", width: "30rem" }}
+                  ></textarea>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div>  
               <TooltipBtn toolTip={false} onClick={submitRequest}>
                 Submit
               </TooltipBtn>
