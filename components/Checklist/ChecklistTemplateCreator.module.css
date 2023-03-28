@@ -1,0 +1,42 @@
+.checklistLowlight {
+    border-left: 2px solid transparent;
+}
+
+.checklistHighlight {
+    border-left: 2px solid red;
+}
+
+.checkDropdown {
+    position: absolute;
+    left: 20px;
+    z-index: 64;
+
+    padding: 1rem;
+
+    background-color: white;
+    border: 1px solid #DDDDDD;
+    border-radius: 4px;
+}
+
+.checkObjs {
+    display: flex;
+    flex-direction: column;
+}
+
+.controlContainer {
+    margin: 1rem;
+    padding: 1rem;
+
+    border-radius: .25rem;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+}
+
+.controlRemoveChoiceButton {
+    float: right;
+    margin-right: 2rem;
+
+    position: relative;
+    top: 0.4rem;
+
+    cursor: pointer;
+}

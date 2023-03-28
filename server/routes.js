@@ -186,6 +186,16 @@ router.get(
 router.get("/checklist/csv", checkIfLoggedInAPI, controllers.checklist.createChecklistCSV);
 
 /**
+ * @api {post} /checklist/template Create Checklist Template
+ * @apiDescription Create a new checklist template for later submission as record
+ * @apiName CreateChecklistTemplate
+ * @apiGroup Checklist
+ * 
+ * @apiSuccess {string} - yeah
+ */
+router.post("/checklist/template", checkIfLoggedInAPI, controllers.checklist.submitNewChecklistTemplate);
+
+/**
  * @api {get} /fault/type Get Fault Types
  * @apiDescription Gets fault types
  * @apiName GetFaultTypes
