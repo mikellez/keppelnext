@@ -231,7 +231,9 @@ const fetchRequestPriority = async (req, res, next) => {
 };
 
 const fetchSpecificRequest = async (req, res, next) => {
-    const sql = `SELECT 
+	console.log(req.user)
+    const sql =
+	`SELECT 
   rt.request as request_name, 
   r.req_id, 
   ft.fault_type as fault_name, 
@@ -260,6 +262,7 @@ const fetchSpecificRequest = async (req, res, next) => {
   WHERE request_id = $1`;
     db.query(sql, [req.params.request_id], (err, result) => {
         if (err) return res.status(500).send("Error in fetching request");
+		// if (req.query.restrict && result.rows[0].assigned_user_id != req.user.id) return res.status(404).json("Unauthorised user") 
         return res.status(200).send(result.rows[0]);
     });
 };
