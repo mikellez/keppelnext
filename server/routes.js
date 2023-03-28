@@ -143,13 +143,13 @@ router.get("/request/types", checkIfLoggedInAPI, controllers.request.fetchReques
 // router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
 router.get("/request/priority", checkIfLoggedInAPI, controllers.request.fetchRequestPriority);
 router.get("/request/csv", checkIfLoggedInAPI, controllers.request.createRequestCSV);
-
+router.patch("/request/complete/:request_id", checkIfLoggedInAPI, controllers.request.completeRequest);
 router
     .route("/request/:request_id", checkIfLoggedInAPI)
     .get(controllers.request.fetchSpecificRequest)
     .patch(controllers.request.updateRequest);
 
-router.get(
+router.patch(
     "/request/:request_id/:status_id",
     checkIfLoggedInAPI,
     controllers.request.approveRejectRequest

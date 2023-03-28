@@ -13,9 +13,7 @@ export interface RequestPreviewProps {
 }
 
 export default function RequestPreview(props: RequestPreviewProps) {
-  console.log(props.request.uploaded_file.data);
   const [url, setUrl] = useState("");
-
   useEffect(() => {
     const imageUrl = URL.createObjectURL(
       new Blob([new Uint8Array(props.request.uploaded_file.data)])

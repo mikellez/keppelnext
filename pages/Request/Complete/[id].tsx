@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   ModuleContent,
   ModuleDivider,
@@ -18,7 +18,79 @@ import { HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../../components/TooltipBtn";
 import { useRouter } from "next/router";
 
+interface CompletionRequestInfo {
+  completion_file?: File;
+  complete_comments: string;
+};
+
+const completeRequest = async (data: CompletionRequestInfo, id: string) => {
+  const sentData = new FormData();
+  sentData.append("complete_comments", data.complete_comments);
+  sentData.append("completion_file", data.completion_file!);
+
+  return await axios({
+    url: "/api/request/complete/" + id,
+    method: "patch",
+    data: sentData,
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  })
+  .then(res => {
+    return res.data
+  })
+  .catch(err => console.log(err));
+};
+
 export default function CompleteRequest(props: RequestPreviewProps) {
+
+  const [completionData, setCompletionData] = useState<CompletionRequestInfo>({} as CompletionRequestInfo);
+  const router = useRouter();
+  const { id } = router.query;
+
+  const updateData = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+
+    if (e.target.name === "completion_file") {
+      const input = e.target as HTMLInputElement
+      if (!input.files || input.files.length == 0) {
+        setCompletionData(prev => {
+          return {
+            ...prev,
+            completion_file: undefined,
+          }
+        })
+      } else if (input.files && input.files.length > 0) {
+        setCompletionData(prev => {
+          return {
+            ...prev,
+            completion_file: input.files![0],
+          }
+        })
+      }
+    } else {
+      setCompletionData(prev => {
+        return {
+          ...prev,
+          complete_comments: e.target.value,
+        }
+      })
+    }
+  };
+
+  const submitRequest = () => {
+    if (
+      !completionData.complete_comments ||
+      completionData.complete_comments === "" ||
+      !completionData.completion_file 
+    ) {
+      console.log("Incomplete")
+
+    } else {
+      completeRequest(completionData, id as string)
+      .then(result => console.log(result))
+    }
+  }
+
   return (
     <ModuleMain>
       <ModuleHeader title="New Request" header="Complete Request">
@@ -31,6 +103,26 @@ export default function CompleteRequest(props: RequestPreviewProps) {
       </ModuleHeader>
       <ModuleContent>
         <RequestPreview request={props.request} />
+        <div>
+          <input 
+            type="file" 
+            className="form-control" 
+            onChange={updateData} 
+            accept="image/jpeg,image/png"
+            name="completion_file"
+          />
+          <textarea 
+            className="form-control" 
+            onChange={updateData}
+            name="complete_comments"
+            value={completionData.complete_comments}
+          >
+
+          </textarea>
+          <TooltipBtn toolTip={false} onClick={submitRequest}>
+            Submit
+          </TooltipBtn>
+        </div>
       </ModuleContent>
     </ModuleMain>
   );
