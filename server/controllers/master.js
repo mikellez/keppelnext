@@ -22,6 +22,15 @@ const tableInfo = {
 			column_name: "system_name"
 		}]
 	},
+	system_asset_lvl5: {
+		internalName: "plant_system_assets",
+		name: "plant_system_assets",
+		id: "system_asset_lvl5",
+		fields: [{
+			column_label: "Name",
+			column_name: "plant_system_assets"
+		}]
+	},
 	fault_types: {
 		internalName: "fault_types",
 		name: "Fault Type",

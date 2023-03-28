@@ -6,6 +6,7 @@ import PlantSelect from '../PlantSelect';
 import RequiredIcon from '../RequiredIcon';
 import AssetTypeSelect from './AssetTypeSelect';
 import SystemSelect from './SystemSelect';
+import SystemAsset from './SelectSystemAsset';
 import axios from 'axios';
 
 interface AssetFormTemplateProps {
@@ -22,15 +23,19 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 			<ModuleContent includeGreyContainer grid>
 				<div>
 					<label className='form-label'>
-						<RequiredIcon /> Plant
+						<RequiredIcon /> Select Plant
 					</label>
 					<PlantSelect onChange={() => {}} />
                     <label className='form-label'>
-						<RequiredIcon /> System
+						<RequiredIcon /> Select System
 					</label>
                     <SystemSelect />
 					<label className='form-label'>
-						<RequiredIcon /> Asset Type
+						<RequiredIcon /> Select System Asset
+					</label>
+                    <SystemAsset />
+					<label className='form-label'>
+						<RequiredIcon /> Select Asset Type
 					</label>
                     <AssetTypeSelect />
 				</div>
