@@ -1,8 +1,8 @@
 import { BsAsterisk } from "react-icons/bs"
 
 export default function RequiredIcon() {
-	return <BsAsterisk size={12} color={"red"} style={{
+	return <BsAsterisk size={7} color={"red"} style={{
 		position:"relative",
-		top: "-0.1em"
+		top: "-0.3em"
 	}}/>
 }
