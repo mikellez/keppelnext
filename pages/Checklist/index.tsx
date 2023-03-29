@@ -18,18 +18,12 @@ import {
 } from "@table-library/react-table-library";
 import { useChecklist } from "../../components/SWR";
 import { CMMSChecklist } from "../../types/common/interfaces";
-import { Nullish } from "@table-library/react-table-library/types/common";
 import { ThreeDots } from "react-loading-icons";
 import { downloadCSV, getColor } from "../Request";
 import { HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../components/TooltipBtn";
 import { BsFileEarmarkPlus } from "react-icons/bs";
-
-type TableNode<T> = {
-  id: string;
-  nodes?: TableNode<T>[] | Nullish;
-  prop: T;
-};
+import LoadingHourglass from "../../components/LoadingHourglass";
 
 const indexedColumn: ("template" | "record" | "approved")[] = [
   "template",
@@ -37,10 +31,27 @@ const indexedColumn: ("template" | "record" | "approved")[] = [
   "approved",
 ];
 
+// pretty much the same as CMMSChecklist but the ID is changed
+interface ChecklistItem {
+  id: number;
+  chl_name: string;
+  description: string;
+  status_id: number;
+  createdbyuser: string;
+  assigneduser: string;
+  signoffuser: string;
+  plant_name: string;
+  plant_id: number;
+  linkedassets: string | null;
+  linkedassetids: string | null;
+  chl_type: string;
+  created_date: Date;
+  history: string;
+  status: string;
+}
+
 export default function Checklist() {
-  const [checklistNodes, setChecklistNodes] = useState<
-    TableNode<CMMSChecklist>[]
-  >([]);
+  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const [isReady, setReady] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 
@@ -61,8 +72,8 @@ export default function Checklist() {
     setActiveTabIndex(index);
   };
 
-  const editRow: OnClick = (item, event) => {
-    const checklistRow = item as TableNode<CMMSChecklist>;
+  const editRow: OnClick<ChecklistItem> = (item, event) => {
+    const checklistRow = item;
 
     console.log(checklistRow, event);
   };
@@ -73,11 +84,25 @@ export default function Checklist() {
 
   useEffect(() => {
     if (!isReady && data && !isValidating) {
-      setChecklistNodes(
-        data.map((row: CMMSChecklist): TableNode<CMMSChecklist> => {
+      // tranform and store data
+      setChecklistItems(
+        data.map(row => {
           return {
-            id: row.checklist_id.toString(),
-            prop: row,
+            id: row.checklist_id,
+            chl_name: row.chl_name,
+            description: row.description,
+            status_id: row.status_id,
+            createdbyuser: row.createdbyuser,
+            assigneduser: row.assigneduser,
+            signoffuser: row.signoffuser,
+            plant_name: row.plant_name,
+            plant_id: row.plant_id,
+            linkedassets: row.linkedassets,
+            linkedassetids: row.linkedassetids,
+            chl_type: row.chl_type,
+            created_date: row.created_date,
+            history: row.history,
+            status: row.status
           };
         })
       );
@@ -126,19 +151,19 @@ export default function Checklist() {
           </li>
         </ul>
         {!isReady && (
-          <div style={{ width: "100%", textAlign: "center" }}>
-            <ThreeDots fill="black" />
+          <div style={{ position: "absolute", top:"calc((100% - 8rem) / 2)", left:"50%", transform:"translate(-50%,-50%)"}}>
+            <LoadingHourglass />
           </div>
         )}
         {error && <div>{error.toString()}</div>}
         {error && <div>error</div>}
         {isReady && (
           <Table
-            data={{ nodes: checklistNodes }}
+            data={{ nodes: checklistItems }}
             theme={theme}
             layout={{ custom: true }}
           >
-            {(tableList) => (
+            {(tableList: ChecklistItem[]) => (
               <>
                 <Header>
                   <HeaderRow>
@@ -154,27 +179,26 @@ export default function Checklist() {
 
                 <Body>
                   {tableList.map((item) => {
-                    let checklistNode = item as TableNode<CMMSChecklist>;
                     return (
-                      <Row key={item.id} item={checklistNode}>
-                        <Cell>{checklistNode.prop.checklist_id}</Cell>
-                        <Cell>{checklistNode.prop.description}</Cell>
+                      <Row key={item.id} item={item}>
+                        <Cell>{item.id}</Cell>
+                        <Cell>{item.description}</Cell>
                         <Cell>
                           <span
                             style={{
-                              color: getColor(checklistNode.prop.status),
+                              color: getColor(item.status),
                               fontWeight: "bold",
                             }}
                           >
-                            {checklistNode.prop.status}
+                            {item.status}
                           </span>
                         </Cell>
                         <Cell>
-                          {checklistNode.prop.created_date.toString()}
+                          {item.created_date.toString()}
                         </Cell>
-                        <Cell>{checklistNode.prop.assigneduser}</Cell>
-                        <Cell>{checklistNode.prop.signoffuser}</Cell>
-                        <Cell>{checklistNode.prop.createdbyuser}</Cell>
+                        <Cell>{item.assigneduser}</Cell>
+                        <Cell>{item.signoffuser}</Cell>
+                        <Cell>{item.createdbyuser}</Cell>
                       </Row>
                     );
                   })}

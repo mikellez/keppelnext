@@ -34,7 +34,16 @@ function useChecklist(checklist_type: "template" | "record" | "approved") {
 	return useSWR<CMMSChecklist[], Error>(["/api/checklist/", checklist_type], checklistFetcher, {revalidateOnFocus: false});
 }
 function useAccountlog() {
-	const accountlogFetcher = (url: string) => axios.get<CMMSActivitylog[]>(url).then((response) => response.data).catch((e) => {
+	const accountlogFetcher = (url: string) => axios.get<any[]>(url).then((response) =>
+		response.data.map(singleLog => {
+			return {
+				id: singleLog.id,
+				user_id: singleLog.user_id,
+				description: singleLog.description,
+				event_time: singleLog.event_time
+			}
+		})
+	).catch((e) => {
 		throw new Error(e);
 	})
 

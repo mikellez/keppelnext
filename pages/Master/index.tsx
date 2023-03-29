@@ -23,15 +23,8 @@ import {
 import { BsTrashFill, BsPencilSquare, BsFileEarmarkPlus } from "react-icons/bs";
 import ModuleSimplePopup from "../../components/ModuleLayout/ModuleSimplePopup";
 import LoadingIcon from "../../components/LoadingIcon";
-import Modal from "react-modal";
 import TooltipBtn from "../../components/TooltipBtn";
 import { FiRefreshCw } from "react-icons/fi";
-
-type TableNode<T> = {
-  id: string;
-  nodes?: TableNode<T>[] | Nullish;
-  prop: CMMSMasterData;
-};
 
 /*
 	CMMSMaster: {
@@ -57,6 +50,7 @@ interface CMMSMaster {
 }
 
 interface CMMSMasterData {
+  id: string;
   [column_name: string]: string;
 }
 
@@ -128,9 +122,7 @@ function MasterActions({
 
 export default function Master() {
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
-  const [masterNodes, setMasterNodes] = useState<TableNode<CMMSMasterData>[]>(
-    []
-  );
+  const [masterItems, setMasterItems] = useState<CMMSMasterData[]>([]);
   const [columnSizes, setColumnSizes] = useState<string>(
     "6em 20% calc(80% - 12em) 6em;"
   );
@@ -194,8 +186,8 @@ export default function Master() {
     switchColumns(activeTabIndex);
   };
 
-  const editRow: OnClick = (item, event) => {
-    const checklistRow = item as TableNode<CMMSMasterData>;
+  const editRow: OnClick<CMMSMasterData> = (item, event) => {
+    const checklistRow = item;
 
     console.log(checklistRow, event);
     setEditModalOpen(true);
@@ -213,12 +205,11 @@ export default function Master() {
         sizes += "calc((100% - 12em) / " + len + ") ";
       setColumnSizes("6em " + sizes + "6em");
 
-      setMasterNodes(
-        data.data.map((row): TableNode<CMMSMasterData> => {
-          return {
+      setMasterItems(
+        data.data.map((row): CMMSMasterData => {
+          return Object.assign({}, {
             id: row[data.idName],
-            prop: row,
-          };
+          }, row);
         })
       );
 
@@ -367,16 +358,16 @@ export default function Master() {
         </ul>
         {isReady && (
           <Table
-            data={{ nodes: masterNodes }}
+            data={{ nodes: masterItems }}
             theme={theme}
             layout={{ custom: true }}
           >
-            {(tableList) => (
+            {(tableList: CMMSMasterData[]) => (
               <>
                 <Header>
                   <HeaderRow>
-                    {tableList.length !== 0 &&
-                      Object.keys(tableList[0].prop).map((k) => {
+                    {tableList.length > 1 &&
+                      Object.keys(tableList[0]).slice(1).map((k) => {
                         return (
                           <HeaderCell resize key={k}>
                             {k}
@@ -389,9 +380,9 @@ export default function Master() {
                 <Body>
                   {tableList.map((item) => (
                     <Row key={item.id} item={item} onClick={editRow}>
-                      {tableList.length !== 0 &&
-                        Object.keys(tableList[0].prop).map((k) => {
-                          return <Cell key={item.prop[k]}>{item.prop[k]}</Cell>;
+                      {tableList.length > 1 &&
+                        Object.keys(tableList[0]).slice(1).map((k) => {
+                          return <Cell key={item[k]}>{item[k]}</Cell>;
                         })}
                       <Cell>
                         <MasterActions
