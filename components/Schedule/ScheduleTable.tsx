@@ -1,75 +1,119 @@
 import React, { useEffect, useState } from "react";
-import { CompactTable } from "@table-library/react-table-library/compact";
+import { Column, CompactTable } from "@table-library/react-table-library/compact";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import { ScheduleInfo, dateFormat, toPeriodString } from "./ScheduleTemplate";
 import EventModalUser from "./EventModalUser";
 import styles from "../../styles/Schedule.module.scss";
-import { TableNode } from "../../pages/Request";
 
 interface ScheduleTableProps {
     schedules?: ScheduleInfo[];
     viewRescheduled?: boolean
 }
 
-const COLUMNS: any[] = [
+interface ScheduleInfoItem {
+    id: number;
+    assigned_fnames: string[];
+    assigned_lnames: string[];
+    assigned_roles: string[];
+    assigned_emails: string[];
+    assigned_usernames: string[];
+    assigned_ids: number[];
+    calendar_dates: string[];
+    checklist_id: number;
+    checklist_name: string;
+    start_date: Date;
+    end_date: Date;
+    prev_start_date?: Date;
+    prev_end_date?: Date;
+    period: number;
+    plant: string;
+    plantId: number;
+    remarks: string;
+    timeline_id: number;
+    exclusionList: number[];
+    isSingle: boolean;
+    index?: number;
+    status?: number;
+}
+
+const COLUMNS: Column<ScheduleInfoItem>[] = [
     {
         label: "Checklist Name",
-        renderCell: (item: TableNode<ScheduleInfo>) => item.prop.checklist_name,
+        renderCell: item => item.checklist_name,
         pinLeft: true,
     },
     {
         label: "Frequency",
-        renderCell: (item: TableNode<ScheduleInfo>) => toPeriodString(item.prop.period),
+        renderCell: item => toPeriodString(item.period),
         pinLeft: true,
     },
     {
         label: "Start",
-        renderCell: (item: TableNode<ScheduleInfo>) =>
-            item.prop.start_date ? dateFormat(new Date(item.prop.start_date)) : "Rescheduled",
+        renderCell: item => item.start_date ? dateFormat(new Date(item.start_date)) : "Rescheduled",
     },
     {
         label: "End",
-        renderCell: (item: TableNode<ScheduleInfo>) =>
-            item.prop.end_date ? dateFormat(new Date(item.prop.end_date)) : "Rescheduled",
+        renderCell: item => item.end_date ? dateFormat(new Date(item.end_date)) : "Rescheduled",
     },
     {
         label: "Assigned",
-        renderCell: (item: TableNode<ScheduleInfo>) => {
+        renderCell: item => {
             let assignedUsers = [];
-            const noOfAssigned = item.prop.assigned_ids.length;
+            const noOfAssigned = item.assigned_ids.length;
             for (let i = 0; i < noOfAssigned; i++) {
                 assignedUsers.push(
                     <EventModalUser
-                        key={item.prop.schedule_id} 
+                        key={item.id} 
                         serial={i + 1}
-                        role_name={item.prop.assigned_roles[i]}
-                        fname={item.prop.assigned_fnames[i]}
-                        lname={item.prop.assigned_lnames[i]}
-                        username={item.prop.assigned_usernames[i]}
-                        id={item.prop.assigned_ids[i]}
-                        email={item.prop.assigned_emails[i]}
+                        role_name={item.assigned_roles[i]}
+                        fname={item.assigned_fnames[i]}
+                        lname={item.assigned_lnames[i]}
+                        username={item.assigned_usernames[i]}
+                        id={item.assigned_ids[i]}
+                        email={item.assigned_emails[i]}
                     />
                 );
             }
             return assignedUsers;
         },
     },
-    { label: "Remarks", renderCell: (item: TableNode<ScheduleInfo>) => item.prop.remarks },
+    { label: "Remarks", renderCell: item => item.remarks },
 ];
 
 export default function ScheduleTable(props: ScheduleTableProps) {
-    const [ScheduleNodes, setScheduleNodes] = useState<TableNode<ScheduleInfo>[]>([]);
+    const [scheduleItems, setScheduleItems] = useState<ScheduleInfoItem[]>([]);
     useEffect(() => {
         if (props.schedules) {
             let schedules = props.schedules;
             if (!props.viewRescheduled) {
                 schedules = schedules.filter(schedule => schedule.end_date != null)
             }
-            setScheduleNodes(schedules.map((row: ScheduleInfo) => {
+            setScheduleItems(schedules.map((row) => {
                 return {
-                    id: row.schedule_id.toString(),
-                    prop: row
+                    id: row.schedule_id,
+                    assigned_fnames: row.assigned_fnames,
+                    assigned_lnames: row.assigned_lnames,
+                    assigned_roles: row.assigned_roles,
+                    assigned_emails: row.assigned_emails,
+                    assigned_usernames: row.assigned_usernames,
+                    assigned_ids: row.assigned_ids,
+                    calendar_dates: row.calendar_dates,
+                    checklist_id: row.checklist_id,
+                    checklist_name: row.checklist_name,
+                    start_date: row.start_date,
+                    end_date: row.end_date,
+                    prev_start_date: row.prev_end_date,
+                    prev_end_date: row.prev_end_date,
+                    period: row.period,
+                    plant: row.plant,
+                    plantId: row.plantId,
+                    remarks: row.remarks,
+                    timeline_id: row.timeline_id,
+                    exclusionList: row.exclusionList,
+                    isSingle: row.isSingle,
+                    index: row.index,
+                    status: row.status
                 }
             }));
         }
@@ -108,7 +152,7 @@ export default function ScheduleTable(props: ScheduleTableProps) {
         <div className={styles.scheduleTable}>
             <CompactTable
                 columns={COLUMNS}
-                data={{ nodes: ScheduleNodes }}
+                data={{ nodes: scheduleItems }}
                 theme={theme}
                 layout={{ custom: true, horizontalScroll: true, fixedHeader: true }}
             />
