@@ -17,8 +17,7 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 
     return (
         <ModuleMain>
-			<ModuleHeader header={props.header}>
-                <Link href="/Asset" className="btn btn-secondary">Back</Link>
+				<ModuleHeader header={props.header}>
             </ModuleHeader>
 			<ModuleContent includeGreyContainer grid>
 				<div>
@@ -41,6 +40,7 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 				</div>
 			</ModuleContent>
 			<ModuleFooter>
+				<Link href="/Asset" className="btn btn-secondary">Back</Link>
 				<TooltipBtn toolTip={false}>Submit</TooltipBtn>
 			</ModuleFooter>
 		</ModuleMain>

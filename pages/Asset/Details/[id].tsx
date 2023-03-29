@@ -1,5 +1,5 @@
 import React, { ReactNode, useCallback, useEffect, useState } from "react";
-import { ModuleMain, ModuleHeader, ModuleContent } from "../../../components";
+import { ModuleMain, ModuleHeader, ModuleContent, ModuleFooter } from "../../../components";
 import { useRouter } from "next/router";
 import axios from "axios";
 import { CMMSAssetDetails, CMMSAssetRequestHistory, CMMSAssetChecklistHistory } from "../../../types/common/interfaces";
@@ -9,6 +9,8 @@ import Image from "next/image";
 import AssetRequestHistory from "../../../components/Asset/AssetRequestHistory";
 import AssetChecklistHistory from "../../../components/Asset/AssetChecklistHistory";
 import AssetHierachy from "../../../components/Asset/AssetHierachy";
+import Link from "next/link";
+
 
 // Get asset detail by psa id
 const getAsset = async (id: number) => {
@@ -56,7 +58,6 @@ export default function AssetDetails() {
 
     const router = useRouter();
     const psa_id = router.query.id;
-
     useEffect(() => {
         setIsLoading(true);
         if (psa_id) {
@@ -171,12 +172,13 @@ export default function AssetDetails() {
                 </>
                 }
             </ModuleContent>
+            <ModuleFooter>
+            
+            <Link href={{ pathname: '/Asset/Edit/[id]', query: { id: psa_id } }} as="/Asset/Edit/id"> 
+            <button className= "btn btn-primary">Edit </button>
+            </Link>
+            
+            </ModuleFooter>
         </ModuleMain>
     );
 }
-
-/* 
-___.Biopolis
- |___.Customer Station
-   |___.Customer
-*/
