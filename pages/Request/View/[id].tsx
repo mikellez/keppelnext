@@ -16,12 +16,34 @@ import { HiOutlineDownload } from 'react-icons/hi';
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import axios from "axios";
 import { CMMSRequest } from "../../../types/common/interfaces";
+import { useRouter } from "next/router";
+
+export const downloadPDF = async (id: number) => {
+  try {
+    const response = await axios({
+      url: `/api/request/pdf/${id}`,
+      method: "get",
+      responseType: "arraybuffer",
+    });
+    const blob = new Blob([response.data]);
+    const url = window.URL.createObjectURL(blob);
+    const temp_link = document.createElement("a");
+    temp_link.download = `request_id_${id}.pdf`;
+    temp_link.href = url;
+    temp_link.click();
+    temp_link.remove();
+  } catch (e) {
+    console.log(e);
+  }
+};
 
 export default function ViewRequest(props: RequestPreviewProps) {
+  const router = useRouter();
+  const { id } = router.query;
     return (
         <ModuleMain>
           <ModuleHeader title="New Request" header="Complete Request">
-            <TooltipBtn text="Download PDF">
+            <TooltipBtn text="Download PDF" onClick={() => downloadPDF(parseInt(id as string))}>
               <HiOutlineDownload size={20} />
             </TooltipBtn>
             <Link href="/Request" className="btn btn-secondary">
