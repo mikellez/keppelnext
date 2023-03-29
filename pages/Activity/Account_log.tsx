@@ -18,21 +18,12 @@ import {
 } from "@table-library/react-table-library";
 import { useAccountlog } from "../../components/SWR";
 import { CMMSActivitylog } from "../../types/common/interfaces";
-import { Nullish } from "@table-library/react-table-library/types/common";
 import { downloadCSV } from "../Request";
 import { HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../components/TooltipBtn";
 
-type TableNode<T> = {
-  id: string;
-  nodes?: TableNode<T>[] | Nullish;
-  prop: T;
-};
-
 export default function AccountLog() {
-  const [ActivityNodes, setActivityNodes] = useState<
-    TableNode<CMMSActivitylog>[]
-  >([]);
+  const [activityItems, setActivityItems] = useState<CMMSActivitylog[]>([]);
   const [isReady, setReady] = useState(false);
 
   const { data, error, isValidating, mutate } = useAccountlog();
@@ -48,19 +39,7 @@ export default function AccountLog() {
 
   useEffect(() => {
     if (!isReady && data && !isValidating) {
-      setActivityNodes(
-        data.map((row: CMMSActivitylog): TableNode<CMMSActivitylog> => {
-          return {
-            id: row.user_id,
-            nodes: null,
-            prop: {
-              user_id: row.user_id,
-              description: row.description,
-              event_time: row.event_time,
-            },
-          };
-        })
-      );
+      setActivityItems(data)
       setReady(true);
     }
   }, [data, isValidating]);
@@ -73,8 +52,8 @@ export default function AccountLog() {
         </TooltipBtn>
       </ModuleHeader>
       <ModuleContent>
-        <Table data={{ nodes: ActivityNodes }} theme={theme}>
-          {(tableList) => (
+        <Table data={{ nodes: activityItems }} theme={theme}>
+          {(tableList: CMMSActivitylog[]) => (
             <>
               <Header>
                 <HeaderRow>
@@ -86,14 +65,13 @@ export default function AccountLog() {
 
               <Body>
                 {tableList.map((item) => {
-                  let ActivityNodes = item as TableNode<CMMSActivitylog>;
                   return (
-                    <Row key={item.id} item={ActivityNodes}>
-                      <Cell>{ActivityNodes.prop.user_id}</Cell>
-                      <Cell>{ActivityNodes.prop.description}</Cell>
+                    <Row key={item.id} item={item}>
+                      <Cell>{item.user_id}</Cell>
+                      <Cell>{item.description}</Cell>
                       <Cell>
                         {new Date(
-                          ActivityNodes.prop.event_time
+                          item.event_time
                         ).toLocaleString()}
                       </Cell>
                     </Row>

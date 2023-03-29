@@ -182,6 +182,7 @@ interface CMMSChecklist {
 }
 
 interface CMMSActivitylog {
+  id: number;
   user_id: string;
   description: string;
   event_time: string;
