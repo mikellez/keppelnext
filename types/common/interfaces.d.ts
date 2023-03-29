@@ -259,5 +259,6 @@ export {
   CMMSSystem,
   CMMSSystemAsset,
   CMMSAssetType,
-  CMMSSystemAssetName
+  CMMSSystemAssetName,
+  CMMSSubComponent1Name
 };
