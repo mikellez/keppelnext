@@ -29,7 +29,7 @@ export default function ViewRequest(props: RequestPreviewProps) {
             </Link>
           </ModuleHeader>
           <ModuleContent>
-            <RequestPreview request={props.request} />
+            <RequestPreview request={props.request} action={props.action} />
           </ModuleContent>
         </ModuleMain>
     );
