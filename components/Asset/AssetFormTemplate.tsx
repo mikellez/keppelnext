@@ -14,11 +14,16 @@ interface AssetFormTemplateProps {
 }
 
 export default function AssetFormTemplate(props: AssetFormTemplateProps) {
+	const [systemId, setSystemId] = useState<string>('0');
+
+	function systemSelectChangeHandler(e: React.ChangeEvent<HTMLSelectElement>) {
+		console.log(e.target.value)
+		setSystemId(e.target.value)
+	}
 
     return (
         <ModuleMain>
-			<ModuleHeader header={props.header}>
-                <Link href="/Asset" className="btn btn-secondary">Back</Link>
+				<ModuleHeader header={props.header}>
             </ModuleHeader>
 			<ModuleContent includeGreyContainer grid>
 				<div>
@@ -29,7 +34,7 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
                     <label className='form-label'>
 						<RequiredIcon /> Select System
 					</label>
-                    <SystemSelect />
+                    <SystemSelect onChange={systemSelectChangeHandler} />
 					<label className='form-label'>
 						<RequiredIcon /> Select System Asset
 					</label>
@@ -41,6 +46,7 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 				</div>
 			</ModuleContent>
 			<ModuleFooter>
+				<Link href="/Asset" className="btn btn-secondary">Back</Link>
 				<TooltipBtn toolTip={false}>Submit</TooltipBtn>
 			</ModuleFooter>
 		</ModuleMain>

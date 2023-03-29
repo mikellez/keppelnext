@@ -86,6 +86,7 @@ interface CMMSRequest {
   requesthistory?: string;
   complete_comments?: string;
   completion_file?: any;
+  rejection_comments: string;
 }
 
 interface CMMSRequestTypes {
@@ -163,6 +164,28 @@ interface CMMSSchedule {
   index?: number;
 }
 
+interface CMMSSystem {
+  system_id: number;
+  system_name: string;
+}
+
+interface CMMSSystemAsset {
+  system_asset_id: number;
+  system_asset: string;
+}
+
+interface CMMSAssetType {
+  asset_id: number;
+  asset_type: string;
+}
+
+interface CMMSSystemAssetName {
+  system_asset_lvl6: string;
+}
+interface CMMSSubComponent1Name {
+  system_asset_lvl7: string;
+}
+
 interface CMMSChecklist {
   checklist_id: number;
   chl_name: string;
@@ -233,4 +256,8 @@ export {
   CMMSMasterTables,
   CMMSActivitylog,
   CMMSDashboardData,
+  CMMSSystem,
+  CMMSSystemAsset,
+  CMMSAssetType,
+  CMMSSystemAssetName
 };

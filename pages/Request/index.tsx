@@ -182,6 +182,7 @@ export default function Request() {
                 data?.role_id == 1 || data?.role_id == 1 || data?.role_id == 1
                   ? "block"
                   : "none",
+              visibility: item.prop.status_id === 1 ? "visible" : "hidden",
             }}
             onClick={() => {
               router.push(`/Request/Assign/${item.id}`);
@@ -339,23 +340,17 @@ export default function Request() {
                     )}
                   </li>
                   <li className={styles.tableDropdownListItem}>
-                    <Link
-                      href={`/Request/${
-                        data?.role_id === 1 || data?.role_id === 2
-                          ? "Manage"
-                          : "Complete"
-                      }/${item.id}`}
-                    >
-                      <strong>
                         {(data?.role_id === 1 || data?.role_id === 2) &&
-                          item.prop.status_id === 3 &&
-                          "Manage"}
-                        {(data?.role_id === 3 || data?.role_id === 4) &&
+                          item.prop.status_id === 3 ?
+                          <Link href={`/Request/Manage/${item.id}`}><strong>Manage</strong></Link>
+                          :
+                        (data?.role_id === 3 || data?.role_id === 4) &&
                           (item.prop.status_id === 2 ||
-                            item.prop.status_id === 5) &&
-                          "Complete"}
-                      </strong>
-                    </Link>
+                            item.prop.status_id === 5) ?
+                            <Link href={`/Request/Complete/${item.id}`}><strong>Complete</strong></Link> 
+                            : 
+                            <Link href={`/Request/View/${item.id}`}><strong>View</strong></Link> 
+                        }
                   </li>
                 </ul>
               </td>
