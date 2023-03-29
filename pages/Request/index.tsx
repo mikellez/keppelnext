@@ -55,6 +55,7 @@ interface RequestItem {
   status_id?: number;
   assigned_user_email: string;
   assigned_user_id: number;
+  assigned_user_name: string;
   fault_description?: string;
   uploaded_file?: any;
   requesthistory?: string;
@@ -152,7 +153,7 @@ export default function Request() {
       ),
     },
     {
-      label: "Filter By Date",
+      label: "Date",
       resize: true,
       renderCell: item =>
         item.created_date.toLocaleDateString("en-US", {
@@ -258,7 +259,7 @@ export default function Request() {
   };
 
   const ROW_OPTIONS: RowOptions<RequestItem> = {
-    renderAfterRow: (item: any) => {
+    renderAfterRow: (item) => {
       return (
         <>
           {ids.includes(item.id) && (
@@ -269,27 +270,27 @@ export default function Request() {
                     <p>
                       <strong>Fault Description</strong>
                     </p>
-                    <p>{item.prop.fault_description}</p>
+                    <p>{item.fault_description}</p>
                   </li>
                   <li className={styles.tableDropdownListItem}>
                     <p>
                       <strong>Assigned To</strong>
                     </p>
                     <p>
-                      {item.prop.assigned_user_name.trim() === ""
+                      {item.assigned_user_name.trim() === ""
                         ? "UNASSIGNED"
-                        : item.prop.assigned_user_name}
+                        : item.assigned_user_name}
                     </p>
                   </li>
                   <li className={styles.tableDropdownListItem}>
                     <p className={styles.tableDropdownListItemHeader}>
                       <strong>Fault File</strong>
                     </p>
-                    {item.prop.uploaded_file ? (
+                    {item.uploaded_file ? (
                       <Image
                         src={URL.createObjectURL(
                           new Blob([
-                            new Uint8Array(item.prop.uploaded_file.data),
+                            new Uint8Array(item.uploaded_file.data),
                           ])
                         )}
                         alt=""
@@ -298,7 +299,7 @@ export default function Request() {
                           setModalSrc(
                             URL.createObjectURL(
                               new Blob([
-                                new Uint8Array(item.prop.uploaded_file.data),
+                                new Uint8Array(item.uploaded_file.data),
                               ])
                             )
                           )
@@ -314,11 +315,11 @@ export default function Request() {
                     <p className={styles.tableDropdownListItemHeader}>
                       <strong>Completion File</strong>
                     </p>
-                    {item.prop.completion_file ? (
+                    {item.completion_file ? (
                       <Image
                         src={URL.createObjectURL(
                           new Blob([
-                            new Uint8Array(item.prop.completion_file.data),
+                            new Uint8Array(item.completion_file.data),
                           ])
                         )}
                         alt=""
@@ -327,7 +328,7 @@ export default function Request() {
                           setModalSrc(
                             URL.createObjectURL(
                               new Blob([
-                                new Uint8Array(item.prop.completion_file.data),
+                                new Uint8Array(item.completion_file.data),
                               ])
                             )
                           )
@@ -341,12 +342,12 @@ export default function Request() {
                   </li>
                   <li className={styles.tableDropdownListItem}>
                         {(data?.role_id === 1 || data?.role_id === 2) &&
-                          item.prop.status_id === 3 ?
+                          item.status_id === 3 ?
                           <Link href={`/Request/Manage/${item.id}`}><strong>Manage</strong></Link>
                           :
                         (data?.role_id === 3 || data?.role_id === 4) &&
-                          (item.prop.status_id === 2 ||
-                            item.prop.status_id === 5) ?
+                          (item.status_id === 2 ||
+                            item.status_id === 5) ?
                             <Link href={`/Request/Complete/${item.id}`}><strong>Complete</strong></Link> 
                             : 
                             <Link href={`/Request/View/${item.id}`}><strong>View</strong></Link> 
@@ -385,6 +386,7 @@ export default function Request() {
             status_id: row.status_id,
             assigned_user_email: row.assigned_user_email,
             assigned_user_id: row.assigned_user_id,
+            assigned_user_name: row.assigned_user_name,
             fault_description: row.fault_description,
             uploaded_file: row.uploaded_file,
             requesthistory: row.requesthistory,

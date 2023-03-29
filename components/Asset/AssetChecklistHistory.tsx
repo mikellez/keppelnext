@@ -2,44 +2,49 @@ import React, { useEffect, useState } from "react";
 import { CMMSAssetChecklistHistory } from "../../types/common/interfaces";
 import styles from "../../styles/Asset.module.scss"
 import { CompactTable } from "@table-library/react-table-library/compact";
-import { TableNode } from "../../pages/Request";
+import { Column } from "@table-library/react-table-library/types";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 
-interface AssetHistoryProps {
-    history: CMMSAssetChecklistHistory[];
+interface HistoryItem {
+    id: string;
+    action: string;
+    date: string;
+    name: string;
+    status: string;
+    checklistId: string;
+    checklistName: string;
 }
 
-const COLUMNS: any[] = [
+const COLUMNS: Column<HistoryItem>[] = [
     { 
         label: 'Status', 
-        renderCell: (item: TableNode<CMMSAssetChecklistHistory>) => item.prop.status,
-        
+        renderCell: item => item.status,
     },
     { 
         label: 'Action', 
-        renderCell: (item: TableNode<CMMSAssetChecklistHistory>) => item.prop.action 
+        renderCell: item => item.action 
     },
     { 
         label: 'Date', 
-        renderCell: (item: TableNode<CMMSAssetChecklistHistory>) => item.prop.date 
+        renderCell: item => item.date 
     },
     { 
         label: 'Role', 
-        renderCell: (item: TableNode<CMMSAssetChecklistHistory>) => item.prop.name
+        renderCell: item => item.name
     },
     { 
         label: 'Checklist ID', 
-        renderCell: (item: TableNode<CMMSAssetChecklistHistory>) => item.prop.checklistId
+        renderCell: item => item.checklistId
     },
     { 
         label: 'Checklist Name', 
-        renderCell: (item: TableNode<CMMSAssetChecklistHistory>) => item.prop.checklistName
+        renderCell: item => item.checklistName
     },
 ];
 
-export default function AssetChecklistHistory(props: AssetHistoryProps) {
-    const [data, setData] = useState<TableNode<CMMSAssetChecklistHistory>[]>();
+export default function AssetChecklistHistory({history}: {history: CMMSAssetChecklistHistory[]}) {
+    const [data, setData] = useState<HistoryItem[]>();
 
     const theme = useTheme([
         getTheme(),
@@ -66,15 +71,20 @@ export default function AssetChecklistHistory(props: AssetHistoryProps) {
         }
     ])
     useEffect(() => {
-        if (props) {
-            setData(props.history.map(row => {
+        if (history) {
+            setData(history.map(row => {
                 return {
-                    prop: row,
                     id: row.checklistId + row.status + row.date + row.action,
+                    action: row.action,
+                    date: row.date,
+                    name: row.name,
+                    status: row.status,
+                    checklistId: row.checklistId,
+                    checklistName: row.checklistName
                 }
             }))
         }  
-    }, [props])
+    }, [history])
 
     return (
         <div>

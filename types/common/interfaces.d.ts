@@ -81,6 +81,7 @@ interface CMMSRequest {
   status_id?: number;
   assigned_user_email: string;
   assigned_user_id: number;
+  assigned_user_name: string;
   fault_description?: string;
   uploaded_file?: any;
   requesthistory?: string;
