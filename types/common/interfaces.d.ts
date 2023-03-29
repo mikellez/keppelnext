@@ -179,6 +179,13 @@ interface CMMSAssetType {
   asset_type: string;
 }
 
+interface CMMSSystemAssetName {
+  system_asset_lvl6: string;
+}
+interface CMMSSubComponent1Name {
+  system_asset_lvl7: string;
+}
+
 interface CMMSChecklist {
   checklist_id: number;
   chl_name: string;
@@ -250,5 +257,6 @@ export {
   CMMSDashboardData,
   CMMSSystem,
   CMMSSystemAsset,
-  CMMSAssetType
+  CMMSAssetType,
+  CMMSSystemAssetName
 };

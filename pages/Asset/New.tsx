@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { ModuleContent, ModuleFooter, ModuleHeader, ModuleMain } from "../../components";
 import AssetFormTemplate from "../../components/Asset/AssetFormTemplate";
 import RequiredIcon from "../../components/RequiredIcon";
-import { useSystemAsset } from "../../components/SWR";
+import { useSystemAsset, useSystemAssetName, useSubComponent1Name } from "../../components/SWR";
 import { CMMSPlant, CMMSSystem, CMMSAssetType} from "../../types/common/interfaces";
 
 interface NewAssetProps {
@@ -15,16 +15,36 @@ interface NewAssetProps {
 }
 
 export default function NewAsset(props: NewAssetProps) {
+	const [selectedPlantID, setSelectedPlantID] = useState<number>(0);
 	const [selectedSystemID, setSelectedSystemID] = useState<number>(0);
 	const [selectedAssetTypeID, setSelectedAssetTypeID] = useState<number>(0);
-	const [selectedSystemAssetNameID, setSelectedSystemAssetNameID] = useState<number>(0);
+	const [selectedSystemAssetID, setSelectedSystemAssetID] = useState<number>(0);
+	const [selectedSystemAssetNameID, setSelectedSystemAssetNameID] = useState<string>('');
 
 	const {
 		data: systemAssetData,
-		error,
-		isValidating,
-		mutate
+		error: systemAssetError,
+		isValidating: systemAssetIsValidating,
+		mutate: systemAssetMutate
 	} = useSystemAsset(selectedSystemID === 0 ? null : selectedSystemID);
+
+	const {
+		data: systemAssetNameData,
+		error: systemAssetNameError,
+		isValidating: systemAssetNameIsValidating,
+		mutate: systemAssetNameMutate
+	} = useSystemAssetName(selectedPlantID === 0 ? null :selectedPlantID, selectedSystemID === 0 ? null : selectedSystemID, selectedSystemAssetID=== 0 ? null :selectedSystemAssetID);
+
+	const {
+		data: subComponent1NameData,
+		error: subComponent1NameError,
+		isValidating: ssubComponent1NameIsValidating,
+		mutate: subComponent1NameMutate
+	} = useSubComponent1Name(selectedPlantID === 0 ? null :selectedPlantID, selectedSystemID === 0 ? null : selectedSystemID, selectedSystemAssetID=== 0 ? null :selectedSystemAssetID, selectedSystemAssetNameID === '' ? null : selectedSystemAssetNameID );
+	
+	const handlePlantSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		setSelectedPlantID(parseInt(e.target.value));
+	}
 
 	const handleSystemSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		setSelectedSystemID(parseInt(e.target.value));
@@ -35,8 +55,10 @@ export default function NewAsset(props: NewAssetProps) {
 	}
 
 	const handleAssetNameSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setSelectedSystemAssetNameID(parseInt(e.target.value));
-		console.log(e.target.value)
+		setSelectedSystemAssetID(parseInt(e.target.value));
+	}
+	const handleSelectedSystemAssetName = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		setSelectedSystemAssetNameID(e.target.value);
 	}
 
 	return (<ModuleMain>
@@ -44,8 +66,13 @@ export default function NewAsset(props: NewAssetProps) {
 		<ModuleContent includeGreyContainer grid>
 			<div className={formStyles.halfContainer}>
 				<div className="form-group">
+				<div>PlantID: {selectedPlantID}</div>
+				<div>SystemID: {selectedSystemID}</div>
+					<div>SystemAssetNameID: {selectedSystemAssetID}</div>
+					<div>Asset type: {selectedAssetTypeID}</div>
+					<div>SystemAssetName: {selectedSystemAssetNameID}</div>
 					<label className='form-label'><RequiredIcon/> Plant</label>
-					<select className="form-select">
+					<select className="form-select" onChange={handlePlantSelect}>
 						<option value="0" disabled hidden selected>-- Select Plant --</option>
 						{
 							props.plants.map(plant => <option key={plant.plant_id} value={plant.plant_id}>{plant.plant_name}</option>)
@@ -82,7 +109,11 @@ export default function NewAsset(props: NewAssetProps) {
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> System Asset Name</label>
 					<div className="input-group">
-						<select className="form-select" defaultValue={0} disabled={!selectedAssetTypeID}>
+						<select className="form-select" defaultValue={0} disabled={!selectedAssetTypeID} onChange={handleSelectedSystemAssetName}>
+						<option value={0} disabled hidden>-- Select System Asset Name--</option>
+						{
+							(systemAssetNameData !== undefined) && systemAssetNameData.map(systemAsset => <option key={systemAsset.system_asset_lvl6} value={systemAsset.system_asset_lvl6}>{systemAsset.system_asset_lvl6}</option>)
+						}
 						</select>
 						<span className="input-group-text">or</span>
 						<input type="text" className="form-control" placeholder="Enter New System Asset Name"/>
@@ -92,6 +123,10 @@ export default function NewAsset(props: NewAssetProps) {
 					<label className='form-label'><RequiredIcon/> Sub-Components 1</label>
 					<div className="input-group">
 						<select className="form-select" defaultValue={0} disabled={!selectedAssetTypeID}>
+						<option value={0} disabled hidden>-- Select Sub-Components 1--</option>
+						{
+							(subComponent1NameData !== undefined) && subComponent1NameData.map(systemAsset => <option key={systemAsset.system_asset_lvl7} value={systemAsset.system_asset_lvl7}>{systemAsset.system_asset_lvl7}</option>)
+						}
 						</select>
 						<span className="input-group-text">or</span>
 						<input type="text" className="form-control" placeholder="Enter New Sub-Component" disabled={!selectedAssetTypeID}/>

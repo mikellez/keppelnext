@@ -39,7 +39,7 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 					<label className='form-label'>
 						<RequiredIcon /> Select System Asset
 					</label>
-                    <SystemAsset systemId={systemId} />
+                    <SystemAsset />
 					<label className='form-label'>
 						<RequiredIcon /> Select Asset Type
 					</label>

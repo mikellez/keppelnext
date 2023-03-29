@@ -227,6 +227,51 @@ const fetchSystemAssets = async (req, res, next) => {
         }
     );
 }
+
+const fetchSystemAssetNames = async (req, res, next) => {
+    let q = `SELECT DIStiNCT system_asset_lvl6 FROM keppel.plant_system_assets
+        WHERE 
+        plant_id = ${req.params.plant_id} AND
+        system_id_lvl3 = ${req.params.system_id} AND
+        system_asset_id_lvl4= ${req.params.system_asset_id};`
+    db.query(q,
+        (err1, result) => {
+            if (err1) {
+                // throw err;
+                console.log(err1);
+                return res.status(400).send({
+                    msg: err1,
+                });
+            }
+            
+            return res.status(200).send(result.rows);
+        }
+    );
+}
+
+const fetchSubComponent1Names = async (req, res, next) => {
+    let q = `SELECT DIStiNCT system_asset_lvl7 FROM keppel.plant_system_assets
+        WHERE 
+        plant_id = ${req.params.plant_id} AND
+        system_id_lvl3 = ${req.params.system_id} AND
+        system_asset_id_lvl4= ${req.params.system_asset_id} AND
+        system_asset_lvl6 = '${req.params.system_asset_name_id}' AND
+        system_asset_lvl7 != '';`
+    db.query(q,
+        (err1, result) => {
+            if (err1) {
+                // throw err;
+                console.log(err1);
+                return res.status(400).send({
+                    msg: err1,
+                });
+            }
+            
+            return res.status(200).send(result.rows);
+        }
+    );
+}
+
 const fetch_asset_types = async (req, res, next) => {
     let q = `SELECT * FROM keppel.asset_type
     ORDER BY asset_type.asset_type ASC `
@@ -252,5 +297,7 @@ module.exports = {
     getAssetHistory,
     fetchSystems,
     fetchSystemAssets,
-    fetch_asset_types
+    fetch_asset_types,
+    fetchSystemAssetNames,
+    fetchSubComponent1Names
 };
