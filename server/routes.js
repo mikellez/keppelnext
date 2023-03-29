@@ -166,6 +166,7 @@ router.get("/asset/fetch_asset_types", checkIfLoggedInAPI, controllers.asset.fet
 router.get("/asset/system/:system_id", checkIfLoggedInAPI, controllers.asset.fetchSystemAssets);
 router.get("/asset/system/:plant_id/:system_id/:system_asset_id", checkIfLoggedInAPI, controllers.asset.fetchSystemAssetNames);
 router.get("/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id", checkIfLoggedInAPI, controllers.asset.fetchSubComponent1Names);
+router.post("/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
 
 router.get(
     "/checklist/template",

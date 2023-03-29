@@ -6,7 +6,7 @@ import { ModuleContent, ModuleFooter, ModuleHeader, ModuleMain } from "../../com
 import AssetFormTemplate from "../../components/Asset/AssetFormTemplate";
 import RequiredIcon from "../../components/RequiredIcon";
 import { useSystemAsset, useSystemAssetName, useSubComponent1Name } from "../../components/SWR";
-import { CMMSPlant, CMMSSystem, CMMSAssetType} from "../../types/common/interfaces";
+import { CMMSPlant, CMMSSystem, CMMSAssetType, CMMSAssetDetails2} from "../../types/common/interfaces";
 
 interface NewAssetProps {
 	plants: CMMSPlant[];
@@ -14,12 +14,57 @@ interface NewAssetProps {
 	assetTypes: CMMSAssetType[];
 }
 
+const createNewAsset = async (plant: number, system_asset_name: string) => {
+
+	return await axios({
+		url: "",
+		method: "POST",
+		data: {
+			system_asset_name: system_asset_name,
+			plantname: plant
+		}
+	})
+		.then(res => {
+			return res.data;
+		})
+		.catch(err => {
+			console.log('error');
+		})
+}
+
 export default function NewAsset(props: NewAssetProps) {
+	//plants
 	const [selectedPlantID, setSelectedPlantID] = useState<number>(0);
+	//system ID
 	const [selectedSystemID, setSelectedSystemID] = useState<number>(0);
-	const [selectedAssetTypeID, setSelectedAssetTypeID] = useState<number>(0);
+	//asset type 
+	const [selectedAssetTypeID, setSelectedAssetTypeID] = useState<string>('');
+	//aystem asset ID
 	const [selectedSystemAssetID, setSelectedSystemAssetID] = useState<number>(0);
+	//system asset
+	const [selectedSystemAsset, setSelectedSystemAsset] = useState<string>('');
+	//system asset name option
 	const [selectedSystemAssetNameID, setSelectedSystemAssetNameID] = useState<string>('');
+	//system asset name form
+	const [selectedSystemAssetNameForm, setSelectedSystemAssetNameForm] = useState<string>('');
+	//sub component 1 name option
+	const [selectedSubComponent1, setSelectedSubComponent1] = useState<string>('');
+	//sub component 1 name form
+	const [selectedSubComponent1Form, setSelectedSubComponent1Form] = useState<string>('');
+
+	const [form, setform] = useState<CMMSAssetDetails2>({
+	sub_component_1: ''
+	,sub_component_1_form: ''
+	,sub_component_2: ''
+	,description:''
+	,location:''
+	,brand:''
+	,model_number:''
+	,warranty:''
+	,tech_specs:''
+	,manufacture_country:''
+	,remarks:''});
+
 
 	const {
 		data: systemAssetData,
@@ -51,14 +96,28 @@ export default function NewAsset(props: NewAssetProps) {
 	}
 
 	const handleAssetTypeSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setSelectedAssetTypeID(parseInt(e.target.value));
+		setSelectedAssetTypeID(e.target.value);
 	}
 
 	const handleAssetNameSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		setSelectedSystemAssetID(parseInt(e.target.value));
+		setSelectedSystemAsset(e.target.options[e.target.selectedIndex].text);
 	}
 	const handleSelectedSystemAssetName = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		setSelectedSystemAssetNameID(e.target.value);
+	}
+	const handleSelectedSystemAssetNameForm = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setSelectedSystemAssetNameForm(e.target.value);
+
+	}
+	const handleSelectedSubComponent1 = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		setSelectedSubComponent1(e.target.value);
+	}
+	const handleSelectedSubComponent1Form = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setSelectedSubComponent1Form(e.target.value);
+	}
+	const handleForm = (e: React.ChangeEvent<HTMLInputElement>) => {	
+		setform((prevState) => {return{...prevState,[e.target.name]:e.target.value}});
 	}
 
 	return (<ModuleMain>
@@ -68,9 +127,24 @@ export default function NewAsset(props: NewAssetProps) {
 				<div className="form-group">
 				<div>PlantID: {selectedPlantID}</div>
 				<div>SystemID: {selectedSystemID}</div>
-					<div>SystemAssetNameID: {selectedSystemAssetID}</div>
+					<div>SystemAssetID: {selectedSystemAssetID}</div>
+					<div>SystemAsset: {selectedSystemAsset}</div>
 					<div>Asset type: {selectedAssetTypeID}</div>
-					<div>SystemAssetName: {selectedSystemAssetNameID}</div>
+					<div>SystemAssetNameOption: {selectedSystemAssetNameID}</div>
+					<div>SystemAssetNameForm: {selectedSystemAssetNameForm}</div>
+					<div>Sub Component-1 Option: {form.sub_component_1}</div>
+					<div>Sub Component-1 Form: {form.sub_component_1_form}</div>
+					<div>Sub Component-2 Form: {form.sub_component_2}</div>
+					<div>Description Form: {form.description}</div>
+					<div>Location Form: {form.location}</div>
+					<div>Brand Form: {form.brand}</div>
+					<div>Model Number Form: {form.model_number}</div>
+					<div>Warranty Form: {form.warranty}</div>
+					<div>Tech Specs Form: {form.tech_specs}</div>
+					<div>Manufacture Country Form: {form.manufacture_country}</div>
+					<div>Remarks Form: {form.remarks}</div>
+
+
 					<label className='form-label'><RequiredIcon/> Plant</label>
 					<select className="form-select" onChange={handlePlantSelect}>
 						<option value="0" disabled hidden selected>-- Select Plant --</option>
@@ -99,10 +173,10 @@ export default function NewAsset(props: NewAssetProps) {
 				</div>
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> Asset Type</label>
-					<select className="form-select" defaultValue={0} onChange={handleAssetTypeSelect}>
-						<option value={0}>NA</option>
+					<select className="form-select" defaultValue={''} onChange={handleAssetTypeSelect}>
+						<option value={''}>NA</option>
 						{
-							props.assetTypes.map(assetType => <option key={assetType.asset_id} value={assetType.asset_id}>{assetType.asset_type}</option>)
+							props.assetTypes.map(assetType => <option key={assetType.asset_type} value={assetType.asset_type}>{assetType.asset_type}</option>)
 						}
 					</select>
 				</div>
@@ -116,27 +190,27 @@ export default function NewAsset(props: NewAssetProps) {
 						}
 						</select>
 						<span className="input-group-text">or</span>
-						<input type="text" className="form-control" placeholder="Enter New System Asset Name"/>
+						<input type="text" className="form-control" onChange={handleSelectedSystemAssetNameForm} placeholder="Enter New System Asset Name"/>
 					</div>
 				</div>
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> Sub-Components 1</label>
 					<div className="input-group">
-						<select className="form-select" defaultValue={0} disabled={!selectedAssetTypeID}>
+						<select className="form-select" defaultValue={0} disabled={!selectedAssetTypeID} onChange={handleForm} name='sub_component_1'>
 						<option value={0} disabled hidden>-- Select Sub-Components 1--</option>
 						{
 							(subComponent1NameData !== undefined) && subComponent1NameData.map(systemAsset => <option key={systemAsset.system_asset_lvl7} value={systemAsset.system_asset_lvl7}>{systemAsset.system_asset_lvl7}</option>)
 						}
 						</select>
 						<span className="input-group-text">or</span>
-						<input type="text" className="form-control" placeholder="Enter New Sub-Component" disabled={!selectedAssetTypeID}/>
+						<input type="text" className="form-control" onChange={handleForm} name='sub_component_1_form' placeholder="Enter New Sub-Component" disabled={!selectedAssetTypeID}/>
 					</div>
 				</div>
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> Sub-Components 2</label>
 					<div className="input-group">
 						
-						<input type="text" className="form-control" placeholder="Enter New Sub-Component" disabled={!selectedAssetTypeID}/>
+						<input onChange={handleForm} name='sub_component_2_form' type="text" className="form-control" placeholder="Enter New Sub-Component" disabled={!selectedAssetTypeID}/>
 					</div>
 				</div>
 			</div>
@@ -144,47 +218,47 @@ export default function NewAsset(props: NewAssetProps) {
 			<div className={formStyles.halfContainer}>
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> Description</label>
-					<input type="text" className="form-control" placeholder="Enter Description"/>
+					<input type="text" className="form-control" onChange={handleForm} name='description' placeholder="Enter Description"/>
 				</div>
 
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> Location</label>
-					<input type="text" className="form-control" placeholder="Enter Location"/>
+					<input type="text" className="form-control" onChange={handleForm} name='location' placeholder="Enter Location"/>
 				</div>
 
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> Brand</label>
-					<input type="text" className="form-control" placeholder="Enter Brand"/>
+					<input type="text" className="form-control" onChange={handleForm} name='brand' placeholder="Enter Brand"/>
 				</div>
 
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> Model Number</label>
-					<input type="text" className="form-control" placeholder="Enter Model Number"/>
+					<input type="text" className="form-control" onChange={handleForm} name='model_number' placeholder="Enter Model Number"/>
 				</div>
 
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> Warranty</label>
-					<input type="text" className="form-control" placeholder="Enter Warranty"/>
+					<input type="text" className="form-control" onChange={handleForm} name='warranty' placeholder="Enter Warranty"/>
 				</div>
 				
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> Tech Specs</label>
-					<input type="text" className="form-control" placeholder="Enter Tech Specs"/>
+					<input type="text" className="form-control" onChange={handleForm} name='tech_specs' placeholder="Enter Tech Specs"/>
 				</div>
 
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> Manufacture Country</label>
-					<input type="text" className="form-control" placeholder="Enter Country"/>
+					<input type="text" className="form-control" onChange={handleForm} name='manufacture_country' placeholder="Enter Country"/>
 				</div>
 
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> Remarks</label>
-					<input type="text" className="form-control" placeholder="Enter Remarks"/>
+					<input type="text" className="form-control" onChange={handleForm} name='remarks' placeholder="Enter Remarks"/>
 				</div>
 			</div>
 		</ModuleContent>
 		<ModuleFooter>
-			<button className="btn btn-primary">Submit</button>
+			<button className="btn btn-primary" onClick={() => createNewAsset(3, (type != "" ? type : select))}>Submit</button>
 		</ModuleFooter>
 	</ModuleMain>
 	);

@@ -32,6 +32,22 @@ interface CMMSAssetDetails extends CMMSAsset {
   system_asset_lvl7?: string;
 }
 
+interface CMMSAssetDetails2{
+  sub_component_1?: string;
+  sub_component_1_form?: string;
+  sub_component_2?: string;
+  description?: string;
+  location?: string;
+  brand?: string;
+  model_number?: string;
+  tech_specs?: string;
+  manufacture_country?: string;
+  warranty?: string;
+  remarks?: string;
+  uploaded_image?: string;
+  uploaded_files?: string;
+}
+
 interface CMMSAssetRequestHistory {
   status: string;
   action: string;
@@ -258,5 +274,7 @@ export {
   CMMSSystem,
   CMMSSystemAsset,
   CMMSAssetType,
-  CMMSSystemAssetName
+  CMMSSystemAssetName,
+  CMMSAssetDetails2
+  
 };
