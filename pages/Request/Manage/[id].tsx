@@ -137,8 +137,7 @@ export const getServerSideProps: GetServerSideProps = async (
   );
 
   if (
-    !getSpecificRequest.data ||
-    ![3].includes(getSpecificRequest.data.status_id as number)
+    !getSpecificRequest.data
   ) {
     return {
       redirect: {

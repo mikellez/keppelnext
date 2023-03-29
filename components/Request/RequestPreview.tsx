@@ -34,7 +34,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
       setCompleteUrl(imageUrl);
     }
   }, [props.request.uploaded_file, props.request.completion_file]);
-
+  console.log(props)
   return (
     <div>
       <table className={styles.table}>
