@@ -21,6 +21,7 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../../components/TooltipBtn";
 import styles from "../../../styles/Manage.module.css";
+import { downloadPDF } from "../View/[id]";
 
 const manageRequest = async (id: number, status: number, comments?: string) => {
   return await axios({
@@ -71,7 +72,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
     <>
       <ModuleMain>
         <ModuleHeader title="New Request" header="Manage Request">
-          <TooltipBtn text="Download PDF">
+          <TooltipBtn text="Download PDF" onClick={() => downloadPDF(parseInt(id as string))}>
             <HiOutlineDownload size={20} />
           </TooltipBtn>
           <Link href="/Request" className="btn btn-secondary">
