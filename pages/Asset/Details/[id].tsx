@@ -93,6 +93,7 @@ export default function AssetDetails() {
                     <div className={styles.assetDetails}>
                         <table className={styles.assetTable}>
                             <tbody>
+                                
                                 <tr>
                                     <th>Asset Name</th>
                                     <td>{assetDetail.asset_name ? assetDetail.asset_name : "-"}</td>
@@ -106,6 +107,7 @@ export default function AssetDetails() {
                                         {assetDetail && <AssetHierachy asset={assetDetail} />}
                                     </td>
                                 </tr>
+                                <span>
                                 <tr>
                                     <th>Description</th>
                                     <td>
@@ -152,6 +154,8 @@ export default function AssetDetails() {
                                     <th>Remarks</th>
                                     <td>{assetDetail.remarks ? assetDetail.remarks : "-"}</td>
                                 </tr>
+                                
+                                </span>
                             </tbody>
                         </table>
                         <div>
@@ -174,7 +178,7 @@ export default function AssetDetails() {
             </ModuleContent>
             <ModuleFooter>
             
-            <Link href={{ pathname: '/Asset/Edit/[id]', query: { id: psa_id } }} as="/Asset/Edit/id"> 
+            <Link href={{ pathname: '/Asset/Edit/[id]', query: { id: psa_id } }} > 
             <button className= "btn btn-primary">Edit </button>
             </Link>
             
