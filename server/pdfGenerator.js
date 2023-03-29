@@ -164,7 +164,7 @@ function placeFooter(doc, svg, marginX) {
 async function fetchRequest(id) {
     return await axios.get("http://localhost:3001/api/request/" + id)
         .then(res => {
-            return res.data[0];
+            return res.data;
         })
         .catch(err => {
             console.log(err);
@@ -206,6 +206,7 @@ async function fetchRequest(id) {
 // Generate a PDF file for request
 async function generateRequestPDF(id) {
     const request = await fetchRequest(id);
+
     if (!request)
         return null;
 
@@ -224,6 +225,7 @@ async function generateRequestPDF(id) {
     const history = request.requesthistory;
     const faultImg = request.uploaded_file
     const completedImg = request.completion_file;
+
     // Generating a 2D array for request table history
     const historyArr = [];
     if (history) {
@@ -234,7 +236,8 @@ async function generateRequestPDF(id) {
 
     // The default header on every page
     doc.on('pageAdded', () => {
-        doc.image('./public/images/keppellogo.png', { height: 20 })
+        doc
+        .image('public/keppellogo.png', { height: 20 })
         .fontSize(10)
         .font('Times-Roman')
         const tmp = doc.y;
@@ -254,8 +257,8 @@ async function generateRequestPDF(id) {
         {title: "Created On", content: moment(new Date(request.created_date)).format("lll")},
         {title: "Created By", content: firstName + " " + lastName},
         null,
-        {title: "Asset", content: request.plant_asset_instrument},
-        {title: "Fault Type", content: request.fault_type},
+        {title: "Asset", content: request.asset_name},
+        {title: "Fault Type", content: request.fault_name},
         {title: "Assigned To", content: assigned},
     ];
 
@@ -304,24 +307,24 @@ async function generateRequestPDF(id) {
 
     doc.text("\n");
 
-
     if (faultImg) {
         doc
             .font("Times-Bold").text("Fault Image", marginX + 370, startY)
             .text("\n")
-            .image(faultImg.data, marginX + 300, startY + 10, { fit: [200, 200], align: "center" })
+            .image(Buffer.from(faultImg.data), marginX + 300, startY + 10, { fit: [200, 200], align: "center" })
     }
 
     if (completedImg) {
         doc
             .font("Times-Bold").text("Completed Image", marginX + 360, startY + 250)
             .text("\n")
-            .image(completedImg.data, marginX + 300, startY + 260, { fit: [200, 200], align: "center" })
+            .image(Buffer.from(completedImg.data), marginX + 300, startY + 260, { fit: [200, 200], align: "center" })
     }
 
-    doc.text("\n\n\n", marginX)
-    doc.text("\n", marginX, startY + 450)
-    if (doc.y > 550) doc.addPage();
+    // doc.text("\n\n\n", marginX)
+    // doc.text("\n", marginX, startY + 450)
+    // if (doc.y > 550) doc.addPage();
+    doc.addPage();
 
     (async function createTable() {
         // Table
@@ -364,6 +367,7 @@ function sendRequestPDF(req, res, next) {
             })
             return res.status(200).send(result);
     }).catch(err => {
+        console.log(err)
         return res.status(500).json("Error in generating PDF")
     })
 }

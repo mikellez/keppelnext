@@ -248,6 +248,7 @@ const fetchRequestPriority = async (req, res, next) => {
 
 const fetchSpecificRequest = async (req, res, next) => {
   const sql = `SELECT 
+  r.request_id,
   rt.request as request_name, 
   r.req_id, 
   ft.fault_type as fault_name, 
@@ -262,6 +263,7 @@ const fetchSpecificRequest = async (req, res, next) => {
   r.priority_id, 
   pr.priority,
   r.status_id,
+  s.status,
   u.user_email as assigned_user_email,
   r.uploaded_file,
   r.completion_file,
@@ -275,6 +277,7 @@ const fetchSpecificRequest = async (req, res, next) => {
   JOIN keppel.plant_system_assets AS psa ON psa.psa_id = r.psa_id
   LEFT JOIN keppel.priority AS pr ON r.priority_id = pr.p_id
   LEFT JOIN keppel.users AS u ON r.assigned_user_id = u.user_id
+  JOIN keppel.status_pm AS s ON r.status_id = s.status_id
   WHERE request_id = $1`;
   db.query(sql, [req.params.request_id], (err, result) => {
     if (err) return res.status(500).send("Error in fetching request");

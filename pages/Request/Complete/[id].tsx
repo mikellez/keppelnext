@@ -23,6 +23,7 @@ import { useRouter } from "next/router";
 import { useCurrentUser } from "../../../components/SWR";
 import { ThreeDots } from "react-loading-icons";
 import styles from "../../../styles/Request.module.scss";
+import { downloadPDF } from "../View/[id]";
 
 interface CompletionRequestInfo {
   completion_file?: File;
@@ -117,7 +118,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
       {isReady ? (
         <ModuleMain>
           <ModuleHeader title="New Request" header="Complete Request">
-            <TooltipBtn text="Download PDF">
+            <TooltipBtn text="Download PDF" onClick={() => downloadPDF(parseInt(id as string))}>
               <HiOutlineDownload size={20} />
             </TooltipBtn>
             <Link href="/Request" className="btn btn-secondary">

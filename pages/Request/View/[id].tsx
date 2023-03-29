@@ -18,7 +18,7 @@ import axios from "axios";
 import { CMMSRequest } from "../../../types/common/interfaces";
 import { useRouter } from "next/router";
 
-const downloadPDF = async (id: number) => {
+export const downloadPDF = async (id: number) => {
   try {
     const response = await axios({
       url: `/api/request/pdf/${id}`,
