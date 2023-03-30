@@ -33,27 +33,15 @@ const createNewAsset = async (plant: number, system_asset_name: string) => {
 }
 
 export default function NewAsset(props: NewAssetProps) {
-	//plants
-	const [selectedPlantID, setSelectedPlantID] = useState<number>(0);
-	//system ID
-	const [selectedSystemID, setSelectedSystemID] = useState<number>(0);
-	//asset type 
-	const [selectedAssetTypeID, setSelectedAssetTypeID] = useState<string>('');
-	//aystem asset ID
-	const [selectedSystemAssetID, setSelectedSystemAssetID] = useState<number>(0);
-	//system asset
-	const [selectedSystemAsset, setSelectedSystemAsset] = useState<string>('');
-	//system asset name option
-	const [selectedSystemAssetNameID, setSelectedSystemAssetNameID] = useState<string>('');
-	//system asset name form
-	const [selectedSystemAssetNameForm, setSelectedSystemAssetNameForm] = useState<string>('');
-	//sub component 1 name option
-	const [selectedSubComponent1, setSelectedSubComponent1] = useState<string>('');
-	//sub component 1 name form
-	const [selectedSubComponent1Form, setSelectedSubComponent1Form] = useState<string>('');
-
 	const [form, setform] = useState<CMMSAssetDetails2>({
-	sub_component_1: ''
+	plant_id:0
+    ,system_id: 0
+	,system_asset_id: 0
+	,system_asset: ''	
+    ,asset_type_id: ''
+	,system_asset_name: ''
+	,system_asset_name_form: ''
+	,sub_component_1: ''
 	,sub_component_1_form: ''
 	,sub_component_2: ''
 	,description:''
@@ -65,73 +53,104 @@ export default function NewAsset(props: NewAssetProps) {
 	,manufacture_country:''
 	,remarks:''});
 
-
 	const {
 		data: systemAssetData,
 		error: systemAssetError,
 		isValidating: systemAssetIsValidating,
 		mutate: systemAssetMutate
-	} = useSystemAsset(selectedSystemID === 0 ? null : selectedSystemID);
+	} = useSystemAsset(form.system_id === 0 ? null : form.system_id!);
 
 	const {
 		data: systemAssetNameData,
 		error: systemAssetNameError,
 		isValidating: systemAssetNameIsValidating,
 		mutate: systemAssetNameMutate
-	} = useSystemAssetName(selectedPlantID === 0 ? null :selectedPlantID, selectedSystemID === 0 ? null : selectedSystemID, selectedSystemAssetID=== 0 ? null :selectedSystemAssetID);
+	} = useSystemAssetName(form.plant_id === 0 ? null :form.plant_id!, form.system_id === 0 ? null : form.system_id!, form.system_asset_id=== 0 ? null :form.system_asset_id!);
 
 	const {
 		data: subComponent1NameData,
 		error: subComponent1NameError,
 		isValidating: ssubComponent1NameIsValidating,
 		mutate: subComponent1NameMutate
-	} = useSubComponent1Name(selectedPlantID === 0 ? null :selectedPlantID, selectedSystemID === 0 ? null : selectedSystemID, selectedSystemAssetID=== 0 ? null :selectedSystemAssetID, selectedSystemAssetNameID === '' ? null : selectedSystemAssetNameID );
-	
-	const handlePlantSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setSelectedPlantID(parseInt(e.target.value));
-	}
-
-	const handleSystemSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setSelectedSystemID(parseInt(e.target.value));
-	}
-
-	const handleAssetTypeSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setSelectedAssetTypeID(e.target.value);
-	}
+	} = useSubComponent1Name(form.plant_id === 0 ? null :form.plant_id!, form.system_id === 0 ? null : form.system_id!, form.system_asset_id=== 0 ? null :form.system_asset_id!, form.system_asset_name === '' ? '' : form.system_asset_name! );
 
 	const handleAssetNameSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setSelectedSystemAssetID(parseInt(e.target.value));
-		setSelectedSystemAsset(e.target.options[e.target.selectedIndex].text);
+		setform((prevState) => {return{...prevState,[e.target.name]:e.target.value,system_asset:e.target.options[e.target.selectedIndex].text}});
 	}
-	const handleSelectedSystemAssetName = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setSelectedSystemAssetNameID(e.target.value);
-	}
-	const handleSelectedSystemAssetNameForm = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setSelectedSystemAssetNameForm(e.target.value);
-
-	}
-	const handleSelectedSubComponent1 = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setSelectedSubComponent1(e.target.value);
-	}
-	const handleSelectedSubComponent1Form = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setSelectedSubComponent1Form(e.target.value);
-	}
-	const handleForm = (e: React.ChangeEvent<HTMLInputElement>) => {	
+	
+	const handleForm = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {	
 		setform((prevState) => {return{...prevState,[e.target.name]:e.target.value}});
 	}
+	function submission() {
+		var system_asset_name_post_data: string;
+		if (form.system_asset_name !== '') {
+			system_asset_name_post_data = form.system_asset_name;
+		} else if (form.system_asset_name_form !== '') {
+			system_asset_name_post_data = form.system_asset_name_form;
+		} else {
+			system_asset_name_post_data = '';
+		}
+		var system_lvl_5_post_data: string;
+		if (form.sub_component_1 !== '') {
+			system_lvl_5_post_data = form.sub_component_1;
+		} else if (form.sub_component_1_form !== '') {
+			system_lvl_5_post_data = form.sub_component_1_form;
+		} else {
+			system_lvl_5_post_data = '';
+		}
 
+		let postData: {
+			plant_id: number;
+			system_id: number;
+			system_asset: string;
+			system_asset_id: number;
+			system_asset_name: string;
+			system_lvl_5_post_data: string;
+			[key: string]: string | number;
+		} = {
+			plant_id: form.plant_id,
+			system_id: form.system_id,
+			system_asset: form.system_asset,
+			system_asset_id: form.system_asset_id,
+			system_asset_name: system_asset_name_post_data,
+			system_lvl_5_post_data: system_lvl_5_post_data,
+			asset_type: form.asset_type_id,
+			system_lvl_6: form.sub_component_2,
+			description: form.description,
+			location: form.location,
+			brand: form.brand,
+			model_number: form.model_number,
+			warranty: form.warranty,
+			tech_specs: form.tech_specs,
+			manufacture_country: form.manufacture_country,
+			remarks: form.remarks,
+			image: '',
+			files : ''
+
+		}
+	
+		console.log(postData);
+	
+		fetch("/api/asset/addNewAsset", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(postData),
+		});
+	}
 	return (<ModuleMain>
 		<ModuleHeader header="New Asset"/>
 		<ModuleContent includeGreyContainer grid>
 			<div className={formStyles.halfContainer}>
 				<div className="form-group">
-				<div>PlantID: {selectedPlantID}</div>
-				<div>SystemID: {selectedSystemID}</div>
-					<div>SystemAssetID: {selectedSystemAssetID}</div>
-					<div>SystemAsset: {selectedSystemAsset}</div>
-					<div>Asset type: {selectedAssetTypeID}</div>
-					<div>SystemAssetNameOption: {selectedSystemAssetNameID}</div>
-					<div>SystemAssetNameForm: {selectedSystemAssetNameForm}</div>
+				<div>PlantID: {form.plant_id}</div>
+				<div>SystemID: {form.system_id}</div>
+					<div>SystemAssetID: {form.system_asset_id}</div>
+					<div>SystemAsset: {form.system_asset}</div>
+					<div>Asset type: {form.asset_type_id}</div>
+					<div>SystemAssetNameOption: {form.system_asset_name}</div>
+					<div>SystemAssetNameForm: {form.system_asset_name_form}</div>
 					<div>Sub Component-1 Option: {form.sub_component_1}</div>
 					<div>Sub Component-1 Form: {form.sub_component_1_form}</div>
 					<div>Sub Component-2 Form: {form.sub_component_2}</div>
@@ -146,7 +165,7 @@ export default function NewAsset(props: NewAssetProps) {
 
 
 					<label className='form-label'><RequiredIcon/> Plant</label>
-					<select className="form-select" onChange={handlePlantSelect}>
+					<select className="form-select" onChange={handleForm} name='plant_id'>
 						<option value="0" disabled hidden selected>-- Select Plant --</option>
 						{
 							props.plants.map(plant => <option key={plant.plant_id} value={plant.plant_id}>{plant.plant_name}</option>)
@@ -155,7 +174,7 @@ export default function NewAsset(props: NewAssetProps) {
 				</div>
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> System</label>
-					<select className="form-select" onChange={handleSystemSelect}>
+					<select className="form-select" onChange={handleForm} name='system_id'>
 						<option value="0" disabled hidden selected>-- Select System --</option>
 						{
 							props.systems.map(system => <option key={system.system_id} value={system.system_id}>{system.system_name}</option>)
@@ -164,7 +183,7 @@ export default function NewAsset(props: NewAssetProps) {
 				</div>
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> System Asset</label>
-					<select className="form-select" defaultValue={0} disabled={systemAssetData === undefined} onChange={handleAssetNameSelect}>
+					<select className="form-select" defaultValue={0} onChange={handleAssetNameSelect} name='system_asset_id'>
 						<option value={0} disabled hidden>-- Select System Asset --</option>
 						{
 							(systemAssetData !== undefined) && systemAssetData.map(systemAsset => <option key={systemAsset.system_asset_id} value={systemAsset.system_asset_id}>{systemAsset.system_asset}</option>)
@@ -173,7 +192,7 @@ export default function NewAsset(props: NewAssetProps) {
 				</div>
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> Asset Type</label>
-					<select className="form-select" defaultValue={''} onChange={handleAssetTypeSelect}>
+					<select className="form-select" defaultValue={''} onChange={handleForm} name='asset_type_id'>
 						<option value={''}>NA</option>
 						{
 							props.assetTypes.map(assetType => <option key={assetType.asset_type} value={assetType.asset_type}>{assetType.asset_type}</option>)
@@ -183,34 +202,34 @@ export default function NewAsset(props: NewAssetProps) {
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> System Asset Name</label>
 					<div className="input-group">
-						<select className="form-select" defaultValue={0} disabled={!selectedAssetTypeID} onChange={handleSelectedSystemAssetName}>
-						<option value={0} disabled hidden>-- Select System Asset Name--</option>
+						<select className="form-select" defaultValue={''} disabled={!form.asset_type_id} onChange={handleForm} name='system_asset_name'>
+						<option value={''} disabled hidden>-- Select System Asset Name--</option>
 						{
 							(systemAssetNameData !== undefined) && systemAssetNameData.map(systemAsset => <option key={systemAsset.system_asset_lvl6} value={systemAsset.system_asset_lvl6}>{systemAsset.system_asset_lvl6}</option>)
 						}
 						</select>
 						<span className="input-group-text">or</span>
-						<input type="text" className="form-control" onChange={handleSelectedSystemAssetNameForm} placeholder="Enter New System Asset Name"/>
+						<input type="text" className="form-control" onChange={handleForm} name='system_asset_name_form' placeholder="Enter New System Asset Name"/>
 					</div>
 				</div>
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> Sub-Components 1</label>
 					<div className="input-group">
-						<select className="form-select" defaultValue={0} disabled={!selectedAssetTypeID} onChange={handleForm} name='sub_component_1'>
+						<select className="form-select" defaultValue={0} disabled={!form.asset_type_id} onChange={handleForm} name='sub_component_1'>
 						<option value={0} disabled hidden>-- Select Sub-Components 1--</option>
 						{
 							(subComponent1NameData !== undefined) && subComponent1NameData.map(systemAsset => <option key={systemAsset.system_asset_lvl7} value={systemAsset.system_asset_lvl7}>{systemAsset.system_asset_lvl7}</option>)
 						}
 						</select>
 						<span className="input-group-text">or</span>
-						<input type="text" className="form-control" onChange={handleForm} name='sub_component_1_form' placeholder="Enter New Sub-Component" disabled={!selectedAssetTypeID}/>
+						<input type="text" className="form-control" onChange={handleForm} name='sub_component_1_form' placeholder="Enter New Sub-Component" disabled={!form.asset_type_id}/>
 					</div>
 				</div>
 				<div className="form-group">
 					<label className='form-label'><RequiredIcon/> Sub-Components 2</label>
 					<div className="input-group">
 						
-						<input onChange={handleForm} name='sub_component_2_form' type="text" className="form-control" placeholder="Enter New Sub-Component" disabled={!selectedAssetTypeID}/>
+						<input onChange={handleForm} name='sub_component_2_form' type="text" className="form-control" placeholder="Enter New Sub-Component" disabled={!form.asset_type_id}/>
 					</div>
 				</div>
 			</div>
