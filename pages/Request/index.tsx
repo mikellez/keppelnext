@@ -6,13 +6,11 @@ import {
   ModuleModal,
 } from "../../components";
 
-import { ThreeDots } from "react-loading-icons";
-
 import {
+  Column,
   CompactTable,
   RowOptions,
 } from "@table-library/react-table-library/compact";
-import { Nullish } from "@table-library/react-table-library/types/common";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 
@@ -31,12 +29,39 @@ import { AiOutlineUserAdd } from "react-icons/ai";
 import Image from "next/image";
 import { useCurrentUser } from "../../components/SWR";
 import RequestHistory from "../../components/Request/RequestHistory";
+import LoadingHourglass from "../../components/LoadingHourglass";
 
-export type TableNode<T> = {
+/*export type TableNode<T> = {
   id: string;
   nodes?: TableNode<T>[] | Nullish;
   prop: T;
-};
+};*/
+
+interface RequestItem {
+  id: string;
+  request_name?: string;
+  created_date: Date;
+  fullname: string;
+  fault_name: string;
+  fault_id?: number;
+  asset_name: string;
+  psa_id?: number;
+  req_id?: number;
+  plant_name: string;
+  plant_id?: number;
+  priority: string;
+  priority_id: number;
+  status: string;
+  status_id?: number;
+  assigned_user_email: string;
+  assigned_user_id: number;
+  assigned_user_name: string;
+  fault_description?: string;
+  uploaded_file?: any;
+  requesthistory?: string;
+  complete_comments?: string;
+  completion_file?: any;
+}
 
 export const getColor = (status: string) => {
   switch (status) {
@@ -82,9 +107,7 @@ export const downloadCSV = async (type: string) => {
 };
 
 export default function Request() {
-  const [requestNodes, setRequestNodes] = useState<TableNode<CMMSRequest>[]>(
-    []
-  );
+  const [requestItems, setRequestItems] = useState<RequestItem[]>([]);
   const [isReady, setReady] = useState(false);
   const [modalSrc, setModalSrc] = useState<string | undefined>();
   const [ids, setIds] = React.useState<string[]>([]);
@@ -93,47 +116,47 @@ export default function Request() {
   const router = useRouter();
   const { data } = useCurrentUser();
 
-  const COLUMNS: any[] = [
+  const COLUMNS: Column<RequestItem>[] = [
     {
       label: "ID",
       resize: true,
-      renderCell: (item: TableNode<CMMSRequest>) => item.prop.request_id,
+      renderCell: item => item.id
     },
     {
       label: "Fault Type",
       resize: true,
-      renderCell: (item: TableNode<CMMSRequest>) => item.prop.fault_name,
+      renderCell: item => item.fault_name
     },
     {
       label: "Location",
       resize: true,
-      renderCell: (item: TableNode<CMMSRequest>) => item.prop.plant_name,
+      renderCell: item => item.plant_name,
     },
     {
       label: "Priority",
       resize: true,
-      renderCell: (item: TableNode<CMMSRequest>) => (
+      renderCell: item => (
         <span
-          style={{ color: getColor(item.prop.priority), fontWeight: "bold" }}
+          style={{ color: getColor(item.priority), fontWeight: "bold" }}
         >
-          {item.prop.priority == null ? "-" : item.prop.priority}
+          {item.priority == null ? "-" : item.priority}
         </span>
       ),
     },
     {
       label: "Status",
       resize: true,
-      renderCell: (item: TableNode<CMMSRequest>) => (
-        <span style={{ color: getColor(item.prop.status), fontWeight: "bold" }}>
-          {item.prop.status}
+      renderCell: item => (
+        <span style={{ color: getColor(item.status), fontWeight: "bold" }}>
+          {item.status}
         </span>
       ),
     },
     {
-      label: "Filter By Date",
+      label: "Date",
       resize: true,
-      renderCell: (item: TableNode<CMMSRequest>) =>
-        item.prop.created_date.toLocaleDateString("en-US", {
+      renderCell: item =>
+        item.created_date.toLocaleDateString("en-US", {
           year: "numeric",
           month: "2-digit",
           day: "2-digit",
@@ -142,16 +165,16 @@ export default function Request() {
     {
       label: "Asset Name",
       resize: true,
-      renderCell: (item: TableNode<CMMSRequest>) => item.prop.asset_name,
+      renderCell: item => item.asset_name,
     },
     {
       label: "Requested By",
       resize: true,
-      renderCell: (item: TableNode<CMMSRequest>) => item.prop.fullname,
+      renderCell: item => item.fullname,
     },
     {
       label: "",
-      renderCell: (item: TableNode<CMMSRequest>) => (
+      renderCell: item => (
         <div className={styles.iconsDiv}>
           <div
             className={styles.editIcon}
@@ -160,10 +183,10 @@ export default function Request() {
                 data?.role_id == 1 || data?.role_id == 1 || data?.role_id == 1
                   ? "block"
                   : "none",
-              visibility: item.prop.status_id === 1 ? "visible" : "hidden",
+              visibility: item.status_id === 1 || item.status_id === 2 ? "visible" : "hidden",
             }}
             onClick={() => {
-              router.push(`/Request/Assign/${item.prop.request_id}`);
+              router.push(`/Request/Assign/${item.id}`);
               setReady(false);
             }}
           >
@@ -172,7 +195,7 @@ export default function Request() {
           <div
             className={styles.editIcon}
             onClick={() => {
-              router.push(`/Request/CorrectiveRequest/${item.prop.request_id}`);
+              router.push(`/Request/CorrectiveRequest/${item.id}`);
               setReady(false);
             }}
           >
@@ -181,7 +204,7 @@ export default function Request() {
           <div
             className={styles.editIcon}
             onClick={() => {
-              setCurrentHistory(item.prop.requesthistory);
+              setCurrentHistory(item.requesthistory);
             }}
           >
             <AiOutlineHistory size={18} title={"View History"} />
@@ -191,7 +214,7 @@ export default function Request() {
     },
   ];
 
-  const handleExpand = (item: TableNode<CMMSRequest>) => {
+  const handleExpand = (item: RequestItem) => {
     if (ids.includes(item.id)) {
       setIds(ids.filter((id) => id !== item.id));
     } else {
@@ -235,8 +258,8 @@ export default function Request() {
     onClick: handleExpand,
   };
 
-  const ROW_OPTIONS: RowOptions = {
-    renderAfterRow: (item: any) => {
+  const ROW_OPTIONS: RowOptions<RequestItem> = {
+    renderAfterRow: (item) => {
       return (
         <>
           {ids.includes(item.id) && (
@@ -247,27 +270,27 @@ export default function Request() {
                     <p>
                       <strong>Fault Description</strong>
                     </p>
-                    <p>{item.prop.fault_description}</p>
+                    <p>{item.fault_description}</p>
                   </li>
                   <li className={styles.tableDropdownListItem}>
                     <p>
                       <strong>Assigned To</strong>
                     </p>
                     <p>
-                      {item.prop.assigned_user_name.trim() === ""
+                      {item.assigned_user_name.trim() === ""
                         ? "UNASSIGNED"
-                        : item.prop.assigned_user_name}
+                        : item.assigned_user_name}
                     </p>
                   </li>
                   <li className={styles.tableDropdownListItem}>
                     <p className={styles.tableDropdownListItemHeader}>
                       <strong>Fault File</strong>
                     </p>
-                    {item.prop.uploaded_file ? (
+                    {item.uploaded_file ? (
                       <Image
                         src={URL.createObjectURL(
                           new Blob([
-                            new Uint8Array(item.prop.uploaded_file.data),
+                            new Uint8Array(item.uploaded_file.data),
                           ])
                         )}
                         alt=""
@@ -276,7 +299,7 @@ export default function Request() {
                           setModalSrc(
                             URL.createObjectURL(
                               new Blob([
-                                new Uint8Array(item.prop.uploaded_file.data),
+                                new Uint8Array(item.uploaded_file.data),
                               ])
                             )
                           )
@@ -292,11 +315,11 @@ export default function Request() {
                     <p className={styles.tableDropdownListItemHeader}>
                       <strong>Completion File</strong>
                     </p>
-                    {item.prop.completion_file ? (
+                    {item.completion_file ? (
                       <Image
                         src={URL.createObjectURL(
                           new Blob([
-                            new Uint8Array(item.prop.completion_file.data),
+                            new Uint8Array(item.completion_file.data),
                           ])
                         )}
                         alt=""
@@ -305,7 +328,7 @@ export default function Request() {
                           setModalSrc(
                             URL.createObjectURL(
                               new Blob([
-                                new Uint8Array(item.prop.completion_file.data),
+                                new Uint8Array(item.completion_file.data),
                               ])
                             )
                           )
@@ -319,12 +342,12 @@ export default function Request() {
                   </li>
                   <li className={styles.tableDropdownListItem}>
                         {(data?.role_id === 1 || data?.role_id === 2) &&
-                          item.prop.status_id === 3 ?
+                          item.status_id === 3 ?
                           <Link href={`/Request/Manage/${item.id}`}><strong>Manage</strong></Link>
                           :
                         (data?.role_id === 3 || data?.role_id === 4) &&
-                          (item.prop.status_id === 2 ||
-                            item.prop.status_id === 5) ?
+                          (item.status_id === 2 ||
+                            item.status_id === 5) ?
                             <Link href={`/Request/Complete/${item.id}`}><strong>Complete</strong></Link> 
                             : 
                             <Link href={`/Request/View/${item.id}`}><strong>View</strong></Link> 
@@ -343,11 +366,32 @@ export default function Request() {
     if (requestIsFetchValidating) setReady(false);
 
     if (requestData && !requestIsFetchValidating) {
-      setRequestNodes(
-        requestData.map((row: CMMSRequest): TableNode<CMMSRequest> => {
+      setRequestItems(
+        requestData.map((row: CMMSRequest) => {
           return {
             id: row.request_id,
-            prop: row,
+            request_name: row.request_name,
+            created_date: row.created_date,
+            fullname: row.fullname,
+            fault_name: row.fault_name,
+            fault_id: row.fault_id,
+            asset_name: row.asset_name,
+            psa_id: row.psa_id,
+            req_id: row.req_id,
+            plant_name: row.plant_name,
+            plant_id: row.plant_id,
+            priority: row.priority,
+            priority_id: row.priority_id,
+            status: row.status,
+            status_id: row.status_id,
+            assigned_user_email: row.assigned_user_email,
+            assigned_user_id: row.assigned_user_id,
+            assigned_user_name: row.assigned_user_name,
+            fault_description: row.fault_description,
+            uploaded_file: row.uploaded_file,
+            requesthistory: row.requesthistory,
+            complete_comments: row.complete_comments,
+            completion_file: row.completion_file
           };
         })
       );
@@ -374,8 +418,8 @@ export default function Request() {
       </ModuleHeader>
       <ModuleContent>
         {!isReady && (
-          <div style={{ width: "100%", textAlign: "center" }}>
-            <ThreeDots fill="black" />
+          <div style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
+            <LoadingHourglass />
           </div>
         )}
         {requestFetchError && <div>{requestFetchError.toString()}</div>}
@@ -384,7 +428,7 @@ export default function Request() {
           <>
             <CompactTable
               columns={COLUMNS}
-              data={{ nodes: requestNodes }}
+              data={{ nodes: requestItems }}
               theme={theme}
               layout={{ custom: true }}
               rowProps={ROW_PROPS}

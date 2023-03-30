@@ -136,6 +136,7 @@ interface CMMSRequest {
   status_id?: number;
   assigned_user_email: string;
   assigned_user_id: number;
+  assigned_user_name: string;
   fault_description?: string;
   uploaded_file?: any;
   requesthistory?: string;
@@ -260,6 +261,7 @@ interface CMMSChecklist {
 }
 
 interface CMMSActivitylog {
+  id: number;
   user_id: string;
   description: string;
   event_time: string;
@@ -314,7 +316,11 @@ export {
   CMMSSystemAsset,
   CMMSAssetType,
   CMMSSystemAssetName,
+<<<<<<< HEAD
   CMMSAssetDetails2,
   postData
   
+=======
+  CMMSSubComponent1Name
+>>>>>>> 03960f92af756b8dc3c143a859971aafaedc78ea
 };

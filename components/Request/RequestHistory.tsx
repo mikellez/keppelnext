@@ -7,7 +7,7 @@ interface RequestHistoryProps {
 
 export default function RequestHistory(props: RequestHistoryProps) {
     const [rows, setRows] = useState<string[][]>();
-
+    console.log(props);
     useEffect(() => {
         if (props.history && props.history.length > 0) {
             const tmpRows = props.history.split("!").map(row => {
@@ -19,7 +19,7 @@ export default function RequestHistory(props: RequestHistoryProps) {
     }, [props]);
 
     const rowElements = rows?.map(row => {
-        return <tr key={row[2]}>{row.map(col => {
+        return <tr key={row[0] + row[1] + row[2]}>{row.map(col => {
             return <td key={col}>{col}</td>
         })}</tr>
     })
@@ -30,8 +30,8 @@ export default function RequestHistory(props: RequestHistoryProps) {
                 <thead>
                     <tr>
                         <th>Status</th>
-                        <th>Date</th>
                         <th>Action</th>
+                        <th>Date</th>
                         <th>Role</th>
                         <th>Name</th>
                     </tr>

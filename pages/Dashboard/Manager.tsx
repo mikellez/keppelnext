@@ -12,6 +12,7 @@ import { CMMSDashboardData } from "../../types/common/interfaces";
 import PChart from "../../components/Dashboard/PChart";
 import { fetchData } from ".";
 import { ThreeDots } from "react-loading-icons";
+import LoadingHourglass from "../../components/LoadingHourglass";
 
 export default function ManagerDashboad() {
   const [isReady, setIsReady] = useState<boolean>(false);
@@ -57,8 +58,8 @@ export default function ManagerDashboad() {
 
   if (!isReady) {
     return (
-      <div style={{ width: "100%", textAlign: "center" }}>
-        <ThreeDots fill="black" />
+      <div style={{ position: "absolute", top:"calc((100% - 8rem) / 2)", left:"50%", transform:"translate(-50%,-50%)"}}>
+        <LoadingHourglass />
       </div>
     );
   }
