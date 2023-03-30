@@ -204,7 +204,7 @@ export default function Request() {
           <div
             className={styles.editIcon}
             onClick={() => {
-              setCurrentHistory(item.id);
+              setCurrentHistory(item.requesthistory);
             }}
           >
             <AiOutlineHistory size={18} title={"View History"} />
