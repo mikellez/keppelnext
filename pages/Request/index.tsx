@@ -183,7 +183,7 @@ export default function Request() {
                 data?.role_id == 1 || data?.role_id == 1 || data?.role_id == 1
                   ? "block"
                   : "none",
-              visibility: item.status_id === 1 ? "visible" : "hidden",
+              visibility: item.status_id === 1 || item.status_id === 2 ? "visible" : "hidden",
             }}
             onClick={() => {
               router.push(`/Request/Assign/${item.id}`);
