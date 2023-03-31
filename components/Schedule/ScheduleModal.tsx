@@ -6,7 +6,7 @@ import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
 import TooltipBtn from "../TooltipBtn";
 import styles from "../../styles/Schedule.module.scss";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
-import { ModuleModal, ModalProps, } from "../";
+import { ModuleModal, ModalProps } from "../";
 import { useRouter } from "next/router";
 import { ThreeDots } from "react-loading-icons";
 import axios from "axios";
@@ -186,6 +186,13 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                                             onChange={updateSchedule}
                                             name="checklistId"
                                             value={newSchedule.checklistId}
+                                            plantId={
+                                                props.timeline
+                                                    ? (props.timeline?.plantId as number)
+                                                    : props.scheduleEvent
+                                                    ? (props.scheduleEvent.plantId as number)
+                                                    : 0 //error
+                                            }
                                         />
                                     </td>
                                 </tr>

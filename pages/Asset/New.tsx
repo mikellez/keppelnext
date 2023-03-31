@@ -144,7 +144,7 @@ export default function NewAsset(props: NewAssetProps) {
 		<ModuleContent includeGreyContainer grid>
 			<div className={formStyles.halfContainer}>
 				<div className="form-group">
-				<div>PlantID: {form.plant_id}</div>
+				{/* <div>PlantID: {form.plant_id}</div>
 				<div>SystemID: {form.system_id}</div>
 					<div>SystemAssetID: {form.system_asset_id}</div>
 					<div>SystemAsset: {form.system_asset}</div>
@@ -161,7 +161,7 @@ export default function NewAsset(props: NewAssetProps) {
 					<div>Warranty Form: {form.warranty}</div>
 					<div>Tech Specs Form: {form.tech_specs}</div>
 					<div>Manufacture Country Form: {form.manufacture_country}</div>
-					<div>Remarks Form: {form.remarks}</div>
+					<div>Remarks Form: {form.remarks}</div> */}
 
 
 					<label className='form-label'><RequiredIcon/> Plant</label>
