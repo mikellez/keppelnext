@@ -20,26 +20,9 @@ interface NewAssetProps {
 	assetTypes: CMMSAssetType[];
 }
 
-const createNewAsset = async (plant: number, system_asset_name: string) => {
-	return await axios({
-		url: "",
-		method: "POST",
-		data: {
-			system_asset_name: system_asset_name,
-			plantname: plant
-		}
-	})
-		.then(res => {
-			return res.data;
-		})
-		.catch(err => {
-			console.log('error');
-		})
-}
-
 export default function NewAsset(props: NewAssetProps) {
 	const router = useRouter();
-	//state of all fields
+	//state of all fields to be sent to API
 	const [form, setform] = useState<CMMSAssetDetailsState>({
 	plant_id:0
     ,system_id: 0
@@ -59,11 +42,16 @@ export default function NewAsset(props: NewAssetProps) {
 	,tech_specs:""
 	,manufacture_country:""
 	,remarks:""});
-
+	
+	//state to display popup
+	//state when details are missing
 	const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
+	//state when multiple entries are found
 	const [isMultipleEntries, setIsMultipleEntries] = useState<boolean>(false);
+	//state when submission is successful
 	const [submissionModal, setSubmissionModal] = useState<boolean>(false);
-
+	
+	//API to get system asset
 	const {
 		data: systemAssetData,
 		error: systemAssetError,
@@ -71,6 +59,7 @@ export default function NewAsset(props: NewAssetProps) {
 		mutate: systemAssetMutate
 	} = useSystemAsset(form.system_id === 0 ? null : form.system_id!);
 
+	//API to get system asset name
 	const {
 		data: systemAssetNameData,
 		error: systemAssetNameError,
@@ -78,6 +67,7 @@ export default function NewAsset(props: NewAssetProps) {
 		mutate: systemAssetNameMutate
 	} = useSystemAssetName(form.plant_id === 0 ? null :form.plant_id!, form.system_id === 0 ? null : form.system_id!, form.system_asset_id=== 0 ? null :form.system_asset_id!);
 
+	//API to get sub component 1
 	const {
 		data: subComponent1NameData,
 		error: subComponent1NameError,
@@ -85,23 +75,30 @@ export default function NewAsset(props: NewAssetProps) {
 		mutate: subComponent1NameMutate
 	} = useSubComponent1Name(form.plant_id === 0 ? null :form.plant_id!, form.system_id === 0 ? null : form.system_id!, form.system_asset_id=== 0 ? null :form.system_asset_id!, form.system_asset_name === '' ? '' : form.system_asset_name! );
 
+	//Function to get value of fields
 	const handleAssetNameSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		setform((prevState) => {return{...prevState,[e.target.name]:e.target.value,system_asset:e.target.options[e.target.selectedIndex].text}});
 	}
 	
+	//Function to get name of fields
 	const handleForm = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {	
 		setform((prevState) => {return{...prevState,[e.target.name]:e.target.value}});
 	}
+
+	//Function to submit form
 	function submission() {
 	
-
+		//check if details are missing
 		if (form.plant_id === 0 || form.system_id === 0 || form.system_asset_id === 0 || (form.system_asset_name === "" && form.system_asset_name_form === "")) {
 			setIsMissingDetailsModaOpen(true);
+		//check if multiple entries are found
 		} else if (((form.system_asset_name !== "") && (form.system_asset_name_form !== "")) || ((form.sub_component_1 !== "") && (form.sub_component_1_form !== ""))){
 			setIsMultipleEntries(true);
 		}
+		//if no errors, submit form
 		else{
 		var system_asset_name_post_data: string;
+		//check if system asset name is selected from dropdown or entered manually
 		if (form.system_asset_name !== "") {
 			system_asset_name_post_data = form.system_asset_name;
 		} else if (form.system_asset_name_form !== "") {
@@ -110,6 +107,7 @@ export default function NewAsset(props: NewAssetProps) {
 			system_asset_name_post_data = "";
 		}
 		var system_lvl_5_post_data: string;
+		//check if sub component 1 is selected from dropdown or entered manually
 		if (form.sub_component_1 !== "") {
 			system_lvl_5_post_data = form.sub_component_1;
 		} else if (form.sub_component_1_form !== "") {
@@ -117,7 +115,7 @@ export default function NewAsset(props: NewAssetProps) {
 		} else {
 			system_lvl_5_post_data = "";
 		}
-
+		//post data
 		let postData: {
 			plant_id: number;
 			system_id: number;
@@ -149,7 +147,7 @@ export default function NewAsset(props: NewAssetProps) {
 		}
 	
 		console.log(postData);
-	
+	    //post data to API
 		fetch("/api/asset/addNewAsset", {
 			method: "POST",
 			headers: {
@@ -157,11 +155,10 @@ export default function NewAsset(props: NewAssetProps) {
 			},
 			body: JSON.stringify(postData),
 		});
+		//open modal to show success
 		setSubmissionModal(true);
 	}}
-	// function vaidateForm(){
 
-	// }
 	return (<ModuleMain>
 		<ModuleHeader header="New Asset"/>
 		<ModuleContent includeGreyContainer grid>
@@ -298,6 +295,8 @@ export default function NewAsset(props: NewAssetProps) {
 					<label className='form-label'> Remarks</label>
 					<input type="text" className="form-control" onChange={handleForm} name='remarks' placeholder="Enter Remarks"/>
 				</div>
+				
+			
 				<ModuleSimplePopup
         modalOpenState={isMissingDetailsModalOpen}
         setModalOpenState={setIsMissingDetailsModaOpen}
@@ -322,19 +321,20 @@ export default function NewAsset(props: NewAssetProps) {
 					<button
 					  onClick={() => {
 						setSubmissionModal(false);
+						router.reload();
+					  }}
+					  className="btn btn-secondary"
+					>Submit another asset</button>
+				}
+				buttons2={
+					
+					<button
+					  onClick={() => {
+						setSubmissionModal(false);
 						router.push("/Asset");
 					  }}
 					  className="btn btn-primary"
 					>Ok</button>
-				}
-				buttons2={
-					<button
-					  onClick={() => {
-						setSubmissionModal(false);
-						router.reload();
-					  }}
-					  className="btn btn-primary"
-					>Submit another asset</button>
 				}
 				onRequestClose={() => {router.push("/Asset");}}
             />
@@ -356,7 +356,7 @@ export const getServerSideProps: GetServerSideProps = async (
 			Cookie: context.req.headers.cookie,
 		},
 	};
-
+	// API to get plants, systems, asset types
 	const plants = await axios.get<CMMSPlant[]>("http://localhost:3001/api/getPlants", headers);
 	const systems = await axios.get<CMMSSystem[]>("http://localhost:3001/api/asset/systems", headers);
 	const asset_type = await axios.get<CMMSAssetType[]>("http://localhost:3001/api/asset/fetch_asset_types", headers);
