@@ -7,6 +7,12 @@ import AssetFormTemplate from "../../components/Asset/AssetFormTemplate";
 import RequiredIcon from "../../components/RequiredIcon";
 import { useSystemAsset, useSystemAssetName, useSubComponent1Name } from "../../components/SWR";
 import { CMMSPlant, CMMSSystem, CMMSAssetType, CMMSAssetDetailsState,} from "../../types/common/interfaces";
+import ModuleSimplePopup, {
+	SimpleIcon,
+  } from "../../components/ModuleLayout/ModuleSimplePopup";
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+
 
 interface NewAssetProps {
 	plants: CMMSPlant[];
@@ -15,7 +21,6 @@ interface NewAssetProps {
 }
 
 const createNewAsset = async (plant: number, system_asset_name: string) => {
-
 	return await axios({
 		url: "",
 		method: "POST",
@@ -33,6 +38,8 @@ const createNewAsset = async (plant: number, system_asset_name: string) => {
 }
 
 export default function NewAsset(props: NewAssetProps) {
+	const router = useRouter();
+	//state of all fields
 	const [form, setform] = useState<CMMSAssetDetailsState>({
 	plant_id:0
     ,system_id: 0
@@ -52,6 +59,10 @@ export default function NewAsset(props: NewAssetProps) {
 	,tech_specs:""
 	,manufacture_country:""
 	,remarks:""});
+
+	const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
+	const [isMultipleEntries, setIsMultipleEntries] = useState<boolean>(false);
+	const [submissionModal, setSubmissionModal] = useState<boolean>(false);
 
 	const {
 		data: systemAssetData,
@@ -82,6 +93,14 @@ export default function NewAsset(props: NewAssetProps) {
 		setform((prevState) => {return{...prevState,[e.target.name]:e.target.value}});
 	}
 	function submission() {
+	
+
+		if (form.plant_id === 0 || form.system_id === 0 || form.system_asset_id === 0 || (form.system_asset_name === "" && form.system_asset_name_form === "")) {
+			setIsMissingDetailsModaOpen(true);
+		} else if (((form.system_asset_name !== "") && (form.system_asset_name_form !== "")) || ((form.sub_component_1 !== "") && (form.sub_component_1_form !== ""))){
+			setIsMultipleEntries(true);
+		}
+		else{
 		var system_asset_name_post_data: string;
 		if (form.system_asset_name !== "") {
 			system_asset_name_post_data = form.system_asset_name;
@@ -138,12 +157,17 @@ export default function NewAsset(props: NewAssetProps) {
 			},
 			body: JSON.stringify(postData),
 		});
-	}
+		setSubmissionModal(true);
+	}}
+	// function vaidateForm(){
+
+	// }
 	return (<ModuleMain>
 		<ModuleHeader header="New Asset"/>
 		<ModuleContent includeGreyContainer grid>
 			<div className={formStyles.halfContainer}>
 				<div className="form-group">
+				{/* for testing */}
 				{/* <div>PlantID: {form.plant_id}</div>
 				<div>SystemID: {form.system_id}</div>
 					<div>SystemAssetID: {form.system_asset_id}</div>
@@ -164,7 +188,7 @@ export default function NewAsset(props: NewAssetProps) {
 					<div>Remarks Form: {form.remarks}</div> */}
 
 
-					<label className='form-label'><RequiredIcon/> Plant</label>
+					<label className='form-label'>Plant<RequiredIcon/></label>
 					<select className="form-select" onChange={handleForm} name='plant_id'>
 						<option value="0" disabled hidden selected>-- Select Plant --</option>
 						{
@@ -173,7 +197,7 @@ export default function NewAsset(props: NewAssetProps) {
 					</select>
 				</div>
 				<div className="form-group">
-					<label className='form-label'><RequiredIcon/> System</label>
+					<label className='form-label'>System<RequiredIcon/></label>
 					<select className="form-select" onChange={handleForm} name='system_id'>
 						<option value="0" disabled hidden selected>-- Select System --</option>
 						{
@@ -182,7 +206,7 @@ export default function NewAsset(props: NewAssetProps) {
 					</select>
 				</div>
 				<div className="form-group">
-					<label className='form-label'><RequiredIcon/> System Asset</label>
+					<label className='form-label'>System Asset<RequiredIcon/></label>
 					<select className="form-select" defaultValue={0} onChange={handleAssetNameSelect} name='system_asset_id'>
 						<option value={0} disabled hidden>-- Select System Asset --</option>
 						{
@@ -191,7 +215,7 @@ export default function NewAsset(props: NewAssetProps) {
 					</select>
 				</div>
 				<div className="form-group">
-					<label className='form-label'><RequiredIcon/> Asset Type</label>
+					<label className='form-label'>Asset Type<RequiredIcon/></label>
 					<select className="form-select" defaultValue={''} onChange={handleForm} name='asset_type_id'>
 						<option value={''}>NA</option>
 						{
@@ -200,7 +224,7 @@ export default function NewAsset(props: NewAssetProps) {
 					</select>
 				</div>
 				<div className="form-group">
-					<label className='form-label'><RequiredIcon/> System Asset Name</label>
+					<label className='form-label'> System Asset Name<RequiredIcon/></label>
 					<div className="input-group">
 						<select className="form-select" defaultValue={''} disabled={!form.asset_type_id} onChange={handleForm} name='system_asset_name'>
 						<option value={''} disabled hidden>-- Select System Asset Name--</option>
@@ -213,7 +237,7 @@ export default function NewAsset(props: NewAssetProps) {
 					</div>
 				</div>
 				<div className="form-group">
-					<label className='form-label'><RequiredIcon/> Sub-Components 1</label>
+					<label className='form-label'> Sub-Components 1</label>
 					<div className="input-group">
 						<select className="form-select" defaultValue={0} disabled={!form.asset_type_id} onChange={handleForm} name='sub_component_1'>
 						<option value={0} disabled hidden>-- Select Sub-Components 1--</option>
@@ -226,7 +250,7 @@ export default function NewAsset(props: NewAssetProps) {
 					</div>
 				</div>
 				<div className="form-group">
-					<label className='form-label'><RequiredIcon/> Sub-Components 2</label>
+					<label className='form-label'>Sub-Components 2</label>
 					<div className="input-group">
 						
 						<input onChange={handleForm} name='sub_component_2_form' type="text" className="form-control" placeholder="Enter New Sub-Component" disabled={!form.asset_type_id}/>
@@ -236,44 +260,84 @@ export default function NewAsset(props: NewAssetProps) {
 
 			<div className={formStyles.halfContainer}>
 				<div className="form-group">
-					<label className='form-label'><RequiredIcon/> Description</label>
+					<label className='form-label'>Description</label>
 					<input type="text" className="form-control" onChange={handleForm} name='description' placeholder="Enter Description"/>
 				</div>
 
 				<div className="form-group">
-					<label className='form-label'><RequiredIcon/> Location</label>
+					<label className='form-label'> Location</label>
 					<input type="text" className="form-control" onChange={handleForm} name='location' placeholder="Enter Location"/>
 				</div>
 
 				<div className="form-group">
-					<label className='form-label'><RequiredIcon/> Brand</label>
+					<label className='form-label'> Brand</label>
 					<input type="text" className="form-control" onChange={handleForm} name='brand' placeholder="Enter Brand"/>
 				</div>
 
 				<div className="form-group">
-					<label className='form-label'><RequiredIcon/> Model Number</label>
+					<label className='form-label'>Model Number</label>
 					<input type="text" className="form-control" onChange={handleForm} name='model_number' placeholder="Enter Model Number"/>
 				</div>
 
 				<div className="form-group">
-					<label className='form-label'><RequiredIcon/> Warranty</label>
+					<label className='form-label'>Warranty</label>
 					<input type="text" className="form-control" onChange={handleForm} name='warranty' placeholder="Enter Warranty"/>
 				</div>
 				
 				<div className="form-group">
-					<label className='form-label'><RequiredIcon/> Tech Specs</label>
+					<label className='form-label'> Tech Specs</label>
 					<input type="text" className="form-control" onChange={handleForm} name='tech_specs' placeholder="Enter Tech Specs"/>
 				</div>
 
 				<div className="form-group">
-					<label className='form-label'><RequiredIcon/> Manufacture Country</label>
+					<label className='form-label'>Manufacture Country</label>
 					<input type="text" className="form-control" onChange={handleForm} name='manufacture_country' placeholder="Enter Country"/>
 				</div>
 
 				<div className="form-group">
-					<label className='form-label'><RequiredIcon/> Remarks</label>
+					<label className='form-label'> Remarks</label>
 					<input type="text" className="form-control" onChange={handleForm} name='remarks' placeholder="Enter Remarks"/>
 				</div>
+				<ModuleSimplePopup
+        modalOpenState={isMissingDetailsModalOpen}
+        setModalOpenState={setIsMissingDetailsModaOpen}
+        title="Missing Details"
+        text="Please ensure that you have filled in all the required entries."
+        icon={SimpleIcon.Cross}
+      />
+	  			<ModuleSimplePopup
+        modalOpenState={isMultipleEntries}
+        setModalOpenState={setIsMultipleEntries}
+        title="Multiple Entries Selected"
+        text="Please ensure that you only fill the dropdown or form. DO NOT choose both."
+        icon={SimpleIcon.Cross}
+      />
+	  			<ModuleSimplePopup
+                modalOpenState={submissionModal}
+                setModalOpenState={setSubmissionModal}
+                title="Success!"
+                text="Your inputs has been submitted!"
+                icon={SimpleIcon.Check}
+				buttons={
+					<button
+					  onClick={() => {
+						setSubmissionModal(false);
+						router.push("/Asset");
+					  }}
+					  className="btn btn-primary"
+					>Ok</button>
+				}
+				buttons2={
+					<button
+					  onClick={() => {
+						setSubmissionModal(false);
+						router.reload();
+					  }}
+					  className="btn btn-primary"
+					>Submit another asset</button>
+				}
+				onRequestClose={() => {router.push("/Asset");}}
+            />
 			</div>
 		</ModuleContent>
 		<ModuleFooter>
