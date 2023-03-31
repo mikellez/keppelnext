@@ -171,23 +171,9 @@ router.get("/asset/systems", checkIfLoggedInAPI, controllers.asset.fetchSystems)
 router.get("/asset/fetch_asset_types", checkIfLoggedInAPI, controllers.asset.fetch_asset_types);
 
 router.get("/asset/system/:system_id", checkIfLoggedInAPI, controllers.asset.fetchSystemAssets);
-<<<<<<< HEAD
 router.get("/asset/system/:plant_id/:system_id/:system_asset_id", checkIfLoggedInAPI, controllers.asset.fetchSystemAssetNames);
 router.get("/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id", checkIfLoggedInAPI, controllers.asset.fetchSubComponent1Names);
 router.post("/asset/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
-=======
-router.get(
-    "/asset/system/:plant_id/:system_id/:system_asset_id",
-    checkIfLoggedInAPI,
-    controllers.asset.fetchSystemAssetNames
-);
-router.get(
-    "/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",
-    checkIfLoggedInAPI,
-    controllers.asset.fetchSubComponent1Names
-);
-router.post("/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
->>>>>>> 91787d58cbea795b18d5d66c07549df71fd123f3
 
 router.get(
     "/checklist/template",
