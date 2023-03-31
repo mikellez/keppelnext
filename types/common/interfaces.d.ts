@@ -316,11 +316,7 @@ export {
   CMMSSystemAsset,
   CMMSAssetType,
   CMMSSystemAssetName,
-<<<<<<< HEAD
   CMMSAssetDetails2,
-  postData
-  
-=======
+  postData,
   CMMSSubComponent1Name
->>>>>>> 03960f92af756b8dc3c143a859971aafaedc78ea
 };
