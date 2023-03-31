@@ -32,7 +32,7 @@ interface CMMSAssetDetails extends CMMSAsset {
   system_asset_lvl7?: string;
 }
 
-interface CMMSAssetDetails2{
+interface CMMSAssetDetailsState{
   plant_id: number;
   system_id: number;
   system_asset_id: number;
@@ -316,7 +316,8 @@ export {
   CMMSSystemAsset,
   CMMSAssetType,
   CMMSSystemAssetName,
-  CMMSAssetDetails2,
+  CMMSAssetDetailsState,
   postData,
+  CMMSAssetDetails,
   CMMSSubComponent1Name
 };

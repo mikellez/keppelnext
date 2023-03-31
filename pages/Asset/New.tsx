@@ -6,7 +6,7 @@ import { ModuleContent, ModuleFooter, ModuleHeader, ModuleMain } from "../../com
 import AssetFormTemplate from "../../components/Asset/AssetFormTemplate";
 import RequiredIcon from "../../components/RequiredIcon";
 import { useSystemAsset, useSystemAssetName, useSubComponent1Name } from "../../components/SWR";
-import { CMMSPlant, CMMSSystem, CMMSAssetType, CMMSAssetDetails2} from "../../types/common/interfaces";
+import { CMMSPlant, CMMSSystem, CMMSAssetType, CMMSAssetDetailsState,} from "../../types/common/interfaces";
 
 interface NewAssetProps {
 	plants: CMMSPlant[];
@@ -33,25 +33,25 @@ const createNewAsset = async (plant: number, system_asset_name: string) => {
 }
 
 export default function NewAsset(props: NewAssetProps) {
-	const [form, setform] = useState<CMMSAssetDetails2>({
+	const [form, setform] = useState<CMMSAssetDetailsState>({
 	plant_id:0
     ,system_id: 0
 	,system_asset_id: 0
-	,system_asset: ''	
-    ,asset_type_id: ''
-	,system_asset_name: ''
-	,system_asset_name_form: ''
-	,sub_component_1: ''
-	,sub_component_1_form: ''
-	,sub_component_2: ''
-	,description:''
-	,location:''
-	,brand:''
-	,model_number:''
-	,warranty:''
-	,tech_specs:''
-	,manufacture_country:''
-	,remarks:''});
+	,system_asset: ""
+    ,asset_type_id: ""
+	,system_asset_name: ""
+	,system_asset_name_form: ""
+	,sub_component_1: ""
+	,sub_component_1_form: ""
+	,sub_component_2: ""
+	,description:""
+	,location:""
+	,brand:""
+	,model_number:""
+	,warranty:""
+	,tech_specs:""
+	,manufacture_country:""
+	,remarks:""});
 
 	const {
 		data: systemAssetData,
@@ -83,20 +83,20 @@ export default function NewAsset(props: NewAssetProps) {
 	}
 	function submission() {
 		var system_asset_name_post_data: string;
-		if (form.system_asset_name !== '') {
+		if (form.system_asset_name !== "") {
 			system_asset_name_post_data = form.system_asset_name;
-		} else if (form.system_asset_name_form !== '') {
+		} else if (form.system_asset_name_form !== "") {
 			system_asset_name_post_data = form.system_asset_name_form;
 		} else {
-			system_asset_name_post_data = '';
+			system_asset_name_post_data = "";
 		}
 		var system_lvl_5_post_data: string;
-		if (form.sub_component_1 !== '') {
+		if (form.sub_component_1 !== "") {
 			system_lvl_5_post_data = form.sub_component_1;
-		} else if (form.sub_component_1_form !== '') {
+		} else if (form.sub_component_1_form !== "") {
 			system_lvl_5_post_data = form.sub_component_1_form;
 		} else {
-			system_lvl_5_post_data = '';
+			system_lvl_5_post_data = "";
 		}
 
 		let postData: {
@@ -105,7 +105,7 @@ export default function NewAsset(props: NewAssetProps) {
 			system_asset: string;
 			system_asset_id: number;
 			system_asset_name: string;
-			system_lvl_5_post_data: string;
+			system_lvl_5: string;
 			[key: string]: string | number;
 		} = {
 			plant_id: form.plant_id,
@@ -113,7 +113,7 @@ export default function NewAsset(props: NewAssetProps) {
 			system_asset: form.system_asset,
 			system_asset_id: form.system_asset_id,
 			system_asset_name: system_asset_name_post_data,
-			system_lvl_5_post_data: system_lvl_5_post_data,
+			system_lvl_5: system_lvl_5_post_data,
 			asset_type: form.asset_type_id,
 			system_lvl_6: form.sub_component_2,
 			description: form.description,
@@ -124,8 +124,8 @@ export default function NewAsset(props: NewAssetProps) {
 			tech_specs: form.tech_specs,
 			manufacture_country: form.manufacture_country,
 			remarks: form.remarks,
-			image: '',
-			files : ''
+			image: "",
+			files : JSON.stringify({})
 
 		}
 	
@@ -277,7 +277,7 @@ export default function NewAsset(props: NewAssetProps) {
 			</div>
 		</ModuleContent>
 		<ModuleFooter>
-			<button className="btn btn-primary" onClick={() => createNewAsset(3, (type != "" ? type : select))}>Submit</button>
+			<button className="btn btn-primary" onClick={submission}>Submit</button>
 		</ModuleFooter>
 	</ModuleMain>
 	);
