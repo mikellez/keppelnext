@@ -35,18 +35,17 @@ ORDER BY cl.checklist_id DESC;
 `;
 
 const fetchTemplateChecklists = async (req, res, next) => {
-  db.query(fetchTemplateChecklistsQuery, [req.user.id], (err, result) => {
-    if (err) return res.status(400).json({ msg: err });
-    if (result.rows.length == 0)
-      return res.status(201).json({ msg: "No checklist" });
+    db.query(fetchTemplateChecklistsQuery, [req.user.id], (err, result) => {
+        if (err) return res.status(400).json({ msg: err });
+        if (result.rows.length == 0) return res.status(201).json({ msg: "No checklist" });
 
-    return res.status(200).json(result.rows);
-  });
+        return res.status(200).json(result.rows);
+    });
 };
 
 const fetchForReviewChecklists = async (req, res, next) => {
-  db.query(
-    `SELECT cl.checklist_id, cl.chl_name, cl.description, cl.status_id,
+    db.query(
+        `SELECT cl.checklist_id, cl.chl_name, cl.description, cl.status_id,
 			concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
 			concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
 			concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
@@ -71,29 +70,29 @@ const fetchForReviewChecklists = async (req, res, next) => {
 			and (cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 4 or cl.status_id = 7)
 			order by cl.checklist_id desc;
 		`,
-    [req.user.id],
-    (err1, result) => {
-      if (err1) {
-        // throw err1;
-        return res.status(400).json({
-          msg: err1,
-        });
-      }
-      if (result.rows.length == 0) {
-        // console.log(result);
-        return res.status(201).json({
-          msg: "No checklist added",
-        });
-      }
+        [req.user.id],
+        (err1, result) => {
+            if (err1) {
+                // throw err1;
+                return res.status(400).json({
+                    msg: err1,
+                });
+            }
+            if (result.rows.length == 0) {
+                // console.log(result);
+                return res.status(201).json({
+                    msg: "No checklist added",
+                });
+            }
 
-      return res.status(200).json(result.rows);
-    }
-  );
+            return res.status(200).json(result.rows);
+        }
+    );
 };
 
 const fetchApprovedChecklists = async (req, res, next) => {
-  db.query(
-    `SELECT cl.checklist_id, cl.chl_name, cl.description, cl.status_id,
+    db.query(
+        `SELECT cl.checklist_id, cl.chl_name, cl.description, cl.status_id,
 	concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
 	concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
 	concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
@@ -117,97 +116,96 @@ const fetchApprovedChecklists = async (req, res, next) => {
 	and (cl.chl_type = 'Approved')
 	and (cl.status_id = 5 or cl.status_id = 7)
 	order by cl.checklist_id desc;`,
-    [req.user.id],
-    (err, result) => {
-      if (err) {
-        // throw err1;
-        return res.status(400).json({
-          msg: err,
-        });
-      }
-      if (result.rows.length == 0) {
-        // console.log(result);
-        return res.status(201).json({
-          msg: "No checklist added",
-        });
-      }
+        [req.user.id],
+        (err, result) => {
+            if (err) {
+                // throw err1;
+                return res.status(400).json({
+                    msg: err,
+                });
+            }
+            if (result.rows.length == 0) {
+                // console.log(result);
+                return res.status(201).json({
+                    msg: "No checklist added",
+                });
+            }
 
-      return res.status(200).json(result.rows);
-    }
-  );
+            return res.status(200).json(result.rows);
+        }
+    );
 };
 
+// get plant specificed checklist templates
 const fetchChecklistTemplateNames = async (req, res, next) => {
-  db.query(`SELECT * from keppel.checklist_templates`, (err, result) => {
-    if (err) throw err;
-    if (result) return res.status(200).json(result.rows);
-  });
+    db.query(
+        `SELECT * from keppel.checklist_templates WHERE plant_id = ${req.params.id}`,
+        (err, result) => {
+            if (err) throw err;
+            if (result) return res.status(200).json(result.rows);
+        }
+    );
 };
 
 const submitNewChecklistTemplate = async (req, res, next) => {
-	if(req.body.checklistSections === undefined)
-		return res.status(400).json("ayo?");
+    if (req.body.checklistSections === undefined) return res.status(400).json("ayo?");
 
-	console.log(req.body.checklistSections);
+    console.log(req.body.checklistSections);
 
-	return res.status(200).json({
-		msg: "awesome",
-		
-	})
-}
+    return res.status(200).json({
+        msg: "awesome",
+    });
+};
 
 const fetchChecklistCounts = (req, res, next) => {
-  let sql;
-  switch (req.params.field) {
-    case "status":
-      sql =
-        req.params.plant != 0
-          ? `SELECT S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
+    let sql;
+    switch (req.params.field) {
+        case "status":
+            sql =
+                req.params.plant != 0
+                    ? `SELECT S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
 				JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
 				WHERE CM.PLANT_ID = ${req.params.plant}
 				GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)`
-          : `SELECT  S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
+                    : `SELECT  S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
 				JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
 				GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)`;
-      break;
-    default:
-      return res
-        .status(404)
-        .send(`Invalid checklist type of ${req.params.field}`);
-  }
-  db.query(sql, (err, result) => {
-    if (err)
-      return res
-        .status(500)
-        .send(`Error in fetching checklist ${req.params.field} for dashboard`);
-    return res.status(200).send(result.rows);
-  });
+            break;
+        default:
+            return res.status(404).send(`Invalid checklist type of ${req.params.field}`);
+    }
+    db.query(sql, (err, result) => {
+        if (err)
+            return res
+                .status(500)
+                .send(`Error in fetching checklist ${req.params.field} for dashboard`);
+        return res.status(200).send(result.rows);
+    });
 };
 
 const createChecklistCSV = async (req, res, next) => {
-  db.query(fetchTemplateChecklistsQuery, [req.user.id], (err, result) => {
-    if (err) return res.status(400).json({ msg: err });
-    if (result.rows.length == 0)
-      return res.status(201).json({ msg: "No checklist" });
-    generateCSV(result.rows)
-      .then((buffer) => {
-        res.set({
-          "Content-Type": "text/csv",
-        });
-        return res.status(200).send(buffer);
-      })
-      .catch((error) => {
-        res.status(500).send(`Error in generating csv file`);
-      });
-  });
+    db.query(fetchTemplateChecklistsQuery, [req.user.id], (err, result) => {
+        if (err) return res.status(400).json({ msg: err });
+        if (result.rows.length == 0) return res.status(201).json({ msg: "No checklist" });
+        generateCSV(result.rows)
+            .then((buffer) => {
+                res.set({
+                    "Content-Type": "text/csv",
+                });
+                return res.status(200).send(buffer);
+            })
+            .catch((error) => {
+                res.status(500).send(`Error in generating csv file`);
+            });
+    });
 };
 
 module.exports = {
-  fetchTemplateChecklists,
-  fetchForReviewChecklists,
-  fetchApprovedChecklists,
-  fetchChecklistTemplateNames,
-	submitNewChecklistTemplate,
-  fetchChecklistCounts,
-  createChecklistCSV,
+    fetchTemplateChecklists,
+    fetchForReviewChecklists,
+    fetchApprovedChecklists,
+    fetchChecklistTemplateNames,
+    submitNewChecklistTemplate,
+    fetchChecklistCounts,
+    createChecklistCSV,
 };

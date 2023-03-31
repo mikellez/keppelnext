@@ -6,12 +6,13 @@ interface ChecklistSelectProps {
     onChange: React.ChangeEventHandler<HTMLSelectElement>;
     name?: string;
     value?: number;
+    plantId?: number;
 }
 
 // Axios call to get all checklist templates
-async function getChecklistTemplates() {
+async function getChecklistTemplates(plantId: number) {
     return await axios
-        .get<CMMSChecklist[]>("/api/checklist/templateNames")
+        .get<CMMSChecklist[]>("/api/checklist/templateNames/" + plantId)
         .then((res) => {
             return res.data;
         })
@@ -24,7 +25,7 @@ const ChecklistSelect = (props: ChecklistSelectProps) => {
 
     // Calls an api on load to get the list of checklist templates
     useEffect(() => {
-        getChecklistTemplates().then((checklist) => {
+        getChecklistTemplates(props.plantId!).then((checklist) => {
             if (checklist == null) {
                 return console.log("no checklist");
             }

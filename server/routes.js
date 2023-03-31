@@ -145,7 +145,12 @@ router.get("/request/types", checkIfLoggedInAPI, controllers.request.fetchReques
 router.get("/request/priority", checkIfLoggedInAPI, controllers.request.fetchRequestPriority);
 router.get("/request/csv", checkIfLoggedInAPI, controllers.request.createRequestCSV);
 router.get("/request/pdf/:request_id", checkIfLoggedInAPI, sendRequestPDF);
-router.patch("/request/complete/:request_id", checkIfLoggedInAPI, upload.single("completion_file"), controllers.request.completeRequest);
+router.patch(
+    "/request/complete/:request_id",
+    checkIfLoggedInAPI,
+    upload.single("completion_file"),
+    controllers.request.completeRequest
+);
 router
     .route("/request/:request_id", checkIfLoggedInAPI)
     .get(controllers.request.fetchSpecificRequest)
@@ -166,8 +171,16 @@ router.get("/asset/systems", checkIfLoggedInAPI, controllers.asset.fetchSystems)
 router.get("/asset/fetch_asset_types", checkIfLoggedInAPI, controllers.asset.fetch_asset_types);
 
 router.get("/asset/system/:system_id", checkIfLoggedInAPI, controllers.asset.fetchSystemAssets);
-router.get("/asset/system/:plant_id/:system_id/:system_asset_id", checkIfLoggedInAPI, controllers.asset.fetchSystemAssetNames);
-router.get("/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id", checkIfLoggedInAPI, controllers.asset.fetchSubComponent1Names);
+router.get(
+    "/asset/system/:plant_id/:system_id/:system_asset_id",
+    checkIfLoggedInAPI,
+    controllers.asset.fetchSystemAssetNames
+);
+router.get(
+    "/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",
+    checkIfLoggedInAPI,
+    controllers.asset.fetchSubComponent1Names
+);
 router.post("/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
 
 router.get(
@@ -183,7 +196,7 @@ router.get(
 );
 
 router.get(
-    "/checklist/templateNames",
+    "/checklist/templateNames/:id",
     checkIfLoggedInAPI,
     controllers.checklist.fetchChecklistTemplateNames
 );
@@ -200,10 +213,14 @@ router.get("/checklist/csv", checkIfLoggedInAPI, controllers.checklist.createChe
  * @apiDescription Create a new checklist template for later submission as record
  * @apiName CreateChecklistTemplate
  * @apiGroup Checklist
- * 
+ *
  * @apiSuccess {string} - yeah
  */
-router.post("/checklist/template", checkIfLoggedInAPI, controllers.checklist.submitNewChecklistTemplate);
+router.post(
+    "/checklist/template",
+    checkIfLoggedInAPI,
+    controllers.checklist.submitNewChecklistTemplate
+);
 
 /**
  * @api {get} /fault/type Get Fault Types
