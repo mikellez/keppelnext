@@ -184,14 +184,14 @@ router.get(
 );
 router.post("/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
 
-router.post("/checklist/", checkIfLoggedInAPI, controllers.checklist.createNewChecklist);
+router.route("/checklist/template", checkIfLoggedInAPI)
+    .get( controllers.checklist.fetchTemplateChecklists)
+    .port(controllers.checklist.createNewChecklistTemplate)
 
-router.get(
-    "/checklist/template",
-    checkIfLoggedInAPI,
-    controllers.checklist.fetchTemplateChecklists
-);
-router.get("/checklist/record", checkIfLoggedInAPI, controllers.checklist.fetchForReviewChecklists);
+router.route("/checklist/record", checkIfLoggedInAPI) 
+    .get(controllers.checklist.fetchForReviewChecklists)
+    .post(controllers.checklist.createNewChecklistRecord)
+
 router.get(
     "/checklist/approved",
     checkIfLoggedInAPI,

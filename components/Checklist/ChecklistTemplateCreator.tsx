@@ -410,7 +410,7 @@ export default function ChecklistTemplateCreator({ sections, setSections }: {
 				</tr>
 			</tbody>
 		</table>
-		<textarea value={JSON.stringify(sections, undefined, 4)} rows={16} style={{width: "100%"}}/>
+		{/* <textarea value={JSON.stringify(sections, undefined, 4)} rows={16} style={{width: "100%"}}/> */}
 		</>
 	);
 }

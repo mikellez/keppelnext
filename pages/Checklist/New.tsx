@@ -14,9 +14,11 @@ import { CheckSection } from '../../types/common/classes'
 import LoadingHourglass from '../../components/LoadingHourglass'
 import { SingleValue } from 'react-select'
 import TooltipBtn from '../../components/TooltipBtn'
+import ModuleSimplePopup, { SimpleIcon } from '../../components/ModuleLayout/ModuleSimplePopup'
+import { useRouter } from 'next/router'
 
-const createChecklist = async (checklist: CMMSChecklist) => {
-	return await axios.post("/api/checklist", { checklist })
+const createChecklist = async (checklist: CMMSChecklist, type: string) => {
+	return await axios.post(`/api/checklist/${type}`, { checklist })
 		.then(res => {
 			return res.data
 		})
@@ -28,16 +30,18 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 	const [checklistData, setChecklistData] = useState<CMMSChecklist>({} as CMMSChecklist);
 	const [isReady, setIsReady] = useState<boolean>(false);
 	const [sections, setSections] = useState<CheckSection[]>([]);
+	const [incompleteModal, setIncompleteModal] = useState<boolean>(false);
+	const [successModal, setSuccessModal] = useState<boolean>(false);
 
 	const resetChecklist = () => {
 		setSections([]);
-	}
+	};
 
-	const user = useCurrentUser()
+	const user = useCurrentUser();
+	const router = useRouter();
 
 	const updateChecklist = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 		const newInput = e.target.name === "plant_id" ? parseInt(e.target.value) : e.target.value;
-
 		setChecklistData(prev => {
 			return {
 				...prev,
@@ -56,10 +60,43 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 		});
 	};
 
-	const submitChecklist = () => {
-		createChecklist(checklistData)
-			.then(result => console.log(result))
+	const submitChecklist = (checklistType: string) => {
+		if (!checkInputFields(checklistType)) {
+			setIncompleteModal(true);
+		} else {
+			setSuccessModal(true);
+			createChecklist(checklistData, checklistType);
+			setTimeout(() => {
+				router.push("/Checklist");
+			}, 1000);
+		}
 	};
+
+	const checkInputFields = (checklistType: string) => {
+		switch (checklistType) {
+			case "record":
+				return (
+					checklistData.assigned_user_id &&
+					checklistData.signoff_user_id &&
+					checklistData.chl_name &&
+					checklistData.chl_name != "" &&
+					checklistData.description &&
+					checklistData.description != "" &&
+					checklistData.plant_id &&
+					checklistData.linkedassetids &&
+					checklistData.linkedassetids != ""
+				);
+			case "template":
+				return (
+					checklistData.signoff_user_id &&
+					checklistData.chl_name &&
+					checklistData.chl_name != "" &&
+					checklistData.description &&
+					checklistData.description != "" &&
+					checklistData.plant_id
+				);
+		}
+	}
 
 	useEffect(() => {
 			setChecklistData(prev => {
@@ -85,9 +122,10 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 				datajson: JSON.stringify(json),
 			}
 		})
-	}, [sections])
+	}, [sections]);
 
 	return (
+		<>
 		<ModuleMain>
 			<ModuleHeader title="New Checklist" header="Create New Checklist">
 				<Link href="/Checklist" className="btn btn-secondary">Back</Link>
@@ -192,9 +230,37 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 	  	</div>
 		}
 			<ModuleFooter>
-				<TooltipBtn toolTip={false} onClick={submitChecklist}>Submit</TooltipBtn>
+				<TooltipBtn 
+					toolTip={false} 
+					style={{backgroundColor: "#F7C04A", borderColor: "#F7C04A"}} 
+					onClick={() => submitChecklist("template")}
+					disabled={successModal}
+				>Save Template</TooltipBtn>
+
+				<TooltipBtn 
+					toolTip={false} 
+					onClick={() => submitChecklist("record")}
+					disabled={successModal}
+				>Submit</TooltipBtn>
 			</ModuleFooter>
 		</ModuleMain>
+
+		<ModuleSimplePopup
+			setModalOpenState={setSuccessModal}
+			modalOpenState={successModal}
+			title="Success"
+			text="New checklist successfully created"
+			icon={SimpleIcon.Check}
+		/>
+
+		<ModuleSimplePopup
+			setModalOpenState={setIncompleteModal}
+			modalOpenState={incompleteModal}
+			title="Missing details"
+			text="Please ensure that all input fields have been filled"
+			icon={SimpleIcon.Exclaim}
+		/>
+		</>
   	)
 }
 
