@@ -11,11 +11,13 @@ import axios from 'axios'
 import { useAsset, useCurrentUser } from '../../components/SWR'
 
 import PlantSelect from '../../components/PlantSelect'
-import AssignToSelect from '../../components/Schedule/AssignToSelect'
+import AssignToSelect, { AssignedUserOption } from '../../components/Schedule/AssignToSelect'
+import AssetSelect from '../../components/Checklist/AssetSelect'
 
 import { CheckSection } from '../../types/common/classes'
 import LoadingIcon from '../../components/LoadingIcon'
 import LoadingHourglass from '../../components/LoadingHourglass'
+import { SingleValue } from 'react-select'
 
 export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 
@@ -37,8 +39,17 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 				...prev,
 				[e.target.name]: newInput,
 			}
-		})
+		});
 
+	};
+
+	const updateChecklistField = (value: number | string | null, field: string) => {
+		setChecklistData(prev => {
+			return {
+				...prev,
+				[field]: value,
+			}
+		});
 	};
 
 	useEffect(() => {
@@ -58,13 +69,6 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 	}, [user.data]);
 
 	console.log(checklistData)
-
-	const {
-		data,
-		error,
-		isValidating,
-		mutate
-	} = useAsset(checklistData.plant_id);
 
 	return (
 		<ModuleMain>
@@ -108,10 +112,15 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 			<div className={formStyles.halfContainer} style={{gridRow: "span 3"}}>
 				<div className="form-group" style={{display:"flex", flexDirection:"column", height:"100%"}}>
 					<label className="form-label">Linked Assets:</label>
-					{/* <select multiple className="form-control" id="formControlLinkedAssets"
-						style={{display:"block", flex:1, height: "100%"}}>
-						{!data && <option disabled>Select a plant</option>}
-					</select> */}
+					<AssetSelect
+						onChange={(values) => {
+							const assetIdsString = values.length > 0 ? values
+								.map(option => option.value.toString())
+								.reduce((accumulator, current) => accumulator + ", " + current) : null;
+							updateChecklistField(assetIdsString, "linkedassetids");
+						}}
+						plantId={checklistData.plant_id}
+					/>
 				</div>
 			</div>
 
@@ -122,7 +131,9 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 				<div className="form-group">
 					<label className='form-label'>Assigned To</label>
 					<AssignToSelect 
-						onChange={() => {}} 
+						onChange={(value) => {
+							updateChecklistField((value as SingleValue<AssignedUserOption>)?.value as number, "assigned_user_id")
+						}} 
 						plantId={checklistData.plant_id}
 						isSingle
 					/>
@@ -140,7 +151,9 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 				<div className="form-group">
 					<label className='form-label'>Sign Off By</label>
 					<AssignToSelect 
-						onChange={() => {}} 
+						onChange={(value) => {
+							updateChecklistField((value as SingleValue<AssignedUserOption>)?.value as number, "signoff_user_id")
+						}} 
 						plantId={checklistData.plant_id}
 						isSingle
 					/>
