@@ -99,6 +99,13 @@ export function toPeriodNum(period: string): number {
     }
 }
 
+/*
+    ScheduleTemplate component is used across 
+    pages with the FullCalendar conmponent.
+    It takes in a list of schedules and render
+    each date on individually on the calendar.
+*/
+
 export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     // Store the list of events in a state to be rendered on the calendar
     const [eventList, setEventList] = useState<CMMSScheduleEvent[]>([]);

@@ -1,3 +1,27 @@
+/*
+  EXPLANATION
+
+  The following is a form component used for creating of new
+  requests as well as the assigning of request to other users.
+  Due to the many features that this one component supports, 
+  it takes in the following props
+
+  RequestData
+  assignRequestData
+  linkedRequestData
+
+  - RequestData is an attribute that enables the dropdowns in
+    the form, such as priority, faults and etc
+
+  - assignRequestData and linkedRequestData are ways of idenitfy
+    the current usage of the component and what exactly needs to 
+    be rendered for each use case
+*/
+
+
+
+
+
 import formStyles from "../../styles/formStyles.module.css";
 
 import React, { useEffect, useState } from "react";

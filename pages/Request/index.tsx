@@ -1,3 +1,26 @@
+/* 
+  EXPLANATION OF REQUEST MODULE
+  
+  The request module is made of 3 major components:
+  - /components/request/RequestContainer.tsx
+  - /components/request/RequestPreview.tsx
+  - and lastly the request table found on /pages/Request/index.tsx
+
+  - RequestContainer is a form component that allows users to fill
+    in details to create new or corrective request. Engineers and 
+    Managers can assign request to other users as well. Please 
+    review it for more details
+
+  - RequestPreview is meant to be a preview only component though
+    it supports the feature of request completion and approval &
+    rejection of request for operation specialists and managers 
+    respectively.
+  
+  - Request table in the index page of request is made using react 
+    table library. It supports table dropdown features.
+*/
+
+
 import React, { useState, useEffect, CSSProperties } from "react";
 import {
   ModuleContent,
@@ -183,7 +206,7 @@ export default function Request() {
                 data?.role_id == 1 || data?.role_id == 1 || data?.role_id == 1
                   ? "block"
                   : "none",
-              visibility: item.status_id === 1 ? "visible" : "hidden",
+              visibility: item.status_id === 1 || item.status_id === 2 ? "visible" : "hidden",
             }}
             onClick={() => {
               router.push(`/Request/Assign/${item.id}`);
@@ -204,7 +227,7 @@ export default function Request() {
           <div
             className={styles.editIcon}
             onClick={() => {
-              setCurrentHistory(item.id);
+              setCurrentHistory(item.requesthistory);
             }}
           >
             <AiOutlineHistory size={18} title={"View History"} />

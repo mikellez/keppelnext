@@ -1,3 +1,30 @@
+/* 
+  EXPLANATION
+
+  CreateScheduleModal accepts the following props:
+
+  title
+  option
+  timelineId
+  isManage
+
+  - option is a prop that accepts an enum value in ScheduleCreateOptions
+    It is a way of defining a usage of the modal whether it will
+    be used to create a New schedule, choose from Draft or from Most Recent
+    Approved
+
+  - timelineId is a prop that is passed when the there is default selected 
+    timeline with prefilled details
+
+  - isManage is a prop used when the component is used in the manage page
+    When isManage is used, the modal is entirely for view purposes and 
+    no edits can be made
+
+*/
+
+
+
+
 import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
 import { ModalProps } from "./EventModal";

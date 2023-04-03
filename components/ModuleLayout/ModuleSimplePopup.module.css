@@ -9,13 +9,13 @@
 
 .footerButtons {
 	position: absolute;
-	bottom: 1em;
-	right: 1em;
+	bottom: 0.1em;
+	right: 0.1em;
 	padding: 0.2em;
 }
 
 .footerButtons > button {
-	margin-left: 0.4rem;
+	margin-left: 0.8rem;
 }
 
 .modalText {

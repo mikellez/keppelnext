@@ -32,6 +32,61 @@ interface CMMSAssetDetails extends CMMSAsset {
   system_asset_lvl7?: string;
 }
 
+interface CMMSAssetDetailsState{
+  plant_id: number;
+  system_id: number;
+  system_asset_id: number;
+  system_asset: string;
+  asset_type_id: string;
+  system_asset_name: string;
+  system_asset_name_form: string;
+  sub_component_1: string;
+  sub_component_1_form: string;
+  sub_component_2: string;
+  description: string;
+  location: string;
+  brand: string;
+  model_number: string;
+  tech_specs: string;
+  manufacture_country: string;
+  warranty: string;
+  remarks: string;
+
+}
+/*
+interface CMMSAssetDetails2 {
+  psa_id: number;
+
+  plant_id: number;
+
+
+  uploaded_image: Uint8Array | null;
+  uploaded_files: Uint8Array[] | null;
+}*/
+
+interface postData{
+  plant_id?: number;
+  system_id?: number;
+  system_asset_id?: number;
+  system_asset?: string;
+  asset_type_id?: string;
+  system_asset_name?: string;
+  system_asset_name_form?: string;
+  sub_component_1?: string;
+  sub_component_1_form?: string;
+  sub_component_2?: string;
+  description?: string;
+  location?: string;
+  brand?: string;
+  model_number?: string;
+  tech_specs?: string;
+  manufacture_country?: string;
+  warranty?: string;
+  remarks?: string;
+  uploaded_image?: string;
+  uploaded_files?: string;
+}
+
 interface CMMSAssetRequestHistory {
   status: string;
   action: string;
@@ -261,5 +316,8 @@ export {
   CMMSSystemAsset,
   CMMSAssetType,
   CMMSSystemAssetName,
+  CMMSAssetDetailsState,
+  postData,
+  CMMSAssetDetails,
   CMMSSubComponent1Name
 };
