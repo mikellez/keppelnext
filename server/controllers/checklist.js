@@ -136,15 +136,16 @@ const fetchApprovedChecklists = async (req, res, next) => {
     );
 };
 
-// get plant specificed checklist templates
+// get checklist templates
 const fetchChecklistTemplateNames = async (req, res, next) => {
-    db.query(
-        `SELECT * from keppel.checklist_templates WHERE plant_id = ${req.params.id}`,
-        (err, result) => {
-            if (err) throw err;
-            if (result) return res.status(200).json(result.rows);
-        }
-    );
+    const sql = req.params.id
+        ? `SELECT * from keppel.checklist_templates WHERE plant_id = ${req.params.id}` // templates are plant specificed (from that plant only)
+        : `SELECT * from keppel.checklist_templates WHERE plant_id = any(ARRAY${req.query.test}::int[])
+            ORDER BY keppel.checklist_templates.checklist_id DESC;`; // templates are plants specificed depending on user access(1 use can be assigned multiple plants)
+    db.query(sql, (err, result) => {
+        if (err) throw err;
+        if (result) return res.status(200).json(result.rows);
+    });
 };
 
 const submitNewChecklistTemplate = async (req, res, next) => {

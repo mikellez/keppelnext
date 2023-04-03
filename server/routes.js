@@ -197,7 +197,7 @@ router.get(
 );
 
 router.get(
-    "/checklist/templateNames/:id",
+    "/checklist/templateNames/:id?",
     checkIfLoggedInAPI,
     controllers.checklist.fetchChecklistTemplateNames
 );
