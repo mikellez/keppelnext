@@ -184,6 +184,8 @@ router.get(
 );
 router.post("/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
 
+router.post("/checklist/", checkIfLoggedInAPI, controllers.checklist.createNewChecklist);
+
 router.get(
     "/checklist/template",
     checkIfLoggedInAPI,
@@ -217,6 +219,7 @@ router.get("/checklist/csv", checkIfLoggedInAPI, controllers.checklist.createChe
  *
  * @apiSuccess {string} - yeah
  */
+
 router.post(
     "/checklist/template",
     checkIfLoggedInAPI,

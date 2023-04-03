@@ -1,23 +1,27 @@
 import formStyles from '../../styles/formStyles.module.css'
-
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-
 import { ModuleContent, ModuleDivider, ModuleHeader, ModuleMain, ModuleFooter } from '../../components'
 import ChecklistTemplateCreator from '../../components/Checklist/ChecklistTemplateCreator'
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import { CMMSPlant, CMMSChecklist } from '../../types/common/interfaces'
 import axios from 'axios'
-import { useAsset, useCurrentUser } from '../../components/SWR'
-
+import { useCurrentUser } from '../../components/SWR'
 import PlantSelect from '../../components/PlantSelect'
 import AssignToSelect, { AssignedUserOption } from '../../components/Schedule/AssignToSelect'
 import AssetSelect from '../../components/Checklist/AssetSelect'
-
 import { CheckSection } from '../../types/common/classes'
-import LoadingIcon from '../../components/LoadingIcon'
 import LoadingHourglass from '../../components/LoadingHourglass'
 import { SingleValue } from 'react-select'
+import TooltipBtn from '../../components/TooltipBtn'
+
+const createChecklist = async (checklist: CMMSChecklist) => {
+	return await axios.post("/api/checklist", { checklist })
+		.then(res => {
+			return res.data
+		})
+		.catch(err => console.log(err))
+};
 
 export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 
@@ -52,8 +56,12 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 		});
 	};
 
-	useEffect(() => {
+	const submitChecklist = () => {
+		createChecklist(checklistData)
+			.then(result => console.log(result))
+	};
 
+	useEffect(() => {
 			setChecklistData(prev => {
 				return {
 					...prev,
@@ -65,10 +73,19 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 			setTimeout(() => {
 				setIsReady(true);
 			}, 1000);
-
 	}, [user.data]);
 
-	console.log(checklistData)
+	useEffect(() => {
+		const json = sections.length > 0 ? 
+			sections.map(section => section.toJSON()) :
+			[];
+		setChecklistData(prev => {
+			return {
+				...prev,
+				datajson: JSON.stringify(json),
+			}
+		})
+	}, [sections])
 
 	return (
 		<ModuleMain>
@@ -116,7 +133,7 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 						onChange={(values) => {
 							const assetIdsString = values.length > 0 ? values
 								.map(option => option.value.toString())
-								.reduce((accumulator, current) => accumulator + ", " + current) : null;
+								.join(", ") : null;
 							updateChecklistField(assetIdsString, "linkedassetids");
 						}}
 						plantId={checklistData.plant_id}
@@ -175,6 +192,7 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 	  	</div>
 		}
 			<ModuleFooter>
+				<TooltipBtn toolTip={false} onClick={submitChecklist}>Submit</TooltipBtn>
 			</ModuleFooter>
 		</ModuleMain>
   	)
@@ -193,8 +211,6 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 	const values = await Promise.all([getPlants])
 
 	const p: CMMSPlant[]				= values[0].data;
-
-	console.log(p);
 
 	let props: {
 		plants: CMMSPlant[]

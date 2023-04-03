@@ -215,7 +215,7 @@ function ChecklistCheckRow(
 		r.checks[i] = check;*/
 
 		r.checks = checks;
-		console.log("handleCheck")
+		// console.log("handleCheck")
 		onChange(r);
 	}
 
@@ -371,8 +371,8 @@ export default function ChecklistTemplateCreator({ sections, setSections }: {
 		if(sections.length < 1)
 			return
 
-		console.log(CheckSection.fromJSON(JSON.stringify(sections[0])))
-		console.log(JSON.stringify(CheckSection.fromJSON(JSON.stringify(sections[0]))))
+		// console.log(CheckSection.fromJSON(JSON.stringify(sections[0])))
+		// console.log(JSON.stringify(CheckSection.fromJSON(JSON.stringify(sections[0]))))
 	}, [sections])
 
 	return (<>

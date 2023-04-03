@@ -157,6 +157,11 @@ const submitNewChecklistTemplate = async (req, res, next) => {
     });
 };
 
+const createNewChecklist = async (req, res, next) => {
+    console.log(req.body.checklist)
+    return res.status(200).json("Hello World")
+};
+
 const fetchChecklistCounts = (req, res, next) => {
     let sql;
     switch (req.params.field) {
@@ -208,4 +213,5 @@ module.exports = {
     submitNewChecklistTemplate,
     fetchChecklistCounts,
     createChecklistCSV,
+    createNewChecklist
 };
