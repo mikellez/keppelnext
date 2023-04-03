@@ -1,48 +1,104 @@
 import formStyles from '../../styles/formStyles.module.css'
-
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-
 import { ModuleContent, ModuleDivider, ModuleHeader, ModuleMain, ModuleFooter } from '../../components'
 import ChecklistTemplateCreator from '../../components/Checklist/ChecklistTemplateCreator'
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import { CMMSPlant, CMMSChecklist } from '../../types/common/interfaces'
 import axios from 'axios'
-import { useAsset, useCurrentUser } from '../../components/SWR'
-
+import { useCurrentUser } from '../../components/SWR'
 import PlantSelect from '../../components/PlantSelect'
-import AssignToSelect from '../../components/Schedule/AssignToSelect'
-
+import AssignToSelect, { AssignedUserOption } from '../../components/Schedule/AssignToSelect'
+import AssetSelect from '../../components/Checklist/AssetSelect'
 import { CheckSection } from '../../types/common/classes'
-import LoadingIcon from '../../components/LoadingIcon'
 import LoadingHourglass from '../../components/LoadingHourglass'
+import { SingleValue } from 'react-select'
+import TooltipBtn from '../../components/TooltipBtn'
+import ModuleSimplePopup, { SimpleIcon } from '../../components/ModuleLayout/ModuleSimplePopup'
+import { useRouter } from 'next/router'
+
+const createChecklist = async (checklist: CMMSChecklist, type: string) => {
+	return await axios.post(`/api/checklist/${type}`, { checklist })
+		.then(res => {
+			return res.data
+		})
+		.catch(err => console.log(err))
+};
 
 export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 
 	const [checklistData, setChecklistData] = useState<CMMSChecklist>({} as CMMSChecklist);
 	const [isReady, setIsReady] = useState<boolean>(false);
 	const [sections, setSections] = useState<CheckSection[]>([]);
+	const [incompleteModal, setIncompleteModal] = useState<boolean>(false);
+	const [successModal, setSuccessModal] = useState<boolean>(false);
 
 	const resetChecklist = () => {
 		setSections([]);
-	}
+	};
 
-	const user = useCurrentUser()
+	const user = useCurrentUser();
+	const router = useRouter();
 
 	const updateChecklist = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 		const newInput = e.target.name === "plant_id" ? parseInt(e.target.value) : e.target.value;
-
 		setChecklistData(prev => {
 			return {
 				...prev,
 				[e.target.name]: newInput,
 			}
-		})
+		});
 
 	};
 
-	useEffect(() => {
+	const updateChecklistField = (value: number | string | null, field: string) => {
+		setChecklistData(prev => {
+			return {
+				...prev,
+				[field]: value,
+			}
+		});
+	};
 
+	const submitChecklist = (checklistType: string) => {
+		if (!checkInputFields(checklistType)) {
+			setIncompleteModal(true);
+		} else {
+			setSuccessModal(true);
+			createChecklist(checklistData, checklistType);
+			setTimeout(() => {
+				router.push("/Checklist");
+			}, 1000);
+		}
+	};
+
+	const checkInputFields = (checklistType: string) => {
+		switch (checklistType) {
+			case "record":
+				return (
+					checklistData.assigned_user_id &&
+					checklistData.signoff_user_id &&
+					checklistData.chl_name &&
+					checklistData.chl_name != "" &&
+					checklistData.description &&
+					checklistData.description != "" &&
+					checklistData.plant_id &&
+					checklistData.linkedassetids &&
+					checklistData.linkedassetids != ""
+				);
+			case "template":
+				return (
+					checklistData.signoff_user_id &&
+					checklistData.chl_name &&
+					checklistData.chl_name != "" &&
+					checklistData.description &&
+					checklistData.description != "" &&
+					checklistData.plant_id
+				);
+		}
+	}
+
+	useEffect(() => {
 			setChecklistData(prev => {
 				return {
 					...prev,
@@ -54,19 +110,22 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 			setTimeout(() => {
 				setIsReady(true);
 			}, 1000);
-
 	}, [user.data]);
 
-	console.log(checklistData)
-
-	const {
-		data,
-		error,
-		isValidating,
-		mutate
-	} = useAsset(checklistData.plant_id);
+	useEffect(() => {
+		const json = sections.length > 0 ? 
+			sections.map(section => section.toJSON()) :
+			[];
+		setChecklistData(prev => {
+			return {
+				...prev,
+				datajson: JSON.stringify(json),
+			}
+		})
+	}, [sections]);
 
 	return (
+		<>
 		<ModuleMain>
 			<ModuleHeader title="New Checklist" header="Create New Checklist">
 				<Link href="/Checklist" className="btn btn-secondary">Back</Link>
@@ -108,10 +167,15 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 			<div className={formStyles.halfContainer} style={{gridRow: "span 3"}}>
 				<div className="form-group" style={{display:"flex", flexDirection:"column", height:"100%"}}>
 					<label className="form-label">Linked Assets:</label>
-					{/* <select multiple className="form-control" id="formControlLinkedAssets"
-						style={{display:"block", flex:1, height: "100%"}}>
-						{!data && <option disabled>Select a plant</option>}
-					</select> */}
+					<AssetSelect
+						onChange={(values) => {
+							const assetIdsString = values.length > 0 ? values
+								.map(option => option.value.toString())
+								.join(", ") : null;
+							updateChecklistField(assetIdsString, "linkedassetids");
+						}}
+						plantId={checklistData.plant_id}
+					/>
 				</div>
 			</div>
 
@@ -122,7 +186,9 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 				<div className="form-group">
 					<label className='form-label'>Assigned To</label>
 					<AssignToSelect 
-						onChange={() => {}} 
+						onChange={(value) => {
+							updateChecklistField((value as SingleValue<AssignedUserOption>)?.value as number, "assigned_user_id")
+						}} 
 						plantId={checklistData.plant_id}
 						isSingle
 					/>
@@ -140,7 +206,9 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 				<div className="form-group">
 					<label className='form-label'>Sign Off By</label>
 					<AssignToSelect 
-						onChange={() => {}} 
+						onChange={(value) => {
+							updateChecklistField((value as SingleValue<AssignedUserOption>)?.value as number, "signoff_user_id")
+						}} 
 						plantId={checklistData.plant_id}
 						isSingle
 					/>
@@ -162,8 +230,37 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 	  	</div>
 		}
 			<ModuleFooter>
+				<TooltipBtn 
+					toolTip={false} 
+					style={{backgroundColor: "#F7C04A", borderColor: "#F7C04A"}} 
+					onClick={() => submitChecklist("template")}
+					disabled={successModal}
+				>Save Template</TooltipBtn>
+
+				<TooltipBtn 
+					toolTip={false} 
+					onClick={() => submitChecklist("record")}
+					disabled={successModal}
+				>Submit</TooltipBtn>
 			</ModuleFooter>
 		</ModuleMain>
+
+		<ModuleSimplePopup
+			setModalOpenState={setSuccessModal}
+			modalOpenState={successModal}
+			title="Success"
+			text="New checklist successfully created"
+			icon={SimpleIcon.Check}
+		/>
+
+		<ModuleSimplePopup
+			setModalOpenState={setIncompleteModal}
+			modalOpenState={incompleteModal}
+			title="Missing details"
+			text="Please ensure that all input fields have been filled"
+			icon={SimpleIcon.Exclaim}
+		/>
+		</>
   	)
 }
 
@@ -180,8 +277,6 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 	const values = await Promise.all([getPlants])
 
 	const p: CMMSPlant[]				= values[0].data;
-
-	console.log(p);
 
 	let props: {
 		plants: CMMSPlant[]

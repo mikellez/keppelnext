@@ -75,11 +75,11 @@ export default function Checklist() {
   const editRow: OnClick<ChecklistItem> = (item, event) => {
     const checklistRow = item;
 
-    console.log(checklistRow, event);
+    // console.log(checklistRow, event);
   };
 
   useEffect(() => {
-    console.log(activeTabIndex);
+    // console.log(activeTabIndex);
   }, [activeTabIndex]);
 
   useEffect(() => {

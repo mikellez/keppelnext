@@ -1,5 +1,6 @@
 const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
+const moment = require("moment");
 
 const fetchTemplateChecklistsQuery = `SELECT cl.checklist_id, cl.chl_name, cl.description, cl.status_id,
 concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
@@ -158,6 +159,96 @@ const submitNewChecklistTemplate = async (req, res, next) => {
     });
 };
 
+const createNewChecklistRecord = async (req, res, next) => {
+    // console.log(req.body.checklist)
+    const { checklist } = req.body;
+    sql = `INSERT INTO
+        keppel.checklist_master
+        (
+            chl_name,
+            description,
+            assigned_user_id,
+            signoff_user_id,
+            linkedassetids,
+            datajson,
+            chl_type,
+            plant_id,
+            created_date,
+            created_user_id,
+            history,
+            status_id
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`;
+
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    
+    const history = `Created Record_ASSIGNED_${today}_${req.user.name}_NIL`;
+
+    db.query(sql, [
+        checklist.chl_name,
+        checklist.description,
+        checklist.assigned_user_id,
+        checklist.signoff_user_id,
+        checklist.linkedassetids,
+        checklist.datajson,
+        "record",
+        checklist.plant_id,
+        today,
+        req.user.id,
+        history,
+        2
+    ], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to create new checklist");
+        }
+        return res.status(200).json("New checklist successfully created");
+    })
+    
+};
+
+const createNewChecklistTemplate = async (req, res, next) => {
+    const { checklist } = req.body;
+    sql = `INSERT INTO
+        keppel.checklist_master
+        (
+            chl_name,
+            description,
+            signoff_user_id,
+            datajson,
+            chl_type,
+            plant_id,
+            created_date,
+            created_user_id,
+            history,
+            status_id
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
+
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    
+    const history = `Created Template_PENDING_${today}_${req.user.name}_NIL`;
+
+    db.query(sql, [
+        checklist.chl_name,
+        checklist.description,
+        checklist.signoff_user_id,
+        checklist.datajson,
+        "template",
+        checklist.plant_id,
+        today,
+        req.user.id,
+        history,
+        1
+    ], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to create new checklist");
+        }
+        return res.status(200).json("New checklist successfully created");
+    })
+};
+
 const fetchChecklistCounts = (req, res, next) => {
     let sql;
     switch (req.params.field) {
@@ -209,4 +300,6 @@ module.exports = {
     submitNewChecklistTemplate,
     fetchChecklistCounts,
     createChecklistCSV,
+    createNewChecklistRecord,
+    createNewChecklistTemplate
 };

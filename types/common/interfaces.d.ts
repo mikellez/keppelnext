@@ -249,7 +249,9 @@ interface CMMSChecklist {
   status_id: number;
   createdbyuser: string;
   assigneduser: string;
+  assigned_user_id?: number;
   signoffuser: string;
+  signoff_user_id?: number;
   plant_name: string;
   plant_id: number;
   linkedassets: string | null;
@@ -258,6 +260,7 @@ interface CMMSChecklist {
   created_date: Date;
   history: string;
   status: string;
+  datajson?: any;
 }
 
 interface CMMSActivitylog {
