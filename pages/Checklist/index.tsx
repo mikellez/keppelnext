@@ -99,7 +99,7 @@ export default function Checklist() {
             plant_id: row.plant_id,
             linkedassets: row.linkedassets,
             linkedassetids: row.linkedassetids,
-            chl_type: row.chl_type,
+            chl_type: row.chl_type as string,
             created_date: row.created_date,
             history: row.history,
             status: row.status
@@ -108,7 +108,7 @@ export default function Checklist() {
       );
       setReady(true);
     }
-  }, [data, isValidating]);
+  }, [data, isValidating, isReady]);
 
   return (
     <ModuleMain>

@@ -55,7 +55,8 @@ function useCurrentUser() {
 		id: number,
 		name: string,
 		role_id: number,
-		role_name: string
+		role_name: string,
+		allocated_plants: number[],
 	}
 
 	const userFetcher = (url: string) => axios.get<CMMSCurrentUser>(url).then((response) => response.data).catch((e) => {

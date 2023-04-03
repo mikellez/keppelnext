@@ -77,6 +77,7 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
         name: req.user.name,
         role_id: req.user.role_id,
         role_name: req.user.role_name,
+        allocated_plants: req.user.allocated_plants,
     });
 });
 
