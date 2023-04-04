@@ -42,7 +42,8 @@ export default function NewAsset(props: NewAssetProps) {
 	,tech_specs:""
 	,manufacture_country:""
 	,remarks:""
-	, image: ""
+	,image: ""
+	,files: ""
 });
 	
 	//state to display popup
@@ -52,6 +53,10 @@ export default function NewAsset(props: NewAssetProps) {
 	const [isMultipleEntries, setIsMultipleEntries] = useState<boolean>(false);
 	//state when submission is successful
 	const [submissionModal, setSubmissionModal] = useState<boolean>(false);
+
+	type UploadedFile = [string, string];
+
+	const [fileraw, setfileraw] = useState<UploadedFile[]>([]);
 	
 	//API to get system asset
 	const {
@@ -105,6 +110,29 @@ export default function NewAsset(props: NewAssetProps) {
       setform({ ...form, image: "" });
     }
   }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+	const files = e.target.files;
+  	const uploadedFiles: [string, string][] = [];
+
+  if (files) {
+    for (let i = 0; i < files.length; i++) {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        uploadedFiles.push([files[i].name, reader.result as string]);
+
+        // If all files have been processed, update the state
+        if (uploadedFiles.length === files.length) {
+          setfileraw(uploadedFiles);
+        }
+      };
+
+      reader.readAsDataURL(files[i]);
+    }
+  }
+  }
+
 	//Function to submit form
 	function submission() {
 	
@@ -162,7 +190,7 @@ export default function NewAsset(props: NewAssetProps) {
 			manufacture_country: form.manufacture_country,
 			remarks: form.remarks,
 			image:form.image,
-			files : JSON.stringify({})
+			files : JSON.stringify(fileraw)
 
 		}
 	
@@ -365,6 +393,12 @@ export default function NewAsset(props: NewAssetProps) {
 							/>
 								
                           </div>
+					<div className="form-group">
+					<label className='form-label'> Upload documents</label>
+					<input type="file" className="form-control" name="file" placeholder="Select Files" multiple
+					onChange={handleFileChange}></input>
+				</div>
+						  
 				
 			
 				<ModuleSimplePopup
