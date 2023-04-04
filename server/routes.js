@@ -185,7 +185,7 @@ router.get(
 router.post("/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
 
 router.route("/checklist/template", checkIfLoggedInAPI)
-    .get( controllers.checklist.fetchTemplateChecklists)
+    .get( controllers.checklist.fetchPendingChecklists)
     .post(controllers.checklist.createNewChecklistTemplate)
 
 router.route("/checklist/record", checkIfLoggedInAPI) 
