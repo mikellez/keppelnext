@@ -184,9 +184,11 @@ router.get(
 );
 router.post("/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
 
-router.route("/checklist/template", checkIfLoggedInAPI)
-    .get( controllers.checklist.fetchPendingChecklists)
+router.route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
+    .get( controllers.checklist.fetchSpecificChecklistTemplate)
     .post(controllers.checklist.createNewChecklistTemplate)
+
+router.get("/checklist/pending", checkIfLoggedInAPI, controllers.checklist.fetchPendingChecklists);
 
 router.route("/checklist/record", checkIfLoggedInAPI) 
     .get(controllers.checklist.fetchForReviewChecklists)

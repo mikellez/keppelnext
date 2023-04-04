@@ -199,6 +199,29 @@ const fetchChecklistTemplateNames = async (req, res, next) => {
     });
 };
 
+const fetchSpecificChecklistTemplate = async (req, res, next) => {
+    const sql = `
+    SELECT 
+        ct.chl_name,
+        ct.description,
+        ct.datajson,
+        ct.plant_id,
+        ct.signoff_user_id
+    FROM
+        keppel.checklist_templates ct
+    WHERE 
+        checklist_id = $1
+    `;
+
+    db.query(sql, [req.params.checklist_id], (err, found) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("No checklist template found");
+        }
+        res.status(200).send(found.rows[0]);
+    })
+};
+
 const submitNewChecklistTemplate = async (req, res, next) => {
     if (req.body.checklistSections === undefined) return res.status(400).json("ayo?");
 
@@ -351,5 +374,6 @@ module.exports = {
     fetchChecklistCounts,
     createChecklistCSV,
     createNewChecklistRecord,
-    createNewChecklistTemplate
+    createNewChecklistTemplate,
+    fetchSpecificChecklistTemplate
 };

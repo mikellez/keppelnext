@@ -25,8 +25,8 @@ import TooltipBtn from "../../components/TooltipBtn";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import LoadingHourglass from "../../components/LoadingHourglass";
 
-const indexedColumn: ("template" | "record" | "approved")[] = [
-  "template",
+const indexedColumn: ("pending" | "record" | "approved")[] = [
+  "pending",
   "record",
   "approved",
 ];
@@ -85,27 +85,29 @@ export default function Checklist() {
   useEffect(() => {
     if (!isReady && data && !isValidating) {
       // tranform and store data
-      setChecklistItems(
-        data.map(row => {
-          return {
-            id: row.checklist_id,
-            chl_name: row.chl_name,
-            description: row.description,
-            status_id: row.status_id,
-            createdbyuser: row.createdbyuser,
-            assigneduser: row.assigneduser,
-            signoffuser: row.signoffuser,
-            plant_name: row.plant_name,
-            plant_id: row.plant_id,
-            linkedassets: row.linkedassets,
-            linkedassetids: row.linkedassetids,
-            chl_type: row.chl_type as string,
-            created_date: row.created_date,
-            history: row.history,
-            status: row.status
-          };
-        })
-      );
+      if (data.length > 0) {
+        setChecklistItems(
+          data.map(row => {
+            return {
+              id: row.checklist_id,
+              chl_name: row.chl_name,
+              description: row.description,
+              status_id: row.status_id,
+              createdbyuser: row.createdbyuser,
+              assigneduser: row.assigneduser,
+              signoffuser: row.signoffuser,
+              plant_name: row.plant_name,
+              plant_id: row.plant_id,
+              linkedassets: row.linkedassets,
+              linkedassetids: row.linkedassetids,
+              chl_type: row.chl_type as string,
+              created_date: row.created_date,
+              history: row.history,
+              status: row.status
+            };
+          })
+        );
+      }
       setReady(true);
     }
   }, [data, isValidating, isReady]);

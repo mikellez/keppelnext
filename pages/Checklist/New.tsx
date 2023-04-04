@@ -17,6 +17,10 @@ import TooltipBtn from '../../components/TooltipBtn'
 import ModuleSimplePopup, { SimpleIcon } from '../../components/ModuleLayout/ModuleSimplePopup'
 import { useRouter } from 'next/router'
 
+interface NewChecklistPageProps {
+	checklistTemplate: CMMSChecklist | null;
+}
+
 const createChecklist = async (checklist: CMMSChecklist, type: string) => {
 	return await axios.post(`/api/checklist/${type}`, { checklist })
 		.then(res => {
@@ -25,7 +29,7 @@ const createChecklist = async (checklist: CMMSChecklist, type: string) => {
 		.catch(err => console.log(err))
 };
 
-export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
+export default function ChecklistNew(props: NewChecklistPageProps) {
 
 	const [checklistData, setChecklistData] = useState<CMMSChecklist>({} as CMMSChecklist);
 	const [isReady, setIsReady] = useState<boolean>(false);
@@ -99,6 +103,7 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 	}
 
 	useEffect(() => {
+
 			setChecklistData(prev => {
 				return {
 					...prev,
@@ -107,11 +112,24 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 				}
 			});
 
+			if (props.checklistTemplate) {
+				setChecklistData(prev => {
+					return {
+						...prev,
+						plant_id: props.checklistTemplate!.plant_id,
+						chl_name: props.checklistTemplate!.chl_name,
+						description: props.checklistTemplate!.description,
+						signoff_user_id: props.checklistTemplate!.signoff_user_id
+					}
+				})
+			}
+
 			setTimeout(() => {
 				setIsReady(true);
 			}, 1000);
-	}, [user.data]);
 
+	}, [user.data, props.checklistTemplate]);
+	console.log(checklistData)
 	useEffect(() => {
 		const json = sections.length > 0 ? 
 			sections.map(section => section.toJSON()) :
@@ -211,11 +229,13 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 						}} 
 						plantId={checklistData.plant_id}
 						isSingle
+						defaultIds={props.checklistTemplate ? [checklistData.signoff_user_id as number] : []}
 					/>
 				</div>
 			</div>
 
 		</ModuleContent>
+
 		<ModuleContent>
 			<ModuleHeader header="Add Checklists" headerSize="1.5rem">
 				<button className="btn btn-primary" onClick={resetChecklist}>Reset</button>
@@ -224,25 +244,27 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 			<ChecklistTemplateCreator sections={sections} setSections={setSections}/>
 
 		</ModuleContent>
+		
+		<ModuleFooter>
+			<TooltipBtn 
+				toolTip={false} 
+				style={{backgroundColor: "#F7C04A", borderColor: "#F7C04A"}} 
+				onClick={() => submitChecklist("template")}
+				disabled={successModal}
+			>Save Template</TooltipBtn>
+
+			<TooltipBtn 
+				toolTip={false} 
+				onClick={() => submitChecklist("record")}
+				disabled={successModal}
+			>Submit</TooltipBtn>
+		</ModuleFooter>
+
 		</> : 
 		<div style={{ position: "absolute", top:"calc((100% - 8rem) / 2)", left:"50%", transform:"translate(-50%,-50%)"}}>
 			<LoadingHourglass />
 	  	</div>
 		}
-			<ModuleFooter>
-				<TooltipBtn 
-					toolTip={false} 
-					style={{backgroundColor: "#F7C04A", borderColor: "#F7C04A"}} 
-					onClick={() => submitChecklist("template")}
-					disabled={successModal}
-				>Save Template</TooltipBtn>
-
-				<TooltipBtn 
-					toolTip={false} 
-					onClick={() => submitChecklist("record")}
-					disabled={successModal}
-				>Submit</TooltipBtn>
-			</ModuleFooter>
 		</ModuleMain>
 
 		<ModuleSimplePopup
@@ -261,28 +283,38 @@ export default function ChecklistNew({plants}: {plants: CMMSPlant[]}) {
 			icon={SimpleIcon.Exclaim}
 		/>
 		</>
-  	)
-}
+  	);
+};
 
-export const getServerSideProps: GetServerSideProps = async(context: GetServerSidePropsContext) => {
+export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
 	const headers = {
 		withCredentials: true,
 		headers: {
-			Cookie: context.req.headers.cookie
+			Cookie: context.req.headers.cookie,
+		},
+	};
+	if (context.query.templateId) {
+		const { templateId}  = context.query;
+		const response = await axios.get("http://localhost:3001/api/checklist/template/" + templateId, headers);
+		if (response.status == 500) {
+			return {
+				props: {
+					checklistTemplate: null
+				},
+				redirect : {
+					destination: "/404"
+				}
+			}
+		}
+		return {
+			props: {
+				checklistTemplate: response.data
+			}
 		}
 	}
-
-	const getPlants = axios.get<CMMSPlant[]>("http://localhost:3001/api/getUserPlants", headers);
-
-	const values = await Promise.all([getPlants])
-
-	const p: CMMSPlant[]				= values[0].data;
-
-	let props: {
-		plants: CMMSPlant[]
-	} = { plants: p }
-	
 	return {
-		props: props
-	}
-}
+		props: {
+			checklistTemplate: null
+		}
+	}	
+};

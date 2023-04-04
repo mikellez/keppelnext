@@ -28,6 +28,7 @@ import LoadingIcon from "../../../components/LoadingIcon";
 import LoadingHourglass from "../../../components/LoadingHourglass";
 import TooltipBtn from "../../../components/TooltipBtn";
 
+
 const ChecklistTemplate = () => {
     const router = useRouter();
     const { id } = router.query;
@@ -49,3 +50,5 @@ const ChecklistTemplate = () => {
 };
 
 export default ChecklistTemplate;
+
+

@@ -1,9 +1,6 @@
-import formStyles from "../../styles/formStyles.module.css";
 import styles from "../../../styles/Checklist.module.scss";
-
 import React, { useEffect, useState } from "react";
 import Iframe from "react-iframe";
-
 import Link from "next/link";
 
 import {
@@ -13,28 +10,24 @@ import {
     ModuleMain,
     ModuleFooter,
 } from "../../../components";
-import ChecklistTemplateCreator from "../../../components/Checklist/ChecklistTemplateCreator";
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import { CMMSPlant, CMMSChecklist } from "../../../types/common/interfaces";
+import { CMMSChecklist } from "../../../types/common/interfaces";
 import axios from "axios";
-import { useAsset, useCurrentUser } from "../../../components/SWR";
-
-import PlantSelect from "../../../components/PlantSelect";
-import AssignToSelect from "../../../components/Schedule/AssignToSelect";
-
-import { CheckSection } from "../../../types/common/classes";
-import LoadingIcon from "../../../components/LoadingIcon";
-import LoadingHourglass from "../../../components/LoadingHourglass";
+import { useCurrentUser } from "../../../components/SWR";
 import TooltipBtn from "../../../components/TooltipBtn";
+import { useRouter } from "next/router";
+
+
 
 const Templates = () => {
     const user = useCurrentUser();
 
-    const [checklistTemplates, setChecklistTemplates] = useState([]);
-    const [templateSelected, setTemplateSelected] = useState();
+    const [checklistTemplates, setChecklistTemplates] = useState<CMMSChecklist[]>([]);
+    const [selectedTemplate, setSelectedTemplate] = useState<CMMSChecklist>();
     const [iframeURL, setIframeURL] = useState<string>();
 
-    async function getChecklistTemplates(plants) {
+    const router = useRouter();
+
+    async function getChecklistTemplates(plants: number[]) {
         return await axios({
             method: "get",
             url: `/api/checklist/templateNames?test=${JSON.stringify(plants)}`,
@@ -58,22 +51,27 @@ const Templates = () => {
     }, [user.data]);
 
     useEffect(() => {
-        setIframeURL("http://localhost:3001/Checklist/Templates/" + templateSelected);
-    }, [templateSelected]);
+        setIframeURL("http://localhost:3001/Checklist/Templates/" + selectedTemplate);
+    }, [selectedTemplate]);
 
-    const checklistTemplateHTML = checklistTemplates?.map((row) => {
+    const checklistTemplateHTML = checklistTemplates?.map((checklist) => {
         return (
-            <tr key={row.checklist_id}>
+            <tr 
+                key={checklist.checklist_id}
+                style={{
+                    // borderLeft: selectedTemplate?.checklist_id == checklist.checklist_id ? "1px solid red" : "none",
+                    backgroundColor: selectedTemplate?.checklist_id == checklist.checklist_id ? "#B2B2B2" : "transparent"
+                }}
+            >
                 <th
-                    id={row.checklist_id}
                     onClick={() => {
-                        console.log(row.checklist_id);
-                        setTemplateSelected(row.checklist_id);
+                        // console.log(checklist.checklist_id);
+                        setSelectedTemplate(checklist);
                     }}
                     style={{ cursor: "pointer" }}
                 >
                     {" "}
-                    {row.chl_name}
+                    {checklist.chl_name}
                 </th>
             </tr>
         );
@@ -94,8 +92,8 @@ const Templates = () => {
                             <thead id="templates_list">{checklistTemplateHTML}</thead>
                         </table>
                     </div>
-                    <div>
-                        {templateSelected && (
+                    {/* <div>
+                        {selectedTemplate && (
                             <Iframe
                                 url={iframeURL!}
                                 width="100%"
@@ -107,12 +105,17 @@ const Templates = () => {
                                 styles={{ pointerEvents: "none" }}
                             />
                         )}
-                    </div>
+                    </div> */}
                 </div>
             </ModuleContent>
 
             <ModuleFooter>
-                <TooltipBtn toolTip={false} onClick={() => {}}>
+                <TooltipBtn 
+                    toolTip={false} 
+                    disabled={!selectedTemplate}
+                    onClick={() => {
+                        router.push(`/Checklist/New?templateId=${selectedTemplate?.checklist_id}`)
+                    }}>
                     Use Template
                 </TooltipBtn>
             </ModuleFooter>
@@ -122,23 +125,3 @@ const Templates = () => {
 
 export default Templates;
 
-// export const getServerSideProps: GetServerSideProps = async (
-//     context: GetServerSidePropsContext
-// ) => {
-//     const headers = {
-//         withCredentials: true,
-//         headers: {
-//             Cookie: context.req.headers.cookie,
-//         },
-//     };
-//     const getPlants = axios.get<CMMSPlant[]>("http://localhost:3001/api/getUserPlants", headers);
-//     const values = await Promise.all([getPlants]);
-//     const p: CMMSPlant[] = values[0].data;
-//     console.log(p);
-//     let props: {
-//         plants: CMMSPlant[];
-//     } = { plants: p };
-//     return {
-//         props: props,
-//     };
-// };
