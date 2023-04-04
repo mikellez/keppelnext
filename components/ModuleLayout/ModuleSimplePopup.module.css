@@ -9,14 +9,15 @@
 
 .footerButtons {
 	position: absolute;
-	bottom: 0.1em;
-	right: 0.1em;
+	bottom: 1em;
+	right: 1em;
 	padding: 0.2em;
 }
 
 .footerButtons > button {
-	margin-left: 0.8rem;
+	margin-left: 0.4rem;
 }
+
 
 .modalText {
 	max-width: 75%;
@@ -74,8 +75,10 @@
 	background-color: rgba(0,0,0,0);
 }
 
+
 @keyframes popout {
 	from	{ transform: translate(-50%, -50%) scale(1)	}
 	50%		{ transform: translate(-50%, -50%) scale(1.02)	}
 	to		{ transform: translate(-50%, -50%) scale(1)	}
 }
+
