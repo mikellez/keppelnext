@@ -52,6 +52,7 @@ interface CMMSAssetDetailsState{
   warranty: string;
   remarks: string;
   image: string;
+  files: string;
 
 }
 /*
