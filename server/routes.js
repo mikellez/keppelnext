@@ -174,6 +174,9 @@ router.get("/asset/system/:system_id", checkIfLoggedInAPI, controllers.asset.fet
 router.get("/asset/system/:plant_id/:system_id/:system_asset_id", checkIfLoggedInAPI, controllers.asset.fetchSystemAssetNames);
 router.get("/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id", checkIfLoggedInAPI, controllers.asset.fetchSubComponent1Names);
 router.post("/asset/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
+router.post("/asset/editAsset", checkIfLoggedInAPI, controllers.asset.editAsset);
+router.post("/asset/deleteAsset", checkIfLoggedInAPI, controllers.asset.deleteAsset);
+
 
 router.get(
     "/checklist/template",
@@ -230,6 +233,7 @@ router.get("/asset/:plant_id", checkIfLoggedInAPI, controllers.asset.getAssetsFr
 router.get("/asset", checkIfLoggedInAPI, controllers.asset.getAssetHierarchy);
 router.get("/assetDetails/:psa_id", checkIfLoggedInAPI, controllers.asset.getAssetDetails);
 router.get("/asset/history/:type/:id", checkIfLoggedInAPI, controllers.asset.getAssetHistory);
+router.get("/asset/Details/:psa_id", checkIfLoggedInAPI, controllers.asset.getAssetDetails);
 
 /**
  * @api {get} /master/new Get Table Metadata

@@ -290,6 +290,207 @@ const fetch_asset_types = async (req, res, next) => {
     );
 }
 
+const editAsset = async (req, res, next) => {
+    console.log(req.body)
+    var parent_asset;
+
+
+
+    if (req.body.asset_type == "") {
+        parent_asset = req.body.system_asset;
+    }
+
+    if ((req.body.system_asset != req.body.asset_type) && (req.body.asset_type != "")) {
+        parent_asset = req.body.system_asset_name;
+    }
+
+    if (req.body.system_asset_name == "NA") {
+        parent_asset = 'req.body.asset_type';
+    }
+
+    var asset_type = req.body.asset_type;
+    var system_asset_lvl5 = req.body.system_lvl_5;
+    var system_asset_lvl6 = req.body.system_lvl_6;
+    // var system_asset_lvl7 = req.body.system_lvl_7;
+    var asset_description = req.body.description;
+    var asset_location = req.body.location;
+    var brand = req.body.brand;
+    var plant_asset_instrument = req.body.system_asset_name;
+    var model_number = req.body.model_number;
+    var technical_specs = req.body.tech_specs;
+    var manufacture_country = req.body.manufacture_country;
+    var warranty = req.body.warranty;
+    var remarks = req.body.remarks;
+    var psa_id = req.body.psa_id
+    var uploaded_image = req.body.image
+    var uploaded_files = req.body.files
+    console.log('req.body is here')
+    console.log(req.body)
+    var system_id_lvl3 = req.body.system_id;
+    var system_asset_id_lvl4 = req.body.system_asset_id;
+    var parent_asset;
+    var plant_asset_instrument;
+    var system_asset_name = req.body.system_asset;
+    var system_asset_name_2 = req.body.system_asset_name;
+
+    var asset_type = req.body.asset_type;
+
+    if (req.body.asset_type == "NA") {
+        asset_type = req.body.system_asset
+        parent_asset = asset_type;
+    }
+    //user selects system asset -> selects an existing tag -> selects asset type to tag a lvl5 item
+    //then lv4 item = parent asset
+    if ((req.body.system_asset != req.body.asset_type) && (req.body.asset_type != "NA")) {
+        parent_asset = req.body.system_asset_name;
+    } else
+    //Case 1: user selects system asset but does not select asset type - lvl4
+    // parent asset same as system asset	  
+    {
+        parent_asset = req.body.system_asset
+    }
+    console.log("Asset Type" + asset_type + "System Asset" + req.body.system_asset_name + "Parent Asset" + parent_asset);
+    var system_asset_lvl5 = req.body.system_lvl_5;
+    var level5 = req.body.system_lvl_5;
+    var system_asset_lvl6 = req.body.system_lvl_6;
+    var system_asset_lvl6_2 = req.body.system_lvl_6;
+
+    
+
+    // var system_asset_lvl7 = req.body.system_lvl_7;
+    var asset_description = req.body.description;
+    var asset_location = req.body.location;
+    var brand = req.body.brand;
+
+    var model_number = req.body.model_number;
+    var technical_specs = req.body.tech_specs;
+    var manufacture_country = req.body.manufacture_country;
+    var warranty = req.body.warranty;
+    var remarks = req.body.remarks;
+    var plant_id = req.body.plant_id;
+    var uploaded_image = req.body.image
+    var uploaded_files = req.body.files
+
+    var plant_asset_instrument = ""
+    plant_asset_instrument = req.body.system_asset_name;
+    console.log(req.body)
+
+    var sql = `UPDATE keppel.plant_system_assets SET parent_asset='${parent_asset}',asset_type='${asset_type}',asset_description='${asset_description}',asset_location='${asset_location}',brand='${brand}',plant_asset_instrument='${plant_asset_instrument}',model_number='${model_number}',technical_specs='${technical_specs}',manufacture_country='${manufacture_country}',warranty='${warranty}',remarks='${remarks}',system_asset_lvl6='${system_asset_lvl6}',system_asset_lvl5='${system_asset_lvl5}',system_asset_lvl7='', uploaded_image = '${uploaded_image}', uploaded_files = '${uploaded_files}'  WHERE psa_id = '${psa_id}'`;
+    // if only chosen up to Select System Asset and create a new asset name with an asset type
+    if (req.body.system_lvl_6=="" && typeof req.body.system_lvl_5 === 'undefined' && asset_type != req.body.system_asset){
+        sql = `UPDATE keppel.plant_system_assets
+       SET 
+           asset_description = '${asset_description}',
+           asset_location = '${asset_location}',
+           brand = '${brand}',
+           model_number = '${model_number}',
+           technical_specs = '${technical_specs}',
+           manufacture_country = '${manufacture_country}',
+           warranty = '${warranty}',
+           remarks = '${remarks}',
+           uploaded_image = '${uploaded_image}',
+           uploaded_files = '${uploaded_files}'
+       WHERE psa_id = '${psa_id}'`;
+    }
+    // if only chosen up to Select System Asset and create a new asset name and no asset type DONE
+    else if (req.body.system_lvl_6 =="" && typeof req.body.system_lvl_5 === 'undefined'){
+        sql = `UPDATE keppel.plant_system_assets
+        SET 
+            asset_description = '${asset_description}',
+            asset_location = '${asset_location}',
+            brand = '${brand}',
+            model_number = '${model_number}',
+            technical_specs = '${technical_specs}',
+            manufacture_country = '${manufacture_country}',
+            warranty = '${warranty}',
+            remarks = '${remarks}',
+            uploaded_image = '${uploaded_image}',
+            uploaded_files = '${uploaded_files}'
+        WHERE psa_id = '${psa_id}'`;
+    }
+    // if only chosen up to System Asset Name and create a new Sub-Components 1 with an asset type
+    else if (req.body.system_lvl_6 == "" && req.body.asset_type != "NA"){
+        sql = `UPDATE keppel.plant_system_assets
+        SET 
+            asset_description = '${asset_description}',
+            asset_location = '${asset_location}',
+            brand = '${brand}',
+            model_number = '${model_number}',
+            technical_specs = '${technical_specs}',
+            manufacture_country = '${manufacture_country}',
+            warranty = '${warranty}',
+            remarks = '${remarks}',
+            uploaded_image = '${uploaded_image}',
+            uploaded_files = '${uploaded_files}'
+        WHERE psa_id = '${psa_id}'`;
+        }
+    // if only chosen up to System Asset Name and create a new Sub-Components 1 without asset type
+    else if (req.body.system_lvl_6 == "" && req.body.asset_type == "NA"){
+        var system_asset_name_2 = req.body.system_asset_name;
+        sql = `UPDATE keppel.plant_system_assets
+        SET 
+            asset_description = '${asset_description}',
+            asset_location = '${asset_location}',
+            brand = '${brand}',
+            model_number = '${model_number}',
+            technical_specs = '${technical_specs}',
+            manufacture_country = '${manufacture_country}',
+            warranty = '${warranty}',
+            remarks = '${remarks}',
+            uploaded_image = '${uploaded_image}',
+            uploaded_files = '${uploaded_files}'
+        WHERE psa_id = '${psa_id}'`;
+            }
+     // if all options are selected with an asset type
+    else if (req.body.system_lvl_6 !="" && req.body.asset_type != "NA"){
+        var system_lvl_7 = req.body.system_lvl_5
+        var asset_type = req.body.asset_type
+        sql = `UPDATE keppel.plant_system_assets
+        SET 
+            asset_description = '${asset_description}',
+            asset_location = '${asset_location}',
+            brand = '${brand}',
+            model_number = '${model_number}',
+            technical_specs = '${technical_specs}',
+            manufacture_country = '${manufacture_country}',
+            warranty = '${warranty}',
+            remarks = '${remarks}',
+            uploaded_image = '${uploaded_image}',
+            uploaded_files = '${uploaded_files}'
+        WHERE psa_id = '${psa_id}'`;
+    }
+    else if (req.body.system_lvl_6 !="" && req.body.asset_type == "NA") {
+        var system_lvl_7 = req.body.system_lvl_5
+        sql = `UPDATE keppel.plant_system_assets
+        SET 
+            asset_description = '${asset_description}',
+            asset_location = '${asset_location}',
+            brand = '${brand}',
+            model_number = '${model_number}',
+            technical_specs = '${technical_specs}',
+            manufacture_country = '${manufacture_country}',
+            warranty = '${warranty}',
+            remarks = '${remarks}',
+            uploaded_image = '${uploaded_image}',
+            uploaded_files = '${uploaded_files}'
+        WHERE psa_id = '${psa_id}'`;
+            }
+    
+    
+    console.log(sql)
+    db.query(sql, function(err, result) {
+        if (err) {
+            console.log(err);
+        }
+        return res.status(200).send({
+            "SuccessCode": "200"
+        });
+    })
+};
+
+
+
+
 const addNewAsset = (req, res, next) => {
     console.log('req.body is here')
     console.log(req.body)
@@ -434,6 +635,20 @@ const addNewAsset = (req, res, next) => {
     })
 };
 
+const deleteAsset = (req,res,next) => {
+    var psa_id = req.body.psa_id;
+    var q = `DELETE from keppel.plant_system_assets where psa_id = '${psa_id}'`
+    console.log(q)
+    db.query(q, function(err, result) {
+        if (err) {
+            console.log(err);
+            }
+
+        return res.status(200).send({
+            "SuccessCode": "200"
+        });
+    })
+};
 module.exports = {
     getAssetsFromPlant,
     getAssetHierarchy,
@@ -444,5 +659,7 @@ module.exports = {
     fetch_asset_types,
     fetchSystemAssetNames,
     fetchSubComponent1Names,
-    addNewAsset
+    addNewAsset,
+    editAsset,
+    deleteAsset
 };
