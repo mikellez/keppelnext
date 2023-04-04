@@ -119,9 +119,17 @@ export default function ChecklistNew(props: NewChecklistPageProps) {
 						plant_id: props.checklistTemplate!.plant_id,
 						chl_name: props.checklistTemplate!.chl_name,
 						description: props.checklistTemplate!.description,
-						signoff_user_id: props.checklistTemplate!.signoff_user_id
+						signoff_user_id: props.checklistTemplate!.signoff_user_id,
 					}
 				})
+
+				if (props.checklistTemplate.datajson.length > 0) {
+					const sectionsFromJSON = props.checklistTemplate.datajson.map(section => {
+						return CheckSection.fromJSON(JSON.stringify(section))
+						return section
+					})
+					setSections(sectionsFromJSON)
+				}
 			}
 
 			setTimeout(() => {
@@ -129,7 +137,7 @@ export default function ChecklistNew(props: NewChecklistPageProps) {
 			}, 1000);
 
 	}, [user.data, props.checklistTemplate]);
-	console.log(checklistData)
+
 	useEffect(() => {
 		const json = sections.length > 0 ? 
 			sections.map(section => section.toJSON()) :

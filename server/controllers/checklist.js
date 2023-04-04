@@ -283,7 +283,7 @@ const createNewChecklistRecord = async (req, res, next) => {
 const createNewChecklistTemplate = async (req, res, next) => {
     const { checklist } = req.body;
     sql = `INSERT INTO
-        keppel.checklist_master
+        keppel.checklist_templates
         (
             chl_name,
             description,
