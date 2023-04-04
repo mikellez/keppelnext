@@ -1,5 +1,5 @@
 import formStyles from "../../styles/formStyles.module.css";
-import styles from "../../styles/Checklist.module.scss";
+import styles from "../../../styles/Checklist.module.scss";
 
 import React, { useEffect, useState } from "react";
 import Iframe from "react-iframe";
@@ -12,24 +12,27 @@ import {
     ModuleHeader,
     ModuleMain,
     ModuleFooter,
-} from "../../components";
-import ChecklistTemplateCreator from "../../components/Checklist/ChecklistTemplateCreator";
+} from "../../../components";
+import ChecklistTemplateCreator from "../../../components/Checklist/ChecklistTemplateCreator";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import { CMMSPlant, CMMSChecklist } from "../../types/common/interfaces";
+import { CMMSPlant, CMMSChecklist } from "../../../types/common/interfaces";
 import axios from "axios";
-import { useAsset, useCurrentUser } from "../../components/SWR";
+import { useAsset, useCurrentUser } from "../../../components/SWR";
 
-import PlantSelect from "../../components/PlantSelect";
-import AssignToSelect from "../../components/Schedule/AssignToSelect";
+import PlantSelect from "../../../components/PlantSelect";
+import AssignToSelect from "../../../components/Schedule/AssignToSelect";
 
-import { CheckSection } from "../../types/common/classes";
-import LoadingIcon from "../../components/LoadingIcon";
-import LoadingHourglass from "../../components/LoadingHourglass";
+import { CheckSection } from "../../../types/common/classes";
+import LoadingIcon from "../../../components/LoadingIcon";
+import LoadingHourglass from "../../../components/LoadingHourglass";
+import TooltipBtn from "../../../components/TooltipBtn";
 
 const Templates = () => {
     const user = useCurrentUser();
 
     const [checklistTemplates, setChecklistTemplates] = useState([]);
+    const [templateSelected, setTemplateSelected] = useState();
+    const [iframeURL, setIframeURL] = useState<string>();
 
     async function getChecklistTemplates(plants) {
         return await axios({
@@ -54,10 +57,24 @@ const Templates = () => {
         }
     }, [user.data]);
 
+    useEffect(() => {
+        setIframeURL("http://localhost:3001/Checklist/Templates/" + templateSelected);
+    }, [templateSelected]);
+
     const checklistTemplateHTML = checklistTemplates?.map((row) => {
         return (
             <tr key={row.checklist_id}>
-                <th> {row.chl_name}</th>
+                <th
+                    id={row.checklist_id}
+                    onClick={() => {
+                        console.log(row.checklist_id);
+                        setTemplateSelected(row.checklist_id);
+                    }}
+                    style={{ cursor: "pointer" }}
+                >
+                    {" "}
+                    {row.chl_name}
+                </th>
             </tr>
         );
     });
@@ -72,27 +89,33 @@ const Templates = () => {
 
             <ModuleContent includeGreyContainer>
                 <div className={styles.gridContainer}>
-                    <div>
+                    <div style={{ maxHeight: "800px", overflow: "auto" }}>
                         <table className="table">
                             <thead id="templates_list">{checklistTemplateHTML}</thead>
                         </table>
                     </div>
                     <div>
-                        <Iframe
-                            url="http://localhost:3001/Login" //to change
-                            width="100%"
-                            height="1000vh"
-                            id=""
-                            className=""
-                            display="block"
-                            position="relative"
-                            styles={{ pointerEvents: "none" }}
-                        />
+                        {templateSelected && (
+                            <Iframe
+                                url={iframeURL!}
+                                width="100%"
+                                height="800px"
+                                id=""
+                                className=""
+                                display="block"
+                                position="relative"
+                                styles={{ pointerEvents: "none" }}
+                            />
+                        )}
                     </div>
                 </div>
             </ModuleContent>
 
-            <ModuleFooter></ModuleFooter>
+            <ModuleFooter>
+                <TooltipBtn toolTip={false} onClick={() => {}}>
+                    Use Template
+                </TooltipBtn>
+            </ModuleFooter>
         </ModuleMain>
     );
 };
