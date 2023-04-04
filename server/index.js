@@ -14,8 +14,9 @@ const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
   const server = express();
-  server.use(bodyParser.json());
-  server.use(bodyParser.urlencoded({ extended: false }));
+  server.use(bodyParser.json({limit: '50mb', extended: true}));
+  server.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
+  server.use(bodyParser.text({ limit: '200mb' }));
   userAuth(server);
   server.use("/api/login", loginLimiter);
   server.use("/api/*", apiLimiter);

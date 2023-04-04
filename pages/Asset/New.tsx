@@ -41,7 +41,9 @@ export default function NewAsset(props: NewAssetProps) {
 	,warranty:""
 	,tech_specs:""
 	,manufacture_country:""
-	,remarks:""});
+	,remarks:""
+	, image: ""
+});
 	
 	//state to display popup
 	//state when details are missing
@@ -84,7 +86,25 @@ export default function NewAsset(props: NewAssetProps) {
 	const handleForm = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {	
 		setform((prevState) => {return{...prevState,[e.target.name]:e.target.value}});
 	}
+	const [imagePreview, setImagePreview] = useState<string | undefined>();
 
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const dataURL = reader.result as string;
+        setImagePreview(dataURL);
+        setform({ ...form, image: dataURL });
+		console.log(form.image);
+      };
+    } else {
+      setImagePreview(undefined);
+      setform({ ...form, image: "" });
+    }
+  }
 	//Function to submit form
 	function submission() {
 	
@@ -141,7 +161,7 @@ export default function NewAsset(props: NewAssetProps) {
 			tech_specs: form.tech_specs,
 			manufacture_country: form.manufacture_country,
 			remarks: form.remarks,
-			image: "",
+			image:form.image,
 			files : JSON.stringify({})
 
 		}
@@ -158,6 +178,36 @@ export default function NewAsset(props: NewAssetProps) {
 		//open modal to show success
 		setSubmissionModal(true);
 	}}
+
+	// const updateData = (
+	// 	e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+	//   ) => {
+	// 	if (e.target.name === "image") {
+	// 	  const input = e.target as HTMLInputElement;
+	// 	  if (!input.files || input.files.length == 0) {
+	// 		setCompletionData((prev) => {
+	// 		  return {
+	// 			...prev,
+	// 			image: undefined,
+	// 		  };
+	// 		});
+	// 	  } else if (input.files && input.files.length > 0) {
+	// 		setCompletionData((prev) => {
+	// 		  return {
+	// 			...prev,
+	// 			image: input.files![0],
+	// 		  };
+	// 		});
+	// 	  }
+	// 	} else {
+	// 	  setCompletionData((prev) => {
+	// 		return {
+	// 		  ...prev,
+	// 		  complete_comments: e.target.value,
+	// 		};
+	// 	  });
+	// 	}
+	//   };
 
 	return (<ModuleMain>
 		<ModuleHeader header="New Asset"/>
@@ -295,6 +345,26 @@ export default function NewAsset(props: NewAssetProps) {
 					<label className='form-label'> Remarks</label>
 					<input type="text" className="form-control" onChange={handleForm} name='remarks' placeholder="Enter Remarks"/>
 				</div>
+				<div className="form-group" >
+					<div style={{marginBottom:"1rem"}}>
+											{form.image !== "" && (
+							<img src={imagePreview} alt="form image" 
+							style = {{width:"300px", height:"300px"}} />
+							)}			
+					</div>					
+                            {/* </img> */}
+
+                            <label className="form-label"> Image of Asset</label>
+                            <input type="file" 
+								className="form-control"
+								accept="image/png, image/jpg, image/jpeg" 
+								placeholder="Select Image"
+								name="image"
+								onChange={handleImageChange}
+									
+							/>
+								
+                          </div>
 				
 			
 				<ModuleSimplePopup

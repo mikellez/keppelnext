@@ -51,6 +51,7 @@ interface CMMSAssetDetailsState{
   manufacture_country: string;
   warranty: string;
   remarks: string;
+  image: string;
 
 }
 /*
