@@ -154,6 +154,9 @@ export default function ChecklistNew(props: NewChecklistPageProps) {
 		<>
 		<ModuleMain>
 			<ModuleHeader title="New Checklist" header="Create New Checklist">
+				<Link href="/Checklist/Templates" className="btn btn-primary">
+					Templates
+				</Link>
 				<Link href="/Checklist" className="btn btn-secondary">Back</Link>
 			</ModuleHeader>
 		{isReady ? 
