@@ -1,9 +1,33 @@
 import { nanoid } from 'nanoid';
+import CheckControl from './CheckControl';
 import { FileUploadControl, FreeTextControl, MultiChoiceControl, SignatureControl, SingleChoice, SingleChoiceControl } from '../../components/Checklist/Controls';
 
 import React from 'react'
 
 // refer to components/Checklist/ChecklistTemplateCreator.tsx README
+
+// abstract class CheckControl {
+// 	question: string;
+// 	value: string;
+// 	id: string;
+
+// 	constructor(question?: string, value?: string, id?:string) {
+// 		this.question = question !== undefined ? question : "";
+// 		this.value = value !== undefined ? value : "";
+// 		this.id = id !== undefined ? id : nanoid();
+// 	}
+
+// 	abstract clone(): CheckControl;
+// 	abstract duplicate(): CheckControl;
+// 	abstract toString(): string;
+// 	abstract toJSON(): {
+// 		type: string;
+// 		question: string;
+// 		value: string;
+// 		[key: string]: any;
+// 	};
+// 	abstract render(onChange: Function, onDelete: Function): React.ReactNode;
+// }
 
 class ControlFactory {
 
@@ -55,29 +79,6 @@ class ControlFactory {
 
 		throw Error("invalid type") 
 	}
-}
-
-abstract class CheckControl {
-	question: string;
-	value: string;
-	id: string;
-
-	constructor(question?: string, value?: string, id?:string) {
-		this.question = question !== undefined ? question : "";
-		this.value = value !== undefined ? value : "";
-		this.id = id !== undefined ? id : nanoid();
-	}
-
-	abstract clone(): CheckControl;
-	abstract duplicate(): CheckControl;
-	abstract toString(): string;
-	abstract toJSON(): {
-		type: string;
-		question: string;
-		value: string;
-		[key: string]: any;
-	};
-	abstract render(onChange: Function, onDelete: Function): React.ReactNode;
 }
 
 class CheckRow {
