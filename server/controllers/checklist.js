@@ -201,16 +201,16 @@ const fetchChecklistTemplateNames = async (req, res, next) => {
 
 const fetchSpecificChecklistTemplate = async (req, res, next) => {
     const sql = `
-    SELECT 
-        ct.chl_name,
-        ct.description,
-        ct.datajson,
-        ct.plant_id,
-        ct.signoff_user_id
-    FROM
-        keppel.checklist_templates ct
-    WHERE 
-        checklist_id = $1
+        SELECT 
+            ct.chl_name,
+            ct.description,
+            ct.datajson,
+            ct.plant_id,
+            ct.signoff_user_id
+        FROM
+            keppel.checklist_templates ct
+        WHERE 
+            checklist_id = $1
     `;
 
     db.query(sql, [req.params.checklist_id], (err, found) => {
@@ -220,6 +220,69 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
         }
         res.status(200).send(found.rows[0]);
     })
+};
+
+const fetchSpecificChecklistRecord = async (req, res, next) => {
+    const sql = `
+        SELECT 
+            cm.checklist_id,
+            cm.chl_name,
+            cm.description,
+            cm.datajson,
+            cm.created_date,
+            pm.plant_id,
+            pm.plant_name,
+            u1.user_id as assigned_user_id,
+            concat(u1.first_name, ' ', u1.last_name) as assigneduser,
+            u1.user_email as assigned_user_email,
+            u2.user_id as assigned_user_id,
+            concat(u2.first_name, ' ', u2.last_name) as signoffuser,
+            u2.user_email as signoff_user_email,
+            u3.user_id as created_by_user_id,
+            concat(u3.first_name, ' ', u3.last_name) as createdbyuser,
+            u3.user_email as created_by_user_email,
+            tmp1.assetNames
+            
+        FROM
+            keppel.checklist_master cm
+            JOIN keppel.users u1 ON u1.user_id = cm.assigned_user_id
+            JOIN keppel.users u2 ON u2.user_id = cm.signoff_user_id
+            JOIN keppel.users u3 ON u3.user_id = cm.created_user_id
+            JOIN keppel.plant_master pm ON pm.plant_id = cm.plant_id
+            JOIN (
+                SELECT  
+                            t3.checklist_id, 
+                            string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id asc) as assetNames
+                        FROM  
+                            keppel.system_assets AS t1,
+                            keppel.plant_system_assets AS t2, 
+                            keppel.checklist_master AS t3
+                        WHERE 
+                            t1.system_asset_id = t2.system_asset_id_lvl4 AND  
+                            t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
+                        group by 
+                            t3.checklist_id
+            ) tmp1 ON tmp1.checklist_id = cm.checklist_id
+            
+        WHERE 
+            cm.checklist_id = $1
+    `;
+
+    db.query(sql, [req.params.checklist_id], (err, found) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("No checklist template found");
+        }
+        res.status(200).send(found.rows[0]);
+    })
+};
+
+const fetchChecklistRecords = async (req, res, next) => {
+    if (req.params.checklist_id) {
+        return fetchSpecificChecklistRecord(req, res, next);
+    } else {
+        return fetchForReviewChecklists(req, res, next);
+    }
 };
 
 const submitNewChecklistTemplate = async (req, res, next) => {
@@ -375,5 +438,7 @@ module.exports = {
     createChecklistCSV,
     createNewChecklistRecord,
     createNewChecklistTemplate,
-    fetchSpecificChecklistTemplate
+    fetchSpecificChecklistTemplate,
+    fetchSpecificChecklistRecord,
+    fetchChecklistRecords
 };

@@ -114,7 +114,7 @@ const Templates = () => {
                     toolTip={false} 
                     disabled={!selectedTemplate}
                     onClick={() => {
-                        router.push(`/Checklist/New?templateId=${selectedTemplate?.checklist_id}`)
+                        router.push(`/Checklist/New?id=${selectedTemplate?.checklist_id}`)
                     }}>
                     Use Template
                 </TooltipBtn>

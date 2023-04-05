@@ -16,9 +16,10 @@ import { SingleValue } from 'react-select'
 import TooltipBtn from '../../components/TooltipBtn'
 import ModuleSimplePopup, { SimpleIcon } from '../../components/ModuleLayout/ModuleSimplePopup'
 import { useRouter } from 'next/router'
+import { createChecklistGetServerSideProps } from '../../types/common/props'
 
-interface NewChecklistPageProps {
-	checklistTemplate: CMMSChecklist | null;
+interface ChecklistPageProps {
+	checklist: CMMSChecklist | null;
 }
 
 const createChecklist = async (checklist: CMMSChecklist, type: string) => {
@@ -29,7 +30,7 @@ const createChecklist = async (checklist: CMMSChecklist, type: string) => {
 		.catch(err => console.log(err))
 };
 
-export default function ChecklistNew(props: NewChecklistPageProps) {
+export default function ChecklistNew(props: ChecklistPageProps) {
 
 	const [checklistData, setChecklistData] = useState<CMMSChecklist>({} as CMMSChecklist);
 	const [isReady, setIsReady] = useState<boolean>(false);
@@ -112,19 +113,19 @@ export default function ChecklistNew(props: NewChecklistPageProps) {
 				}
 			});
 
-			if (props.checklistTemplate) {
+			if (props.checklist) {
 				setChecklistData(prev => {
 					return {
 						...prev,
-						plant_id: props.checklistTemplate!.plant_id,
-						chl_name: props.checklistTemplate!.chl_name,
-						description: props.checklistTemplate!.description,
-						signoff_user_id: props.checklistTemplate!.signoff_user_id,
+						plant_id: props.checklist!.plant_id,
+						chl_name: props.checklist!.chl_name,
+						description: props.checklist!.description,
+						signoff_user_id: props.checklist!.signoff_user_id,
 					}
 				})
 
-				if (props.checklistTemplate.datajson.length > 0) {
-					const sectionsFromJSON = props.checklistTemplate.datajson.map((section: any) => {
+				if (props.checklist.datajson.length > 0) {
+					const sectionsFromJSON = props.checklist.datajson.map((section: any) => {
 						return CheckSection.fromJSON(JSON.stringify(section))
 						return section
 					})
@@ -136,7 +137,7 @@ export default function ChecklistNew(props: NewChecklistPageProps) {
 				setIsReady(true);
 			}, 1000);
 
-	}, [user.data, props.checklistTemplate]);
+	}, [user.data, props.checklist]);
 
 	useEffect(() => {
 		const json = sections.length > 0 ? 
@@ -240,7 +241,7 @@ export default function ChecklistNew(props: NewChecklistPageProps) {
 						}} 
 						plantId={checklistData.plant_id}
 						isSingle
-						defaultIds={props.checklistTemplate ? [checklistData.signoff_user_id as number] : []}
+						defaultIds={props.checklist ? [checklistData.signoff_user_id as number] : []}
 					/>
 				</div>
 			</div>
@@ -297,35 +298,9 @@ export default function ChecklistNew(props: NewChecklistPageProps) {
   	);
 };
 
-export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
-	const headers = {
-		withCredentials: true,
-		headers: {
-			Cookie: context.req.headers.cookie,
-		},
-	};
-	if (context.query.templateId) {
-		const { templateId}  = context.query;
-		const response = await axios.get("http://localhost:3001/api/checklist/template/" + templateId, headers);
-		if (response.status == 500) {
-			return {
-				props: {
-					checklistTemplate: null
-				},
-				redirect : {
-					destination: "/404"
-				}
-			}
-		}
-		return {
-			props: {
-				checklistTemplate: response.data
-			}
-		}
-	}
-	return {
-		props: {
-			checklistTemplate: null
-		}
-	}	
-};
+const getServerSideProps =  createChecklistGetServerSideProps("template");
+
+export {
+	type ChecklistPageProps,
+	getServerSideProps,
+}

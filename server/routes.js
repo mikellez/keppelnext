@@ -190,8 +190,8 @@ router.route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
 
 router.get("/checklist/pending", checkIfLoggedInAPI, controllers.checklist.fetchPendingChecklists);
 
-router.route("/checklist/record", checkIfLoggedInAPI) 
-    .get(controllers.checklist.fetchForReviewChecklists)
+router.route("/checklist/record/:checklist_id?", checkIfLoggedInAPI) 
+    .get(controllers.checklist.fetchChecklistRecords)
     .post(controllers.checklist.createNewChecklistRecord)
 
 router.get(
