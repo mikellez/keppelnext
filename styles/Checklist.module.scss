@@ -3,5 +3,23 @@
     grid-template-columns: 25% 75%;
     grid-template-rows: 1fr auto;
     column-gap: 1em;
+}
 
-  }
+.checklistDetailsContainer {
+  display: grid;
+  grid-template-columns: auto auto;
+}
+
+.checklistDetailsHeading {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.checklistDetailsContent {
+  
+}
+
+.checklistDetailsAssets {
+  margin: 0;
+}

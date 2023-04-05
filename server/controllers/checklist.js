@@ -241,7 +241,7 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
             u3.user_id as created_by_user_id,
             concat(u3.first_name, ' ', u3.last_name) as createdbyuser,
             u3.user_email as created_by_user_email,
-            tmp1.assetNames
+            tmp1.assetNames as linkedassets
             
         FROM
             keppel.checklist_master cm

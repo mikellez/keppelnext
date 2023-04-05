@@ -261,7 +261,7 @@ interface CMMSChecklist {
   linkedassets: string | null;
   linkedassetids: string | null;
   chl_type?: "Template";
-  created_date: Date;
+  created_date: Date | string;
   history: string;
   status: string;
   datajson?: any;
