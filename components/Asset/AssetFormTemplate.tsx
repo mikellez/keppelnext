@@ -75,7 +75,7 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 		setform((prevState) => {return{...prevState,[e.target.name]:e.target.value}});
 	}
 	
-
+//Function to get state of image
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
 
@@ -93,7 +93,7 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
       setform({ ...form, image: "" });
     }
   }
-
+	//Function to get state of files and post them to form
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
 	const files = e.target.files;
   	const uploadedFiles: [string, string][] = [];
@@ -116,11 +116,12 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
   }
   }
 
-
+    //Function to delete when pressed Confirm
 	function handledeleteModal() {
 		setdeleteModal(true);
 	}
 
+	//delete funciton
 	function deletion() {
 		let postData: {
 	} = {
@@ -188,7 +189,7 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 		setSubmissionModal(true);
 	}
 	
-	//Function to get asset details
+	//Function to get asset details and set image and files states
 	useEffect (() => {
 	getAsset(parseInt(psa_id as string)).then(result =>  {
 		console.log(result);
@@ -228,6 +229,7 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 		})
 	},[])
 
+ 	//function for files
 	var filename = [''];
 	var filevalue = [''];
 	if (fileraw) {
