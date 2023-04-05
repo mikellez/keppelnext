@@ -124,7 +124,7 @@ export default function ChecklistNew(props: NewChecklistPageProps) {
 				})
 
 				if (props.checklistTemplate.datajson.length > 0) {
-					const sectionsFromJSON = props.checklistTemplate.datajson.map(section => {
+					const sectionsFromJSON = props.checklistTemplate.datajson.map((section: any) => {
 						return CheckSection.fromJSON(JSON.stringify(section))
 						return section
 					})

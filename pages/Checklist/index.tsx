@@ -107,6 +107,8 @@ export default function Checklist() {
             };
           })
         );
+      } else {
+        setChecklistItems([])
       }
       setReady(true);
     }
