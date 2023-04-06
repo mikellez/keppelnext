@@ -6,7 +6,7 @@ import TooltipBtn from "../../../components/TooltipBtn";
 import { ChecklistPageProps } from "../New";
 import { createChecklistGetServerSideProps } from "../../../types/common/props";
 import { CheckSection } from "../../../types/common/classes";
-import ChecklistTemplateCreator from "../../../components/Checklist/ChecklistTemplateCreator";
+import ChecklistEditableForm from "../../../components/Checklist/ChecklistEditableForm";
 
 
 const CompleteChecklistPage = (props: ChecklistPageProps) => {
@@ -30,6 +30,9 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
             </ModuleHeader>
             <ModuleContent>
                 <ChecklistDetails checklist={props.checklist} />
+            </ModuleContent>
+            <ModuleContent>
+                <ChecklistEditableForm sections={sections} />
             </ModuleContent>
             <ModuleFooter>
                 <TooltipBtn toolTip={false}>Submit</TooltipBtn>
