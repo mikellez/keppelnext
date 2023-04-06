@@ -14,16 +14,16 @@ interface CMMSAssetDetails extends CMMSAsset {
   system_asset: string;
   parent_asset: string;
   asset_type: string;
-  asset_description?: string;
-  asset_location?: string;
-  brand?: string;
-  model_number?: string;
-  technical_specs?: string;
-  manufacture_country?: string;
-  warranty?: string;
-  remarks?: string;
-  uploaded_image?: string;
-  uploaded_files?: string;
+  asset_description: string;
+  asset_location: string;
+  brand: string;
+  model_number: string;
+  technical_specs: string;
+  manufacture_country: string;
+  warranty: string;
+  remarks: string;
+  uploaded_image: string;
+  uploaded_files: string;
   plant_id: number;
   system_id: number;
   system_asset_id: number;
@@ -258,16 +258,23 @@ interface CMMSChecklist {
   description: string;
   status_id: number;
   createdbyuser: string;
+  created_by_user_id: string | null;
+  created_by_user_email: string | null;
   assigneduser: string;
+  assigned_user_email: string | null;
+  assigned_user_id?: number;
   signoffuser: string;
+  signoff_user_id?: number;
+  signoff_user_email: string | null;
   plant_name: string;
   plant_id: number;
   linkedassets: string | null;
   linkedassetids: string | null;
-  chl_type: "Template";
-  created_date: Date;
+  chl_type?: "Template";
+  created_date: Date | string;
   history: string;
   status: string;
+  datajson?: any;
 }
 
 interface CMMSActivitylog {

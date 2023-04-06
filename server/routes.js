@@ -79,6 +79,7 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
     name: req.user.name,
     role_id: req.user.role_id,
     role_name: req.user.role_name,
+    allocated_plants: req.user.allocated_plants,
   });
 });
 
@@ -191,10 +192,64 @@ router.get(
   checkIfLoggedInAPI,
   controllers.asset.fetch_asset_types
 );
+
 router.get(
-  "/asset/history/:psa_Id",
+  "/asset/system/:system_id",
   checkIfLoggedInAPI,
-  controllers.asset.fetchAssetHistory
+  controllers.asset.fetchSystemAssets
+);
+router.get(
+  "/asset/system/:plant_id/:system_id/:system_asset_id",
+  checkIfLoggedInAPI,
+  controllers.asset.fetchSystemAssetNames
+);
+router.get(
+  "/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",
+  checkIfLoggedInAPI,
+  controllers.asset.fetchSubComponent1Names
+);
+router.post(
+  "/asset/addNewAsset",
+  checkIfLoggedInAPI,
+  controllers.asset.addNewAsset
+);
+router.post(
+  "/asset/editAsset",
+  checkIfLoggedInAPI,
+  controllers.asset.editAsset
+);
+router.post(
+  "/asset/deleteAsset",
+  checkIfLoggedInAPI,
+  controllers.asset.deleteAsset
+);
+
+router
+  .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
+  .get(controllers.checklist.fetchSpecificChecklistTemplate)
+  .post(controllers.checklist.createNewChecklistTemplate);
+
+router.get(
+  "/checklist/pending",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchPendingChecklists
+);
+
+router
+  .route("/checklist/record/:checklist_id?", checkIfLoggedInAPI)
+  .get(controllers.checklist.fetchChecklistRecords)
+  .post(controllers.checklist.createNewChecklistRecord);
+
+router.get(
+  "/checklist/approved",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchApprovedChecklists
+);
+
+router.get(
+  "/checklist/templateNames/:id?",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchChecklistTemplateNames
 );
 
 router.get(
@@ -269,6 +324,7 @@ router.get(
  *
  * @apiSuccess {string} - yeah
  */
+
 router.post(
   "/checklist/template",
   checkIfLoggedInAPI,
