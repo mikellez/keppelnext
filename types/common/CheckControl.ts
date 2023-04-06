@@ -22,6 +22,10 @@ abstract class CheckControl {
 	};
 	abstract render(onChange: Function, onDelete: Function): React.ReactNode;
 	abstract renderEditableForm(onChange: React.ChangeEventHandler): React.ReactNode;
+
+	updateCheck(value: string) {
+		this.value = value;
+	};
 }
 
 export default CheckControl

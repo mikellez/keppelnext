@@ -1,33 +1,30 @@
-import React from  "react";
+import React, { useContext } from  "react";
 import { CheckSection, CheckRow } from "../../types/common/classes";
+import { SectionsContext } from "../../pages/Checklist/Complete/[id]";
 
 const ChecklistEditableForm = (
-    { sections, setSections } : 
-    { sections: CheckSection[], setSections: React.Dispatch<React.SetStateAction<CheckSection[]>> }
+   
 ) => {
-    
-    const updateSections = (e: React.ChangeEvent) => {
-        console.log(e.target)
-    }
+    const { sections, setSections } = useContext(SectionsContext);
 
     return (
         <div>
             {sections.map((section, index) => {
-                return <ChecklistEditableFormSection key={index} section={section} onChange={updateSections} />
+                return <ChecklistEditableFormSection key={section.id} section={section} sectionId={section.id} />
             })}
         </div>
     )
 };
 
 const ChecklistEditableFormSection = (
-    { section, onChange }: { section: CheckSection, onChange: React.ChangeEventHandler }
+    { section, sectionId }: { section: CheckSection, sectionId: string }
 ) => {
 
     return (
         <div>
             {
                section.rows.map((row, index) => {
-                    return <ChecklistEditableFormRow key={index} row={row} onChange={onChange} />
+                    return <ChecklistEditableFormRow key={row.id} row={row} rowId={row.id} sectionId={sectionId} />
                })
             }
         </div>
@@ -35,14 +32,30 @@ const ChecklistEditableFormSection = (
 }
 
 const ChecklistEditableFormRow = (
-    { row, onChange }: { row: CheckRow, onChange: React.ChangeEventHandler }
+    { row, rowId, sectionId }: { row: CheckRow, rowId: string, sectionId: string }
 ) => {
+
+    const { sections, setSections } = useContext(SectionsContext);
+
+    const updateSections = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSections((prevSections) => {
+            const newSections = [...prevSections];
+            newSections.forEach(section => {
+                if (section.id === sectionId) {
+                    section.updateSection(rowId, e.target.name, e.target.value)
+                }
+            })
+            return newSections;
+        });
+    };
+
+    console.log(sections)
 
     return (
         <div>
             {
                 row.checks.map((check, index) => {
-                    return <React.Fragment key={check.id}>{check.renderEditableForm(onChange)}</React.Fragment>
+                    return <React.Fragment key={check.id}>{check.renderEditableForm(updateSections)}</React.Fragment>
                 })
             }
         </div>

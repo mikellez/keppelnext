@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext } from "react";
 import { ModuleContent, ModuleMain, ModuleHeader, ModuleFooter } from "../../../components";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import ChecklistDetails from "../../../components/Checklist/ChecklistDetails";
@@ -8,6 +8,10 @@ import { createChecklistGetServerSideProps } from "../../../types/common/props";
 import { CheckSection } from "../../../types/common/classes";
 import ChecklistEditableForm from "../../../components/Checklist/ChecklistEditableForm";
 
+export const SectionsContext = createContext({
+    sections: [] as CheckSection[],
+    setSections: (() => {}) as React.Dispatch<React.SetStateAction<CheckSection[]>>
+});
 
 const CompleteChecklistPage = (props: ChecklistPageProps) => {
     const [sections, setSections] = useState<CheckSection[]>([]);
@@ -29,7 +33,9 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
                 <ChecklistDetails checklist={props.checklist} />
             </ModuleContent>
             <ModuleContent>
-                <ChecklistEditableForm sections={sections} setSections={setSections} />
+                <SectionsContext.Provider value={{sections, setSections}}>
+                    <ChecklistEditableForm />
+                </SectionsContext.Provider>
             </ModuleContent>
             <ModuleFooter>
                 <TooltipBtn toolTip={false}>Submit</TooltipBtn>

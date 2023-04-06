@@ -110,6 +110,12 @@ class CheckRow {
 			"checks": this.checks
 		}
 	}
+
+	updateRow(checkId: string, value: string) {
+		this.checks.forEach(check => {
+			if (check.id === checkId) check.updateCheck(value)
+		})
+	}
 }
 
 class CheckSection {
@@ -159,6 +165,12 @@ class CheckSection {
 		})
 
 		return new CheckSection(description, rows)
+	}
+
+	updateSection(rowId: string, checkId: string, value: string) {
+		this.rows.forEach(row => {
+			if (row.id === rowId) row.updateRow(checkId, value)
+		})
 	}
 }
 
