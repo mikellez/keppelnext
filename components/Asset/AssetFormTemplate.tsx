@@ -266,37 +266,37 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 			<div className={formStyles.halfContainer}>
 				<div className="form-group">
 					<label className='form-label'>Description</label>
-					<input type="text" className="form-control"  onChange={handleForm} name='asset_description' placeholder="Enter Description" defaultValue={assetDetail.asset_description}/>
+					<input type="text" className="form-control"  onChange={handleForm} onBlur={handleForm} name='asset_description' placeholder="Enter Description" defaultValue={assetDetail.asset_description}/>
 				</div>
 
 				<div className="form-group">
 					<label className='form-label'> Location</label>
-					<input type="text" className="form-control"  onChange={handleForm} name='asset_location' placeholder="Enter Location" defaultValue={assetDetail.asset_location}/>
+					<input type="text" className="form-control"  onChange={handleForm} onBlur={handleForm} name='asset_location' placeholder="Enter Location" defaultValue={assetDetail.asset_location}/>
 				</div>
 
 				<div className="form-group">
 					<label className='form-label'> Brand</label>
-					<input type="text" className="form-control"onChange={handleForm}  name='brand' placeholder="Enter Brand" defaultValue={assetDetail.brand}/>
+					<input type="text" className="form-control"onChange={handleForm}  onBlur={handleForm} name='brand' placeholder="Enter Brand" defaultValue={assetDetail.brand}/>
 				</div>
 
 				<div className="form-group">
 					<label className='form-label'>Model Number</label>
-					<input type="text" className="form-control" onChange={handleForm}  name='model_number' placeholder="Enter Model Number" defaultValue={assetDetail.model_number}/>
+					<input type="text" className="form-control" onChange={handleForm}  onBlur={handleForm} name='model_number' placeholder="Enter Model Number" defaultValue={assetDetail.model_number}/>
 				</div>
 
 				<div className="form-group">
 					<label className='form-label'>Warranty</label>
-					<input type="text" className="form-control" onChange={handleForm} name='warranty' placeholder="Enter Warranty" defaultValue={assetDetail.warranty}/>
+					<input type="text" className="form-control" onChange={handleForm} onBlur={handleForm} name='warranty' placeholder="Enter Warranty" defaultValue={assetDetail.warranty}/>
 				</div>
 				
 				<div className="form-group">
 					<label className='form-label'> Tech Specs</label>
-					<input type="text" className="form-control" onChange={handleForm} name='technical_specs' placeholder="Enter Tech Specs" defaultValue={assetDetail.technical_specs}/>
+					<input type="text" className="form-control" onChange={handleForm} onBlur={handleForm} name='technical_specs' placeholder="Enter Tech Specs" defaultValue={assetDetail.technical_specs}/>
 				</div>
 
 				<div className="form-group">
 					<label className='form-label'>Manufacture Country</label>
-					<input type="text" className="form-control" onChange={handleForm} name='manufacture_country' placeholder="Enter Country" defaultValue={assetDetail.manufacture_country}/>
+					<input type="text" className="form-control" onChange={handleForm} onBlur={handleForm} name='manufacture_country' placeholder="Enter Country" defaultValue={assetDetail.manufacture_country}/>
 				</div>
 
 				<div className="form-group">
