@@ -36,6 +36,10 @@ export class FreeTextControl extends CheckControl {
     render(onChange: Function, onDelete: Function) {
 		return <FreeText freeTextObj={this} onChange={onChange} onDelete={onDelete} />
 	}
+
+	renderEditableForm(onChange: Function) {
+		return <div></div>
+	}
 }
 
 export function FreeText({freeTextObj, onChange, onDelete}: {

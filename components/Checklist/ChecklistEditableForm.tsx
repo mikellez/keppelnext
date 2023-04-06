@@ -1,39 +1,48 @@
 import React from  "react";
 import { CheckSection, CheckRow } from "../../types/common/classes";
 
-const ChecklistEditableForm = ({ sections } : { sections: CheckSection[] }) => {
+const ChecklistEditableForm = (
+    { sections, setSections } : 
+    { sections: CheckSection[], setSections: React.Dispatch<React.SetStateAction<CheckSection[]>> }
+) => {
     
-    
+    const updateSections = (e: React.ChangeEvent) => {
+        console.log(e.target)
+    }
 
     return (
         <div>
             {sections.map((section, index) => {
-                return <ChecklistEditableFormSection key={index} section={section} />
+                return <ChecklistEditableFormSection key={index} section={section} onChange={updateSections} />
             })}
         </div>
     )
 };
 
-const ChecklistEditableFormSection = ({ section }: { section: CheckSection }) => {
+const ChecklistEditableFormSection = (
+    { section, onChange }: { section: CheckSection, onChange: React.ChangeEventHandler }
+) => {
 
     return (
         <div>
             {
                section.rows.map((row, index) => {
-                    return <ChecklistEditableFormRow key={index} row={row} />
+                    return <ChecklistEditableFormRow key={index} row={row} onChange={onChange} />
                })
             }
         </div>
     )
 }
 
-const ChecklistEditableFormRow = ({ row }: { row: CheckRow }) => {
+const ChecklistEditableFormRow = (
+    { row, onChange }: { row: CheckRow, onChange: React.ChangeEventHandler }
+) => {
 
     return (
         <div>
             {
                 row.checks.map((check, index) => {
-                    return <React.Fragment key={check.id}>{check.render(() => {}, () => {})}</React.Fragment>
+                    return <React.Fragment key={check.id}>{check.renderEditableForm(onChange)}</React.Fragment>
                 })
             }
         </div>

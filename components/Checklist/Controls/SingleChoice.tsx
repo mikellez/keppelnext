@@ -39,6 +39,10 @@ export class SingleChoiceControl extends CheckControl {
 	render(onChange: Function, onDelete: Function) {
 		return <SingleChoice singleChoiceObj={this} onChange={onChange} onDelete={onDelete} />
 	}
+
+	renderEditableForm(onChange: React.ChangeEventHandler) {
+		return <SingleChoiceEditable singleChoiceObj={this} onChange={onChange} />
+	}
 }
 
 function Choice({choice, onChange, onDelete}: {
@@ -149,4 +153,32 @@ export function SingleChoice({singleChoiceObj, onChange, onDelete}: {
 		</div>
 
 	</div>;
+}
+
+function SingleChoiceEditable({ singleChoiceObj, onChange }: { 
+	singleChoiceObj: SingleChoiceControl,
+	onChange: React.ChangeEventHandler
+}) {
+
+	return (
+		<div>
+			<h6>{singleChoiceObj.question}</h6>
+			{singleChoiceObj.choices.map(choice => {
+				return (
+					<div key={choice} className="form-check">
+						<input 
+							type="radio"
+							value={choice}
+							name={singleChoiceObj.id}
+							className="form-check-input"
+							onChange={onChange}
+						/>
+						<label className="form-check-label">
+							{choice}
+						</label>
+					</div>
+				)
+			})}
+		</div>
+	)
 }

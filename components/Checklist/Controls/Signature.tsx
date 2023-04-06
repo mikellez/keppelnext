@@ -37,6 +37,10 @@ export class SignatureControl extends CheckControl {
     render(onChange: Function, onDelete: Function) {
 		return <Signature signatureControlObj={this} onChange={onChange} onDelete={onDelete} />
 	}
+
+	renderEditableForm(onChange: Function) {
+		return <div></div>
+	}
 }
 
 export function Signature({signatureControlObj, onChange, onDelete}: {

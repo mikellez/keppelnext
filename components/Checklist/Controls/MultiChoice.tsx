@@ -40,6 +40,10 @@ export class MultiChoiceControl extends CheckControl {
     render(onChange: Function, onDelete: Function) {
 		return <MultiChoice multiChoiceObj={this} onChange={onChange} onDelete={onDelete} />
 	}
+
+	renderEditableForm(onChange: Function) {
+		return <div></div>
+	}
 }
 
 function Choice({choice, onChange, onDelete}: {

@@ -21,6 +21,7 @@ abstract class CheckControl {
 		[key: string]: any;
 	};
 	abstract render(onChange: Function, onDelete: Function): React.ReactNode;
+	abstract renderEditableForm(onChange: React.ChangeEventHandler): React.ReactNode;
 }
 
 export default CheckControl

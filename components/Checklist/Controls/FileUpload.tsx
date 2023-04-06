@@ -36,6 +36,10 @@ export class FileUploadControl extends CheckControl {
     render(onChange: Function, onDelete: Function) {
 		return <FileUpload fileControlObj={this} onChange={onChange} onDelete={onDelete} />
 	}
+
+	renderEditableForm(onChange: Function) {
+		return <div></div>
+	}
 }
 
 export function FileUpload({fileControlObj, onChange, onDelete}: {

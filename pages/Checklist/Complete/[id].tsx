@@ -20,9 +20,6 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
             setSections(sectionsFromJSON)
         }
     }, [props.checklist]);
-    
-    console.log(props.checklist?.datajson)
-    console.log(sections)
 
     return (
         <ModuleMain>
@@ -32,7 +29,7 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
                 <ChecklistDetails checklist={props.checklist} />
             </ModuleContent>
             <ModuleContent>
-                <ChecklistEditableForm sections={sections} />
+                <ChecklistEditableForm sections={sections} setSections={setSections} />
             </ModuleContent>
             <ModuleFooter>
                 <TooltipBtn toolTip={false}>Submit</TooltipBtn>
