@@ -1,6 +1,8 @@
 import React from 'react';
 import { useState } from 'react';
-import { CheckControl } from '../../../types/common/classes';
+// import { CheckControl } from '../../../types/common/classes';
+import CheckControl from '../../../types/common/CheckControl';
+
 import { ImCross } from "react-icons/im"
 
 import checklistStyles from '../ChecklistTemplateCreator.module.css'
