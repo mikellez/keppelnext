@@ -77,6 +77,7 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
         name: req.user.name,
         role_id: req.user.role_id,
         role_name: req.user.role_name,
+        allocated_plants: req.user.allocated_plants,
     });
 });
 
@@ -178,12 +179,16 @@ router.post("/asset/editAsset", checkIfLoggedInAPI, controllers.asset.editAsset)
 router.post("/asset/deleteAsset", checkIfLoggedInAPI, controllers.asset.deleteAsset);
 
 
-router.get(
-    "/checklist/template",
-    checkIfLoggedInAPI,
-    controllers.checklist.fetchTemplateChecklists
-);
-router.get("/checklist/record", checkIfLoggedInAPI, controllers.checklist.fetchForReviewChecklists);
+router.route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
+    .get( controllers.checklist.fetchSpecificChecklistTemplate)
+    .post(controllers.checklist.createNewChecklistTemplate)
+
+router.get("/checklist/pending", checkIfLoggedInAPI, controllers.checklist.fetchPendingChecklists);
+
+router.route("/checklist/record/:checklist_id?", checkIfLoggedInAPI) 
+    .get(controllers.checklist.fetchChecklistRecords)
+    .post(controllers.checklist.createNewChecklistRecord)
+
 router.get(
     "/checklist/approved",
     checkIfLoggedInAPI,
@@ -191,7 +196,7 @@ router.get(
 );
 
 router.get(
-    "/checklist/templateNames/:id",
+    "/checklist/templateNames/:id?",
     checkIfLoggedInAPI,
     controllers.checklist.fetchChecklistTemplateNames
 );
@@ -211,6 +216,7 @@ router.get("/checklist/csv", checkIfLoggedInAPI, controllers.checklist.createChe
  *
  * @apiSuccess {string} - yeah
  */
+
 router.post(
     "/checklist/template",
     checkIfLoggedInAPI,

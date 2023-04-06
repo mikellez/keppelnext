@@ -37,13 +37,25 @@ module.exports = (server) => {
     });
 
     passport.deserializeUser((id, cb) => {
-        db.query(`SELECT * FROM keppel.user_access WHERE user_id = $1::integer`, [id], (err, result) => {
+        db.query(`SELECT 
+                user_id,
+                first_name,
+                last_name,
+                role_id,
+                role_name,
+                STRING_TO_ARRAY(allocatedplantids, ', ') as allocated_plants
+            FROM 
+                keppel.user_access 
+            WHERE 
+                user_id = $1::integer`, [id], (err, result) => {
             if (err) return cb(err);
+
             const userInfo = {
                 id: result.rows[0].user_id,
                 name: result.rows[0].first_name + " " + result.rows[0].last_name,
                 role_id: parseInt(result.rows[0].role_id),
-                role_name: result.rows[0].role_name
+                role_name: result.rows[0].role_name,
+                allocated_plants: result.rows[0].allocated_plants.map(plant => parseInt(plant)).sort()
             };
             cb(null, userInfo);
         })

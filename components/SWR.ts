@@ -26,7 +26,7 @@ function useAsset(plant_id: number|null) {
 	return useSWR<CMMSAsset[], Error>(plant_id ? ["/api/asset/", plant_id.toString()] : null, assetFetcher, {revalidateOnFocus: false});
 }
 
-function useChecklist(checklist_type: "template" | "record" | "approved") {
+function useChecklist(checklist_type: "pending" | "record" | "approved") {
 	const checklistFetcher = (url: string) => axios.get<CMMSChecklist[]>(url + checklist_type).then((response) => response.data).catch((e) => {
 		throw new Error(e);
 	})
@@ -55,7 +55,8 @@ function useCurrentUser() {
 		id: number,
 		name: string,
 		role_id: number,
-		role_name: string
+		role_name: string,
+		allocated_plants: number[],
 	}
 
 	const userFetcher = (url: string) => axios.get<CMMSCurrentUser>(url).then((response) => response.data).catch((e) => {

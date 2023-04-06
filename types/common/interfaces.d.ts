@@ -250,16 +250,23 @@ interface CMMSChecklist {
   description: string;
   status_id: number;
   createdbyuser: string;
+  created_by_user_id: string | null;
+  created_by_user_email: string | null;
   assigneduser: string;
+  assigned_user_email: string | null;
+  assigned_user_id?: number;
   signoffuser: string;
+  signoff_user_id?: number;
+  signoff_user_email: string | null;
   plant_name: string;
   plant_id: number;
   linkedassets: string | null;
   linkedassetids: string | null;
-  chl_type: "Template";
-  created_date: Date;
+  chl_type?: "Template";
+  created_date: Date | string;
   history: string;
   status: string;
+  datajson?: any;
 }
 
 interface CMMSActivitylog {
