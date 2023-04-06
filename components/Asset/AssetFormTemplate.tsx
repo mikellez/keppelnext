@@ -42,38 +42,18 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 	type UploadedFile = [string, string];
 	const [fileraw, setfileraw] = useState<UploadedFile[]>([]);
 	const [imagePreview, setImagePreview] = useState<string | undefined>();
-	const [form, setform] = useState<CMMSAssetDetailsState>({
-		plant_id:0
-		,system_id: 0
-		,system_asset_id: 0
-		,system_asset: ""
-		,asset_type_id: ""
-		,system_asset_name: ""
-		,system_asset_name_form: ""
-		,sub_component_1: ""
-		,sub_component_1_form: ""
-		,sub_component_2: ""
-		,description:""
-		,location:""
-		,brand:""
-		,model_number:""
-		,warranty:""
-		,tech_specs:""
-		,manufacture_country:""
-		,remarks:""
-		,image:""
-		,files:""
-	});
-
+	
 	//Function to get value of fields
 	const handleAssetNameSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setform((prevState) => {return{...prevState,[e.target.name]:e.target.value,system_asset:e.target.options[e.target.selectedIndex].text}});
+		setAssetDetail((prevState) => {return{...prevState,[e.target.name]:e.target.value,system_asset:e.target.options[e.target.selectedIndex].text}});
 	}
 	
 	//Function to get name of fields
 	const handleForm = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {	
-		setform((prevState) => {return{...prevState,[e.target.name]:e.target.value}});
+		setAssetDetail((prevState) => {return{...prevState,[e.target.name]:e.target.value}});
+		console.log("&*^&^*&^")
 	}
+	console.log(assetDetail)
 	
 //Function to get state of image
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -85,12 +65,10 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
       reader.onload = () => {
         const dataURL = reader.result as string;
         setImagePreview(dataURL);
-        setform({ ...form, image: dataURL });
-		console.log(form.image);
+		setAssetDetail({ ...assetDetail, uploaded_image: dataURL });
       };
     } else {
       setImagePreview(undefined);
-      setform({ ...form, image: "" });
     }
   }
 	//Function to get state of files and post them to form
@@ -147,32 +125,18 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 		//if no errors, submit form		
 		//post data
 		let postData: {
-			plant_id: number;
-			system_id: number;
-			system_asset: string;
-			system_asset_id: number;
-			system_asset_name: string;
-			system_lvl_5: string;
 			[key: string]: string | number;
 		} = {
 			psa_id: psa_id,
-			plant_id: form.plant_id,
-			system_id: form.system_id,
-			system_asset: form.system_asset,
-			system_asset_id: form.system_asset_id,
-			system_asset_name: form.system_asset_name,
-			system_lvl_5: form.sub_component_1,
-			asset_type: form.asset_type_id,
-			system_lvl_6: form.sub_component_2,
-			description: form.description,
-			location: form.location,
-			brand: form.brand,
-			model_number: form.model_number,
-			warranty: form.warranty,
-			tech_specs: form.tech_specs,
-			manufacture_country: form.manufacture_country,
-			remarks: form.remarks,
-			image:form.image,
+			description: assetDetail.asset_description,
+			location: assetDetail.asset_location,
+			brand: assetDetail.brand,
+			model_number: assetDetail.model_number,
+			warranty: assetDetail.warranty,
+			tech_specs: assetDetail.technical_specs,
+			manufacture_country: assetDetail.manufacture_country,
+			remarks: assetDetail.remarks,
+			image: assetDetail.uploaded_image,
 			files : JSON.stringify(fileraw)
 
 		}
@@ -200,7 +164,6 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 					asset_name: ""
 			})
 			setImagePreview(result[0].uploaded_image);
-			setform({ ...form, image: result[0].uploaded_image });
 			setfileraw(result[0].uploaded_files)
 		}
 		else if (!result[0].system_asset_lvl6) {
@@ -210,8 +173,8 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 					asset_name: ""
 				
 			})
+
 			setImagePreview(result[0].uploaded_image);
-			setform({ ...form, image: result[0].uploaded_image });
 			setfileraw(result[0].uploaded_files)
 
 		}
@@ -223,18 +186,16 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 				
 			})
 			setImagePreview(result[0].uploaded_image);
-			setform({ ...form, image: result[0].uploaded_image });
 			setfileraw(result[0].uploaded_files)
 		}
 		})
-	},[])
-
+	},[])		
  	//function for files
 	var filename = [''];
 	var filevalue = [''];
-	if (fileraw) {
-	filename = fileraw.map((file) => file[0]);
-	filevalue = fileraw.map((file) => file[1]);
+	if (fileraw !== undefined && fileraw !== null) {
+		filename = fileraw.map((file) => file[0]);
+		filevalue = fileraw.map((file) => file[1]);
 	}
 
 	const filesToDownload = filevalue.map((file, index) => {
@@ -242,8 +203,6 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 			<Link key={index} href={file} download>{filename[index]}</Link>
 		)
 	})
-	console.log(form.image)
-
     return (
         <ModuleMain>
 				<ModuleHeader header={props.header}>
@@ -307,12 +266,12 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 			<div className={formStyles.halfContainer}>
 				<div className="form-group">
 					<label className='form-label'>Description</label>
-					<input type="text" className="form-control"  onChange={handleForm} name='description' placeholder="Enter Description" defaultValue={assetDetail.asset_description}/>
+					<input type="text" className="form-control"  onChange={handleForm} name='asset_description' placeholder="Enter Description" defaultValue={assetDetail.asset_description}/>
 				</div>
 
 				<div className="form-group">
 					<label className='form-label'> Location</label>
-					<input type="text" className="form-control"  onChange={handleForm} name='location' placeholder="Enter Location" defaultValue={assetDetail.asset_location}/>
+					<input type="text" className="form-control"  onChange={handleForm} name='asset_location' placeholder="Enter Location" defaultValue={assetDetail.asset_location}/>
 				</div>
 
 				<div className="form-group">
@@ -332,7 +291,7 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 				
 				<div className="form-group">
 					<label className='form-label'> Tech Specs</label>
-					<input type="text" className="form-control" onChange={handleForm} name='tech_specs' placeholder="Enter Tech Specs" defaultValue={assetDetail.technical_specs}/>
+					<input type="text" className="form-control" onChange={handleForm} name='technical_specs' placeholder="Enter Tech Specs" defaultValue={assetDetail.technical_specs}/>
 				</div>
 
 				<div className="form-group">
@@ -346,7 +305,7 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 				</div>
 				<div className="form-group" >
 					<div style={{marginBottom:"1rem"}}>
-											{form.image !== null && form.image !== "" && (
+											{imagePreview !== null && imagePreview !== "" && (
 							<img src={imagePreview} alt="form image" 
 							style = {{width:"300px", height:"300px"}} />
 							)}			
@@ -357,7 +316,7 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 								className="form-control"
 								accept="image/png, image/jpg, image/jpeg" 
 								placeholder="Select Image"
-								name="image"
+								name="uploaded_image"
 								onChange={handleImageChange}
 							/>
 								
