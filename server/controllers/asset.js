@@ -488,15 +488,52 @@ const editAsset = async (req, res, next) => {
         WHERE psa_id = '${psa_id}'`;
   }
 
-  console.log(sql);
-  db.query(sql, function (err, result) {
-    if (err) {
-      console.log(err);
-    }
-    return res.status(200).send({
-      SuccessCode: "200",
-    });
+  //   console.log(sql);
+  const assetQuery = `
+  SELECT asset_description,
+  asset_location,
+  brand,
+  model_number,
+  technical_specs,
+  manufacture_country,
+  warranty,
+  remarks,
+  uploaded_image,
+  uploaded_files
+  FROM keppel.plant_system_assets
+  WHERE psa_id = '${psa_id}'
+  `;
+
+  const old = await db.query(assetQuery);
+
+  await db.query(sql);
+
+  const updated = await db.query(assetQuery);
+
+  const fields = compare(old.rows[0], updated.rows[0]);
+
+  res.status(200).send({
+    SuccessCode: "200",
   });
+};
+
+const compare = (old, updated) => {
+  const fields = [];
+  console.log(old.asset_description);
+  console.log("----------------------------------------------");
+  console.log(updated.asset_description);
+  for (const key in old) {
+    if (Array.isArray(old[key])) {
+      if (JSON.stringify(old[key]) !== JSON.stringify(updated[key])) {
+        fields.push(key);
+      }
+    } else if (old[key] !== updated[key]) {
+      fields.push(key);
+    }
+  }
+
+  console.log(fields);
+  return fields;
 };
 
 const addNewAsset = (req, res, next) => {

@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import Modal from 'react-modal';
 
 import { IconType } from 'react-icons/lib';
-import { BsX, BsCheck2, BsExclamationTriangle, BsInfoCircle } from "react-icons/bs";
+import { BsX, BsCheck2, BsExclamationCircle,BsInfoCircle } from "react-icons/bs";
 
 export enum SimpleIcon {
 	Info,
@@ -39,7 +39,7 @@ export default function ModuleSimplePopup(props: ModuleSimplePopupProps) {
 		if(props.icon === SimpleIcon.Check)
 			return <BsCheck2 size={122} color="#1F8A70" />;
 		if(props.icon === SimpleIcon.Exclaim)
-			return <BsExclamationTriangle size={108} color="#FFB200" />;
+			return <BsExclamationCircle size={108} color="#C70F2B" />;
 		if(props.icon === SimpleIcon.Cross)
 			return <BsX size={122} color="#CD0404"/>;
 

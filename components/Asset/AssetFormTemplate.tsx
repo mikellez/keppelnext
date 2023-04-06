@@ -16,7 +16,6 @@ import ModuleSimplePopup, { SimpleIcon } from '../ModuleLayout/ModuleSimplePopup
 interface AssetFormTemplateProps {
     header: string;
 }    
-
 const getAsset = async (id: number) => {
     const url =  "/api/assetDetails/" 
     return await axios
@@ -40,7 +39,9 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 	const [submissionModal, setSubmissionModal] = useState<boolean>(false);
 	const [confirmModal, setconfirmModal] = useState<boolean>(false);
 	const [deleteModal, setdeleteModal] = useState<boolean>(false);
-
+	type UploadedFile = [string, string];
+	const [fileraw, setfileraw] = useState<UploadedFile[]>([]);
+	const [imagePreview, setImagePreview] = useState<string | undefined>();
 	const [form, setform] = useState<CMMSAssetDetailsState>({
 		plant_id:0
 		,system_id: 0
@@ -59,7 +60,10 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 		,warranty:""
 		,tech_specs:""
 		,manufacture_country:""
-		,remarks:""});
+		,remarks:""
+		,image:""
+		,files:""
+	});
 
 	//Function to get value of fields
 	const handleAssetNameSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -70,10 +74,54 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 	const handleForm = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {	
 		setform((prevState) => {return{...prevState,[e.target.name]:e.target.value}});
 	}
+	
+//Function to get state of image
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const dataURL = reader.result as string;
+        setImagePreview(dataURL);
+        setform({ ...form, image: dataURL });
+		console.log(form.image);
+      };
+    } else {
+      setImagePreview(undefined);
+      setform({ ...form, image: "" });
+    }
+  }
+	//Function to get state of files and post them to form
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+	const files = e.target.files;
+  	const uploadedFiles: [string, string][] = [];
+
+  if (files) {
+    for (let i = 0; i < files.length; i++) {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        uploadedFiles.push([files[i].name, reader.result as string]);
+
+        // If all files have been processed, update the state
+        if (uploadedFiles.length === files.length) {
+			setfileraw((prevState) => [...prevState, ...uploadedFiles]);
+        }
+      };
+
+      reader.readAsDataURL(files[i]);
+    }
+  }
+  }
+
+    //Function to delete when pressed Confirm
 	function handledeleteModal() {
 		setdeleteModal(true);
 	}
 
+	//delete funciton
 	function deletion() {
 		let postData: {
 	} = {
@@ -92,6 +140,8 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 	
 		//open modal to show success
 	}
+
+
 	function submission() {
 	
 		//if no errors, submit form		
@@ -122,11 +172,10 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 			tech_specs: form.tech_specs,
 			manufacture_country: form.manufacture_country,
 			remarks: form.remarks,
-			image: "",
-			files : JSON.stringify({})
+			image:form.image,
+			files : JSON.stringify(fileraw)
 
 		}
-	
 		console.log(postData);
 	    //post data to API
 		fetch("/api/asset/editAsset", {
@@ -140,14 +189,19 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 		setSubmissionModal(true);
 	}
 	
+	//Function to get asset details and set image and files states
 	useEffect (() => {
 	getAsset(parseInt(psa_id as string)).then(result =>  {
+		console.log(result);
 		if (!result[0].system_asset_lvl5) {
 			setAssetDetail({
 					...result[0],
 					system_asset_lvl5: result[0].asset_name,
 					asset_name: ""
 			})
+			setImagePreview(result[0].uploaded_image);
+			setform({ ...form, image: result[0].uploaded_image });
+			setfileraw(result[0].uploaded_files)
 		}
 		else if (!result[0].system_asset_lvl6) {
 			setAssetDetail({
@@ -156,6 +210,9 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 					asset_name: ""
 				
 			})
+			setImagePreview(result[0].uploaded_image);
+			setform({ ...form, image: result[0].uploaded_image });
+			setfileraw(result[0].uploaded_files)
 
 		}
 		else if (!result[0].system_asset_lvl7) {
@@ -165,14 +222,27 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 					asset_name: ""
 				
 			})
+			setImagePreview(result[0].uploaded_image);
+			setform({ ...form, image: result[0].uploaded_image });
+			setfileraw(result[0].uploaded_files)
 		}
 		})
 	},[])
 
-	console.log(assetDetail)
+ 	//function for files
+	var filename = [''];
+	var filevalue = [''];
+	if (fileraw) {
+	filename = fileraw.map((file) => file[0]);
+	filevalue = fileraw.map((file) => file[1]);
+	}
 
-	
-
+	const filesToDownload = filevalue.map((file, index) => {
+		return (
+			<Link key={index} href={file} download>{filename[index]}</Link>
+		)
+	})
+	console.log(form.image)
 
     return (
         <ModuleMain>
@@ -274,6 +344,37 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 					<label className='form-label'> Remarks</label>
 					<input type="text" className="form-control" onChange={handleForm} name='remarks' placeholder="Enter Remarks" defaultValue={assetDetail.remarks}/>
 				</div>
+				<div className="form-group" >
+					<div style={{marginBottom:"1rem"}}>
+											{form.image !== null && form.image !== "" && (
+							<img src={imagePreview} alt="form image" 
+							style = {{width:"300px", height:"300px"}} />
+							)}			
+					</div>					
+                            {/* </img> */}
+                            <label className="form-label"> Image of Asset</label>
+                            <input type="file" 
+								className="form-control"
+								accept="image/png, image/jpg, image/jpeg" 
+								placeholder="Select Image"
+								name="image"
+								onChange={handleImageChange}
+							/>
+								
+                          </div>
+					<div className="form-group">
+
+					<label className='form-label'> Upload documents</label>
+					<div style={{display: "flex", flexDirection: "column", fontSize: "0.8em"}}>
+					
+							{
+								filesToDownload
+							}
+							
+					</div>
+					<input type="file" className="form-control" name="file" placeholder="Select Files" multiple
+					onChange={handleFileChange}></input>
+				</div>
 			</div>
 			<ModuleSimplePopup
                 modalOpenState={submissionModal}
@@ -296,27 +397,29 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
 			<ModuleSimplePopup
                 modalOpenState={deleteModal}
                 setModalOpenState={setdeleteModal}
-                title="Are You Sure?"
-                text="The whole entity will be deleted!				"
-                icon={SimpleIcon.Check}
-				buttons={
-					
+                title="Irreversible Action!"
+                text="The whole entity will be deleted!"
+                icon={SimpleIcon.Exclaim}
+				
+				buttons2={
 					<button onClick={() => {
 						deletion();
 						setdeleteModal(false);
 						// route back to assets
-						router.push("/Asset")
+						// router.push("/Asset")
 					  }}
 					  className="btn btn-primary"
-					>Confirm</button>
+						>Confirm</button>
 				}
-				buttons2={
-					<button className="btn btn-primary"
+				buttons={
+					<button className="btn"
+					style={{backgroundColor: "grey", color: "white"}}
 					onClick={() => {
 						setdeleteModal(false);
 					}}>Cancel</button>
 
 				}
+				
 
 				onRequestClose={() => {router.push("/Asset");}}
             />
