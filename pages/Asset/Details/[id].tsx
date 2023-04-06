@@ -273,7 +273,7 @@ export default function AssetDetails(props: { history: [CMMSAssetHistory] }) {
             <tr>
               <th>Action</th>
               <th>User</th>
-              <th>Date</th>
+              <th style={{ width: "12rem" }}>Date</th>
               <th>Fields Changed</th>
             </tr>
           </thead>
