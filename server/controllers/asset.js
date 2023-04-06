@@ -507,10 +507,17 @@ const editAsset = async (req, res, next) => {
   const old = await db.query(assetQuery);
 
   await db.query(sql);
-
   const updated = await db.query(assetQuery);
 
-  const fields = compare(old.rows[0], updated.rows[0]);
+  const fields = compare(old.rows[0], updated.rows[0]).join(", ");
+
+  await db.query(
+    `INSERT INTO keppel.history (action, user_id, fields, date, asset_id) VALUES ('EDITED', '${
+      req.body.user_id
+    }', '${fields}', '${moment(new Date()).format(
+      "YYYY-MM-DD HH:mm:ss"
+    )}', '${psa_id}')`
+  );
 
   res.status(200).send({
     SuccessCode: "200",
@@ -519,9 +526,6 @@ const editAsset = async (req, res, next) => {
 
 const compare = (old, updated) => {
   const fields = [];
-  console.log(old.asset_description);
-  console.log("----------------------------------------------");
-  console.log(updated.asset_description);
   for (const key in old) {
     if (Array.isArray(old[key])) {
       if (JSON.stringify(old[key]) !== JSON.stringify(updated[key])) {

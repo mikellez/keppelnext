@@ -24,6 +24,7 @@ import Link from "next/link";
 import TooltipBtn from "../../../components/TooltipBtn";
 import { AiOutlineHistory } from "react-icons/ai";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import { HiOutlinePencilAlt } from "react-icons/hi";
 
 // Get asset detail by psa id
 const getAsset = async (id: number) => {
@@ -99,9 +100,48 @@ export default function AssetDetails(props: { history: [CMMSAssetHistory] }) {
     }, 1000);
   }, [psa_id, router]);
 
+  const formatDate = (oldDate: string) => {
+    let strArray = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const date = new Date(oldDate);
+    let y = date.getFullYear();
+    let d = date.getDate();
+    let m = strArray[date.getMonth()];
+
+    let hr = date.getHours();
+    let min: number | string = date.getMinutes();
+    if (min < 10) {
+      min = "0" + min.toString();
+    }
+    let ampm = "AM";
+    if (hr > 12) {
+      hr -= 12;
+      ampm = "PM";
+    }
+    return `${d} ${m} ${y} at ${hr}:${min} ${ampm}`;
+  };
+
   return (
     <ModuleMain>
       <ModuleHeader header="Asset Details">
+        <Link href={`/Asset/Edit/${psa_id}`}>
+          <TooltipBtn text="Edit Asset">
+            <HiOutlinePencilAlt size={20} />
+          </TooltipBtn>
+        </Link>
+
         <TooltipBtn
           text="View Asset History"
           onClick={() => setHistoryModal(true)}
@@ -223,11 +263,6 @@ export default function AssetDetails(props: { history: [CMMSAssetHistory] }) {
           </>
         )}
       </ModuleContent>
-      <ModuleFooter>
-        <Link href={{ pathname: "/Asset/Edit/[id]", query: { id: psa_id } }}>
-          <button className="btn btn-primary">Edit </button>
-        </Link>
-      </ModuleFooter>
       <ModuleModal
         isOpen={historyModal}
         closeModal={() => setHistoryModal(false)}
@@ -248,7 +283,7 @@ export default function AssetDetails(props: { history: [CMMSAssetHistory] }) {
                 <tr key={history.history_id}>
                   <td>{history.action}</td>
                   <td>{history.name}</td>
-                  <td>{history.date.toString()}</td>
+                  <td>{formatDate(history.date.toString())}</td>
                   <td>{history.fields}</td>
                 </tr>
               );
