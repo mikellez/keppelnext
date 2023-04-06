@@ -32,7 +32,7 @@ interface CMMSAssetDetails extends CMMSAsset {
   system_asset_lvl7?: string;
 }
 
-interface CMMSAssetDetailsState{
+interface CMMSAssetDetailsState {
   plant_id: number;
   system_id: number;
   system_asset_id: number;
@@ -53,7 +53,6 @@ interface CMMSAssetDetailsState{
   remarks: string;
   image: string;
   files: string;
-
 }
 /*
 interface CMMSAssetDetails2 {
@@ -66,7 +65,16 @@ interface CMMSAssetDetails2 {
   uploaded_files: Uint8Array[] | null;
 }*/
 
-interface postData{
+interface CMMSAssetHistory {
+  history_id: number;
+  action: string;
+  fields: string;
+  date: Date;
+  asset_id: number;
+  name: string;
+}
+
+interface postData {
   plant_id?: number;
   system_id?: number;
   system_asset_id?: number;
@@ -313,6 +321,7 @@ export {
   CMMSSchedule,
   CMMSAsset,
   CMMSAssetDetails,
+  CMMSAssetHistory,
   CMMSAssetRequestHistory,
   CMMSAssetChecklistHistory,
   CMMSChecklist,
@@ -328,5 +337,5 @@ export {
   CMMSAssetDetailsState,
   postData,
   CMMSAssetDetails,
-  CMMSSubComponent1Name
+  CMMSSubComponent1Name,
 };
