@@ -184,6 +184,16 @@ class CheckSection {
 		if (row) return row.getValue(checkId);	
 		return "";
 	}
+
+	isComplete() {
+		let result: boolean = true;
+		this.rows.forEach(row => {
+			row.checks.forEach(check => {
+				if (!check.value || check.value.trim() === "") result = false;
+			})
+		})
+		return result;
+	}
 }
 
 export {

@@ -41,12 +41,19 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
             const sectionsFromJSON = props.checklist.datajson.map((section: any) => {
                 return CheckSection.fromJSON(JSON.stringify(section));
             });
-            setSections(sectionsFromJSON)
+            setSections(sectionsFromJSON);
         }
     }, [props.checklist]);
 
     const handleSubmit = () => {
         setDisableSubmit(false);
+
+        if (!isCompleteChecklist()) {
+            setIncompleteModal(true);
+            setDisableSubmit(false);
+            return;
+        }
+
         submitCompletedChecklist(sections, parseInt(router.query.id as string))
             .then(result => {
                 setSuccessModal(true);
@@ -54,7 +61,14 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
                     router.push("/Checklist");
                 })
             })
+        
     }
+
+    console.log(sections)
+
+    const isCompleteChecklist = () => {
+        return sections.every(section => section.isComplete());
+    };
 
     return (
         <>
