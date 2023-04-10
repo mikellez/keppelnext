@@ -76,7 +76,6 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
     setAssetDetail((prevState) => {
       return { ...prevState, [e.target.name]: e.target.value };
     });
-    console.log("&*^&^*&^");
   };
   console.log(assetDetail);
 
@@ -210,7 +209,7 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
   //function for files
   var filename = [""];
   var filevalue = [""];
-  if (fileraw !== undefined && fileraw !== null) {
+  if (fileraw !== undefined && fileraw !== null && fileraw.length > 0) {
     filename = fileraw.map((file) => file[0]);
     filevalue = fileraw.map((file) => file[1]);
   }
@@ -538,7 +537,7 @@ export default function AssetFormTemplate(props: AssetFormTemplateProps) {
                 deletion();
                 setdeleteModal(false);
                 // route back to assets
-                // router.push("/Asset")
+                router.push("/Asset")
               }}
               className="btn btn-primary"
             >
