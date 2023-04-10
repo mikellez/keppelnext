@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { ModuleContent, ModuleMain, ModuleHeader, ModuleFooter } from "../../../components";
 import { ChecklistPageProps } from "../New";
-import ChecklistDetails from "../../../components/Checklist/ChecklistDetails";
 import { createChecklistGetServerSideProps } from "../../../types/common/props";
 import { GetServerSideProps } from "next";
-import ChecklistViewForm from "../../../components/Checklist/ChecklistViewForm";
 import { CheckSection } from "../../../types/common/classes";
 import TooltipBtn from "../../../components/TooltipBtn";
 import axios from "axios";
 import { useRouter } from "next/router";
 import ModuleSimplePopup, {SimpleIcon} from "../../../components/ModuleLayout/ModuleSimplePopup";
+import ChecklistPreview from "../../../components/Checklist/ChecklistPreview";
 
 const manageChecklist = async (id: number, action: string, remarks: string) => {
     return await axios({
@@ -22,7 +21,6 @@ const manageChecklist = async (id: number, action: string, remarks: string) => {
 };
 
 const ManageChecklistPage = (props: ChecklistPageProps) => {
-    const [sections, setSections] = useState<CheckSection[]>([]);
     const [remarks, setRemarks] = useState<string>("")
     const [missingRemarksModal, setMissingRemarksModal] = useState<boolean>(false);
     const [successModal, setSuccessModal] = useState<boolean>(false);
@@ -47,26 +45,14 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
             })
     };
 
-    useEffect(() => {
-
-        if (props.checklist && props.checklist.datajson.length > 0) {
-            const sectionsFromJSON = props.checklist.datajson.map((section: any) => {
-                return CheckSection.fromJSON(JSON.stringify(section));
-            });
-            setSections(sectionsFromJSON);
-        }
-    }, [props.checklist]);
-
     return (
         <>
         <ModuleMain>
             <ModuleHeader header="Mange Checklist">
             </ModuleHeader>
+            <ChecklistPreview checklist={props.checklist} />
             <ModuleContent>
-                <ChecklistDetails checklist={props.checklist} />
-            </ModuleContent>
-            <ModuleContent>
-                <ChecklistViewForm sections={sections} />
+                <label>Remarks</label>
                 <textarea
                     className="form-control"
                     value={remarks}
