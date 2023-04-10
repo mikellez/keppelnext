@@ -76,6 +76,10 @@ export default function AssetDetails(props: { history: [CMMSAssetHistory] }) {
   const [imgIsErr, setImgIsErr] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [historyModal, setHistoryModal] = useState<boolean>(false);
+  const [fileIsErr, setFileIsErr] = useState<boolean>(false);
+  type UploadedFile = [string, string];
+  const [fileraw, setfileraw] = useState<UploadedFile[]>([]);
+
 
   const router = useRouter();
   const psa_id = router.query.id;
@@ -89,6 +93,7 @@ export default function AssetDetails(props: { history: [CMMSAssetHistory] }) {
           getAssetHistory(id, "checklist").then((chistory) => {
             setAssetDetail(result[0]);
             setImgIsErr(!result[0].uploaded_image);
+            setfileraw(result[0].uploaded_files);
             if (rhistory) setAssetRequestHistory(rhistory);
             if (chistory) setAssetChecklistHistory(chistory);
           });
@@ -99,6 +104,22 @@ export default function AssetDetails(props: { history: [CMMSAssetHistory] }) {
       setIsLoading(false);
     }, 1000);
   }, [psa_id, router]);
+  var filename = [""];
+  var filevalue = [""];
+  if (fileraw !== undefined && fileraw !== null && fileraw.length > 0) {
+    filename = fileraw.map((file) => file[0]);
+    filevalue = fileraw.map((file) => file[1]);
+  }
+
+  const filesToDownload = filevalue.map((file, index) => {
+    return (
+      <tr>
+      <Link key={index} href={file} download={filename[index]}>
+        {filename[index]}
+      </Link>
+      </tr>
+    );
+  });
 
   const formatDate = (oldDate: string) => {
     let strArray = [
@@ -230,6 +251,10 @@ export default function AssetDetails(props: { history: [CMMSAssetHistory] }) {
                       <th>Remarks</th>
                       <td>{assetDetail.remarks ? assetDetail.remarks : "-"}</td>
                     </tr>
+                    <tr>
+                      <th>Files</th>
+                      <td>{filesToDownload}</td>
+                    </tr>
                   </span>
                 </tbody>
               </table>
@@ -248,6 +273,7 @@ export default function AssetDetails(props: { history: [CMMSAssetHistory] }) {
                     className={styles.assetImage}
                   />
                 )}
+             
               </div>
             </div>
             {assetRequestHistory && (
