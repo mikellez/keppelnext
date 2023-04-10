@@ -7,14 +7,14 @@ import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 
 import {
-    Table,
-    Header,
-    HeaderRow,
-    HeaderCell,
-    Body,
-    Row,
-    Cell,
-    OnClick,
+  Table,
+  Header,
+  HeaderRow,
+  HeaderCell,
+  Body,
+  Row,
+  Cell,
+  OnClick,
 } from "@table-library/react-table-library";
 import { useChecklist, useCurrentUser } from "../../components/SWR";
 import { CMMSChecklist } from "../../types/common/interfaces";
@@ -26,44 +26,48 @@ import { BsFileEarmarkPlus } from "react-icons/bs";
 import LoadingHourglass from "../../components/LoadingHourglass";
 import axios from "axios";
 
-const indexedColumn: ("pending" | "record" | "approved")[] = ["pending", "record", "approved"];
+const indexedColumn: ("pending" | "record" | "approved")[] = [
+  "pending",
+  "record",
+  "approved",
+];
 
 // pretty much the same as CMMSChecklist but the ID is changed
 interface ChecklistItem {
-    id: number;
-    chl_name: string;
-    description: string;
-    status_id: number;
-    createdbyuser: string;
-    assigneduser: string;
-    signoffuser: string;
-    plant_name: string;
-    plant_id: number;
-    linkedassets: string | null;
-    linkedassetids: string | null;
-    chl_type: string;
-    created_date: Date;
-    history: string;
-    status: string;
+  id: number;
+  chl_name: string;
+  description: string;
+  status_id: number;
+  createdbyuser: string;
+  assigneduser: string;
+  signoffuser: string;
+  plant_name: string;
+  plant_id: number;
+  linkedassets: string | null;
+  linkedassetids: string | null;
+  chl_type: string;
+  created_date: Date;
+  history: string;
+  status: string;
 }
 
 const downloadCSV = async (type: string, activeTabIndex: number) => {
-    try {
-        const response = await axios({
-            url: `/api/${type}/csv?activeTab=${JSON.stringify(activeTabIndex)}`,
-            method: "get",
-            responseType: "arraybuffer",
-        });
-        const blob = new Blob([response.data]);
-        const url = window.URL.createObjectURL(blob);
-        const temp_link = document.createElement("a");
-        temp_link.download = `${type}.csv`;
-        temp_link.href = url;
-        temp_link.click();
-        temp_link.remove();
-    } catch (e) {
-        console.log(e);
-    }
+  try {
+    const response = await axios({
+      url: `/api/${type}/csv?activeTab=${JSON.stringify(activeTabIndex)}`,
+      method: "get",
+      responseType: "arraybuffer",
+    });
+    const blob = new Blob([response.data]);
+    const url = window.URL.createObjectURL(blob);
+    const temp_link = document.createElement("a");
+    temp_link.download = `${type}.csv`;
+    temp_link.href = url;
+    temp_link.click();
+    temp_link.remove();
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 export default function Checklist() {
@@ -72,7 +76,9 @@ export default function Checklist() {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const user = useCurrentUser();
 
-    const { data, error, isValidating, mutate } = useChecklist(indexedColumn[activeTabIndex]);
+  const { data, error, isValidating, mutate } = useChecklist(
+    indexedColumn[activeTabIndex]
+  );
 
   const theme = useTheme([
     getTheme(),
@@ -82,20 +88,20 @@ export default function Checklist() {
     },
   ]);
 
-    const switchColumns = (index: number) => {
-        setReady(false);
-        setActiveTabIndex(index);
-    };
+  const switchColumns = (index: number) => {
+    setReady(false);
+    setActiveTabIndex(index);
+  };
 
-    const editRow: OnClick<ChecklistItem> = (item, event) => {
-        const checklistRow = item;
+  const editRow: OnClick<ChecklistItem> = (item, event) => {
+    const checklistRow = item;
 
-        // console.log(checklistRow, event);
-    };
+    // console.log(checklistRow, event);
+  };
 
-    useEffect(() => {
-        // console.log(activeTabIndex);
-    }, [activeTabIndex]);
+  useEffect(() => {
+    // console.log(activeTabIndex);
+  }, [activeTabIndex]);
 
   useEffect(() => {
     if (!isReady && data && !isValidating) {
@@ -116,7 +122,7 @@ export default function Checklist() {
               linkedassets: row.linkedassets,
               linkedassetids: row.linkedassetids,
               chl_type: row.chl_type as string,
-              created_date: row.created_date,
+              created_date: row.created_date as Date,
               history: row.history,
               status: row.status,
             };
@@ -129,21 +135,21 @@ export default function Checklist() {
     }
   }, [data, isValidating, isReady]);
 
-    return (
-        <ModuleMain>
-            <ModuleHeader title="Checklist" header="Checklist">
-                <Link href="/Checklist/New">
-                    <TooltipBtn text="New Checklist">
-                        <BsFileEarmarkPlus href="/Checklist/New" size={20} />
-                    </TooltipBtn>
-                </Link>
-                <TooltipBtn
-                    onClick={() => downloadCSV("checklist", activeTabIndex)}
-                    text="Export CSV"
-                >
-                    <HiOutlineDownload size={20} />
-                </TooltipBtn>
-            </ModuleHeader>
+  return (
+    <ModuleMain>
+      <ModuleHeader title="Checklist" header="Checklist">
+        <Link href="/Checklist/New">
+          <TooltipBtn text="New Checklist">
+            <BsFileEarmarkPlus href="/Checklist/New" size={20} />
+          </TooltipBtn>
+        </Link>
+        <TooltipBtn
+          onClick={() => downloadCSV("checklist", activeTabIndex)}
+          text="Export CSV"
+        >
+          <HiOutlineDownload size={20} />
+        </TooltipBtn>
+      </ModuleHeader>
 
       <ModuleContent>
         <ul className="nav nav-tabs">
