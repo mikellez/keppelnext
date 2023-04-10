@@ -13,6 +13,10 @@ export const SectionsContext = createContext({
     setSections: (() => {}) as React.Dispatch<React.SetStateAction<CheckSection[]>>
 });
 
+const submitCompletedChecklist = () => {
+
+};
+
 const CompleteChecklistPage = (props: ChecklistPageProps) => {
     const [sections, setSections] = useState<CheckSection[]>([]);
 
@@ -38,7 +42,7 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
                 </SectionsContext.Provider>
             </ModuleContent>
             <ModuleFooter>
-                <TooltipBtn toolTip={false}>Submit</TooltipBtn>
+                <TooltipBtn toolTip={false} onClick={submitCompletedChecklist}>Submit</TooltipBtn>
             </ModuleFooter>
         </ModuleMain>
     );

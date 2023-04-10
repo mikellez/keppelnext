@@ -1,7 +1,9 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useContext } from 'react';
 // import { CheckControl } from '../../../types/common/classes';
 import CheckControl from '../../../types/common/CheckControl';
+import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
+import { updateSpecificCheck } from '../ChecklistEditableForm';
+
 
 import { ImCross } from "react-icons/im"
 
@@ -37,8 +39,8 @@ export class FreeTextControl extends CheckControl {
 		return <FreeText freeTextObj={this} onChange={onChange} onDelete={onDelete} />
 	}
 
-	renderEditableForm(onChange: Function) {
-		return <div></div>
+	renderEditableForm(rowId: string, sectionId: string) {
+		return <FreeTextEditable freeTextObj={this} rowId={rowId} sectionId={sectionId} />
 	}
 }
 
@@ -73,4 +75,35 @@ export function FreeText({freeTextObj, onChange, onDelete}: {
 			<textarea onChange={handleResponse} className="form-control" disabled></textarea>
 		</div>
 	</div>;
+}
+
+function FreeTextEditable({ freeTextObj, rowId, sectionId }: {
+	freeTextObj: FreeTextControl,
+	rowId: string,
+	sectionId: string
+}) {
+
+	const { setSections } = useContext(SectionsContext);
+	
+	const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+		updateSpecificCheck(sectionId, rowId, freeTextObj.id, e.target.value, setSections)
+		// setSections((prevSections) => {
+        //     const newSections = [...prevSections];
+        //     newSections.forEach(section => {
+        //         if (section.id === sectionId) {
+        //             section.updateSection(rowId, freeTextObj.id, e.target.value)
+        //         }
+        //     })
+        //     return newSections;
+        // });
+	};
+
+	return (
+		<div>
+			<h6>{freeTextObj.question}</h6>
+			<textarea className="form-control" onChange={handleChange}>
+
+			</textarea>
+		</div>
+	)
 }

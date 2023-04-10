@@ -116,6 +116,12 @@ class CheckRow {
 			if (check.id === checkId) check.updateCheck(value)
 		})
 	}
+
+	getValue(checkId: string) {
+		const check = this.checks.find(check => check.id === checkId)
+		if (check) return check.value;
+		return "";
+	}
 }
 
 class CheckSection {
@@ -171,6 +177,12 @@ class CheckSection {
 		this.rows.forEach(row => {
 			if (row.id === rowId) row.updateRow(checkId, value)
 		})
+	}
+
+	getValue(rowId: string, checkId: string) {
+		const row = this.rows.find(row => row.id === rowId);
+		if (row) return row.getValue(checkId);	
+		return "";
 	}
 }
 
