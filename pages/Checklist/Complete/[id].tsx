@@ -7,18 +7,34 @@ import { ChecklistPageProps } from "../New";
 import { createChecklistGetServerSideProps } from "../../../types/common/props";
 import { CheckSection } from "../../../types/common/classes";
 import ChecklistEditableForm from "../../../components/Checklist/ChecklistEditableForm";
+import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
+import { useRouter } from "next/router";
+import axios from "axios";
 
 export const SectionsContext = createContext({
     sections: [] as CheckSection[],
     setSections: (() => {}) as React.Dispatch<React.SetStateAction<CheckSection[]>>
 });
 
-const submitCompletedChecklist = () => {
-
+const submitCompletedChecklist = async (data: CheckSection[], id: number) => {
+    return await axios({
+            url: "/api/checklist/complete/" + id,
+            method: "patch",
+            data: {
+                datajson: JSON.stringify(data.map(section => section.toJSON()))
+            }
+        })
+        .then(res => res.data)
+        .catch(err => console.log(err))
 };
 
 const CompleteChecklistPage = (props: ChecklistPageProps) => {
     const [sections, setSections] = useState<CheckSection[]>([]);
+    const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
+    const [successModal, setSuccessModal] = useState<boolean>(false);
+    const [incompleteModal, setIncompleteModal] = useState<boolean>(false);
+
+    const router = useRouter();
 
     useEffect(() => {
         if (props.checklist && props.checklist.datajson.length > 0) {
@@ -29,7 +45,19 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
         }
     }, [props.checklist]);
 
+    const handleSubmit = () => {
+        setDisableSubmit(false);
+        submitCompletedChecklist(sections, parseInt(router.query.id as string))
+            .then(result => {
+                setSuccessModal(true);
+                setTimeout(() => {
+                    router.push("/Checklist");
+                })
+            })
+    }
+
     return (
+        <>
         <ModuleMain>
             <ModuleHeader header="Complete Checklist">
             </ModuleHeader>
@@ -42,14 +70,31 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
                 </SectionsContext.Provider>
             </ModuleContent>
             <ModuleFooter>
-                <TooltipBtn toolTip={false} onClick={submitCompletedChecklist}>Submit</TooltipBtn>
+                <TooltipBtn toolTip={false} onClick={handleSubmit} disabled={disableSubmit}>Submit</TooltipBtn>
             </ModuleFooter>
         </ModuleMain>
+
+        <ModuleSimplePopup 
+            modalOpenState={successModal}
+            setModalOpenState={setSuccessModal}
+            icon={SimpleIcon.Check}
+            title="Completed"
+            text="Checklist is successfully completed"
+        />
+
+        <ModuleSimplePopup 
+            modalOpenState={incompleteModal}
+            setModalOpenState={setIncompleteModal}
+            icon={SimpleIcon.Exclaim}
+            title="Incomplete checklist"
+            text="Please ensure that all fields have been filled"
+        />
+        </>
     );
 };
 
 export default CompleteChecklistPage;
-const getServerSideProps: GetServerSideProps = createChecklistGetServerSideProps("record");
+const getServerSideProps: GetServerSideProps = createChecklistGetServerSideProps("record", [2, 3]);
 
 export {
     getServerSideProps

@@ -226,6 +226,7 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
             cm.description,
             cm.datajson,
             cm.created_date,
+            cm.status_id,
             pm.plant_id,
             pm.plant_name,
             u1.user_id as assigned_user_id,
@@ -445,6 +446,26 @@ const createChecklistCSV = async (req, res, next) => {
     });
 };
 
+const completeChecklist = async (req, res, next) => {
+    const sql = `
+        UPDATE
+            keppel.checklist_master
+        SET 
+            datajson = $1,
+            status_id = 4
+        WHERE 
+            checklist_id = $2
+    `;
+
+    db.query(sql, [req.body.datajson, req.params.checklist_id], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to update checklist completion");
+        }
+        return res.status(200).json("Checklist successfully completed");
+    })
+}
+
 module.exports = {
     fetchPendingChecklists,
     fetchForReviewChecklists,
@@ -458,4 +479,5 @@ module.exports = {
     fetchSpecificChecklistTemplate,
     fetchSpecificChecklistRecord,
     fetchChecklistRecords,
+    completeChecklist
 };

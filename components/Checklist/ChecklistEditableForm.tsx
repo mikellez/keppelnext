@@ -6,7 +6,7 @@ const ChecklistEditableForm = (
    
 ) => {
     const { sections } = useContext(SectionsContext);
-    console.log(sections)
+    
     return (
         <div>
             {sections.map((section, index) => {

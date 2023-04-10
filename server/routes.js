@@ -200,6 +200,8 @@ router.get(
     controllers.checklist.fetchApprovedChecklists
 );
 
+router.patch("/checklist/complete/:checklist_id", checkIfLoggedInAPI, controllers.checklist.completeChecklist);
+
 router.get(
     "/checklist/templateNames/:id?",
     checkIfLoggedInAPI,
