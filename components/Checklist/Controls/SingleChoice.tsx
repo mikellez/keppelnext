@@ -142,7 +142,9 @@ export function SingleChoice({
   };
 
   const handleQuestion = (e: React.ChangeEvent<HTMLInputElement>) => {
-    singleChoiceObj.question = e.target.value;
+    const o = singleChoiceObj.clone();
+    o.question = e.target.value;
+    onChange(o);
   };
 
   return (
