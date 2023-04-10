@@ -447,12 +447,17 @@ const createChecklistCSV = async (req, res, next) => {
 };
 
 const completeChecklist = async (req, res, next) => {
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
+    const updatehistory = `,Updated Record_WORK DONE_${today}_${req.user.name}`;
+
     const sql = `
         UPDATE
             keppel.checklist_master
         SET 
             datajson = $1,
-            status_id = 4
+            status_id = 4,
+            history = concat(history,'${updatehistory}')
         WHERE 
             checklist_id = $2
     `;
@@ -463,7 +468,96 @@ const completeChecklist = async (req, res, next) => {
             return res.status(500).json("Failure to update checklist completion");
         }
         return res.status(200).json("Checklist successfully completed");
-    })
+    });
+};
+
+const approveChecklist = async (req, res, next) => {
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
+    const updatehistory = `,Updated Record_APPROVE_${today}_${req.user.name}`;
+
+    const sql = `
+        UPDATE
+            keppel.checklist_master
+        SET 
+            status_id = 5,
+            history = concat(history,'${updatehistory}')
+        WHERE 
+            checklist_id = $2
+    `;
+
+    db.query(sql, [req.params.checklist_id], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to update checklist completion");
+        }
+        return res.status(200).json("Checklist successfully approved");
+    });
+};
+
+const rejectChecklist = async (req, res, next) => {
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    const rejectionComments = ""; // todo add rejected comment here
+
+    const updatehistory = `,Updated Record_REJECTED_${today}_${req.user.name}_${rejectionComments}`;
+
+    const sql = `
+        UPDATE
+            keppel.checklist_master
+        SET 
+            status_id = 6,
+            history = concat(history,'${updatehistory}')
+        WHERE 
+            checklist_id = $2
+    `;
+
+    db.query(sql, [req.params.checklist_id], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to update checklist completion");
+        }
+        return res.status(200).json("Checklist successfully cancelled");
+    });
+};
+
+const cancelChecklist = async (req, res, next) => {
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    const cancelledComments = ""; // todo add cancelled comment here
+
+    const updatehistory = `,Updated Record_CANCELLED_${today}_${req.user.name}_${cancelledComments}`;
+
+    const sql = `
+        UPDATE
+            keppel.checklist_master
+        SET 
+            status_id = 7,
+            history = concat(history,'${updatehistory}')
+        WHERE 
+            checklist_id = $2
+    `;
+
+    db.query(sql, [req.params.checklist_id], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to update checklist completion");
+        }
+        return res.status(200).json("Checklist successfully rejected");
+    });
+};
+
+function updateChecklist(updateType) {
+    switch (updateType) {
+        case "complete":
+            return completeChecklist;
+        case "approve":
+            return approveChecklist;
+        case "reject":
+            return rejectChecklist;
+        case "cancel":
+            return cancelChecklist;
+        default:
+            return console.log("update checklist type error");
+    }
 }
 
 module.exports = {
@@ -479,5 +573,5 @@ module.exports = {
     fetchSpecificChecklistTemplate,
     fetchSpecificChecklistRecord,
     fetchChecklistRecords,
-    completeChecklist
+    updateChecklist,
 };
