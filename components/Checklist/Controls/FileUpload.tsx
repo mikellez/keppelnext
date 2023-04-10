@@ -6,6 +6,8 @@ import { ImCross } from "react-icons/im";
 import checklistStyles from "../ChecklistTemplateCreator.module.css";
 import { ModuleDivider } from "../../ModuleLayout/ModuleDivider";
 import Image from 'next/image';
+import styles from "../../../styles/Checklist.module.scss";
+
 
 export class FileUploadControl extends CheckControl {
   constructor(question?: string, value?: string, id?: string) {
@@ -154,7 +156,7 @@ function FileUploadEditable({ fileControlObj, rowId, sectionId }: {
 function FileUploadView({ fileControlObj }: {fileControlObj: FileUploadControl}) {
 
   return (
-    <div>
+    <div className={styles.checkViewContainer}>
       <h6>{fileControlObj.question}</h6>
       <Image 
         src={fileControlObj.value}

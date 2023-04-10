@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
-// import { CheckControl } from '../../../types/common/classes';
 import CheckControl from '../../../types/common/CheckControl';
 import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
 import { updateSpecificCheck } from '../ChecklistEditableForm';
+import styles from "../../../styles/Checklist.module.scss";
 
 
 import { ImCross } from "react-icons/im";
@@ -133,14 +133,9 @@ function FreeTextEditable({ freeTextObj, rowId, sectionId }: {
 
 function FreeTextView({freeTextObj}: {freeTextObj: FreeTextControl}) {
   return (
-    <div>
+    <div className={styles.checkViewContainer}>
       <h6>{freeTextObj.question}</h6>
-      <textarea 
-        defaultValue={freeTextObj.value} 
-        disabled
-        className="form-control"
-        style={{resize: "none"}}
-      ></textarea>
+      <p>{freeTextObj.value}</p>
     </div>
   )
 }

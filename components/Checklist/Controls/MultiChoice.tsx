@@ -1,12 +1,11 @@
 import React, { useContext, useState } from 'react';
-// import { CheckControl } from '../../../types/common/classes';
 import CheckControl from '../../../types/common/CheckControl';
 import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
-
 import { ImCross } from "react-icons/im";
-
 import checklistStyles from "../ChecklistTemplateCreator.module.css";
 import { ModuleDivider } from "../../ModuleLayout/ModuleDivider";
+import styles from "../../../styles/Checklist.module.scss";
+
 
 export class MultiChoiceControl extends CheckControl {
   choices: string[];
@@ -265,7 +264,7 @@ function MultiChoiceEditable ({ multiChoiceObj, rowId, sectionId }: {
 
 function MultiChoiceView ({multiChoiceObj}: {multiChoiceObj: MultiChoiceControl}) {
   return (
-    <div>
+    <div className={styles.checkViewContainer}>
 			<h6>{multiChoiceObj.question}</h6>
 			{
 				multiChoiceObj.choices.map(choice => {

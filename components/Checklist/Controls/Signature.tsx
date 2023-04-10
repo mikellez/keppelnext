@@ -8,6 +8,8 @@ import { ModuleDivider } from '../../ModuleLayout/ModuleDivider';
 import SignatureCanvas from 'react-signature-canvas';
 import ReactSignatureCanvas from 'react-signature-canvas';
 import Image from 'next/image';
+import styles from "../../../styles/Checklist.module.scss";
+
 
 export class SignatureControl extends CheckControl {
   constructor(question?: string, value?: string, id?: string) {
@@ -134,7 +136,7 @@ function SignatureEditable({ signatureControlObj, rowId, sectionId }: {
 
 function SignatureView({signatureControlObj}: {signatureControlObj: SignatureControl}) {
   return (
-    <div>
+    <div className={styles.checkViewContainer}>
       <h6>{signatureControlObj.question}</h6>
       <Image
         src={signatureControlObj.value}

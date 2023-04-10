@@ -1,12 +1,11 @@
 import React, { useState, useContext } from 'react';
 import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
 import { updateSpecificCheck } from '../ChecklistEditableForm';
-// import { CheckControl } from '../../../types/common/classes';
 import CheckControl from "../../../types/common/CheckControl";
 import { ImCross } from "react-icons/im";
-
 import checklistStyles from "../ChecklistTemplateCreator.module.css";
 import { ModuleDivider } from "../../ModuleLayout/ModuleDivider";
+import styles from "../../../styles/Checklist.module.scss";
 
 export class SingleChoiceControl extends CheckControl {
   choices: string[];
@@ -252,7 +251,7 @@ function SingleChoiceEditable({ singleChoiceObj, rowId, sectionId }: {
 
 function SingleChoiceView({singleChoiceObj}: {singleChoiceObj: SingleChoiceControl}) {
   return (
-    <div>
+    <div className={styles.checkViewContainer}>
       <h6>{singleChoiceObj.question}</h6>
       {
 				singleChoiceObj.choices.map(choice => {

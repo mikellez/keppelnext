@@ -4,6 +4,7 @@ import { ChecklistPageProps } from "../New";
 import { createChecklistGetServerSideProps } from "../../../types/common/props";
 import { GetServerSideProps } from "next";
 import { CheckSection } from "../../../types/common/classes";
+import Link from "next/link";
 import TooltipBtn from "../../../components/TooltipBtn";
 import axios from "axios";
 import { useRouter } from "next/router";
@@ -49,6 +50,9 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
         <>
         <ModuleMain>
             <ModuleHeader header="Mange Checklist">
+            <Link href="/Checklist" className="btn btn-secondary">
+                Back
+            </Link>
             </ModuleHeader>
             <ChecklistPreview checklist={props.checklist} />
             <ModuleContent>
@@ -57,6 +61,9 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
                     className="form-control"
                     value={remarks}
                     onChange={(e) => setRemarks(e.target.value)}
+                    rows={2}
+                    maxLength={100}
+                    style={{resize: "none"}}
                 ></textarea>
             </ModuleContent>
             <ModuleFooter>
