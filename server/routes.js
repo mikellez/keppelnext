@@ -198,7 +198,11 @@ router
     .get(controllers.checklist.fetchSpecificChecklistTemplate)
     .post(controllers.checklist.createNewChecklistTemplate);
 
-router.get("/checklist/pending", checkIfLoggedInAPI, controllers.checklist.fetchPendingChecklists);
+router.get(
+    "/checklist/assigned",
+    checkIfLoggedInAPI,
+    controllers.checklist.fetchAssignedChecklists
+);
 
 router
     .route("/checklist/record/:checklist_id?", checkIfLoggedInAPI)

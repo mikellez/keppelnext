@@ -26,7 +26,7 @@ import { BsFileEarmarkPlus } from "react-icons/bs";
 import LoadingHourglass from "../../components/LoadingHourglass";
 import axios from "axios";
 
-const indexedColumn: ("pending" | "record" | "approved")[] = ["pending", "record", "approved"];
+const indexedColumn: ("assigned" | "record" | "approved")[] = ["assigned", "record", "approved"];
 
 // pretty much the same as CMMSChecklist but the ID is changed
 interface ChecklistItem {
@@ -153,7 +153,7 @@ export default function Checklist() {
             }}
             className={"nav-link" + (activeTabIndex === 0 ? " active" : "")}
           >
-            <span style={{ all: "unset" }}>Pending</span>
+            <span style={{ all: "unset" }}>Assigned</span>
           </li>
           <li
             onClick={() => {

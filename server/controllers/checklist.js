@@ -2,7 +2,7 @@ const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
 
-const fetchPendingChecklistsQuery = `
+const fetchAssignedChecklistsQuery = `
 SELECT 
     cl.checklist_id, 
     cl.chl_name, 
@@ -43,12 +43,12 @@ FROM
     JOIN keppel.status_cm st ON st.status_id = cl.status_id	
 WHERE 
     ua.user_id = $1 AND 
-    (cl.status_id is null or cl.status_id = 1 or cl.status_id = 6)
+    (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3)
 ORDER BY cl.checklist_id DESC;
 `;
 
-const fetchPendingChecklists = async (req, res, next) => {
-    db.query(fetchPendingChecklistsQuery, [req.user.id], (err, result) => {
+const fetchAssignedChecklists = async (req, res, next) => {
+    db.query(fetchAssignedChecklistsQuery, [req.user.id], (err, result) => {
         if (err) return res.status(400).json({ msg: err });
         if (result.rows.length == 0) return res.status(201).json({ msg: "No checklist" });
 
@@ -96,7 +96,7 @@ FROM
     JOIN keppel.status_cm st ON st.status_id = cl.status_id						
 WHERE 
     ua.user_id = $1 AND 
-    (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4)
+    (cl.status_id = 4 OR cl.status_id = 6)
 ORDER BY cl.checklist_id desc;
         
 `;
@@ -561,7 +561,7 @@ function updateChecklist(updateType) {
 }
 
 module.exports = {
-    fetchPendingChecklists,
+    fetchAssignedChecklists,
     fetchForReviewChecklists,
     fetchApprovedChecklists,
     fetchChecklistTemplateNames,
