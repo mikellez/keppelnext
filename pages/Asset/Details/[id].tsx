@@ -253,7 +253,8 @@ export default function AssetDetails(props: { history: [CMMSAssetHistory] }) {
                     </tr>
                     <tr>
                       <th>Files</th>
-                      <td>{filesToDownload}</td>
+                      <td>{fileraw ? filesToDownload : "-"}</td>
+                      {/* <td>{fileraw[0]}</td> */}
                     </tr>
                   </span>
                 </tbody>
