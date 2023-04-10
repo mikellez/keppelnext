@@ -110,6 +110,18 @@ class CheckRow {
 			"checks": this.checks
 		}
 	}
+
+	updateRow(checkId: string, value: string) {
+		this.checks.forEach(check => {
+			if (check.id === checkId) check.updateCheck(value)
+		})
+	}
+
+	getValue(checkId: string) {
+		const check = this.checks.find(check => check.id === checkId)
+		if (check) return check.value;
+		return "";
+	}
 }
 
 class CheckSection {
@@ -159,6 +171,28 @@ class CheckSection {
 		})
 
 		return new CheckSection(description, rows)
+	}
+
+	updateSection(rowId: string, checkId: string, value: string) {
+		this.rows.forEach(row => {
+			if (row.id === rowId) row.updateRow(checkId, value)
+		})
+	}
+
+	getValue(rowId: string, checkId: string) {
+		const row = this.rows.find(row => row.id === rowId);
+		if (row) return row.getValue(checkId);	
+		return "";
+	}
+
+	isComplete() {
+		let result: boolean = true;
+		this.rows.forEach(row => {
+			row.checks.forEach(check => {
+				if (!check.value || check.value.trim() === "") result = false;
+			})
+		})
+		return result;
 	}
 }
 

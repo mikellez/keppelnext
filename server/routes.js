@@ -182,6 +182,8 @@ router.get(
   controllers.request.fetchRequestCounts
 );
 
+router.patch("/checklist/complete/:checklist_id", checkIfLoggedInAPI, controllers.checklist.completeChecklist);
+
 router.get(
   "/asset/systems",
   checkIfLoggedInAPI,

@@ -1,5 +1,6 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState, useContext } from 'react';
+import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
+import { updateSpecificCheck } from '../ChecklistEditableForm';
 // import { CheckControl } from '../../../types/common/classes';
 import CheckControl from "../../../types/common/CheckControl";
 import { ImCross } from "react-icons/im";
@@ -46,15 +47,13 @@ export class SingleChoiceControl extends CheckControl {
     };
   }
 
-  render(onChange: Function, onDelete: Function) {
-    return (
-      <SingleChoice
-        singleChoiceObj={this}
-        onChange={onChange}
-        onDelete={onDelete}
-      />
-    );
-  }
+	render(onChange: Function, onDelete: Function) {
+		return <SingleChoice singleChoiceObj={this} onChange={onChange} onDelete={onDelete} />
+	}
+
+	renderEditableForm(rowId: string, sectionId: string) {
+		return <SingleChoiceEditable singleChoiceObj={this} rowId={rowId} sectionId={sectionId} />
+	}
 }
 
 function Choice({
@@ -198,4 +197,50 @@ export function SingleChoice({
       </div>
     </div>
   );
+}
+
+function SingleChoiceEditable({ singleChoiceObj, rowId, sectionId }: { 
+	singleChoiceObj: SingleChoiceControl,
+	rowId: string,
+	sectionId: string
+}) {
+
+	const { setSections } = useContext(SectionsContext);
+	
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		// setSections((prevSections) => {
+        //     const newSections = [...prevSections];
+        //     newSections.forEach(section => {
+        //         if (section.id === sectionId) {
+        //             section.updateSection(rowId, singleChoiceObj.id, e.target.value)
+        //         }
+        //     })
+        //     return newSections;
+        // });
+		updateSpecificCheck(sectionId, rowId, singleChoiceObj.id, e.target.value, setSections)
+	}
+
+	return (
+		<div>
+			<h6>{singleChoiceObj.question}</h6>
+			{
+				singleChoiceObj.choices.map(choice => {
+					return (
+						<div key={choice} className="form-check">
+							<input 
+								type="radio"
+								value={choice}
+								name={singleChoiceObj.id}
+								className="form-check-input"
+								onChange={handleChange}
+							/>
+							<label className="form-check-label">
+								{choice}
+							</label>
+						</div>
+					)
+				})
+			}
+		</div>
+	)
 }

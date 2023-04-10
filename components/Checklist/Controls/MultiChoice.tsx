@@ -1,7 +1,7 @@
-import React from "react";
-import { useState } from "react";
+import React, { useContext, useState } from 'react';
 // import { CheckControl } from '../../../types/common/classes';
-import CheckControl from "../../../types/common/CheckControl";
+import CheckControl from '../../../types/common/CheckControl';
+import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
 
 import { ImCross } from "react-icons/im";
 
@@ -46,15 +46,13 @@ export class MultiChoiceControl extends CheckControl {
     };
   }
 
-  render(onChange: Function, onDelete: Function) {
-    return (
-      <MultiChoice
-        multiChoiceObj={this}
-        onChange={onChange}
-        onDelete={onDelete}
-      />
-    );
-  }
+    render(onChange: Function, onDelete: Function) {
+		return <MultiChoice multiChoiceObj={this} onChange={onChange} onDelete={onDelete} />
+	}
+
+	renderEditableForm(rowId: string, sectionId: string) {
+		return <MultiChoiceEditable multiChoiceObj={this} rowId={rowId} sectionId={sectionId} />
+	}
 }
 
 function Choice({
@@ -199,3 +197,64 @@ export function MultiChoice({
     </div>
   );
 }
+
+function MultiChoiceEditable ({ multiChoiceObj, rowId, sectionId }: {
+	multiChoiceObj: MultiChoiceControl, 
+	rowId: string,
+	sectionId: string
+}) {
+
+	const { setSections } = useContext(SectionsContext);
+
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setSections((prevSections) => {
+            const newSections = [...prevSections];
+            newSections.forEach(section => {
+                if (section.id === sectionId) {
+					const currentValue = section.getValue(rowId, multiChoiceObj.id);
+					if (e.target.checked) {
+						section.updateSection(rowId, multiChoiceObj.id, addEventTargetValue(currentValue, e.target.value));
+					} else {
+						section.updateSection(rowId, multiChoiceObj.id, removeEventTargetValue(currentValue, e.target.value));
+					}	
+                }
+            })
+            return newSections;
+        });
+	};
+
+	const addEventTargetValue = (current: string, value: string) => {
+		if (current.trim().length > 0) {
+			return Array.from(new Set((current + ", " + value).split(", "))).join(", ");
+		}
+		return value;
+	};
+
+	const removeEventTargetValue = (current: string, value: string) => {
+		return current.split(", ").filter(item => item != value).join(", ");
+	};
+
+	return (
+		<div>
+			<h6>{multiChoiceObj.question}</h6>
+			{
+				multiChoiceObj.choices.map(choice => {
+					return (
+						<div key={choice} className="form-check">
+							<input 
+								type="checkbox"
+								value={choice}
+								className="form-check-input"
+								onChange={handleChange}
+								name={multiChoiceObj.id}
+							/>
+							<label className="form-check-label">
+								{choice}
+							</label>
+						</div>
+					)
+				})
+			}
+		</div>
+	);
+};

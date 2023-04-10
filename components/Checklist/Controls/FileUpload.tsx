@@ -1,7 +1,8 @@
-import React from "react";
-import { useState } from "react";
+import React, { useContext } from 'react';
 // import { CheckControl } from '../../../types/common/classes';
-import CheckControl from "../../../types/common/CheckControl";
+import { updateSpecificCheck } from '../ChecklistEditableForm';
+import CheckControl from '../../../types/common/CheckControl';
+import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
 
 import { ImCross } from "react-icons/im";
 
@@ -34,14 +35,12 @@ export class FileUploadControl extends CheckControl {
   }
 
   render(onChange: Function, onDelete: Function) {
-    return (
-      <FileUpload
-        fileControlObj={this}
-        onChange={onChange}
-        onDelete={onDelete}
-      />
-    );
-  }
+		return <FileUpload fileControlObj={this} onChange={onChange} onDelete={onDelete} />
+	}
+
+	renderEditableForm(rowId: string, sectionId: string) {
+		return <FileUploadEditable fileControlObj={this} rowId={rowId} sectionId={sectionId} />
+	}
 }
 
 export function FileUpload({
@@ -90,14 +89,62 @@ export function FileUpload({
         />
       </div>
 
-      <div className="form-group">
-        <input
-          type="file"
-          onChange={handleFile}
-          className="form-control"
-          disabled
-        />
-      </div>
-    </div>
-  );
+		<div className="form-group">
+			<input type="file" onChange={handleFile} className="form-control" disabled/>
+		</div>
+	</div>);
+}
+
+function FileUploadEditable({ fileControlObj, rowId, sectionId }: {
+	fileControlObj: FileUploadControl,
+	rowId: string,
+	sectionId: string
+}) {
+
+	const { setSections } = useContext(SectionsContext);
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		if (e.target.files && e.target.files.length > 0) {
+			addFileToValue(e.target.files[0]);
+		} else {
+			removeFileFromValue();
+		}
+	};
+
+	const addFileToValue = (file: File) => {
+		const reader = new FileReader();
+		reader.readAsDataURL(file);
+		reader.onload = () => {
+			updateSpecificCheck(sectionId, rowId, fileControlObj.id, reader.result as string, setSections);
+			// updateSection(reader.result as string)
+		};
+	};
+
+	const removeFileFromValue = () => {
+		updateSpecificCheck(sectionId, rowId, fileControlObj.id, "", setSections);
+		// updateSection("")
+	};
+
+	const updateSection = (value: string) => {
+		setSections((prevSections) => {
+			const newSections = [...prevSections];
+			newSections.forEach(section => {
+				if (section.id === sectionId) {
+					section.updateSection(rowId, fileControlObj.id, value)
+				}
+			})
+			return newSections;
+		});
+	};
+	
+	return (
+		<div>
+			<h6>{fileControlObj.question}</h6>
+			<input 
+				type="file" 
+				name={fileControlObj.id}
+				className="form-control"
+				onChange={handleChange}
+			/>
+		</div>
+	)
 }

@@ -518,11 +518,11 @@ export default function ChecklistTemplateCreator({
           </tr>
         </tbody>
       </table>
-      <textarea
+      {/* <textarea
         value={JSON.stringify(sections, undefined, 4)}
         rows={16}
         style={{ width: "100%" }}
-      />
+      /> */}
     </>
   );
 }

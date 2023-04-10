@@ -6,7 +6,6 @@ import { dateFormat } from "../Schedule/ScheduleTemplate";
 
 
 const ChecklistDetails = (props: ChecklistPageProps) => {
-    console.log(props)
 
     const createdDate = dateFormat(new Date(props.checklist?.created_date as string));
     const assets = (props.checklist?.linkedassets != null && 
