@@ -1,15 +1,13 @@
 import React, { useState, useRef, LegacyRef, useContext } from 'react';
 import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
 import { updateSpecificCheck } from '../ChecklistEditableForm';
-// import { CheckControl } from '../../../types/common/classes';
 import CheckControl from "../../../types/common/CheckControl";
-
 import { ImCross } from "react-icons/im";
-
 import checklistStyles from '../ChecklistTemplateCreator.module.css'
 import { ModuleDivider } from '../../ModuleLayout/ModuleDivider';
 import SignatureCanvas from 'react-signature-canvas';
 import ReactSignatureCanvas from 'react-signature-canvas';
+import Image from 'next/image';
 
 export class SignatureControl extends CheckControl {
   constructor(question?: string, value?: string, id?: string) {
@@ -138,6 +136,12 @@ function SignatureView({signatureControlObj}: {signatureControlObj: SignatureCon
   return (
     <div>
       <h6>{signatureControlObj.question}</h6>
+      <Image
+        src={signatureControlObj.value}
+        alt="signature"
+        height={100}
+        width={100}
+      />
     </div>
   )
 };
