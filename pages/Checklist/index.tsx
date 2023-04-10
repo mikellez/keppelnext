@@ -16,7 +16,7 @@ import {
   Cell,
   OnClick,
 } from "@table-library/react-table-library";
-import { useChecklist } from "../../components/SWR";
+import { useChecklist, useCurrentUser } from "../../components/SWR";
 import { CMMSChecklist } from "../../types/common/interfaces";
 import { ThreeDots } from "react-loading-icons";
 import { downloadCSV, getColor } from "../Request";
@@ -54,6 +54,7 @@ export default function Checklist() {
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const [isReady, setReady] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const user = useCurrentUser();
 
   const { data, error, isValidating, mutate } = useChecklist(
     indexedColumn[activeTabIndex]
@@ -63,7 +64,7 @@ export default function Checklist() {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns:  5em calc(90% - 40em) 7em 8em 10em 10em 10%;",
+        "--data-table-library_grid-template-columns:  5em calc(90% - 46em) 7em 8em 10em 10em 10% 6em;",
     },
   ]);
 
@@ -87,7 +88,7 @@ export default function Checklist() {
       // tranform and store data
       if (data.length > 0) {
         setChecklistItems(
-          data.map(row => {
+          data.map((row) => {
             return {
               id: row.checklist_id,
               chl_name: row.chl_name,
@@ -103,12 +104,12 @@ export default function Checklist() {
               chl_type: row.chl_type as string,
               created_date: row.created_date,
               history: row.history,
-              status: row.status
+              status: row.status,
             };
           })
         );
       } else {
-        setChecklistItems([])
+        setChecklistItems([]);
       }
       setReady(true);
     }
@@ -155,7 +156,14 @@ export default function Checklist() {
           </li>
         </ul>
         {!isReady && (
-          <div style={{ position: "absolute", top:"calc((100% - 8rem) / 2)", left:"50%", transform:"translate(-50%,-50%)"}}>
+          <div
+            style={{
+              position: "absolute",
+              top: "calc((100% - 8rem) / 2)",
+              left: "50%",
+              transform: "translate(-50%,-50%)",
+            }}
+          >
             <LoadingHourglass />
           </div>
         )}
@@ -178,6 +186,7 @@ export default function Checklist() {
                     <HeaderCell resize>Assigned To</HeaderCell>
                     <HeaderCell resize>Signed Off By</HeaderCell>
                     <HeaderCell resize>Created By</HeaderCell>
+                    <HeaderCell resize>Action</HeaderCell>
                   </HeaderRow>
                 </Header>
 
@@ -197,12 +206,31 @@ export default function Checklist() {
                             {item.status}
                           </span>
                         </Cell>
-                        <Cell>
-                          {item.created_date.toString()}
-                        </Cell>
+                        <Cell>{item.created_date.toString()}</Cell>
                         <Cell>{item.assigneduser}</Cell>
                         <Cell>{item.signoffuser}</Cell>
                         <Cell>{item.createdbyuser}</Cell>
+                        <Cell>
+                          {(user.data!.role_id === 1 ||
+                            user.data!.role_id === 3) &&
+                            item.status_id === 4 && (
+                              <Link href={`/Checklist/Manage/${item.id}`}>
+                                <strong>Manage</strong>
+                              </Link>
+                            )}
+                          {(item.status_id === 2 || item.status_id === 3) && (
+                            <Link href={`/Checklist/Complete/${item.id}`}>
+                              <strong>Complete</strong>
+                            </Link>
+                          )}
+                          {item.status_id !== 2 &&
+                            item.status_id !== 3 &&
+                            item.status_id !== 4 && (
+                              <Link href={`/Checklist/View/${item.id}`}>
+                                <strong>View</strong>
+                              </Link>
+                            )}
+                        </Cell>
                       </Row>
                     );
                   })}
