@@ -237,9 +237,9 @@ router
   .post(controllers.checklist.createNewChecklistTemplate);
 
 router.get(
-  "/checklist/pending",
+  "/checklist/assigned",
   checkIfLoggedInAPI,
-  controllers.checklist.fetchPendingChecklists
+  controllers.checklist.fetchAssignedChecklists
 );
 
 router
