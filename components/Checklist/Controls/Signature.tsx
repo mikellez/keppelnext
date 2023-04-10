@@ -1,15 +1,15 @@
-import React, { useState, useRef, useContext, RefObject } from "react";
-import { SectionsContext } from "../../../pages/Checklist/Complete/[id]";
-import { updateSpecificCheck } from "../ChecklistEditableForm";
-// import { CheckControl } from '../../../types/common/classes';
+import React, { useRef, useContext, RefObject } from 'react';
+import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
+import { updateSpecificCheck } from '../ChecklistEditableForm';
 import CheckControl from "../../../types/common/CheckControl";
-
 import { ImCross } from "react-icons/im";
+import checklistStyles from '../ChecklistTemplateCreator.module.css'
+import { ModuleDivider } from '../../ModuleLayout/ModuleDivider';
+import SignatureCanvas from 'react-signature-canvas';
+import ReactSignatureCanvas from 'react-signature-canvas';
+import Image from 'next/image';
+import styles from "../../../styles/Checklist.module.scss";
 
-import checklistStyles from "../ChecklistTemplateCreator.module.css";
-import { ModuleDivider } from "../../ModuleLayout/ModuleDivider";
-import SignatureCanvas from "react-signature-canvas";
-import ReactSignatureCanvas from "react-signature-canvas";
 
 export class SignatureControl extends CheckControl {
   constructor(question?: string, value?: string, id?: string) {
@@ -37,24 +37,17 @@ export class SignatureControl extends CheckControl {
   }
 
   render(onChange: Function, onDelete: Function) {
-    return (
-      <Signature
-        signatureControlObj={this}
-        onChange={onChange}
-        onDelete={onDelete}
-      />
-    );
+		return <Signature signatureControlObj={this} onChange={onChange} onDelete={onDelete} />
+	}
+
+	renderEditableForm(rowId: string, sectionId: string) {
+		return <SignatureEditable signatureControlObj={this} rowId={rowId} sectionId={sectionId} />
+	}
+
+  renderViewOnlyForm() {
+    return <SignatureView signatureControlObj={this} />
   }
 
-  renderEditableForm(rowId: string, sectionId: string) {
-    return (
-      <SignatureEditable
-        signatureControlObj={this}
-        rowId={rowId}
-        sectionId={sectionId}
-      />
-    );
-  }
 }
 
 export function Signature({
@@ -102,13 +95,12 @@ export function Signature({
           placeholder="Enter Question"
         />
       </div>
-
-      <div className="form-group" style={{ border: "black dashed 1px" }}>
-        <SignatureCanvas canvasProps={{ width: "90%", height: "140%" }} />
-      </div>
-    </div>
-  );
-}
+		
+		<div className="form-group" style={{border: "black dashed 1px"}}>
+            <SignatureCanvas canvasProps={{width: "90%", height: "140%"}}/>
+		</div>
+	</div>);
+};
 
 function SignatureEditable({
   signatureControlObj,
@@ -134,19 +126,33 @@ function SignatureEditable({
       setSections
     );
   };
+	
+	return (
+		<div>
+			<h6>{signatureControlObj.question}</h6>
+			<div className="form-group" style={{border: "black dashed 1px"}}>
+            	<SignatureCanvas 
+					canvasProps={{width: "100%", height: "70%"}}
+					backgroundColor="#E4DCCF"
+					penColor='black'
+					ref={sigRef}
+					onEnd={handleSignatureEnd}
+				/>
+			</div>
+		</div>
+	)
+};
 
+function SignatureView({signatureControlObj}: {signatureControlObj: SignatureControl}) {
   return (
-    <div>
+    <div className={styles.checkViewContainer}>
       <h6>{signatureControlObj.question}</h6>
-      <div className="form-group" style={{ border: "black dashed 1px" }}>
-        <SignatureCanvas
-          canvasProps={{ width: "100%", height: "70%" }}
-          backgroundColor="#E4DCCF"
-          penColor="black"
-          ref={sigRef}
-          onEnd={handleSignatureEnd}
-        />
-      </div>
+      <Image
+        src={signatureControlObj.value}
+        alt="signature"
+        height={100}
+        width={100}
+      />
     </div>
-  );
-}
+  )
+};

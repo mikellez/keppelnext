@@ -1,12 +1,11 @@
 import React, { useState, useContext } from 'react';
 import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
 import { updateSpecificCheck } from '../ChecklistEditableForm';
-// import { CheckControl } from '../../../types/common/classes';
 import CheckControl from "../../../types/common/CheckControl";
 import { ImCross } from "react-icons/im";
-
 import checklistStyles from "../ChecklistTemplateCreator.module.css";
 import { ModuleDivider } from "../../ModuleLayout/ModuleDivider";
+import styles from "../../../styles/Checklist.module.scss";
 
 export class SingleChoiceControl extends CheckControl {
   choices: string[];
@@ -54,6 +53,11 @@ export class SingleChoiceControl extends CheckControl {
 	renderEditableForm(rowId: string, sectionId: string) {
 		return <SingleChoiceEditable singleChoiceObj={this} rowId={rowId} sectionId={sectionId} />
 	}
+
+  renderViewOnlyForm() {
+    return <SingleChoiceView singleChoiceObj={this} />
+  }
+
 }
 
 function Choice({
@@ -93,7 +97,7 @@ function Choice({
       )}
     </div>
   );
-}
+};
 
 export function SingleChoice({
   singleChoiceObj,
@@ -197,7 +201,7 @@ export function SingleChoice({
       </div>
     </div>
   );
-}
+};
 
 function SingleChoiceEditable({ singleChoiceObj, rowId, sectionId }: { 
 	singleChoiceObj: SingleChoiceControl,
@@ -242,5 +246,30 @@ function SingleChoiceEditable({ singleChoiceObj, rowId, sectionId }: {
 				})
 			}
 		</div>
-	)
-}
+	);
+};
+
+function SingleChoiceView({singleChoiceObj}: {singleChoiceObj: SingleChoiceControl}) {
+  return (
+    <div className={styles.checkViewContainer}>
+      <h6>{singleChoiceObj.question}</h6>
+      {
+				singleChoiceObj.choices.map(choice => {
+					return (
+						<div key={choice} className="form-check">
+							<input 
+								type="radio"
+								className="form-check-input"
+								disabled
+                checked={choice === singleChoiceObj.value}
+							/>
+							<label className="form-check-label">
+								{choice}
+							</label>
+						</div>
+					)
+				})
+			}
+    </div>
+  );
+};

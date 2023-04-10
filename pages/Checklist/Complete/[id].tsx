@@ -10,6 +10,7 @@ import ChecklistEditableForm from "../../../components/Checklist/ChecklistEditab
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
 import axios from "axios";
+import Link from "next/link";
 
 export const SectionsContext = createContext({
     sections: [] as CheckSection[],
@@ -74,6 +75,9 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
         <>
         <ModuleMain>
             <ModuleHeader header="Complete Checklist">
+                <Link href="/Checklist" className="btn btn-secondary">
+                    Back
+                </Link>
             </ModuleHeader>
             <ModuleContent>
                 <ChecklistDetails checklist={props.checklist} />

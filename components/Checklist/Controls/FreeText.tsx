@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
-// import { CheckControl } from '../../../types/common/classes';
 import CheckControl from '../../../types/common/CheckControl';
 import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
 import { updateSpecificCheck } from '../ChecklistEditableForm';
+import styles from "../../../styles/Checklist.module.scss";
 
 
 import { ImCross } from "react-icons/im";
@@ -42,6 +42,10 @@ export class FreeTextControl extends CheckControl {
 	renderEditableForm(rowId: string, sectionId: string) {
 		return <FreeTextEditable freeTextObj={this} rowId={rowId} sectionId={sectionId} />
 	}
+
+  renderViewOnlyForm() {
+    return <FreeTextView freeTextObj={this} />
+  }
 }
 
 export function FreeText({
@@ -94,7 +98,7 @@ export function FreeText({
 		</div>
 	</div>
   );
-}
+};
 
 function FreeTextEditable({ freeTextObj, rowId, sectionId }: {
 	freeTextObj: FreeTextControl,
@@ -125,4 +129,15 @@ function FreeTextEditable({ freeTextObj, rowId, sectionId }: {
 			</textarea>
 		</div>
 	)
+};
+
+function FreeTextView({freeTextObj}: {freeTextObj: FreeTextControl}) {
+  return (
+    <div className={styles.checkViewContainer}>
+      <h6>{freeTextObj.question}</h6>
+      <p>{freeTextObj.value}</p>
+    </div>
+  )
 }
+
+
