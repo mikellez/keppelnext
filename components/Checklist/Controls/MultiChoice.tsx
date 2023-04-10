@@ -53,6 +53,10 @@ export class MultiChoiceControl extends CheckControl {
 	renderEditableForm(rowId: string, sectionId: string) {
 		return <MultiChoiceEditable multiChoiceObj={this} rowId={rowId} sectionId={sectionId} />
 	}
+
+  renderViewOnlyForm() {
+    return <MultiChoiceView multiChoiceObj={this} />
+  }
 }
 
 function Choice({
@@ -92,7 +96,7 @@ function Choice({
       )}
     </div>
   );
-}
+};
 
 export function MultiChoice({
   multiChoiceObj,
@@ -196,7 +200,7 @@ export function MultiChoice({
       </div>
     </div>
   );
-}
+};
 
 function MultiChoiceEditable ({ multiChoiceObj, rowId, sectionId }: {
 	multiChoiceObj: MultiChoiceControl, 
@@ -258,3 +262,28 @@ function MultiChoiceEditable ({ multiChoiceObj, rowId, sectionId }: {
 		</div>
 	);
 };
+
+function MultiChoiceView ({multiChoiceObj}: {multiChoiceObj: MultiChoiceControl}) {
+  return (
+    <div>
+			<h6>{multiChoiceObj.question}</h6>
+			{
+				multiChoiceObj.choices.map(choice => {
+					return (
+						<div key={choice} className="form-check">
+							<input 
+								type="checkbox"
+								className="form-check-input"
+                disabled
+                checked={multiChoiceObj.value.split(", ").includes(choice)}
+							/>
+							<label className="form-check-label">
+								{choice}
+							</label>
+						</div>
+					)
+				})
+			}
+		</div>
+  )
+}

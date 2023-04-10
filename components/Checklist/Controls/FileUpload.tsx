@@ -1,13 +1,11 @@
 import React, { useContext } from 'react';
-// import { CheckControl } from '../../../types/common/classes';
 import { updateSpecificCheck } from '../ChecklistEditableForm';
 import CheckControl from '../../../types/common/CheckControl';
 import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
-
 import { ImCross } from "react-icons/im";
-
 import checklistStyles from "../ChecklistTemplateCreator.module.css";
 import { ModuleDivider } from "../../ModuleLayout/ModuleDivider";
+import Image from 'next/image';
 
 export class FileUploadControl extends CheckControl {
   constructor(question?: string, value?: string, id?: string) {
@@ -41,7 +39,11 @@ export class FileUploadControl extends CheckControl {
 	renderEditableForm(rowId: string, sectionId: string) {
 		return <FileUploadEditable fileControlObj={this} rowId={rowId} sectionId={sectionId} />
 	}
-}
+
+  renderViewOnlyForm() {
+    return <FileUploadView fileControlObj={this} />
+  }
+};
 
 export function FileUpload({
   fileControlObj,
@@ -93,7 +95,7 @@ export function FileUpload({
 			<input type="file" onChange={handleFile} className="form-control" disabled/>
 		</div>
 	</div>);
-}
+};
 
 function FileUploadEditable({ fileControlObj, rowId, sectionId }: {
 	fileControlObj: FileUploadControl,
@@ -147,4 +149,19 @@ function FileUploadEditable({ fileControlObj, rowId, sectionId }: {
 			/>
 		</div>
 	)
-}
+};
+
+function FileUploadView({ fileControlObj }: {fileControlObj: FileUploadControl}) {
+
+  return (
+    <div>
+      <h6>{fileControlObj.question}</h6>
+      <Image 
+        src={fileControlObj.value}
+        alt="img"
+        width={250}
+        height={250}
+      />
+    </div>
+  );
+};

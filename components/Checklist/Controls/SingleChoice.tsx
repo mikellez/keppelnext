@@ -54,6 +54,11 @@ export class SingleChoiceControl extends CheckControl {
 	renderEditableForm(rowId: string, sectionId: string) {
 		return <SingleChoiceEditable singleChoiceObj={this} rowId={rowId} sectionId={sectionId} />
 	}
+
+  renderViewOnlyForm() {
+    return <SingleChoiceView singleChoiceObj={this} />
+  }
+
 }
 
 function Choice({
@@ -93,7 +98,7 @@ function Choice({
       )}
     </div>
   );
-}
+};
 
 export function SingleChoice({
   singleChoiceObj,
@@ -197,7 +202,7 @@ export function SingleChoice({
       </div>
     </div>
   );
-}
+};
 
 function SingleChoiceEditable({ singleChoiceObj, rowId, sectionId }: { 
 	singleChoiceObj: SingleChoiceControl,
@@ -242,5 +247,30 @@ function SingleChoiceEditable({ singleChoiceObj, rowId, sectionId }: {
 				})
 			}
 		</div>
-	)
-}
+	);
+};
+
+function SingleChoiceView({singleChoiceObj}: {singleChoiceObj: SingleChoiceControl}) {
+  return (
+    <div>
+      <h6>{singleChoiceObj.question}</h6>
+      {
+				singleChoiceObj.choices.map(choice => {
+					return (
+						<div key={choice} className="form-check">
+							<input 
+								type="radio"
+								className="form-check-input"
+								disabled
+                checked={choice === singleChoiceObj.value}
+							/>
+							<label className="form-check-label">
+								{choice}
+							</label>
+						</div>
+					)
+				})
+			}
+    </div>
+  );
+};

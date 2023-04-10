@@ -36,13 +36,18 @@ export class SignatureControl extends CheckControl {
     };
   }
 
-    render(onChange: Function, onDelete: Function) {
+  render(onChange: Function, onDelete: Function) {
 		return <Signature signatureControlObj={this} onChange={onChange} onDelete={onDelete} />
 	}
 
 	renderEditableForm(rowId: string, sectionId: string) {
 		return <SignatureEditable signatureControlObj={this} rowId={rowId} sectionId={sectionId} />
 	}
+
+  renderViewOnlyForm() {
+    return <SignatureView signatureControlObj={this} />
+  }
+
 }
 
 export function Signature({
@@ -97,7 +102,7 @@ export function Signature({
             <SignatureCanvas canvasProps={{width: "90%", height: "140%"}}/>
 		</div>
 	</div>);
-}
+};
 
 function SignatureEditable({ signatureControlObj, rowId, sectionId }: {
 	signatureControlObj: SignatureControl,
@@ -127,4 +132,12 @@ function SignatureEditable({ signatureControlObj, rowId, sectionId }: {
 			</div>
 		</div>
 	)
-}
+};
+
+function SignatureView({signatureControlObj}: {signatureControlObj: SignatureControl}) {
+  return (
+    <div>
+      <h6>{signatureControlObj.question}</h6>
+    </div>
+  )
+};
