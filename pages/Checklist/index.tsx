@@ -230,25 +230,30 @@ export default function Checklist() {
                         <Cell>{item.signoffuser}</Cell>
                         <Cell>{item.createdbyuser}</Cell>
                         <Cell>
-                          {(user.data!.role_id === 1 ||
-                            user.data!.role_id === 3) &&
-                            item.status_id === 4 && (
-                              <Link href={`/Checklist/Manage/${item.id}`}>
-                                <strong>Manage</strong>
-                              </Link>
-                            )}
-                          {(item.status_id === 2 || item.status_id === 3) && (
+                          {
+                            (user.data!.role_id === 1 || user.data!.role_id === 3) &&
+                            item.status_id === 4 ? 
+                            
+                            <Link href={`/Checklist/Manage/${item.id}`}>
+                              <strong>Manage</strong>
+                            </Link>
+                             
+                            :
+                            
+                            item.status_id === 2 ||
+                            item.status_id === 3 ? 
+                            
                             <Link href={`/Checklist/Complete/${item.id}`}>
                               <strong>Complete</strong>
                             </Link>
-                          )}
-                          {item.status_id !== 2 &&
-                            item.status_id !== 3 &&
-                            item.status_id !== 4 && (
-                              <Link href={`/Checklist/View/${item.id}`}>
-                                <strong>View</strong>
-                              </Link>
-                            )}
+                            
+                            :
+                            
+                            <Link href={`/Checklist/View/${item.id}`}>
+                              <strong>View</strong>
+                            </Link>
+                            
+                          }
                         </Cell>
                       </Row>
                     );

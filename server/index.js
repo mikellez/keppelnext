@@ -52,11 +52,14 @@ app.prepare().then(() => {
         res.redirect("/404");
       } else if (
         req.user.role_id == 4 &&
-        (restrictOps.includes(req.path) ||
+        (
+          restrictOps.includes(req.path) ||
           req.path.startsWith("/Schedule/Timeline") ||
           req.path.startsWith("/Asset/Edit") ||
           req.path.startsWith("/Request/Assign") ||
-          req.path.startsWith("/Request/Manage"))
+          req.path.startsWith("/Request/Manage") ||
+          req.path.startsWith("/Checklist/Manage")
+        )
       ) {
         res.redirect("/404");
       } else if ((req.user.role_id = 2 && restrictManager.includes(req.path))) {
