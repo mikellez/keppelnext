@@ -11,6 +11,8 @@ import axios from 'axios';
 import LoadingIcon from '../../components/LoadingIcon';
 import { CMMSMasterField, CMMSMasterSubmission, CMMSMasterTables } from '../../types/common/interfaces';
 import { MultiFields } from '../../components/Master/MultiField';
+import ModuleSimplePopup, { SimpleIcon } from '../../components/ModuleLayout/ModuleSimplePopup';
+import router from 'next/router';
 
 /*
 	FormValues: {
@@ -33,6 +35,10 @@ interface NewMasterEntryProps {
 
 export default function New(props: NewMasterEntryProps) {
 	const [masterType, setMasterType] = useState<string | null>(null)
+	const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] =
+    useState<boolean>(true);
+	const [isMissingDetailsModalOpen2, setIsMissingDetailsModaOpen2] =
+    useState<boolean>(false);
 
 	const {
 		register,
@@ -46,6 +52,22 @@ export default function New(props: NewMasterEntryProps) {
 
 	const formSubmit: SubmitHandler<FormValues> = async (data) => {
 		console.log(data);
+		const values = Object.values(data["entries"]);
+		if (values.includes("")){
+			setIsMissingDetailsModaOpen2(true);
+		}
+		else{
+			return await axios.post("/api/master/new/add", data)
+				.then(res => {
+					console.log(res.data)
+					return res.data;
+				})
+				.catch(err => {
+					console.log(err);
+				});
+			
+		}
+
 	};
 
 	function changePlant(e : React.ChangeEvent<HTMLSelectElement>) {
@@ -101,8 +123,27 @@ export default function New(props: NewMasterEntryProps) {
 
 			</ModuleContent>
 			<ModuleFooter>
-				{(errors.type || errors.entries) && 
-				<span style={{color: "red"}}>Please fill in all required fields</span>}
+				{(errors.type || errors.entries) &&
+				<ModuleSimplePopup
+				modalOpenState={isMissingDetailsModalOpen}
+				setModalOpenState={setIsMissingDetailsModaOpen}
+				title="Missing Details"
+				text="Please ensure that you have filled in all the required entries."
+				icon={SimpleIcon.Cross}
+				onRequestClose={() => {
+					router.reload();
+				  }}
+			  />}
+			  <ModuleSimplePopup
+				modalOpenState={isMissingDetailsModalOpen2}
+				setModalOpenState={setIsMissingDetailsModaOpen2}
+				title="Missing Details"
+				text="Please ensure that you have filled in all the required entries."
+				icon={SimpleIcon.Cross}
+				// onRequestClose={() => {
+				// 	router.reload();
+				//   }}
+			  />
 				<button type="submit" className="btn btn-primary">
 				{
 					isSubmitting && <LoadingIcon/>

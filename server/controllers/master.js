@@ -22,15 +22,15 @@ const tableInfo = {
 			column_name: "system_name"
 		}]
 	},
-	system_asset_lvl5: {
-		internalName: "plant_system_assets",
-		name: "plant_system_assets",
-		id: "system_asset_lvl5",
-		fields: [{
-			column_label: "Name",
-			column_name: "plant_system_assets"
-		}]
-	},
+	// system_asset_lvl5: {
+	// 	internalName: "plant_system_assets",
+	// 	name: "plant_system_assets",
+	// 	id: "system_asset_lvl5",
+	// 	fields: [{
+	// 		column_label: "Name",
+	// 		column_name: "plant_system_assets"
+	// 	}]
+	// },
 	fault_types: {
 		internalName: "fault_types",
 		name: "Fault Type",
@@ -49,19 +49,19 @@ const tableInfo = {
 			column_name: "asset_type"
 		}]
 	},
-	asset_instrument: {
-		internalName: "plant_system_assets",
-		name: "Asset Instrument",
-		id: "psa_id",
-		fields: [{}]
-	},
+	// asset_instrument: {
+	// 	internalName: "plant_system_assets",
+	// 	name: "Asset Instrument",
+	// 	id: "psa_id",
+	// 	fields: [{}]
+	// },
 }
 
 const fetchMasterInfo = async (req, res, next) => {
 
 	if(tableInfo[req.params.type] === undefined)
 		return res.status(404).json("no type");
-
+	console.log(tableInfo[req.params.type].internalName)
 	let table       = tableInfo[req.params.type].internalName;
 	let idColumn    = tableInfo[req.params.type].id;
 
@@ -88,7 +88,32 @@ const fetchMasterTypeEntry = async (req, res, next) => {
 };
 
 const createMasterTypeEntry = async (req, res, next) => {
-	return res.status(200).json(tableInfo)
+	console.log(req.body);
+	let sql;
+	let insert;
+	// if asset_type
+	if (req.body.type == 'asset_type'){
+		sql = `INSERT INTO keppel.asset_type (asset_type) VALUES ($1)`;
+		insert = [req.body.entries.asset_type]
+	} else if (req.body.type == 'system'){
+		sql = `INSERT INTO keppel.system_master (system_name) VALUES ($1)`;
+		insert = [req.body.entries.system_name]
+	} else if (req.body.type == 'fault_types'){
+		sql = `INSERT INTO keppel.fault_types (fault_type) VALUES ($1)`;
+		insert = [req.body.entries.fault_type]
+	} else if (req.body.type == 'plant'){
+		sql = `INSERT INTO keppel.plant_master (plant_name, plant_description) VALUES ($1, $2)`;
+		insert = [req.body.entries.plant_name, req.body.entries.plant_description]
+	}
+	db.query(sql,insert)
+		.then(result => {
+			return res.status(200).send({
+				msg: "success",
+			})
+		})
+	// return res.status(200).send({
+	// 	msg: "success",
+    //   })
 };
 
 const fetchMasterTypeSingle = async (req, res, next) => {

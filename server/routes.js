@@ -287,7 +287,7 @@ router.get("/asset/Details/:psa_id", checkIfLoggedInAPI, controllers.asset.getAs
  * @apiSuccess {string} -.request Name of the request type
  */
 router.get("/master/new", checkIfLoggedInAPI, controllers.master.fetchMasterTypeEntry);
-router.post("/master/new", checkIfLoggedInAPI, controllers.master.createMasterTypeEntry);
+router.post("/master/new/add", checkIfLoggedInAPI, controllers.master.createMasterTypeEntry);
 router.get("/master/:type", checkIfLoggedInAPI, controllers.master.fetchMasterInfo);
 router.get("/master/:type/:id", checkIfLoggedInAPI, controllers.master.fetchMasterTypeSingle);
 router.post("/master/:type/:id", checkIfLoggedInAPI, controllers.master.updateMasterTypeSingle);
