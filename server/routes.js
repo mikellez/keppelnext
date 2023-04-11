@@ -6,7 +6,7 @@ const multer = require("multer");
 const express = require("express");
 
 const router = express.Router();
-const { sendRequestPDF } = require("./pdfGenerator");
+const { sendRequestPDF, sendChecklistPDF } = require("./pdfGenerator");
 
 // checkIfLoggedInAPI   - auth failures send 401 requrest. use this for API routes
 function checkIfLoggedInAPI(req, res, next) {
@@ -238,6 +238,8 @@ router.patch(
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("reject")
 );
+
+router.get("/checklist/pdf/:checklist_id", checkIfLoggedInAPI, sendChecklistPDF);
 
 router.get("/checklist/csv", checkIfLoggedInAPI, controllers.checklist.createChecklistCSV);
 

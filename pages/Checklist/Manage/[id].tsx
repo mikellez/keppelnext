@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import ModuleSimplePopup, {SimpleIcon} from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { HiOutlineDownload } from "react-icons/hi";
 import ChecklistPreview from "../../../components/Checklist/ChecklistPreview";
+import { downloadChecklistPDF } from "../View/[id]";
 
 const manageChecklist = async (id: number, action: string, remarks: string) => {
     return await axios({
@@ -50,7 +51,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
         <>
         <ModuleMain>
             <ModuleHeader header="Mange Checklist">
-            <TooltipBtn text="Download PDF">
+            <TooltipBtn text="Download PDF" onClick={() => downloadChecklistPDF(parseInt(router.query.id as string))}>
                 <HiOutlineDownload size={24} />
             </TooltipBtn>
             <Link href="/Checklist" className="btn btn-secondary">
