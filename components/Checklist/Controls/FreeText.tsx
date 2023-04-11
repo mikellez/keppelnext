@@ -124,9 +124,11 @@ function FreeTextEditable({ freeTextObj, rowId, sectionId }: {
 	return (
 		<div>
 			<h6>{freeTextObj.question}</h6>
-			<textarea className="form-control" onChange={handleChange}>
-
-			</textarea>
+			<textarea 
+        className="form-control" 
+        onChange={handleChange}
+        style={{resize: "none"}}
+      ></textarea>
 		</div>
 	)
 };

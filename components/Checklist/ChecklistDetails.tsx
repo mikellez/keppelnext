@@ -29,7 +29,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
                 </div>
                 <div>
                     <p className={styles.checklistDetailsHeading}>Plant</p>
-                    <p>{props.checklist?.plant_name}</p>
+                    <p className={styles.checklistDetailsContent}>{props.checklist?.plant_name}</p>
                 </div>
                 <div>
                     <p className={styles.checklistDetailsHeading}>Assigned To</p>

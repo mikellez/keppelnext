@@ -1,6 +1,8 @@
 import React, { useContext } from  "react";
 import { CheckSection, CheckRow } from "../../types/common/classes";
 import { SectionsContext } from "../../pages/Checklist/Complete/[id]";
+import styles from "../../styles/Checklist.module.scss";
+
 
 const ChecklistEditableForm = (
    
@@ -23,11 +25,13 @@ const ChecklistEditableFormSection = (
     return (
         <div>
             <h5>{section.description}</h5>
+            <div className={styles.checklistViewSection}>
             {
                section.rows.map((row, index) => {
                     return <ChecklistEditableFormRow key={row.id} row={row} rowId={row.id} sectionId={sectionId} />
                })
             }
+            </div>
         </div>
     );
 };

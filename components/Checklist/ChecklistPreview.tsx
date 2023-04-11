@@ -1,6 +1,6 @@
 import React, { useState, useEffect} from "react";
 import { CheckSection } from "../../types/common/classes";
-import { ModuleContent } from "../ModuleLayout/ModuleContent";
+import { ModuleContent, ModuleDivider } from "../";
 import { ChecklistPageProps } from "../../pages/Checklist/New";
 import ChecklistDetails from "./ChecklistDetails";
 import ChecklistViewForm from "./ChecklistViewForm";
@@ -23,9 +23,11 @@ const ChecklistPreview = (props: ChecklistPageProps) => {
         <ModuleContent>
             <ChecklistDetails checklist={props.checklist} />
         </ModuleContent>
+        <ModuleDivider />
         <ModuleContent>
             <ChecklistViewForm sections={sections} />
         </ModuleContent>
+        <ModuleDivider />
         </>
     );
 };

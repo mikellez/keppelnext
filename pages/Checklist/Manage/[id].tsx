@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ModuleContent, ModuleMain, ModuleHeader, ModuleFooter } from "../../../components";
 import { ChecklistPageProps } from "../New";
 import { createChecklistGetServerSideProps } from "../../../types/common/props";
 import { GetServerSideProps } from "next";
-import { CheckSection } from "../../../types/common/classes";
 import Link from "next/link";
 import TooltipBtn from "../../../components/TooltipBtn";
 import axios from "axios";
 import { useRouter } from "next/router";
 import ModuleSimplePopup, {SimpleIcon} from "../../../components/ModuleLayout/ModuleSimplePopup";
+import { HiOutlineDownload } from "react-icons/hi";
 import ChecklistPreview from "../../../components/Checklist/ChecklistPreview";
 
 const manageChecklist = async (id: number, action: string, remarks: string) => {
@@ -50,6 +50,9 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
         <>
         <ModuleMain>
             <ModuleHeader header="Mange Checklist">
+            <TooltipBtn text="Download PDF">
+                <HiOutlineDownload size={24} />
+            </TooltipBtn>
             <Link href="/Checklist" className="btn btn-secondary">
                 Back
             </Link>

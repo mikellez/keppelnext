@@ -1,5 +1,6 @@
 import React from "react";
 import { CheckSection, CheckRow } from "../../types/common/classes";
+import styles from "../../styles/Checklist.module.scss";
 
 const ChecklistViewForm = ({sections}: {sections: CheckSection[]}) => {
     return (
@@ -16,11 +17,13 @@ const ChecklistViewFormSection = ({section}: {section: CheckSection}) => {
     return (
         <div>
             <h5>{section.description}</h5>
+            <div className={styles.checklistViewSection}>
             {
                section.rows.map((row, index) => {
                     return <ChecklistViewFormRow key={row.id} row={row} />
                })
             }
+            </div>
         </div>
     );
 };

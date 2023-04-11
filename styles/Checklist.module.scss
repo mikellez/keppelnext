@@ -8,25 +8,33 @@
 .checklistDetailsContainer {
   display: grid;
   grid-template-columns: auto auto;
+  row-gap: 10px;
+  // background-color: #E3E3E3;
+  // border-radius: 5px;
 }
 
 .checklistDetailsHeading {
   font-size: 1.1rem;
   font-weight: 500;
-  margin: 0;
+  margin: 8px 0 0 0;
 }
 
 .checklistDetailsContent {
-  
+  color: #73777B;
 }
 
 .checklistDetailsAssets {
+  @extend .checklistDetailsContent;
   margin: 0;
 }
 
 .checkViewContainer {
-  background-color: #E3E3E3;
-  border-radius: 5px;
-  padding: 10px;
-  margin: 10px 0;
+  // background-color: #E3E3E3;
+  // border-radius: 5px;
+  // padding: 10px;
+  margin: 12px 0;
+}
+
+.checklistViewSection {
+  @extend .checklistDetailsContainer;
 }
