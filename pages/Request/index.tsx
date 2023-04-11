@@ -35,6 +35,7 @@ import {
 } from "@table-library/react-table-library/compact";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
+import { usePagination } from "@table-library/react-table-library/pagination";
 
 import { useRequest } from "../../components/SWR";
 import { CMMSRequest } from "../../types/common/interfaces";
@@ -45,13 +46,23 @@ import axios from "axios";
 import TooltipBtn from "../../components/TooltipBtn";
 import { FiRefreshCw } from "react-icons/fi";
 import { HiOutlineDownload, HiOutlineLink } from "react-icons/hi";
-import { BsFileEarmarkPlus } from "react-icons/bs";
-import { AiOutlineHistory } from "react-icons/ai";
+import {
+  BsChevronLeft,
+  BsChevronRight,
+  BsFileEarmarkPlus,
+} from "react-icons/bs";
+import {
+  AiOutlineHistory,
+  AiOutlineLeft,
+  AiOutlineRight,
+} from "react-icons/ai";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import Image from "next/image";
 import { useCurrentUser } from "../../components/SWR";
 import RequestHistory from "../../components/Request/RequestHistory";
 import LoadingHourglass from "../../components/LoadingHourglass";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import PageButton from "../../components/PageButton";
 
 /*export type TableNode<T> = {
   id: string;
@@ -59,7 +70,7 @@ import LoadingHourglass from "../../components/LoadingHourglass";
   prop: T;
 };*/
 
-interface RequestItem {
+export interface RequestItem {
   id: string;
   request_name?: string;
   created_date: Date;
@@ -137,6 +148,16 @@ export default function Request() {
 
   const router = useRouter();
   const { data } = useCurrentUser();
+
+  const pageData = { nodes: requestItems };
+
+  const pagination = usePagination(pageData, {
+    state: {
+      page: 0,
+      size: 10,
+    },
+  });
+  const totalPages = pagination.state.getTotalPages(pageData.nodes);
 
   const COLUMNS: Column<RequestItem>[] = [
     {
@@ -464,7 +485,69 @@ export default function Request() {
               layout={{ custom: true }}
               rowProps={ROW_PROPS}
               rowOptions={ROW_OPTIONS}
+              pagination={pagination}
             />
+            <div className={styles.requestPagination}>
+              <FaChevronLeft
+                size={15}
+                className={`${styles.paginationChevron} ${
+                  pagination.state.page - 1 >= 0
+                    ? styles.active
+                    : styles.disabled
+                }`}
+                onClick={() =>
+                  pagination.state.page - 1 >= 0
+                    ? pagination.fns.onSetPage(pagination.state.page - 1)
+                    : ""
+                }
+              />
+              <span>
+                {pagination.state.page >= 2 && (
+                  <span>
+                    <PageButton pagination={pagination}>1</PageButton>
+                    {pagination.state.page - 1 >= 2 && <span>...</span>}
+                  </span>
+                )}
+                {pagination.state
+                  .getPages(pageData.nodes)
+                  .map((data: any, index: number) => {
+                    if (
+                      index === pagination.state.page + 1 ||
+                      index === pagination.state.page ||
+                      index === Math.abs(pagination.state.page - 1)
+                    ) {
+                      return (
+                        <PageButton key={index} pagination={pagination}>
+                          {index + 1}
+                        </PageButton>
+                      );
+                    }
+                  })}
+                {pagination.state.page <= totalPages - 3 && (
+                  <span>
+                    {totalPages - pagination.state.page >= 4 && (
+                      <span>...</span>
+                    )}
+                    <PageButton pagination={pagination}>
+                      {totalPages}
+                    </PageButton>
+                  </span>
+                )}
+              </span>
+              <FaChevronRight
+                size={15}
+                className={`${styles.paginationChevron} ${
+                  pagination.state.page + 1 <= totalPages - 1
+                    ? styles.active
+                    : styles.disabled
+                }`}
+                onClick={() =>
+                  pagination.state.page + 1 <= totalPages - 1
+                    ? pagination.fns.onSetPage(pagination.state.page + 1)
+                    : ""
+                }
+              />
+            </div>
           </>
         )}
         <ModuleModal
