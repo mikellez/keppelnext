@@ -1,5 +1,6 @@
 import React from "react";
 import { CheckSection, CheckRow } from "../../types/common/classes";
+import { ModuleDivider } from "../ModuleLayout/ModuleDivider";
 import styles from "../../styles/Checklist.module.scss";
 
 const ChecklistViewForm = ({sections}: {sections: CheckSection[]}) => {
@@ -24,6 +25,7 @@ const ChecklistViewFormSection = ({section}: {section: CheckSection}) => {
                })
             }
             </div>
+            <ModuleDivider />
         </div>
     );
 };

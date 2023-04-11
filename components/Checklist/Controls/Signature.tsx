@@ -1,10 +1,10 @@
-import React, { useRef, useContext, RefObject } from 'react';
+import React, { useRef, useContext, RefObject, useState } from 'react';
 import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
 import { updateSpecificCheck } from '../ChecklistEditableForm';
 import CheckControl from "../../../types/common/CheckControl";
 import { ImCross } from "react-icons/im";
 import checklistStyles from '../ChecklistTemplateCreator.module.css'
-import { ModuleDivider } from '../../ModuleLayout/ModuleDivider';
+import { ModuleDivider } from '../../';
 import SignatureCanvas from 'react-signature-canvas';
 import ReactSignatureCanvas from 'react-signature-canvas';
 import Image from 'next/image';
@@ -128,7 +128,7 @@ function SignatureEditable({
   };
 	
 	return (
-		<div>
+		<div className={styles.checkViewContainer}>
 			<h6>{signatureControlObj.question}</h6>
 			<div className="form-group" style={{border: "black dashed 1px"}}>
             	<SignatureCanvas 
@@ -137,17 +137,19 @@ function SignatureEditable({
 					penColor='black'
 					ref={sigRef}
 					onEnd={handleSignatureEnd}
-				/>
+			/>
 			</div>
 		</div>
 	)
 };
 
 function SignatureView({signatureControlObj}: {signatureControlObj: SignatureControl}) {
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+
   return (
     <div className={styles.checkViewContainer}>
       <h6>{signatureControlObj.question}</h6>
-      <Image
+        <Image
         src={signatureControlObj.value}
         alt="signature"
         height={100}

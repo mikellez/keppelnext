@@ -63,6 +63,7 @@ import RequestHistory from "../../components/Request/RequestHistory";
 import LoadingHourglass from "../../components/LoadingHourglass";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import PageButton from "../../components/PageButton";
+import { Role } from "../../types/common/enums";
 
 /*export type TableNode<T> = {
   id: string;
@@ -221,7 +222,9 @@ export default function Request() {
             className={styles.editIcon}
             style={{
               display:
-                data?.role_id == 1 || data?.role_id == 1 || data?.role_id == 1
+                data?.role_id == Role.Admin ||
+                data?.role_id == Role.Manager ||
+                data?.role_id == Role.Engineer
                   ? "block"
                   : "none",
               visibility:
@@ -381,12 +384,14 @@ export default function Request() {
                     )}
                   </li>
                   <li className={styles.tableDropdownListItem}>
-                    {(data?.role_id === 1 || data?.role_id === 2) &&
+                    {(data?.role_id === Role.Admin ||
+                      data?.role_id === Role.Manager) &&
                     item.status_id === 3 ? (
                       <Link href={`/Request/Manage/${item.id}`}>
                         <strong>Manage</strong>
                       </Link>
-                    ) : (data?.role_id === 3 || data?.role_id === 4) &&
+                    ) : (data?.role_id === Role.Engineer ||
+                        data?.role_id === Role.Specialist) &&
                       (item.status_id === 2 || item.status_id === 5) ? (
                       <Link href={`/Request/Complete/${item.id}`}>
                         <strong>Complete</strong>

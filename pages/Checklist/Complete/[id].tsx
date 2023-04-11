@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext } from "react";
-import { ModuleContent, ModuleMain, ModuleHeader, ModuleFooter } from "../../../components";
+import { ModuleContent, ModuleMain, ModuleHeader, ModuleFooter, ModuleDivider } from "../../../components";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import ChecklistDetails from "../../../components/Checklist/ChecklistDetails";
 import TooltipBtn from "../../../components/TooltipBtn";
@@ -12,6 +12,7 @@ import { HiOutlineDownload } from "react-icons/hi";
 import { useRouter } from "next/router";
 import axios from "axios";
 import Link from "next/link";
+import { downloadChecklistPDF } from "../View/[id]";
 
 export const SectionsContext = createContext({
     sections: [] as CheckSection[],
@@ -76,7 +77,7 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
         <>
         <ModuleMain>
             <ModuleHeader header="Complete Checklist">
-                <TooltipBtn text="Download PDF">
+                <TooltipBtn text="Download PDF" onClick={() => downloadChecklistPDF(parseInt(router.query.id as string))}>
                     <HiOutlineDownload size={24} />
                 </TooltipBtn>
                 <Link href="/Checklist" className="btn btn-secondary">
@@ -86,6 +87,7 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
             <ModuleContent>
                 <ChecklistDetails checklist={props.checklist} />
             </ModuleContent>
+            <ModuleDivider />
             <ModuleContent>
                 <SectionsContext.Provider value={{sections, setSections}}>
                     <ChecklistEditableForm />

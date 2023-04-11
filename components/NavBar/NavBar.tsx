@@ -10,6 +10,7 @@ import NavDropdown, { NavDropdownLink } from './NavDropdown';
 import NavLink, { NavLinkInfo } from './NavLink';
 import { useCurrentUser } from '../SWR';
 import { useRouter } from 'next/router';
+import { Role } from '../../types/common/enums';
 
 export default function NavBar() {
 
@@ -85,7 +86,7 @@ export default function NavBar() {
                     <NavDropdown name="Schedule"          path="/Schedule" navOpen={navDisplay} icon={<AiOutlineSchedule size={21} />}>
                         <NavDropdownLink href="/Schedule" >View Schedules</NavDropdownLink>
                         <NavDropdownLink href="/Schedule/Create" >Create Schedule</NavDropdownLink>
-                        {data && (data.role_id === 1 || data.role_id === 2 ) &&
+                        {data && (data.role_id === Role.Admin || data.role_id === Role.Manager ) &&
                             <NavDropdownLink href="/Schedule/Manage" >Manage Schedules</NavDropdownLink>
                         }
                     </NavDropdown>

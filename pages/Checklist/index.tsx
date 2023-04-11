@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-
 import { ModuleContent, ModuleHeader, ModuleMain } from "../../components";
-
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
-
 import {
   Table,
   Header,
@@ -29,6 +26,7 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import PageButton from "../../components/PageButton";
 import styles from "../../styles/Request.module.scss";
 import { usePagination } from "@table-library/react-table-library/pagination";
+import { Role } from "../../types/common/enums";
 
 const indexedColumn: ("assigned" | "record" | "approved")[] = [
   "assigned",
@@ -250,25 +248,22 @@ export default function Checklist() {
                           <Cell>{item.signoffuser}</Cell>
                           <Cell>{item.createdbyuser}</Cell>
                           <Cell>
-                            {(user.data!.role_id === 1 ||
-                              user.data!.role_id === 3) &&
-                              item.status_id === 4 && (
-                                <Link href={`/Checklist/Manage/${item.id}`}>
-                                  <strong>Manage</strong>
-                                </Link>
-                              )}
-                            {(item.status_id === 2 || item.status_id === 3) && (
+                            {(user.data!.role_id === Role.Admin ||
+                              user.data!.role_id === Role.Manager ||
+                              user.data!.role_id === Role.Engineer) &&
+                            item.status_id === 4 ? (
+                              <Link href={`/Checklist/Manage/${item.id}`}>
+                                <strong>Manage</strong>
+                              </Link>
+                            ) : item.status_id === 2 || item.status_id === 3 ? (
                               <Link href={`/Checklist/Complete/${item.id}`}>
                                 <strong>Complete</strong>
                               </Link>
+                            ) : (
+                              <Link href={`/Checklist/View/${item.id}`}>
+                                <strong>View</strong>
+                              </Link>
                             )}
-                            {item.status_id !== 2 &&
-                              item.status_id !== 3 &&
-                              item.status_id !== 4 && (
-                                <Link href={`/Checklist/View/${item.id}`}>
-                                  <strong>View</strong>
-                                </Link>
-                              )}
                           </Cell>
                         </Row>
                       );

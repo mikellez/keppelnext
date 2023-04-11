@@ -110,19 +110,10 @@ function FreeTextEditable({ freeTextObj, rowId, sectionId }: {
 	
 	const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		updateSpecificCheck(sectionId, rowId, freeTextObj.id, e.target.value, setSections)
-		// setSections((prevSections) => {
-        //     const newSections = [...prevSections];
-        //     newSections.forEach(section => {
-        //         if (section.id === sectionId) {
-        //             section.updateSection(rowId, freeTextObj.id, e.target.value)
-        //         }
-        //     })
-        //     return newSections;
-        // });
 	};
 
 	return (
-		<div>
+		<div className={styles.checkViewContainer}>
 			<h6>{freeTextObj.question}</h6>
 			<textarea 
         className="form-control" 

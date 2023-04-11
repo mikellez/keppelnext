@@ -5,10 +5,6 @@ const moment = require('moment');
 const getStream = require('get-stream');
 const SVGtoPDF = require('svg-to-pdfkit');
 
-//import { Buffer } from 'buffer'
-
-// axios.defaults.baseURL = 'http://localhost:3000';
-
 const azSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7" shape-rendering="crispEdges">
 <rect width="7" height="7" fill="#F15A23"/>
 <g fill="white">
@@ -18,16 +14,15 @@ const azSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7" shape-r
 </g>
 </svg>`;
 
-// Get the details of checklist
-// async function fetchChecklist(userId, checklistId, checklistType) {
-//     return axios.get(`http://localhost:3000/api/checklist/getChecklist/${userId}/${checklistId}/${checklistType}`)
-//         .then(res => {
-//             return res.data[0];
-//         })
-//         .catch(err => {
-//             console.log(err)
-//         })
-// };
+async function fetchChecklist(checklistId) {
+    return axios.get(`http://localhost:3001/api/checklist/record/${checklistId}`)
+        .then(res => {
+            return res.data;
+        })
+        .catch(err => {
+            console.log(err)
+        })
+};
 
 function placeTopInfo(doc, arr, marginX=50, distance=110) {
     arr.forEach((e) => {
@@ -48,117 +43,115 @@ function placeFooter(doc, svg, marginX) {
 };
 
 // Generate a pdf file for the checklist
-// async function generateChecklistPDF(userId, checklistId, checklistType) {
-//     const cl = await fetchChecklist(userId, checklistId, checklistType);
-//     if (!cl)
-//         return null;
+async function generateChecklistPDF(checklistId) {
+    const cl = await fetchChecklist(checklistId);
+    if (!cl)
+        return null;
 
-//     const marginX = 50;
-//     const doc = new PDFDocument({ margin: marginX, autoFirstPage: false });
+    const marginX = 50;
+    const doc = new PDFDocument({ margin: marginX, autoFirstPage: false });
 
-//     // The default header on every page
-//     doc.on('pageAdded', () => {
-//         doc.image('./public/images/keppellogo.png', { height: 20 })
-//         .fontSize(10)
-//         .font('Times-Roman')
-//         const tmp = doc.y;
-//         doc.fontSize(8).text("\n", marginX, 700)
-//         placeFooter(doc, azSVG, marginX)
-//         doc.text("\n", marginX, tmp)
-//     });
+    // The default header on every page
+    doc.on('pageAdded', () => {
+        doc.image('public/keppellogo.png', { height: 20 })
+        .fontSize(10)
+        .font('Times-Roman')
+        const tmp = doc.y;
+        doc.fontSize(8).text("\n", marginX, 700)
+        placeFooter(doc, azSVG, marginX)
+        doc.text("\n", marginX, tmp)
+    });
 
-//     // Add First Page
-//     doc.addPage()
+    // Add First Page
+    doc.addPage()
 
-//     const headerObj = [
-//         {title: "Checklist Name",   content: cl.chl_name},
-//         {title: "Checklist ID",     content: cl.checklist_id},
-//         {title: "Plant",            content: cl.plant_name},
-//         {title: "Assigned To",      content: cl.assigneduser},
-//         {title: "Created By",     content: cl.createdbyuser},
-//         {title: "Created On",     content: moment(new Date(cl.created_date)).format("lll")}
-//     ]
+    const headerObj = [
+        {title: "Checklist Name",   content: cl.chl_name},
+        {title: "Checklist ID",     content: cl.checklist_id},
+        {title: "Plant",            content: cl.plant_name},
+        {title: "Assigned To",      content: cl.assigneduser.trim()},
+        {title: "Created By",       content: cl.createdbyuser.trim()},
+        {title: "Signoff By",       content: cl.signoffuser.trim()},
+        {title: "Created On",       content: moment(new Date(cl.created_date)).format("lll")},
+        {title: "Linked Assets",    content: cl.linkedassets}
+    ]
     
-//     if (cl.chl_type === "Approved") {
-//         const approvedDate = moment(new Date(cl.history.split(",").slice(-1)[0].split("_")[2].slice(0, 16))).format("lll");
-//         const approvedUser =  cl.history.split(",").slice(-1)[0].split("_")[3];
-//         headerObj.push({title: "Approved On", content: approvedDate});
-//         headerObj.push({title: "Approved By", content: approvedUser});
-//     }
-    
-//     placeTopInfo(doc, headerObj, marginX);
-//     doc.text("\n", marginX);
+    placeTopInfo(doc, headerObj, marginX);
+    doc.text("\n", marginX);
 
-//     // The checklist contents
-//     Object.keys(cl.datajson).forEach(sect => {
-//         // Page break
-//         if (doc.y > 450) {
-//             doc.addPage({ margin: 50 })
-//         }
-//         doc.font('Times-Bold').text(`${cl.datajson[sect].sectionName}`, {underline: true})
-//         let count = 1;
-//         Object.keys(cl.datajson[sect]).forEach(row => {
-//             // Page break
-//             if (doc.y > 590) {
-//                 doc.addPage({ margin: 50 })
-//             }
+    // The checklist contents
+    cl.datajson.forEach(sect => {
+        // Page break
+        if (doc.y > 450) {
+            doc.addPage({ margin: 50 })
+        }
+        doc.font('Times-Bold').text(`${sect.description}`, {underline: true})
+        let count = 1;
+        sect.rows.forEach(row => {
+            // Page break
+            if (doc.y > 590) {
+                doc.addPage({ margin: 50 })
+            }
 
-//             if (row != "sectionName" && cl.datajson[sect].sectionName != "Sign Off") {
-//                 doc.font('Times-Roman').fontSize(8).text(count + ". " + cl.datajson[sect][row].rowDescription, {underline: true});
-//                 count++;
-//             } 
-
-//             if (cl.datajson[sect][row].checks) {
+            if (row.checks) {
                 
-//                 cl.datajson[sect][row].checks.forEach(check => {
-//                     // Page break
-//                     if (doc.y > 600) {
-//                         doc.addPage({ margin: 50 })
-//                     }
-//                     if (check.input_type === "radio") {
-//                         doc.font('Times-Roman').fontSize(8).text(check.question.trim())
-//                         check.values.forEach(option => {
-//                             if (check.selected && option === check.selected) {
-//                                 doc.rect(doc.x + 1, doc.y + 1, 4, 4).font('Times-Roman').fillOpacity(1.0).fillAndStroke("black", "black").fontSize(8).text(option, marginX, doc.y, {indent: 7})
-//                             } 
-//                             else {
-//                                 doc.rect(doc.x + 1, doc.y + 1, 4, 4).font('Times-Roman').stroke().fontSize(8).text(option, marginX, doc.y, {indent: 7})
-//                             }
-//                         })
-//                     } else if (check.input_type === "textarea" || check.input_type === "textarealong") {
-//                         if (check.selected) {
-//                             doc.font('Times-Roman').fontSize(8).text(check.question.trim())
-//                             const startY = doc.y;
-//                             doc.text("\n").text(check.selected, marginX + 7, doc.y, { width: "496" }).text("\n");
-//                             const endY = doc.y;
-//                             doc.rect(marginX, startY + 5, 507, endY - startY - 10).stroke();
-//                         } else if (!check.selected) {
-//                             if (check.selected.trim().length != 0) {
-//                                 doc.font('Times-Roman').fontSize(8).text(check.question.trim())
-//                                 doc.text().rect(marginX, doc.y, 507, 40).stroke().text("\n\n\n\n");
-//                             }
-//                         }
-//                     } else if (check.input_type === "Signature") {
-//                         doc.font('Times-Roman').fontSize(8).text(check.question.trim())
-//                         if (check.selected) {
-//                             doc.image(check.selected, marginX, doc.y, { width: 50, height: 50 })
-//                         }
-//                     } else if (check.input_type === "file") {
-//                         if (check.selected) {
-//                             doc.font('Times-Roman').fontSize(8).text(check.question.trim())
-//                             doc.image(check.selected, marginX, doc.y, { height: 100 })
-//                         }
-//                     }
-//                     doc.text("\n", marginX)  
-//                 })
-//             } 
-//         })
-//     })
+                row.checks.forEach(check => {
+                    // Page break
+                    if (doc.y > 600) {
+                        doc.addPage({ margin: 50 })
+                    }
 
-//     doc.end();
-//     let docData = await getStream.buffer(doc);
-//     return docData;
-// }
+                    doc.font('Times-Roman').fontSize(8).text(check.question.trim())
+                    if (check.type === "SingleChoice") {
+                        check.choices.forEach(choice => {
+                            if (check.value && choice === check.value) {
+                                doc.rect(doc.x + 1, doc.y + 1, 4, 4).font('Times-Roman').fillOpacity(1.0).fillAndStroke("black", "black").fontSize(8).text(choice, marginX, doc.y, {indent: 7})
+                            } 
+                            else {
+                                doc.rect(doc.x + 1, doc.y + 1, 4, 4).font('Times-Roman').stroke().fontSize(8).text(choice, marginX, doc.y, {indent: 7})
+                            }
+                        })
+                    } else if (check.type === "FreeText") {
+                        if (check.value) {
+                            doc.font('Times-Roman').fontSize(8).text(check.question.trim())
+                            const startY = doc.y;
+                            doc.text("\n").text(check.value, marginX + 7, doc.y, { width: "496" }).text("\n");
+                            const endY = doc.y;
+                            doc.rect(marginX, startY + 5, 507, endY - startY - 10).stroke();
+                        } else if (!check.value) {
+                            if (check.value.trim().length != 0) {
+                                doc.font('Times-Roman').fontSize(8).text(check.question.trim())
+                                doc.text().rect(marginX, doc.y, 507, 40).stroke().text("\n\n\n\n");
+                            }
+                        }
+                    } else if (check.type === "Signature") {
+                        if (check.value) {
+                            doc.image(check.value, marginX, doc.y, { width: 50, height: 50 })
+                        }
+                    } else if (check.type === "FileUpload") {
+                        if (check.value) {
+                            doc.image(check.value, marginX, doc.y, { height: 100 })
+                        }
+                    } else if (check.type === "MultiChoice") {
+                        check.choices.forEach(choice => {
+                            if (check.value && check.value.split(", ").includes(choice)) {
+                                doc.rect(doc.x + 1, doc.y + 1, 4, 4).font('Times-Roman').fillOpacity(1.0).fillAndStroke("black", "black").fontSize(8).text(choice, marginX, doc.y, {indent: 7})
+                            } 
+                            else {
+                                doc.rect(doc.x + 1, doc.y + 1, 4, 4).font('Times-Roman').stroke().fontSize(8).text(choice, marginX, doc.y, {indent: 7})
+                            }
+                        })
+                    }
+                    doc.text("\n", marginX)  
+                })
+            } 
+        })
+    })
+
+    doc.end();
+    let docData = await getStream.buffer(doc);
+    return docData;
+}
 
 // Fetch a specific request by id
 async function fetchRequest(id) {
@@ -170,38 +163,6 @@ async function fetchRequest(id) {
             console.log(err);
         });
 };
-
-// // Fetch fault image
-// async function fetchFaultImg(id) {
-//     return await axios.get("http://localhost:3000/api/request/file/" + id, {responseType: "arraybuffer"})
-//         .then(res => {
-//             if (res.status === 200) return res.data;
-//         })
-//         .catch(err => {
-//             console.log(err);
-//         });
-// }
-
-// // Fetch completed image
-// async function fetchCompletedImg(id) {
-//     return await axios.get("http://localhost:3000/api/request/completefile/" + id, {responseType: "arraybuffer"})
-//         .then(res => {
-//             if (res.status === 200) return res.data;
-//         })
-//         .catch(err => {
-//             console.log(err);
-//         });
-// }
-
-// async function fectchRequestHistory(id) {
-//     return await axios.get("http://localhost:3000/api/request/getReqHistory/" + id)
-//         .then(res => {
-//             if (res.status === 200) return res.data.requesthistory;
-//         })
-//         .catch(err => {
-//             console.log(err);
-//         });
-// }
 
 // Generate a PDF file for request
 async function generateRequestPDF(id) {
@@ -320,10 +281,6 @@ async function generateRequestPDF(id) {
             .text("\n")
             .image(Buffer.from(completedImg.data), marginX + 300, startY + 260, { fit: [200, 200], align: "center" })
     }
-
-    // doc.text("\n\n\n", marginX)
-    // doc.text("\n", marginX, startY + 450)
-    // if (doc.y > 550) doc.addPage();
     doc.addPage();
 
     (async function createTable() {
@@ -344,7 +301,6 @@ async function generateRequestPDF(id) {
             prepareHeader: () => doc.font("Times-Bold").fontSize(10),
             prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
                 doc.font("Times-Roman").fontSize(8);
-                // indexColumn === 0 && doc.addBackground(rectRow, 'blue', 0.15);
             },
         });
 
@@ -372,27 +328,28 @@ function sendRequestPDF(req, res, next) {
     })
 }
 
-// // Send a checklist pdf
-// function sendChecklistPDF(req, res, next) {
-//     generateChecklistPDF(req.params.userId, req.params.checklistId, req.params.cType).then(
-//         result => {
-//             if(result === null)
-//                 return res.status(400).send();
+// Send a checklist pdf
+function sendChecklistPDF(req, res, next) {
+    generateChecklistPDF(req.params.checklist_id).then(
+        result => {
+            if(result === null)
+                return res.status(400).send("No checklist found");
 
-//             res.set({
-//                 'Content-Type': 'application/pdf',
-//                 'Content-Length': result.len,
-//             })
-//             return res.status(200).send(result);
-//         }
-//     ).catch(err => {
-//         return res.status(500).json("Error in generating PDF")
-//     })
-// }
+            res.set({
+                'Content-Type': 'application/pdf',
+                'Content-Length': result.len,
+            })
+            return res.status(200).send(result);
+        }
+    ).catch(err => {
+        console.log(err)
+        return res.status(500).json("Error in generating PDF")
+    })
+}
 
 module.exports = { 
-    // generateChecklistPDF,
-    // sendChecklistPDF,
+    generateChecklistPDF,
+    sendChecklistPDF,
     generateRequestPDF,
     sendRequestPDF
 };
