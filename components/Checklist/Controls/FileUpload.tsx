@@ -1,12 +1,14 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { updateSpecificCheck } from '../ChecklistEditableForm';
 import CheckControl from '../../../types/common/CheckControl';
 import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
 import { ImCross } from "react-icons/im";
 import checklistStyles from "../ChecklistTemplateCreator.module.css";
-import { ModuleDivider } from "../../ModuleLayout/ModuleDivider";
+import { ModuleDivider, ModuleModal } from "../../";
 import Image from 'next/image';
 import styles from "../../../styles/Checklist.module.scss";
+import requestStyles from "../../../styles/Request.module.scss";
+
 
 
 export class FileUploadControl extends CheckControl {
@@ -141,29 +143,44 @@ function FileUploadEditable({ fileControlObj, rowId, sectionId }: {
 	};
 	
 	return (
-		<div>
+		<div className={styles.checkViewContainer}>
 			<h6>{fileControlObj.question}</h6>
 			<input 
 				type="file" 
 				name={fileControlObj.id}
 				className="form-control"
 				onChange={handleChange}
+        accept='jpeg/png'
 			/>
 		</div>
 	)
 };
 
 function FileUploadView({ fileControlObj }: {fileControlObj: FileUploadControl}) {
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   return (
-    <div className={styles.checkViewContainer}>
-      <h6>{fileControlObj.question}</h6>
+    <>
+      <div className={styles.checkViewContainer}>
+        <h6>{fileControlObj.question}</h6>
+        <p 
+          onClick={() => setModalOpen(true)}
+          className={requestStyles.editIcon}
+        >View File</p>
+      </div>
+      <ModuleModal
+        closeModal={() => setModalOpen(false)}
+        isOpen={modalOpen}
+        closeOnOverlayClick
+        className={requestStyles.imageModal}
+      >
       <Image 
         src={fileControlObj.value}
         alt="img"
-        width={250}
-        height={250}
+        width={500} 
+        height={500}
       />
-    </div>
+  </ModuleModal>
+  </>
   );
 };

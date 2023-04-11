@@ -1,6 +1,7 @@
 import React, { useContext } from  "react";
 import { CheckSection, CheckRow } from "../../types/common/classes";
 import { SectionsContext } from "../../pages/Checklist/Complete/[id]";
+import { ModuleDivider } from "../ModuleLayout/ModuleDivider";
 import styles from "../../styles/Checklist.module.scss";
 
 
@@ -32,6 +33,7 @@ const ChecklistEditableFormSection = (
                })
             }
             </div>
+            <ModuleDivider />
         </div>
     );
 };
@@ -41,13 +43,7 @@ const ChecklistEditableFormRow = (
 ) => {
 
     return (
-        <div>
-            {
-                row.checks.map((check, index) => {
-                    return <React.Fragment key={check.id}>{check.renderEditableForm(rowId, sectionId)}</React.Fragment>
-                })
-            }
-        </div>
+        <React.Fragment>{row.checks.map((check) => check.renderEditableForm(rowId, sectionId))}</React.Fragment>
     );
 };
 
