@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-
 import { ModuleContent, ModuleHeader, ModuleMain } from "../../components";
-
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
-
 import {
   Table,
   Header,
@@ -25,6 +22,7 @@ import TooltipBtn from "../../components/TooltipBtn";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import LoadingHourglass from "../../components/LoadingHourglass";
 import axios from "axios";
+import { Role } from "../../types/common/enums";
 
 const indexedColumn: ("assigned" | "record" | "approved")[] = ["assigned", "record", "approved"];
 
@@ -231,7 +229,11 @@ export default function Checklist() {
                         <Cell>{item.createdbyuser}</Cell>
                         <Cell>
                           {
-                            (user.data!.role_id === 1 || user.data!.role_id === 3) &&
+                            (
+                              user.data!.role_id === Role.Admin || 
+                              user.data!.role_id === Role.Manager ||
+                              user.data!.role_id === Role.Engineer
+                            ) &&
                             item.status_id === 4 ? 
                             
                             <Link href={`/Checklist/Manage/${item.id}`}>
@@ -239,7 +241,7 @@ export default function Checklist() {
                             </Link>
                              
                             :
-                            
+
                             item.status_id === 2 ||
                             item.status_id === 3 ? 
                             
