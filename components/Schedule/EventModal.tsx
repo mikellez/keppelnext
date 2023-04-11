@@ -17,6 +17,7 @@ import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup
 import styles from "../../styles/Schedule.module.scss";
 import axios from "axios";
 import ScheduleModal, { scheduleMaintenance, scheduleValidator } from "./ScheduleModal";
+import { Role } from "../../types/common/enums";
 
 interface CustomMouseEventHandler extends React.MouseEventHandler {
     (event: React.MouseEvent | void): void;
@@ -388,7 +389,7 @@ export default function EventModal(props: ModalProps) {
                                 </div>
                             )}
                             {props.editSingle &&
-                                (data?.role_id as number) < 4 &&
+                                (data?.role_id as number) != Role.Specialist &&
                                 (props.event.extendedProps.date as Date) > new Date() &&
                                 (props.event.extendedProps.recurringPeriod > 1 ||
                                     props.event.extendedProps.isSingle) && (

@@ -27,7 +27,6 @@ const ChecklistPreview = (props: ChecklistPageProps) => {
         <ModuleContent>
             <ChecklistViewForm sections={sections} />
         </ModuleContent>
-        <ModuleDivider />
         </>
     );
 };

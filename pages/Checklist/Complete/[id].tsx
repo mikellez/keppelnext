@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext } from "react";
-import { ModuleContent, ModuleMain, ModuleHeader, ModuleFooter } from "../../../components";
+import { ModuleContent, ModuleMain, ModuleHeader, ModuleFooter, ModuleDivider } from "../../../components";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import ChecklistDetails from "../../../components/Checklist/ChecklistDetails";
 import TooltipBtn from "../../../components/TooltipBtn";
@@ -87,6 +87,7 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
             <ModuleContent>
                 <ChecklistDetails checklist={props.checklist} />
             </ModuleContent>
+            <ModuleDivider />
             <ModuleContent>
                 <SectionsContext.Provider value={{sections, setSections}}>
                     <ChecklistEditableForm />

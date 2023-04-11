@@ -212,20 +212,11 @@ function SingleChoiceEditable({ singleChoiceObj, rowId, sectionId }: {
 	const { setSections } = useContext(SectionsContext);
 	
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		// setSections((prevSections) => {
-        //     const newSections = [...prevSections];
-        //     newSections.forEach(section => {
-        //         if (section.id === sectionId) {
-        //             section.updateSection(rowId, singleChoiceObj.id, e.target.value)
-        //         }
-        //     })
-        //     return newSections;
-        // });
 		updateSpecificCheck(sectionId, rowId, singleChoiceObj.id, e.target.value, setSections)
 	}
 
 	return (
-		<div>
+		<div className={styles.checkViewContainer}>
 			<h6>{singleChoiceObj.question}</h6>
 			{
 				singleChoiceObj.choices.map(choice => {
