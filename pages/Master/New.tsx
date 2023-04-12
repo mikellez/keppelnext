@@ -40,6 +40,7 @@ export default function New(props: NewMasterEntryProps) {
 	const [isMissingDetailsModalOpen2, setIsMissingDetailsModaOpen2] =
     useState<boolean>(false);
 	const [submissionModal, setSubmissionModal] = useState<boolean>(false);
+	const [isNotValid, setIsNotValid] = useState<boolean>(false);
 
 
 	const {
@@ -66,7 +67,12 @@ export default function New(props: NewMasterEntryProps) {
 					return res.data;
 				})
 				.catch(err => {
+					// console.log(err.response.data);
 					console.log(err);
+					console.log(err.response.data.table);
+					if (err.response.data.table === "system_assets"){
+						setIsNotValid(true);
+					}
 				});
 			
 		}
@@ -142,6 +148,16 @@ export default function New(props: NewMasterEntryProps) {
 				setModalOpenState={setIsMissingDetailsModaOpen2}
 				title="Missing Details 💀💀💀"
 				text="Please ensure that you have filled in all the required entries."
+				icon={SimpleIcon.Cross}
+				// onRequestClose={() => {
+				// 	router.reload();
+				//   }}
+			  />
+			  <ModuleSimplePopup
+				modalOpenState={isNotValid}
+				setModalOpenState={setIsNotValid}
+				title="System asset ID not valid 💀💀💀"
+				text="Please ensure that you have chosen a valid ID from the tables."
 				icon={SimpleIcon.Cross}
 				// onRequestClose={() => {
 				// 	router.reload();
