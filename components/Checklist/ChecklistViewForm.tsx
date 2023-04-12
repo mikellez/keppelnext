@@ -32,7 +32,15 @@ const ChecklistViewFormSection = ({section}: {section: CheckSection}) => {
 
 const ChecklistViewFormRow = ({row}: {row: CheckRow}) => {
     return (
-        <React.Fragment>{row.checks.map(check => check.renderViewOnlyForm())}</React.Fragment>
+        <React.Fragment>
+            {
+                row.checks.map(check => 
+                    <React.Fragment key={check.id}>
+                        {check.renderViewOnlyForm()}
+                    </React.Fragment>
+                )
+            }
+        </React.Fragment>
     );
 };
 

@@ -151,7 +151,7 @@ class CheckSection {
 	}
 
 	static fromJSON(jsonStr: string) {
-		console.log("string", jsonStr)
+		// console.log("string", jsonStr)
 		let obj = JSON.parse(jsonStr)
 
 		if(typeof obj.description !== "string" || !Array.isArray(obj.rows))

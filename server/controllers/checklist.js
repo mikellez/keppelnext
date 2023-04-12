@@ -227,6 +227,7 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
             cm.datajson,
             cm.created_date,
             cm.status_id,
+            cm.history,
             pm.plant_id,
             pm.plant_name,
             u1.user_id as assigned_user_id,
