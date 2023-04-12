@@ -49,6 +49,15 @@ const tableInfo = {
 			column_name: "asset_type"
 		}]
 	},
+	system_assets: {
+		internalName: "system_assets",
+		name: "System Asset",
+		id: "system_asset_id",
+		fields: [{
+			column_label: "Name",
+			column_name: "system_asset"
+		}]
+	},
 	// asset_instrument: {
 	// 	internalName: "plant_system_assets",
 	// 	name: "Asset Instrument",
@@ -62,11 +71,19 @@ const fetchMasterInfo = async (req, res, next) => {
 	if(tableInfo[req.params.type] === undefined)
 		return res.status(404).json("no type");
 	console.log(tableInfo[req.params.type].internalName)
+	console.log("{&*(&(*&*&(*&(")
 	let table       = tableInfo[req.params.type].internalName;
 	let idColumn    = tableInfo[req.params.type].id;
-
 	let q = `SELECT * FROM keppel.${table} ORDER BY ${idColumn}`;
 
+	if(table == 'system_assets'){
+		q = `SELECT keppel.system_assets.system_id,keppel.system_assets.system_asset_id,keppel.system_master.system_name,keppel.system_assets.system_asset
+		FROM keppel.system_assets
+		JOIN keppel.system_master
+		ON keppel.system_assets.system_id = keppel.system_master.system_id ORDER BY ${idColumn}
+		`;
+	}
+	
 	db.query(q, (err1, result) => {
 		if (err1) {
 			// throw err;
@@ -74,7 +91,7 @@ const fetchMasterInfo = async (req, res, next) => {
 					msg: err1,
 			});
 		}
-
+		console.log(result.rows);
 		return res.status(200).json(
 			{
 				rows: result.rows,
