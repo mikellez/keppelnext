@@ -56,6 +56,9 @@ const tableInfo = {
 		fields: [{
 			column_label: "Name",
 			column_name: "system_asset"
+		},{
+			column_label: "System id (Number only)",
+			column_name: "system_id"
 		}]
 	},
 	// asset_instrument: {
@@ -77,10 +80,10 @@ const fetchMasterInfo = async (req, res, next) => {
 	let q = `SELECT * FROM keppel.${table} ORDER BY ${idColumn}`;
 
 	if(table == 'system_assets'){
-		q = `SELECT keppel.system_assets.system_id,keppel.system_assets.system_asset_id,keppel.system_master.system_name,keppel.system_assets.system_asset
+		q = `SELECT keppel.system_assets.system_id,keppel.system_master.system_name,keppel.system_assets.system_asset
 		FROM keppel.system_assets
 		JOIN keppel.system_master
-		ON keppel.system_assets.system_id = keppel.system_master.system_id ORDER BY ${idColumn}
+		ON keppel.system_assets.system_id = keppel.system_master.system_id ORDER BY keppel.system_assets.system_id
 		`;
 	}
 	
@@ -121,11 +124,22 @@ const createMasterTypeEntry = async (req, res, next) => {
 	} else if (req.body.type == 'plant'){
 		sql = `INSERT INTO keppel.plant_master (plant_name, plant_description) VALUES ($1, $2)`;
 		insert = [req.body.entries.plant_name, req.body.entries.plant_description]
+	} else if (req.body.type == 'system_assets'){
+		sql = `INSERT INTO keppel.system_assets (system_id, system_asset) VALUES ($1, $2)`;
+		insert = [parseInt(req.body.entries.system_id), req.body.entries.system_asset]
+		console.log(insert)
 	}
 	db.query(sql,insert)
 		.then(result => {
 			return res.status(200).send({
 				msg: "success",
+			})})
+		.catch(err => {
+			// console.log(err.table)
+			// return err.table
+			return res.status(500).send({
+				msg: err,
+				table: err.table
 			})
 		})
 	// return res.status(200).send({
