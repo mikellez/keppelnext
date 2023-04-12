@@ -6,3 +6,4 @@ exports.fault			= require("./fault");
 exports.master			= require("./master");
 exports.dashboard       = require("./dashboard");
 exports.activity        = require("./activity")
+exports.changeOfParts   = require("./changeOfParts");

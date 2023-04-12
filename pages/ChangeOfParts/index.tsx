@@ -1,5 +1,7 @@
 import React from 'react'
 import { ModuleMain, ModuleHeader, ModuleContent } from '../../components'
+import { GetServerSideProps, GetServerSidePropsContext } from 'next';
+import axios from 'axios';
 
 const ChangeOfPartsPage = () => {
     return (
@@ -13,3 +15,7 @@ const ChangeOfPartsPage = () => {
 };
 
 export default ChangeOfPartsPage;
+
+export const getServerSideProps = (context: GetServerSidePropsContext) => {
+    
+};
