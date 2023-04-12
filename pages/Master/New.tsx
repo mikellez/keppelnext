@@ -49,7 +49,8 @@ export default function New(props: NewMasterEntryProps) {
 		handleSubmit,
 		formState,
 		control,
-		getValues
+		getValues,
+		clearErrors
 	} = useForm<FormValues>();
 
 	const { isSubmitting, errors } = formState;
@@ -58,22 +59,22 @@ export default function New(props: NewMasterEntryProps) {
 		// console.log(data);
 		const values = Object.values(data["entries"]);
 		if (values.includes("")){
-			// setIsMissingDetailsModaOpen2(true);
+			setIsMissingDetailsModaOpen2(true);
 		}
 		else{
-			// return await axios.post("/api/master/new/add", data)
-			// 	.then(res => {
-			// 		console.log(res.data)
-			// 		setSubmissionModal(true)
-			// 		return res.data;
-			// 	})
-			// 	.catch(err => {
-			// 		console.log(err);
-			// 		console.log(err.response.data.table);
-			// 		if (err.response.data.table === "system_assets"){
-			// 			setIsNotValid(true);
-			// 		}
-			// 	});
+			return await axios.post("/api/master/new/add", data)
+				.then(res => {
+					console.log(res.data)
+					setSubmissionModal(true)
+					return res.data;
+				})
+				.catch(err => {
+					console.log(err);
+					console.log(err.response.data.table);
+					if (err.response.data.table === "system_assets"){
+						setIsNotValid(true);
+					}
+				});
 			
 		}
 
@@ -132,7 +133,7 @@ export default function New(props: NewMasterEntryProps) {
 
 			</ModuleContent>
 			<ModuleFooter>
-				{/* {(errors.type || errors.entries) &&
+				{(errors.type || errors.entries || isMissingDetailsModalOpen2) &&
 				<ModuleSimplePopup
 				modalOpenState={isMissingDetailsModalOpen}
 				setModalOpenState={setIsMissingDetailsModaOpen}
@@ -140,10 +141,13 @@ export default function New(props: NewMasterEntryProps) {
 				text="Please ensure that you have filled in all the required entries."
 				icon={SimpleIcon.Cross}
 				onRequestClose={() => {
+					// clearErrors();
+					// setIsMissingDetailsModaOpen(false)
 					router.reload();
-				  }}
-			  />} */}
-			  <ModuleSimplePopup
+
+				}}
+			  />}
+			  {/* <ModuleSimplePopup
 				modalOpenState={isMissingDetailsModalOpen2}
 				setModalOpenState={setIsMissingDetailsModaOpen2}
 				title="Missing Details 💀💀💀"
@@ -152,7 +156,7 @@ export default function New(props: NewMasterEntryProps) {
 				// onRequestClose={() => {
 				// 	router.reload();
 				//   }}
-			  />
+			  /> */}
 			  <ModuleSimplePopup
 				modalOpenState={isNotValid}
 				setModalOpenState={setIsNotValid}

@@ -7,7 +7,7 @@ interface FieldProps {
 	label: string
 	name: string
 	value?: string
-	onChange: React.ChangeEventHandler<HTMLInputElement>
+	onChange: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement>
 	system?: CMMSSystem[]
 }
 
@@ -36,6 +36,7 @@ function Field(props: FieldProps) {
 					className="form-select"
 					onChange={(e) => {
 						setValue(e.target.value)
+						props.onChange(e)
 					}}
 					value={value}
 				>
@@ -58,6 +59,7 @@ function Field(props: FieldProps) {
 					type="text"
 					onChange={(e) => {
 						setValue(e.target.value)
+						props.onChange(e)
 					}}
 					value={value}
 				/>
@@ -85,7 +87,7 @@ export function MultiFields(props: MultiFieldProps) {
 
 	console.log(entries)
 
-	const getValueOnChange = (e: React.ChangeEvent<HTMLInputElement>, column_name: string) => {
+	const getValueOnChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, column_name: string) => {
 		let newEntries = entries;
 		newEntries[column_name] = e.target.value;
 		setEntries(newEntries);
