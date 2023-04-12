@@ -140,7 +140,7 @@ export default function New(props: NewMasterEntryProps) {
 			  <ModuleSimplePopup
 				modalOpenState={isMissingDetailsModalOpen2}
 				setModalOpenState={setIsMissingDetailsModaOpen2}
-				title="Missing Details"
+				title="Missing Details 💀💀💀"
 				text="Please ensure that you have filled in all the required entries."
 				icon={SimpleIcon.Cross}
 				// onRequestClose={() => {
