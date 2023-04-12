@@ -559,7 +559,26 @@ function updateChecklist(updateType) {
         default:
             return console.log("update checklist type error");
     }
-}
+};
+
+const deleteChecklistTemplate = async (req, res, next) => {
+    const sql = `
+        DELETE FROM
+            keppel.schedule_checklist
+        WHERE 
+            checklist_template_id = ${req.params.checklist_id};
+
+        DELETE FROM
+            keppel.checklist_templates
+        WHERE
+            checklist_id = ${req.params.checklist_id}
+    `;
+
+    db.query(sql, (err) => {
+        if (err) return res.status(500).json("Failure to delete template")
+        return res.status(200).json("Template successfully deleted");
+    });
+};
 
 module.exports = {
     fetchAssignedChecklists,
@@ -575,4 +594,5 @@ module.exports = {
     fetchSpecificChecklistRecord,
     fetchChecklistRecords,
     updateChecklist,
+    deleteChecklistTemplate,
 };
