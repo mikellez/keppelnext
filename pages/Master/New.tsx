@@ -39,6 +39,8 @@ export default function New(props: NewMasterEntryProps) {
     useState<boolean>(true);
 	const [isMissingDetailsModalOpen2, setIsMissingDetailsModaOpen2] =
     useState<boolean>(false);
+	const [submissionModal, setSubmissionModal] = useState<boolean>(false);
+
 
 	const {
 		register,
@@ -60,6 +62,7 @@ export default function New(props: NewMasterEntryProps) {
 			return await axios.post("/api/master/new/add", data)
 				.then(res => {
 					console.log(res.data)
+					setSubmissionModal(true)
 					return res.data;
 				})
 				.catch(err => {
@@ -144,6 +147,38 @@ export default function New(props: NewMasterEntryProps) {
 				// 	router.reload();
 				//   }}
 			  />
+			  <ModuleSimplePopup
+            modalOpenState={submissionModal}
+            setModalOpenState={setSubmissionModal}
+            title="Success!"
+            text="Your entry has been submitted! 🔥🔥🔥"
+            icon={SimpleIcon.Check}
+            buttons={
+              <button
+                onClick={() => {
+                  setSubmissionModal(false);
+                  router.reload();
+                }}
+                className="btn btn-secondary"
+              >
+                Create another entry
+              </button>
+            }
+            buttons2={
+              <button
+                onClick={() => {
+                  setSubmissionModal(false);
+                  router.push("/Master");
+                }}
+                className="btn btn-primary"
+              >
+                Ok
+              </button>
+            }
+            onRequestClose={() => {
+              router.push("/Master");
+            }}
+          />
 				<button type="submit" className="btn btn-primary">
 				{
 					isSubmitting && <LoadingIcon/>
