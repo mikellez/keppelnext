@@ -57,7 +57,7 @@ const tableInfo = {
 			column_label: "Name",
 			column_name: "system_asset"
 		},{
-			column_label: "System id (Number only)",
+			column_label: "Select System",
 			column_name: "system_id"
 		}]
 	},

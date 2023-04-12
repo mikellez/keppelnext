@@ -9,7 +9,7 @@ import { FieldErrorsImpl, SubmitHandler } from 'react-hook-form/dist/types';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import axios from 'axios';
 import LoadingIcon from '../../components/LoadingIcon';
-import { CMMSMasterField, CMMSMasterSubmission, CMMSMasterTables } from '../../types/common/interfaces';
+import { CMMSMasterField, CMMSMasterSubmission, CMMSMasterTables, CMMSSystem } from '../../types/common/interfaces';
 import { MultiFields } from '../../components/Master/MultiField';
 import ModuleSimplePopup, { SimpleIcon } from '../../components/ModuleLayout/ModuleSimplePopup';
 import router from 'next/router';
@@ -31,6 +31,7 @@ type FormValues = {
 
 interface NewMasterEntryProps {
 	tables: CMMSMasterTables
+	systems: CMMSSystem[]
 }
 
 export default function New(props: NewMasterEntryProps) {
@@ -54,26 +55,25 @@ export default function New(props: NewMasterEntryProps) {
 	const { isSubmitting, errors } = formState;
 
 	const formSubmit: SubmitHandler<FormValues> = async (data) => {
-		console.log(data);
+		// console.log(data);
 		const values = Object.values(data["entries"]);
 		if (values.includes("")){
-			setIsMissingDetailsModaOpen2(true);
+			// setIsMissingDetailsModaOpen2(true);
 		}
 		else{
-			return await axios.post("/api/master/new/add", data)
-				.then(res => {
-					console.log(res.data)
-					setSubmissionModal(true)
-					return res.data;
-				})
-				.catch(err => {
-					// console.log(err.response.data);
-					console.log(err);
-					console.log(err.response.data.table);
-					if (err.response.data.table === "system_assets"){
-						setIsNotValid(true);
-					}
-				});
+			// return await axios.post("/api/master/new/add", data)
+			// 	.then(res => {
+			// 		console.log(res.data)
+			// 		setSubmissionModal(true)
+			// 		return res.data;
+			// 	})
+			// 	.catch(err => {
+			// 		console.log(err);
+			// 		console.log(err.response.data.table);
+			// 		if (err.response.data.table === "system_assets"){
+			// 			setIsNotValid(true);
+			// 		}
+			// 	});
 			
 		}
 
@@ -112,7 +112,7 @@ export default function New(props: NewMasterEntryProps) {
 							control={control}
 							name="entries"
 							render={ ({ field: { onChange, value }, formState: {errors}}) => (
-								<MultiFields fields={props.tables[masterType].fields} onChange={onChange}/>
+								<MultiFields fields={props.tables[masterType].fields} onChange={onChange} system={props.systems}/>
 							)}
 							rules={{
 								validate: {
@@ -132,7 +132,7 @@ export default function New(props: NewMasterEntryProps) {
 
 			</ModuleContent>
 			<ModuleFooter>
-				{(errors.type || errors.entries) &&
+				{/* {(errors.type || errors.entries) &&
 				<ModuleSimplePopup
 				modalOpenState={isMissingDetailsModalOpen}
 				setModalOpenState={setIsMissingDetailsModaOpen}
@@ -142,7 +142,7 @@ export default function New(props: NewMasterEntryProps) {
 				onRequestClose={() => {
 					router.reload();
 				  }}
-			  />}
+			  />} */}
 			  <ModuleSimplePopup
 				modalOpenState={isMissingDetailsModalOpen2}
 				setModalOpenState={setIsMissingDetailsModaOpen2}
@@ -214,8 +214,12 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 	}
 
 	const masterCreateInfo = await axios.get<CMMSMasterTables>("http://localhost:3001/api/master/new", headers);
+	const systems = await axios.get<CMMSSystem[]>(
+		"http://localhost:3001/api/asset/systems",
+		headers
+	  );
 
-	let props: NewMasterEntryProps = { tables: masterCreateInfo.data }
+	let props: NewMasterEntryProps = { tables: masterCreateInfo.data, systems: systems.data}
 
 	return {
 		props: props
