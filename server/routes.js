@@ -190,7 +190,8 @@ router.post("/asset/deleteAsset", checkIfLoggedInAPI, controllers.asset.deleteAs
 router
     .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
     .get(controllers.checklist.fetchSpecificChecklistTemplate)
-    .post(controllers.checklist.createNewChecklistTemplate);
+    .post(controllers.checklist.createNewChecklistTemplate)
+    .delete(controllers.checklist.deleteChecklistTemplate)
 
 router.get(
     "/checklist/assigned",

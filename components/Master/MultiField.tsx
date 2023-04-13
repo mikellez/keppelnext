@@ -1,12 +1,14 @@
 import formStyles from '../../styles/formStyles.module.css'
 import React, { useEffect, useState } from 'react'
-import { CMMSMasterField, CMMSMasterSubmission } from '../../types/common/interfaces'
+import { CMMSMasterField, CMMSMasterSubmission, CMMSSystem } from '../../types/common/interfaces'
+import axios from 'axios'
 
 interface FieldProps {
 	label: string
 	name: string
 	value?: string
-	onChange: React.ChangeEventHandler<HTMLInputElement>
+	onChange: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement>
+	system?: CMMSSystem[]
 }
 
 interface MultiFieldProps {
@@ -15,6 +17,7 @@ interface MultiFieldProps {
 		[column_name:string]: string
 	}
 	onChange: Function
+	system?: CMMSSystem[]
 }
 
 function Field(props: FieldProps) {
@@ -23,20 +26,47 @@ function Field(props: FieldProps) {
 	useEffect(() => {
 		console.log("val", value)
 	})
+	
 
-	return (
-		<div className="form-group">
-			<label className='form-label'>{props.label}</label>
-			<input className="form-control"
-				type="text"
-				onChange={(e) => {
-					setValue(e.target.value)
-					props.onChange(e);
-				}}
-				value={value}
-			/>
-		</div>
-	)
+	if (props.name === "system_id") {
+		return (
+			<div className="form-group">
+				<label className='form-label'>{props.label}</label>
+				<select 
+					className="form-select"
+					onChange={(e) => {
+						setValue(e.target.value)
+						props.onChange(e)
+					}}
+					value={value}
+				>
+					<option hidden>--Select--</option>
+					{
+						props.system!.map(system => (
+							<option key={system.system_id} value={system.system_id}>
+								{system.system_name}
+							</option>
+              			))
+					}
+				</select>
+			</div>
+		)
+	} else {
+		return (
+			<div className="form-group">
+				<label className='form-label'>{props.label}</label>
+				<input className="form-control"
+					type="text"
+					onChange={(e) => {
+						setValue(e.target.value)
+						props.onChange(e)
+					}}
+					value={value}
+				/>
+			</div>
+		)
+	}
+	
 }
 
 export function MultiFields(props: MultiFieldProps) {
@@ -46,7 +76,6 @@ export function MultiFields(props: MultiFieldProps) {
 	useEffect(() => {
 		const newEntries = props.values === undefined ? props.fields.reduce(toProps,{}) : props.values;
 		console.log("fields changed", props.fields, newEntries)
-
 		setEntries(newEntries);
 
 		props.onChange({
@@ -56,7 +85,9 @@ export function MultiFields(props: MultiFieldProps) {
 		});
 	}, [props.fields])
 
-	const getValueOnChange = (e: React.ChangeEvent<HTMLInputElement>, column_name: string) => {
+	console.log(entries)
+
+	const getValueOnChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, column_name: string) => {
 		let newEntries = entries;
 		newEntries[column_name] = e.target.value;
 		setEntries(newEntries);
@@ -77,7 +108,16 @@ export function MultiFields(props: MultiFieldProps) {
 					if(props.values !== undefined)
 						v = props.values[f.column_name]
 
-					return <Field label={f.column_label} name={f.column_name} value={v} key={f.column_name} onChange={(e) => {getValueOnChange(e, f.column_name)}} />
+					return (
+						<Field 
+							label={f.column_label} 
+							name={f.column_name} 
+							value={v} 
+							key={f.column_name} 
+							onChange={(e) => {getValueOnChange(e, f.column_name)}} 
+							system={props.system}
+						/>
+					)
 				})
 			}
 		</div>
