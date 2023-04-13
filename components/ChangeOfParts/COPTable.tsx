@@ -51,6 +51,7 @@ const COPTable = (props: COPTableProps) => {
             Cell: `
                 & > div {
                     overflow: visible;
+                    white-space: unset !important;
                 }
             `,
 
