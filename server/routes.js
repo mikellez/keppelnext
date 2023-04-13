@@ -333,7 +333,7 @@ router.get("/schedule/event/:id", checkIfLoggedInAPI, controllers.schedule.getSc
 router.get("/activity/account_log", checkIfLoggedInAPI, controllers.activity.getEventtHistory);
 router.get("/activity/csv", checkIfLoggedInAPI, controllers.activity.createActivityCSV);
 
-router.get("/changeOfParts", checkIfLoggedInAPI, controllers.changeOfParts.fetchChangeOfParts);
+router.get("/changeOfParts/:plant_id?", checkIfLoggedInAPI, controllers.changeOfParts.fetchChangeOfParts);
 
 // NO API ROUTE
 router.all("/*", (req, res) => {
