@@ -37,13 +37,15 @@ const COPTable = (props: COPTableProps) => {
     const theme = useTheme([
         getTheme(),
         {
-            Table: `--data-table-library_grid-template-columns: 5% 20% 15% 15% 20% 25%;`,
+            Table: `
+                --data-table-library_grid-template-columns: 5% 20% 15% 15% 20% 25%;
+            `,
           
             Row: `
-                    &:nth-of-type(n) {
-                    cursor: pointer
-                    };                    
-                `,
+                &:nth-of-type(n) {
+                cursor: pointer
+                };                    
+            `,
         },
     ]);
 
@@ -125,7 +127,7 @@ const COPTable = (props: COPTableProps) => {
                                 isRowEditable(item) ?
                                 <AssignToSelect
                                     onChange={() => {}} 
-                                    plantId={item.plantId}
+                                    plantId={3}
                                     isSingle
                                     defaultIds={[item.assignedUserId]}
                                 /> :

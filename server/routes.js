@@ -191,7 +191,7 @@ router
     .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
     .get(controllers.checklist.fetchSpecificChecklistTemplate)
     .post(controllers.checklist.createNewChecklistTemplate)
-    .delete(controllers.checklist.deleteChecklistTemplate)
+    .delete(controllers.checklist.deleteChecklistTemplate);
 
 router.get(
     "/checklist/assigned",
@@ -223,21 +223,21 @@ router.get(
 );
 
 router.patch(
-  "/checklist/complete/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("complete")
+    "/checklist/complete/:checklist_id",
+    checkIfLoggedInAPI,
+    controllers.checklist.updateChecklist("complete")
 );
 
 router.patch(
-  "/checklist/approve/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("approve")
+    "/checklist/approve/:checklist_id",
+    checkIfLoggedInAPI,
+    controllers.checklist.updateChecklist("approve")
 );
 
 router.patch(
-  "/checklist/reject/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("reject")
+    "/checklist/reject/:checklist_id",
+    checkIfLoggedInAPI,
+    controllers.checklist.updateChecklist("reject")
 );
 
 router.get("/checklist/pdf/:checklist_id", checkIfLoggedInAPI, sendChecklistPDF);
@@ -333,7 +333,14 @@ router.get("/schedule/event/:id", checkIfLoggedInAPI, controllers.schedule.getSc
 router.get("/activity/account_log", checkIfLoggedInAPI, controllers.activity.getEventtHistory);
 router.get("/activity/csv", checkIfLoggedInAPI, controllers.activity.createActivityCSV);
 
-router.get("/changeOfParts/:plant_id?", checkIfLoggedInAPI, controllers.changeOfParts.fetchChangeOfParts);
+router.get(
+    "/changeOfParts/:plant_id?",
+    checkIfLoggedInAPI,
+    controllers.changeOfParts.fetchChangeOfParts
+);
+router
+    .route("/changeOfParts/", checkIfLoggedInAPI)
+    .post(controllers.changeOfParts.createNewChangeOfParts);
 
 // NO API ROUTE
 router.all("/*", (req, res) => {

@@ -23,6 +23,7 @@ import TooltipBtn from "../../components/TooltipBtn";
 import ModuleSimplePopup, { SimpleIcon } from "../../components/ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
 import { createChecklistGetServerSideProps } from "../../types/common/props";
+import RequiredIcon from "../../components/RequiredIcon";
 
 interface ChecklistPageProps {
     checklist: CMMSChecklist | null;
@@ -167,7 +168,9 @@ export default function ChecklistNew(props: ChecklistPageProps) {
                         <ModuleContent includeGreyContainer grid>
                             <div className={formStyles.halfContainer}>
                                 <div className="form-group">
-                                    <label className="form-label">Checklist Name</label>
+                                    <label className="form-label">
+                                        <RequiredIcon /> Checklist Name
+                                    </label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -178,7 +181,9 @@ export default function ChecklistNew(props: ChecklistPageProps) {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">Description</label>
+                                    <label className="form-label">
+                                        <RequiredIcon /> Description
+                                    </label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -193,7 +198,9 @@ export default function ChecklistNew(props: ChecklistPageProps) {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">Plant</label>
+                                    <label className="form-label">
+                                        <RequiredIcon /> Plant
+                                    </label>
                                     <PlantSelect
                                         onChange={updateChecklist}
                                         name="plant_id"
@@ -204,27 +211,29 @@ export default function ChecklistNew(props: ChecklistPageProps) {
                             </div>
 
                             <div className={formStyles.halfContainer} style={{ gridRow: "span 3" }}>
-                                <div
-                                    className="form-group"
-                                    style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        height: "100%",
-                                    }}
-                                >
-                                    <label className="form-label">Linked Assets</label>
+                                <div className="form-group">
+                                    <label className="form-label">
+                                        <RequiredIcon /> Linked Assets
+                                    </label>
+
                                     <AssetSelect
                                         onChange={(values) => {
-                                            const assetIdsString =
-                                                values.length > 0
-                                                    ? values
-                                                          .map((option) => option.value.toString())
-                                                          .join(", ")
-                                                    : null;
-                                            updateChecklistField(assetIdsString, "linkedassetids");
+                                            if (Array.isArray(values)) {
+                                                const assetIdsString =
+                                                    values.length > 0
+                                                        ? values
+                                                              .map((option) =>
+                                                                  option.value.toString()
+                                                              )
+                                                              .join(", ")
+                                                        : null;
+                                                updateChecklistField(
+                                                    assetIdsString,
+                                                    "linkedassetids"
+                                                );
+                                            }
                                         }}
                                         plantId={checklistData.plant_id}
-                                        isMulti={true}
                                     />
                                 </div>
                             </div>
@@ -233,7 +242,9 @@ export default function ChecklistNew(props: ChecklistPageProps) {
 
                             <div className={formStyles.halfContainer}>
                                 <div className="form-group">
-                                    <label className="form-label">Assigned To</label>
+                                    <label className="form-label">
+                                        <RequiredIcon /> Assigned To
+                                    </label>
                                     <AssignToSelect
                                         onChange={(value) => {
                                             updateChecklistField(
@@ -248,7 +259,9 @@ export default function ChecklistNew(props: ChecklistPageProps) {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">Created By</label>
+                                    <label className="form-label">
+                                        <RequiredIcon /> Created By
+                                    </label>
                                     <input
                                         className="form-control"
                                         defaultValue={checklistData.createdbyuser}
@@ -257,7 +270,9 @@ export default function ChecklistNew(props: ChecklistPageProps) {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">Sign Off By</label>
+                                    <label className="form-label">
+                                        <RequiredIcon /> Sign Off By
+                                    </label>
                                     <AssignToSelect
                                         onChange={(value) => {
                                             updateChecklistField(
