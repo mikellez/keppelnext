@@ -2,7 +2,9 @@ const db = require("../../db");
 const moment = require("moment");
 
 const fetchChangeOfParts = async (req, res, next) => {
-    const sql = req.params.plant_id ? fetchChangeOfPartsByPlantQuery(req.params.plant_id) : fetchAllOfChangeOfPartsQuery;
+    const sql = req.params.plant_id
+        ? fetchChangeOfPartsByPlantQuery(req.params.plant_id)
+        : fetchAllOfChangeOfPartsQuery;
 
     db.query(sql, (err, found) => {
         if (err) {
@@ -10,20 +12,22 @@ const fetchChangeOfParts = async (req, res, next) => {
             return res.status(500).json("Failure to fetch change of parts");
         }
         if (found.rows.length === 0) return res.status(404).json("No change of parts found");
-        return res.status(200).send(found.rows.map(row => {
-            return {
-                plant: row.plant_name,
-                plantId: row.plant_id,
-                changedDate: row.changed_date,
-                scheduledDate: row.scheduled_date,
-                assignedUser: (row.first_name + " " + row.last_name).trim(),
-                assignedUserId: row.assigned_user_id,
-                asset: row.plant_system_instrument,
-                psaId: row.psa_id,
-                copId: row.cop_id,
-            }
-        }))
-    })
+        return res.status(200).send(
+            found.rows.map((row) => {
+                return {
+                    plant: row.plant_name,
+                    plantId: row.plant_id,
+                    changedDate: row.changed_date,
+                    scheduledDate: row.scheduled_date,
+                    assignedUser: (row.first_name + " " + row.last_name).trim(),
+                    assignedUserId: row.assigned_user_id,
+                    asset: row.plant_system_instrument,
+                    psaId: row.psa_id,
+                    copId: row.cop_id,
+                };
+            })
+        );
+    });
 };
 
 const fetchChangeOfPartsByPlantQuery = (plant_id) => `
@@ -69,6 +73,37 @@ const fetchAllOfChangeOfPartsQuery = `
     ORDER BY(pm.plant_id, cop.psa_id);
 `;
 
-module.exports =  {
+const createNewChangeOfParts = async (req, res, next) => {
+    console.log(req.body.formData);
+    sql = `INSERT INTO
+        keppel.change_of_parts
+        (
+            psa_id,
+            scheduled_date,
+            description,
+            assigned_user_id
+        )
+        VALUES ($1, $2, $3, $4)`;
+
+    db.query(
+        sql,
+        [
+            req.body.formData.linkedAsset,
+            moment(req.body.formData.scheduledDate).format("YYYY-MM-DD HH:mm:ss"),
+            req.body.formData.description,
+            req.body.formData.assignedUser,
+        ],
+        (err) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json("Failure to create new change of parts");
+            }
+            return res.status(200).json("New change of parts successfully created");
+        }
+    );
+};
+
+module.exports = {
     fetchChangeOfParts,
-}
+    createNewChangeOfParts,
+};

@@ -4,7 +4,7 @@ import Select, { ActionMeta, MultiValue, StylesConfig, SingleValue } from "react
 import { CMMSAsset } from "../../types/common/interfaces";
 import { useAsset } from "../SWR";
 
-interface AssetOption {
+export interface AssetOption {
     value: number;
     label: string;
 }
@@ -17,7 +17,7 @@ interface AssetSelectProps {
     plantId: number;
     style?: React.CSSProperties;
     name?: string;
-    isMulti: boolean;
+    isSingle?: boolean;
 }
 
 export default function AssetSelect(props: AssetSelectProps) {
@@ -39,7 +39,7 @@ export default function AssetSelect(props: AssetSelectProps) {
     return (
         <div>
             <Select
-                isMulti={props.isMulti ? true : false}
+                isMulti={props.isSingle ? false : true}
                 onChange={props.onChange}
                 options={options}
             />
