@@ -75,7 +75,6 @@ const fetchAllOfChangeOfPartsQuery = `
 `;
 
 const createNewChangeOfParts = async (req, res, next) => {
-    console.log(req.body.formData);
     sql = `INSERT INTO
         keppel.change_of_parts
         (
@@ -90,7 +89,7 @@ const createNewChangeOfParts = async (req, res, next) => {
         sql,
         [
             req.body.formData.linkedAsset,
-            moment(req.body.formData.scheduledDate).format("YYYY-MM-DD HH:mm:ss"),
+            moment(req.body.formData.scheduleDate).format("YYYY-MM-DD HH:mm:ss"),
             req.body.formData.description,
             req.body.formData.assignedUser,
         ],

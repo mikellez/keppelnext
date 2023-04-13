@@ -36,7 +36,7 @@ const createChangeOfParts = async (formData: ChangeOfPartsForm) => {
 const ChangeOfPartsNew = () => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [formData, setFormData] = useState<ChangeOfPartsForm>({} as ChangeOfPartsForm);
-    console.log(formData);
+    // console.log(formData);
 
     const user = useCurrentUser();
     const router = useRouter();
