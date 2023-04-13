@@ -71,16 +71,15 @@ const fetchMasterInfo = async (req, res, next) => {
 	if(tableInfo[req.params.type] === undefined)
 		return res.status(404).json("no type");
 	console.log(tableInfo[req.params.type].internalName)
-	console.log("{&*(&(*&*&(*&(")
 	let table       = tableInfo[req.params.type].internalName;
 	let idColumn    = tableInfo[req.params.type].id;
 	let q = `SELECT * FROM keppel.${table} ORDER BY ${idColumn}`;
 
 	if(table == 'system_assets'){
-		q = `SELECT keppel.system_assets.system_id,keppel.system_assets.system_asset_id,keppel.system_master.system_name,keppel.system_assets.system_asset
+		q = `SELECT keppel.system_assets.system_asset_id,keppel.system_assets.system_id,keppel.system_assets.system_asset_id,keppel.system_master.system_name,keppel.system_assets.system_asset
 		FROM keppel.system_assets
 		JOIN keppel.system_master
-		ON keppel.system_assets.system_id = keppel.system_master.system_id ORDER BY ${idColumn}
+		ON keppel.system_assets.system_id = keppel.system_master.system_id ORDER BY keppel.system_assets.system_asset_id
 		`;
 	}
 	
@@ -171,7 +170,10 @@ const updateMasterTypeSingle = async (req, res, next) => {
 	// returns queryFields if success
 	function verifyColumns(tableName /*string*/, entries /*([column:string]: string)[]*/) {
 		const columns = Object.keys(entries)
-
+		if (tableName == 'plant_master')
+			tableName = 'plant'
+		if(tableName == 'system_master')
+			tableName = 'system'
 		if(!(tableName in tableInfo))
 			return false;
 
@@ -179,7 +181,6 @@ const updateMasterTypeSingle = async (req, res, next) => {
 			if( !(x.column_name in columns) )
 				return false;
 		}*/
-
 		console.log(columns);
 		tableInfo[tableName].fields.forEach(x => console.log(x.column_name));
 

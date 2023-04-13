@@ -25,7 +25,7 @@ interface EditMasterProps {
 }
 
 interface FormValues{
-	entries: MasterData
+	entries: MasterData;
 }
 
 export default function Edit(props: EditMasterProps) {
@@ -39,20 +39,33 @@ export default function Edit(props: EditMasterProps) {
 		getValues
 	} = useForm<FormValues>({
 		defaultValues: {
-			entries: props.data
+			entries: props.data,
 		}
 	});
 
 	useEffect(() => {
 		reset({
-			entries: props.data
+			entries: props.data,
 		})
 	}, [props])
 
 	const { isSubmitting, errors } = formState;
-
+	const urlParams = new URLSearchParams(window.location.search);
+	const type = urlParams.get('type');
+	const id = urlParams.get('id');
+	
 	const formSubmit: SubmitHandler<FormValues> = async (data) => {
 		console.log(data);
+		return await axios.post(`/api/master/${type}/${id}`, data)
+				.then(res => {
+					console.log(res.data)
+
+					return res.data;
+				})
+				.catch(err => {
+					console.log(err);
+				});
+			
 	};
 	
 	return (
