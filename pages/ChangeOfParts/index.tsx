@@ -4,6 +4,8 @@ import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { CMMSChangeOfParts } from '../../types/common/interfaces';
 import PlantSelect from '../../components/PlantSelect';
 import axios from 'axios';
+import { AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
+import TooltipBtn from '../../components/TooltipBtn';
 import COPTable from '../../components/ChangeOfParts/COPTable';
 
 export interface ChangeOfPartsPageProps {
@@ -20,6 +22,8 @@ const fetchChangeOfParts = async (plantId: number) => {
 const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
 
     const [COPData, setCOPData] = useState<CMMSChangeOfParts[]>(props.changeOfParts);
+    const [selectedCOP, setSelectedCOP] = useState<CMMSChangeOfParts>({} as CMMSChangeOfParts);
+    const [editMode, setEditMode] = useState<boolean>(false);
 
     const updateCOPData = async (plantId: number) => {
         const newCOP = await fetchChangeOfParts(plantId);
@@ -27,11 +31,28 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
         else setCOPData([]);
     };
 
-    console.log(COPData)
+    console.log(selectedCOP)
+    const handleSaveClick = () => {
+        setEditMode(false);
+    };
 
     return (
         <ModuleMain>
             <ModuleHeader header="Change of Parts">
+                
+                {editMode ? 
+                    <TooltipBtn
+                        text='Save'
+                        onClick={handleSaveClick}
+                    ><AiOutlineSave size={22} /></TooltipBtn>
+            
+                :
+                    <TooltipBtn 
+                        text='Edit'
+                        disabled={!selectedCOP.copId}
+                        onClick={() => setEditMode(true)}
+                    ><AiOutlineEdit size={22} /></TooltipBtn>
+                }
                 <PlantSelect 
                     onChange={(e) => updateCOPData(+e.target.value)}
                     allPlants
@@ -39,7 +60,12 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                 />
             </ModuleHeader>
             <ModuleContent>
-                <COPTable changeOfParts={COPData} />
+                <COPTable 
+                    changeOfParts={COPData} 
+                    setSelectedCOP={setSelectedCOP} 
+                    selectedCOP={selectedCOP} 
+                    editMode={editMode}
+                />
             </ModuleContent>
         </ModuleMain>
     );

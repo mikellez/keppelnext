@@ -315,7 +315,7 @@ interface CMMSChangeOfParts {
   asset: string;
   plant: string;
   plantId: number;
-  changedDate: Date;
+  changedDate: Date | null;
   scheduledDate: Date;
   description: string;
   assignedUserId: number;
