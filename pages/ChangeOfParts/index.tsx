@@ -19,6 +19,10 @@ const fetchChangeOfParts = async (plantId: number) => {
         .catch(err => console.log(err));
 };
 
+const updateChangeOfParts = async (cop: CMMSChangeOfParts) => {
+    
+};
+
 const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
 
     const [COPData, setCOPData] = useState<CMMSChangeOfParts[]>(props.changeOfParts);

@@ -33,6 +33,7 @@ interface COPTableProps extends ChangeOfPartsPageProps {
 const COPTable = (props: COPTableProps) => {
 
     const [tableData, setTableData] = useState<COPTableData[]>([]);
+    const [newCOP, setNewCOP] = useState<CMMSChangeOfParts>({} as CMMSChangeOfParts);
 
     const theme = useTheme([
         getTheme(),
@@ -44,8 +45,24 @@ const COPTable = (props: COPTableProps) => {
             Row: `
                 &:nth-of-type(n) {
                 cursor: pointer
-                };                    
+                }; 
             `,
+
+            Cell: `
+                & > div {
+                    overflow: visible;
+                }
+            `,
+
+            HeaderCell: `
+                background-color: white !important;
+                z-index: 20 !important;
+                &:nth-of-type(1) {
+                    z-index: 30 !important;
+                }
+            `,
+
+            
         },
     ]);
 
@@ -73,11 +90,15 @@ const COPTable = (props: COPTableProps) => {
                 ...item,
                 id: item.copId.toString(),
             }
-        })
+        });
 
         setTableData(data);
 
     }, [props.changeOfParts]);
+
+    useEffect(() => {
+        // set
+    }, [props.selectedCOP])
 
     return (
         <Table data={{ nodes: tableData }} theme={theme} layout={{ custom: true }} select={!props.editMode ? select : null}>
