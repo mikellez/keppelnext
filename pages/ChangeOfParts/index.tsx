@@ -2,6 +2,7 @@ import React from 'react'
 import { ModuleMain, ModuleHeader, ModuleContent } from '../../components'
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { CMMSChangeOfParts } from '../../types/common/interfaces';
+import PlantSelect from '../../components/PlantSelect';
 import axios from 'axios';
 
 interface ChangeOfPartsPageProps {
@@ -9,9 +10,14 @@ interface ChangeOfPartsPageProps {
 };
 
 const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
+    
     return (
         <ModuleMain>
-            <ModuleHeader header="Change of Parts"></ModuleHeader>
+            <ModuleHeader header="Change of Parts">
+                <PlantSelect 
+                    onChange={() => {}}
+                />
+            </ModuleHeader>
             <ModuleContent>
                 
             </ModuleContent>
@@ -22,7 +28,15 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
 export default ChangeOfPartsPage;
 
 export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
-    const response = await axios.get("http://localhost:3001/api/changeOfParts");
+
+    const headers = {
+        withCredentials: true,
+        headers: {
+            Cookie: context.req.headers.cookie,
+        },
+    };
+
+    const response = await axios.get("http://localhost:3001/api/changeOfParts", headers);
     
     return {
         props: {
