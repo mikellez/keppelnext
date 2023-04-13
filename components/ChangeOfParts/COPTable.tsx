@@ -127,7 +127,7 @@ const COPTable = (props: COPTableProps) => {
                                 isRowEditable(item) ?
                                 <AssignToSelect
                                     onChange={() => {}} 
-                                    plantId={3}
+                                    plantId={item.plantId}
                                     isSingle
                                     defaultIds={[item.assignedUserId]}
                                 /> :
