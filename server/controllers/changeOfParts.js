@@ -17,11 +17,12 @@ const fetchChangeOfParts = async (req, res, next) => {
                 return {
                     plant: row.plant_name,
                     plantId: row.plant_id,
+                    description: row.description,
                     changedDate: row.changed_date,
                     scheduledDate: row.scheduled_date,
                     assignedUser: (row.first_name + " " + row.last_name).trim(),
                     assignedUserId: row.assigned_user_id,
-                    asset: row.plant_system_instrument,
+                    asset: row.plant_asset_instrument,
                     psaId: row.psa_id,
                     copId: row.cop_id,
                 };

@@ -312,11 +312,12 @@ interface CMMSDashboardData {
 interface CMMSChangeOfParts {
   copId: number;
   psaId: number;
+  asset: string;
   plant: string;
   plantId: number;
   changedDate: Date;
   scheduledDate: Date;
-  description: Date;
+  description: string;
   assignedUserId: number;
   assignedUser: string; 
 }
