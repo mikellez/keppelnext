@@ -66,7 +66,7 @@ const EditChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
             setFormData(data)
         }
     }, [props.changeOfParts]);
-
+    
     return (
         <>
         <ModuleMain>

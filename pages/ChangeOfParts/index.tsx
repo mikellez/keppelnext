@@ -44,7 +44,7 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
 
                 <TooltipBtn 
                     text='Edit'
-                    disabled={!selectedCOP.copId}
+                    disabled={(!selectedCOP.copId || selectedCOP.changedDate) as boolean}
                     onClick={() => router.push("/ChangeOfParts/Edit/" + selectedCOP.copId)}
                 ><AiOutlineEdit size={22} /></TooltipBtn>
 

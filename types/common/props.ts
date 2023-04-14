@@ -60,6 +60,18 @@ const createChangeOfPartsServerSideProps = (page?: string) => {
 			"http://localhost:3001/api/changeOfParts";
 	
 		const response = await axios.get<CMMSChangeOfParts[]>(url, headers);
+
+		if (page === "Edit" && (
+			!response.data ||
+			response.data[0].changedDate != null
+		)) {
+			return {
+				redirect: {
+					destination: "/404",
+				},
+				props: {}
+			}
+		}
 		
 		return {
 			props: {
