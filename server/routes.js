@@ -334,7 +334,7 @@ router.get("/activity/account_log", checkIfLoggedInAPI, controllers.activity.get
 router.get("/activity/csv", checkIfLoggedInAPI, controllers.activity.createActivityCSV);
 
 router.get(
-    "/changeOfParts/:plant_id?",
+    "/changeOfParts",
     checkIfLoggedInAPI,
     controllers.changeOfParts.fetchChangeOfParts
 );

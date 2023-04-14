@@ -2,9 +2,11 @@ const db = require("../../db");
 const moment = require("moment");
 
 const fetchChangeOfParts = async (req, res, next) => {
-    const sql = req.params.plant_id
-        ? fetchChangeOfPartsByPlantQuery(req.params.plant_id)
-        : fetchAllOfChangeOfPartsQuery;
+    const sql = req.query.plantId ? 
+        fetchChangeOfPartsByPlantQuery(req.query.plantId) : 
+        req.query.copId ? 
+        fetchChangeOfPartsByIdQuery(req.query.copId) :
+        fetchAllOfChangeOfPartsQuery;
 
     db.query(sql, (err, found) => {
         if (err) {
@@ -50,7 +52,6 @@ const fetchChangeOfPartsByPlantQuery = (plant_id) => `
             JOIN keppel.plant_master pm ON psa.plant_id = pm.plant_id
             JOIN keppel.users u ON cop.assigned_user_id = u.user_id
     WHERE pm.plant_id = ${plant_id}
-    ORDER BY(psa_id);
 `;
 
 const fetchAllOfChangeOfPartsQuery = `
@@ -71,7 +72,27 @@ const fetchAllOfChangeOfPartsQuery = `
             JOIN keppel.plant_system_assets psa ON cop.psa_id = psa.psa_id
             JOIN keppel.plant_master pm ON psa.plant_id = pm.plant_id
             JOIN keppel.users u ON cop.assigned_user_id = u.user_id
-    ORDER BY(pm.plant_id, cop.psa_id);
+`;
+
+const fetchChangeOfPartsByIdQuery = (copId) => `
+    SELECT 
+        cop.cop_id,
+        cop.psa_id,
+        cop.changed_date,
+        cop.scheduled_date,
+        cop.description,
+        cop.assigned_user_id,
+        psa.plant_asset_instrument,
+        psa.plant_id,
+        pm.plant_name,
+        u.first_name,
+        u.last_name
+    FROM
+        keppel.change_of_parts cop
+            JOIN keppel.plant_system_assets psa ON cop.psa_id = psa.psa_id
+            JOIN keppel.plant_master pm ON psa.plant_id = pm.plant_id
+            JOIN keppel.users u ON cop.assigned_user_id = u.user_id
+    WHERE cop.cop_id = ${copId}
 `;
 
 const createNewChangeOfParts = async (req, res, next) => {

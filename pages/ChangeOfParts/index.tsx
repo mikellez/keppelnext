@@ -9,6 +9,7 @@ import { VscNewFile } from "react-icons/vsc"
 import TooltipBtn from '../../components/TooltipBtn';
 import COPTable from '../../components/ChangeOfParts/COPTable';
 import { useRouter } from 'next/router';
+import { createChangeOfPartsServerSideProps } from '../../types/common/props';
 
 export interface ChangeOfPartsPageProps {
     changeOfParts: CMMSChangeOfParts[];
@@ -16,13 +17,9 @@ export interface ChangeOfPartsPageProps {
 
 const fetchChangeOfParts = async (plantId: number) => {
     const plant = plantId > 0 ? plantId : "";
-    return await axios.get<CMMSChangeOfParts[]>("/api/changeOfParts/" + plant)   
+    return await axios.get<CMMSChangeOfParts[]>("/api/changeOfParts/?plantId=" + plant)   
         .then(res => res.data)
         .catch(err => console.log(err));
-};
-
-const updateChangeOfParts = async (cop: CMMSChangeOfParts) => {
-    
 };
 
 const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
@@ -37,8 +34,6 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
         else setCOPData([]);
     };
 
-    console.log(selectedCOP)
-
     return (
         <ModuleMain>
             <ModuleHeader header="Change of Parts">
@@ -46,7 +41,7 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                     text='Create new'
                     onClick={() => router.push("/ChangeOfParts/New")}
                 ><VscNewFile size={22} /></TooltipBtn>
-                
+
                 <TooltipBtn 
                     text='Edit'
                     disabled={!selectedCOP.copId}
@@ -65,6 +60,7 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                     setSelectedCOP={setSelectedCOP} 
                     selectedCOP={selectedCOP} 
                 />
+                {COPData.length === 0 && <p>No Change of Parts</p>}
             </ModuleContent>
         </ModuleMain>
     );
@@ -72,20 +68,4 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
 
 export default ChangeOfPartsPage;
 
-export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
-
-    const headers = {
-        withCredentials: true,
-        headers: {
-            Cookie: context.req.headers.cookie,
-        },
-    };
-
-    const response = await axios.get("http://localhost:3001/api/changeOfParts", headers);
-    
-    return {
-        props: {
-            changeOfParts: response.data
-        }
-    };
-};
+export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps();

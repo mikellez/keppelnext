@@ -114,7 +114,6 @@ const COPTable = (props: COPTableProps) => {
                             <Cell>{item.changedDate ? `Changed on ${item.changedDate}` : "-"}</Cell>
                         </Row>
                     )}
-                    {props.changeOfParts.length == 0 &&<p>No Change of Parts</p>}
                 </Body>
             </>
             }
