@@ -156,8 +156,34 @@ const editChangeOfParts = async (req, res, next) => {
     )
 }
 
+const completeChangeOfParts = async (req, res, next) => {
+    sql = `
+        UPDATE
+            keppel.change_of_parts
+        SET 
+            changed_date = CURRENT_DATE
+        WHERE
+            cop_id = $1
+    `;
+
+    db.query(
+        sql,
+        [
+            req.params.cop_id
+        ],
+        (err) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json("Failure to complete new change of parts");
+            }
+            return res.status(200).json("Change of parts successfully completed");
+        }
+    )
+}
+
 module.exports = {
     fetchChangeOfParts,
     createNewChangeOfParts,
     editChangeOfParts,
+    completeChangeOfParts,
 };
