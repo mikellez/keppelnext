@@ -19,6 +19,7 @@ interface AssetSelectProps {
     name?: string;
     isSingle?: boolean;
     defaultIds?: number[];
+    disabled?: boolean;
 }
 
 export default function AssetSelect(props: AssetSelectProps) {
@@ -39,22 +40,23 @@ export default function AssetSelect(props: AssetSelectProps) {
     );
 
     useEffect(() => {
-        setOptions(
-            data?.map((asset) => {
-                return {
-                    value: asset.psa_id,
-                    label: asset.asset_name,
-                };
-            })
-        );
-
-        if (props.defaultIds) {
-            updateDefault(data!)
-                .then((result) => {
-                    return setDefaultOptions(result);
+        if (data) {
+            setOptions(
+                data.map((asset) => {
+                    return {
+                        value: asset.psa_id,
+                        label: asset.asset_name,
+                    };
                 })
+            );
+    
+            if (props.defaultIds) {
+                updateDefault(data)
+                    .then((result) => {
+                        return setDefaultOptions(result);
+                    })
+            }
         }
-
     }, [data, props.defaultIds, updateDefault]);
 
     return (
@@ -68,6 +70,7 @@ export default function AssetSelect(props: AssetSelectProps) {
                     onChange={props.onChange}
                     options={options}
                     defaultValue={props.isSingle ? defaultOptions![0] : defaultOptions}
+                    isDisabled={props.disabled}
                 />
             }
         </div>

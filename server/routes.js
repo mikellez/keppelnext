@@ -333,14 +333,11 @@ router.get("/schedule/event/:id", checkIfLoggedInAPI, controllers.schedule.getSc
 router.get("/activity/account_log", checkIfLoggedInAPI, controllers.activity.getEventtHistory);
 router.get("/activity/csv", checkIfLoggedInAPI, controllers.activity.createActivityCSV);
 
-router.get(
-    "/changeOfParts",
-    checkIfLoggedInAPI,
-    controllers.changeOfParts.fetchChangeOfParts
-);
 router
-    .route("/changeOfParts/", checkIfLoggedInAPI)
-    .post(controllers.changeOfParts.createNewChangeOfParts);
+    .route("/changeOfParts/:cop_id?", checkIfLoggedInAPI)
+    .get(controllers.changeOfParts.fetchChangeOfParts)
+    .post(controllers.changeOfParts.createNewChangeOfParts)
+    .patch(controllers.changeOfParts.editChangeOfParts)
 
 // NO API ROUTE
 router.all("/*", (req, res) => {

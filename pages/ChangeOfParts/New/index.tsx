@@ -11,6 +11,7 @@ import TooltipBtn from "../../../components/TooltipBtn";
 import axios from "axios";
 import { useRouter } from "next/router";
 import COPForm, { ChangeOfPartsForm } from "../../../components/ChangeOfParts/COPForm";
+import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 
 
 const createChangeOfParts = async (formData: ChangeOfPartsForm) => {
@@ -25,9 +26,38 @@ const createChangeOfParts = async (formData: ChangeOfPartsForm) => {
 const ChangeOfPartsNew = () => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [formData, setFormData] = useState<ChangeOfPartsForm>({scheduledDate: new Date()} as ChangeOfPartsForm);
+    const [successModal, setSuccessModal] = useState<boolean>(false);
+    const [displayErrorMsg, setDisplayErrorMsg] = useState<boolean>(false);
     const router = useRouter();
 
+
+    const handleSubmit = () => {
+        setIsSubmitting(true);
+        if (validateCOPFormData()) {
+            createChangeOfParts(formData);
+            setSuccessModal(true);
+            setTimeout(() => {
+                router.push("/ChangeOfParts");
+            }, 1000);
+        } else {
+            setDisplayErrorMsg(true);
+            setTimeout(() => {
+                setIsSubmitting(false)
+            })
+        }
+    };
+
+    const validateCOPFormData = () => {
+        return (
+            formData.linkedAsset &&
+            formData.description &&
+            formData.assignedUser &&
+            formData.scheduledDate
+        );
+    };
+
     return (
+        <>
         <ModuleMain>
             <ModuleHeader title="New Change Of Parts" header="Create New Change Of Parts">
                 <Link href="/ChangeOfParts" className="btn btn-secondary">
@@ -37,39 +67,29 @@ const ChangeOfPartsNew = () => {
             <ModuleContent>
                 <COPForm formData={formData} setFormData={setFormData} />
                 <ModuleFooter>
-                    {isSubmitting &&
-                        !(
-                            formData.linkedAsset &&
-                            formData.description &&
-                            formData.assignedUser &&
-                            formData.scheduledDate
-                        ) && (
-                            <span style={{ color: "red" }}>Please fill in all required fields</span>
-                        )}
-
+               
+                    {displayErrorMsg && <span style={{ color: "red" }}>Please fill in all required fields</span>}
+                    
                     <TooltipBtn
                         toolTip={false}
-                        onClick={() => {
-                            setIsSubmitting(true);
-                            if (
-                                formData.linkedAsset &&
-                                formData.description &&
-                                formData.assignedUser &&
-                                formData.scheduledDate
-                            ) {
-                                createChangeOfParts(formData);
-                                setTimeout(() => {
-                                    router.push("/ChangeOfParts");
-                                }, 1000);
-                            }
-                        }}
+                        onClick={handleSubmit}
                         style={{ marginRight: "10px" }}
+                        disabled={isSubmitting}
                     >
                         Submit
                     </TooltipBtn>
                 </ModuleFooter>
             </ModuleContent>
         </ModuleMain>
+
+        <ModuleSimplePopup 
+            modalOpenState={successModal}
+            setModalOpenState={setSuccessModal}
+            icon={SimpleIcon.Check}
+            title="Success"
+            text="Change of parts successfully updated"
+        />
+        </>
     );
 };
 

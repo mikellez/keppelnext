@@ -4,8 +4,8 @@ const moment = require("moment");
 const fetchChangeOfParts = async (req, res, next) => {
     const sql = req.query.plantId ? 
         fetchChangeOfPartsByPlantQuery(req.query.plantId) : 
-        req.query.copId ? 
-        fetchChangeOfPartsByIdQuery(req.query.copId) :
+        req.params.cop_id ? 
+        fetchChangeOfPartsByIdQuery(req.params.cop_id) :
         fetchAllOfChangeOfPartsQuery;
 
     db.query(sql, (err, found) => {
@@ -110,7 +110,7 @@ const createNewChangeOfParts = async (req, res, next) => {
         sql,
         [
             req.body.formData.linkedAsset,
-            moment(req.body.formData.scheduleDate).format("YYYY-MM-DD HH:mm:ss"),
+            moment(req.body.formData.scheduledDate).format("YYYY-MM-DD HH:mm:ss"),
             req.body.formData.description,
             req.body.formData.assignedUser,
         ],
@@ -124,7 +124,40 @@ const createNewChangeOfParts = async (req, res, next) => {
     );
 };
 
+const editChangeOfParts = async (req, res, next) => {
+    sql = `
+    UPDATE 
+        keppel.change_of_parts
+    SET
+        psa_id = $1,
+        scheduled_date = $2,
+        description = $3,
+        assigned_user_id = $4  
+    WHERE 
+        cop_id = $5
+    `;
+
+    db.query(
+        sql,
+        [
+            req.body.formData.linkedAsset,
+            moment(req.body.formData.scheduledDate).format("YYYY-MM-DD HH:mm:ss"),
+            req.body.formData.description,
+            req.body.formData.assignedUser,
+            req.params.cop_id
+        ],
+        (err) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json("Failure to update new change of parts");
+            }
+            return res.status(200).json("Change of parts successfully edited");
+        }
+    )
+}
+
 module.exports = {
     fetchChangeOfParts,
     createNewChangeOfParts,
+    editChangeOfParts,
 };

@@ -56,7 +56,7 @@ const createChangeOfPartsServerSideProps = (page?: string) => {
 		};
 
 		const url = page === "Edit" ? 
-			`http://localhost:3001/api/changeOfParts/?copId=${context.params!.id}` : 
+			`http://localhost:3001/api/changeOfParts/${context.params!.id}` : 
 			"http://localhost:3001/api/changeOfParts";
 	
 		const response = await axios.get<CMMSChangeOfParts[]>(url, headers);

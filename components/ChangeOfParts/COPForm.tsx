@@ -9,9 +9,9 @@ import { useCurrentUser } from "../SWR";
 import LoadingIcon from "../LoadingIcon";
 
 export interface ChangeOfPartsForm {
-    linkedAsset: AssetOption;
+    linkedAsset: number;
     description: string;
-    assignedUser: AssignedUserOption;
+    assignedUser: number;
     scheduledDate: Date;
 }
 
@@ -44,8 +44,6 @@ const COPForm = (props: COPFormProps) => {
         });
     };
 
-    console.log(props.formData)
-
     return (
         props.formData.scheduledDate &&
         <ModuleContent includeGreyContainer grid>
@@ -63,9 +61,9 @@ const COPForm = (props: COPFormProps) => {
                         }}
                         plantId={user.data?.allocated_plants[0] as number}
                         isSingle={true}
-                        defaultIds={props.formData.linkedAsset ? [props.formData.linkedAsset.value] : []}
+                        defaultIds={props.formData.linkedAsset ? [props.formData.linkedAsset] : []}
                     />
-                    
+
                 </div>
                 <div className="form-group">
                     <label className="form-label">
@@ -95,7 +93,7 @@ const COPForm = (props: COPFormProps) => {
                                 "assignedUser"
                             );
                         }}
-                        defaultIds={props.formData.assignedUser ? [props.formData.assignedUser.value] : []}
+                        defaultIds={props.formData.assignedUser ? [props.formData.assignedUser] : []}
                     />
                 </div>
                 <div className="form-group">
@@ -105,7 +103,7 @@ const COPForm = (props: COPFormProps) => {
                     <input
                         type="date"
                         className="form-control"
-                        name="scheduleDate"
+                        name="scheduledDate"
                         onChange={updateData}
                         min={new Date().toISOString().slice(0, 10)}
                         value={new Date(new Date(props.formData.scheduledDate).getTime() + 8 * 3600 * 1000).toISOString().slice(0, 10)}
