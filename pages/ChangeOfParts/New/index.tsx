@@ -24,7 +24,7 @@ const createChangeOfParts = async (formData: ChangeOfPartsForm) => {
 
 const ChangeOfPartsNew = () => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const [formData, setFormData] = useState<ChangeOfPartsForm>({} as ChangeOfPartsForm);
+    const [formData, setFormData] = useState<ChangeOfPartsForm>({scheduledDate: new Date()} as ChangeOfPartsForm);
     const router = useRouter();
 
     return (
@@ -42,7 +42,7 @@ const ChangeOfPartsNew = () => {
                             formData.linkedAsset &&
                             formData.description &&
                             formData.assignedUser &&
-                            formData.scheduleDate
+                            formData.scheduledDate
                         ) && (
                             <span style={{ color: "red" }}>Please fill in all required fields</span>
                         )}
@@ -55,7 +55,7 @@ const ChangeOfPartsNew = () => {
                                 formData.linkedAsset &&
                                 formData.description &&
                                 formData.assignedUser &&
-                                formData.scheduleDate
+                                formData.scheduledDate
                             ) {
                                 createChangeOfParts(formData);
                                 setTimeout(() => {

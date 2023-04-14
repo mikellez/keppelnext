@@ -56,9 +56,7 @@ const COPTable = (props: COPTableProps) => {
                 &:nth-of-type(1) {
                     z-index: 30 !important;
                 }
-            `,
-
-            
+            `, 
         },
     ]);
 

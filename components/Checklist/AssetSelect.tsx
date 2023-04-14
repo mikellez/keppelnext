@@ -18,12 +18,25 @@ interface AssetSelectProps {
     style?: React.CSSProperties;
     name?: string;
     isSingle?: boolean;
+    defaultIds?: number[];
 }
 
 export default function AssetSelect(props: AssetSelectProps) {
     const [options, setOptions] = useState<AssetOption[]>();
+    const [defaultOptions, setDefaultOptions] = useState<AssetOption[]>();
 
     const { data } = useAsset(props.plantId);
+
+    const updateDefault = useCallback(
+        async (assets: CMMSAsset[]) => {
+            return assets
+                .filter((asset) => props.defaultIds?.includes(asset.psa_id))
+                .map((asset) => {
+                    return { value: asset.psa_id, label: asset.asset_name };
+                });
+        },
+        [props.defaultIds]
+    );
 
     useEffect(() => {
         setOptions(
@@ -34,15 +47,29 @@ export default function AssetSelect(props: AssetSelectProps) {
                 };
             })
         );
-    }, [data]);
+
+        if (props.defaultIds) {
+            updateDefault(data!)
+                .then((result) => {
+                    return setDefaultOptions(result);
+                })
+        }
+
+    }, [data, props.defaultIds, updateDefault]);
 
     return (
         <div>
-            <Select
-                isMulti={props.isSingle ? false : true}
-                onChange={props.onChange}
-                options={options}
-            />
+            {(
+                (props.defaultIds && defaultOptions) ||
+                (!props.defaultIds)
+            ) &&
+                <Select
+                    isMulti={props.isSingle ? false : true}
+                    onChange={props.onChange}
+                    options={options}
+                    defaultValue={props.isSingle ? defaultOptions![0] : defaultOptions}
+                />
+            }
         </div>
     );
 }

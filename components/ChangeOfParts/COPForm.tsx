@@ -6,12 +6,13 @@ import { SingleValue } from "react-select";
 import { ModuleContent } from "../ModuleLayout/ModuleContent";
 import formStyles from "../../styles/formStyles.module.css";
 import { useCurrentUser } from "../SWR";
+import LoadingIcon from "../LoadingIcon";
 
 export interface ChangeOfPartsForm {
     linkedAsset: AssetOption;
     description: string;
     assignedUser: AssignedUserOption;
-    scheduleDate: Date;
+    scheduledDate: Date;
 }
 
 interface COPFormProps {
@@ -43,68 +44,76 @@ const COPForm = (props: COPFormProps) => {
         });
     };
 
+    console.log(props.formData)
 
     return (
+        props.formData.scheduledDate &&
         <ModuleContent includeGreyContainer grid>
-                    <div className={formStyles.halfContainer}>
-                        <div className="form-group">
-                            <label className="form-label">
-                                <RequiredIcon /> Linked Assets
-                            </label>
-                            <AssetSelect
-                                onChange={(value) => {
-                                    updateDataField(
-                                        (value as SingleValue<AssetOption>)?.value as number,
-                                        "linkedAsset"
-                                    );
-                                }}
-                                plantId={user.data?.allocated_plants[0] as number}
-                                isSingle={true}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">
-                                <RequiredIcon /> Description
-                            </label>
-                            <textarea
-                                className="form-control"
-                                name="description"
-                                id="formControlDescription"
-                                rows={6}
-                                onChange={updateData}
-                            ></textarea>
-                        </div>
-                    </div>
-                    <div className={formStyles.halfContainer}>
-                        <div className="form-group">
-                            <label className="form-label">
-                                <RequiredIcon /> Assign to
-                            </label>
-                            <AssignToSelect
-                                plantId={user.data?.allocated_plants[0] as number}
-                                isSingle={true}
-                                onChange={(value) => {
-                                    updateDataField(
-                                        (value as SingleValue<AssignedUserOption>)?.value as number,
-                                        "assignedUser"
-                                    );
-                                }}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">
-                                <RequiredIcon /> Schedule Date
-                            </label>
-                            <input
-                                type="date"
-                                className="form-control"
-                                name="scheduleDate"
-                                onChange={updateData}
-                                min={new Date().toISOString().slice(0, 10)}
-                            />
-                        </div>
-                    </div>
-                </ModuleContent>
+            <div className={formStyles.halfContainer}>
+                <div className="form-group">
+                    <label className="form-label">
+                        <RequiredIcon /> Linked Assets
+                    </label>
+                    <AssetSelect
+                        onChange={(value) => {
+                            updateDataField(
+                                (value as SingleValue<AssetOption>)?.value as number,
+                                "linkedAsset"
+                            );
+                        }}
+                        plantId={user.data?.allocated_plants[0] as number}
+                        isSingle={true}
+                        defaultIds={props.formData.linkedAsset ? [props.formData.linkedAsset.value] : []}
+                    />
+                    
+                </div>
+                <div className="form-group">
+                    <label className="form-label">
+                        <RequiredIcon /> Description
+                    </label>
+                    <textarea
+                        className="form-control"
+                        name="description"
+                        id="formControlDescription"
+                        rows={6}
+                        onChange={updateData}
+                        value={props.formData.description}
+                    ></textarea>
+                </div>
+            </div>
+            <div className={formStyles.halfContainer}>
+                <div className="form-group">
+                    <label className="form-label">
+                        <RequiredIcon /> Assign to
+                    </label>
+                    <AssignToSelect
+                        plantId={user.data?.allocated_plants[0] as number}
+                        isSingle={true}
+                        onChange={(value) => {
+                            updateDataField(
+                                (value as SingleValue<AssignedUserOption>)?.value as number,
+                                "assignedUser"
+                            );
+                        }}
+                        defaultIds={props.formData.assignedUser ? [props.formData.assignedUser.value] : []}
+                    />
+                </div>
+                <div className="form-group">
+                    <label className="form-label">
+                        <RequiredIcon /> Schedule Date
+                    </label>
+                    <input
+                        type="date"
+                        className="form-control"
+                        name="scheduleDate"
+                        onChange={updateData}
+                        min={new Date().toISOString().slice(0, 10)}
+                        value={new Date(new Date(props.formData.scheduledDate).getTime() + 8 * 3600 * 1000).toISOString().slice(0, 10)}
+                    />
+                </div>
+            </div>
+        </ModuleContent>
+        
     )
 };
 
