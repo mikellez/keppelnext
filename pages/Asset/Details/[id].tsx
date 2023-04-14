@@ -80,7 +80,6 @@ export default function AssetDetails(props: { history: [CMMSAssetHistory] }) {
   type UploadedFile = [string, string];
   const [fileraw, setfileraw] = useState<UploadedFile[]>([]);
 
-
   const router = useRouter();
   const psa_id = router.query.id;
   useEffect(() => {
@@ -114,9 +113,9 @@ export default function AssetDetails(props: { history: [CMMSAssetHistory] }) {
   const filesToDownload = filevalue.map((file, index) => {
     return (
       <tr>
-      <Link key={index} href={file} download={filename[index]}>
-        {filename[index]}
-      </Link>
+        <Link key={index} href={file} download={filename[index]}>
+          {filename[index]}
+        </Link>
       </tr>
     );
   });
@@ -274,7 +273,6 @@ export default function AssetDetails(props: { history: [CMMSAssetHistory] }) {
                     className={styles.assetImage}
                   />
                 )}
-             
               </div>
             </div>
             {assetRequestHistory && (
