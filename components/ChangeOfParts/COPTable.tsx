@@ -14,10 +14,6 @@ import { getTheme } from "@table-library/react-table-library/baseline";
 import {ChangeOfPartsPageProps} from "../../pages/ChangeOfParts";
 import { CMMSChangeOfParts } from "../../types/common/interfaces";
 import { dateFormat } from "../Schedule/ScheduleTemplate";
-import AssignToSelect from "../Schedule/AssignToSelect";
-import { useCurrentUser } from "../SWR";
-import TooltipBtn from "../TooltipBtn";
-import styles from "../../styles/ChangeOfParts.module.scss";
 
 
 interface COPTableData extends CMMSChangeOfParts {
@@ -27,7 +23,6 @@ interface COPTableData extends CMMSChangeOfParts {
 interface COPTableProps extends ChangeOfPartsPageProps {
     selectedCOP: CMMSChangeOfParts;
     setSelectedCOP: React.Dispatch<React.SetStateAction<CMMSChangeOfParts>>;
-    editMode: boolean;
 }
 
 const COPTable = (props: COPTableProps) => {
@@ -79,12 +74,6 @@ const COPTable = (props: COPTableProps) => {
         { onChange: onSelectChange }
     );
     
-    const isRowEditable = (item: COPTableData) => {
-        return props.editMode &&
-        props.selectedCOP.copId === item.copId
-    };
-    
-
     useEffect(() => {
         const data : COPTableData[] = props.changeOfParts.map(item => {
             return {
@@ -97,12 +86,8 @@ const COPTable = (props: COPTableProps) => {
 
     }, [props.changeOfParts]);
 
-    useEffect(() => {
-        // set
-    }, [props.selectedCOP])
-
     return (
-        <Table data={{ nodes: tableData }} theme={theme} layout={{ custom: true }} select={!props.editMode ? select : null}>
+        <Table data={{ nodes: tableData }} theme={theme} layout={{ custom: true }} select={select}>
             {(tableList: COPTableData[]) =>
             <>
                 <Header>
@@ -123,44 +108,10 @@ const COPTable = (props: COPTableProps) => {
                         >
                             <Cell>{item.copId}</Cell>
                             <Cell>{item.asset}</Cell>
-
-                            <Cell>{
-                                isRowEditable(item) ? 
-                                <input 
-                                    type="date"
-                                    className="form-control"
-                                    defaultValue={new Date(new Date(item.scheduledDate).getTime() + 8*3600*1000).toISOString().slice(0, 10)}
-                                /> :
-                                dateFormat(new Date(item.scheduledDate))
-                            }</Cell>
-
-                            <Cell>{
-                                isRowEditable(item) ? 
-                                <textarea 
-                                className="form-control"
-                                style={{resize: "none"}}
-                                maxLength={200}
-                                defaultValue={item.description}
-                                ></textarea> :
-                                item.description
-                            }</Cell>
-
-                            <Cell>{
-                                isRowEditable(item) ?
-                                <AssignToSelect
-                                    onChange={() => {}} 
-                                    plantId={item.plantId}
-                                    isSingle
-                                    defaultIds={[item.assignedUserId]}
-                                /> :
-                                item.assignedUser
-                            }</Cell>
-
-                            <Cell>
-                                {
-                                    item.changedDate ? `Changed on ${item.changedDate}` : "-"
-                                }
-                            </Cell>
+                            <Cell>{dateFormat(new Date(item.scheduledDate))}</Cell>
+                            <Cell>{item.description}</Cell>
+                            <Cell>{item.assignedUser}</Cell>
+                            <Cell>{item.changedDate ? `Changed on ${item.changedDate}` : "-"}</Cell>
                         </Row>
                     )}
                     {props.changeOfParts.length == 0 &&<p>No Change of Parts</p>}
