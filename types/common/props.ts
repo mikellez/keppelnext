@@ -1,5 +1,5 @@
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import { CMMSChecklist } from "./interfaces";
+import { CMMSChecklist, CMMSChangeOfParts } from "./interfaces";
 import axios from "axios";
 
 const createChecklistGetServerSideProps = (checklistType: string, allowedStatuses?: number[]) => {
@@ -44,6 +44,34 @@ const createChecklistGetServerSideProps = (checklistType: string, allowedStatuse
 	return x;
 };
 
+const createChangeOfPartsServerSideProps = (page?: string) => {
+	
+	const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
+
+		const headers = {
+			withCredentials: true,
+			headers: {
+				Cookie: context.req.headers.cookie,
+			},
+		};
+
+		const url = page === "Edit" ? 
+			`http://localhost:3001/api/changeOfParts/${context.params!.id}` : 
+			"http://localhost:3001/api/changeOfParts";
+	
+		const response = await axios.get<CMMSChangeOfParts[]>(url, headers);
+		
+		return {
+			props: {
+				changeOfParts: response.data
+			}
+		};
+	};
+
+	return getServerSideProps;
+};
+
 export {
     createChecklistGetServerSideProps,
+	createChangeOfPartsServerSideProps,
 }

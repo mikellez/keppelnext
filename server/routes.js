@@ -192,6 +192,16 @@ router.get(
   checkIfLoggedInAPI,
   controllers.asset.fetch_asset_types
 );
+router.post("/asset/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
+router.post("/asset/editAsset", checkIfLoggedInAPI, controllers.asset.editAsset);
+router.post("/asset/deleteAsset", checkIfLoggedInAPI, controllers.asset.deleteAsset);
+
+router
+    .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
+    .get(controllers.checklist.fetchSpecificChecklistTemplate)
+    .post(controllers.checklist.createNewChecklistTemplate)
+    .delete(controllers.checklist.deleteChecklistTemplate);
+
 router.get(
   "/asset/history/:psa_Id",
   checkIfLoggedInAPI,
@@ -285,21 +295,21 @@ router.get(
 );
 
 router.patch(
-  "/checklist/complete/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("complete")
+    "/checklist/complete/:checklist_id",
+    checkIfLoggedInAPI,
+    controllers.checklist.updateChecklist("complete")
 );
 
 router.patch(
-  "/checklist/approve/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("approve")
+    "/checklist/approve/:checklist_id",
+    checkIfLoggedInAPI,
+    controllers.checklist.updateChecklist("approve")
 );
 
 router.patch(
-  "/checklist/reject/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("reject")
+    "/checklist/reject/:checklist_id",
+    checkIfLoggedInAPI,
+    controllers.checklist.updateChecklist("reject")
 );
 
 router.get(
@@ -477,6 +487,14 @@ router
   .route("/logbook", checkIfLoggedInAPI)
   .get(controllers.logbook.getLogbook)
   .post(controllers.logbook.addEntryToLogbook);
+
+router
+    .route("/changeOfParts/:cop_id?", checkIfLoggedInAPI)
+    .get(controllers.changeOfParts.fetchChangeOfParts)
+    .post(controllers.changeOfParts.createNewChangeOfParts)
+    .patch(controllers.changeOfParts.editChangeOfParts)
+
+router.patch("/changeOfParts/complete/:cop_id", checkIfLoggedInAPI, controllers.changeOfParts.completeChangeOfParts); 
 
 // NO API ROUTE
 router.all("/*", (req, res) => {

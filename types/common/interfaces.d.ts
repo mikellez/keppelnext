@@ -309,6 +309,19 @@ interface CMMSDashboardData {
   fill: string;
 }
 
+interface CMMSChangeOfParts {
+  copId: number;
+  psaId: number;
+  asset: string;
+  plant: string;
+  plantId: number;
+  changedDate: Date | null;
+  scheduledDate: Date;
+  description: string;
+  assignedUserId: number;
+  assignedUser: string; 
+}
+
 export {
   CMMSBaseType,
   CMMSUser,
@@ -338,4 +351,5 @@ export {
   postData,
   CMMSAssetDetails,
   CMMSSubComponent1Name,
+  CMMSChangeOfParts,
 };

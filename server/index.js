@@ -115,6 +115,9 @@ app.prepare().then(() => {
   server.get("/Asset*", checkIfLoggedIn, accessControl, (req, res) => {
     return handle(req, res);
   });
+  server.get("/ChangeOfParts*", checkIfLoggedIn, accessControl, (req, res) => {
+    return handle(req, res);
+  });
   server.get("/Schedule*", checkIfLoggedIn, accessControl, (req, res) => {
     return handle(req, res);
   });
