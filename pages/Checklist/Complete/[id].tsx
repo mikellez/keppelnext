@@ -1,5 +1,11 @@
 import React, { useState, useEffect, createContext } from "react";
-import { ModuleContent, ModuleMain, ModuleHeader, ModuleFooter, ModuleDivider } from "../../../components";
+import {
+    ModuleContent,
+    ModuleMain,
+    ModuleHeader,
+    ModuleFooter,
+    ModuleDivider,
+} from "../../../components";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import ChecklistDetails from "../../../components/Checklist/ChecklistDetails";
 import TooltipBtn from "../../../components/TooltipBtn";
@@ -16,19 +22,19 @@ import { downloadChecklistPDF } from "../View/[id]";
 
 export const SectionsContext = createContext({
     sections: [] as CheckSection[],
-    setSections: (() => {}) as React.Dispatch<React.SetStateAction<CheckSection[]>>
+    setSections: (() => {}) as React.Dispatch<React.SetStateAction<CheckSection[]>>,
 });
 
 const submitCompletedChecklist = async (data: CheckSection[], id: number) => {
     return await axios({
-            url: "/api/checklist/complete/" + id,
-            method: "patch",
-            data: {
-                datajson: JSON.stringify(data.map(section => section.toJSON()))
-            }
-        })
-        .then(res => res.data)
-        .catch(err => console.log(err))
+        url: "/api/checklist/complete/" + id,
+        method: "patch",
+        data: {
+            datajson: JSON.stringify(data.map((section) => section.toJSON())),
+        },
+    })
+        .then((res) => res.data)
+        .catch((err) => console.log(err));
 };
 
 const CompleteChecklistPage = (props: ChecklistPageProps) => {
@@ -57,62 +63,65 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
             return;
         }
 
-        submitCompletedChecklist(sections, parseInt(router.query.id as string))
-            .then(result => {
-                setSuccessModal(true);
-                setTimeout(() => {
-                    router.push("/Checklist");
-                }, 1000)
-            })
-        
-    }
+        submitCompletedChecklist(sections, parseInt(router.query.id as string)).then((result) => {
+            setSuccessModal(true);
+            setTimeout(() => {
+                router.push("/Checklist");
+            }, 1000);
+        });
+    };
 
-    console.log(sections)
+    console.log(sections);
 
     const isCompleteChecklist = () => {
-        return sections.every(section => section.isComplete());
+        return sections.every((section) => section.isComplete());
     };
 
     return (
         <>
-        <ModuleMain>
-            <ModuleHeader header="Complete Checklist">
-                <TooltipBtn text="Download PDF" onClick={() => downloadChecklistPDF(parseInt(router.query.id as string))}>
-                    <HiOutlineDownload size={24} />
-                </TooltipBtn>
-                <Link href="/Checklist" className="btn btn-secondary">
-                    Back
-                </Link>
-            </ModuleHeader>
-            <ModuleContent>
-                <ChecklistDetails checklist={props.checklist} />
-            </ModuleContent>
-            <ModuleDivider />
-            <ModuleContent>
-                <SectionsContext.Provider value={{sections, setSections}}>
-                    <ChecklistEditableForm />
-                </SectionsContext.Provider>
-            </ModuleContent>
-            <ModuleFooter>
-                <TooltipBtn toolTip={false} onClick={handleSubmit} disabled={disableSubmit}>Submit</TooltipBtn>
-            </ModuleFooter>
-        </ModuleMain>
+            <ModuleMain>
+                <ModuleHeader header="Complete Checklist">
+                    <TooltipBtn
+                        text="Download PDF"
+                        onClick={() => downloadChecklistPDF(parseInt(router.query.id as string))}
+                    >
+                        <HiOutlineDownload size={24} />
+                    </TooltipBtn>
+                    <Link href="/Checklist" className="btn btn-secondary">
+                        Back
+                    </Link>
+                </ModuleHeader>
+                <ModuleContent>
+                    <ChecklistDetails checklist={props.checklist} />
+                </ModuleContent>
+                <ModuleDivider />
+                <ModuleContent>
+                    <SectionsContext.Provider value={{ sections, setSections }}>
+                        <ChecklistEditableForm />
+                    </SectionsContext.Provider>
+                </ModuleContent>
+                <ModuleFooter>
+                    <TooltipBtn toolTip={false} onClick={handleSubmit} disabled={disableSubmit}>
+                        Submit
+                    </TooltipBtn>
+                </ModuleFooter>
+            </ModuleMain>
 
-        <ModuleSimplePopup 
-            modalOpenState={successModal}
-            setModalOpenState={setSuccessModal}
-            icon={SimpleIcon.Check}
-            title="Completed"
-            text="Checklist is successfully completed"
-        />
+            <ModuleSimplePopup
+                modalOpenState={successModal}
+                setModalOpenState={setSuccessModal}
+                icon={SimpleIcon.Check}
+                title="Completed"
+                text="Checklist is successfully completed"
+            />
 
-        <ModuleSimplePopup 
-            modalOpenState={incompleteModal}
-            setModalOpenState={setIncompleteModal}
-            icon={SimpleIcon.Exclaim}
-            title="Incomplete checklist"
-            text="Please ensure that all fields have been filled"
-        />
+            <ModuleSimplePopup
+                modalOpenState={incompleteModal}
+                setModalOpenState={setIncompleteModal}
+                icon={SimpleIcon.Exclaim}
+                title="Incomplete checklist"
+                text="Please ensure that all fields have been filled"
+            />
         </>
     );
 };
@@ -120,7 +129,4 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
 export default CompleteChecklistPage;
 const getServerSideProps: GetServerSideProps = createChecklistGetServerSideProps("record", [2, 3]);
 
-export {
-    getServerSideProps
-}
-
+export { getServerSideProps };

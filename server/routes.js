@@ -10,9 +10,8 @@ const { sendRequestPDF, sendChecklistPDF } = require("./pdfGenerator");
 
 // checkIfLoggedInAPI   - auth failures send 401 requrest. use this for API routes
 function checkIfLoggedInAPI(req, res, next) {
-  if (req.user === undefined)
-    return res.status(401).json("you are not logged in");
-  next();
+    if (req.user === undefined) return res.status(401).json("you are not logged in");
+    next();
 }
 
 const upload = multer();
@@ -41,7 +40,7 @@ const upload = multer();
  * @apiUse SuccessCMMSUser
  */
 router.post("/login", passport.authenticate("local", {}), (req, res) => {
-  return res.status(200).json("success");
+    return res.status(200).json("success");
 });
 
 /**
@@ -55,13 +54,12 @@ router.post("/login", passport.authenticate("local", {}), (req, res) => {
  * @apiSuccess {string} - "success"
  */
 router.post("/logout", (req, res) => {
-  if (req.user === undefined)
-    return res.status(400).json({ errormsg: "you are not logged in" });
+    if (req.user === undefined) return res.status(400).json({ errormsg: "you are not logged in" });
 
-  req.logout((err) => {
-    if (err) return res.status(500).json({ errormsg: err });
-    return res.status(200).json("success");
-  });
+    req.logout((err) => {
+        if (err) return res.status(500).json({ errormsg: err });
+        return res.status(200).json("success");
+    });
 });
 
 /**
@@ -74,13 +72,13 @@ router.post("/logout", (req, res) => {
  *
  */
 router.get("/user", checkIfLoggedInAPI, (req, res) => {
-  res.status(200).json({
-    id: req.user.id,
-    name: req.user.name,
-    role_id: req.user.role_id,
-    role_name: req.user.role_name,
-    allocated_plants: req.user.allocated_plants,
-  });
+    res.status(200).json({
+        id: req.user.id,
+        name: req.user.name,
+        role_id: req.user.role_id,
+        role_name: req.user.role_name,
+        allocated_plants: req.user.allocated_plants,
+    });
 });
 
 /**
@@ -109,7 +107,10 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
  * @apiSuccess {string} -.requesthistory Request history
  * @apiSuccess {string|null} -.rejection_comments Rejection comments of fault request
  */
-router.get("/request/", checkIfLoggedInAPI, controllers.request.fetchRequests);
+router.get("/request/pending", checkIfLoggedInAPI, controllers.request.fetchPendingRequests);
+router.get("/request/assigned", checkIfLoggedInAPI, controllers.request.fetchAssignedRequests);
+router.get("/request/review", checkIfLoggedInAPI, controllers.request.fetchReviewRequests);
+router.get("/request/approved", checkIfLoggedInAPI, controllers.request.fetchApprovedRequests);
 
 /**
  * @api {post} /request Create Request
@@ -127,10 +128,10 @@ router.get("/request/", checkIfLoggedInAPI, controllers.request.fetchRequests);
  * @apiSuccess {string} - "success"
  */
 router.post(
-  "/request/",
-  checkIfLoggedInAPI,
-  upload.single("image"),
-  controllers.request.createRequest
+    "/request/",
+    checkIfLoggedInAPI,
+    upload.single("image"),
+    controllers.request.createRequest
 );
 
 /**
@@ -143,55 +144,35 @@ router.post(
  * @apiSuccess {number} -.req_id ID of the request type
  * @apiSuccess {string} -.request Name of the request type
  */
-router.get(
-  "/request/types",
-  checkIfLoggedInAPI,
-  controllers.request.fetchRequestTypes
-);
+router.get("/request/types", checkIfLoggedInAPI, controllers.request.fetchRequestTypes);
 // router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
-router.get(
-  "/request/priority",
-  checkIfLoggedInAPI,
-  controllers.request.fetchRequestPriority
-);
-router.get(
-  "/request/csv",
-  checkIfLoggedInAPI,
-  controllers.request.createRequestCSV
-);
+router.get("/request/priority", checkIfLoggedInAPI, controllers.request.fetchRequestPriority);
+router.get("/request/csv", checkIfLoggedInAPI, controllers.request.createRequestCSV);
 router.get("/request/pdf/:request_id", checkIfLoggedInAPI, sendRequestPDF);
 router.patch(
-  "/request/complete/:request_id",
-  checkIfLoggedInAPI,
-  upload.single("completion_file"),
-  controllers.request.completeRequest
+    "/request/complete/:request_id",
+    checkIfLoggedInAPI,
+    upload.single("completion_file"),
+    controllers.request.completeRequest
 );
 router
-  .route("/request/:request_id", checkIfLoggedInAPI)
-  .get(controllers.request.fetchSpecificRequest)
-  .patch(controllers.request.updateRequest);
+    .route("/request/:request_id", checkIfLoggedInAPI)
+    .get(controllers.request.fetchSpecificRequest)
+    .patch(controllers.request.updateRequest);
 
 router.patch(
-  "/request/:request_id/:status_id",
-  checkIfLoggedInAPI,
-  controllers.request.approveRejectRequest
+    "/request/:request_id/:status_id",
+    checkIfLoggedInAPI,
+    controllers.request.approveRejectRequest
 );
 router.get(
-  "/request/counts/:field/:plant",
-  checkIfLoggedInAPI,
-  controllers.request.fetchRequestCounts
+    "/request/counts/:field/:plant",
+    checkIfLoggedInAPI,
+    controllers.request.fetchRequestCounts
 );
 
-router.get(
-  "/asset/systems",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchSystems
-);
-router.get(
-  "/asset/fetch_asset_types",
-  checkIfLoggedInAPI,
-  controllers.asset.fetch_asset_types
-);
+router.get("/asset/systems", checkIfLoggedInAPI, controllers.asset.fetchSystems);
+router.get("/asset/fetch_asset_types", checkIfLoggedInAPI, controllers.asset.fetch_asset_types);
 router.post("/asset/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
 router.post("/asset/editAsset", checkIfLoggedInAPI, controllers.asset.editAsset);
 router.post("/asset/deleteAsset", checkIfLoggedInAPI, controllers.asset.deleteAsset);
@@ -202,96 +183,64 @@ router
     .post(controllers.checklist.createNewChecklistTemplate)
     .delete(controllers.checklist.deleteChecklistTemplate);
 
+router.get("/asset/history/:psa_Id", checkIfLoggedInAPI, controllers.asset.fetchAssetHistory);
+router.post("/asset/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
+router.post("/asset/editAsset", checkIfLoggedInAPI, controllers.asset.editAsset);
+router.post("/asset/deleteAsset", checkIfLoggedInAPI, controllers.asset.deleteAsset);
+
+router
+    .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
+    .get(controllers.checklist.fetchSpecificChecklistTemplate)
+    .post(controllers.checklist.createNewChecklistTemplate)
+    .delete(controllers.checklist.deleteChecklistTemplate);
+
+router.get("/asset/system/:system_id", checkIfLoggedInAPI, controllers.asset.fetchSystemAssets);
 router.get(
-  "/asset/history/:psa_Id",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchAssetHistory
+    "/asset/system/:plant_id/:system_id/:system_asset_id",
+    checkIfLoggedInAPI,
+    controllers.asset.fetchSystemAssetNames
 );
-router.post(
-  "/asset/addNewAsset",
-  checkIfLoggedInAPI,
-  controllers.asset.addNewAsset
+router.get(
+    "/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",
+    checkIfLoggedInAPI,
+    controllers.asset.fetchSubComponent1Names
 );
-router.post(
-  "/asset/editAsset",
-  checkIfLoggedInAPI,
-  controllers.asset.editAsset
-);
-router.post(
-  "/asset/deleteAsset",
-  checkIfLoggedInAPI,
-  controllers.asset.deleteAsset
+router.post("/asset/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
+router.post("/asset/editAsset", checkIfLoggedInAPI, controllers.asset.editAsset);
+router.post("/asset/deleteAsset", checkIfLoggedInAPI, controllers.asset.deleteAsset);
+
+router
+    .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
+    .get(controllers.checklist.fetchSpecificChecklistTemplate)
+    .post(controllers.checklist.createNewChecklistTemplate);
+
+router.get(
+    "/checklist/assigned",
+    checkIfLoggedInAPI,
+    controllers.checklist.fetchAssignedChecklists
 );
 
 router
-  .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
-  .get(controllers.checklist.fetchSpecificChecklistTemplate)
-  .post(controllers.checklist.createNewChecklistTemplate)
-  .delete(controllers.checklist.deleteChecklistTemplate);
+    .route("/checklist/record/:checklist_id?", checkIfLoggedInAPI)
+    .get(controllers.checklist.fetchChecklistRecords)
+    .post(controllers.checklist.createNewChecklistRecord);
 
 router.get(
-  "/asset/system/:system_id",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchSystemAssets
-);
-router.get(
-  "/asset/system/:plant_id/:system_id/:system_asset_id",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchSystemAssetNames
-);
-router.get(
-  "/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchSubComponent1Names
-);
-router.post(
-  "/asset/addNewAsset",
-  checkIfLoggedInAPI,
-  controllers.asset.addNewAsset
-);
-router.post(
-  "/asset/editAsset",
-  checkIfLoggedInAPI,
-  controllers.asset.editAsset
-);
-router.post(
-  "/asset/deleteAsset",
-  checkIfLoggedInAPI,
-  controllers.asset.deleteAsset
-);
-
-router
-  .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
-  .get(controllers.checklist.fetchSpecificChecklistTemplate)
-  .post(controllers.checklist.createNewChecklistTemplate);
-
-router.get(
-  "/checklist/assigned",
-  checkIfLoggedInAPI,
-  controllers.checklist.fetchAssignedChecklists
-);
-
-router
-  .route("/checklist/record/:checklist_id?", checkIfLoggedInAPI)
-  .get(controllers.checklist.fetchChecklistRecords)
-  .post(controllers.checklist.createNewChecklistRecord);
-
-router.get(
-  "/checklist/approved",
-  checkIfLoggedInAPI,
-  controllers.checklist.fetchApprovedChecklists
+    "/checklist/approved",
+    checkIfLoggedInAPI,
+    controllers.checklist.fetchApprovedChecklists
 );
 
 router.get(
-  "/checklist/templateNames/:id?",
-  checkIfLoggedInAPI,
-  controllers.checklist.fetchChecklistTemplateNames
+    "/checklist/templateNames/:id?",
+    checkIfLoggedInAPI,
+    controllers.checklist.fetchChecklistTemplateNames
 );
 
 router.get(
-  "/checklist/counts/:field/:plant",
-  checkIfLoggedInAPI,
-  controllers.checklist.fetchChecklistCounts
+    "/checklist/counts/:field/:plant",
+    checkIfLoggedInAPI,
+    controllers.checklist.fetchChecklistCounts
 );
 
 router.patch(
@@ -312,17 +261,9 @@ router.patch(
     controllers.checklist.updateChecklist("reject")
 );
 
-router.get(
-  "/checklist/pdf/:checklist_id",
-  checkIfLoggedInAPI,
-  sendChecklistPDF
-);
+router.get("/checklist/pdf/:checklist_id", checkIfLoggedInAPI, sendChecklistPDF);
 
-router.get(
-  "/checklist/csv",
-  checkIfLoggedInAPI,
-  controllers.checklist.createChecklistCSV
-);
+router.get("/checklist/csv", checkIfLoggedInAPI, controllers.checklist.createChecklistCSV);
 
 /**
  * @api {post} /checklist/template Create Checklist Template
@@ -334,9 +275,9 @@ router.get(
  */
 
 router.post(
-  "/checklist/template",
-  checkIfLoggedInAPI,
-  controllers.checklist.submitNewChecklistTemplate
+    "/checklist/template",
+    checkIfLoggedInAPI,
+    controllers.checklist.submitNewChecklistTemplate
 );
 
 /**
@@ -349,33 +290,13 @@ router.post(
  * @apiSuccess {number} -.fault_id ID of the fault type
  * @apiSuccess {string} -.fault_type Name of the fault type
  */
-router.get(
-  "/fault/types",
-  checkIfLoggedInAPI,
-  controllers.fault.fetchFaultTypes
-);
+router.get("/fault/types", checkIfLoggedInAPI, controllers.fault.fetchFaultTypes);
 
-router.get(
-  "/asset/:plant_id",
-  checkIfLoggedInAPI,
-  controllers.asset.getAssetsFromPlant
-);
+router.get("/asset/:plant_id", checkIfLoggedInAPI, controllers.asset.getAssetsFromPlant);
 router.get("/asset", checkIfLoggedInAPI, controllers.asset.getAssetHierarchy);
-router.get(
-  "/assetDetails/:psa_id",
-  checkIfLoggedInAPI,
-  controllers.asset.getAssetDetails
-);
-router.get(
-  "/asset/history/:type/:id",
-  checkIfLoggedInAPI,
-  controllers.asset.getAssetHistory
-);
-router.get(
-  "/asset/Details/:psa_id",
-  checkIfLoggedInAPI,
-  controllers.asset.getAssetDetails
-);
+router.get("/assetDetails/:psa_id", checkIfLoggedInAPI, controllers.asset.getAssetDetails);
+router.get("/asset/history/:type/:id", checkIfLoggedInAPI, controllers.asset.getAssetHistory);
+router.get("/asset/Details/:psa_id", checkIfLoggedInAPI, controllers.asset.getAssetDetails);
 
 /**
  * @api {get} /master/new Get Table Metadata
@@ -387,118 +308,72 @@ router.get(
  * @apiSuccess {number} -.req_id ID of the request type
  * @apiSuccess {string} -.request Name of the request type
  */
-router.get(
-  "/master/new",
-  checkIfLoggedInAPI,
-  controllers.master.fetchMasterTypeEntry
-);
-router.post(
-  "/master/new/add",
-  checkIfLoggedInAPI,
-  controllers.master.createMasterTypeEntry
-);
-router.get(
-  "/master/:type",
-  checkIfLoggedInAPI,
-  controllers.master.fetchMasterInfo
-);
-router.get(
-  "/master/:type/:id",
-  checkIfLoggedInAPI,
-  controllers.master.fetchMasterTypeSingle
-);
-router.post(
-  "/master/:type/:id",
-  checkIfLoggedInAPI,
-  controllers.master.updateMasterTypeSingle
-);
-router.delete(
-  "/master/:type/:id",
-  checkIfLoggedInAPI,
-  controllers.master.deleteMasterTypeSingle
-);
+router.get("/master/new", checkIfLoggedInAPI, controllers.master.fetchMasterTypeEntry);
+router.post("/master/new/add", checkIfLoggedInAPI, controllers.master.createMasterTypeEntry);
+router.get("/master/:type", checkIfLoggedInAPI, controllers.master.fetchMasterInfo);
+router.get("/master/:type/:id", checkIfLoggedInAPI, controllers.master.fetchMasterTypeSingle);
+router.post("/master/:type/:id", checkIfLoggedInAPI, controllers.master.updateMasterTypeSingle);
+router.delete("/master/:type/:id", checkIfLoggedInAPI, controllers.master.deleteMasterTypeSingle);
 
 router.get("/plants", checkIfLoggedInAPI, controllers.schedule.getPlants);
 
 router.get("/getPlants", checkIfLoggedInAPI, controllers.schedule.getPlants);
+router.get("/getUserPlants", checkIfLoggedInAPI, controllers.schedule.getUserPlants);
+router
+    .route("/timeline/:id?", checkIfLoggedInAPI)
+    .get(controllers.schedule.getTimeline)
+    .post(controllers.schedule.createTimeline)
+    .patch(controllers.schedule.editTimeline)
+    .delete(controllers.schedule.deleteTimeline);
+router.route("/timeline/schedules/:id").get(controllers.schedule.getSchedulesTimeline);
+router
+    .route("/timeline/status/:status/:id?", checkIfLoggedInAPI)
+    .get(controllers.schedule.getTimelineByStatus)
+    .post(controllers.schedule.changeTimelineStatus);
 router.get(
-  "/getUserPlants",
-  checkIfLoggedInAPI,
-  controllers.schedule.getUserPlants
+    "/getAssignedUsers/:plant_id",
+    checkIfLoggedInAPI,
+    controllers.schedule.getOpsAndEngineers
 );
+router.post("/insertSchedule", checkIfLoggedInAPI, controllers.schedule.insertSchedule);
+router.patch("/updateSchedule", checkIfLoggedInAPI, controllers.schedule.updateSchedule);
 router
-  .route("/timeline/:id?", checkIfLoggedInAPI)
-  .get(controllers.schedule.getTimeline)
-  .post(controllers.schedule.createTimeline)
-  .patch(controllers.schedule.editTimeline)
-  .delete(controllers.schedule.deleteTimeline);
-router
-  .route("/timeline/schedules/:id")
-  .get(controllers.schedule.getSchedulesTimeline);
-router
-  .route("/timeline/status/:status/:id?", checkIfLoggedInAPI)
-  .get(controllers.schedule.getTimelineByStatus)
-  .post(controllers.schedule.changeTimelineStatus);
-router.get(
-  "/getAssignedUsers/:plant_id",
-  checkIfLoggedInAPI,
-  controllers.schedule.getOpsAndEngineers
-);
-router.post(
-  "/insertSchedule",
-  checkIfLoggedInAPI,
-  controllers.schedule.insertSchedule
-);
-router.patch(
-  "/updateSchedule",
-  checkIfLoggedInAPI,
-  controllers.schedule.updateSchedule
-);
-router
-  .route("/schedule/:id", checkIfLoggedInAPI)
-  .delete(controllers.schedule.deleteSchedule)
-  .get(controllers.schedule.getViewSchedules);
+    .route("/schedule/:id", checkIfLoggedInAPI)
+    .delete(controllers.schedule.deleteSchedule)
+    .get(controllers.schedule.getViewSchedules);
 
 router
-  .route("/event/:schedule_id?/:index?/", checkIfLoggedInAPI)
-  .get(controllers.schedule.getPendingSingleEvents)
-  .post(controllers.schedule.createSingleEvent)
-  .patch(controllers.schedule.manageSingleEvent)
-  .delete();
+    .route("/event/:schedule_id?/:index?/", checkIfLoggedInAPI)
+    .get(controllers.schedule.getPendingSingleEvents)
+    .post(controllers.schedule.createSingleEvent)
+    .patch(controllers.schedule.manageSingleEvent)
+    .delete();
 
-router.get(
-  "/schedule/event/:id",
-  checkIfLoggedInAPI,
-  controllers.schedule.getScheduleById
-);
+router.get("/schedule/event/:id", checkIfLoggedInAPI, controllers.schedule.getScheduleById);
 
-router.get(
-  "/activity/account_log",
-  checkIfLoggedInAPI,
-  controllers.activity.getEventtHistory
-);
-router.get(
-  "/activity/csv",
-  checkIfLoggedInAPI,
-  controllers.activity.createActivityCSV
-);
+router.get("/activity/account_log", checkIfLoggedInAPI, controllers.activity.getEventtHistory);
+router.get("/activity/csv", checkIfLoggedInAPI, controllers.activity.createActivityCSV);
 
 router
-  .route("/logbook", checkIfLoggedInAPI)
-  .get(controllers.logbook.getLogbook)
-  .post(controllers.logbook.addEntryToLogbook);
+    .route("/logbook", checkIfLoggedInAPI)
+    .get(controllers.logbook.getLogbook)
+    .post(controllers.logbook.addEntryToLogbook);
 
 router
     .route("/changeOfParts/:cop_id?", checkIfLoggedInAPI)
     .get(controllers.changeOfParts.fetchChangeOfParts)
     .post(controllers.changeOfParts.createNewChangeOfParts)
-    .patch(controllers.changeOfParts.editChangeOfParts)
+    .patch(controllers.changeOfParts.editChangeOfParts);
 
-router.patch("/changeOfParts/complete/:cop_id", checkIfLoggedInAPI, controllers.changeOfParts.completeChangeOfParts); 
+router.patch(
+    "/changeOfParts/complete/:cop_id",
+    checkIfLoggedInAPI,
+    controllers.changeOfParts.completeChangeOfParts
+);
 
 // NO API ROUTE
 router.all("/*", (req, res) => {
-  return res.status(404).send("no route");
+    return res.status(404).send("no route");
 });
 
 module.exports = router;

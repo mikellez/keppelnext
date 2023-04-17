@@ -1,4 +1,4 @@
-import formStyles from "../../styles/formStyles.module.css";
+import formStyles from "../../../styles/formStyles.module.css";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -7,23 +7,23 @@ import {
     ModuleHeader,
     ModuleMain,
     ModuleFooter,
-} from "../../components";
-import ChecklistTemplateCreator from "../../components/Checklist/ChecklistTemplateCreator";
+} from "../../../components";
+import ChecklistTemplateCreator from "../../../components/Checklist/ChecklistTemplateCreator";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import { CMMSPlant, CMMSChecklist } from "../../types/common/interfaces";
+import { CMMSPlant, CMMSChecklist } from "../../../types/common/interfaces";
 import axios from "axios";
-import { useCurrentUser } from "../../components/SWR";
-import PlantSelect from "../../components/PlantSelect";
-import AssignToSelect, { AssignedUserOption } from "../../components/Schedule/AssignToSelect";
-import AssetSelect from "../../components/Checklist/AssetSelect";
-import { CheckSection } from "../../types/common/classes";
-import LoadingHourglass from "../../components/LoadingHourglass";
+import { useCurrentUser } from "../../../components/SWR";
+import PlantSelect from "../../../components/PlantSelect";
+import AssignToSelect, { AssignedUserOption } from "../../../components/Schedule/AssignToSelect";
+import AssetSelect from "../../../components/Checklist/AssetSelect";
+import { CheckSection } from "../../../types/common/classes";
+import LoadingHourglass from "../../../components/LoadingHourglass";
 import { SingleValue } from "react-select";
-import TooltipBtn from "../../components/TooltipBtn";
-import ModuleSimplePopup, { SimpleIcon } from "../../components/ModuleLayout/ModuleSimplePopup";
+import TooltipBtn from "../../../components/TooltipBtn";
+import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
-import { createChecklistGetServerSideProps } from "../../types/common/props";
-import RequiredIcon from "../../components/RequiredIcon";
+import { createChecklistGetServerSideProps } from "../../../types/common/props";
+import RequiredIcon from "../../../components/RequiredIcon";
 
 interface ChecklistPageProps {
     checklist: CMMSChecklist | null;
