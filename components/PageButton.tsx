@@ -2,12 +2,16 @@ import { Pagination } from "@table-library/react-table-library/types/pagination"
 import styles from "../styles/PageButton.module.css";
 import { RequestItem } from "../pages/Request";
 import { ChecklistItem } from "../pages/Checklist";
+import { logbookData } from "../pages/Logbook";
 
 const PageButton = ({
   pagination,
   children,
 }: {
-  pagination: Pagination<RequestItem> | Pagination<ChecklistItem>;
+  pagination:
+    | Pagination<RequestItem>
+    | Pagination<ChecklistItem>
+    | Pagination<logbookData>;
   children: React.ReactNode;
 }) => {
   return (

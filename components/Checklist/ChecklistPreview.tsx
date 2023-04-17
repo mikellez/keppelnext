@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { CheckSection } from "../../types/common/classes";
 import { ModuleContent, ModuleDivider } from "../";
 import { ChecklistPageProps } from "../../pages/Checklist/New";
@@ -6,7 +6,6 @@ import ChecklistDetails from "./ChecklistDetails";
 import ChecklistViewForm from "./ChecklistViewForm";
 
 const ChecklistPreview = (props: ChecklistPageProps) => {
-
     const [sections, setSections] = useState<CheckSection[]>([]);
 
     useEffect(() => {
@@ -20,16 +19,15 @@ const ChecklistPreview = (props: ChecklistPageProps) => {
 
     return (
         <>
-        <ModuleContent>
-            <ChecklistDetails checklist={props.checklist} />
-        </ModuleContent>
-        <ModuleDivider />
-        <ModuleContent>
-            <ChecklistViewForm sections={sections} />
-        </ModuleContent>
+            <ModuleContent>
+                <ChecklistDetails checklist={props.checklist} />
+            </ModuleContent>
+            <ModuleDivider />
+            <ModuleContent>
+                <ChecklistViewForm sections={sections} />
+            </ModuleContent>
         </>
     );
 };
-
 
 export default ChecklistPreview;

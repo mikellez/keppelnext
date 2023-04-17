@@ -420,7 +420,7 @@ const createChecklistCSV = async (req, res, next) => {
     let activeTabQuery;
     switch (req.query.activeTab) {
         case "0":
-            activeTabQuery = fetchPendingChecklistsQuery;
+            activeTabQuery = fetchAssignedChecklistsQuery;
             break;
         case "1":
             activeTabQuery = fetchForReviewChecklistsQuery;
@@ -559,7 +559,7 @@ function updateChecklist(updateType) {
         default:
             return console.log("update checklist type error");
     }
-};
+}
 
 const deleteChecklistTemplate = async (req, res, next) => {
     const sql = `
@@ -575,7 +575,7 @@ const deleteChecklistTemplate = async (req, res, next) => {
     `;
 
     db.query(sql, (err) => {
-        if (err) return res.status(500).json("Failure to delete template")
+        if (err) return res.status(500).json("Failure to delete template");
         return res.status(200).json("Template successfully deleted");
     });
 };

@@ -4,9 +4,10 @@ import axios from 'axios';
 
 import { CMMSAsset, CMMSRequest, CMMSChecklist, CMMSActivitylog, CMMSSystemAsset, CMMSSystemAssetName, CMMSSubComponent1Name} from '../types/common/interfaces'; 
 
-function useRequest() {
-	const requestFetcher = (url: string) => axios.get<CMMSRequest[]>(url).then((response) => {
-		response.data.forEach((s) => {
+function useRequest(request_type: "pending" | "assigned" | "review" | "approved") {
+	const requestFetcher = (url: string) => axios.get<CMMSRequest[]>(url + request_type).then((response) => {
+		response.data.forEach(
+			(s) => {
 			s.created_date = new Date(s.created_date)
 		});
 		return response.data;
@@ -15,7 +16,7 @@ function useRequest() {
 		throw new Error(e);
 	});
 
-	return useSWR<CMMSRequest[], Error>("/api/request", requestFetcher, {revalidateOnFocus: false});
+	return useSWR<CMMSRequest[], Error>(["/api/request/", request_type], requestFetcher, {revalidateOnFocus: false});
 }
 
 function useAsset(plant_id: number|null) {
