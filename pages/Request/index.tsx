@@ -38,8 +38,9 @@ import TooltipBtn from "../../components/TooltipBtn";
 import { FiRefreshCw } from "react-icons/fi";
 import { HiOutlineDownload, HiOutlineLink } from "react-icons/hi";
 import { BsChevronLeft, BsChevronRight, BsFileEarmarkPlus } from "react-icons/bs";
-import { AiOutlineHistory, AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
-import { AiOutlineUserAdd, AiOutlineComment } from "react-icons/ai";
+import { AiOutlineHistory } from "react-icons/ai";
+import { AiOutlineUserAdd } from "react-icons/ai";
+import { BiCommentCheck } from "react-icons/bi";
 import Image from "next/image";
 import { useCurrentUser } from "../../components/SWR";
 import RequestHistory from "../../components/Request/RequestHistory";
@@ -250,7 +251,7 @@ export default function Request() {
                                 setReady(false);
                             }}
                         >
-                            <AiOutlineComment size={18} title={"Manage"} />
+                            <BiCommentCheck size={18} title={"Manage"} />
                         </div>
                     )}
                     <div
