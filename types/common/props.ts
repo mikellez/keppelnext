@@ -44,7 +44,7 @@ const createChecklistGetServerSideProps = (checklistType: string, allowedStatuse
 	return x;
 };
 
-const createChangeOfPartsServerSideProps = (page?: string) => {
+const createChangeOfPartsServerSideProps = (specificCOP: boolean, conditionalFunc?: Function) => {
 	
 	const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
 
@@ -55,16 +55,13 @@ const createChangeOfPartsServerSideProps = (page?: string) => {
 			},
 		};
 
-		const url = page === "Edit" ? 
+		const url = specificCOP ? 
 			`http://localhost:3001/api/changeOfParts/${context.params!.id}` : 
 			"http://localhost:3001/api/changeOfParts";
 	
 		const response = await axios.get<CMMSChangeOfParts[]>(url, headers);
 
-		if (page === "Edit" && (
-			!response.data ||
-			response.data[0].changedDate != null
-		)) {
+		if (conditionalFunc && conditionalFunc(response) == false) {
 			return {
 				redirect: {
 					destination: "/404",

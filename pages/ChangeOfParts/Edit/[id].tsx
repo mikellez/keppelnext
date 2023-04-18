@@ -9,7 +9,7 @@ import COPForm from "../../../components/ChangeOfParts/COPForm";
 import { useRouter } from "next/router";
 import { CMMSChangeOfParts } from "../../../types/common/interfaces";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 const editChangeOfParts = async (copId: number, formData: CMMSChangeOfParts) => {
     return await axios
@@ -57,13 +57,6 @@ const EditChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
     
     useEffect(() => {
         if (props.changeOfParts[0]) {
-            // const cop = props.changeOfParts[0];
-            // const data = {
-            //     linkedAsset: cop.psaId,
-            //     description: cop.description,
-            //     assignedUser: cop.assignedUserId,
-            //     scheduledDate: new Date(cop.scheduledDate),
-            // }
             setFormData(props.changeOfParts[0])
         }
     }, [props.changeOfParts]);
@@ -110,4 +103,11 @@ const EditChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
 };
 
 export default EditChangeOfPartsPage;
-export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps("Edit")
+export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps(true, 
+    (response: AxiosResponse<CMMSChangeOfParts[]>) => {
+        return (
+            response.data &&
+			response.data[0].changedDate
+        );
+    }
+);

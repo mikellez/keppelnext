@@ -68,4 +68,4 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
 
 export default ChangeOfPartsPage;
 
-export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps();
+export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps(false);
