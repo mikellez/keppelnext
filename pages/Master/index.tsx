@@ -54,7 +54,7 @@ interface CMMSMasterData {
   [column_name: string]: string;
 }
 
-const indexedColumn = ["plant", "system", "system_assets",  "asset_type", "fault_types",];
+const indexedColumn = ["plant", "system",  "asset_type", "fault_types",];
 
 function useMaster(type: string) {
   interface CMMSMasterInfo {
@@ -345,21 +345,21 @@ export default function Master() {
             }}
             className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
           >
-            <span style={{ all: "unset" }}>System Assets</span>
+            {/* <span style={{ all: "unset" }}>System Assets</span>
           </li>
           <li
             onClick={() => {
               activeTabIndex !== 3 && switchColumns(3);
             }}
             className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
-          >
+          > */}
             <span style={{ all: "unset" }}>Asset Types</span>
           </li>
           <li
             onClick={() => {
-              activeTabIndex !== 4 && switchColumns(4);
+              activeTabIndex !== 3 && switchColumns(3);
             }}
-            className={"nav-link" + (activeTabIndex === 4 ? " active" : "")}
+            className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
           >
             <span style={{ all: "unset" }}>Fault Types</span>
           </li>

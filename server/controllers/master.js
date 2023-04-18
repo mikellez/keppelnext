@@ -49,18 +49,18 @@ const tableInfo = {
 			column_name: "asset_type"
 		}]
 	},
-	system_assets: {
-		internalName: "system_assets",
-		name: "System Asset",
-		id: "system_asset_id",
-		fields: [{
-			column_label: "Name",
-			column_name: "system_asset"
-		},{
-			column_label: "System id (Number only)",
-			column_name: "system_id"
-		}]
-	},
+	// system_assets: {
+	// 	internalName: "system_assets",
+	// 	name: "System Asset",
+	// 	id: "system_asset_id",
+	// 	fields: [{
+	// 		column_label: "Name",
+	// 		column_name: "system_asset"
+	// 	},{
+	// 		column_label: "Select System",
+	// 		column_name: "system_id"
+	// 	}]
+	// },
 	// asset_instrument: {
 	// 	internalName: "plant_system_assets",
 	// 	name: "Asset Instrument",
@@ -74,16 +74,15 @@ const fetchMasterInfo = async (req, res, next) => {
 	if(tableInfo[req.params.type] === undefined)
 		return res.status(404).json("no type");
 	console.log(tableInfo[req.params.type].internalName)
-	console.log("{&*(&(*&*&(*&(")
 	let table       = tableInfo[req.params.type].internalName;
 	let idColumn    = tableInfo[req.params.type].id;
 	let q = `SELECT * FROM keppel.${table} ORDER BY ${idColumn}`;
 
 	if(table == 'system_assets'){
-		q = `SELECT keppel.system_assets.system_id,keppel.system_master.system_name,keppel.system_assets.system_asset
+		q = `SELECT keppel.system_assets.system_asset_id,keppel.system_assets.system_id,keppel.system_assets.system_asset_id,keppel.system_master.system_name,keppel.system_assets.system_asset
 		FROM keppel.system_assets
 		JOIN keppel.system_master
-		ON keppel.system_assets.system_id = keppel.system_master.system_id ORDER BY keppel.system_assets.system_id
+		ON keppel.system_assets.system_id = keppel.system_master.system_id ORDER BY keppel.system_assets.system_asset_id
 		`;
 	}
 	
@@ -129,7 +128,7 @@ const createMasterTypeEntry = async (req, res, next) => {
 		insert = [parseInt(req.body.entries.system_id), req.body.entries.system_asset]
 		console.log(insert)
 	}
-	db.query(sql,insert)
+	db.query(sql,insert)	
 		.then(result => {
 			return res.status(200).send({
 				msg: "success",
@@ -185,7 +184,10 @@ const updateMasterTypeSingle = async (req, res, next) => {
 	// returns queryFields if success
 	function verifyColumns(tableName /*string*/, entries /*([column:string]: string)[]*/) {
 		const columns = Object.keys(entries)
-
+		if (tableName == 'plant_master')
+			tableName = 'plant'
+		if(tableName == 'system_master')
+			tableName = 'system'
 		if(!(tableName in tableInfo))
 			return false;
 
@@ -193,7 +195,6 @@ const updateMasterTypeSingle = async (req, res, next) => {
 			if( !(x.column_name in columns) )
 				return false;
 		}*/
-
 		console.log(columns);
 		tableInfo[tableName].fields.forEach(x => console.log(x.column_name));
 
@@ -233,6 +234,7 @@ const updateMasterTypeSingle = async (req, res, next) => {
 	let entryKeys = Object.keys(req.body.entries)
 	// verify columns are filled in
 	const q = verifyColumns(table, req.body.entries)
+	console.log(q)
 	if(!q)
 		return res.status(400).json("entries invalid")
 
