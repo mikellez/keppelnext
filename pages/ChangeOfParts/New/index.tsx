@@ -10,11 +10,12 @@ import Link from "next/link";
 import TooltipBtn from "../../../components/TooltipBtn";
 import axios from "axios";
 import { useRouter } from "next/router";
-import COPForm, { ChangeOfPartsForm } from "../../../components/ChangeOfParts/COPForm";
+import COPForm from "../../../components/ChangeOfParts/COPForm";
+import { CMMSChangeOfParts } from "../../../types/common/interfaces";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 
 
-const createChangeOfParts = async (formData: ChangeOfPartsForm) => {
+const createChangeOfParts = async (formData: CMMSChangeOfParts) => {
     return await axios
         .post(`/api/changeOfParts/`, { formData })
         .then((res) => {
@@ -25,7 +26,7 @@ const createChangeOfParts = async (formData: ChangeOfPartsForm) => {
 
 const ChangeOfPartsNew = () => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const [formData, setFormData] = useState<ChangeOfPartsForm>({scheduledDate: new Date()} as ChangeOfPartsForm);
+    const [formData, setFormData] = useState<CMMSChangeOfParts>({scheduledDate: new Date()} as CMMSChangeOfParts);
     const [successModal, setSuccessModal] = useState<boolean>(false);
     const [displayErrorMsg, setDisplayErrorMsg] = useState<boolean>(false);
     const router = useRouter();
@@ -49,9 +50,9 @@ const ChangeOfPartsNew = () => {
 
     const validateCOPFormData = () => {
         return (
-            formData.linkedAsset &&
+            formData.psaId &&
             formData.description &&
-            formData.assignedUser &&
+            formData.assignedUserId &&
             formData.scheduledDate
         );
     };

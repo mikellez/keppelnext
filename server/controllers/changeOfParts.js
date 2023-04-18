@@ -109,10 +109,10 @@ const createNewChangeOfParts = async (req, res, next) => {
     db.query(
         sql,
         [
-            req.body.formData.linkedAsset,
+            req.body.formData.psaId,
             moment(req.body.formData.scheduledDate).format("YYYY-MM-DD HH:mm:ss"),
             req.body.formData.description,
-            req.body.formData.assignedUser,
+            req.body.formData.assignedUserId,
         ],
         (err) => {
             if (err) {
@@ -140,10 +140,10 @@ const editChangeOfParts = async (req, res, next) => {
     db.query(
         sql,
         [
-            req.body.formData.linkedAsset,
+            req.body.formData.psaId,
             moment(req.body.formData.scheduledDate).format("YYYY-MM-DD HH:mm:ss"),
             req.body.formData.description,
-            req.body.formData.assignedUser,
+            req.body.formData.assignedUserId,
             req.params.cop_id
         ],
         (err) => {

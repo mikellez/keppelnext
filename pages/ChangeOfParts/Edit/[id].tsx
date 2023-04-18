@@ -5,12 +5,13 @@ import Link from "next/link";
 import { GetServerSideProps } from "next";
 import { createChangeOfPartsServerSideProps } from "../../../types/common/props";
 import { ChangeOfPartsPageProps } from "..";
-import COPForm, { ChangeOfPartsForm } from "../../../components/ChangeOfParts/COPForm";
+import COPForm from "../../../components/ChangeOfParts/COPForm";
 import { useRouter } from "next/router";
+import { CMMSChangeOfParts } from "../../../types/common/interfaces";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import axios from "axios";
 
-const editChangeOfParts = async (copId: number, formData: ChangeOfPartsForm) => {
+const editChangeOfParts = async (copId: number, formData: CMMSChangeOfParts) => {
     return await axios
         .patch(`/api/changeOfParts/${copId}`, { formData })
         .then((res) => {
@@ -20,7 +21,7 @@ const editChangeOfParts = async (copId: number, formData: ChangeOfPartsForm) => 
 };
 
 const EditChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
-    const [formData, setFormData] = useState<ChangeOfPartsForm>({} as ChangeOfPartsForm);
+    const [formData, setFormData] = useState<CMMSChangeOfParts>({} as CMMSChangeOfParts);
     const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(false);
     const [successModal, setSuccessModal] = useState<boolean>(false);
     const [failureModal, setFailureModal] = useState<boolean>(false);
@@ -46,24 +47,24 @@ const EditChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
 
     const validateCOPFormData = () => {
         return (
-            formData.linkedAsset &&
+            formData.psaId &&
             formData.description &&
             formData.description.trim() != "" &&
-            formData.assignedUser &&
+            formData.assignedUserId &&
             formData.scheduledDate
         );
     };
     
     useEffect(() => {
         if (props.changeOfParts[0]) {
-            const cop = props.changeOfParts[0];
-            const data = {
-                linkedAsset: cop.psaId,
-                description: cop.description,
-                assignedUser: cop.assignedUserId,
-                scheduledDate: new Date(cop.scheduledDate),
-            }
-            setFormData(data)
+            // const cop = props.changeOfParts[0];
+            // const data = {
+            //     linkedAsset: cop.psaId,
+            //     description: cop.description,
+            //     assignedUser: cop.assignedUserId,
+            //     scheduledDate: new Date(cop.scheduledDate),
+            // }
+            setFormData(props.changeOfParts[0])
         }
     }, [props.changeOfParts]);
     
