@@ -12,6 +12,8 @@
 	bottom: 1em;
 	right: 1em;
 	padding: 0.2em;
+	display: flex;
+	gap: 5px;
 }
 
 .footerButtons > button {

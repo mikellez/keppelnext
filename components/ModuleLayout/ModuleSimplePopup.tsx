@@ -20,7 +20,6 @@ interface ModuleSimplePopupProps {
 	text?: string
 	icon?: SimpleIcon | IconType | null
 	buttons?: React.ReactNode | React.ReactNode[]
-	buttons2?: React.ReactNode | React.ReactNode[]
 	onRequestClose?: Function
 }
 
@@ -81,7 +80,6 @@ export default function ModuleSimplePopup(props: ModuleSimplePopupProps) {
 				<p className={styles.modalText}>{props.text}</p>
 				<div className={styles.footerButtons}>
 					{props.buttons}
-					{props.buttons2}
 				</div>
 			</div>
 		</Modal>
