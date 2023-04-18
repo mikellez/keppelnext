@@ -2,18 +2,20 @@ const db = require("../../db");
 const moment = require("moment");
 
 const fetchChangeOfParts = async (req, res, next) => {
-    const sql = req.query.plantId ? 
-        fetchChangeOfPartsByPlantQuery(req.query.plantId) : 
-        req.params.cop_id ? 
-        fetchChangeOfPartsByIdQuery(req.params.cop_id) :
-        fetchAllOfChangeOfPartsQuery;
+    const sql = req.query.plantId
+        ? fetchChangeOfPartsByPlantQuery(req.query.plantId)
+        : req.params.cop_id
+        ? fetchChangeOfPartsByIdQuery(req.params.cop_id)
+        : req.query.assetId
+        ? fetchChangeofPartsByAssetQuery(req.query.assetId)
+        : fetchAllOfChangeOfPartsQuery;
 
     db.query(sql, (err, found) => {
         if (err) {
             console.log(err);
             return res.status(500).json("Failure to fetch change of parts");
         }
-        if (found.rows.length === 0) return res.status(404).json("No change of parts found");
+        if (found.rows.length === 0) return res.status(204).json("No change of parts found");
         return res.status(200).send(
             found.rows.map((row) => {
                 return {
@@ -52,6 +54,27 @@ const fetchChangeOfPartsByPlantQuery = (plant_id) => `
             JOIN keppel.plant_master pm ON psa.plant_id = pm.plant_id
             JOIN keppel.users u ON cop.assigned_user_id = u.user_id
     WHERE pm.plant_id = ${plant_id}
+`;
+
+const fetchChangeofPartsByAssetQuery = (asset_id) => `
+    SELECT 
+        cop.cop_id,
+        cop.psa_id,
+        cop.changed_date,
+        cop.scheduled_date,
+        cop.description,
+        cop.assigned_user_id,
+        psa.plant_asset_instrument,
+        psa.plant_id,
+        pm.plant_name,
+        u.first_name,
+        u.last_name
+    FROM
+        keppel.change_of_parts cop
+            JOIN keppel.plant_system_assets psa ON cop.psa_id = psa.psa_id
+            JOIN keppel.plant_master pm ON psa.plant_id = pm.plant_id
+            JOIN keppel.users u ON cop.assigned_user_id = u.user_id
+    WHERE cop.psa_id = ${asset_id}
 `;
 
 const fetchAllOfChangeOfPartsQuery = `
@@ -144,7 +167,7 @@ const editChangeOfParts = async (req, res, next) => {
             moment(req.body.formData.scheduledDate).format("YYYY-MM-DD HH:mm:ss"),
             req.body.formData.description,
             req.body.formData.assignedUserId,
-            req.params.cop_id
+            req.params.cop_id,
         ],
         (err) => {
             if (err) {
@@ -153,8 +176,8 @@ const editChangeOfParts = async (req, res, next) => {
             }
             return res.status(200).json("Change of parts successfully edited");
         }
-    )
-}
+    );
+};
 
 const completeChangeOfParts = async (req, res, next) => {
     sql = `
@@ -166,20 +189,14 @@ const completeChangeOfParts = async (req, res, next) => {
             cop_id = $1
     `;
 
-    db.query(
-        sql,
-        [
-            req.params.cop_id
-        ],
-        (err) => {
-            if (err) {
-                console.log(err);
-                return res.status(500).json("Failure to complete new change of parts");
-            }
-            return res.status(200).json("Change of parts successfully completed");
+    db.query(sql, [req.params.cop_id], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to complete new change of parts");
         }
-    )
-}
+        return res.status(200).json("Change of parts successfully completed");
+    });
+};
 
 module.exports = {
     fetchChangeOfParts,

@@ -7,11 +7,11 @@ import {
     Row,
     HeaderCell,
     Cell,
-} from '@table-library/react-table-library/table';
+} from "@table-library/react-table-library/table";
 import { useRowSelect } from "@table-library/react-table-library/select";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
-import {ChangeOfPartsPageProps} from "../../pages/ChangeOfParts";
+import { ChangeOfPartsPageProps } from "../../pages/ChangeOfParts";
 import { CMMSChangeOfParts } from "../../types/common/interfaces";
 import { dateFormat } from "../Schedule/ScheduleTemplate";
 import { useCurrentUser } from "../SWR";
@@ -20,24 +20,24 @@ import axios from "axios";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
 
-
 const completeCOP = async (copId: number) => {
-    return await axios.patch("/api/changeOfParts/complete/" + copId)
-        .then(res => res.data)
-        .catch(err => console.log(err));
+    return await axios
+        .patch("/api/changeOfParts/complete/" + copId)
+        .then((res) => res.data)
+        .catch((err) => console.log(err));
 };
 
 interface COPTableData extends CMMSChangeOfParts {
     id: string;
-};
+}
 
 interface COPTableProps extends ChangeOfPartsPageProps {
-    selectedCOP: CMMSChangeOfParts;
-    setSelectedCOP: React.Dispatch<React.SetStateAction<CMMSChangeOfParts>>;
-};
+    selectedCOP?: CMMSChangeOfParts;
+    setSelectedCOP?: React.Dispatch<React.SetStateAction<CMMSChangeOfParts>>;
+    isDisabledSelect: boolean;
+}
 
 const COPTable = (props: COPTableProps) => {
-
     const [tableData, setTableData] = useState<COPTableData[]>([]);
     const [pendingCompleteCOPId, setPendingCompleteCOPId] = useState<number>();
     const [confirmModal, setConfirmModal] = useState<boolean>(false);
@@ -51,7 +51,7 @@ const COPTable = (props: COPTableProps) => {
             Table: `
                 --data-table-library_grid-template-columns: 5% 20% 15% 15% 20% 25%;
             `,
-          
+
             Row: `
                 &:nth-of-type(n) {
                 cursor: pointer
@@ -66,34 +66,30 @@ const COPTable = (props: COPTableProps) => {
             `,
 
             HeaderCell: `
-                background-color: white !important;
                 z-index: 20 !important;
                 &:nth-of-type(1) {
                     z-index: 30 !important;
                 }
-            `, 
+            `,
         },
     ]);
 
     const onSelectChange = (action: any, state: any) => {
-        const selectedId = +state.id
-        const newCOP = tableData.filter(cop => cop.copId === selectedId)[0]
-        if (newCOP) props.setSelectedCOP(newCOP);
-        else props.setSelectedCOP({} as CMMSChangeOfParts);
+        const selectedId = +state.id;
+        const newCOP = tableData.filter((cop) => cop.copId === selectedId)[0];
+        if (newCOP) props.setSelectedCOP!(newCOP);
+        else props.setSelectedCOP!({} as CMMSChangeOfParts);
     };
 
-    const select = useRowSelect(
-        { nodes: tableData }, 
-        { onChange: onSelectChange }
-    );
+    const select = useRowSelect({ nodes: tableData }, { onChange: onSelectChange });
 
     const handleCompleteClick = (copId: number) => {
-        setPendingCompleteCOPId(copId)
+        setPendingCompleteCOPId(copId);
         setConfirmModal(true);
     };
 
     const handleConfirmClick = () => {
-        completeCOP(pendingCompleteCOPId as number).then(result => {
+        completeCOP(pendingCompleteCOPId as number).then((result) => {
             setSuccessModal(true);
             setTimeout(() => {
                 router.reload();
@@ -102,85 +98,89 @@ const COPTable = (props: COPTableProps) => {
     };
 
     useEffect(() => {
-        if (!confirmModal) setPendingCompleteCOPId(undefined)
-    }, [confirmModal])
+        if (!confirmModal) setPendingCompleteCOPId(undefined);
+    }, [confirmModal]);
 
     useEffect(() => {
-        const data : COPTableData[] = props.changeOfParts.map(item => {
+        const data: COPTableData[] = props.changeOfParts.map((item) => {
             return {
                 ...item,
                 id: item.copId.toString(),
-            }
+            };
         });
 
         setTableData(data);
-
     }, [props.changeOfParts]);
 
     return (
         <>
-        <Table data={{ nodes: tableData }} theme={theme} layout={{ custom: true }} select={select}>
-            {(tableList: COPTableData[]) =>
-            <>
-                <Header>
-                    <HeaderRow>
-                        <HeaderCell>ID</HeaderCell>
-                        <HeaderCell>Asset</HeaderCell>
-                        <HeaderCell>Scheduled Date</HeaderCell>
-                        <HeaderCell>Description</HeaderCell>
-                        <HeaderCell>Assigned To</HeaderCell>
-                        <HeaderCell>Remarks</HeaderCell>
-                    </HeaderRow>
-                </Header>
-                <Body>
-                    {tableList.map(item => 
-                        <Row 
-                            key={item.id} 
-                            item={item}
-                        >
-                            <Cell>{item.copId}</Cell>
-                            <Cell>{item.asset}</Cell>
-                            <Cell>{dateFormat(new Date(item.scheduledDate))}</Cell>
-                            <Cell>{item.description}</Cell>
-                            <Cell>{item.assignedUser}</Cell>
-                            <Cell>{
-                                item.changedDate ? 
-                                `Changed on ${item.changedDate}` : 
-                                user.data?.id === item.assignedUserId ? 
-                                <TooltipBtn
-                                    toolTip={false}
-                                    onClick={() => handleCompleteClick(item.copId)}
-                                >Complete</TooltipBtn> :
-                                "-"
-                            }</Cell>
-                        </Row>
-                    )}
-                </Body>
-            </>
-            }
-        </Table>
+            <Table
+                data={{ nodes: tableData }}
+                theme={theme}
+                layout={{ custom: true }}
+                select={props.isDisabledSelect ? "" : select}
+            >
+                {(tableList: COPTableData[]) => (
+                    <>
+                        <Header>
+                            <HeaderRow>
+                                <HeaderCell>ID</HeaderCell>
+                                <HeaderCell>Asset</HeaderCell>
+                                <HeaderCell>Scheduled Date</HeaderCell>
+                                <HeaderCell>Description</HeaderCell>
+                                <HeaderCell>Assigned To</HeaderCell>
+                                <HeaderCell>Remarks</HeaderCell>
+                            </HeaderRow>
+                        </Header>
+                        <Body>
+                            {tableList.map((item) => (
+                                <Row key={item.id} item={item}>
+                                    <Cell>{item.copId}</Cell>
+                                    <Cell>{item.asset}</Cell>
+                                    <Cell>{dateFormat(new Date(item.scheduledDate))}</Cell>
+                                    <Cell>{item.description}</Cell>
+                                    <Cell>{item.assignedUser}</Cell>
+                                    <Cell>
+                                        {item.changedDate ? (
+                                            `Changed on ${item.changedDate}`
+                                        ) : user.data?.id === item.assignedUserId ? (
+                                            <TooltipBtn
+                                                toolTip={false}
+                                                onClick={() => handleCompleteClick(item.copId)}
+                                            >
+                                                Complete
+                                            </TooltipBtn>
+                                        ) : (
+                                            "-"
+                                        )}
+                                    </Cell>
+                                </Row>
+                            ))}
+                        </Body>
+                    </>
+                )}
+            </Table>
 
-        <ModuleSimplePopup 
-            modalOpenState={confirmModal}
-            setModalOpenState={setConfirmModal}
-            buttons={
-            <TooltipBtn
-                toolTip={false}
-                onClick={handleConfirmClick}
-            >Confirm</TooltipBtn>
-            }
-            title="Confirm"
-            text="Please confirm that you have completed the change of part"
-            icon={SimpleIcon.Info}
-        />
+            <ModuleSimplePopup
+                modalOpenState={confirmModal}
+                setModalOpenState={setConfirmModal}
+                buttons={
+                    <TooltipBtn toolTip={false} onClick={handleConfirmClick}>
+                        Confirm
+                    </TooltipBtn>
+                }
+                title="Confirm"
+                text="Please confirm that you have completed the change of part"
+                icon={SimpleIcon.Info}
+            />
 
-        <ModuleSimplePopup 
-            modalOpenState={successModal}
-            setModalOpenState={setSuccessModal}
-            title="Success"
-            text="You have successfully completed change of part"
-            icon={SimpleIcon.Check}
-        />
+            <ModuleSimplePopup
+                modalOpenState={successModal}
+                setModalOpenState={setSuccessModal}
+                title="Success"
+                text="You have successfully completed change of part"
+                icon={SimpleIcon.Check}
+            />
         </>
     );
 };
