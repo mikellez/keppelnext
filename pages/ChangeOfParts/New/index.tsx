@@ -16,6 +16,7 @@ import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/
 import { createChangeOfPartsServerSideProps } from "../../../types/common/props";
 import { GetServerSideProps } from "next";
 import { ChangeOfPartsPageProps } from "..";
+import LoadingHourglass from "../../../components/LoadingHourglass";
 
 const createChangeOfParts = async (formData: CMMSChangeOfParts) => {
     return await axios
@@ -31,6 +32,7 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
     const [formData, setFormData] = useState<CMMSChangeOfParts>({scheduledDate: new Date()} as CMMSChangeOfParts);
     const [successModal, setSuccessModal] = useState<boolean>(false);
     const [displayErrorMsg, setDisplayErrorMsg] = useState<boolean>(false);
+    const [isReady, setIsReady] = useState<boolean>(false);
     const router = useRouter();
 
 
@@ -60,6 +62,7 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
     };
 
     useEffect(() => {
+        setIsReady(false);
         if (props.changeOfParts[0] && router.query.id) {
             setFormData(prev => {
                 return {
@@ -71,12 +74,19 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
                 }
             });
 
-        } 
+            setTimeout(() => {
+                setIsReady(true);
+            }, 1000);
+
+        } else {
+            setIsReady(true);
+        }
+
     }, [props.changeOfParts, router.query]);
 
     return (
         <>
-        <ModuleMain>
+            {isReady ? <><ModuleMain>
             <ModuleHeader title="New Change Of Parts" header="Create New Change Of Parts">
                 <Link href="/ChangeOfParts" className="btn btn-secondary">
                     Back
@@ -106,7 +116,7 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
             icon={SimpleIcon.Check}
             title="Success"
             text="Change of parts successfully updated"
-        /> 
+        /></> : <LoadingHourglass />}
         </>
     );
 };
