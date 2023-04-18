@@ -167,19 +167,15 @@ export default function AssetDetails(props: {
                         <HiOutlinePencilAlt size={20} />
                     </TooltipBtn>
                 </Link>
-
-                <TooltipBtn text="View Asset History" onClick={() => setAssetHistoryModal(true)}>
-                    <AiOutlineHistory size={20} />
-                </TooltipBtn>
-
-                {/* <Link href={`/ChangeOfParts/New`}> */}
                 <TooltipBtn
-                    text="View Change of Parts History"
+                    text="View Change of Parts Details"
                     onClick={() => setCOPHistoryModal(true)}
                 >
                     <TbExchange size={20} />
                 </TooltipBtn>
-                {/* </Link> */}
+                <TooltipBtn text="View Asset History" onClick={() => setAssetHistoryModal(true)}>
+                    <AiOutlineHistory size={20} />
+                </TooltipBtn>
             </ModuleHeader>
             <ModuleContent>
                 {isLoading ? (
@@ -336,6 +332,10 @@ export default function AssetDetails(props: {
                 closeOnOverlayClick={true}
             >
                 <COPTable changeOfParts={COPData} isDisabledSelect={true} />
+
+                <Link href={`/ChangeOfParts/New`}>
+                    <TooltipBtn toolTip={false}>Create New Change of Parts</TooltipBtn>
+                </Link>
             </ModuleModal>
         </ModuleMain>
     );
