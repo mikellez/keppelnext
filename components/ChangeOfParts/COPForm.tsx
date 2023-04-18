@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import RequiredIcon from "../RequiredIcon";
 import AssetSelect, { AssetOption } from "../Checklist/AssetSelect";
 import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
@@ -16,6 +16,7 @@ interface COPFormProps {
 
 const COPForm = (props: COPFormProps) => {
     const user = useCurrentUser();
+    const assetRef = useRef<any>();
 
     const updateDataField = (value: number | string | null, field: string) => {
         props.setFormData((prev) => {
@@ -24,6 +25,10 @@ const COPForm = (props: COPFormProps) => {
                 [field]: value,
             };
         });
+
+        if (field === "plantId") {
+            assetRef.current.setValue("")
+        }
     };
 
     return (
@@ -71,6 +76,7 @@ const COPForm = (props: COPFormProps) => {
                         plantId={props.formData.plantId ? props.formData.plantId : -1}
                         isSingle={true}
                         defaultIds={props.formData.psaId ? [props.formData.psaId] : []}
+                        ref={assetRef}
                     />
 
                 </div>
