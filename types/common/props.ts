@@ -55,8 +55,10 @@ const createChangeOfPartsServerSideProps = (specificCOP: boolean, conditionalFun
 			},
 		};
 
-		const url = specificCOP ? 
+		const url = specificCOP && context.params?.id ? 
 			`http://localhost:3001/api/changeOfParts/${context.params!.id}` : 
+			specificCOP && context.query.id? 
+			`http://localhost:3001/api/changeOfParts/${context.query!.id}` :
 			"http://localhost:3001/api/changeOfParts";
 	
 		const response = await axios.get<CMMSChangeOfParts[]>(url, headers);

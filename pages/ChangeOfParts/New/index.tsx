@@ -13,7 +13,9 @@ import { useRouter } from "next/router";
 import COPForm from "../../../components/ChangeOfParts/COPForm";
 import { CMMSChangeOfParts } from "../../../types/common/interfaces";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
-
+import { createChangeOfPartsServerSideProps } from "../../../types/common/props";
+import { GetServerSideProps } from "next";
+import { ChangeOfPartsPageProps } from "..";
 
 const createChangeOfParts = async (formData: CMMSChangeOfParts) => {
     return await axios
@@ -24,7 +26,7 @@ const createChangeOfParts = async (formData: CMMSChangeOfParts) => {
         .catch((err) => console.log(err));
 };
 
-const ChangeOfPartsNew = () => {
+const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [formData, setFormData] = useState<CMMSChangeOfParts>({scheduledDate: new Date()} as CMMSChangeOfParts);
     const [successModal, setSuccessModal] = useState<boolean>(false);
@@ -56,6 +58,21 @@ const ChangeOfPartsNew = () => {
             formData.scheduledDate
         );
     };
+
+    useEffect(() => {
+        if (props.changeOfParts[0] && router.query.id) {
+            setFormData(prev => {
+                return {
+                    ...prev,
+                    plantId: props.changeOfParts[0].plantId,
+                    description: props.changeOfParts[0].description,
+                    psaId: props.changeOfParts[0].psaId,
+                    assignedUserId: props.changeOfParts[0].assignedUserId, 
+                }
+            });
+
+        } 
+    }, [props.changeOfParts, router.query]);
 
     return (
         <>
@@ -89,9 +106,11 @@ const ChangeOfPartsNew = () => {
             icon={SimpleIcon.Check}
             title="Success"
             text="Change of parts successfully updated"
-        />
+        /> 
         </>
     );
 };
 
 export default ChangeOfPartsNew;
+
+export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps(true);

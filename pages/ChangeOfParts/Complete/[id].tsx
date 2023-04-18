@@ -9,6 +9,7 @@ import TooltipBtn from "../../../components/TooltipBtn";
 import { useRouter } from "next/router";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { editChangeOfParts } from "../Edit/[id]";
+import Link from "next/link";
 
 const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
     const [formData, setFormData] = useState<CMMSChangeOfParts>(props.changeOfParts[0]);
@@ -32,16 +33,17 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
     const handleConfirmClick = () => {
         editChangeOfParts(formData).then(result => {
             setSuccessModal(true);
-            setTimeout(() => {
-                router.push("/ChangeOfParts")
-            }, 1000);
         });
     };
-    console.log(formData)
+
     return (
         <>
         <ModuleMain>
-            <ModuleHeader header="Complete Change of Parts"></ModuleHeader>
+            <ModuleHeader header="Complete Change of Parts">
+                <Link href="/ChangeOfParts" className="btn btn-secondary">
+                    Back
+                </Link>
+            </ModuleHeader>
             <ModuleContent>
                 <COPForm formData={formData} setFormData={setFormData} disableForm />
             </ModuleContent>
@@ -54,6 +56,7 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                         type="date" 
                         className="form-control"
                         onChange={handleOnChange}
+                        max={new Date().toISOString().slice(0, 10)}
                     />
                 </div>  
             </ModuleContent>
@@ -83,7 +86,19 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                 modalOpenState={successModal}
                 setModalOpenState={setSuccessModal}
                 title="Success"
-                text="You have successfully completed change of part"
+                text="You have successfully completed change of part. Do you want to create another one?"
+                buttons={[
+                    <TooltipBtn 
+                        key={1}
+                        toolTip={false}
+                        onClick={() => router.push("/ChangeOfParts")}
+                    >No</TooltipBtn>,
+                    <TooltipBtn 
+                        key={2}
+                        toolTip={false}
+                        onClick={() => router.push("/ChangeOfParts/New?id=" + formData.copId)}
+                    >Yes</TooltipBtn>
+                ]}
                 icon={SimpleIcon.Check}
             />
         </>
