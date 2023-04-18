@@ -11,21 +11,24 @@ import { CMMSChangeOfParts } from "../../types/common/interfaces";
 
 interface COPFormProps {
     formData: CMMSChangeOfParts
-    setFormData: React.Dispatch<React.SetStateAction<CMMSChangeOfParts>>
+    setFormData?: React.Dispatch<React.SetStateAction<CMMSChangeOfParts>>
+    disableForm?: boolean
 }
 
 const COPForm = (props: COPFormProps) => {
     const user = useCurrentUser();
     const assetRef = useRef<any>();
 
-    const updateDataField = (value: number | string | null, field: string) => {
-        props.setFormData((prev) => {
-            return {
-                ...prev,
-                [field]: value,
-            };
-        });
-
+    const updateDataField = (value: number | string | Date | null, field: string) => {
+        if (props.setFormData) {
+            props.setFormData((prev) => {
+                return {
+                    ...prev,
+                    [field]: value,
+                };
+            });
+        }
+        
         if (field === "plantId") {
             assetRef.current.setValue("")
         }
@@ -43,6 +46,7 @@ const COPForm = (props: COPFormProps) => {
                         onChange={(e) => updateDataField(+e.target.value, "plantId")}
                         accessControl
                         defaultPlant={props.formData.plantId ? props.formData.plantId : -1}
+                        disabled={props.disableForm}
                     />
                 </div>
                 
@@ -58,6 +62,7 @@ const COPForm = (props: COPFormProps) => {
                         onChange={(e) => updateDataField(e.target.value, "description")}
                         value={props.formData.description}
                         style={{resize: "none"}}
+                        disabled={props.disableForm}
                     ></textarea>
                 </div>
             </div>
@@ -77,6 +82,7 @@ const COPForm = (props: COPFormProps) => {
                         isSingle={true}
                         defaultIds={props.formData.psaId ? [props.formData.psaId] : []}
                         ref={assetRef}
+                        disabled={props.disableForm}
                     />
 
                 </div>
@@ -95,6 +101,7 @@ const COPForm = (props: COPFormProps) => {
                             );
                         }}
                         defaultIds={props.formData.assignedUserId ? [props.formData.assignedUserId] : []}
+                        disabled={props.disableForm}
                     />
                 </div>
                         
@@ -106,9 +113,10 @@ const COPForm = (props: COPFormProps) => {
                         type="date"
                         className="form-control"
                         name="scheduledDate"
-                        onChange={(e) => updateDataField(e.target.value, "scheduledDate")}
+                        onChange={(e) => updateDataField(new Date(e.target.value), "scheduledDate")}
                         min={new Date().toISOString().slice(0, 10)}
                         value={new Date(new Date(props.formData.scheduledDate).getTime() + 8 * 3600 * 1000).toISOString().slice(0, 10)}
+                        disabled={props.disableForm}
                     />
                 </div>
             </div>

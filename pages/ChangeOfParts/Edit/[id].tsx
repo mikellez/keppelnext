@@ -11,9 +11,9 @@ import { CMMSChangeOfParts } from "../../../types/common/interfaces";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import axios, { AxiosResponse } from "axios";
 
-const editChangeOfParts = async (copId: number, formData: CMMSChangeOfParts) => {
+export const editChangeOfParts = async (formData: CMMSChangeOfParts) => {
     return await axios
-        .patch(`/api/changeOfParts/${copId}`, { formData })
+        .patch(`/api/changeOfParts`, { formData })
         .then((res) => {
             return res.data;
         })
@@ -21,7 +21,7 @@ const editChangeOfParts = async (copId: number, formData: CMMSChangeOfParts) => 
 };
 
 const EditChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
-    const [formData, setFormData] = useState<CMMSChangeOfParts>({} as CMMSChangeOfParts);
+    const [formData, setFormData] = useState<CMMSChangeOfParts>(props.changeOfParts[0]);
     const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(false);
     const [successModal, setSuccessModal] = useState<boolean>(false);
     const [failureModal, setFailureModal] = useState<boolean>(false);
@@ -35,7 +35,7 @@ const EditChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
             setIsSubmitDisabled(false);
             
         } else {
-            editChangeOfParts(+router.query.id!, formData)
+            editChangeOfParts(formData)
             .then(result => {
                 setSuccessModal(true);
                 setTimeout(() => [
@@ -54,12 +54,6 @@ const EditChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
             formData.scheduledDate
         );
     };
-    
-    useEffect(() => {
-        if (props.changeOfParts[0]) {
-            setFormData(props.changeOfParts[0])
-        }
-    }, [props.changeOfParts]);
     
     return (
         <>
