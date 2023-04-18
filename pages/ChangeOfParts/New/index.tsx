@@ -17,6 +17,7 @@ import { createChangeOfPartsServerSideProps } from "../../../types/common/props"
 import { GetServerSideProps } from "next";
 import { ChangeOfPartsPageProps } from "..";
 import LoadingHourglass from "../../../components/LoadingHourglass";
+import { useCurrentUser } from "../../../components/SWR";
 
 const createChangeOfParts = async (formData: CMMSChangeOfParts) => {
     return await axios
@@ -34,6 +35,7 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
     const [displayErrorMsg, setDisplayErrorMsg] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
     const router = useRouter();
+    const user = useCurrentUser();
 
 
     const handleSubmit = () => {
@@ -64,29 +66,35 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
     useEffect(() => {
         setIsReady(false);
         if (props.changeOfParts[0] && router.query.id) {
+            const defaultCOP = props.changeOfParts[0]
+            if (user.data?.id != defaultCOP.assignedUserId) {
+                router.push("/404");
+                return;
+            };
+
             setFormData(prev => {
                 return {
                     ...prev,
-                    plantId: props.changeOfParts[0].plantId,
-                    description: props.changeOfParts[0].description,
-                    psaId: props.changeOfParts[0].psaId,
-                    assignedUserId: props.changeOfParts[0].assignedUserId, 
+                    plantId: defaultCOP.plantId,
+                    description: defaultCOP.description,
+                    psaId: defaultCOP.psaId,
+                    assignedUserId: defaultCOP.assignedUserId, 
                 }
             });
 
             setTimeout(() => {
                 setIsReady(true);
-            }, 1000);
+            }, 1500);
 
         } else {
             setIsReady(true);
         }
 
-    }, [props.changeOfParts, router.query]);
+    }, [props.changeOfParts, router.query, user.data]);
 
     return (
         <>
-            {isReady ? <><ModuleMain>
+            {isReady ? <ModuleMain>
             <ModuleHeader title="New Change Of Parts" header="Create New Change Of Parts">
                 <Link href="/ChangeOfParts" className="btn btn-secondary">
                     Back
@@ -108,7 +116,7 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
                     </TooltipBtn>
                 </ModuleFooter>
             </ModuleContent>
-        </ModuleMain>
+        </ModuleMain> : <LoadingHourglass />}
 
         <ModuleSimplePopup 
             modalOpenState={successModal}
@@ -116,7 +124,7 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
             icon={SimpleIcon.Check}
             title="Success"
             text="Change of parts successfully updated"
-        /></> : <LoadingHourglass />}
+        /> 
         </>
     );
 };
