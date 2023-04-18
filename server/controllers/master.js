@@ -108,26 +108,28 @@ const fetchMasterTypeEntry = async (req, res, next) => {
 
 const createMasterTypeEntry = async (req, res, next) => {
 	console.log(req.body);
+	let table=tableInfo[req.body.type].internalName;
 	let sql;
-	let insert;
+	let insert =[];
 	// if asset_type
-	if (req.body.type == 'asset_type'){
-		sql = `INSERT INTO keppel.asset_type (asset_type) VALUES ($1)`;
-		insert = [req.body.entries.asset_type]
-	} else if (req.body.type == 'system'){
-		sql = `INSERT INTO keppel.system_master (system_name) VALUES ($1)`;
-		insert = [req.body.entries.system_name]
-	} else if (req.body.type == 'fault_types'){
-		sql = `INSERT INTO keppel.fault_types (fault_type) VALUES ($1)`;
-		insert = [req.body.entries.fault_type]
-	} else if (req.body.type == 'plant'){
-		sql = `INSERT INTO keppel.plant_master (plant_name, plant_description) VALUES ($1, $2)`;
-		insert = [req.body.entries.plant_name, req.body.entries.plant_description]
-	} else if (req.body.type == 'system_assets'){
-		sql = `INSERT INTO keppel.system_assets (system_id, system_asset) VALUES ($1, $2)`;
-		insert = [parseInt(req.body.entries.system_id), req.body.entries.system_asset]
-		console.log(insert)
+	num="("
+	temp = 0;
+
+	columns ="(";
+	for (const key in req.body.entries) {
+		columns += key + ",";
+		insert.push(req.body.entries[key]);
+		temp++;
 	}
+	console.log(temp);
+	for (let i = 0; i < temp; i++) {
+		num += "$"+(i+1)+",";
+	}
+	columns = columns.slice(0, -1);
+	columns += ")";
+	num = num.slice(0, -1);
+	num += ")";
+	sql = `INSERT INTO keppel.${table} ${columns} VALUES ${num}`;
 	db.query(sql,insert)	
 		.then(result => {
 			return res.status(200).send({
@@ -141,9 +143,6 @@ const createMasterTypeEntry = async (req, res, next) => {
 				table: err.table
 			})
 		})
-	// return res.status(200).send({
-	// 	msg: "success",
-    //   })
 };
 
 const fetchMasterTypeSingle = async (req, res, next) => {
