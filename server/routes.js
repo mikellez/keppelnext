@@ -365,12 +365,6 @@ router
     .post(controllers.changeOfParts.createNewChangeOfParts)
     .patch(controllers.changeOfParts.editChangeOfParts);
 
-router.patch(
-    "/changeOfParts/complete/:cop_id",
-    checkIfLoggedInAPI,
-    controllers.changeOfParts.completeChangeOfParts
-);
-
 // NO API ROUTE
 router.all("/*", (req, res) => {
     return res.status(404).send("no route");
