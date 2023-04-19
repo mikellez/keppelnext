@@ -10,9 +10,11 @@ import { CMMSDashboardData } from "../../types/common/interfaces";
 export async function fetchData(
   type: string,
   plant: number,
-  field: string
+  field: string,
+  datetype: string,
+  date: string
 ): Promise<CMMSDashboardData[]> {
-  const url = `/api/${type}/counts/${field}/${plant}`;
+  const url = `/api/${type}/counts/${field}/${plant}/${datetype}/${date}`;
   const colors = [
     "#03C988",
     "#FFAC41",
@@ -21,6 +23,8 @@ export async function fetchData(
     "#282A3A",
     "#FB2576",
   ];
+
+  console.log(url)
 
   return await axios
     .get(url)
@@ -42,6 +46,7 @@ export default function Dashboad({ role_id }: { role_id: number }) {
   if (role_id === 1 || role_id === 2) return <ManagerDashboad />;
 
   if (role_id === 3) return <EngineerDashboad />;
+  return <EngineerDashboad />;
 
   return <SpecialistDashboad />;
 }

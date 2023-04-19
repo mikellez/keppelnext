@@ -1,7 +1,9 @@
 
 $primary: #C70F2B;
+$secondary: #E3E3E3;
 $gray: #4D4D4D;
 
 :export {
-    primary: $primary
+    primary: $primary;
+    secondary: $secondary;
 }

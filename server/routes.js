@@ -177,7 +177,7 @@ router.patch(
   controllers.request.approveRejectRequest
 );
 router.get(
-  "/request/counts/:field/:plant",
+  "/request/counts/:field/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.request.fetchRequestCounts
 );
@@ -258,7 +258,7 @@ router.get(
 );
 
 router.get(
-  "/checklist/counts/:field/:plant",
+  "/checklist/counts/:field/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.checklist.fetchChecklistCounts
 );

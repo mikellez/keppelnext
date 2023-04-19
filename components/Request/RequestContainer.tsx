@@ -87,6 +87,8 @@ async function createRequest(
   if (data.image.length > 0) formData.append("image", data.image[0]);
   if (linkedRequestId) formData.append("linkedRequestId", linkedRequestId);
 
+  console.log('formData', formData)
+
   return await axios
     .post("/api/request/", formData, {
       headers: { "Content-Type": "multipart/form-data" },

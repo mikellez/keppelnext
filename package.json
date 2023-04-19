@@ -20,6 +20,7 @@
 		"ag-grid-community": "^29.1.0",
 		"ag-grid-enterprise": "^29.1.0",
 		"ag-grid-react": "^29.1.0",
+		"antd": "^5.4.0",
 		"axios": "^1.2.1",
 		"bcryptjs": "^2.4.3",
 		"bootstrap": "^5.2.3",
@@ -64,7 +65,8 @@
 		"@types/node": "^18.11.17",
 		"@types/nprogress": "^0.2.0",
 		"@types/react-modal": "^3.13.1",
-		"@types/react-signature-canvas": "^1.0.2"
+		"@types/react-signature-canvas": "^1.0.2",
+		"kill-port": "^2.0.1"
 	},
 	"apidoc": {
 		"title": "Keppel Next",

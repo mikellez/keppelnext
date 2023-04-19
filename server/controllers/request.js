@@ -180,6 +180,42 @@ const fetchRequestTypes = async (req, res, next) => {
 
 const fetchRequestCounts = async (req, res, next) => {
   let sql;
+  let date = req.params.date;
+  let datetype = req.params.datetype;
+  let dateCond = "";
+  if(date !== "all"){
+      switch(datetype) {
+          case "week":
+              dateCond = `
+                  AND DATE_PART('week', R.CREATED_DATE::DATE) = DATE_PART('week', '${date}'::DATE) 
+                  AND DATE_PART('year', R.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+              break;
+
+          case "month":
+              dateCond = `
+                  AND DATE_PART('month', R.CREATED_DATE::DATE) = DATE_PART('month', '${date}'::DATE) 
+                  AND DATE_PART('year', R.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+              break;
+
+          case "year":
+              dateCond = `AND DATE_PART('year', R.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+              break;
+
+          case "quarter":
+              dateCond = `
+                  AND DATE_PART('quarter', R.CREATED_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) 
+                  AND DATE_PART('year', R.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+              break;
+          default:
+              dateCond = `AND R.CREATED_DATE::DATE = '${date}'::DATE`;
+
+      }
+  }
+
   switch (req.params.field) {
     case "status":
       sql =
@@ -187,9 +223,12 @@ const fetchRequestCounts = async (req, res, next) => {
           ? `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
 				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
 				WHERE R.PLANT_ID = ${req.params.plant}
+				${dateCond}	
 				GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (name)`
           : `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
 				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
+				WHERE 1 = 1 
+				${dateCond}
 
 				GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (name)`;
       break;
@@ -202,11 +241,13 @@ const fetchRequestCounts = async (req, res, next) => {
 				WHERE R.STATUS_ID != 5 AND 
 				R.STATUS_ID != 7 AND
 				R.PLANT_ID = ${req.params.plant}
+				${dateCond}	
 				GROUP BY(FT.FAULT_TYPE, R.FAULT_ID) ORDER BY (name)`
           : `SELECT FT.FAULT_TYPE AS NAME, R.FAULT_ID AS ID, COUNT(R.FAULT_ID) AS VALUE FROM 
 				KEPPEL.REQUEST R 
 				JOIN KEPPEL.FAULT_TYPES FT ON R.FAULT_ID = FT.FAULT_ID
 				WHERE R.STATUS_ID != 5 AND R.STATUS_ID != 7
+				${dateCond}	
 				GROUP BY(FT.FAULT_TYPE, R.FAULT_ID) ORDER BY (name)`;
       break;
     case "priority":
@@ -218,11 +259,13 @@ const fetchRequestCounts = async (req, res, next) => {
 				WHERE R.STATUS_ID != 5 AND 
 				R.STATUS_ID != 7 AND
 				R.PLANT_ID = ${req.params.plant}
+				${dateCond}	
 				GROUP BY(P.PRIORITY, R.PRIORITY_ID) ORDER BY (ID)`
           : `SELECT P.PRIORITY AS NAME, R.PRIORITY_ID AS ID, COUNT(R.PRIORITY_ID) AS VALUE FROM 
 				KEPPEL.REQUEST R 
 				JOIN KEPPEL.PRIORITY P ON R.PRIORITY_ID = P.P_ID
 				WHERE R.STATUS_ID != 5 AND R.STATUS_ID != 7
+				${dateCond}	
 				GROUP BY(P.PRIORITY, R.PRIORITY_ID) ORDER BY (ID)`;
       break;
     default:

@@ -387,6 +387,46 @@ const createNewChecklistTemplate = async (req, res, next) => {
 
 const fetchChecklistCounts = (req, res, next) => {
     let sql;
+    let date = req.params.date;
+    let datetype = req.params.datetype;
+    let dateCond = "";
+    let dateSplit = {};
+    let year, month, week, quarter;
+
+    if(date !== "all"){
+        switch(datetype) {
+            case "week":
+                dateCond = `
+                    AND DATE_PART('week', CM.CREATED_DATE::DATE) = DATE_PART('week', '${date}'::DATE) 
+                    AND DATE_PART('year', CM.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+                break;
+
+            case "month":
+                dateCond = `
+                    AND DATE_PART('month', CM.CREATED_DATE::DATE) = DATE_PART('month', '${date}'::DATE) 
+                    AND DATE_PART('year', CM.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+                break;
+
+            case "year":
+                dateCond = `
+                    AND DATE_PART('year', CM.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+                break;
+
+            case "quarter":
+                dateCond = `
+                    AND DATE_PART('quarter', CM.CREATED_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) 
+                    AND DATE_PART('year', CM.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+                break;
+            default:
+                dateCond = `AND CM.CREATED_DATE::DATE = '${date}'::DATE`;
+
+        }
+    }
+
     switch (req.params.field) {
         case "status":
             sql =
@@ -394,14 +434,19 @@ const fetchChecklistCounts = (req, res, next) => {
                     ? `SELECT S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
 				JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
 				WHERE CM.PLANT_ID = ${req.params.plant}
+                ${dateCond}
 				GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)`
                     : `SELECT  S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
 				JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
+                WHERE 1 = 1
+                ${dateCond}
 				GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)`;
             break;
         default:
             return res.status(404).send(`Invalid checklist type of ${req.params.field}`);
     }
+    console.log(date)
+    console.log(sql)
     db.query(sql, (err, result) => {
         if (err)
             return res

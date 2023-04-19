@@ -20,6 +20,7 @@
     table library. It supports table dropdown features.
 */
 
+
 import React, { useState, useEffect, CSSProperties } from "react";
 import {
   ModuleContent,
@@ -142,23 +143,25 @@ export default function Request() {
     {
       label: "ID",
       resize: true,
-      renderCell: (item) => item.id,
+      renderCell: item => item.id
     },
     {
       label: "Fault Type",
       resize: true,
-      renderCell: (item) => item.fault_name,
+      renderCell: item => item.fault_name
     },
     {
       label: "Location",
       resize: true,
-      renderCell: (item) => item.plant_name,
+      renderCell: item => item.plant_name,
     },
     {
       label: "Priority",
       resize: true,
-      renderCell: (item) => (
-        <span style={{ color: getColor(item.priority), fontWeight: "bold" }}>
+      renderCell: item => (
+        <span
+          style={{ color: getColor(item.priority), fontWeight: "bold" }}
+        >
           {item.priority == null ? "-" : item.priority}
         </span>
       ),
@@ -166,7 +169,7 @@ export default function Request() {
     {
       label: "Status",
       resize: true,
-      renderCell: (item) => (
+      renderCell: item => (
         <span style={{ color: getColor(item.status), fontWeight: "bold" }}>
           {item.status}
         </span>
@@ -175,7 +178,7 @@ export default function Request() {
     {
       label: "Date",
       resize: true,
-      renderCell: (item) =>
+      renderCell: item =>
         item.created_date.toLocaleDateString("en-US", {
           year: "numeric",
           month: "2-digit",
@@ -185,16 +188,16 @@ export default function Request() {
     {
       label: "Asset Name",
       resize: true,
-      renderCell: (item) => item.asset_name,
+      renderCell: item => item.asset_name,
     },
     {
       label: "Requested By",
       resize: true,
-      renderCell: (item) => item.fullname,
+      renderCell: item => item.fullname,
     },
     {
       label: "",
-      renderCell: (item) => (
+      renderCell: item => (
         <div className={styles.iconsDiv}>
           <div
             className={styles.editIcon}
@@ -203,10 +206,7 @@ export default function Request() {
                 data?.role_id == 1 || data?.role_id == 1 || data?.role_id == 1
                   ? "block"
                   : "none",
-              visibility:
-                item.status_id === 1 || item.status_id === 2
-                  ? "visible"
-                  : "hidden",
+              visibility: item.status_id === 1 || item.status_id === 2 ? "visible" : "hidden",
             }}
             onClick={() => {
               router.push(`/Request/Assign/${item.id}`);
@@ -312,7 +312,9 @@ export default function Request() {
                     {item.uploaded_file ? (
                       <Image
                         src={URL.createObjectURL(
-                          new Blob([new Uint8Array(item.uploaded_file.data)])
+                          new Blob([
+                            new Uint8Array(item.uploaded_file.data),
+                          ])
                         )}
                         alt=""
                         className={styles.tableDropdownImg}
@@ -339,7 +341,9 @@ export default function Request() {
                     {item.completion_file ? (
                       <Image
                         src={URL.createObjectURL(
-                          new Blob([new Uint8Array(item.completion_file.data)])
+                          new Blob([
+                            new Uint8Array(item.completion_file.data),
+                          ])
                         )}
                         alt=""
                         className={styles.tableDropdownImg}
@@ -360,21 +364,17 @@ export default function Request() {
                     )}
                   </li>
                   <li className={styles.tableDropdownListItem}>
-                    {(data?.role_id === 1 || data?.role_id === 2) &&
-                    item.status_id === 3 ? (
-                      <Link href={`/Request/Manage/${item.id}`}>
-                        <strong>Manage</strong>
-                      </Link>
-                    ) : (data?.role_id === 3 || data?.role_id === 4) &&
-                      (item.status_id === 2 || item.status_id === 5) ? (
-                      <Link href={`/Request/Complete/${item.id}`}>
-                        <strong>Complete</strong>
-                      </Link>
-                    ) : (
-                      <Link href={`/Request/View/${item.id}`}>
-                        <strong>View</strong>
-                      </Link>
-                    )}
+                        {(data?.role_id === 1 || data?.role_id === 2) &&
+                          item.status_id === 3 ?
+                          <Link href={`/Request/Manage/${item.id}`}><strong>Manage</strong></Link>
+                          :
+                        (data?.role_id === 3 || data?.role_id === 4) &&
+                          (item.status_id === 2 ||
+                            item.status_id === 5) ?
+                            <Link href={`/Request/Complete/${item.id}`}><strong>Complete</strong></Link> 
+                            : 
+                            <Link href={`/Request/View/${item.id}`}><strong>View</strong></Link> 
+                        }
                   </li>
                 </ul>
               </td>
@@ -414,7 +414,7 @@ export default function Request() {
             uploaded_file: row.uploaded_file,
             requesthistory: row.requesthistory,
             complete_comments: row.complete_comments,
-            completion_file: row.completion_file,
+            completion_file: row.completion_file
           };
         })
       );
@@ -441,15 +441,7 @@ export default function Request() {
       </ModuleHeader>
       <ModuleContent>
         {!isReady && (
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              textAlign: "center",
-            }}
-          >
+          <div style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
             <LoadingHourglass />
           </div>
         )}
