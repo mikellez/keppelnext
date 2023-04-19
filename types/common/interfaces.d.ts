@@ -128,6 +128,11 @@ interface CMMSUser {
   username?: string;
 }
 
+interface CMMSEmployee extends CMMSUser {
+  employee_id?: number;
+  full_name: string;
+}
+
 interface CMMSRequest {
   request_id: string;
   request_name?: string;
@@ -325,6 +330,7 @@ interface CMMSChangeOfParts {
 export {
   CMMSBaseType,
   CMMSUser,
+  CMMSEmployee,
   CMMSRequest,
   CMMSRequestTypes,
   CMMSFaultTypes,

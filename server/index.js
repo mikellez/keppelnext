@@ -136,7 +136,9 @@ app.prepare().then(() => {
   server.get("/Master*", checkIfLoggedIn, accessControl, (req, res) => {
     return handle(req, res);
   });
-
+  server.get("/User*", checkIfLoggedIn, accessControl, (req, res) => {
+    return handle(req, res);
+  });
   server.get("*", (req, res) => {
     return handle(req, res);
   });
