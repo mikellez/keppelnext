@@ -26,7 +26,6 @@ import LoadingHourglass from "../components/LoadingHourglass";
 import ModuleSimplePopup, {
   SimpleIcon,
 } from "../components/ModuleLayout/ModuleSimplePopup";
-import { usePagination } from "@table-library/react-table-library/pagination";
 import PageButton from "../components/PageButton";
 import styles2 from "../styles/Request.module.scss";
 import { FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
@@ -86,15 +85,6 @@ const Logbook = ({
     second: null | number;
   }>({ first: null, second: null });
 
-  // const pageData = { nodes: logbookData };
-
-  // const pagination = usePagination(pageData, {
-  //   state: {
-  //     page: 0,
-  //     size: 10,
-  //   },
-  // });
-  // const totalPages = pagination.state.getTotalPages(pageData.nodes);
   const user = useCurrentUser();
 
   const theme = useTheme([
@@ -297,7 +287,6 @@ const Logbook = ({
             data={{ nodes: logbookData }}
             theme={theme}
             layout={{ custom: true }}
-            // pagination={pagination}
           >
             {(logbookData: logbookData[]) => (
               <>
