@@ -29,7 +29,7 @@ const fetchChangeOfPartsByIdQuery = (copId) => fetchAllOfChangeOfPartsQuery + `W
 
 const fetchAllCompletedChangeOfPartsQuery = fetchAllOfChangeOfPartsQuery + `WHERE cop.changed_date IS NOT NULL `;
 
-const fetchAllScheduledChangeOfPartsQuery = fetchAllOfChangeOfPartsQuery + `WHERE cop.changed_date = NULL `;
+const fetchAllScheduledChangeOfPartsQuery = fetchAllOfChangeOfPartsQuery + `WHERE cop.changed_date IS NULL `;
 
 const toCMMSChangeOfParts = (row) => {
     return {

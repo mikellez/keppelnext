@@ -16,24 +16,38 @@ export interface ChangeOfPartsPageProps {
     changeOfParts: CMMSChangeOfParts[];
 }
 
-const fetchChangeOfParts = async (plantId: number) => {
-    const plant = plantId > 0 ? plantId : "";
-    return await axios
-        .get<CMMSChangeOfParts[]>("/api/changeOfParts/?plant_id=" + plant)
-        .then((res) => res.data)
-        .catch((err) => console.log(err));
-};
+const indexedColumn: ("scheduled" | "completed")[] = ["scheduled", "completed"]
 
 const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
     const [COPData, setCOPData] = useState<CMMSChangeOfParts[]>(props.changeOfParts);
+    const [selectedPlant, setSelectedPlant] = useState<number>(0)
     const [selectedCOP, setSelectedCOP] = useState<CMMSChangeOfParts>({} as CMMSChangeOfParts);
+    const [activeCOPType, setActveCOPType] = useState<number>(0);
+    const [isReady, setIsReady] = useState<boolean>(false);
     const router = useRouter();
 
-    const updateCOPData = async (plantId: number) => {
-        const newCOP = await fetchChangeOfParts(plantId);
-        if (newCOP) setCOPData(newCOP);
-        else setCOPData([]);
+    const updatePlant = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setIsReady(false);
+        setSelectedPlant(+e.target.value)
     };
+
+    const switchColumns = (activeIndex: number) => {
+        setIsReady(false);
+        setActveCOPType(activeIndex);
+    };
+
+    const { data, error, isValidating, mutate } = useChangeOfParts(null, {type: indexedColumn[activeCOPType], plant_id: selectedPlant});
+
+    useEffect(() => {
+        if (!isReady && data && !isValidating) {
+            if (data.length > 0) {
+                setCOPData(data);
+            } else {
+                setCOPData([]);
+            }
+            setIsReady(true);
+        } 
+    }, [data, isValidating, isReady]);
 
     return (
         <ModuleMain>
@@ -51,10 +65,11 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                 </TooltipBtn>
 
                 <PlantSelect
-                    onChange={(e) => updateCOPData(+e.target.value)}
+                    onChange={updatePlant}
                     allPlants
                     accessControl
                 />
+
             </ModuleHeader>
             <ModuleContent>
                 <COPTable
@@ -62,8 +77,15 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                     setSelectedCOP={setSelectedCOP}
                     selectedCOP={selectedCOP}
                     isDisabledSelect={false}
+                    activeCOPType={activeCOPType}
+                    switchColumns={switchColumns}
+                    display={isReady}
                 />
-                {COPData.length === 0 && <p>No Change of Parts</p>}
+                {COPData.length === 0 && (
+                    activeCOPType === 0 ?
+                    <p>No Scheduled Change of Parts</p> :
+                    <p>No Completed Change of Parts</p>
+                )}
             </ModuleContent>
         </ModuleMain>
     );
