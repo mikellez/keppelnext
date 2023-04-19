@@ -38,7 +38,7 @@ module.exports = (server) => {
 
     passport.deserializeUser((id, cb) => {
         db.query(`SELECT 
-                employee_id
+                employee_id,
                 user_id,
                 first_name,
                 last_name,
