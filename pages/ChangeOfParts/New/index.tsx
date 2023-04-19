@@ -8,7 +8,7 @@ import {
 } from "../../../components";
 import Link from "next/link";
 import TooltipBtn from "../../../components/TooltipBtn";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { useRouter } from "next/router";
 import COPForm from "../../../components/ChangeOfParts/COPForm";
 import { CMMSChangeOfParts } from "../../../types/common/interfaces";
@@ -67,10 +67,6 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
         setIsReady(false);
         if (props.changeOfParts[0] && router.query.id) {
             const defaultCOP = props.changeOfParts[0]
-            if (user.data?.id != defaultCOP.assignedUserId) {
-                router.push("/404");
-                return;
-            };
 
             setFormData(prev => {
                 return {
@@ -131,4 +127,10 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
 
 export default ChangeOfPartsNew;
 
-export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps(true);
+export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps(true,  
+    (response: AxiosResponse<CMMSChangeOfParts[]>) => {
+        return (
+            !!response.data
+        );
+    }
+);

@@ -12,6 +12,7 @@ import { editChangeOfParts } from "../Edit/[id]";
 import Link from "next/link";
 import { useCurrentUser } from "../../../components/SWR";
 import LoadingHourglass from "../../../components/LoadingHourglass";
+import { AxiosResponse } from "axios";
 
 const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
     const [formData, setFormData] = useState<CMMSChangeOfParts>(props.changeOfParts[0]);
@@ -124,5 +125,12 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
 
 export default CompleteChangeOfPartsPage;
 
-export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps(true);
+export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps(true, 
+    (response: AxiosResponse<CMMSChangeOfParts[]>) => {
+        return (
+            response.data &&
+			response.data[0].changedDate
+        );
+    }    
+);
 
