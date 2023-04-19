@@ -49,7 +49,7 @@ app.prepare().then(() => {
   function accessControl(req, res, next) {
     if (req.user) {
       if (req.user.role_id == 3 && restrictEng.includes(req.path)) {
-        res.redirect("/404");
+        res.redirect("/403");
       } else if (
         req.user.role_id == 4 &&
         (
@@ -61,9 +61,9 @@ app.prepare().then(() => {
           req.path.startsWith("/Checklist/Manage")
         )
       ) {
-        res.redirect("/404");
+        res.redirect("/403");
       } else if ((req.user.role_id = 2 && restrictManager.includes(req.path))) {
-        res.redirect("/404");
+        res.redirect("/403");
       }
     }
     next();
@@ -136,7 +136,9 @@ app.prepare().then(() => {
   server.get("/Master*", checkIfLoggedIn, accessControl, (req, res) => {
     return handle(req, res);
   });
-
+  server.get("/User*", checkIfLoggedIn, accessControl, (req, res) => {
+    return handle(req, res);
+  });
   server.get("*", (req, res) => {
     return handle(req, res);
   });

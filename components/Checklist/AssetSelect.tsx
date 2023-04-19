@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, forwardRef } from "react";
 import axios from "axios";
 import Select, { ActionMeta, MultiValue, StylesConfig, SingleValue } from "react-select";
 import { CMMSAsset } from "../../types/common/interfaces";
@@ -20,9 +20,10 @@ interface AssetSelectProps {
     isSingle?: boolean;
     defaultIds?: number[];
     disabled?: boolean;
+    ref?: any
 }
 
-export default function AssetSelect(props: AssetSelectProps) {
+const AssetSelect = forwardRef((props: AssetSelectProps, ref: any) => {
     const [options, setOptions] = useState<AssetOption[]>();
     const [defaultOptions, setDefaultOptions] = useState<AssetOption[]>();
 
@@ -71,8 +72,15 @@ export default function AssetSelect(props: AssetSelectProps) {
                     options={options}
                     defaultValue={props.isSingle ? defaultOptions![0] : defaultOptions}
                     isDisabled={props.disabled}
+                    ref={ref}
                 />
             }
         </div>
     );
-}
+});
+
+AssetSelect.displayName = "AssetSelect";
+  
+
+
+export default AssetSelect;

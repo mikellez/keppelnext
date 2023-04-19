@@ -618,19 +618,19 @@ export default function NewAsset(props: NewAssetProps) {
             title="Success!"
             text="Your inputs has been submitted!"
             icon={SimpleIcon.Check}
-            buttons={
+            buttons={[
               <button
-                onClick={() => {
-                  setSubmissionModal(false);
-                  router.reload();
-                }}
-                className="btn btn-secondary"
-              >
-                Submit another asset
-              </button>
-            }
-            buttons2={
+                  key={1}
+                  onClick={() => {
+                    setSubmissionModal(false);
+                    router.reload();
+                  }}
+                  className="btn btn-secondary"
+                >
+                  Submit another asset
+              </button>, 
               <button
+                key={2}
                 onClick={() => {
                   setSubmissionModal(false);
                   router.push("/Asset");
@@ -638,8 +638,8 @@ export default function NewAsset(props: NewAssetProps) {
                 className="btn btn-primary"
               >
                 Ok
-              </button>
-            }
+            </button>
+            ]}
             onRequestClose={() => {
               router.push("/Asset");
             }}

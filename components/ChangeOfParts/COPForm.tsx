@@ -1,52 +1,71 @@
-import React from "react";
+import React, { useRef } from "react";
 import RequiredIcon from "../RequiredIcon";
 import AssetSelect, { AssetOption } from "../Checklist/AssetSelect";
 import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
+import PlantSelect from "../PlantSelect";
 import { SingleValue } from "react-select";
 import { ModuleContent } from "../ModuleLayout/ModuleContent";
 import formStyles from "../../styles/formStyles.module.css";
 import { useCurrentUser } from "../SWR";
-import LoadingIcon from "../LoadingIcon";
-
-export interface ChangeOfPartsForm {
-    linkedAsset: number;
-    description: string;
-    assignedUser: number;
-    scheduledDate: Date;
-}
+import { CMMSChangeOfParts } from "../../types/common/interfaces";
 
 interface COPFormProps {
-    formData: ChangeOfPartsForm
-    setFormData: React.Dispatch<React.SetStateAction<ChangeOfPartsForm>>
+    formData: CMMSChangeOfParts
+    setFormData?: React.Dispatch<React.SetStateAction<CMMSChangeOfParts>>
+    disableForm?: boolean
 }
 
 const COPForm = (props: COPFormProps) => {
     const user = useCurrentUser();
+    const assetRef = useRef<any>();
 
-    const updateData = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-    ) => {
-        const newInput = e.target.value;
-        props.setFormData((prev) => {
-            return {
-                ...prev,
-                [e.target.name]: newInput,
-            };
-        });
-    };
-
-    const updateDataField = (value: number | string | null, field: string) => {
-        props.setFormData((prev) => {
-            return {
-                ...prev,
-                [field]: value,
-            };
-        });
+    const updateDataField = (value: number | string | Date | null, field: string) => {
+        if (props.setFormData) {
+            props.setFormData((prev) => {
+                return {
+                    ...prev,
+                    [field]: value,
+                };
+            });
+        }
+        
+        if (field === "plantId") {
+            assetRef.current.setValue("")
+        }
     };
 
     return (
         props.formData.scheduledDate &&
         <ModuleContent includeGreyContainer grid>
+            <div className={formStyles.halfContainer}>
+                <div className="form-group">
+                    <label className="form-label">
+                        <RequiredIcon /> Plant
+                    </label>
+                    <PlantSelect 
+                        onChange={(e) => updateDataField(+e.target.value, "plantId")}
+                        accessControl
+                        defaultPlant={props.formData.plantId ? props.formData.plantId : -1}
+                        disabled={props.disableForm}
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label className="form-label">
+                        <RequiredIcon /> Description
+                    </label>
+                    <textarea
+                        className="form-control"
+                        name="description"
+                        id="formControlDescription"
+                        rows={5}
+                        onChange={(e) => updateDataField(e.target.value, "description")}
+                        value={props.formData.description}
+                        style={{resize: "none"}}
+                        disabled={props.disableForm}
+                    ></textarea>
+                </div>
+            </div>
             <div className={formStyles.halfContainer}>
                 <div className="form-group">
                     <label className="form-label">
@@ -56,30 +75,18 @@ const COPForm = (props: COPFormProps) => {
                         onChange={(value) => {
                             updateDataField(
                                 (value as SingleValue<AssetOption>)?.value as number,
-                                "linkedAsset"
+                                "psaId"
                             );
                         }}
-                        plantId={user.data?.allocated_plants[0] as number}
+                        plantId={props.formData.plantId ? props.formData.plantId : -1}
                         isSingle={true}
-                        defaultIds={props.formData.linkedAsset ? [props.formData.linkedAsset] : []}
+                        defaultIds={props.formData.psaId ? [props.formData.psaId] : []}
+                        ref={assetRef}
+                        disabled={props.disableForm}
                     />
 
                 </div>
-                <div className="form-group">
-                    <label className="form-label">
-                        <RequiredIcon /> Description
-                    </label>
-                    <textarea
-                        className="form-control"
-                        name="description"
-                        id="formControlDescription"
-                        rows={6}
-                        onChange={updateData}
-                        value={props.formData.description}
-                    ></textarea>
-                </div>
-            </div>
-            <div className={formStyles.halfContainer}>
+
                 <div className="form-group">
                     <label className="form-label">
                         <RequiredIcon /> Assign to
@@ -90,12 +97,14 @@ const COPForm = (props: COPFormProps) => {
                         onChange={(value) => {
                             updateDataField(
                                 (value as SingleValue<AssignedUserOption>)?.value as number,
-                                "assignedUser"
+                                "assignedUserId"
                             );
                         }}
-                        defaultIds={props.formData.assignedUser ? [props.formData.assignedUser] : []}
+                        defaultIds={props.formData.assignedUserId ? [props.formData.assignedUserId] : []}
+                        disabled={props.disableForm}
                     />
                 </div>
+                        
                 <div className="form-group">
                     <label className="form-label">
                         <RequiredIcon /> Schedule Date
@@ -104,9 +113,10 @@ const COPForm = (props: COPFormProps) => {
                         type="date"
                         className="form-control"
                         name="scheduledDate"
-                        onChange={updateData}
+                        onChange={(e) => updateDataField(new Date(e.target.value), "scheduledDate")}
                         min={new Date().toISOString().slice(0, 10)}
                         value={new Date(new Date(props.formData.scheduledDate).getTime() + 8 * 3600 * 1000).toISOString().slice(0, 10)}
+                        disabled={props.disableForm}
                     />
                 </div>
             </div>
