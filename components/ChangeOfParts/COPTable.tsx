@@ -17,6 +17,9 @@ import { dateFormat } from "../Schedule/ScheduleTemplate";
 import { useCurrentUser } from "../SWR";
 import TooltipBtn from "../TooltipBtn";
 import { useRouter } from "next/router";
+import styles from "../../styles/Request.module.scss";
+
+
 
 interface COPTableData extends CMMSChangeOfParts {
     id: string;
@@ -26,6 +29,9 @@ interface COPTableProps extends ChangeOfPartsPageProps {
     selectedCOP?: CMMSChangeOfParts;
     setSelectedCOP?: React.Dispatch<React.SetStateAction<CMMSChangeOfParts>>;
     isDisabledSelect: boolean;
+    activeCOPType: number;
+    switchColumns: Function;
+    display: boolean | null;
 }
 
 const COPTable = (props: COPTableProps) => {
@@ -90,6 +96,21 @@ const COPTable = (props: COPTableProps) => {
 
     return (
         <>
+            <ul className="nav nav-tabs">
+                <li
+                    onClick={() => props.switchColumns(0)}
+                    className={"nav-link" + (props.activeCOPType === 0 ? " active" : "")}
+                >
+                    <span style={{ all: "unset" }}>Scheduled</span>
+                </li>
+                <li
+                    onClick={() => props.switchColumns(1)}
+                   className={"nav-link" + (props.activeCOPType === 1 ? " active" : "")}
+                >
+                    <span style={{ all: "unset" }}>Completed</span>
+                </li>
+            </ul>
+            {props.display != null && !!props.display && props.changeOfParts.length > 0 &&
             <Table
                 data={{ nodes: tableData }}
                 theme={theme}
@@ -136,7 +157,7 @@ const COPTable = (props: COPTableProps) => {
                         </Body>
                     </>
                 )}
-            </Table>
+            </Table>}
         </>
     );
 };

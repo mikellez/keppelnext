@@ -325,7 +325,7 @@ export default function AssetDetails(props: {
                 closeModal={() => setCOPHistoryModal(false)}
                 closeOnOverlayClick={true}
             >
-                <COPTable changeOfParts={COPData} isDisabledSelect={true} />
+                {/* <COPTable changeOfParts={COPData} isDisabledSelect={true} /> */}
 
                 <Link href={`/ChangeOfParts/New?assetId=${psa_id}`}>
                     <TooltipBtn toolTip={false}>Create New Change of Parts</TooltipBtn>

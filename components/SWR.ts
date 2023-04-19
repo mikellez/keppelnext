@@ -96,11 +96,12 @@ function useChangeOfParts(copId: number | null, options?: {plant_id?: number, ps
 			url;
 		
 		if (options) {
-			if (options.plant_id) apiURL += `?plant_id=${options.plant_id}`;
-			else if (options.plant_id && options.type) apiURL += `?plant_id=${options.plant_id}&type=${options.type}`;
+			if (options.plant_id && options.type) apiURL += `?plant_id=${options.plant_id}&type=${options.type}`;
+			else if (options.plant_id) apiURL += `?plant_id=${options.plant_id}`;
+			else if (options.type) apiURL += `?type=${options.type}`;
 			else if (options.psa_id && copId === null) apiURL += `?psa_id=${options.psa_id}`;
 		}
-			
+		console.log(apiURL)
 		return await axios.get<CMMSChangeOfParts[]>(apiURL).then((response) => response.data).catch((e) => {
 			throw new Error(e);
 		});
