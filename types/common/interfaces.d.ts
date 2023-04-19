@@ -335,7 +335,7 @@ interface CMMSAddUser{
   employeeId: string;
   email: string;
   roleType: number;
-  allocatedPlants: number[];
+  allocatedPlants: array;
 }
 
 export {
