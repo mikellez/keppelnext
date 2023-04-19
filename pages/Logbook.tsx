@@ -28,8 +28,9 @@ import ModuleSimplePopup, {
 } from "../components/ModuleLayout/ModuleSimplePopup";
 import { usePagination } from "@table-library/react-table-library/pagination";
 import PageButton from "../components/PageButton";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import styles2 from "../styles/Request.module.scss";
+import { FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
+import { useCurrentUser } from "../components/SWR";
 
 export interface logbookData {
   [key: string]: string | number;
@@ -65,28 +66,36 @@ const formatDate = (oldDate: string) => {
   return `${d} ${m} ${y}, ${hr}:${min}`;
 };
 
-const Logbook = ({ data }: { data: logbookData[] }) => {
+const Logbook = ({
+  data,
+  totalPages,
+}: {
+  data: logbookData[];
+  totalPages: number;
+}) => {
   const [logbookData, setLogbookData] = useState(data);
   const [lock, setLock] = useState(false);
   const [label, setLabel] = useState<string>("");
   const [entry, setEntry] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
+  const [page, setPage] = useState(1);
 
   const [staff, setStaff] = useState<{
     first: null | number;
     second: null | number;
   }>({ first: null, second: null });
 
-  const pageData = { nodes: logbookData };
+  // const pageData = { nodes: logbookData };
 
-  const pagination = usePagination(pageData, {
-    state: {
-      page: 0,
-      size: 10,
-    },
-  });
-  const totalPages = pagination.state.getTotalPages(pageData.nodes);
+  // const pagination = usePagination(pageData, {
+  //   state: {
+  //     page: 0,
+  //     size: 10,
+  //   },
+  // });
+  // const totalPages = pagination.state.getTotalPages(pageData.nodes);
+  const user = useCurrentUser();
 
   const theme = useTheme([
     getTheme(),
@@ -148,6 +157,16 @@ const Logbook = ({ data }: { data: logbookData[] }) => {
     }
   }, [staff]);
 
+  useEffect(() => {
+    const getLogbook = async (pageNumber: number) => {
+      const response = await axios.get(`/api/logbook?page=${pageNumber}`);
+
+      setLogbookData(response.data.rows);
+    };
+
+    getLogbook(page);
+  }, [page]);
+
   const onLockHandler = () => {
     localStorage.setItem("staff", JSON.stringify(staff));
     setLock(true);
@@ -197,7 +216,7 @@ const Logbook = ({ data }: { data: logbookData[] }) => {
                   return { ...prevState, first: option!.value };
                 });
               }}
-              plantId={0}
+              plantId={user.data?.allocated_plants}
               isSingle
               style={{
                 width: "25rem",
@@ -215,7 +234,7 @@ const Logbook = ({ data }: { data: logbookData[] }) => {
                   return { ...prevState, second: option!.value };
                 });
               }}
-              plantId={0}
+              plantId={user.data?.allocated_plants}
               isSingle
               style={{
                 width: "25rem",
@@ -278,7 +297,7 @@ const Logbook = ({ data }: { data: logbookData[] }) => {
             data={{ nodes: logbookData }}
             theme={theme}
             layout={{ custom: true }}
-            pagination={pagination}
+            // pagination={pagination}
           >
             {(logbookData: logbookData[]) => (
               <>
@@ -310,58 +329,30 @@ const Logbook = ({ data }: { data: logbookData[] }) => {
           </Table>
         )}
         <div className={styles2.requestPagination}>
-          <FaChevronLeft
-            size={15}
+          <FiChevronsLeft
+            size={25}
             className={`${styles2.paginationChevron} ${
-              pagination.state.page - 1 >= 0 ? styles2.active : styles2.disabled
+              page - 1 > 0 ? styles2.active : styles2.disabled
             }`}
-            onClick={() =>
-              pagination.state.page - 1 >= 0
-                ? pagination.fns.onSetPage(pagination.state.page - 1)
-                : ""
-            }
+            onClick={() => setPage(1)}
           />
           <span>
-            {pagination.state.page >= 2 && (
-              <span>
-                <PageButton pagination={pagination}>1</PageButton>
-                {pagination.state.page - 1 >= 2 && <span>...</span>}
-              </span>
+            {page - 1 > 0 && (
+              <PageButton setPage={setPage}>{page - 1}</PageButton>
             )}
-            {pagination.state
-              .getPages(pageData.nodes)
-              .map((data: any, index: number) => {
-                if (
-                  index === pagination.state.page + 1 ||
-                  index === pagination.state.page ||
-                  index === Math.abs(pagination.state.page - 1)
-                ) {
-                  return (
-                    <PageButton key={index} pagination={pagination}>
-                      {index + 1}
-                    </PageButton>
-                  );
-                }
-              })}
-            {pagination.state.page <= totalPages - 3 && (
-              <span>
-                {totalPages - pagination.state.page >= 4 && <span>...</span>}
-                <PageButton pagination={pagination}>{totalPages}</PageButton>
-              </span>
+            <PageButton active setPage={setPage}>
+              {page}
+            </PageButton>
+            {page + 1 <= totalPages && (
+              <PageButton setPage={setPage}>{page + 1}</PageButton>
             )}
           </span>
-          <FaChevronRight
-            size={15}
+          <FiChevronsRight
+            size={25}
             className={`${styles2.paginationChevron} ${
-              pagination.state.page + 1 <= totalPages - 1
-                ? styles2.active
-                : styles2.disabled
+              page < totalPages ? styles2.active : styles2.disabled
             }`}
-            onClick={() =>
-              pagination.state.page + 1 <= totalPages - 1
-                ? pagination.fns.onSetPage(pagination.state.page + 1)
-                : ""
-            }
+            onClick={() => setPage(totalPages)}
           />
         </div>
       </ModuleContent>
@@ -381,11 +372,12 @@ export const getServerSideProps = async (
     },
   };
 
-  const response1 = await axios.get(
-    "http://localhost:3001/api/logbook",
+  const response = await axios.get(
+    "http://localhost:3001/api/logbook?page=1",
     headers
   );
 
-  // const response2 = await axios.get();
-  return { props: { data: response1.data } };
+  return {
+    props: { data: response.data.rows, totalPages: response.data.total },
+  };
 };
