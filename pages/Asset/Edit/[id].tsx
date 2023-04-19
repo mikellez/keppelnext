@@ -201,8 +201,8 @@ export default function EditAsset(props: EditAssetProps) {
 
   const filesToDownload = filevalue.map((file, index) => {
     return (
-      <tr>
-      <Link key={index} href={file} download={filename[index]}>
+      <tr key={index}>
+      <Link href={file} download={filename[index]}>
         {filename[index]}
       </Link>
       </tr>
@@ -518,21 +518,9 @@ export default function EditAsset(props: EditAssetProps) {
           title="Irreversible Action!"
           text="The whole entity will be deleted!"
           icon={SimpleIcon.Exclaim}
-          buttons2={
+          buttons={[
             <button
-              onClick={() => {
-                deletion();
-                setdeleteModal(false);
-                // route back to assets
-                router.push("/Asset")
-              }}
-              className="btn btn-primary"
-            >
-              Confirm
-            </button>
-          }
-          buttons={
-            <button
+              key={1}
               className="btn"
               style={{ backgroundColor: "grey", color: "white" }}
               onClick={() => {
@@ -540,8 +528,20 @@ export default function EditAsset(props: EditAssetProps) {
               }}
             >
               Cancel
+            </button>,
+            <button
+            key={2}
+            onClick={() => {
+              deletion();
+              setdeleteModal(false);
+              // route back to assets
+              router.push("/Asset")
+            }}
+            className="btn btn-primary"
+            >
+              Confirm
             </button>
-          }
+          ]}
           onRequestClose={() => {
             router.push("/Asset");
           }}

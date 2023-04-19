@@ -8,13 +8,18 @@ import {
 } from "../../../components";
 import Link from "next/link";
 import TooltipBtn from "../../../components/TooltipBtn";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { useRouter } from "next/router";
-import COPForm, { ChangeOfPartsForm } from "../../../components/ChangeOfParts/COPForm";
+import COPForm from "../../../components/ChangeOfParts/COPForm";
+import { CMMSChangeOfParts } from "../../../types/common/interfaces";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
+import { createChangeOfPartsServerSideProps } from "../../../types/common/props";
+import { GetServerSideProps } from "next";
+import { ChangeOfPartsPageProps } from "..";
+import LoadingHourglass from "../../../components/LoadingHourglass";
+import { useCurrentUser } from "../../../components/SWR";
 
-
-const createChangeOfParts = async (formData: ChangeOfPartsForm) => {
+const createChangeOfParts = async (formData: CMMSChangeOfParts) => {
     return await axios
         .post(`/api/changeOfParts/`, { formData })
         .then((res) => {
@@ -23,12 +28,14 @@ const createChangeOfParts = async (formData: ChangeOfPartsForm) => {
         .catch((err) => console.log(err));
 };
 
-const ChangeOfPartsNew = () => {
+const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const [formData, setFormData] = useState<ChangeOfPartsForm>({scheduledDate: new Date()} as ChangeOfPartsForm);
+    const [formData, setFormData] = useState<CMMSChangeOfParts>({scheduledDate: new Date()} as CMMSChangeOfParts);
     const [successModal, setSuccessModal] = useState<boolean>(false);
     const [displayErrorMsg, setDisplayErrorMsg] = useState<boolean>(false);
+    const [isReady, setIsReady] = useState<boolean>(false);
     const router = useRouter();
+    const user = useCurrentUser();
 
 
     const handleSubmit = () => {
@@ -49,16 +56,41 @@ const ChangeOfPartsNew = () => {
 
     const validateCOPFormData = () => {
         return (
-            formData.linkedAsset &&
+            formData.psaId &&
             formData.description &&
-            formData.assignedUser &&
+            formData.assignedUserId &&
             formData.scheduledDate
         );
     };
 
+    useEffect(() => {
+        setIsReady(false);
+        if (props.changeOfParts[0] && router.query.id) {
+            const defaultCOP = props.changeOfParts[0]
+
+            setFormData(prev => {
+                return {
+                    ...prev,
+                    plantId: defaultCOP.plantId,
+                    description: defaultCOP.description,
+                    psaId: defaultCOP.psaId,
+                    assignedUserId: defaultCOP.assignedUserId, 
+                }
+            });
+
+            setTimeout(() => {
+                setIsReady(true);
+            }, 1500);
+
+        } else {
+            setIsReady(true);
+        }
+
+    }, [props.changeOfParts, router.query, user.data]);
+
     return (
         <>
-        <ModuleMain>
+            {isReady ? <ModuleMain>
             <ModuleHeader title="New Change Of Parts" header="Create New Change Of Parts">
                 <Link href="/ChangeOfParts" className="btn btn-secondary">
                     Back
@@ -80,7 +112,7 @@ const ChangeOfPartsNew = () => {
                     </TooltipBtn>
                 </ModuleFooter>
             </ModuleContent>
-        </ModuleMain>
+        </ModuleMain> : <LoadingHourglass />}
 
         <ModuleSimplePopup 
             modalOpenState={successModal}
@@ -88,9 +120,17 @@ const ChangeOfPartsNew = () => {
             icon={SimpleIcon.Check}
             title="Success"
             text="Change of parts successfully updated"
-        />
+        /> 
         </>
     );
 };
 
 export default ChangeOfPartsNew;
+
+export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps(true,  
+    (response: AxiosResponse<CMMSChangeOfParts[]>) => {
+        return (
+            !!response.data
+        );
+    }
+);

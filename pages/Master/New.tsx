@@ -173,28 +173,28 @@ export default function New(props: NewMasterEntryProps) {
             title="Success!"
             text="Your entry has been submitted! 🔥🔥🔥"
             icon={SimpleIcon.Check}
-            buttons={
-              <button
-                onClick={() => {
-                  setSubmissionModal(false);
-                  router.reload();
-                }}
-                className="btn btn-secondary"
-              >
-                Create another entry
-              </button>
-            }
-            buttons2={
-              <button
-                onClick={() => {
-                  setSubmissionModal(false);
-                  router.push("/Master");
-                }}
-                className="btn btn-primary"
-              >
-                Ok
-              </button>
-            }
+            buttons={[
+              	<button
+					key={1}
+					onClick={() => {
+					setSubmissionModal(false);
+					router.reload();
+					}}
+					className="btn btn-secondary"
+				>
+                	Create another entry
+				</button>,
+				<button
+					key={2}
+					onClick={() => {
+						setSubmissionModal(false);
+						router.push("/Master");
+					}}
+					className="btn btn-primary"
+				>
+			  		Ok
+				</button>
+            ]}
             onRequestClose={() => {
               router.push("/Master");
             }}
