@@ -66,7 +66,7 @@ const createChangeOfPartsServerSideProps = (specificCOP: boolean, conditionalFun
 		if (conditionalFunc && conditionalFunc(response) == false) {
 			return {
 				redirect: {
-					destination: "/404",
+					destination: "/403",
 				},
 				props: {}
 			}

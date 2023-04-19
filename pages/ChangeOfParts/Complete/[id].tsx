@@ -44,7 +44,7 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
     useEffect(() => {
         setIsReady(false);
         if (user.data?.id != formData.assignedUserId) {
-            router.push("/404");
+            router.push("/403");
                 return;
         } else {
             setTimeout(() => {

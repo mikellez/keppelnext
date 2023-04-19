@@ -118,8 +118,8 @@ export default function AssetDetails(props: {
 
     const filesToDownload = filevalue.map((file, index) => {
         return (
-            <tr>
-                <Link key={index} href={file} download={filename[index]}>
+            <tr key={index}>
+                <Link href={file} download={filename[index]}>
                     {filename[index]}
                 </Link>
             </tr>
