@@ -19,8 +19,6 @@ import TooltipBtn from "../TooltipBtn";
 import { useRouter } from "next/router";
 import styles from "../../styles/Request.module.scss";
 
-
-
 interface COPTableData extends CMMSChangeOfParts {
     id: string;
 }
@@ -96,70 +94,72 @@ const COPTable = (props: COPTableProps) => {
 
     return (
         <>
-            {props.switchColumns != null && props.activeCOPType != null &&
+            {props.switchColumns != null && props.activeCOPType != null && (
                 <ul className="nav nav-tabs">
                     <li
-                        onClick={() => props.switchColumns!(0)}
+                        onClick={() => props.activeCOPType != 0 && props.switchColumns!(0)}
                         className={"nav-link" + (props.activeCOPType === 0 ? " active" : "")}
                     >
                         <span style={{ all: "unset" }}>Scheduled</span>
                     </li>
                     <li
-                        onClick={() => props.switchColumns!(1)}
-                    className={"nav-link" + (props.activeCOPType === 1 ? " active" : "")}
+                        onClick={() => props.activeCOPType != 1 && props.switchColumns!(1)}
+                        className={"nav-link" + (props.activeCOPType === 1 ? " active" : "")}
                     >
                         <span style={{ all: "unset" }}>Completed</span>
                     </li>
                 </ul>
-            }
-            {((props.display === true && props.changeOfParts.length > 0) || props.display === undefined)&&
-            <Table
-                data={{ nodes: tableData }}
-                theme={theme}
-                layout={{ custom: true }}
-                select={props.isDisabledSelect ? "" : select}
-            >
-                {(tableList: COPTableData[]) => (
-                    <>
-                        <Header>
-                            <HeaderRow>
-                                <HeaderCell>ID</HeaderCell>
-                                <HeaderCell>Asset</HeaderCell>
-                                <HeaderCell>Description</HeaderCell>
-                                <HeaderCell>Scheduled Date</HeaderCell>
-                                <HeaderCell>Completion Date</HeaderCell>
-                                <HeaderCell>Assigned To</HeaderCell>
-                            </HeaderRow>
-                        </Header>
-                        <Body>
-                            {tableList.map((item) => (
-                                <Row key={item.id} item={item}>
-                                    <Cell>{item.copId}</Cell>
-                                    <Cell>{item.asset}</Cell>
-                                    <Cell>{item.description}</Cell>
+            )}
+            {((props.display === true && props.changeOfParts.length > 0) ||
+                props.display === undefined) && (
+                <Table
+                    data={{ nodes: tableData }}
+                    theme={theme}
+                    layout={{ custom: true }}
+                    select={props.isDisabledSelect ? "" : select}
+                >
+                    {(tableList: COPTableData[]) => (
+                        <>
+                            <Header>
+                                <HeaderRow>
+                                    <HeaderCell>ID</HeaderCell>
+                                    <HeaderCell>Asset</HeaderCell>
+                                    <HeaderCell>Description</HeaderCell>
+                                    <HeaderCell>Scheduled Date</HeaderCell>
+                                    <HeaderCell>Completion Date</HeaderCell>
+                                    <HeaderCell>Assigned To</HeaderCell>
+                                </HeaderRow>
+                            </Header>
+                            <Body>
+                                {tableList.map((item) => (
+                                    <Row key={item.id} item={item}>
+                                        <Cell>{item.copId}</Cell>
+                                        <Cell>{item.asset}</Cell>
+                                        <Cell>{item.description}</Cell>
 
-                                    <Cell>{dateFormat(new Date(item.scheduledDate))}</Cell>
-                                    <Cell>
-                                        {item.changedDate ? (
-                                            dateFormat(new Date(item.changedDate))
-                                        ) : user.data?.id === item.assignedUserId ? (
-                                            <TooltipBtn
-                                                toolTip={false}
-                                                onClick={() => handleCompleteClick(item.copId)}
-                                            >
-                                                Complete
-                                            </TooltipBtn>
-                                        ) : (
-                                            "-"
-                                        )}
-                                    </Cell>
-                                    <Cell>{item.assignedUser}</Cell>
-                                </Row>
-                            ))}
-                        </Body>
-                    </>
-                )}
-            </Table>}
+                                        <Cell>{dateFormat(new Date(item.scheduledDate))}</Cell>
+                                        <Cell>
+                                            {item.changedDate ? (
+                                                dateFormat(new Date(item.changedDate))
+                                            ) : user.data?.id === item.assignedUserId ? (
+                                                <TooltipBtn
+                                                    toolTip={false}
+                                                    onClick={() => handleCompleteClick(item.copId)}
+                                                >
+                                                    Complete
+                                                </TooltipBtn>
+                                            ) : (
+                                                "-"
+                                            )}
+                                        </Cell>
+                                        <Cell>{item.assignedUser}</Cell>
+                                    </Row>
+                                ))}
+                            </Body>
+                        </>
+                    )}
+                </Table>
+            )}
         </>
     );
 };
