@@ -1,11 +1,11 @@
 import formStyles from "../../styles/formStyles.module.css"
 
-import React from 'react';
+import React, {useState} from 'react';
 import Select, { defaultTheme } from "react-select";
 import { ModuleContent, ModuleDivider, ModuleFooter, ModuleHeader, ModuleMain } from '../../components';
 import RequiredIcon from "../../components/RequiredIcon";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import { CMMSPlant } from "../../types/common/interfaces";
+import { CMMSPlant, CMMSAddUser } from "../../types/common/interfaces";
 import axios from "axios";
 import LoadingIcon from "../../components/LoadingIcon";
 
@@ -14,6 +14,23 @@ interface AddUserProps {
 }
 
 export default function AddUser(props: AddUserProps) {
+	const [form, setform] = useState<CMMSAddUser>({
+		firstName: "",
+		lastName: "",
+		username: "",
+		password: "",
+		employeeId: "",
+		email: "",
+		roleType: 0,
+		allocatedPlants: [],
+			});
+	const handleForm = (
+		e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+	  ) => {
+		setform((prevState) => {
+		  return { ...prevState, [e.target.name]: e.target.value };
+		});
+	  };
 	return (
 		<ModuleMain>
 			<ModuleHeader header="Add User" title="Add User">
@@ -67,12 +84,12 @@ export default function AddUser(props: AddUserProps) {
 						<input className="form-control" type="email"/>
 					</div>
 
-					<div className="form-group">
+					{/* <div className="form-group">
 						<label className='form-label'>
 							<RequiredIcon/> Mobile Number
 						</label>
 						<input className="form-control" type="text"/>
-					</div>
+					</div> */}
 
 				</div>
 
