@@ -89,10 +89,10 @@ function useSubComponent1Name(plant_id: number|null, system_id: number|null, sys
 	return useSWR<CMMSSubComponent1Name[], Error>(system_id ? ["/api/asset/system/", plant_id, system_id, system_asset_id, system_asset_name_id] : null, systemAssetFetcher, {revalidateOnFocus: false});
 }
 
-function useChangeOfParts(copId?: number, options?: {plant_id?: number, psa_id?: number, type: "completed" | "scheduled" | null}) {
+function useChangeOfParts(copId: number | null, options?: {plant_id?: number, psa_id?: number, type: "completed" | "scheduled" | null}) {
 	const changeOfPartsFetcher = async (url: string) => {
 		let apiURL = copId ? 
-			`url/${copId}` : 
+			`${url}/${copId}` : 
 			url;
 		
 		if (options) {
@@ -101,21 +101,13 @@ function useChangeOfParts(copId?: number, options?: {plant_id?: number, psa_id?:
 			else if (options.psa_id && copId === null) apiURL += `?psa_id=${options.psa_id}`;
 		}
 			
-		return await axios.get<CMMSChangeOfParts[] | CMMSChangeOfParts>(apiURL).then((response) => response.data).catch((e) => {
+		return await axios.get<CMMSChangeOfParts[]>(apiURL).then((response) => response.data).catch((e) => {
 			throw new Error(e);
 		});
 	}
 
-	return useSWR<CMMSChangeOfParts[] | CMMSChangeOfParts, Error>([copId, options], changeOfPartsFetcher, {revalidateOnFocus: false});
+	return useSWR<CMMSChangeOfParts[], Error>(["/api/changeOfParts", copId, options], changeOfPartsFetcher, {revalidateOnFocus: false});
 };
-
-// function useAsset(plant_id: number|null) {
-// 	const assetFetcher = (url: string) => axios.get<CMMSAsset[]>(url + plant_id).then((response) => response.data).catch((e) => {
-// 		throw new Error(e);
-// 	})
-
-// 	return useSWR<CMMSAsset[], Error>(plant_id ? ["/api/asset/", plant_id.toString()] : null, assetFetcher, {revalidateOnFocus: false});
-// }
 
 export {
     useRequest,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ModuleMain, ModuleHeader, ModuleContent } from "../../components";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { CMMSChangeOfParts } from "../../types/common/interfaces";
@@ -10,6 +10,7 @@ import TooltipBtn from "../../components/TooltipBtn";
 import COPTable from "../../components/ChangeOfParts/COPTable";
 import { useRouter } from "next/router";
 import { createChangeOfPartsServerSideProps } from "../../types/common/props";
+import { useChangeOfParts } from "../../components/SWR";
 
 export interface ChangeOfPartsPageProps {
     changeOfParts: CMMSChangeOfParts[];
