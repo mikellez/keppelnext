@@ -365,12 +365,6 @@ router
     .post(controllers.changeOfParts.createNewChangeOfParts)
     .patch(controllers.changeOfParts.editChangeOfParts);
 
-router.patch(
-    "/changeOfParts/complete/:cop_id",
-    checkIfLoggedInAPI,
-    controllers.changeOfParts.completeChangeOfParts
-);
-
 router.get("/user/getUsers", checkIfLoggedInAPI, controllers.user.getUsers);
 
 // NO API ROUTE
