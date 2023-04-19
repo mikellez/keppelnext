@@ -47,12 +47,12 @@ const toCMMSChangeOfParts = (row) => {
 };
 
 const fetchChangeOfParts = async (req, res, next) => {
-    let sql = req.query.plantId ? 
-        fetchChangeOfPartsByPlantQuery(req.query.plantId) : 
+    let sql = req.query.plant_id ? 
+        fetchChangeOfPartsByPlantQuery(req.query.plant_id) : 
         req.params.cop_id ? 
         fetchChangeOfPartsByIdQuery(req.params.cop_id) : 
-        req.query.assetId ? 
-        fetchChangeofPartsByAssetQuery(req.query.assetId) : 
+        req.query.psa_id ? 
+        fetchChangeofPartsByAssetQuery(req.query.psa_id) : 
         fetchAllOfChangeOfPartsQuery;
 
     sql =  req.query.type === "completed" ?
@@ -63,7 +63,7 @@ const fetchChangeOfParts = async (req, res, next) => {
     sql = req.query.plant_id && req.query.type ? 
         sql + `AND pm.plant_id = ${req.query.plant_id}` :
         sql;
-        
+
     db.query(sql, (err, found) => {
         if (err) {
             console.log(err);

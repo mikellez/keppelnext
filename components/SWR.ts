@@ -2,7 +2,7 @@
 import useSWR from 'swr';
 import axios from 'axios';
 
-import { CMMSAsset, CMMSRequest, CMMSChecklist, CMMSActivitylog, CMMSSystemAsset, CMMSSystemAssetName, CMMSSubComponent1Name} from '../types/common/interfaces'; 
+import { CMMSAsset, CMMSRequest, CMMSChecklist, CMMSActivitylog, CMMSSystemAsset, CMMSSystemAssetName, CMMSSubComponent1Name, CMMSChangeOfParts} from '../types/common/interfaces'; 
 
 function useRequest(request_type: "pending" | "assigned" | "review" | "approved") {
 	const requestFetcher = (url: string) => axios.get<CMMSRequest[]>(url + request_type).then((response) => {
@@ -89,7 +89,33 @@ function useSubComponent1Name(plant_id: number|null, system_id: number|null, sys
 	return useSWR<CMMSSubComponent1Name[], Error>(system_id ? ["/api/asset/system/", plant_id, system_id, system_asset_id, system_asset_name_id] : null, systemAssetFetcher, {revalidateOnFocus: false});
 }
 
+function useChangeOfParts(copId?: number, options?: {plant_id?: number, psa_id?: number, type: "completed" | "scheduled" | null}) {
+	const changeOfPartsFetcher = async (url: string) => {
+		let apiURL = copId ? 
+			`url/${copId}` : 
+			url;
+		
+		if (options) {
+			if (options.plant_id) apiURL += `?plant_id=${options.plant_id}`;
+			else if (options.plant_id && options.type) apiURL += `?plant_id=${options.plant_id}&type=${options.type}`;
+			else if (options.psa_id && copId === null) apiURL += `?psa_id=${options.psa_id}`;
+		}
+			
+		return await axios.get<CMMSChangeOfParts[] | CMMSChangeOfParts>(apiURL).then((response) => response.data).catch((e) => {
+			throw new Error(e);
+		});
+	}
 
+	return useSWR<CMMSChangeOfParts[] | CMMSChangeOfParts, Error>([copId, options], changeOfPartsFetcher, {revalidateOnFocus: false});
+};
+
+// function useAsset(plant_id: number|null) {
+// 	const assetFetcher = (url: string) => axios.get<CMMSAsset[]>(url + plant_id).then((response) => response.data).catch((e) => {
+// 		throw new Error(e);
+// 	})
+
+// 	return useSWR<CMMSAsset[], Error>(plant_id ? ["/api/asset/", plant_id.toString()] : null, assetFetcher, {revalidateOnFocus: false});
+// }
 
 export {
     useRequest,
@@ -99,5 +125,6 @@ export {
 	useAccountlog,
 	useSystemAsset,
 	useSystemAssetName,
-	useSubComponent1Name
+	useSubComponent1Name,
+	useChangeOfParts,
 }

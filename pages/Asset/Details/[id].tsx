@@ -351,7 +351,7 @@ export const getServerSideProps: GetServerSideProps = async (
         headers
     );
     const COPHistory = await axios.get(
-        "http://localhost:3001/api/changeOfParts/?assetId=" + psaId,
+        "http://localhost:3001/api/changeOfParts/?psa_id=" + psaId,
         headers
     );
 

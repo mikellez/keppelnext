@@ -18,7 +18,7 @@ export interface ChangeOfPartsPageProps {
 const fetchChangeOfParts = async (plantId: number) => {
     const plant = plantId > 0 ? plantId : "";
     return await axios
-        .get<CMMSChangeOfParts[]>("/api/changeOfParts/?plantId=" + plant)
+        .get<CMMSChangeOfParts[]>("/api/changeOfParts/?plant_id=" + plant)
         .then((res) => res.data)
         .catch((err) => console.log(err));
 };
