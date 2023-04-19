@@ -203,69 +203,63 @@ export default function AssetDetails(props: {
                                             {assetDetail && <AssetHierachy asset={assetDetail} />}
                                         </td>
                                     </tr>
-                                    <span>
-                                        <tr>
-                                            <th>Description</th>
-                                            <td>
-                                                {assetDetail.asset_description
-                                                    ? assetDetail.asset_description
-                                                    : "-"}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Brand</th>
-                                            <td>{assetDetail.brand ? assetDetail.brand : "-"}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Model Number</th>
-                                            <td>
-                                                {assetDetail.model_number
-                                                    ? assetDetail.model_number
-                                                    : "-"}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Technical Spec</th>
-                                            <td>
-                                                {assetDetail.technical_specs
-                                                    ? assetDetail.technical_specs
-                                                    : "-"}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Location</th>
-                                            <td>
-                                                {assetDetail.asset_location
-                                                    ? assetDetail.asset_location
-                                                    : "-"}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Country of Manufacture</th>
-                                            <td>
-                                                {assetDetail.manufacture_country
-                                                    ? assetDetail.manufacture_country
-                                                    : "-"}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Warranty Expiry Date</th>
-                                            <td>
-                                                {assetDetail.warranty ? assetDetail.warranty : "-"}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Remarks</th>
-                                            <td>
-                                                {assetDetail.remarks ? assetDetail.remarks : "-"}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Files</th>
-                                            <td>{fileraw ? filesToDownload : "-"}</td>
-                                            {/* <td>{fileraw[0]}</td> */}
-                                        </tr>
-                                    </span>
+                                    <tr>
+                                        <th>Description</th>
+                                        <td>
+                                            {assetDetail.asset_description
+                                                ? assetDetail.asset_description
+                                                : "-"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Brand</th>
+                                        <td>{assetDetail.brand ? assetDetail.brand : "-"}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Model Number</th>
+                                        <td>
+                                            {assetDetail.model_number
+                                                ? assetDetail.model_number
+                                                : "-"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Technical Spec</th>
+                                        <td>
+                                            {assetDetail.technical_specs
+                                                ? assetDetail.technical_specs
+                                                : "-"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Location</th>
+                                        <td>
+                                            {assetDetail.asset_location
+                                                ? assetDetail.asset_location
+                                                : "-"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Country of Manufacture</th>
+                                        <td>
+                                            {assetDetail.manufacture_country
+                                                ? assetDetail.manufacture_country
+                                                : "-"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Warranty Expiry Date</th>
+                                        <td>{assetDetail.warranty ? assetDetail.warranty : "-"}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Remarks</th>
+                                        <td>{assetDetail.remarks ? assetDetail.remarks : "-"}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Files</th>
+                                        <td>{fileraw ? filesToDownload : "-"}</td>
+                                        {/* <td>{fileraw[0]}</td> */}
+                                    </tr>
                                 </tbody>
                             </table>
                             <div>

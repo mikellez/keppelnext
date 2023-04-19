@@ -18,7 +18,6 @@ import { useCurrentUser } from "../SWR";
 import TooltipBtn from "../TooltipBtn";
 import { useRouter } from "next/router";
 
-
 interface COPTableData extends CMMSChangeOfParts {
     id: string;
 }
@@ -77,14 +76,16 @@ const COPTable = (props: COPTableProps) => {
     };
 
     useEffect(() => {
-        const data: COPTableData[] = props.changeOfParts.map((item) => {
-            return {
-                ...item,
-                id: item.copId.toString(),
-            };
-        });
+        if (props.changeOfParts) {
+            const data: COPTableData[] = props.changeOfParts.map((item) => {
+                return {
+                    ...item,
+                    id: item.copId.toString(),
+                };
+            });
 
-        setTableData(data);
+            setTableData(data);
+        }
     }, [props.changeOfParts]);
 
     return (
