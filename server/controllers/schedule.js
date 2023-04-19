@@ -399,32 +399,44 @@ const deleteSchedule = async (req, res, next) => {
 
 // Get assigned-to users
 const getOpsAndEngineers = async (req, res, next) => {
-  let sql = `SELECT u.user_id as id, r.role_id, role_name, concat( concat(u.first_name , ' ') , u.last_name) AS name, user_email as email, first_name as fname, last_name as lname, user_name as username
+  let sql;
+  const arr = req.params.plant_id.split(",");
+  for (let i = 0; i < arr.length; i++) {
+    arr[i] = +arr[i];
+  }
+
+  if (req.params.plant_id.toString().length > 1) {
+    sql = `SELECT DISTINCT(u.user_id) as id, concat( concat(u.first_name , ' ') , u.last_name) AS name, user_email as email, first_name as fname, last_name as lname, user_name as username
+          FROM keppel.users u
+          LEFT JOIN keppel.user_plant up ON up.user_id = u.user_id
+          WHERE up.plant_id = ANY($1::int[])`;
+  } else {
+    sql = `SELECT u.user_id as id, r.role_id, role_name, concat( concat(u.first_name , ' ') , u.last_name) AS name, user_email as email, first_name as fname, last_name as lname, user_name as username
     FROM keppel.user_role ur, keppel.role r, keppel.role_parent rp, keppel.users u 
     LEFT JOIN keppel.user_plant up ON up.user_id = u.user_id
         WHERE rp.role_id = r.role_id
             and rp.role_parent_id = ur.role_parent_id
             and u.user_id = ur.user_id
             and (r.role_name = 'Operation Specialist' or r.role_name = 'Engineer' or r.role_name = 'Manager')
-            and up.plant_id =  '${req.params.plant_id}';`;
-
-  if (+req.params.plant_id === 0) {
-    sql = `SELECT u.user_id as id, concat( concat(u.first_name , ' ') , u.last_name) AS name, user_email as email, first_name as fname, last_name as lname, user_name as username
-          FROM keppel.users u;`;
+            and up.plant_id = $1;`;
   }
-  db.query(sql, (err, result) => {
-    if (err) throw err;
-    if (result.rows.length == 0) {
-      console.log(sql);
-      console.log(result.rows);
+  db.query(
+    sql,
+    [req.params.plant_id.toString().length > 1 ? arr : req.params.plant_id],
+    (err, result) => {
+      if (err) throw err;
+      if (result.rows.length == 0) {
+        console.log(sql);
+        console.log(result.rows);
 
-      return res.status(201).send({
-        success: false,
-        msg: "No Operators added",
-      });
+        return res.status(201).send({
+          success: false,
+          msg: "No Operators added",
+        });
+      }
+      return res.status(200).send(result.rows);
     }
-    return res.status(200).send(result.rows);
-  });
+  );
 };
 
 const insertSchedule = async (req, res, next) => {

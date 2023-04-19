@@ -16,7 +16,7 @@ interface AssignToSelectProps {
     value: MultiValue<AssignedUserOption> | SingleValue<AssignedUserOption>,
     action: ActionMeta<AssignedUserOption>
   ) => void;
-  plantId?: number;
+  plantId?: number | number[];
   style?: React.CSSProperties;
   name?: string;
   defaultIds?: number[]; //user_ids
@@ -32,7 +32,7 @@ export interface AssignedUserOption {
 }
 
 // Axios call to get all assigned users based on plant_id
-async function getAssignedUsers(plantId: number) {
+async function getAssignedUsers(plantId: number | number[]) {
   return await axios
     .get<CMMSUser[]>("/api/getAssignedUsers/" + plantId)
     .then((res) => {
