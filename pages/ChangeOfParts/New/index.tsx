@@ -11,7 +11,7 @@ import TooltipBtn from "../../../components/TooltipBtn";
 import axios, { AxiosResponse } from "axios";
 import { useRouter } from "next/router";
 import COPForm from "../../../components/ChangeOfParts/COPForm";
-import { CMMSChangeOfParts } from "../../../types/common/interfaces";
+import { CMMSAssetDetails, CMMSChangeOfParts } from "../../../types/common/interfaces";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { createChangeOfPartsServerSideProps } from "../../../types/common/props";
 import { GetServerSideProps } from "next";
@@ -30,13 +30,14 @@ const createChangeOfParts = async (formData: CMMSChangeOfParts) => {
 
 const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const [formData, setFormData] = useState<CMMSChangeOfParts>({scheduledDate: new Date()} as CMMSChangeOfParts);
+    const [formData, setFormData] = useState<CMMSChangeOfParts>({
+        scheduledDate: new Date(),
+    } as CMMSChangeOfParts);
     const [successModal, setSuccessModal] = useState<boolean>(false);
     const [displayErrorMsg, setDisplayErrorMsg] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
     const router = useRouter();
     const user = useCurrentUser();
-
 
     const handleSubmit = () => {
         setIsSubmitting(true);
@@ -49,8 +50,8 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
         } else {
             setDisplayErrorMsg(true);
             setTimeout(() => {
-                setIsSubmitting(false)
-            })
+                setIsSubmitting(false);
+            });
         }
     };
 
@@ -65,72 +66,90 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
 
     useEffect(() => {
         setIsReady(false);
-        if (props.changeOfParts[0] && router.query.id) {
-            const defaultCOP = props.changeOfParts[0]
+        if (props.changeOfParts[0] && router.query.copId) {
+            const defaultCOP = props.changeOfParts[0];
+            console.log(defaultCOP);
 
-            setFormData(prev => {
+            setFormData((prev) => {
                 return {
                     ...prev,
                     plantId: defaultCOP.plantId,
                     description: defaultCOP.description,
                     psaId: defaultCOP.psaId,
-                    assignedUserId: defaultCOP.assignedUserId, 
-                }
+                    assignedUserId: defaultCOP.assignedUserId,
+                };
             });
 
             setTimeout(() => {
                 setIsReady(true);
             }, 1500);
+        } else if (props.changeOfParts[0] && router.query.assetId) {
+            const defaultCOP = props.changeOfParts[0];
+            setFormData((prev) => {
+                return {
+                    ...prev,
+                    plantId: defaultCOP.plantId,
+                    psaId: defaultCOP.psaId,
+                };
+            });
 
+            setTimeout(() => {
+                setIsReady(true);
+            }, 1500);
         } else {
             setIsReady(true);
         }
-
     }, [props.changeOfParts, router.query, user.data]);
 
     return (
         <>
-            {isReady ? <ModuleMain>
-            <ModuleHeader title="New Change Of Parts" header="Create New Change Of Parts">
-                <Link href="/ChangeOfParts" className="btn btn-secondary">
-                    Back
-                </Link>
-            </ModuleHeader>
-            <ModuleContent>
-                <COPForm formData={formData} setFormData={setFormData} />
-                <ModuleFooter>
-               
-                    {displayErrorMsg && <span style={{ color: "red" }}>Please fill in all required fields</span>}
-                    
-                    <TooltipBtn
-                        toolTip={false}
-                        onClick={handleSubmit}
-                        style={{ marginRight: "10px" }}
-                        disabled={isSubmitting}
-                    >
-                        Submit
-                    </TooltipBtn>
-                </ModuleFooter>
-            </ModuleContent>
-        </ModuleMain> : <LoadingHourglass />}
+            {isReady ? (
+                <ModuleMain>
+                    <ModuleHeader title="New Change Of Parts" header="Create New Change Of Parts">
+                        <Link href="/ChangeOfParts" className="btn btn-secondary">
+                            Back
+                        </Link>
+                    </ModuleHeader>
+                    <ModuleContent>
+                        <COPForm formData={formData} setFormData={setFormData} />
+                        <ModuleFooter>
+                            {displayErrorMsg && (
+                                <span style={{ color: "red" }}>
+                                    Please fill in all required fields
+                                </span>
+                            )}
 
-        <ModuleSimplePopup 
-            modalOpenState={successModal}
-            setModalOpenState={setSuccessModal}
-            icon={SimpleIcon.Check}
-            title="Success"
-            text="Change of parts successfully updated"
-        /> 
+                            <TooltipBtn
+                                toolTip={false}
+                                onClick={handleSubmit}
+                                style={{ marginRight: "10px" }}
+                                disabled={isSubmitting}
+                            >
+                                Submit
+                            </TooltipBtn>
+                        </ModuleFooter>
+                    </ModuleContent>
+                </ModuleMain>
+            ) : (
+                <LoadingHourglass />
+            )}
+
+            <ModuleSimplePopup
+                modalOpenState={successModal}
+                setModalOpenState={setSuccessModal}
+                icon={SimpleIcon.Check}
+                title="Success"
+                text="Change of parts successfully updated"
+            />
         </>
     );
 };
 
 export default ChangeOfPartsNew;
 
-export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps(true,  
+export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps(
+    true,
     (response: AxiosResponse<CMMSChangeOfParts[]>) => {
-        return (
-            !!response.data
-        );
+        return !!response.data;
     }
 );
