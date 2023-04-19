@@ -87,6 +87,7 @@ const COPTable = (props: COPTableProps) => {
             setTableData(data);
         }
     }, [props.changeOfParts]);
+    console.log(tableData)
 
     return (
         <>

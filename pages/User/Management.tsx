@@ -12,6 +12,13 @@ import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import { CMMSEmployee } from "../../types/common/interfaces";
 import axios from "axios";
+import { ModuleHeader, ModuleMain } from "../../components";
+import TooltipBtn from "../../components/TooltipBtn";
+import Link from "next/link";
+import { BsFileEarmarkPlus } from "react-icons/bs";
+import { AiOutlineUserAdd } from "react-icons/ai";
+import { HiOutlineDownload } from "react-icons/hi";
+
 
 const getUser = async () => {
   const url = "/api/user/getUsers";
@@ -33,7 +40,6 @@ export default function User() {
       setData(res);
     });
   }, []);
-
   const [data, setData] = useState<CMMSEmployee[]>([]);
   const [columnSizes, setColumnSizes] = useState<string>(
     "6em 20% calc(80% - 12em) 6em;"
@@ -42,55 +48,71 @@ export default function User() {
   const theme = useTheme([
     getTheme(),
     {
-      Table:
-        "--data-table-library_grid-template-columns:  " +
-        columnSizes +
-        "",
-      HeaderRow: `
-        background-color: #eaf5fd;
-      `,
+        Table: `
+            --data-table-library_grid-template-columns: 5% 15% 35% 15% 15% 15%;
+        `,
+
+        Row: `
+            &:nth-of-type(n) {
+            cursor: pointer
+            }; 
+        `,
+
+        Cell: `
+            & > div {
+                overflow: visible;
+                white-space: unset !important;
+            }
+        `,
+
+        HeaderCell: `
+            z-index: 20 !important;
+            &:nth-of-type(1) {
+                z-index: 30 !important;
+            }
+        `,
     },
   ]);
 
-  const columns = [
-    {
-      HeaderCell: "Employee ID",
-      Cell: ({ item }: { item: CMMSEmployee }) => (
-        <Cell>{item.employee_id}</Cell>
-      ),
-    },
-    {
-      HeaderCell: "Name",
-      Cell: ({ item }: { item: CMMSEmployee }) => (
-        <Cell>{item.full_name}</Cell>
-      ),
-    },
-    {
-      HeaderCell: "Role",
-      Cell: ({ item }: { item: CMMSEmployee }) => (
-        <Cell>{item.role_name}</Cell>
-      ),
-    },
-  ];
 
   return (
-    <Table data={{ nodes: data }} columns={columns} theme={theme}>
-      <Header>
-        <HeaderRow>
-          <HeaderCell>Employee ID</HeaderCell>
-          <HeaderCell>Name</HeaderCell>
-          <HeaderCell>Role</HeaderCell>
-        </HeaderRow>
-      </Header>
-      <Body>
-        {data.map((d) => (
-          <Row key={d.id} item={d}>
-            <Cell>{d.employee_id}</Cell>
-            <Cell>{d.full_name}</Cell>
-            <Cell>{d.role_name}</Cell>
-          </Row>
-        ))}
-      </Body>
-    </Table>
+    <ModuleMain>
+      <ModuleHeader title="User Management" header="User Tables">
+        <TooltipBtn
+            onClick={() => downloadCSV("checklist", activeTabIndex)}
+                    text="Export CSV">
+            <HiOutlineDownload size={20} />
+        </TooltipBtn>
+        <Link href="./Add">
+          <TooltipBtn text="Add User">
+            <AiOutlineUserAdd href="./Add" size={20} />
+          </TooltipBtn>
+        </Link>
+      </ModuleHeader>
+    <Table data={{ nodes: data }} theme={theme} >
+    {(tableList: CMMSEmployee[]) => (
+      <>
+        <Header>
+          <HeaderRow>
+            <HeaderCell>Employee ID</HeaderCell>
+            <HeaderCell>Name</HeaderCell>
+            <HeaderCell>Role</HeaderCell>
+
+          </HeaderRow>
+        </Header>
+
+        <Body>
+          {tableList.map((item) => (
+            <Row key={item.id} item={item}>
+              <Cell>{item.employee_id}</Cell>
+              <Cell>{item.full_name}</Cell>
+              <Cell>{item.role_name}</Cell>
+            </Row>
+          ))}
+        </Body>
+      </>
+    )}
+  </Table>
+  </ModuleMain>
   );
 }

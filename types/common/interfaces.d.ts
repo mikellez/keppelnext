@@ -327,6 +327,17 @@ interface CMMSChangeOfParts {
   assignedUser: string; 
 }
 
+interface CMMSAddUser{
+  firstName: string;
+  lastName: string;
+  username: string;
+  password: string;
+  employeeId: string;
+  email: string;
+  roleType: number;
+  allocatedPlants: number[];
+}
+
 export {
   CMMSBaseType,
   CMMSUser,
@@ -358,4 +369,5 @@ export {
   CMMSAssetDetails,
   CMMSSubComponent1Name,
   CMMSChangeOfParts,
+  CMMSAddUser
 };
