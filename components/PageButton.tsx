@@ -5,13 +5,12 @@ import { ChecklistItem } from "../pages/Checklist";
 import { logbookData } from "../pages/Logbook";
 
 const PageButton = ({
-  pagination,
+  setPage,
   children,
+  active,
 }: {
-  pagination:
-    | Pagination<RequestItem>
-    | Pagination<ChecklistItem>
-    | Pagination<logbookData>;
+  active?: boolean;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
   children: React.ReactNode;
 }) => {
   return (
@@ -21,12 +20,8 @@ const PageButton = ({
         marginRight: "0.1rem",
         marginLeft: "0.1rem",
       }}
-      onClick={() => pagination.fns.onSetPage((children as number) - 1)}
-      className={`btn btn-primary ${
-        pagination.state.page === (children as number) - 1
-          ? ""
-          : styles.nonActiveBtns
-      }`}
+      onClick={() => setPage(children as number)}
+      className={`btn btn-primary ${active ? "" : styles.nonActiveBtns}`}
     >
       {children}
     </button>
