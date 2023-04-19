@@ -3,7 +3,6 @@ import { ModuleMain, ModuleHeader, ModuleContent } from "../../components";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { CMMSChangeOfParts } from "../../types/common/interfaces";
 import PlantSelect from "../../components/PlantSelect";
-import axios from "axios";
 import { AiOutlineEdit } from "react-icons/ai";
 import { VscNewFile } from "react-icons/vsc";
 import TooltipBtn from "../../components/TooltipBtn";
@@ -11,6 +10,7 @@ import COPTable from "../../components/ChangeOfParts/COPTable";
 import { useRouter } from "next/router";
 import { createChangeOfPartsServerSideProps } from "../../types/common/props";
 import { useChangeOfParts } from "../../components/SWR";
+import { useCurrentUser } from "../../components/SWR";
 
 export interface ChangeOfPartsPageProps {
     changeOfParts: CMMSChangeOfParts[];
@@ -20,11 +20,12 @@ const indexedColumn: ("scheduled" | "completed")[] = ["scheduled", "completed"]
 
 const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
     const [COPData, setCOPData] = useState<CMMSChangeOfParts[]>(props.changeOfParts);
-    const [selectedPlant, setSelectedPlant] = useState<number>(0)
+    const [selectedPlant, setSelectedPlant] = useState<number>()
     const [selectedCOP, setSelectedCOP] = useState<CMMSChangeOfParts>({} as CMMSChangeOfParts);
     const [activeCOPType, setActveCOPType] = useState<number>(0);
     const [isReady, setIsReady] = useState<boolean>(false);
     const router = useRouter();
+    const user = useCurrentUser();
 
     const updatePlant = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setIsReady(false);
@@ -49,6 +50,10 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
         } 
     }, [data, isValidating, isReady]);
 
+    useEffect(() => {
+        if (user.data?.allocated_plants.length == 1) setSelectedPlant(user.data?.allocated_plants[0])
+    }, [user.data?.allocated_plants])
+
     return (
         <ModuleMain>
             <ModuleHeader header="Change of Parts">
@@ -68,6 +73,7 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                     onChange={updatePlant}
                     allPlants
                     accessControl
+                    default
                 />
 
             </ModuleHeader>

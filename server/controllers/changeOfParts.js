@@ -1,7 +1,7 @@
 const db = require("../../db");
 const moment = require("moment");
 
-const fetchAllOfChangeOfPartsQuery = `
+const fetchAllOfChangeOfPartsQuery = (req) => `
     SELECT 
         cop.cop_id,
         cop.psa_id,
@@ -19,17 +19,24 @@ const fetchAllOfChangeOfPartsQuery = `
             JOIN keppel.plant_system_assets psa ON cop.psa_id = psa.psa_id
             JOIN keppel.plant_master pm ON psa.plant_id = pm.plant_id
             JOIN keppel.users u ON cop.assigned_user_id = u.user_id
+    WHERE 
+        psa.plant_id IN 
+            (SELECT 
+                UNNEST(string_to_array(allocatedplantids, ', ')::int[]) 
+            FROM 
+                keppel.user_access WHERE user_id = ${req.user.id})
+        
 `;
 
-const fetchChangeOfPartsByPlantQuery = (plant_id) => fetchAllOfChangeOfPartsQuery + `WHERE pm.plant_id = ${plant_id} `;
+const fetchChangeOfPartsByPlantQuery = (req) => fetchAllOfChangeOfPartsQuery(req) + `AND pm.plant_id = ${req.query.plant_id} `;
 
-const fetchChangeofPartsByAssetQuery = (asset_id) => fetchAllOfChangeOfPartsQuery + `WHERE cop.psa_id = ${asset_id} `;
+const fetchChangeofPartsByAssetQuery = (req) => fetchAllOfChangeOfPartsQuery(req) + `AND cop.psa_id = ${req.query.psa_id} `;
 
-const fetchChangeOfPartsByIdQuery = (copId) => fetchAllOfChangeOfPartsQuery + `WHERE cop.cop_id = ${copId} `;
+const fetchChangeOfPartsByIdQuery = (req) => fetchAllOfChangeOfPartsQuery(req) + `AND cop.cop_id = ${req.params.cop_id} `;
 
-const fetchAllCompletedChangeOfPartsQuery = fetchAllOfChangeOfPartsQuery + `WHERE cop.changed_date IS NOT NULL `;
+const fetchAllCompletedChangeOfPartsQuery = (req) => fetchAllOfChangeOfPartsQuery(req) + `AND cop.changed_date IS NOT NULL `;
 
-const fetchAllScheduledChangeOfPartsQuery = fetchAllOfChangeOfPartsQuery + `WHERE cop.changed_date IS NULL `;
+const fetchAllScheduledChangeOfPartsQuery  = (req) =>  fetchAllOfChangeOfPartsQuery(req) + `AND cop.changed_date IS NULL `;
 
 const toCMMSChangeOfParts = (row) => {
     return {
@@ -48,17 +55,17 @@ const toCMMSChangeOfParts = (row) => {
 
 const fetchChangeOfParts = async (req, res, next) => {
     let sql = req.query.plant_id ? 
-        fetchChangeOfPartsByPlantQuery(req.query.plant_id) : 
+        fetchChangeOfPartsByPlantQuery(req) : 
         req.params.cop_id ? 
-        fetchChangeOfPartsByIdQuery(req.params.cop_id) : 
+        fetchChangeOfPartsByIdQuery(req) : 
         req.query.psa_id ? 
-        fetchChangeofPartsByAssetQuery(req.query.psa_id) : 
-        fetchAllOfChangeOfPartsQuery;
+        fetchChangeofPartsByAssetQuery(req) : 
+        fetchAllOfChangeOfPartsQuery(req);
 
     sql =  req.query.type === "completed" ?
-        fetchAllCompletedChangeOfPartsQuery :
+        fetchAllCompletedChangeOfPartsQuery(req) :
         req.query.type === "scheduled" ? 
-        fetchAllScheduledChangeOfPartsQuery : sql;
+        fetchAllScheduledChangeOfPartsQuery(req) : sql;
     
     sql = req.query.plant_id && req.query.type ? 
         sql + `AND pm.plant_id = ${req.query.plant_id}` :
