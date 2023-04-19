@@ -16,16 +16,8 @@ import { CMMSChangeOfParts } from "../../types/common/interfaces";
 import { dateFormat } from "../Schedule/ScheduleTemplate";
 import { useCurrentUser } from "../SWR";
 import TooltipBtn from "../TooltipBtn";
-import axios from "axios";
-import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
 
-// const completeCOP = async (copId: number) => {
-//     return await axios
-//         .patch("/api/changeOfParts/complete/" + copId)
-//         .then((res) => res.data)
-//         .catch((err) => console.log(err));
-// };
 
 interface COPTableData extends CMMSChangeOfParts {
     id: string;
@@ -39,9 +31,6 @@ interface COPTableProps extends ChangeOfPartsPageProps {
 
 const COPTable = (props: COPTableProps) => {
     const [tableData, setTableData] = useState<COPTableData[]>([]);
-    // const [pendingCompleteCOPId, setPendingCompleteCOPId] = useState<number>();
-    // const [confirmModal, setConfirmModal] = useState<boolean>(false);
-    // const [successModal, setSuccessModal] = useState<boolean>(false);
     const user = useCurrentUser();
     const router = useRouter();
 
@@ -85,23 +74,7 @@ const COPTable = (props: COPTableProps) => {
 
     const handleCompleteClick = (copId: number) => {
         router.push("/ChangeOfParts/Complete/" + copId);
-
-        // setPendingCompleteCOPId(copId);
-        // setConfirmModal(true);
     };
-
-    // const handleConfirmClick = () => {
-    // completeCOP(pendingCompleteCOPId as number).then((result) => {
-    //     setSuccessModal(true);
-    //     setTimeout(() => {
-    //         router.reload();
-    //     }, 1000);
-    // });
-    // };
-
-    // useEffect(() => {
-    //     if (!confirmModal) setPendingCompleteCOPId(undefined);
-    // }, [confirmModal]);
 
     useEffect(() => {
         const data: COPTableData[] = props.changeOfParts.map((item) => {
@@ -163,27 +136,6 @@ const COPTable = (props: COPTableProps) => {
                     </>
                 )}
             </Table>
-
-            {/* <ModuleSimplePopup
-                modalOpenState={confirmModal}
-                setModalOpenState={setConfirmModal}
-                buttons={
-                    <TooltipBtn toolTip={false} onClick={handleConfirmClick}>
-                        Confirm
-                    </TooltipBtn>
-                }
-                title="Confirm"
-                text="Please confirm that you have completed the change of part"
-                icon={SimpleIcon.Info}
-            /> */}
-
-            {/* <ModuleSimplePopup
-                modalOpenState={successModal}
-                setModalOpenState={setSuccessModal}
-                title="Success"
-                text="You have successfully completed change of part"
-                icon={SimpleIcon.Check}
-            /> */}
         </>
     );
 };
