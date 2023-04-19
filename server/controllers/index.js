@@ -8,3 +8,4 @@ exports.dashboard       = require("./dashboard");
 exports.activity        = require("./activity")
 exports.changeOfParts   = require("./changeOfParts");
 exports.logbook         = require("./logbook");
+exports.user            = require("./user");
