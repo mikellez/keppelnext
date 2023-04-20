@@ -9,6 +9,7 @@ import {
   CMMSSystemAsset,
   CMMSSystemAssetName,
   CMMSSubComponent1Name,
+  CMMSChangeOfParts
 } from "../types/common/interfaces";
 
 function useRequest(
@@ -26,6 +27,7 @@ function useRequest(
       .catch((e) => {
         throw new Error(e);
       });
+
 
   return useSWR<CMMSRequest[], Error>(
     ["/api/request/", request_type],
@@ -189,13 +191,36 @@ function useSubComponent1Name(
   );
 }
 
-export {
-  useRequest,
-  useAsset,
-  useChecklist,
-  useCurrentUser,
-  useAccountlog,
-  useSystemAsset,
-  useSystemAssetName,
-  useSubComponent1Name,
+
+function useChangeOfParts(copId: number | null, options?: {plant_id?: number, psa_id?: number, type: "completed" | "scheduled" | null}) {
+	const changeOfPartsFetcher = async (url: string) => {
+		let apiURL = copId ? 
+			`${url}/${copId}` : 
+			url;
+		
+		if (options) {
+			if (options.plant_id && options.type) apiURL += `?plant_id=${options.plant_id}&type=${options.type}`;
+			else if (options.plant_id) apiURL += `?plant_id=${options.plant_id}`;
+			else if (options.type) apiURL += `?type=${options.type}`;
+			else if (options.psa_id && copId === null) apiURL += `?psa_id=${options.psa_id}`;
+		}
+		
+		return await axios.get<CMMSChangeOfParts[]>(apiURL).then((response) => response.data).catch((e) => {
+			throw new Error(e);
+		});
+	}
+
+	return useSWR<CMMSChangeOfParts[], Error>(["/api/changeOfParts", copId, options], changeOfPartsFetcher, {revalidateOnFocus: false});
 };
+
+export {
+    useRequest,
+	useAsset,
+	useChecklist,
+	useCurrentUser,
+	useAccountlog,
+	useSystemAsset,
+	useSystemAssetName,
+	useSubComponent1Name,
+	useChangeOfParts,
+}

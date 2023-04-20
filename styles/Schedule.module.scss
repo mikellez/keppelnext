@@ -184,6 +184,31 @@
     height: 70vh;
 }
 
+.calendarDisplayCheckboxContainer {
+    display: flex;
+    gap: 15px;
+    font-size: 0.9rem;
+}   
+
+.legendColorBox {
+    height: 10px;
+    width: 10px;
+    border-radius: 5px;
+}
+
+.legendLine {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.legendContainer {
+    display: grid;
+    grid-template-columns: auto auto;
+    column-gap: 20px;
+}
+
 // ------------------------------------------ Create Schedule Page -------------------------------------------
 .createCardsContainer {
     display: flex;

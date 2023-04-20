@@ -23,11 +23,11 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
     const user = useCurrentUser();
 
     const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData(prev => {
+        setFormData((prev) => {
             return {
                 ...prev,
-                changedDate: new Date(e.target.value) 
-            }
+                changedDate: new Date(e.target.value),
+            };
         });
     };
 
@@ -36,7 +36,7 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
     };
 
     const handleConfirmClick = () => {
-        editChangeOfParts(formData).then(result => {
+        editChangeOfParts(formData).then((result) => {
             setSuccessModal(true);
         });
     };
@@ -45,7 +45,7 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
         setIsReady(false);
         if (user.data?.id != formData.assignedUserId) {
             router.push("/403");
-                return;
+            return;
         } else {
             setTimeout(() => {
                 setIsReady(true);
@@ -55,36 +55,40 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
 
     return (
         <>
-        {isReady ? <ModuleMain>
-            <ModuleHeader header="Complete Change of Parts">
-                <Link href="/ChangeOfParts" className="btn btn-secondary">
-                    Back
-                </Link>
-            </ModuleHeader>
-            <ModuleContent>
-                <COPForm formData={formData} setFormData={setFormData} disableForm />
-            </ModuleContent>
-            <ModuleContent>
-                <div className="form-group" style={{width: "150px"}}>
-                    <label className="form-label">
-                        Date of Completion
-                    </label>
-                    <input 
-                        type="date" 
-                        className="form-control"
-                        onChange={handleOnChange}
-                        max={new Date().toISOString().slice(0, 10)}
-                    />
-                </div>  
-            </ModuleContent>
-            <ModuleFooter>
-                <TooltipBtn
-                    toolTip={false}
-                    disabled={!formData.changedDate}
-                    onClick={handleCompleteClick}
-                >Complete</TooltipBtn>
-            </ModuleFooter>
-        </ModuleMain> : <LoadingHourglass />}
+            {isReady ? (
+                <ModuleMain>
+                    <ModuleHeader header="Complete Change of Parts">
+                        <Link href="/ChangeOfParts" className="btn btn-secondary">
+                            Back
+                        </Link>
+                    </ModuleHeader>
+                    <ModuleContent>
+                        <COPForm formData={formData} setFormData={setFormData} disableForm />
+                    </ModuleContent>
+                    <ModuleContent>
+                        <div className="form-group" style={{ width: "150px" }}>
+                            <label className="form-label">Date of Completion</label>
+                            <input
+                                type="date"
+                                className="form-control"
+                                onChange={handleOnChange}
+                                max={new Date().toISOString().slice(0, 10)}
+                            />
+                        </div>
+                    </ModuleContent>
+                    <ModuleFooter>
+                        <TooltipBtn
+                            toolTip={false}
+                            disabled={!formData.changedDate}
+                            onClick={handleCompleteClick}
+                        >
+                            Complete
+                        </TooltipBtn>
+                    </ModuleFooter>
+                </ModuleMain>
+            ) : (
+                <LoadingHourglass />
+            )}
 
             <ModuleSimplePopup
                 modalOpenState={confirmModal}
@@ -105,17 +109,21 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                 title="Success"
                 text="You have successfully completed change of part. Do you want to create another one?"
                 buttons={[
-                    <TooltipBtn 
+                    <TooltipBtn
                         key={1}
                         toolTip={false}
                         onClick={() => router.push("/ChangeOfParts")}
-                    >No</TooltipBtn>,
-                    <TooltipBtn 
+                    >
+                        No
+                    </TooltipBtn>,
+                    <TooltipBtn
                         key={2}
                         toolTip={false}
-                        onClick={() => router.push("/ChangeOfParts/New?id=" + formData.copId)}
-                        style={{backgroundColor: "#367E18", borderColor: "#367E18"}}
-                    >Yes</TooltipBtn>
+                        onClick={() => router.push("/ChangeOfParts/New?copId=" + formData.copId)}
+                        style={{ backgroundColor: "#367E18", borderColor: "#367E18" }}
+                    >
+                        Yes
+                    </TooltipBtn>,
                 ]}
                 icon={SimpleIcon.Check}
             />
@@ -125,12 +133,9 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
 
 export default CompleteChangeOfPartsPage;
 
-export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps(true, 
+export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps(
+    true,
     (response: AxiosResponse<CMMSChangeOfParts[]>) => {
-        return (
-            response.data &&
-			response.data[0].changedDate
-        );
-    }    
+        return response.data && response.data[0].changedDate;
+    }
 );
-
