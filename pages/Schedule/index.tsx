@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import ScheduleTemplate, { ScheduleInfo } from '../../components/Schedule/ScheduleTemplate';
-import { CMMSPlant } from '../../types/common/interfaces';
+import { CMMSChangeOfParts, CMMSPlant } from '../../types/common/interfaces';
 import PlantSelect from '../../components/PlantSelect';
 import axios from 'axios';
 import { MdOutlineLocationOn } from "react-icons/md"
 import styles from "../../styles/Schedule.module.scss";
+import { useChangeOfParts } from '../../components/SWR';
 
 /*
 	EXPLANATION OF SCHEDULE MODULE
@@ -65,17 +66,21 @@ async function getSchedules(id : number) {
 
 
 export default function Schedule() {
-	// Store the list of plants in a state for dropdown
-	const [plantList, setPlantList] = useState<CMMSPlant[]>([]);
-	// Store the list of schedules in a state to be rendered on the calendar
+	const [selectedPlant, setSelectedPlant] = useState<number>(0);
 	const [scheduleList, setScheduleList] = useState<ScheduleInfo[]>([]);
+	const [changeOfParts, setChangeOfParts] = useState<CMMSChangeOfParts[]>([]);
 
-	// Calls an api on load to get the list of plants
+	const { data, error, isValidating, mutate } = useChangeOfParts(null, {plant_id: selectedPlant, type: null});
+
 	useEffect(() => {
-		updateSchedules(0);
-	}, []);
+		updateSchedules(selectedPlant);
 
-	// Get the schedules to be rendered on the calendar
+		if (!isValidating && data) {
+			setChangeOfParts(data);
+		}
+
+	}, [selectedPlant, isValidating, data]);
+
 	function updateSchedules(id : number) {
 		setScheduleList([]);
 		getSchedules(id).then((schedules) => {	
@@ -86,13 +91,12 @@ export default function Schedule() {
 		});
 	};
 
-	// Change the events according to plant on change of plant select
 	function changePlant(e : React.ChangeEvent<HTMLSelectElement>) {
-		updateSchedules(parseInt(e.target.value));
+		setSelectedPlant(+e.target.value)
 	};
 
   	return (
-		<ScheduleTemplate title="View Schedule" header="View Schedule" schedules={scheduleList}>
+		<ScheduleTemplate title="View Schedule" header="View Schedule" schedules={scheduleList} changeOfParts={changeOfParts}>
 			<div className={"form-group" && styles.eventModalHeader} style={{gap: "0.3rem"}}>
 				<MdOutlineLocationOn size={30} />
 				<PlantSelect onChange={changePlant} allPlants={true} />

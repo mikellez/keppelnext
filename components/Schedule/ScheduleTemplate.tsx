@@ -9,12 +9,13 @@ import styles from "../../styles/Schedule.module.scss";
 import { BsCalendar4Week, BsListUl } from "react-icons/bs";
 import { TableNode } from "@table-library/react-table-library/types/table";
 import ScheduleTable from "./ScheduleTable";
-import { CMMSScheduleEvent } from "../../types/common/interfaces";
+import { CMMSScheduleEvent, CMMSChangeOfPartsEvent, CMMSChangeOfParts } from "../../types/common/interfaces";
 
 interface ScheduleTemplateInfo extends PropsWithChildren {
     title: string;
     header: string;
     schedules?: ScheduleInfo[];
+    changeOfParts?: CMMSChangeOfParts[];
     timeline?: number;
     children?: ReactNode;
 }
@@ -43,7 +44,6 @@ export interface ScheduleInfo {
     isSingle: boolean;
     index?: number;
     status?: number;
-    // prev_schedule_id?: number;
 }
 
 // Function to format Date to string
@@ -99,6 +99,7 @@ export function toPeriodNum(period: string): number {
     }
 }
 
+
 /*
     ScheduleTemplate component is used across 
     pages with the FullCalendar conmponent.
@@ -108,7 +109,8 @@ export function toPeriodNum(period: string): number {
 
 export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     // Store the list of events in a state to be rendered on the calendar
-    const [eventList, setEventList] = useState<CMMSScheduleEvent[]>([]);
+    const [checklistEvents, setChecklistEvents] = useState<CMMSScheduleEvent[]>([]);
+    const [COPEvents, setCOPEvents] = useState<CMMSChangeOfPartsEvent[]>([]);
     // Store the state of the view event modal
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     // Store the current event which will pop up as a modal in a state
@@ -117,10 +119,10 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     const [toggleCalendarOrListView, setToggleCalendarOrListView] = useState<boolean>(true);
 
     const router = useRouter();
-
+    
     // Add events to be displayed on the calendar
     useEffect(() => {
-        setEventList([]);
+        setChecklistEvents([]);
         if (props.schedules) {
             let newEvents: CMMSScheduleEvent[] = [];
             props.schedules.forEach((item) => {
@@ -136,8 +138,6 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                             date: new Date(item.calendar_dates[index]),
                             startDate: item.start_date ? new Date(item.start_date.toString().slice(0, 10)) : "Rescheduled",
                             endDate: item.end_date ? new Date(item.end_date.toString().slice(0, 10)) : "Rescheduled",
-                            // prevStartDate: item.prev_start_date,
-                            // prevEndDate: item.prev_end_date,
                             recurringPeriod: item.period,
                             assignedIds: item.assigned_ids,
                             assignedEmails: item.assigned_emails,
@@ -151,17 +151,37 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                             isSingle: item.isSingle,
                             exclusionList: item.exclusionList,
                             status: item.status,
-                            // prevId: item.prev_schedule_id,
                         },
                     };
                     if (!item.exclusionList || !item.exclusionList.includes(index)) {
                         newEvents.push(event);
                     }
                 });
-                setEventList(newEvents);
+                setChecklistEvents(newEvents);
             });
         }
-    }, [props.schedules]);
+
+        if (props.changeOfParts) {
+            const newCOPEvents: CMMSChangeOfPartsEvent[] = props.changeOfParts.map(cop => {
+                return {
+                    title: "Change of Parts for " + cop.asset,
+                    start: new Date(cop.scheduledDate),
+                    extendedProps: {
+                        description: cop.description,
+                        assignedUserId: cop.assignedUserId,
+                        assignedUser: cop.assignedUser,
+                        psaId: cop.psaId,
+                        asset: cop.asset,
+                        copId: cop.copId,
+                        plant: cop.plant,
+                        plantId: cop.plantId,
+                    }
+                }
+            })
+            setCOPEvents(newCOPEvents);
+        }
+
+    }, [props.schedules, props.changeOfParts]);
 
     return (
         <ModuleMain>
@@ -213,7 +233,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                         stickyHeaderDates={true}
                         selectable={true}
                         unselectAuto={true}
-                        events={eventList}
+                        events={checklistEvents.concat(COPEvents)}
                         dayMaxEvents={2}
                         eventDisplay="block"
                         eventBackgroundColor="#FA9494"
@@ -223,34 +243,36 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                         eventClick={() => setIsModalOpen(true)}
                         eventMouseEnter={(info) => {
                             document.body.style.cursor = "pointer";
-                            const event = {
-                                title: info.event._def.title,
-                                start: info.event._instance?.range.start,
-                                extendedProps: {
-                                    plant: info.event._def.extendedProps.plant,
-                                    plantId: info.event._def.extendedProps.plantId,
-                                    scheduleId: info.event._def.extendedProps.scheduleId,
-                                    checklistId: info.event._def.extendedProps.checklistId,
-                                    timelineId: info.event._def.extendedProps.timelineId,
-                                    date: info.event._def.extendedProps.date,
-                                    startDate: info.event._def.extendedProps.startDate,
-                                    endDate: info.event._def.extendedProps.endDate,
-                                    recurringPeriod: info.event._def.extendedProps.recurringPeriod,
-                                    assignedIds: info.event._def.extendedProps.assignedIds,
-                                    assignedEmails: info.event._def.extendedProps.assignedEmails,
-                                    assignedFnames: info.event._def.extendedProps.assignedFnames,
-                                    assignedLnames: info.event._def.extendedProps.assignedLnames,
-                                    assignedUsernames: info.event._def.extendedProps.assignedUsernames,
-                                    assignedRoles: info.event._def.extendedProps.assignedRoles,
-                                    remarks: info.event._def.extendedProps.remarks,
-                                    index: info.event._def.extendedProps.index,
-                                    exclusionList: info.event._def.extendedProps.exclusionList,
-                                    isSingle: info.event._def.extendedProps.isSingle,
-                                    status: info.event._def.extendedProps.status,
-                                    // prevId: info.event._def.extendedProps.prevId,
-                                },
-                            };
-                            setCurrentEvent(event);
+                            if (info.event._def.extendedProps.scheduleId) {
+                                const event = {
+                                    title: info.event._def.title,
+                                    start: info.event._instance?.range.start,
+                                    extendedProps: {
+                                        plant: info.event._def.extendedProps.plant,
+                                        plantId: info.event._def.extendedProps.plantId,
+                                        scheduleId: info.event._def.extendedProps.scheduleId,
+                                        checklistId: info.event._def.extendedProps.checklistId,
+                                        timelineId: info.event._def.extendedProps.timelineId,
+                                        date: info.event._def.extendedProps.date,
+                                        startDate: info.event._def.extendedProps.startDate,
+                                        endDate: info.event._def.extendedProps.endDate,
+                                        recurringPeriod: info.event._def.extendedProps.recurringPeriod,
+                                        assignedIds: info.event._def.extendedProps.assignedIds,
+                                        assignedEmails: info.event._def.extendedProps.assignedEmails,
+                                        assignedFnames: info.event._def.extendedProps.assignedFnames,
+                                        assignedLnames: info.event._def.extendedProps.assignedLnames,
+                                        assignedUsernames: info.event._def.extendedProps.assignedUsernames,
+                                        assignedRoles: info.event._def.extendedProps.assignedRoles,
+                                        remarks: info.event._def.extendedProps.remarks,
+                                        index: info.event._def.extendedProps.index,
+                                        exclusionList: info.event._def.extendedProps.exclusionList,
+                                        isSingle: info.event._def.extendedProps.isSingle,
+                                        status: info.event._def.extendedProps.status,
+                                    },
+                                };
+                                setCurrentEvent(event);
+                            }
+                            
                         }}
                         eventMouseLeave={() => {
                             document.body.style.cursor = "default";

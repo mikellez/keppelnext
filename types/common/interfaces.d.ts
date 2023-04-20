@@ -188,8 +188,6 @@ interface CMMSScheduleEvent {
     date?: Date;
     startDate: Date | string;
     endDate: Date | string;
-    // prevStartDate?: Date | string;
-    // prevEndDate?: Date | string;
     recurringPeriod: number;
     assignedIds: number[];
     assignedEmails: string[];
@@ -202,7 +200,6 @@ interface CMMSScheduleEvent {
     isSingle?: boolean;
     index?: number;
     status?: number;
-    // prevId?: number;
   };
 }
 
@@ -327,6 +324,21 @@ interface CMMSChangeOfParts {
   assignedUser: string; 
 }
 
+interface CMMSChangeOfPartsEvent {
+  title: string;
+  start?: Date | string;
+  extendedProps: {
+    description: string;
+    assignedUserId: number;
+    assignedUser: string;
+    psaId: number;
+    asset: string;
+    copId: number;
+    plant: string;
+    plantId: number;
+  };
+}
+
 export {
   CMMSBaseType,
   CMMSUser,
@@ -358,4 +370,5 @@ export {
   CMMSAssetDetails,
   CMMSSubComponent1Name,
   CMMSChangeOfParts,
+  CMMSChangeOfPartsEvent,
 };
