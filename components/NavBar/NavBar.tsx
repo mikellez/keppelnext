@@ -87,7 +87,9 @@ export default function NavBar() {
                     <NavLink     name="Change of Parts"   path="/ChangeOfParts" icon={<TbExchange size={21} />} />
                     <NavDropdown name="Schedule"          path="/Schedule" navOpen={navDisplay} icon={<AiOutlineSchedule size={21} />}>
                         <NavDropdownLink href="/Schedule" >View Schedules</NavDropdownLink>
-                        <NavDropdownLink href="/Schedule/Create" >Create Schedule</NavDropdownLink>
+                        {data && (data.role_id === Role.Admin || data.role_id === Role.Manager ) &&
+                            <NavDropdownLink href="/Schedule/Create" >Create Schedule</NavDropdownLink>
+                        }
                         {data && (data.role_id === Role.Admin || data.role_id === Role.Manager ) &&
                             <NavDropdownLink href="/Schedule/Manage" >Manage Schedules</NavDropdownLink>
                         }
