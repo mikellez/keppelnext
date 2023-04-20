@@ -9,6 +9,7 @@ import { CMMSPlant, CMMSAddUser } from "../../types/common/interfaces";
 import axios from "axios";
 import LoadingIcon from "../../components/LoadingIcon";
 import ModuleSimplePopup, { SimpleIcon } from "../../components/ModuleLayout/ModuleSimplePopup";
+import router from "next/router";
 
 interface AddUserProps {
 	plants: CMMSPlant[];
@@ -26,6 +27,7 @@ export default function AddUser(props: AddUserProps) {
 		allocatedPlants: [],
 			});
 	const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
+	const [submissionModal, setSubmissionModal] = useState<boolean>(false);
 	const handleForm = (
 		e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
 	  ) => {
@@ -40,6 +42,7 @@ export default function AddUser(props: AddUserProps) {
 			return { ...prevState, [e.target.name]: Number(e.target.value) };
 		})
 	}
+
 	function validate(){
 		// console.log(form);
 		if(form.firstName == "" || form.lastName == "" || form.username == "" || form.password == "" || form.email == "" || form.roleType == 0 || form.allocatedPlants.length == 0){
@@ -49,9 +52,12 @@ export default function AddUser(props: AddUserProps) {
 			submission();
 		}
 	}
+
 	async function submission(){
-		try { let res = await axios.post("/api/user/add", form);
+		try { let res = await axios.post("/api/user/addUser", form);
 		console.log(res);
+		setSubmissionModal(true);
+
 	} catch(err){
 		console.log(err);
 	}
@@ -193,6 +199,38 @@ export default function AddUser(props: AddUserProps) {
             title="Missing Details"
             text="Please ensure that you have filled in all the required entries."
             icon={SimpleIcon.Cross}
+          />
+		  		<ModuleSimplePopup
+            modalOpenState={submissionModal}
+            setModalOpenState={setSubmissionModal}
+            title="Success!"
+            text="Your inputs has been submitted!"
+            icon={SimpleIcon.Check}
+            buttons={[
+              <button
+                  key={1}
+                  onClick={() => {
+                    setSubmissionModal(false);
+                    router.reload();
+                  }}
+                  className="btn btn-secondary"
+                >
+                  Add another user
+              </button>, 
+              <button
+                key={2}
+                onClick={() => {
+                  setSubmissionModal(false);
+                  router.push("/User/Management");
+                }}
+                className="btn btn-primary"
+              >
+                Ok
+            </button>
+            ]}
+            onRequestClose={() => {
+              router.push("/User");
+            }}
           />
 			</ModuleContent>
 			<ModuleFooter>

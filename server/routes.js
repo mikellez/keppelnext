@@ -365,7 +365,9 @@ router
     .post(controllers.changeOfParts.createNewChangeOfParts)
     .patch(controllers.changeOfParts.editChangeOfParts);
 
-router.get("/user/getUsers", checkIfLoggedInAPI, controllers.user.getUsers);
+router
+    .get("/user/getUsers", checkIfLoggedInAPI, controllers.user.getUsers)
+    .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser);
 
 // NO API ROUTE
 router.all("/*", (req, res) => {
