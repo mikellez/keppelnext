@@ -4,8 +4,8 @@ import styles from "../../styles/Schedule.module.scss"
 export const EventColours = {
     scheduledCOP: {color: "#4D96FF", label: "Scheduled Change of Parts"},
     completedCOP: {color: "#36AE7C", label: "Completed Change of Parts"},
-    completedTimeline: {color: "#F9D923", label: "Completed Schedule"},
-    approvedTimeline: {color: "#FF6B6B", label: "Approved Schedule"}
+    completedTimeline: {color: "#F9D923", label: "Completed Checklist"},
+    approvedTimeline: {color: "#FF6B6B", label: "Approved Checklist"}
 };
 
 const EventColorLegend = () => {
