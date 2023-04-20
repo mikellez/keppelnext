@@ -66,6 +66,7 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
 
     useEffect(() => {
         setIsReady(false);
+        // url query for copId
         if (props.changeOfParts[0] && router.query.copId) {
             const defaultCOP = props.changeOfParts[0];
             console.log(defaultCOP);
@@ -83,15 +84,20 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
             setTimeout(() => {
                 setIsReady(true);
             }, 1500);
-        } else if (props.changeOfParts[0] && router.query.assetId) {
+        }
+        // url query for assetId
+        else if (props.changeOfParts[0] && router.query.assetId) {
             const defaultCOP = props.changeOfParts[0];
-            setFormData((prev) => {
-                return {
-                    ...prev,
-                    plantId: defaultCOP.plantId,
-                    psaId: defaultCOP.psaId,
-                };
-            });
+            // set data only if the asset is inside user's allocated plant
+            if (user.data?.allocated_plants.includes(defaultCOP.plantId)) {
+                setFormData((prev) => {
+                    return {
+                        ...prev,
+                        plantId: defaultCOP.plantId,
+                        psaId: defaultCOP.psaId,
+                    };
+                });
+            }
 
             setTimeout(() => {
                 setIsReady(true);
