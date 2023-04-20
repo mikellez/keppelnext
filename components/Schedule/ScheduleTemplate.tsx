@@ -9,7 +9,7 @@ import styles from "../../styles/Schedule.module.scss";
 import { BsCalendar4Week, BsListUl } from "react-icons/bs";
 import { TableNode } from "@table-library/react-table-library/types/table";
 import ScheduleTable from "./ScheduleTable";
-import { CMMSScheduleEvent, CMMSChangeOfPartsEvent, CMMSChangeOfParts } from "../../types/common/interfaces";
+import { CMMSScheduleEvent, CMMSChangeOfPartsEvent, CMMSChangeOfParts, CMMSEvent } from "../../types/common/interfaces";
 
 interface ScheduleTemplateInfo extends PropsWithChildren {
     title: string;
@@ -119,67 +119,82 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     const [toggleCalendarOrListView, setToggleCalendarOrListView] = useState<boolean>(true);
 
     const router = useRouter();
+
+
+    function updateCOPEvents(newCOPs: CMMSChangeOfParts[]) {
+        const newCOPEvents: CMMSChangeOfPartsEvent[] = newCOPs.map(cop => toCMMSChangeOfPartsEvent(cop))
+        setCOPEvents(newCOPEvents);
+    };
+
+    function toCMMSChangeOfPartsEvent(cop: CMMSChangeOfParts) {
+        return {
+            title: "Change of Parts for " + cop.asset,
+                start: new Date(cop.changedDate ? cop.changedDate : cop.scheduledDate),
+                extendedProps: {
+                    description: cop.description,
+                    assignedUserId: cop.assignedUserId,
+                    assignedUser: cop.assignedUser,
+                    psaId: cop.psaId,
+                    asset: cop.asset,
+                    copId: cop.copId,
+                    plant: cop.plant,
+                    plantId: cop.plantId,
+                }
+        };
+    };
+
+    function updateChecklistEvents(newList: ScheduleInfo[]) {
+        let newEvents: CMMSScheduleEvent[] = [];
+        newList.forEach((item) => {
+            item.calendar_dates.forEach((date, index) => {
+                const event = toCMMSScheduleEvents(item, date, index);
+
+                if (!item.exclusionList || !item.exclusionList.includes(index)) {
+                    newEvents.push(event);
+                }
+                
+            });
+            setChecklistEvents(newEvents);
+        });
+    };
+
+    function toCMMSScheduleEvents(schedule: ScheduleInfo, date: string, index: number) {
+        const event = {
+            title: schedule.checklist_name,
+            start: schedule.start_date ? new Date(date) : "",
+            extendedProps: {
+                plant: schedule.plant,
+                plantId: schedule.plantId,
+                scheduleId: schedule.schedule_id,
+                checklistId: schedule.checklist_id,
+                date: new Date(schedule.calendar_dates[index]),
+                startDate: schedule.start_date ? new Date(schedule.start_date.toString().slice(0, 10)) : "Rescheduled",
+                endDate: schedule.end_date ? new Date(schedule.end_date.toString().slice(0, 10)) : "Rescheduled",
+                recurringPeriod: schedule.period,
+                assignedIds: schedule.assigned_ids,
+                assignedEmails: schedule.assigned_emails,
+                assignedFnames: schedule.assigned_fnames,
+                assignedLnames: schedule.assigned_lnames,
+                assignedUsernames: schedule.assigned_usernames,
+                assignedRoles: schedule.assigned_usernames,
+                timelineId: schedule.timeline_id,
+                remarks: schedule.remarks,
+                index: index,
+                isSingle: schedule.isSingle,
+                exclusionList: schedule.exclusionList,
+                status: schedule.status,
+            },
+        }; 
+
+        return event;
+    };
     
     // Add events to be displayed on the calendar
     useEffect(() => {
         setChecklistEvents([]);
-        if (props.schedules) {
-            let newEvents: CMMSScheduleEvent[] = [];
-            props.schedules.forEach((item) => {
-                item.calendar_dates.forEach((date, index) => {
-                    const event = {
-                        title: item.checklist_name,
-                        start: item.start_date ? new Date(date) : "",
-                        extendedProps: {
-                            plant: item.plant,
-                            plantId: item.plantId,
-                            scheduleId: item.schedule_id,
-                            checklistId: item.checklist_id,
-                            date: new Date(item.calendar_dates[index]),
-                            startDate: item.start_date ? new Date(item.start_date.toString().slice(0, 10)) : "Rescheduled",
-                            endDate: item.end_date ? new Date(item.end_date.toString().slice(0, 10)) : "Rescheduled",
-                            recurringPeriod: item.period,
-                            assignedIds: item.assigned_ids,
-                            assignedEmails: item.assigned_emails,
-                            assignedFnames: item.assigned_fnames,
-                            assignedLnames: item.assigned_lnames,
-                            assignedUsernames: item.assigned_usernames,
-                            assignedRoles: item.assigned_usernames,
-                            timelineId: item.timeline_id,
-                            remarks: item.remarks,
-                            index: index,
-                            isSingle: item.isSingle,
-                            exclusionList: item.exclusionList,
-                            status: item.status,
-                        },
-                    };
-                    if (!item.exclusionList || !item.exclusionList.includes(index)) {
-                        newEvents.push(event);
-                    }
-                });
-                setChecklistEvents(newEvents);
-            });
-        }
+        if (props.schedules) updateChecklistEvents(props.schedules);
 
-        if (props.changeOfParts) {
-            const newCOPEvents: CMMSChangeOfPartsEvent[] = props.changeOfParts.map(cop => {
-                return {
-                    title: "Change of Parts for " + cop.asset,
-                    start: new Date(cop.scheduledDate),
-                    extendedProps: {
-                        description: cop.description,
-                        assignedUserId: cop.assignedUserId,
-                        assignedUser: cop.assignedUser,
-                        psaId: cop.psaId,
-                        asset: cop.asset,
-                        copId: cop.copId,
-                        plant: cop.plant,
-                        plantId: cop.plantId,
-                    }
-                }
-            })
-            setCOPEvents(newCOPEvents);
-        }
+        if (props.changeOfParts) updateCOPEvents(props.changeOfParts);
 
     }, [props.schedules, props.changeOfParts]);
 
@@ -233,7 +248,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                         stickyHeaderDates={true}
                         selectable={true}
                         unselectAuto={true}
-                        events={checklistEvents.concat(COPEvents)}
+                        events={(checklistEvents as CMMSEvent[]).concat(COPEvents)}
                         dayMaxEvents={2}
                         eventDisplay="block"
                         eventBackgroundColor="#FA9494"

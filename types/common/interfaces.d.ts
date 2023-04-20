@@ -176,7 +176,13 @@ interface CMMSPlant {
   plant_description: string;
 }
 
-interface CMMSScheduleEvent {
+interface CMMSEvent {
+  title: string;
+  start?: Date | string;
+  extendedProps: Object;
+}
+
+interface CMMSScheduleEvent extends CMMSEvent {
   title: string;
   start?: Date | string;
   extendedProps: {
@@ -324,7 +330,7 @@ interface CMMSChangeOfParts {
   assignedUser: string; 
 }
 
-interface CMMSChangeOfPartsEvent {
+interface CMMSChangeOfPartsEvent extends CMMSEvent {
   title: string;
   start?: Date | string;
   extendedProps: {
@@ -371,4 +377,5 @@ export {
   CMMSSubComponent1Name,
   CMMSChangeOfParts,
   CMMSChangeOfPartsEvent,
+  CMMSEvent,
 };
