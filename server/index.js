@@ -49,18 +49,21 @@ app.prepare().then(() => {
   function accessControl(req, res, next) {
     if (req.user) {
       if (req.user.role_id == 3 && restrictEng.includes(req.path)) {
-        res.redirect("/404");
+        res.redirect("/403");
       } else if (
         req.user.role_id == 4 &&
-        (restrictOps.includes(req.path) ||
+        (
+          restrictOps.includes(req.path) ||
           req.path.startsWith("/Schedule/Timeline") ||
           req.path.startsWith("/Asset/Edit") ||
           req.path.startsWith("/Request/Assign") ||
-          req.path.startsWith("/Request/Manage"))
+          req.path.startsWith("/Request/Manage") ||
+          req.path.startsWith("/Checklist/Manage")
+        )
       ) {
-        res.redirect("/404");
+        res.redirect("/403");
       } else if ((req.user.role_id = 2 && restrictManager.includes(req.path))) {
-        res.redirect("/404");
+        res.redirect("/403");
       }
     }
     next();
@@ -112,6 +115,9 @@ app.prepare().then(() => {
   server.get("/Asset*", checkIfLoggedIn, accessControl, (req, res) => {
     return handle(req, res);
   });
+  server.get("/ChangeOfParts*", checkIfLoggedIn, accessControl, (req, res) => {
+    return handle(req, res);
+  });
   server.get("/Schedule*", checkIfLoggedIn, accessControl, (req, res) => {
     return handle(req, res);
   });
@@ -130,7 +136,9 @@ app.prepare().then(() => {
   server.get("/Master*", checkIfLoggedIn, accessControl, (req, res) => {
     return handle(req, res);
   });
-
+  server.get("/User*", checkIfLoggedIn, accessControl, (req, res) => {
+    return handle(req, res);
+  });
   server.get("*", (req, res) => {
     return handle(req, res);
   });

@@ -1,0 +1,42 @@
+{
+	"plant": {
+		"internalName": "plant_master",
+		"name": "Plant",
+		"id": "plant_id",
+		"fields": [{
+			"column_label": "Name",
+			"column_name": "plant_name"
+		},{
+			"column_label": "Description",
+			"column_name": "plant_description"
+		}]
+	},
+	"system": {
+		"internalName": "system_master",
+		"name": "System",
+		"id": "system_id",
+		"fields": [{
+			"column_label": "Name",
+			"column_name": "system_name"
+		}]
+	},
+	"fault_types": {
+		"internalName": "fault_types",
+		"name": "Fault Type",
+		"id": "fault_id",
+		"fields": [{
+			"column_label": "Name",
+			"column_name": "fault_type"
+		}]
+	},
+	"asset_type": {
+		"internalName": "asset_type",
+		"name": "Asset Type",
+		"id": "asset_id",
+		"fields": [{
+			"column_label": "Name",
+			"column_name": "asset_type"
+		}]
+	}
+}
+

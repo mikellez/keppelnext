@@ -1,0 +1,10 @@
+.nonActiveBtns {
+  background-color: transparent;
+  border: none;
+  color: black;
+}
+
+.nonActiveBtns:hover {
+  color: #c70f2b;
+  background-color: transparent;
+}

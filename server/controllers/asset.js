@@ -723,7 +723,8 @@ const addNewAsset = (req, res, next) => {
 
 const deleteAsset = (req, res, next) => {
   var psa_id = req.body.psa_id;
-  var q = `DELETE from keppel.plant_system_assets where psa_id = '${psa_id}'`;
+  var q = `DELETE from keppel.history where asset_id = '${psa_id}';
+  DELETE from keppel.plant_system_assets where psa_id = '${psa_id}'`;
   console.log(q);
   db.query(q, function (err, result) {
     if (err) {

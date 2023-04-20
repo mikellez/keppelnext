@@ -4,16 +4,19 @@ import { ChecklistPageProps } from "../../pages/Checklist/New";
 import styles from "../../styles/Checklist.module.scss";
 import { dateFormat } from "../Schedule/ScheduleTemplate";
 
-
 const ChecklistDetails = (props: ChecklistPageProps) => {
-    console.log(props)
-
     const createdDate = dateFormat(new Date(props.checklist?.created_date as string));
-    const assets = (props.checklist?.linkedassets != null && 
-        props.checklist?.linkedassets != "") ? props.checklist?.linkedassets.split(", ") : [];
-    
-    const assetHTMLElements = assets.map(asset => {
-        return <p key={asset} className={styles.checklistDetailsAssets}>{asset}</p>
+    const assets =
+        props.checklist?.linkedassets != null && props.checklist?.linkedassets != ""
+            ? props.checklist?.linkedassets.split(", ")
+            : [];
+
+    const assetHTMLElements = assets.map((asset) => {
+        return (
+            <p key={asset} className={styles.checklistDetailsAssets}>
+                {asset}
+            </p>
+        );
     });
 
     return (
@@ -30,15 +33,19 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
                 </div>
                 <div>
                     <p className={styles.checklistDetailsHeading}>Plant</p>
-                    <p>{props.checklist?.plant_name}</p>
+                    <p className={styles.checklistDetailsContent}>{props.checklist?.plant_name}</p>
                 </div>
                 <div>
                     <p className={styles.checklistDetailsHeading}>Assigned To</p>
-                    <p className={styles.checklistDetailsContent}>{props.checklist?.assigneduser}</p>
+                    <p className={styles.checklistDetailsContent}>
+                        {props.checklist?.assigneduser}
+                    </p>
                 </div>
                 <div>
                     <p className={styles.checklistDetailsHeading}>Created By</p>
-                    <p className={styles.checklistDetailsContent}>{props.checklist?.createdbyuser}</p>
+                    <p className={styles.checklistDetailsContent}>
+                        {props.checklist?.createdbyuser}
+                    </p>
                 </div>
                 <div>
                     <p className={styles.checklistDetailsHeading}>Sign Off By</p>

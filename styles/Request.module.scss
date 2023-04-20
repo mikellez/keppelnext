@@ -91,3 +91,29 @@ table.table > tbody > tr > th {
   outline: none !important;
   border: none !important;
 }
+
+.requestPagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  color: black;
+}
+
+.paginationChevron {
+  cursor: pointer;
+  margin-right: 0.5rem;
+  margin-left: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.paginationChevron.active:hover {
+  color: #c70f2b;
+  background-color: transparent;
+}
+
+.paginationChevron.disabled {
+  opacity: 0.3;
+  cursor: default;
+}

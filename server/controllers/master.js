@@ -1,72 +1,23 @@
+const  tableInfo = require("../../public/master.json");
 const db = require("../../db");
-
-const tableInfo = {
-	plant: {
-		internalName: "plant_master",
-		name: "Plant",
-		id: "plant_id",
-		fields: [{
-			column_label: "Name",
-			column_name: "plant_name"
-		},{
-			column_label: "Description",
-			column_name: "plant_description"
-		}]
-	},
-	system: {
-		internalName: "system_master",
-		name: "System",
-		id: "system_id",
-		fields: [{
-			column_label: "Name",
-			column_name: "system_name"
-		}]
-	},
-	system_asset_lvl5: {
-		internalName: "plant_system_assets",
-		name: "plant_system_assets",
-		id: "system_asset_lvl5",
-		fields: [{
-			column_label: "Name",
-			column_name: "plant_system_assets"
-		}]
-	},
-	fault_types: {
-		internalName: "fault_types",
-		name: "Fault Type",
-		id: "fault_id",
-		fields: [{
-			column_label: "Name",
-			column_name: "fault_type"
-		}]
-	},
-	asset_type: {
-		internalName: "asset_type",
-		name: "Asset Type",
-		id: "asset_id",
-		fields: [{
-			column_label: "Name",
-			column_name: "asset_type"
-		}]
-	},
-	asset_instrument: {
-		internalName: "plant_system_assets",
-		name: "Asset Instrument",
-		id: "psa_id",
-		fields: [{}]
-	},
-}
 
 const fetchMasterInfo = async (req, res, next) => {
 
 	if(tableInfo[req.params.type] === undefined)
 		return res.status(404).json("no type");
-
+	console.log(tableInfo[req.params.type].internalName)
 	let table       = tableInfo[req.params.type].internalName;
 	let idColumn    = tableInfo[req.params.type].id;
-
 	let q = `SELECT * FROM keppel.${table} ORDER BY ${idColumn}`;
 
+	if(table == 'system_assets'){
+		q = `SELECT keppel.system_assets.system_asset_id,keppel.system_assets.system_id,keppel.system_assets.system_asset_id,keppel.system_master.system_name,keppel.system_assets.system_asset
+		FROM keppel.system_assets
+		JOIN keppel.system_master
+		ON keppel.system_assets.system_id = keppel.system_master.system_id ORDER BY keppel.system_assets.system_asset_id
+		`;
+	}
+	
 	db.query(q, (err1, result) => {
 		if (err1) {
 			// throw err;
@@ -74,7 +25,7 @@ const fetchMasterInfo = async (req, res, next) => {
 					msg: err1,
 			});
 		}
-
+		console.log(result.rows);
 		return res.status(200).json(
 			{
 				rows: result.rows,
@@ -88,7 +39,42 @@ const fetchMasterTypeEntry = async (req, res, next) => {
 };
 
 const createMasterTypeEntry = async (req, res, next) => {
-	return res.status(200).json(tableInfo)
+	console.log(req.body);
+	let table=tableInfo[req.body.type].internalName;
+	let sql;
+	let insert =[];
+	// if asset_type
+	num="("
+	temp = 0;
+
+	columns ="(";
+	for (const key in req.body.entries) {
+		columns += key + ",";
+		insert.push(req.body.entries[key]);
+		temp++;
+	}
+	console.log(temp);
+	for (let i = 0; i < temp; i++) {
+		num += "$"+(i+1)+",";
+	}
+	columns = columns.slice(0, -1);
+	columns += ")";
+	num = num.slice(0, -1);
+	num += ")";
+	sql = `INSERT INTO keppel.${table} ${columns} VALUES ${num}`;
+	db.query(sql,insert)	
+		.then(result => {
+			return res.status(200).send({
+				msg: "success",
+			})})
+		.catch(err => {
+			// console.log(err.table)
+			// return err.table
+			return res.status(500).send({
+				msg: err,
+				table: err.table
+			})
+		})
 };
 
 const fetchMasterTypeSingle = async (req, res, next) => {
@@ -129,7 +115,10 @@ const updateMasterTypeSingle = async (req, res, next) => {
 	// returns queryFields if success
 	function verifyColumns(tableName /*string*/, entries /*([column:string]: string)[]*/) {
 		const columns = Object.keys(entries)
-
+		if (tableName == 'plant_master')
+			tableName = 'plant'
+		if(tableName == 'system_master')
+			tableName = 'system'
 		if(!(tableName in tableInfo))
 			return false;
 
@@ -137,7 +126,6 @@ const updateMasterTypeSingle = async (req, res, next) => {
 			if( !(x.column_name in columns) )
 				return false;
 		}*/
-
 		console.log(columns);
 		tableInfo[tableName].fields.forEach(x => console.log(x.column_name));
 
@@ -177,6 +165,7 @@ const updateMasterTypeSingle = async (req, res, next) => {
 	let entryKeys = Object.keys(req.body.entries)
 	// verify columns are filled in
 	const q = verifyColumns(table, req.body.entries)
+	console.log(q)
 	if(!q)
 		return res.status(400).json("entries invalid")
 

@@ -3,11 +3,13 @@ import formStyles from '../../styles/formStyles.module.css'
 import axios from 'axios';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import Link from 'next/link';
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ModuleMain, ModuleHeader, ModuleContent, ModuleFooter } from '../../components';
 import { MultiFields } from '../../components/Master/MultiField';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import LoadingIcon from '../../components/LoadingIcon';
+import router from 'next/router';
+import ModuleSimplePopup, { SimpleIcon } from '../../components/ModuleLayout/ModuleSimplePopup';
 
 interface MasterData {
 	[column_name: string]: string;
@@ -25,11 +27,12 @@ interface EditMasterProps {
 }
 
 interface FormValues{
-	entries: MasterData
+	entries: MasterData;
 }
 
 export default function Edit(props: EditMasterProps) {
-
+	const [submissionModal, setSubmissionModal] = useState<boolean>(false);
+	
 	const {
 		register,
 		handleSubmit,
@@ -39,20 +42,34 @@ export default function Edit(props: EditMasterProps) {
 		getValues
 	} = useForm<FormValues>({
 		defaultValues: {
-			entries: props.data
+			entries: props.data,
 		}
 	});
 
 	useEffect(() => {
 		reset({
-			entries: props.data
+			entries: props.data,
 		})
 	}, [props])
 
 	const { isSubmitting, errors } = formState;
-
+	const urlParams = new URLSearchParams(window.location.search);
+	const type = urlParams.get('type');
+	const id = urlParams.get('id');
+	
 	const formSubmit: SubmitHandler<FormValues> = async (data) => {
 		console.log(data);
+		setSubmissionModal(true);
+		return await axios.post(`/api/master/${type}/${id}`, data)
+				.then(res => {
+					console.log(res.data)
+
+					return res.data;
+				})
+				.catch(err => {
+					console.log(err);
+				});
+			
 	};
 	
 	return (
@@ -96,7 +113,27 @@ export default function Edit(props: EditMasterProps) {
 					}}
 				/>
 			</ModuleContent>
-
+			<ModuleSimplePopup
+            modalOpenState={submissionModal}
+            setModalOpenState={setSubmissionModal}
+            title="Success!"
+            text="Your entry has been updated!"
+            icon={SimpleIcon.Check}
+            buttons={
+              <button
+                onClick={() => {
+                  setSubmissionModal(false);
+                  router.push("/Master");
+                }}
+                className="btn btn-primary"
+              >
+                Ok
+              </button>
+            }
+            onRequestClose={() => {
+              router.push("/Master");
+            }}
+          />
 			<ModuleFooter>
 				{(errors.entries) && 
 				<span style={{color: "red"}}>Please fill in all required fields</span>}

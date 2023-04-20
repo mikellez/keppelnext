@@ -1,19 +1,65 @@
 import formStyles from "../../styles/formStyles.module.css"
 
-import React from 'react';
+import React, {useState} from 'react';
 import Select, { defaultTheme } from "react-select";
 import { ModuleContent, ModuleDivider, ModuleFooter, ModuleHeader, ModuleMain } from '../../components';
 import RequiredIcon from "../../components/RequiredIcon";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import { CMMSPlant } from "../../types/common/interfaces";
+import { CMMSPlant, CMMSAddUser } from "../../types/common/interfaces";
 import axios from "axios";
 import LoadingIcon from "../../components/LoadingIcon";
+import ModuleSimplePopup, { SimpleIcon } from "../../components/ModuleLayout/ModuleSimplePopup";
 
 interface AddUserProps {
 	plants: CMMSPlant[];
 }
 
 export default function AddUser(props: AddUserProps) {
+	const [form, setform] = useState<CMMSAddUser>({
+		firstName: "",
+		lastName: "",
+		username: "",
+		password: "",
+		employeeId: "-",
+		email: "",
+		roleType: 0,
+		allocatedPlants: [],
+			});
+	const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
+	const handleForm = (
+		e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+	  ) => {
+		setform((prevState) => {
+		  return { ...prevState, [e.target.name]: e.target.value };
+		});
+	  };
+	const handleFormNumber =(
+		e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+	) => {
+		setform((prevState) => {
+			return { ...prevState, [e.target.name]: Number(e.target.value) };
+		})
+	}
+	function validate(){
+		// console.log(form);
+		if(form.firstName == "" || form.lastName == "" || form.username == "" || form.password == "" || form.email == "" || form.roleType == 0 || form.allocatedPlants.length == 0){
+			setIsMissingDetailsModaOpen(true);
+		}
+		else{
+			submission();
+		}
+	}
+	async function submission(){
+		try { let res = await axios.post("/api/user/add", form);
+		console.log(res);
+	} catch(err){
+		console.log(err);
+	}
+
+			
+		
+		
+	}
 	return (
 		<ModuleMain>
 			<ModuleHeader header="Add User" title="Add User">
@@ -29,8 +75,17 @@ export default function AddUser(props: AddUserProps) {
 						</label>
 
 						<div className="input-group">
-							<input type="text" className="form-control" placeholder="First Name"/>
-							<input type="text" className="form-control" placeholder="Last Name"/>
+							<input type="text" 
+							className="form-control" 
+							placeholder="First Name" 
+							onChange={handleForm} 
+							name="firstName"/>
+
+							<input type="text" 
+							className="form-control" 
+							placeholder="Last Name" 
+							onChange={handleForm} 
+							name="lastName"/>
 						</div>
 
 					</div>
@@ -39,14 +94,20 @@ export default function AddUser(props: AddUserProps) {
 						<label className='form-label'>
 							<RequiredIcon/> Username
 						</label>
-						<input className="form-control" type="text"/>
+						<input className="form-control" 
+						type="text"
+						onChange={handleForm} 
+						name="username"/>
 					</div>
 
 					<div className="form-group">
 						<label className='form-label'>
 							<RequiredIcon/> Password
 						</label>
-						<input className="form-control" type="password"/>
+						<input className="form-control" 
+						type="password"
+						onChange={handleForm} 
+						name="password"/>
 					</div>
 
 				</div>
@@ -55,24 +116,30 @@ export default function AddUser(props: AddUserProps) {
 
 					<div className="form-group">
 						<label className='form-label'>
-							<RequiredIcon/> Employee ID
+							Employee ID
 						</label>
-						<input className="form-control" type="text"/>
+						<input className="form-control" 
+						type="text"
+						onChange={handleForm} 
+						name="employeeId"/>
 					</div>
 
 					<div className="form-group">
 						<label className='form-label'>
 							<RequiredIcon/> Email
 						</label>
-						<input className="form-control" type="email"/>
+						<input className="form-control" 
+						type="email"
+						onChange={handleForm}
+						name="email"/>
 					</div>
 
-					<div className="form-group">
+					{/* <div className="form-group">
 						<label className='form-label'>
 							<RequiredIcon/> Mobile Number
 						</label>
 						<input className="form-control" type="text"/>
-					</div>
+					</div> */}
 
 				</div>
 
@@ -84,14 +151,16 @@ export default function AddUser(props: AddUserProps) {
 						<label className='form-label'>
 							<RequiredIcon/> Role Type
 						</label>
-						<select className="form-select">
-							<option value="1">Admin</option>
-							<option value="2">Manager</option>
-							<option value="3">Engineer</option>
-							<option value="4">Operation Specialist</option>
+						<select className="form-select"
+						onChange={handleFormNumber}
+						name="roleType">
+							<option value={0} disabled hidden selected> -- Select Role -- </option>
+							<option value={1}>Admin</option>
+							<option value={2}>Manager</option>
+							<option value={3}>Engineer</option>
+							<option value={4}>Operation Specialist</option>
 						</select>
 					</div>
-
 				</div>
 
 				<div className={formStyles.halfContainer}>
@@ -100,20 +169,37 @@ export default function AddUser(props: AddUserProps) {
 							<RequiredIcon/> Allocated Plants
 						</label>
 						{/* TODO style this somehow */}
-						<Select classNamePrefix='form-control' isMulti={true} options={props.plants.map(p => {
+						<Select classNamePrefix='form-control' 
+						isMulti={true} 
+						onChange={(e) => {
+							console.log(e)
+							setform((prevState) => {
+								return { ...prevState, allocatedPlants: e.map(p => p.value) };
+							})
+						}}
+						name="allocatedPlants"
+						options={props.plants.map(p => {
 							return {
 								value: p.plant_id,
 								label: p.plant_name
 							}
-						})} />
+						})}
+						/>
 					</div>
 				</div>
-
+				<ModuleSimplePopup
+            modalOpenState={isMissingDetailsModalOpen}
+            setModalOpenState={setIsMissingDetailsModaOpen}
+            title="Missing Details"
+            text="Please ensure that you have filled in all the required entries."
+            icon={SimpleIcon.Cross}
+          />
 			</ModuleContent>
 			<ModuleFooter>
-				<button type="submit" className="btn btn-primary">
+				<button type="submit" className="btn btn-primary" onClick={validate}>
 				{
 					//isSubmitting && <LoadingIcon/>
+
 				}
 				Submit</button>
 			</ModuleFooter>

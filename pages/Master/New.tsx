@@ -9,8 +9,10 @@ import { FieldErrorsImpl, SubmitHandler } from 'react-hook-form/dist/types';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import axios from 'axios';
 import LoadingIcon from '../../components/LoadingIcon';
-import { CMMSMasterField, CMMSMasterSubmission, CMMSMasterTables } from '../../types/common/interfaces';
+import { CMMSMasterField, CMMSMasterSubmission, CMMSMasterTables, CMMSSystem } from '../../types/common/interfaces';
 import { MultiFields } from '../../components/Master/MultiField';
+import ModuleSimplePopup, { SimpleIcon } from '../../components/ModuleLayout/ModuleSimplePopup';
+import router from 'next/router';
 
 /*
 	FormValues: {
@@ -29,23 +31,53 @@ type FormValues = {
 
 interface NewMasterEntryProps {
 	tables: CMMSMasterTables
+	systems: CMMSSystem[]
 }
 
 export default function New(props: NewMasterEntryProps) {
 	const [masterType, setMasterType] = useState<string | null>(null)
+	const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] =
+    useState<boolean>(true);
+	const [isMissingDetailsModalOpen2, setIsMissingDetailsModaOpen2] =
+    useState<boolean>(false);
+	const [submissionModal, setSubmissionModal] = useState<boolean>(false);
+	const [isNotValid, setIsNotValid] = useState<boolean>(false);
+
 
 	const {
 		register,
 		handleSubmit,
 		formState,
 		control,
-		getValues
+		getValues,
+		clearErrors
 	} = useForm<FormValues>();
 
 	const { isSubmitting, errors } = formState;
 
 	const formSubmit: SubmitHandler<FormValues> = async (data) => {
-		console.log(data);
+		// console.log(data);
+		const values = Object.values(data["entries"]);
+		if (values.includes("")){
+			setIsMissingDetailsModaOpen2(true);
+		}
+		else{
+			return await axios.post("/api/master/new/add", data)
+				.then(res => {
+					console.log(res.data)
+					setSubmissionModal(true)
+					return res.data;
+				})
+				.catch(err => {
+					console.log(err);
+					console.log(err.response.data.table);
+					if (err.response.data.table === "system_assets"){
+						setIsNotValid(true);
+					}
+				});
+			
+		}
+
 	};
 
 	function changePlant(e : React.ChangeEvent<HTMLSelectElement>) {
@@ -81,7 +113,7 @@ export default function New(props: NewMasterEntryProps) {
 							control={control}
 							name="entries"
 							render={ ({ field: { onChange, value }, formState: {errors}}) => (
-								<MultiFields fields={props.tables[masterType].fields} onChange={onChange}/>
+								<MultiFields fields={props.tables[masterType].fields} onChange={onChange} system={props.systems}/>
 							)}
 							rules={{
 								validate: {
@@ -101,8 +133,72 @@ export default function New(props: NewMasterEntryProps) {
 
 			</ModuleContent>
 			<ModuleFooter>
-				{(errors.type || errors.entries) && 
-				<span style={{color: "red"}}>Please fill in all required fields</span>}
+				{(errors.type || errors.entries || isMissingDetailsModalOpen2) &&
+				<ModuleSimplePopup
+				modalOpenState={isMissingDetailsModalOpen}
+				setModalOpenState={setIsMissingDetailsModaOpen}
+				title="Missing Details"
+				text="Please ensure that you have filled in all the required entries."
+				icon={SimpleIcon.Cross}
+				onRequestClose={() => {
+					// clearErrors();
+					// setIsMissingDetailsModaOpen(false)
+					router.reload();
+
+				}}
+			  />}
+			  {/* <ModuleSimplePopup
+				modalOpenState={isMissingDetailsModalOpen2}
+				setModalOpenState={setIsMissingDetailsModaOpen2}
+				title="Missing Details 💀💀💀"
+				text="Please ensure that you have filled in all the required entries."
+				icon={SimpleIcon.Cross}
+				// onRequestClose={() => {
+				// 	router.reload();
+				//   }}
+			  /> */}
+			  <ModuleSimplePopup
+				modalOpenState={isNotValid}
+				setModalOpenState={setIsNotValid}
+				title="System asset ID not valid 💀💀💀"
+				text="Please ensure that you have chosen a valid ID from the tables."
+				icon={SimpleIcon.Cross}
+				// onRequestClose={() => {
+				// 	router.reload();
+				//   }}
+			  />
+			  <ModuleSimplePopup
+            modalOpenState={submissionModal}
+            setModalOpenState={setSubmissionModal}
+            title="Success!"
+            text="Your entry has been submitted! 🔥🔥🔥"
+            icon={SimpleIcon.Check}
+            buttons={[
+              	<button
+					key={1}
+					onClick={() => {
+					setSubmissionModal(false);
+					router.reload();
+					}}
+					className="btn btn-secondary"
+				>
+                	Create another entry
+				</button>,
+				<button
+					key={2}
+					onClick={() => {
+						setSubmissionModal(false);
+						router.push("/Master");
+					}}
+					className="btn btn-primary"
+				>
+			  		Ok
+				</button>
+            ]}
+            onRequestClose={() => {
+              router.push("/Master");
+            }}
+          />
 				<button type="submit" className="btn btn-primary">
 				{
 					isSubmitting && <LoadingIcon/>
@@ -122,8 +218,12 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 	}
 
 	const masterCreateInfo = await axios.get<CMMSMasterTables>("http://localhost:3001/api/master/new", headers);
+	const systems = await axios.get<CMMSSystem[]>(
+		"http://localhost:3001/api/asset/systems",
+		headers
+	  );
 
-	let props: NewMasterEntryProps = { tables: masterCreateInfo.data }
+	let props: NewMasterEntryProps = { tables: masterCreateInfo.data, systems: systems.data}
 
 	return {
 		props: props

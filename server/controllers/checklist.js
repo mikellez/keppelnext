@@ -2,51 +2,53 @@ const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
 
-const fetchPendingChecklists = async (req, res, next) => {
-    db.query(`
-    SELECT 
-        cl.checklist_id, 
-        cl.chl_name, 
-        cl.description, 
-        cl.status_id,
-        concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
-        concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
-        concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
-        pm.plant_name,
-        pm.plant_id,
-        completeremarks_req,
-        tmp1.assetNames AS linkedassets,
-        linkedassetids,
-        cl.chl_type,
-        cl.created_date,
-        cl.history,
-        st.status
-    FROM 
-        keppel.users u
-        JOIN keppel.user_access ua ON u.user_id = ua.user_id
-        JOIN keppel.checklist_master cl on ua.allocatedplantids LIKE concat(concat('%',cl.plant_id::text), '%')
-        LEFT JOIN (
-            SELECT 
-                t3.checklist_id, 
-                string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id ASC) AS assetNames
-            FROM  
-                keppel.system_assets AS t1,
-                keppel.plant_system_assets AS t2, 
-                keppel.checklist_master AS t3
-            WHERE 
-                t1.system_asset_id = t2.system_asset_id_lvl4 AND 
-                t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
-            GROUP BY t3.checklist_id) tmp1 ON tmp1.checklist_id = cl.checklist_id
-        LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
-        LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
-        LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
-        LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id
-        JOIN keppel.status_cm st ON st.status_id = cl.status_id	
-    WHERE 
-        ua.user_id = $1 AND 
-        (cl.status_id is null or cl.status_id = 1 or cl.status_id = 6)
-    ORDER BY cl.checklist_id DESC;
-    `, [req.user.id], (err, result) => {
+const fetchAssignedChecklistsQuery = `
+SELECT 
+    cl.checklist_id, 
+    cl.chl_name, 
+    cl.description, 
+    cl.status_id,
+    concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
+    concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
+    concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
+    pm.plant_name,
+    pm.plant_id,
+    completeremarks_req,
+    tmp1.assetNames AS linkedassets,
+    linkedassetids,
+    cl.chl_type,
+    cl.created_date,
+    cl.history,
+    st.status
+FROM 
+    keppel.users u
+    JOIN keppel.user_access ua ON u.user_id = ua.user_id
+    JOIN keppel.checklist_master cl on ua.allocatedplantids LIKE concat(concat('%',cl.plant_id::text), '%')
+    LEFT JOIN (
+        SELECT 
+            t3.checklist_id, 
+            string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id ASC) AS assetNames
+        FROM  
+            keppel.system_assets AS t1,
+            keppel.plant_system_assets AS t2, 
+            keppel.checklist_master AS t3
+        WHERE 
+            t1.system_asset_id = t2.system_asset_id_lvl4 AND 
+            t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
+        GROUP BY t3.checklist_id) tmp1 ON tmp1.checklist_id = cl.checklist_id
+    LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
+    LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
+    LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
+    LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id
+    JOIN keppel.status_cm st ON st.status_id = cl.status_id	
+WHERE 
+    ua.user_id = $1 AND 
+    (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3)
+ORDER BY cl.checklist_id DESC;
+`;
+
+const fetchAssignedChecklists = async (req, res, next) => {
+    db.query(fetchAssignedChecklistsQuery, [req.user.id], (err, result) => {
         if (err) return res.status(400).json({ msg: err });
         if (result.rows.length == 0) return res.status(201).json({ msg: "No checklist" });
 
@@ -54,137 +56,131 @@ const fetchPendingChecklists = async (req, res, next) => {
     });
 };
 
-const fetchForReviewChecklists = async (req, res, next) => {
-    db.query(
-        `
-        SELECT 
-            cl.checklist_id, 
-            cl.chl_name, 
-            cl.description, 
-            cl.status_id,
-            concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
-            concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
-            concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
-            pm.plant_name,
-            pm.plant_id,
-            completeremarks_req, 
-            tmp1.assetNames AS linkedassets, 
-            cl.chl_type, 
-            cl.created_date, 
-            cl.history, 
-            st.status 
+const fetchForReviewChecklistsQuery = `
+SELECT 
+    cl.checklist_id, 
+    cl.chl_name, 
+    cl.description, 
+    cl.status_id,
+    concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
+    concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
+    concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
+    pm.plant_name,
+    pm.plant_id,
+    completeremarks_req, 
+    tmp1.assetNames AS linkedassets, 
+    cl.chl_type, 
+    cl.created_date, 
+    cl.history, 
+    st.status 
+FROM  
+    keppel.users u
+    JOIN keppel.user_access ua ON u.user_id = ua.user_id
+    JOIN keppel.checklist_master cl ON ua.allocatedplantids LIKE concat(concat('%',cl.plant_id::text) , '%')
+    LEFT JOIN (
+        SELECT  
+            t3.checklist_id, 
+            string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id ASC) AS assetNames
         FROM  
-            keppel.users u
-            JOIN keppel.user_access ua ON u.user_id = ua.user_id
-            JOIN keppel.checklist_master cl ON ua.allocatedplantids LIKE concat(concat('%',cl.plant_id::text) , '%')
-            LEFT JOIN (
-                SELECT  
-                    t3.checklist_id, 
-                    string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id ASC) AS assetNames
-                FROM  
-                    keppel.system_assets AS t1,
-                    keppel.plant_system_assets AS t2, 
-                    keppel.checklist_master AS t3
-                WHERE 
-                    t1.system_asset_id = t2.system_asset_id_lvl4 AND  
-                    t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
-                GROUP BY t3.checklist_id) tmp1 ON tmp1.checklist_id = cl.checklist_id
-            LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
-            LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
-            LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
-            LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id 
-            JOIN keppel.status_cm st ON st.status_id = cl.status_id						
+            keppel.system_assets AS t1,
+            keppel.plant_system_assets AS t2, 
+            keppel.checklist_master AS t3
         WHERE 
-            ua.user_id = $1 AND 
-            (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4)
-        ORDER BY cl.checklist_id desc;
-                
-		`,
-        [req.user.id],
-        (err1, result) => {
-            if (err1) {
-                // throw err1;
-                return res.status(400).json({
-                    msg: err1,
-                });
-            }
-            if (result.rows.length == 0) {
-                // console.log(result);
-                return res.status(201).json({
-                    msg: "No checklist added",
-                });
-            }
-
-            return res.status(200).json(result.rows);
+            t1.system_asset_id = t2.system_asset_id_lvl4 AND  
+            t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
+        GROUP BY t3.checklist_id) tmp1 ON tmp1.checklist_id = cl.checklist_id
+    LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
+    LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
+    LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
+    LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id 
+    JOIN keppel.status_cm st ON st.status_id = cl.status_id						
+WHERE 
+    ua.user_id = $1 AND 
+    (cl.status_id = 4 OR cl.status_id = 6)
+ORDER BY cl.checklist_id desc;
+        
+`;
+const fetchForReviewChecklists = async (req, res, next) => {
+    db.query(fetchForReviewChecklistsQuery, [req.user.id], (err1, result) => {
+        if (err1) {
+            // throw err1;
+            return res.status(400).json({
+                msg: err1,
+            });
         }
-    );
+        if (result.rows.length == 0) {
+            // console.log(result);
+            return res.status(201).json({
+                msg: "No checklist added",
+            });
+        }
+
+        return res.status(200).json(result.rows);
+    });
 };
 
-const fetchApprovedChecklists = async (req, res, next) => {
-    db.query(
-        `
-        SELECT 
-            cl.checklist_id, 
-            cl.chl_name, 
-            cl.description, 
-            cl.status_id,
-            concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
-            concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
-            concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
-            pm.plant_name,
-            pm.plant_id,
-            completeremarks_req, 
-            tmp1.assetNames as linkedassets, 
-            cl.chl_type, 
-            cl.created_date, 
-            cl.history, 
-            st.status 
-        FROM 
-            keppel.users u 
-            JOIN keppel.user_access ua ON u.user_id = ua.user_id
-            JOIN keppel.checklist_master cl ON ua.allocatedplantids LIKE concat(concat('%',cl.plant_id::text) , '%')
-            LEFT JOIN (
-                SELECT  
-                    t3.checklist_id, 
-                    string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id asc) as assetNames
-                FROM  
-                    keppel.system_assets AS t1,
-                    keppel.plant_system_assets AS t2, 
-                    keppel.checklist_master AS t3
-                WHERE 
-                    t1.system_asset_id = t2.system_asset_id_lvl4 AND  
-                    t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
-                group by 
-                    t3.checklist_id) tmp1 ON tmp1.checklist_id = cl.checklist_id
-            LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
-            LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
-            LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
-            LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id 
-            JOIN keppel.status_cm st ON st.status_id = cl.status_id
-                            
+const fetchApprovedChecklistsQuery = `
+SELECT 
+    cl.checklist_id, 
+    cl.chl_name, 
+    cl.description, 
+    cl.status_id,
+    concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
+    concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
+    concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
+    pm.plant_name,
+    pm.plant_id,
+    completeremarks_req, 
+    tmp1.assetNames as linkedassets, 
+    cl.chl_type, 
+    cl.created_date, 
+    cl.history, 
+    st.status 
+FROM 
+    keppel.users u 
+    JOIN keppel.user_access ua ON u.user_id = ua.user_id
+    JOIN keppel.checklist_master cl ON ua.allocatedplantids LIKE concat(concat('%',cl.plant_id::text) , '%')
+    LEFT JOIN (
+        SELECT  
+            t3.checklist_id, 
+            string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id asc) as assetNames
+        FROM  
+            keppel.system_assets AS t1,
+            keppel.plant_system_assets AS t2, 
+            keppel.checklist_master AS t3
         WHERE 
-            ua.user_id = $1 AND 
-            (cl.status_id = 5 OR cl.status_id = 7)
-        ORDER BY cl.checklist_id DESC;
-    `,
-        [req.user.id],
-        (err, result) => {
-            if (err) {
-                // throw err1;
-                return res.status(400).json({
-                    msg: err,
-                });
-            }
-            if (result.rows.length == 0) {
-                // console.log(result);
-                return res.status(201).json({
-                    msg: "No checklist added",
-                });
-            }
-
-            return res.status(200).json(result.rows);
+            t1.system_asset_id = t2.system_asset_id_lvl4 AND  
+            t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
+        group by 
+            t3.checklist_id) tmp1 ON tmp1.checklist_id = cl.checklist_id
+    LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
+    LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
+    LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
+    LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id 
+    JOIN keppel.status_cm st ON st.status_id = cl.status_id
+                    
+WHERE 
+    ua.user_id = $1 AND 
+    (cl.status_id = 5 OR cl.status_id = 7)
+ORDER BY cl.checklist_id DESC;
+`;
+const fetchApprovedChecklists = async (req, res, next) => {
+    db.query(fetchApprovedChecklistsQuery, [req.user.id], (err, result) => {
+        if (err) {
+            // throw err1;
+            return res.status(400).json({
+                msg: err,
+            });
         }
-    );
+        if (result.rows.length == 0) {
+            // console.log(result);
+            return res.status(201).json({
+                msg: "No checklist added",
+            });
+        }
+
+        return res.status(200).json(result.rows);
+    });
 };
 
 // get checklist templates
@@ -219,7 +215,7 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
             return res.status(500).json("No checklist template found");
         }
         res.status(200).send(found.rows[0]);
-    })
+    });
 };
 
 const fetchSpecificChecklistRecord = async (req, res, next) => {
@@ -230,6 +226,8 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
             cm.description,
             cm.datajson,
             cm.created_date,
+            cm.status_id,
+            cm.history,
             pm.plant_id,
             pm.plant_name,
             u1.user_id as assigned_user_id,
@@ -274,7 +272,7 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
             return res.status(500).json("No checklist template found");
         }
         res.status(200).send(found.rows[0]);
-    })
+    });
 };
 
 const fetchChecklistRecords = async (req, res, next) => {
@@ -317,30 +315,33 @@ const createNewChecklistRecord = async (req, res, next) => {
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`;
 
     const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-    
+
     const history = `Created Record_ASSIGNED_${today}_${req.user.name}_NIL`;
 
-    db.query(sql, [
-        checklist.chl_name,
-        checklist.description,
-        checklist.assigned_user_id,
-        checklist.signoff_user_id,
-        checklist.linkedassetids,
-        checklist.datajson,
-        "Record",
-        checklist.plant_id,
-        today,
-        req.user.id,
-        history,
-        2
-    ], (err) => {
-        if (err) {
-            console.log(err);
-            return res.status(500).json("Failure to create new checklist");
+    db.query(
+        sql,
+        [
+            checklist.chl_name,
+            checklist.description,
+            checklist.assigned_user_id,
+            checklist.signoff_user_id,
+            checklist.linkedassetids,
+            checklist.datajson,
+            "Record",
+            checklist.plant_id,
+            today,
+            req.user.id,
+            history,
+            2,
+        ],
+        (err) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json("Failure to create new checklist");
+            }
+            return res.status(200).json("New checklist successfully created");
         }
-        return res.status(200).json("New checklist successfully created");
-    })
-    
+    );
 };
 
 const createNewChecklistTemplate = async (req, res, next) => {
@@ -362,27 +363,31 @@ const createNewChecklistTemplate = async (req, res, next) => {
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
 
     const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-    
+
     const history = `Created Template_PENDING_${today}_${req.user.name}_NIL`;
 
-    db.query(sql, [
-        checklist.chl_name,
-        checklist.description,
-        checklist.signoff_user_id,
-        checklist.datajson,
-        "Template",
-        checklist.plant_id,
-        today,
-        req.user.id,
-        history,
-        1
-    ], (err) => {
-        if (err) {
-            console.log(err);
-            return res.status(500).json("Failure to create new checklist");
+    db.query(
+        sql,
+        [
+            checklist.chl_name,
+            checklist.description,
+            checklist.signoff_user_id,
+            checklist.datajson,
+            "Template",
+            checklist.plant_id,
+            today,
+            req.user.id,
+            history,
+            1,
+        ],
+        (err) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json("Failure to create new checklist");
+            }
+            return res.status(200).json("New checklist successfully created");
         }
-        return res.status(200).json("New checklist successfully created");
-    })
+    );
 };
 
 const fetchChecklistCounts = (req, res, next) => {
@@ -457,7 +462,21 @@ const fetchChecklistCounts = (req, res, next) => {
 };
 
 const createChecklistCSV = async (req, res, next) => {
-    db.query(fetchTemplateChecklistsQuery, [req.user.id], (err, result) => {
+    let activeTabQuery;
+    switch (req.query.activeTab) {
+        case "0":
+            activeTabQuery = fetchAssignedChecklistsQuery;
+            break;
+        case "1":
+            activeTabQuery = fetchForReviewChecklistsQuery;
+            break;
+        case "2":
+            activeTabQuery = fetchApprovedChecklistsQuery;
+            break;
+        default:
+            activeTabQuery = `fetch error`;
+    }
+    db.query(activeTabQuery, [req.user.id], (err, result) => {
         if (err) return res.status(400).json({ msg: err });
         if (result.rows.length == 0) return res.status(201).json({ msg: "No checklist" });
         generateCSV(result.rows)
@@ -470,6 +489,139 @@ const createChecklistCSV = async (req, res, next) => {
             .catch((error) => {
                 res.status(500).send(`Error in generating csv file`);
             });
+    });
+};
+
+const completeChecklist = async (req, res, next) => {
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
+    const updatehistory = `,Updated Record_WORK DONE_${today}_${req.user.name}`;
+
+    const sql = `
+        UPDATE
+            keppel.checklist_master
+        SET 
+            datajson = $1,
+            status_id = 4,
+            history = concat(history,'${updatehistory}')
+        WHERE 
+            checklist_id = $2
+    `;
+
+    db.query(sql, [req.body.datajson, req.params.checklist_id], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to update checklist completion");
+        }
+        return res.status(200).json("Checklist successfully completed");
+    });
+};
+
+const approveChecklist = async (req, res, next) => {
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
+    const updatehistory = `,Updated Record_APPROVE_${today}_${req.user.name}`;
+
+    const sql = `
+        UPDATE
+            keppel.checklist_master
+        SET 
+            status_id = 5,
+            history = concat(history,'${updatehistory}')
+        WHERE 
+            checklist_id = $1
+    `;
+
+    db.query(sql, [req.params.checklist_id], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to update checklist completion");
+        }
+        return res.status(200).json("Checklist successfully approved");
+    });
+};
+
+const rejectChecklist = async (req, res, next) => {
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    const rejectionComments = req.body.remarks; // todo add rejected comment here
+
+    const updatehistory = `,Updated Record_REJECTED_${today}_${req.user.name}_${rejectionComments}`;
+
+    const sql = `
+        UPDATE
+            keppel.checklist_master
+        SET 
+            status_id = 6,
+            history = concat(history,'${updatehistory}')
+        WHERE 
+            checklist_id = $1
+    `;
+
+    db.query(sql, [req.params.checklist_id], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to update checklist completion");
+        }
+        return res.status(200).json("Checklist successfully cancelled");
+    });
+};
+
+const cancelChecklist = async (req, res, next) => {
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    const cancelledComments = ""; // todo add cancelled comment here
+
+    const updatehistory = `,Updated Record_CANCELLED_${today}_${req.user.name}_${cancelledComments}`;
+
+    const sql = `
+        UPDATE
+            keppel.checklist_master
+        SET 
+            status_id = 7,
+            history = concat(history,'${updatehistory}')
+        WHERE 
+            checklist_id = $1
+    `;
+
+    db.query(sql, [req.params.checklist_id], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to update checklist completion");
+        }
+        return res.status(200).json("Checklist successfully rejected");
+    });
+};
+
+function updateChecklist(updateType) {
+    switch (updateType) {
+        case "complete":
+            return completeChecklist;
+        case "approve":
+            return approveChecklist;
+        case "reject":
+            return rejectChecklist;
+        case "cancel":
+            return cancelChecklist;
+        default:
+            return console.log("update checklist type error");
+    }
+}
+
+const deleteChecklistTemplate = async (req, res, next) => {
+    const sql = `
+        DELETE FROM
+            keppel.schedule_checklist
+        WHERE 
+            checklist_template_id = ${req.params.checklist_id};
+
+        DELETE FROM
+            keppel.checklist_templates
+        WHERE
+            checklist_id = ${req.params.checklist_id}
+    `;
+
+    db.query(sql, (err) => {
+        if (err) return res.status(500).json("Failure to delete template");
+        return res.status(200).json("Template successfully deleted");
     });
 };
 
@@ -583,10 +735,10 @@ const fetchFilteredChecklists = async (req, res, next) => {
 
         return res.status(200).json(result.rows);
     });
-};
+}
 
 module.exports = {
-    fetchPendingChecklists,
+    fetchAssignedChecklists,
     fetchForReviewChecklists,
     fetchApprovedChecklists,
     fetchChecklistTemplateNames,
@@ -598,5 +750,7 @@ module.exports = {
     fetchSpecificChecklistTemplate,
     fetchSpecificChecklistRecord,
     fetchChecklistRecords,
+    updateChecklist,
+    deleteChecklistTemplate,
     fetchFilteredChecklists
 };

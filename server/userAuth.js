@@ -38,6 +38,7 @@ module.exports = (server) => {
 
     passport.deserializeUser((id, cb) => {
         db.query(`SELECT 
+                employee_id,
                 user_id,
                 first_name,
                 last_name,
@@ -51,6 +52,7 @@ module.exports = (server) => {
             if (err) return cb(err);
 
             const userInfo = {
+                employee_id: result.rows[0].employee_id,
                 id: result.rows[0].user_id,
                 name: result.rows[0].first_name + " " + result.rows[0].last_name,
                 role_id: parseInt(result.rows[0].role_id),

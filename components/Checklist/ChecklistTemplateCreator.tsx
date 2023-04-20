@@ -1,14 +1,24 @@
-import checklistStyles from './ChecklistTemplateCreator.module.css'
+import checklistStyles from "./ChecklistTemplateCreator.module.css";
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react";
 import useComponentVisible from "../TopBar/useComponentVisible";
 
-import { BsTrash } from "react-icons/bs"
-import { AiOutlinePlus } from "react-icons/ai"
-import { FaRegCopy } from "react-icons/fa"
+import { BsTrash } from "react-icons/bs";
+import { AiOutlinePlus } from "react-icons/ai";
+import { FaRegCopy } from "react-icons/fa";
 
-import { FileUploadControl, FreeTextControl, MultiChoiceControl, SignatureControl, SingleChoiceControl } from './Controls';
-import { CheckControl, CheckRow, CheckSection } from "../../types/common/classes"
+import {
+  FileUploadControl,
+  FreeTextControl,
+  MultiChoiceControl,
+  SignatureControl,
+  SingleChoiceControl,
+} from "./Controls";
+import {
+  CheckControl,
+  CheckRow,
+  CheckSection,
+} from "../../types/common/classes";
 
 /*
     --- --- --- --- --- --- READ ME --- --- --- --- --- --- ---
@@ -103,263 +113,353 @@ import { CheckControl, CheckRow, CheckSection } from "../../types/common/classes
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 */
 
-function ChecklistChecks(
-	{
-		checks,			// check objects
-		onChange,		// change handler
-		onDelete,		// delete self handler
-	}: {checks: CheckControl[], onChange: Function, onDelete?: Function}
-) {
-    const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(false);
+function ChecklistChecks({
+  checks, // check objects
+  onChange, // change handler
+  onDelete, // delete self handler
+}: {
+  checks: CheckControl[];
+  onChange: Function;
+  onDelete?: Function;
+}) {
+  const { ref, isComponentVisible, setIsComponentVisible } =
+    useComponentVisible(false);
 
-	// TODO: consolidate all this into one function
-	// i was lazy but this is getting a bit too much
-	// ----------------------------------------
+  // TODO: consolidate all this into one function
+  // i was lazy but this is getting a bit too much
+  // ----------------------------------------
 
-	const addCheck = () => {
-		let c = [...checks]; // clone checks
-		c.push(new SingleChoiceControl("", ["Yes", "No"]));
-		onChange(c);
-	}
+  const addCheck = () => {
+    let c = [...checks]; // clone checks
+    c.push(new SingleChoiceControl("", ["Yes", "No"]));
+    onChange(c);
+  };
 
-	const addMulti = () => {
-		let c = [...checks]; // clone checks
-		c.push(new MultiChoiceControl("", []));
-		onChange(c);
-	}
+  const addMulti = () => {
+    let c = [...checks]; // clone checks
+    c.push(new MultiChoiceControl("", []));
+    onChange(c);
+  };
 
-	const addFree = () => {
-		let c = [...checks]; // clone checks
-		c.push(new FreeTextControl());
-		onChange(c);
-	}
+  const addFree = () => {
+    let c = [...checks]; // clone checks
+    c.push(new FreeTextControl());
+    onChange(c);
+  };
 
-	const addUpload = () => {
-		let c = [...checks]; // clone checks
-		c.push(new FileUploadControl());
-		onChange(c);
-	}
+  const addUpload = () => {
+    let c = [...checks]; // clone checks
+    c.push(new FileUploadControl());
+    onChange(c);
+  };
 
-	const addSig = () => {
-		let c = [...checks]; // clone checks
-		c.push(new SignatureControl());
-		onChange(c);
-	}
+  const addSig = () => {
+    let c = [...checks]; // clone checks
+    c.push(new SignatureControl());
+    onChange(c);
+  };
 
-	// ----------------------------------------
+  // ----------------------------------------
 
-	const handleCheck = (check: CheckControl) => {
-		let c = [...checks];
-		let i = c.findIndex(v => v.id === check.id)
-		c[i] = check; // replace old check with new
-		onChange(c);
-	}
+  const handleCheck = (check: CheckControl) => {
+    let c = [...checks];
+    let i = c.findIndex((v) => v.id === check.id);
+    c[i] = check; // replace old check with new
+    onChange(c);
+  };
 
-	const deleteCheck = (check: CheckControl) => {
-		let c = [...checks];
-		let i = c.findIndex(v => v.id === check.id)
-		c.splice(i, 1);
-		onChange(c);
-	}
+  const deleteCheck = (check: CheckControl) => {
+    let c = [...checks];
+    let i = c.findIndex((v) => v.id === check.id);
+    c.splice(i, 1);
+    onChange(c);
+  };
 
-	return (
-		<div className={checklistStyles.checkObjs}>
-			{
-				checks.map(check => <React.Fragment key={check.id}>{check.render(handleCheck, deleteCheck)}</React.Fragment>)
-			}
+  return (
+    <div className={checklistStyles.checkObjs}>
+      {checks.map((check) => (
+        <React.Fragment key={check.id}>
+          {check.render(handleCheck, deleteCheck)}
+        </React.Fragment>
+      ))}
 
-			<div ref={ref} className="input-group" style={{justifyContent: "center"}}>
-				<button type="button" onClick={addCheck} className="btn btn-sm btn-outline-secondary">Add Check</button>
-				<button type="button" onClick={addMulti} className="btn btn-sm btn-outline-secondary">Add Multi</button>
-				<button type="button" onClick={addFree} className="btn btn-sm btn-outline-secondary">Add Free</button>
-				<button type="button" onClick={addUpload} className="btn btn-sm btn-outline-secondary">Add File Upload</button>
-				<button type="button" onClick={addSig} className="btn btn-sm btn-outline-secondary">Add Signature</button>
-			</div>
+      <div
+        ref={ref}
+        className="input-group"
+        style={{ justifyContent: "center" }}
+      >
+        <button
+          type="button"
+          onClick={addCheck}
+          className="btn btn-sm btn-outline-secondary"
+        >
+          Add Check
+        </button>
+        <button
+          type="button"
+          onClick={addMulti}
+          className="btn btn-sm btn-outline-secondary"
+        >
+          Add Multi
+        </button>
+        <button
+          type="button"
+          onClick={addFree}
+          className="btn btn-sm btn-outline-secondary"
+        >
+          Add Free
+        </button>
+        <button
+          type="button"
+          onClick={addUpload}
+          className="btn btn-sm btn-outline-secondary"
+        >
+          Add File Upload
+        </button>
+        <button
+          type="button"
+          onClick={addSig}
+          className="btn btn-sm btn-outline-secondary"
+        >
+          Add Signature
+        </button>
+      </div>
 
-			{
-				isComponentVisible &&
-				<div className={checklistStyles.checkDropdown} onClick={addCheck}>asd</div>
-			}
-		</div>
-	)
+      {isComponentVisible && (
+        <div className={checklistStyles.checkDropdown} onClick={addCheck}>
+          asd
+        </div>
+      )}
+    </div>
+  );
 }
 
-function ChecklistCheckRow(
-	{
-		row,			// row object
-		onChange,		// change handler
-		onDuplicate,	// duplicate self handler
-		onDelete,		// delete self handler
-		SN				// number in checklist
-	}: {row: CheckRow, onChange: Function, onDuplicate: Function, onDelete: Function, SN: number})
-{
+function ChecklistCheckRow({
+  row, // row object
+  onChange, // change handler
+  onDuplicate, // duplicate self handler
+  onDelete, // delete self handler
+  SN, // number in checklist
+}: {
+  row: CheckRow;
+  onChange: Function;
+  onDuplicate: Function;
+  onDelete: Function;
+  SN: number;
+}) {
+  const [isHover, setHover] = useState<boolean>(false);
 
-	const [isHover, setHover] = useState<boolean>(false)
+  const deleteSelf = () => {
+    onDelete(row);
+  };
 
-	const deleteSelf = () => {
-		onDelete(row);
-	}
+  const duplicateSelf = () => {
+    onDuplicate(row);
+  };
 
-	const duplicateSelf = () => {
-		onDuplicate(row);
-	}
+  const handleText = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // row.description = e.target.value; // dangerous
+    const r = row.clone();
+    r.description = e.target.value;
+    onChange(r);
+  };
 
-	const handleText = (e: React.ChangeEvent<HTMLInputElement>) => {
-		row.description = e.target.value; // dangerous
-	}
-
-	const handleChecks = (checks: CheckControl[]) => {
-		let r = row.clone();
-		/*let i = r.checks.findIndex(v => v.id === check.id)
+  const handleChecks = (checks: CheckControl[]) => {
+    let r = row.clone();
+    /*let i = r.checks.findIndex(v => v.id === check.id)
 
 		r.checks[i] = check;*/
 
-		r.checks = checks;
-		// console.log("handleCheck")
-		onChange(r);
-	}
+    r.checks = checks;
+    // console.log("handleCheck")
+    onChange(r);
+  };
 
-	return <tr
-			onMouseOver={() => setHover(true)}
-			onMouseLeave={() => setHover(false)}
-			className={isHover ? checklistStyles.checklistHighlight : undefined}
-	>
-		<td>{SN}</td>
-		<td>
-			<input type={"text"} defaultValue={row.description} placeholder={"Check Description"} className="form-control" style={{border: "none"}} onChange={handleText}></input>
-		</td>
-		<td>
-			<ChecklistChecks checks={row.checks} onChange={handleChecks}/>
-		</td>
-		<td>
-			<button type="button" className="btn" title="Delete Row" onClick={deleteSelf}>
-				<BsTrash size={26}/>
-			</button>
-			<button type="button" className="btn" title="Duplicate Row" onClick={duplicateSelf}>
-				<FaRegCopy size={26}/>
-			</button>
-		</td>
-	</tr>
+  return (
+    <tr
+      onMouseOver={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className={isHover ? checklistStyles.checklistHighlight : undefined}
+    >
+      <td>{SN}</td>
+      <td>
+        <input
+          type={"text"}
+          defaultValue={row.description}
+          placeholder={"Check Description"}
+          className="form-control"
+          style={{ border: "none" }}
+          onChange={handleText}
+        ></input>
+      </td>
+      <td>
+        <ChecklistChecks checks={row.checks} onChange={handleChecks} />
+      </td>
+      <td>
+        <button
+          type="button"
+          className="btn"
+          title="Delete Row"
+          onClick={deleteSelf}
+        >
+          <BsTrash size={26} />
+        </button>
+        <button
+          type="button"
+          className="btn"
+          title="Duplicate Row"
+          onClick={duplicateSelf}
+        >
+          <FaRegCopy size={26} />
+        </button>
+      </td>
+    </tr>
+  );
 }
 
-function ChecklistSection(
-	{
-		section,		// section object
-		onChange,		// change handler
-		onDelete		// delete self handler
-	}: {section: CheckSection, onChange: Function, onDelete: Function})
-{
-
-	const addRow = () => {
-		let s = section.clone();
-		s.rows.push(new CheckRow())
-
-		onChange(s);
-	}
-
-	const duplicateRow = (row: CheckRow) => {
-		let s = section.clone();
-		let i = s.rows.findIndex(v => v.id === row.id)
-
-		s.rows.splice(i+1, 0, row.duplicate());
-		onChange(s);
-	}
-
-	const deleteRow = (row: CheckRow) => {
-		let s = section.clone();
-		s.rows = s.rows.filter(v =>  v.id !== row.id)
-
-		onChange(s);
-	}
-
-	const handleText = (e: React.ChangeEvent<HTMLInputElement>) => {
-		section.description = e.target.value; // dangerous
-		/*
-		// valid
-		let s = section.clone();
-		s.description = e.target.value;
-		onChange(s);*/
-	}
-
-	const handleRow = (row: CheckRow) => {
-		let s = section.clone();
-		let i = 0;
-
-		s.rows.filter((value, index) => {
-			if(value.id === row.id)
-			{
-				i = index;
-				return true;
-			}
-			return false;
-		})[0];
-
-		s.rows[i] = row;
-
-		onChange(s);
-	}
-
-	const deleteSelf = () => {
-		onDelete(section);
-	}
-
-	return (<>
-		<tr>
-			<td/>
-			<td colSpan={2}>
-				<input type={"text"} placeholder={"Section Name"} className="form-control" style={{border: "none"}} onChange={handleText}></input>
-			</td>
-			<td>
-				<button type="button" className="btn" title="Delete Entire Section" onClick={deleteSelf}>
-					<BsTrash size={26}/>
-				</button>
-				<button type="button" className="btn" title="Add Row" onClick={addRow}>
-					<AiOutlinePlus size={26}/>
-				</button>
-			</td>
-		</tr>
-
-		{
-			section.rows.map((row, index) => {
-				return <ChecklistCheckRow key={row.id} row={row} SN={index+1} onChange={handleRow} onDuplicate={duplicateRow} onDelete={deleteRow}/>
-			})
-		}
-	</>)
-}
-
-export default function ChecklistTemplateCreator({ sections, setSections }: {
-	sections: CheckSection[],
-	setSections: React.Dispatch<React.SetStateAction<CheckSection[]>>
+function ChecklistSection({
+  section, // section object
+  onChange, // change handler
+  onDelete, // delete self handler
+}: {
+  section: CheckSection;
+  onChange: Function;
+  onDelete: Function;
 }) {
+  const addRow = () => {
+    let s = section.clone();
+    s.rows.push(new CheckRow());
 
-	const addSection = () => {
-		setSections((sections) => [...sections, new CheckSection()])
-	}
+    onChange(s);
+  };
 
-	const deleteSection = (s: CheckSection) => {
-		setSections(() => {
-			return sections.filter((value) => value.id !== s.id)
-		})
-	}
+  const duplicateRow = (row: CheckRow) => {
+    let s = section.clone();
+    let i = s.rows.findIndex((v) => v.id === row.id);
 
-	const handleSectionEdit = (section: CheckSection) => {
-		let i = 0;
-		let s = [...sections];
-		sections.filter((value, index) => {
-			if(value.id === section.id)
-			{
-				i = index;
-				return true;
-			}
-			return false;
-		})[0];
+    s.rows.splice(i + 1, 0, row.duplicate());
+    onChange(s);
+  };
 
-		s[i] = section;
+  const deleteRow = (row: CheckRow) => {
+    let s = section.clone();
+    s.rows = s.rows.filter((v) => v.id !== row.id);
 
-		setSections(s);
-	}
+    onChange(s);
+  };
 
-	/*useEffect(() => {
+  const handleText = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // section.description = e.target.value; // dangerous
+    // valid
+    let s = section.clone();
+    s.description = e.target.value;
+    onChange(s);
+  };
+
+  const handleRow = (row: CheckRow) => {
+    let s = section.clone();
+    let i = 0;
+
+    s.rows.filter((value, index) => {
+      if (value.id === row.id) {
+        i = index;
+        return true;
+      }
+      return false;
+    })[0];
+
+    s.rows[i] = row;
+
+    onChange(s);
+  };
+
+  const deleteSelf = () => {
+    onDelete(section);
+  };
+
+  return (
+    <>
+      <tr>
+        <td />
+        <td colSpan={2}>
+          <input
+            type={"text"}
+            placeholder={"Section Name"}
+            className="form-control"
+            style={{ border: "none" }}
+            onChange={handleText}
+          ></input>
+        </td>
+        <td>
+          <button
+            type="button"
+            className="btn"
+            title="Delete Entire Section"
+            onClick={deleteSelf}
+          >
+            <BsTrash size={26} />
+          </button>
+          <button
+            type="button"
+            className="btn"
+            title="Add Row"
+            onClick={addRow}
+          >
+            <AiOutlinePlus size={26} />
+          </button>
+        </td>
+      </tr>
+
+      {section.rows.map((row, index) => {
+        return (
+          <ChecklistCheckRow
+            key={row.id}
+            row={row}
+            SN={index + 1}
+            onChange={handleRow}
+            onDuplicate={duplicateRow}
+            onDelete={deleteRow}
+          />
+        );
+      })}
+    </>
+  );
+}
+
+export default function ChecklistTemplateCreator({
+  sections,
+  setSections,
+}: {
+  sections: CheckSection[];
+  setSections: React.Dispatch<React.SetStateAction<CheckSection[]>>;
+}) {
+  const addSection = () => {
+    setSections((sections) => [...sections, new CheckSection()]);
+  };
+
+  const deleteSection = (s: CheckSection) => {
+    setSections(() => {
+      return sections.filter((value) => value.id !== s.id);
+    });
+  };
+
+  const handleSectionEdit = (section: CheckSection) => {
+    let i = 0;
+    let s = [...sections];
+    sections.filter((value, index) => {
+      if (value.id === section.id) {
+        i = index;
+        return true;
+      }
+      return false;
+    })[0];
+
+    s[i] = section;
+
+    setSections(s);
+  };
+
+  /*useEffect(() => {
 		let ix = setInterval(() => {
 			console.log(sections);
 		}, 3000)
@@ -367,50 +467,62 @@ export default function ChecklistTemplateCreator({ sections, setSections }: {
 		return () => clearInterval(ix);
 	}, [sections])*/
 
-	useEffect(() => {
-		if(sections.length < 1)
-			return
+  useEffect(() => {
+    if (sections.length < 1) return;
 
-		// console.log(CheckSection.fromJSON(JSON.stringify(sections[0])))
-		// console.log(JSON.stringify(CheckSection.fromJSON(JSON.stringify(sections[0]))))
-	}, [sections])
+    // console.log(CheckSection.fromJSON(JSON.stringify(sections[0])))
+    // console.log(JSON.stringify(CheckSection.fromJSON(JSON.stringify(sections[0]))))
+  }, [sections]);
 
-	return (<>
-		<table className="table">
-			<colgroup>
-				<col style={{width:"50px"}}/>
-				<col style={{width:"calc((40% - 250px) / 2)"}}/>
-				<col style={{width:"40%"}}/>
-				<col style={{width:"200px"}}/>
-			</colgroup>  
-			<thead>
-				<tr>
-					<th>SN</th>
-					<th>Description</th>
-					<th>Checks</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody className={checklistStyles.checklistLowlight}>
-				{
-					sections.map((sect, index) => {
-						return <ChecklistSection
-							key={sect.id}
-							section={sect}
-							onChange={handleSectionEdit}
-							onDelete={deleteSection}
-						/>
-					})
-				}
-				<tr>
-					<td/><td/><td/>
-					<td>
-						<button type="button" onClick={addSection} className="btn btn-secondary">Add Section</button>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-		{/* <textarea value={JSON.stringify(sections, undefined, 4)} rows={16} style={{width: "100%"}}/> */}
-		</>
-	);
+  return (
+    <>
+      <table className="table">
+        <colgroup>
+          <col style={{ width: "50px" }} />
+          <col style={{ width: "calc((40% - 250px) / 2)" }} />
+          <col style={{ width: "40%" }} />
+          <col style={{ width: "200px" }} />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>SN</th>
+            <th>Description</th>
+            <th>Checks</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody className={checklistStyles.checklistLowlight}>
+          {sections.map((sect, index) => {
+            return (
+              <ChecklistSection
+                key={sect.id}
+                section={sect}
+                onChange={handleSectionEdit}
+                onDelete={deleteSection}
+              />
+            );
+          })}
+          <tr>
+            <td />
+            <td />
+            <td />
+            <td>
+              <button
+                type="button"
+                onClick={addSection}
+                className="btn btn-secondary"
+              >
+                Add Section
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      {/* <textarea
+        value={JSON.stringify(sections, undefined, 4)}
+        rows={16}
+        style={{ width: "100%" }}
+      /> */}
+    </>
+  );
 }

@@ -6,10 +6,12 @@ import { TbChecklist } from "react-icons/tb";
 import { AiOutlineQrcode , AiOutlineControl, AiOutlineUser, AiOutlineSchedule, AiOutlinePhone, AiOutlineHistory, AiOutlineDashboard } from "react-icons/ai";
 import { MdWorkOutline } from "react-icons/md";
 import { VscBook } from "react-icons/vsc";
+import { TbExchange } from "react-icons/tb";
 import NavDropdown, { NavDropdownLink } from './NavDropdown';
 import NavLink, { NavLinkInfo } from './NavLink';
 import { useCurrentUser } from '../SWR';
 import { useRouter } from 'next/router';
+import { Role } from '../../types/common/enums';
 
 export default function NavBar() {
 
@@ -82,10 +84,11 @@ export default function NavBar() {
                     <NavLink     name="Dashboard"         path="/Dashboard"     icon={<AiOutlineDashboard size={21} />} />
                     <NavLink     name="Request"           path="/Request"       icon={<AiOutlinePhone size={21} />} />
                     <NavLink     name="Asset"             path="/Asset"         icon={<BsHouseDoor size={21} />} />
+                    <NavLink     name="Change of Parts"   path="/ChangeOfParts" icon={<TbExchange size={21} />} />
                     <NavDropdown name="Schedule"          path="/Schedule" navOpen={navDisplay} icon={<AiOutlineSchedule size={21} />}>
                         <NavDropdownLink href="/Schedule" >View Schedules</NavDropdownLink>
                         <NavDropdownLink href="/Schedule/Create" >Create Schedule</NavDropdownLink>
-                        {data && (data.role_id === 1 || data.role_id === 2 ) &&
+                        {data && (data.role_id === Role.Admin || data.role_id === Role.Manager ) &&
                             <NavDropdownLink href="/Schedule/Manage" >Manage Schedules</NavDropdownLink>
                         }
                     </NavDropdown>
@@ -95,7 +98,7 @@ export default function NavBar() {
                     <NavLink     name="Workflow"          path="/Workflow"      icon={<MdWorkOutline size={21} />} />
                     <NavLink     name="Master"            path="/Master"        icon={<AiOutlineControl size={21} />} />
                     <NavDropdown name="User Management"   path="/User" navOpen={navDisplay} icon={<AiOutlineUser size={21} />}>
-                        <NavDropdownLink href="/">User Management</NavDropdownLink>
+                        <NavDropdownLink href="/User/Management">User Management</NavDropdownLink>
                         <NavDropdownLink href="/">Access Control</NavDropdownLink>
                         <NavDropdownLink href="/User/Add">Add New User</NavDropdownLink>
                         <NavDropdownLink href="/">Password Policy</NavDropdownLink>

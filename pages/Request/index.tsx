@@ -44,15 +44,19 @@ import { useRouter } from "next/router";
 import styles from "../../styles/Request.module.scss";
 import axios from "axios";
 import TooltipBtn from "../../components/TooltipBtn";
-import { FiRefreshCw } from "react-icons/fi";
+import { FiChevronsLeft, FiChevronsRight, FiRefreshCw } from "react-icons/fi";
 import { HiOutlineDownload, HiOutlineLink } from "react-icons/hi";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import { AiOutlineHistory } from "react-icons/ai";
 import { AiOutlineUserAdd } from "react-icons/ai";
+import { BiCommentCheck } from "react-icons/bi";
 import Image from "next/image";
 import { useCurrentUser } from "../../components/SWR";
 import RequestHistory from "../../components/Request/RequestHistory";
 import LoadingHourglass from "../../components/LoadingHourglass";
+import PageButton from "../../components/PageButton";
+import { Role } from "../../types/common/enums";
+import { GetServerSidePropsContext } from "next";
 
 /*export type TableNode<T> = {
   id: string;
@@ -60,7 +64,14 @@ import LoadingHourglass from "../../components/LoadingHourglass";
   prop: T;
 };*/
 
-interface RequestItem {
+const indexedColumn: ("pending" | "assigned" | "review" | "approved")[] = [
+  "pending",
+  "assigned",
+  "review",
+  "approved",
+];
+
+export interface RequestItem {
   id: string;
   request_name?: string;
   created_date: Date;
@@ -137,15 +148,28 @@ export const downloadCSV = async (type: string) => {
   }
 };
 
+<<<<<<< HEAD
 export default function Request(props: RequestProps) {
+=======
+export default function Request({ pages }: { pages: number }) {
+>>>>>>> 61314b2efa77053706442af7664d0daf47a3a09d
   const [requestItems, setRequestItems] = useState<RequestItem[]>([]);
   const [isReady, setReady] = useState(false);
   const [modalSrc, setModalSrc] = useState<string | undefined>();
   const [ids, setIds] = React.useState<string[]>([]);
   const [currentHistory, setCurrentHistory] = useState<string | undefined>();
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(pages);
+  console.log(pages);
 
   const router = useRouter();
   const { data } = useCurrentUser();
+
+  const switchColumns = (index: number) => {
+    setReady(false);
+    setActiveTabIndex(index);
+  };
 
   const COLUMNS: Column<RequestItem>[] = [
     {
@@ -207,6 +231,7 @@ export default function Request(props: RequestProps) {
       label: "",
       renderCell: item => (
         <div className={styles.iconsDiv}>
+<<<<<<< HEAD
           <div
             className={styles.editIcon}
             style={{
@@ -223,6 +248,47 @@ export default function Request(props: RequestProps) {
           >
             <AiOutlineUserAdd size={18} title={"Assign"} />
           </div>
+=======
+          {(item.status_id === 1 || item.status_id === 2) && (
+            <div
+              className={styles.editIcon}
+              style={{
+                display:
+                  data?.role_id == Role.Admin ||
+                  data?.role_id == Role.Manager ||
+                  data?.role_id == Role.Engineer
+                    ? "block"
+                    : "none",
+                // visibility:
+                //     item.status_id === 1 || item.status_id === 2 ? "visible" : "hidden",
+              }}
+              onClick={() => {
+                router.push(`/Request/Assign/${item.id}`);
+                setReady(false);
+              }}
+            >
+              <AiOutlineUserAdd size={18} title={"Assign"} />
+            </div>
+          )}
+          {item.status_id === 3 && (
+            <div
+              className={styles.editIcon}
+              style={{
+                display:
+                  data?.role_id == Role.Admin || data?.role_id == Role.Manager
+                    ? "block"
+                    : "none",
+                // visibility: item.status_id === 3 ? "visible" : "hidden",
+              }}
+              onClick={() => {
+                router.push(`/Request/Manage/${item.id}`);
+                setReady(false);
+              }}
+            >
+              <BiCommentCheck size={18} title={"Manage"} />
+            </div>
+          )}
+>>>>>>> 61314b2efa77053706442af7664d0daf47a3a09d
           <div
             className={styles.editIcon}
             onClick={() => {
@@ -258,7 +324,11 @@ export default function Request(props: RequestProps) {
     error: requestFetchError,
     isValidating: requestIsFetchValidating,
     mutate: requestMutate,
+<<<<<<< HEAD
   } = props?.filter ? useRequestFilter(props) : useRequest();
+=======
+  } = useRequest(indexedColumn[activeTabIndex]);
+>>>>>>> 61314b2efa77053706442af7664d0daf47a3a09d
 
   const theme = useTheme([
     getTheme(),
@@ -372,6 +442,7 @@ export default function Request(props: RequestProps) {
                     )}
                   </li>
                   <li className={styles.tableDropdownListItem}>
+<<<<<<< HEAD
                         {(data?.role_id === 1 || data?.role_id === 2) &&
                           item.status_id === 3 ?
                           <Link href={`/Request/Manage/${item.id}`}><strong>Manage</strong></Link>
@@ -383,6 +454,28 @@ export default function Request(props: RequestProps) {
                             : 
                             <Link href={`/Request/View/${item.id}`}><strong>View</strong></Link> 
                         }
+=======
+                    {
+                      // (data?.role_id === Role.Admin ||
+                      //     data?.role_id === Role.Manager) &&
+                      // item.status_id === 3 ? (
+                      //     <Link href={`/Request/Manage/${item.id}`}>
+                      //         <strong>Manage</strong>
+                      //     </Link>
+                      // ) :
+                      (data?.role_id === Role.Engineer ||
+                        data?.role_id === Role.Specialist) &&
+                      (item.status_id === 2 || item.status_id === 5) ? (
+                        <Link href={`/Request/Complete/${item.id}`}>
+                          <strong>Complete</strong>
+                        </Link>
+                      ) : (
+                        <Link href={`/Request/View/${item.id}`}>
+                          <strong>View</strong>
+                        </Link>
+                      )
+                    }
+>>>>>>> 61314b2efa77053706442af7664d0daf47a3a09d
                   </li>
                 </ul>
               </td>
@@ -394,8 +487,9 @@ export default function Request(props: RequestProps) {
   };
 
   useEffect(() => {
-    if (requestIsFetchValidating) setReady(false);
+    // if (requestIsFetchValidating) setReady(false);
 
+<<<<<<< HEAD
     if (requestData && !requestIsFetchValidating) {
       setRequestItems(
         requestData.map((row: CMMSRequest) => {
@@ -426,9 +520,62 @@ export default function Request(props: RequestProps) {
           };
         })
       );
+=======
+    if (!isReady && requestData && !requestIsFetchValidating) {
+      if (requestData.length > 0) {
+        setRequestItems(
+          requestData.map((row: CMMSRequest) => {
+            return {
+              id: row.request_id,
+              ...row,
+            };
+          })
+        );
+      } else {
+        setRequestItems([]);
+      }
+>>>>>>> 61314b2efa77053706442af7664d0daf47a3a09d
       setReady(true);
     }
-  }, [requestData, requestIsFetchValidating]);
+  }, [requestData, requestIsFetchValidating, isReady]);
+
+  useEffect(() => {
+    setReady(false);
+    axios
+      .get(`/api/request/${indexedColumn[activeTabIndex]}?page=${page}`)
+      .then((response) => {
+        setRequestItems(
+          response.data.rows.map((row: CMMSRequest) => {
+            return {
+              ...row,
+              id: row.request_id,
+              created_date: new Date(row.created_date),
+            };
+          })
+        );
+        setReady(true);
+      });
+  }, [page]);
+
+  useEffect(() => {
+    setReady(false);
+    axios
+      .get(`/api/request/${indexedColumn[activeTabIndex]}?page=${page}`)
+      .then((response) => {
+        setRequestItems(
+          response.data.rows.map((row: CMMSRequest) => {
+            return {
+              ...row,
+              id: row.request_id,
+              created_date: new Date(row.created_date),
+            };
+          })
+        );
+        setTotalPages(response.data.total);
+        setPage(1);
+        setReady(true);
+      });
+  }, [activeTabIndex]);
 
   return (
     <ModuleMain>
@@ -448,6 +595,40 @@ export default function Request(props: RequestProps) {
         </a>
       </ModuleHeader>
       <ModuleContent>
+        <ul className="nav nav-tabs">
+          <li
+            onClick={() => {
+              activeTabIndex !== 0 && switchColumns(0);
+            }}
+            className={"nav-link" + (activeTabIndex === 0 ? " active" : "")}
+          >
+            <span style={{ all: "unset" }}>Pending</span>
+          </li>
+          <li
+            onClick={() => {
+              activeTabIndex !== 1 && switchColumns(1);
+            }}
+            className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
+          >
+            <span style={{ all: "unset" }}>Assigned</span>
+          </li>
+          <li
+            onClick={() => {
+              activeTabIndex !== 2 && switchColumns(2);
+            }}
+            className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
+          >
+            <span style={{ all: "unset" }}>For Review</span>
+          </li>
+          <li
+            onClick={() => {
+              activeTabIndex !== 3 && switchColumns(3);
+            }}
+            className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
+          >
+            <span style={{ all: "unset" }}>Approved</span>
+          </li>
+        </ul>
         {!isReady && (
           <div style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
             <LoadingHourglass />
@@ -465,6 +646,33 @@ export default function Request(props: RequestProps) {
               rowProps={ROW_PROPS}
               rowOptions={ROW_OPTIONS}
             />
+            <div className={styles.requestPagination}>
+              <FiChevronsLeft
+                size={25}
+                className={`${styles.paginationChevron} ${
+                  page - 1 > 0 ? styles.active : styles.disabled
+                }`}
+                onClick={() => setPage(1)}
+              />
+              <span>
+                {page - 1 > 0 && (
+                  <PageButton setPage={setPage}>{page - 1}</PageButton>
+                )}
+                <PageButton active setPage={setPage}>
+                  {page}
+                </PageButton>
+                {page + 1 <= totalPages && (
+                  <PageButton setPage={setPage}>{page + 1}</PageButton>
+                )}
+              </span>
+              <FiChevronsRight
+                size={25}
+                className={`${styles.paginationChevron} ${
+                  page < totalPages ? styles.active : styles.disabled
+                }`}
+                onClick={() => setPage(totalPages)}
+              />
+            </div>
           </>
         )}
         <ModuleModal
@@ -487,3 +695,23 @@ export default function Request(props: RequestProps) {
     </ModuleMain>
   );
 }
+
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const headers = {
+    withCredentials: true,
+    headers: {
+      Cookie: context.req.headers.cookie,
+    },
+  };
+
+  const response = await axios.get(
+    "http://localhost:3001/api/request/pending?page=1",
+    headers
+  );
+
+  return {
+    props: { pages: response.data.total },
+  };
+};

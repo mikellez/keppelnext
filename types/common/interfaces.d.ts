@@ -128,6 +128,11 @@ interface CMMSUser {
   username?: string;
 }
 
+interface CMMSEmployee extends CMMSUser {
+  employee_id?: number;
+  full_name: string;
+}
+
 interface CMMSRequest {
   request_id: string;
   request_name?: string;
@@ -309,9 +314,34 @@ interface CMMSDashboardData {
   fill: string;
 }
 
+interface CMMSChangeOfParts {
+  copId: number;
+  psaId: number;
+  asset: string;
+  plant: string;
+  plantId: number;
+  changedDate: Date | null;
+  scheduledDate: Date;
+  description: string;
+  assignedUserId: number;
+  assignedUser: string; 
+}
+
+interface CMMSAddUser{
+  firstName: string;
+  lastName: string;
+  username: string;
+  password: string;
+  employeeId: string;
+  email: string;
+  roleType: number;
+  allocatedPlants: array;
+}
+
 export {
   CMMSBaseType,
   CMMSUser,
+  CMMSEmployee,
   CMMSRequest,
   CMMSRequestTypes,
   CMMSFaultTypes,
@@ -338,4 +368,6 @@ export {
   postData,
   CMMSAssetDetails,
   CMMSSubComponent1Name,
+  CMMSChangeOfParts,
+  CMMSAddUser
 };
