@@ -229,7 +229,7 @@ export default function AddUser(props: AddUserProps) {
             </button>
             ]}
             onRequestClose={() => {
-              router.push("/User");
+              router.push("/User/Management");
             }}
           />
 			</ModuleContent>

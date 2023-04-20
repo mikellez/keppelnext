@@ -65,15 +65,8 @@ const addUser = async (req, res, next) => {
   }  
   q += plants + ` END $$;`
   console.log(q);
-  await db.query(q, (err, result) => {
-    if (err) throw err;
-    if (result) {
-      return res.status(200).send({
-				msg: "success",
-			})
-    }
-  }
-  );
+  try {await db.query(q); return res.status(200).json("success");} catch (err) {console.log(err);}
+  
 }
 
 module.exports ={
