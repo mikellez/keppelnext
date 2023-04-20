@@ -4,13 +4,12 @@ import FullCalendar from "@fullcalendar/react";
 import { EventClickArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import EventModal from "./EventModal";
-import axios from "axios";
 import { useRouter } from "next/router";
 import styles from "../../styles/Schedule.module.scss";
 import { BsCalendar4Week, BsListUl } from "react-icons/bs";
-import { TableNode } from "@table-library/react-table-library/types/table";
 import ScheduleTable from "./ScheduleTable";
 import { CMMSScheduleEvent, CMMSChangeOfPartsEvent, CMMSChangeOfParts, CMMSEvent } from "../../types/common/interfaces";
+import EventColorLegend, { EventColours } from "./EventColorLegend";
 
 interface ScheduleTemplateInfo extends PropsWithChildren {
     title: string;
@@ -137,7 +136,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     plant: cop.plant,
                     plantId: cop.plantId,
                 },
-                color: cop.changedDate ? "#36AE7C" : "#4D96FF",
+                color: cop.changedDate ? EventColours.completedCOP.color : EventColours.scheduledCOP.color,
                 display: displayCOP ? "block" : "none"
         };
     }, [displayCOP]);
@@ -173,7 +172,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 exclusionList: schedule.exclusionList,
                 status: schedule.status,
             },
-            color: schedule.status === 5 ? "#488FB1" : "#FF6B6B", 
+            color: schedule.status === 5 ? EventColours.completedTimeline.color : EventColours.approvedTimeline.color, 
             display: displayChecklist ? "block" : "none"
         }; 
 
@@ -239,7 +238,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
         if (props.changeOfParts) updateCOPEvents(props.changeOfParts);
 
     }, [props.schedules, props.changeOfParts, updateCOPEvents, updateChecklistEvents]);
-    console.log(displayCOP)
+
     return (
         <>
         <ModuleMain>
@@ -272,45 +271,58 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 {toggleCalendarOrListView ? (
                     // Render Full calendar view
                     <div>
-                    <FullCalendar
-                        plugins={[dayGridPlugin]}
-                        initialView="dayGridMonth"
-                        headerToolbar={{
-                            left: "today",
-                            center: "title",
-                            right: "prevYear,prev,next,nextYear",
-                        }}
-                        aspectRatio={2}
-                        handleWindowResize={true}
-                        windowResizeDelay={1}
-                        stickyHeaderDates={true}
-                        selectable={true}
-                        unselectAuto={true}
-                        events={(checklistEvents as CMMSEvent[]).concat(COPEvents)}
-                        dayMaxEvents={2}
-                        eventDisplay="block"
-                        eventBackgroundColor="#FA9494"
-                        eventBorderColor="#FFFFFF"
-                        eventTextColor="#000000"
-                        displayEventTime={false}
-                        eventClick={handleEventClick}
-                        eventMouseEnter={(info) => document.body.style.cursor = "pointer"}
-                        eventMouseLeave={() => document.body.style.cursor = "default"}
-                    />
-                        <input
-                            id="checkbox-cop"
-                            type="checkbox"
-                            onChange={() => setDisplayCOP((prev) => !prev)}
-                            checked={displayCOP}
+                        <FullCalendar
+                            plugins={[dayGridPlugin]}
+                            initialView="dayGridMonth"
+                            headerToolbar={{
+                                left: "today",
+                                center: "title",
+                                right: "prevYear,prev,next,nextYear",
+                            }}
+                            aspectRatio={2}
+                            handleWindowResize={true}
+                            windowResizeDelay={1}
+                            stickyHeaderDates={true}
+                            selectable={true}
+                            unselectAuto={true}
+                            events={(checklistEvents as CMMSEvent[]).concat(COPEvents)}
+                            dayMaxEvents={2}
+                            eventDisplay="block"
+                            eventBackgroundColor="#FA9494"
+                            eventBorderColor="#FFFFFF"
+                            eventTextColor="#000000"
+                            displayEventTime={false}
+                            eventClick={handleEventClick}
+                            eventMouseEnter={(info) => document.body.style.cursor = "pointer"}
+                            eventMouseLeave={() => document.body.style.cursor = "default"}
                         />
-                         <label htmlFor="checkbox-cop">Change of Parts</label>
-                        <input
-                            id="checkbox-checklist"
-                            type="checkbox"
-                            onChange={() => setDisplayChecklist((prev) => !prev)}
-                            checked={displayChecklist}
-                        />
-                        <label htmlFor="checkbox-checklist">Checklist</label>
+                        <div className={styles.calendarDisplayCheckboxContainer}>
+                            <div className="form-check">
+                                <input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    onChange={() => setDisplayCOP((prev) => !prev)}
+                                    checked={displayCOP}
+                                />
+                                <label className="form-check-label">
+                                    Change of Parts
+                                </label>
+                            </div>
+                            <div className="form-check">
+                                <input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    onChange={() => setDisplayChecklist((prev) => !prev)}
+                                    checked={displayChecklist}
+                                />
+                                <label className="form-check-label">
+                                    Checklist
+                                </label>
+                            </div>
+                            <div style={{marginLeft: "auto"}}>
+                                <EventColorLegend />
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     // Render list view
