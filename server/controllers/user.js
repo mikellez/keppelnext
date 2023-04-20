@@ -7,6 +7,7 @@ const getUsers = (req, res, next) => {
         `SELECT 
         employee_id,
         CONCAT(first_name, ' ', last_name) AS full_name,
+        user_id,
         role_name
     FROM 
         keppel.user_access
@@ -91,8 +92,29 @@ FROM
     });
 };
 
+const deleteUser = async (req, res, next) => {
+    const { id } = req.params;
+    const query = 
+    `DELETE FROM keppel.user_role_privileges
+    WHERE user_id = ${id};
+    
+    DELETE FROM keppel.user_plant
+    WHERE user_id = ${id};
+    
+    DELETE FROM keppel.user_role
+    WHERE user_id = ${id};
+    
+    DELETE FROM keppel.users
+    WHERE user_id = ${id};`
+    console.log(query);
+    try {await db.query(query); return res.status(200).json("success");} 
+      catch (err) {
+        console.log(err);}
+};
+
 module.exports ={
     getUsersCSV,
     getUsers,
-    addUser
+    addUser,
+    deleteUser
 }

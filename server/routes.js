@@ -365,10 +365,12 @@ router
     .post(controllers.changeOfParts.createNewChangeOfParts)
     .patch(controllers.changeOfParts.editChangeOfParts);
 
-router
+router 
     .get("/user/getUsers", checkIfLoggedInAPI, controllers.user.getUsers)
     .get("/user/getUsersCSV", checkIfLoggedInAPI, controllers.user.getUsersCSV)
     .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser);
+router
+    .delete("/user/deleteUser/:id", checkIfLoggedInAPI, controllers.user.deleteUser);
 
 // NO API ROUTE
 router.all("/*", (req, res) => {

@@ -131,6 +131,7 @@ interface CMMSUser {
 interface CMMSEmployee extends CMMSUser {
   employee_id?: number;
   full_name: string;
+  user_id: number;
 }
 
 interface CMMSRequest {
