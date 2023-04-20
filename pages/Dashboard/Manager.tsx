@@ -25,10 +25,12 @@ const { Option } = Select;
 type PickerType = 'date';
 
 export default function ManagerDashboad() {
+  const [page, setPage] = useState(1);
   const [showDiv, setShowDiv] = useState<string>();
   const [active, setActive] = useState("");
   const [isReady, setIsReady] = useState<boolean>(false);
   const [isChecklistReady, setIsChecklistReady] = useState<boolean>(false);
+  const [isRequestReady, setIsRequestReady] = useState<boolean>(false);
   const [plant, setPlant] = useState<number>(0);
   const [field, setField] = useState<string>("status");
   const [pickerwithtype, setPickerWithType] = useState<{
@@ -59,6 +61,7 @@ export default function ManagerDashboad() {
 
   useEffect(() => {
     const { datetype, date } = pickerwithtype;
+    setIsRequestReady(false);
 
     fetchData("request", plant, field, datetype, date).then((result) => {
       if (result) setRequestData(result);
@@ -72,8 +75,9 @@ export default function ManagerDashboad() {
       setTimeout(() => {
         setIsReady(true);
       }, 500);
+      setIsRequestReady(true);
     });
-  }, [plant, field, pickerwithtype, pickerwithtype.date, pickerwithtype.datetype]);
+  }, [plant, field, pickerwithtype, active]);
 
   useEffect(() => {
     const { datetype, date } = pickerwithtype;
@@ -86,7 +90,7 @@ export default function ManagerDashboad() {
         setIsChecklistReady(true);
       }
     });
-  }, [plant, pickerwithtype.date, pickerwithtype.datetype]);
+  }, [plant, field, pickerwithtype, active]);
 
   const pendingChecklist = checklistData?.filter((data) => data.id === 1)[0];
   const completedChecklist = checklistData?.filter((data) => data.id === 4)[0];
@@ -183,10 +187,41 @@ export default function ManagerDashboad() {
             style={{ gridArea: "g" }}
           ></DashboardBox>
         </div>
-        {showDiv === 'pending-requests-box' && <Request filter={true} status={1} date={date} datetype={datetype} plant={plant as number}/>}
-        {showDiv === 'closed-requests-box' && <Request filter={true} status={4} date={date} datetype={datetype} plant={plant as number}/>}
-        {showDiv === 'pending-checklists-box' && <Checklist isReady={isChecklistReady} filter={true} status={1} date={date} datetype={datetype} plant={plant as number}/>}
-        {showDiv === 'completed-checklists-box' && <Checklist isReady={isChecklistReady} filter={true} status={4} date={date} datetype={datetype} plant={plant as number}/>}
+        {showDiv === 'pending-requests-box' && 
+          <Request 
+            isReady={isRequestReady} 
+            filter={true} 
+            status={1} 
+            date={date} 
+            datetype={datetype} 
+            plant={plant as number} 
+            />}
+        {showDiv === 'closed-requests-box' && 
+          <Request 
+            isReady={isRequestReady} 
+            filter={true} 
+            status={4} 
+            date={date} 
+            datetype={datetype} 
+            plant={plant as number} 
+            />}
+        {showDiv === 'pending-checklists-box' && 
+          <Checklist 
+            isReady={isChecklistReady} 
+            filter={true} 
+            status={1} 
+            date={date} 
+            datetype={datetype} 
+            plant={plant as number} />}
+        {showDiv === 'completed-checklists-box' && 
+          <Checklist 
+            isReady={isChecklistReady} 
+            filter={true} 
+            status={4} 
+            date={date} 
+            datetype={datetype} 
+            plant={plant as number} 
+             />}
       </ModuleContent>
     </ModuleMain>
   );

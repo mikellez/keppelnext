@@ -21,7 +21,7 @@
 */
 
 
-import React, { useState, useEffect, CSSProperties } from "react";
+import React, { useState, useEffect, CSSProperties, MouseEventHandler } from "react";
 import {
   ModuleContent,
   ModuleHeader,
@@ -57,6 +57,7 @@ import LoadingHourglass from "../../components/LoadingHourglass";
 import PageButton from "../../components/PageButton";
 import { Role } from "../../types/common/enums";
 import { GetServerSidePropsContext } from "next";
+import Pagination from "../../components/Pagination";
 
 /*export type TableNode<T> = {
   id: string;
@@ -103,6 +104,7 @@ export interface RequestProps {
   plant: number;
   date: string;
   datetype: string;
+  isReady?: boolean;
 }
 
 export const getColor = (status: string) => {
@@ -148,7 +150,7 @@ export const downloadCSV = async (type: string) => {
   }
 };
 
-export default function Request({ props, pages }: { props: RequestProps, pages: number }) {
+export default function Request( props: RequestProps ) {
   const [requestItems, setRequestItems] = useState<RequestItem[]>([]);
   const [isReady, setReady] = useState(false);
   const [modalSrc, setModalSrc] = useState<string | undefined>();
@@ -156,8 +158,7 @@ export default function Request({ props, pages }: { props: RequestProps, pages: 
   const [currentHistory, setCurrentHistory] = useState<string | undefined>();
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(pages);
-  console.log(pages);
+  const [totalPages, setTotalPages] = useState(1);
 
   const router = useRouter();
   const { data } = useCurrentUser();
@@ -301,7 +302,7 @@ export default function Request({ props, pages }: { props: RequestProps, pages: 
     error: requestFetchError,
     isValidating: requestIsFetchValidating,
     mutate: requestMutate,
-  } = props?.filter ? useRequestFilter(props) : useRequest(indexedColumn[activeTabIndex]);
+  } = props?.filter ? useRequestFilter(props, page) : useRequest(indexedColumn[activeTabIndex], page);
 
   const theme = useTheme([
     getTheme(),
@@ -447,25 +448,28 @@ export default function Request({ props, pages }: { props: RequestProps, pages: 
 
   useEffect(() => {
     // if (requestIsFetchValidating) setReady(false);
+    if (props?.filter) setReady(props?.isReady ?? true);
 
     if (!isReady && requestData && !requestIsFetchValidating) {
-      if (requestData.length > 0) {
+      if (requestData?.rows?.length > 0) {
         setRequestItems(
-          requestData.map((row: CMMSRequest) => {
+          requestData.rows.map((row: CMMSRequest, total: number) => {
             return {
               id: row.request_id,
               ...row,
+              created_date: new Date(row.created_date)
             };
           })
         );
+        setReady(true);
+        setTotalPages(requestData.total);
       } else {
         setRequestItems([]);
       }
-      setReady(true);
     }
-  }, [requestData, requestIsFetchValidating, isReady]);
+  }, [requestData, requestIsFetchValidating, isReady, page]);
 
-  useEffect(() => {
+  /*useEffect(() => {
     setReady(false);
     axios
       .get(`/api/request/${indexedColumn[activeTabIndex]}?page=${page}`)
@@ -484,6 +488,7 @@ export default function Request({ props, pages }: { props: RequestProps, pages: 
   }, [page]);
 
   useEffect(() => {
+
     setReady(false);
     axios
       .get(`/api/request/${indexedColumn[activeTabIndex]}?page=${page}`)
@@ -502,6 +507,7 @@ export default function Request({ props, pages }: { props: RequestProps, pages: 
         setReady(true);
       });
   }, [activeTabIndex]);
+  */
 
   return (
     <ModuleMain>
@@ -521,7 +527,7 @@ export default function Request({ props, pages }: { props: RequestProps, pages: 
         </a>
       </ModuleHeader>
       <ModuleContent>
-        <ul className="nav nav-tabs">
+        {!props?.filter && <ul className="nav nav-tabs">
           <li
             onClick={() => {
               activeTabIndex !== 0 && switchColumns(0);
@@ -555,6 +561,7 @@ export default function Request({ props, pages }: { props: RequestProps, pages: 
             <span style={{ all: "unset" }}>Approved</span>
           </li>
         </ul>
+        }
         {!isReady && (
           <div style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
             <LoadingHourglass />
@@ -572,33 +579,11 @@ export default function Request({ props, pages }: { props: RequestProps, pages: 
               rowProps={ROW_PROPS}
               rowOptions={ROW_OPTIONS}
             />
-            <div className={styles.requestPagination}>
-              <FiChevronsLeft
-                size={25}
-                className={`${styles.paginationChevron} ${
-                  page - 1 > 0 ? styles.active : styles.disabled
-                }`}
-                onClick={() => setPage(1)}
-              />
-              <span>
-                {page - 1 > 0 && (
-                  <PageButton setPage={setPage}>{page - 1}</PageButton>
-                )}
-                <PageButton active setPage={setPage}>
-                  {page}
-                </PageButton>
-                {page + 1 <= totalPages && (
-                  <PageButton setPage={setPage}>{page + 1}</PageButton>
-                )}
-              </span>
-              <FiChevronsRight
-                size={25}
-                className={`${styles.paginationChevron} ${
-                  page < totalPages ? styles.active : styles.disabled
-                }`}
-                onClick={() => setPage(totalPages)}
-              />
-            </div>
+              <Pagination 
+                setPage={setPage} 
+                setReady={setReady} 
+                totalPages={totalPages} 
+                page={page}/>
           </>
         )}
         <ModuleModal

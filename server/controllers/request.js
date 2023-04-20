@@ -575,14 +575,22 @@ const completeRequest = async (req, res, next) => {
 };
 
 const fetchFilteredRequests = async (req, res, next) => {
+
   let date = req.params.date;
   let datetype = req.params.datetype;
   let status = req.params.status;
   let plant = req.params.plant;
+  let page = req.params?.page;
   let dateCond = "";
   let statusCond = "";
   let plantCond = ""; 
   let userRoleCond = "";
+  let pageCond = "";
+
+  if(page) {
+    const offsetItems = (page - 1) * ITEMS_PER_PAGE;
+    pageCond = `OFFSET ${offsetItems} LIMIT ${ITEMS_PER_PAGE}`;
+  }
 
   if(![1,2,3].includes(req.user.role_id)) {
     userRoleCond = `AND (r.assigned_user_id = ${req.user.id} OR r.user_id = ${req.user.id})`;
@@ -628,8 +636,6 @@ const fetchFilteredRequests = async (req, res, next) => {
 
       }
   }
-
-
 
   const sql = `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
 		rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
@@ -678,15 +684,20 @@ const fetchFilteredRequests = async (req, res, next) => {
 			au.first_name,
 			au.last_name
 		)
-		ORDER BY r.created_date DESC, r.status_id DESC;`;
-      
-    console.log('fetchfilteredreq',req.user);
-    console.log('fetchfilteredreq',sql);
+		ORDER BY r.created_date DESC, r.status_id DESC
+    
+    `;
 
-  db.query(sql, (err, result) => {
-    if (err) return res.status(500).json({ errormsg: err });
+    const countSql = `SELECT COUNT(*) AS total FROM (${sql}) AS t1`;
 
-    res.status(200).json(result.rows);
+    const totalRows = await db.query(countSql);
+    const totalPages = Math.ceil(+totalRows.rows[0].total / ITEMS_PER_PAGE);
+
+  db.query(sql + pageCond, (err, result) => {
+    if (err) return res.status(400).json({ errormsg: err });
+    if (result.rows.length == 0) return res.status(201).json({ msg: "No requests" });
+
+    res.status(200).json({ rows: result.rows, total: totalPages});
   });
 };
 

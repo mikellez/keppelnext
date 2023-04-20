@@ -15,40 +15,49 @@ import { RequestProps } from '../pages/Request';
 import { ChecklistProps } from '../pages/Checklist';
 
 function useRequest(
-  request_type: "pending" | "assigned" | "review" | "approved"
+  request_type: "pending" | "assigned" | "review" | "approved",
+	page: number
 ) {
   const requestFetcher = (url: string) =>
     axios
-      .get<{ rows: CMMSRequest[] }>(url + request_type)
+      .get<{ rows: CMMSRequest[], total: number }>(url)
       .then((response) => {
         response.data.rows.forEach((s: CMMSRequest) => {
           s.created_date = new Date(s.created_date);
         });
-        return response.data.rows;
+        return response.data;
       })
       .catch((e) => {
         throw new Error(e);
       });
 
-  return useSWR<CMMSRequest[], Error>(
-    ["/api/request/", request_type],
+  return useSWR<{ rows: CMMSRequest[], total: number }, Error>(
+    [`/api/request/${request_type}?page=${page}`],
     requestFetcher,
     { revalidateOnFocus: false }
   );
 }
 
-function useRequestFilter(props: RequestProps) {
-	const requestFetcher = (url: string) => axios.get<CMMSRequest[]>(url).then((response) => {
-		response.data.forEach((s) => {
-			s.created_date = new Date(s.created_date)
-		});
-		return response.data;
-	})
-	.catch((e) => {
-		throw new Error(e);
-	});
+function useRequestFilter(props: RequestProps, page:number) {
+	const requestFetcher = (url: string) => 
+		axios
+		.get<{ rows: CMMSRequest[], total: number}>(url)
+		.then((response) => {
+			if(response?.data?.rows === undefined) return {rows: [], total: 0};
 
-	return useSWR<CMMSRequest[], Error>(`/api/request/filter/${props.status}/${props.plant}/${props.datetype}/${props.date}`, requestFetcher, {revalidateOnFocus: false});
+			response.data.rows.forEach((s) => {
+				s.created_date = new Date(s.created_date)
+			});
+			return response.data;
+		})
+		.catch((e) => {
+			throw new Error(e);
+		});
+
+	return useSWR<{ rows: CMMSRequest[], total: number}, Error>(
+		`/api/request/filter/${props.status}/${props.plant}/${props.datetype}/${props.date}/${page}`, 
+		requestFetcher, 
+		{revalidateOnFocus: false});
 }
 
 function useAsset(plant_id: number | null) {
@@ -67,27 +76,35 @@ function useAsset(plant_id: number | null) {
   );
 }
 
-function useChecklist(checklist_type: "assigned" | "record" | "approved") {
+function useChecklist(checklist_type: "assigned" | "record" | "approved", page:number) {
   const checklistFetcher = (url: string) =>
     axios
-      .get<CMMSChecklist[]>(url + checklist_type)
+      .get<CMMSChecklist[]>(url + checklist_type + `?page=${page}`)
       .then((response) => response.data)
       .catch((e) => {
         throw new Error(e);
       });
 
   return useSWR<CMMSChecklist[], Error>(
-    ["/api/checklist/", checklist_type],
+    [`/api/checklist/${checklist_type}?page=${page}`],
     checklistFetcher,
     { revalidateOnFocus: false }
   );
 }
-function useChecklistFilter(props: ChecklistProps) {
-	const checklistFetcher = (url: string) => axios.get<CMMSChecklist[]>(url).then((response) => response.data).catch((e) => {
-		throw new Error(e);
-	})
+function useChecklistFilter(props: ChecklistProps, page: number) {
+	const checklistFetcher = (url: string) => 
+		axios
+		.get<{ rows: CMMSChecklist[], total: number}>(url)
+		.then((response) => response.data)
+		.catch((e) => {
+			throw new Error(e);
+		})
 
-	return useSWR<CMMSChecklist[], Error>(`/api/checklist/filter/${props.status}/${props.plant}/${props.datetype}/${props.date}`, checklistFetcher, {revalidateOnFocus: false});
+	return useSWR<{ rows: CMMSChecklist[], total: number}, Error>(
+		`/api/checklist/filter/${props.status}/${props.plant}/${props.datetype}/${props.date}/${page}`, 
+		checklistFetcher, 
+		{revalidateOnFocus: false }
+	);
 }
 function useAccountlog() {
   const accountlogFetcher = (url: string) =>

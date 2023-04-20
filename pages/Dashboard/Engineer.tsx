@@ -21,6 +21,7 @@ export default function EngineerDashboad() {
     const [showDiv, setShowDiv] = useState<string>();
     const [active, setActive] = useState("");
     const [isChecklistReady, setIsChecklistReady] = useState<boolean>(false);
+    const [isRequestReady, setIsRequestReady] = useState<boolean>(false);
     const [plant, setPlant] = useState<number>();
     const [checklistData, setChecklistData] = useState<CMMSDashboardData[]>();
     const [requestData, setRequestData] = useState<CMMSDashboardData[]>();
@@ -46,24 +47,28 @@ export default function EngineerDashboad() {
 
     useEffect(() => {
         const { datetype, date } = pickerwithtype;
-        setIsChecklistReady(true);
+        setIsRequestReady(false);
+        setIsChecklistReady(false);
 
         getPlants("/api/getUserPlants").then(result => {
             if (result) {
                 console.log(result)
                 setPlant(result[0].plant_id)
-                setIsChecklistReady(false);
                 fetchData("checklist", plant as number, "status", datetype, date).then(result => {
                     if (result) {
                         setChecklistData(result) 
+                        setIsChecklistReady(true)
                     }
                 });
                 fetchData("request", plant as number, "status", datetype, date).then(result => {
-                    if (result) setRequestData(result)
+                    if (result) {
+                        setRequestData(result)
+                        setIsChecklistReady(true)
+                    }
                 });
             }
         })
-    }, [plant, pickerwithtype]);
+    }, [pickerwithtype, active]);
 
     const pendingRequest = requestData?.filter(data => data.id === 1)[0];
     const closedRequest = requestData?.filter(data => data.id === 4)[0];
@@ -122,10 +127,41 @@ export default function EngineerDashboad() {
                     <DashboardBox title="Change of Parts Requested" style={{gridArea: "g"}}>
                     </DashboardBox>
                 </div>
-                {showDiv === 'pending-requests-box' && <Request filter={true} status={1} date={date} datetype={datetype} plant={plant as number}/>}
-                {showDiv === 'closed-requests-box' && <Request filter={true} status={4} date={date} datetype={datetype} plant={plant as number}/>}
-                {showDiv === 'pending-checklists-box' && <Checklist isReady={isChecklistReady} filter={true} status={1} date={date} datetype={datetype} plant={plant as number}/>}
-                {showDiv === 'completed-checklists-box' && <Checklist isReady={isChecklistReady} filter={true} status={4} date={date} datetype={datetype} plant={plant as number}/>}
+                {showDiv === 'pending-requests-box' && 
+                <Request 
+                    isReady={isRequestReady} 
+                    filter={true} 
+                    status={1} 
+                    date={date} 
+                    datetype={datetype} 
+                    plant={plant as number} 
+                    />}
+                {showDiv === 'closed-requests-box' && 
+                <Request 
+                    isReady={isRequestReady} 
+                    filter={true} 
+                    status={4} 
+                    date={date} 
+                    datetype={datetype} 
+                    plant={plant as number} 
+                    />}
+                {showDiv === 'pending-checklists-box' && 
+                <Checklist 
+                    isReady={isChecklistReady} 
+                    filter={true} 
+                    status={1} 
+                    date={date} 
+                    datetype={datetype} 
+                    plant={plant as number} />}
+                {showDiv === 'completed-checklists-box' && 
+                <Checklist 
+                    isReady={isChecklistReady} 
+                    filter={true} 
+                    status={4} 
+                    date={date} 
+                    datetype={datetype} 
+                    plant={plant as number} 
+                    />}
             </ModuleContent>
        </ModuleMain>
     );

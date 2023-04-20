@@ -8,10 +8,12 @@ const PageButton = ({
   setPage,
   children,
   active,
+  onClick
 }: {
   active?: boolean;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   children: React.ReactNode;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
 }) => {
   return (
     <button
@@ -20,7 +22,10 @@ const PageButton = ({
         marginRight: "0.1rem",
         marginLeft: "0.1rem",
       }}
-      onClick={() => setPage(children as number)}
+      onClick={(e) => {
+        if(onClick) onClick(e);
+        setPage(children as number)
+      }}
       className={`btn btn-primary ${active ? "" : styles.nonActiveBtns}`}
     >
       {children}

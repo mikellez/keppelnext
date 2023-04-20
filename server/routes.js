@@ -175,6 +175,11 @@ router.get(
   checkIfLoggedInAPI,
   controllers.request.fetchFilteredRequests
 );
+router.get(
+  "/request/filter/:status/:plant/:datetype/:date/:page",
+  checkIfLoggedInAPI,
+  controllers.request.fetchFilteredRequests
+);
 
 
 
@@ -257,6 +262,11 @@ router.patch(
 );
 router.get(
   "/checklist/filter/:status/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchFilteredChecklists
+);
+router.get(
+  "/checklist/filter/:status/:plant/:datetype/:date/:page",
   checkIfLoggedInAPI,
   controllers.checklist.fetchFilteredChecklists
 );

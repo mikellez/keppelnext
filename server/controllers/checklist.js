@@ -2,6 +2,8 @@ const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
 
+const ITEMS_PER_PAGE = 10;
+
 const fetchAssignedChecklistsQuery = `
 SELECT 
     cl.checklist_id, 
@@ -630,10 +632,17 @@ const fetchFilteredChecklists = async (req, res, next) => {
     let datetype = req.params.datetype;
     let status = req.params.status;
     let plant = req.params.plant;
+    let page = req.params?.page;
     let dateCond = "";
     let statusCond = "";
     let plantCond = ""; 
     let userRoleCond = "";
+    let pageCond = "";
+
+    if(page) {
+        const offsetItems = (page - 1) * ITEMS_PER_PAGE;
+        pageCond = `OFFSET ${offsetItems} LIMIT ${ITEMS_PER_PAGE}`;
+    }
 
     if(![1,2,3].includes(req.user.role_id)) {
         userRoleCond = `AND ua.user_id = ${req.user.id}`;
@@ -720,20 +729,24 @@ const fetchFilteredChecklists = async (req, res, next) => {
         LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id
         JOIN keppel.status_cm st ON st.status_id = cl.status_id	
     WHERE 1 = 1
-        AND ua.user_id = $1 
+        AND ua.user_id = ${req.user.id} 
         ${plantCond}
         ${statusCond}
         ${dateCond}
-    ORDER BY cl.checklist_id DESC;
+    ORDER BY cl.checklist_id DESC
     `
 
+    const countSql = `SELECT COUNT(*) AS total FROM (${sql}) AS t1`;
+
+    const totalRows = await db.query(countSql);
+    const totalPages = Math.ceil(+totalRows.rows[0].total / ITEMS_PER_PAGE);
     console.log(sql)
 
-    db.query(sql, [req.user.id], (err, result) => {
+    db.query(sql + pageCond, (err, result) => {
         if (err) return res.status(400).json({ msg: err });
         if (result.rows.length == 0) return res.status(201).json({ msg: "No checklist" });
 
-        return res.status(200).json(result.rows);
+        return res.status(200).json({ rows: result.rows, total: totalPages });
     });
 }
 

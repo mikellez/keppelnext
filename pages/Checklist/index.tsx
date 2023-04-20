@@ -27,6 +27,7 @@ import PageButton from "../../components/PageButton";
 import styles from "../../styles/Request.module.scss";
 import { usePagination } from "@table-library/react-table-library/pagination";
 import { Role } from "../../types/common/enums";
+import Pagination from "../../components/Pagination";
 
 const indexedColumn: ("assigned" | "record" | "approved")[] = ["assigned", "record", "approved"];
 
@@ -77,12 +78,20 @@ const downloadCSV = async (type: string, activeTabIndex: number) => {
 };
 
 export default function Checklist(props: ChecklistProps) {
-    const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
-    const [isReady, setReady] = useState(false);
-    const [activeTabIndex, setActiveTabIndex] = useState(0);
-    const user = useCurrentUser();
+  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
+  const [isReady, setReady] = useState(false);
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const user = useCurrentUser();
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-    const { data, error, isValidating, mutate } = props?.filter ? useChecklistFilter(props) : useChecklist(indexedColumn[activeTabIndex]);
+    const { 
+      data, 
+      error, 
+      isValidating, 
+      mutate } = props?.filter 
+        ? useChecklistFilter(props, page) 
+        : useChecklist(indexedColumn[activeTabIndex], page);
 
     const pageData = { nodes: checklistItems };
 
@@ -92,7 +101,7 @@ export default function Checklist(props: ChecklistProps) {
             size: 10,
         },
     });
-    const totalPages = pagination.state.getTotalPages(pageData.nodes);
+    //const totalPages = pagination.state.getTotalPages(pageData.nodes);
 
     const theme = useTheme([
         getTheme(),
@@ -117,36 +126,67 @@ export default function Checklist(props: ChecklistProps) {
     // }, [activeTabIndex]);
 
     useEffect(() => {
-        if (!isReady && data && !isValidating) {
-            // tranform and store data
-            if (data.length > 0) {
-                setChecklistItems(
-                    data.map((row) => {
-                        return {
-                            id: row.checklist_id,
-                            chl_name: row.chl_name,
-                            description: row.description,
-                            status_id: row.status_id,
-                            createdbyuser: row.createdbyuser,
-                            assigneduser: row.assigneduser,
-                            signoffuser: row.signoffuser,
-                            plant_name: row.plant_name,
-                            plant_id: row.plant_id,
-                            linkedassets: row.linkedassets,
-                            linkedassetids: row.linkedassetids,
-                            chl_type: row.chl_type as string,
-                            created_date: row.created_date as Date,
-                            history: row.history,
-                            status: row.status,
-                        };
-                    })
-                );
-            } else {
-                setChecklistItems([]);
-            }
+      if(props?.filter) setReady(props?.isReady ?? true);
+
+      if (!isReady && data && !isValidating) {
+          // tranform and store data
+          if (data?.rows?.length > 0) {
+              setChecklistItems(
+                  data.rows.map((row) => {
+                      return {
+                          id: row.checklist_id,
+                          chl_name: row.chl_name,
+                          description: row.description,
+                          status_id: row.status_id,
+                          createdbyuser: row.createdbyuser,
+                          assigneduser: row.assigneduser,
+                          signoffuser: row.signoffuser,
+                          plant_name: row.plant_name,
+                          plant_id: row.plant_id,
+                          linkedassets: row.linkedassets,
+                          linkedassetids: row.linkedassetids,
+                          chl_type: row.chl_type as string,
+                          created_date: row.created_date as Date,
+                          history: row.history,
+                          status: row.status,
+                      };
+                  })
+              );
+
             setReady(true);
-        }
-    }, [data, isValidating, isReady]);
+            setTotalPages(data.total);
+          } else if(data?.length > 0) {
+              // TODO: to copy requests tab
+              setChecklistItems(
+                  data.map((row) => {
+                      return {
+                          id: row.checklist_id,
+                          chl_name: row.chl_name,
+                          description: row.description,
+                          status_id: row.status_id,
+                          createdbyuser: row.createdbyuser,
+                          assigneduser: row.assigneduser,
+                          signoffuser: row.signoffuser,
+                          plant_name: row.plant_name,
+                          plant_id: row.plant_id,
+                          linkedassets: row.linkedassets,
+                          linkedassetids: row.linkedassetids,
+                          chl_type: row.chl_type as string,
+                          created_date: row.created_date as Date,
+                          history: row.history,
+                          status: row.status,
+                      };
+                  })
+              );
+
+            setReady(true);
+            setTotalPages(data.total);
+
+          } else {
+              setChecklistItems([]);
+          }
+      }
+    }, [data, isValidating, isReady, page]);
 
     return (
         <ModuleMain>
@@ -281,65 +321,12 @@ export default function Checklist(props: ChecklistProps) {
                                 </>
                             )}
                         </Table>
-                        <div className={styles.requestPagination}>
-                            <FaChevronLeft
-                                size={15}
-                                className={`${styles.paginationChevron} ${
-                                    pagination.state.page - 1 >= 0 ? styles.active : styles.disabled
-                                }`}
-                                onClick={() =>
-                                    pagination.state.page - 1 >= 0
-                                        ? pagination.fns.onSetPage(pagination.state.page - 1)
-                                        : ""
-                                }
-                            />
-                            <span>
-                                {pagination.state.page >= 2 && (
-                                    <span>
-                                        <PageButton pagination={pagination}>1</PageButton>
-                                        {pagination.state.page - 1 >= 2 && <span>...</span>}
-                                    </span>
-                                )}
-                                {pagination.state
-                                    .getPages(pageData.nodes)
-                                    .map((data: any, index: number) => {
-                                        if (
-                                            index === pagination.state.page + 1 ||
-                                            index === pagination.state.page ||
-                                            index === Math.abs(pagination.state.page - 1)
-                                        ) {
-                                            return (
-                                                <PageButton key={index} pagination={pagination}>
-                                                    {index + 1}
-                                                </PageButton>
-                                            );
-                                        }
-                                    })}
-                                {pagination.state.page <= totalPages - 3 && (
-                                    <span>
-                                        {totalPages - pagination.state.page >= 4 && (
-                                            <span>...</span>
-                                        )}
-                                        <PageButton pagination={pagination}>
-                                            {totalPages}
-                                        </PageButton>
-                                    </span>
-                                )}
-                            </span>
-                            <FaChevronRight
-                                size={15}
-                                className={`${styles.paginationChevron} ${
-                                    pagination.state.page + 1 <= totalPages - 1
-                                        ? styles.active
-                                        : styles.disabled
-                                }`}
-                                onClick={() =>
-                                    pagination.state.page + 1 <= totalPages - 1
-                                        ? pagination.fns.onSetPage(pagination.state.page + 1)
-                                        : ""
-                                }
-                            />
-                        </div>
+
+                        <Pagination 
+                          setPage={setPage} 
+                          setReady={setReady} 
+                          totalPages={totalPages} 
+                          page={page}/>
                     </>
                 )}
             </ModuleContent>
