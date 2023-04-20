@@ -69,11 +69,6 @@ export function Signature({
     onChange(o);
   };
 
-  const handleSignature = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //TODO
-    console.log("yeah");
-  };
-
   return (
     <div className={checklistStyles.controlContainer}>
       <button
@@ -84,7 +79,7 @@ export function Signature({
       >
         <ImCross size={16} />
       </button>
-      <div>Signatue</div>
+      <div>Signature</div>
       <ModuleDivider />
 
       <div className="form-group">
@@ -144,17 +139,18 @@ function SignatureEditable({
 };
 
 function SignatureView({signatureControlObj}: {signatureControlObj: SignatureControl}) {
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
-
+  
   return (
     <div className={styles.checkViewContainer}>
       <h6>{signatureControlObj.question}</h6>
+      { signatureControlObj.value.trim() !== "" &&
         <Image
         src={signatureControlObj.value}
         alt="signature"
         height={100}
         width={100}
-      />
+      /> 
+      }
     </div>
   )
 };
