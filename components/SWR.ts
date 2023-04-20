@@ -32,14 +32,8 @@ function useRequest(
         throw new Error(e);
       });
 
-<<<<<<< HEAD
   return useSWR<{ rows: CMMSRequest[], total: number }, Error>(
     [`/api/request/${request_type}?page=${page}`],
-=======
-
-  return useSWR<CMMSRequest[], Error>(
-    ["/api/request/", request_type],
->>>>>>> 398d5fbe177c8684ef9d0f180402478abaa8d0c8
     requestFetcher,
     { revalidateOnFocus: false }
   );
