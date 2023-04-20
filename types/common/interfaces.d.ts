@@ -344,6 +344,7 @@ interface CMMSChangeOfPartsEvent extends CMMSEvent {
     copId: number;
     plant: string;
     plantId: number;
+    status: string
   };
   color?: string;
   display?: string;

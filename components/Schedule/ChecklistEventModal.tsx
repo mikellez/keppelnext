@@ -45,7 +45,7 @@ async function deleteSchedule(id: number) {
         .catch((err) => console.log(err));
 }
 
-export default function EventModal(props: ModalProps) {
+export default function ChecklistEventModal(props: ModalProps) {
     // Store the assigned users as a state
     const [assignedUsers, setAssignedUsers] = useState<CMMSUser[]>([]);
     const [editDeleteModal, setEditDeleteModal] = useState<boolean>(false);

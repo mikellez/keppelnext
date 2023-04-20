@@ -3,14 +3,20 @@ import { ModuleContent, ModuleHeader, ModuleMain } from "../";
 import FullCalendar from "@fullcalendar/react";
 import { EventClickArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import EventModal from "./EventModal";
+import ChecklistEventModal from "./ChecklistEventModal";
 import axios from "axios";
 import { useRouter } from "next/router";
 import styles from "../../styles/Schedule.module.scss";
 import { BsCalendar4Week, BsListUl } from "react-icons/bs";
 import { TableNode } from "@table-library/react-table-library/types/table";
 import ScheduleTable from "./ScheduleTable";
-import { CMMSScheduleEvent, CMMSChangeOfPartsEvent, CMMSChangeOfParts, CMMSEvent } from "../../types/common/interfaces";
+import {
+    CMMSScheduleEvent,
+    CMMSChangeOfPartsEvent,
+    CMMSChangeOfParts,
+    CMMSEvent,
+} from "../../types/common/interfaces";
+import COPEventModal from "./COPEventModal";
 
 interface ScheduleTemplateInfo extends PropsWithChildren {
     title: string;
@@ -100,7 +106,6 @@ export function toPeriodNum(period: string): number {
     }
 }
 
-
 /*
     ScheduleTemplate component is used across 
     pages with the FullCalendar conmponent.
@@ -123,9 +128,10 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     const [displayChecklist, setDisplayChecklist] = useState<boolean>(true);
     const router = useRouter();
 
-    const toCMMSChangeOfPartsEvent = useCallback((cop: CMMSChangeOfParts): CMMSChangeOfPartsEvent => {
-        return {
-            title: "Change of Parts for " + cop.asset,
+    const toCMMSChangeOfPartsEvent = useCallback(
+        (cop: CMMSChangeOfParts): CMMSChangeOfPartsEvent => {
+            return {
+                title: "Change of Parts for " + cop.asset,
                 start: new Date(cop.changedDate ? cop.changedDate : cop.scheduledDate),
                 extendedProps: {
                     description: cop.description,
@@ -136,67 +142,85 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     copId: cop.copId,
                     plant: cop.plant,
                     plantId: cop.plantId,
+                    status: cop.changedDate ? "Completed" : "Scheduled",
                 },
                 color: cop.changedDate ? "#36AE7C" : "#4D96FF",
-                display: displayCOP ? "block" : "none"
-        };
-    }, [displayCOP]);
+                display: displayCOP ? "block" : "none",
+            };
+        },
+        [displayCOP]
+    );
 
-    const updateCOPEvents = useCallback((newCOPs: CMMSChangeOfParts[]) => {
-        const newCOPEvents: CMMSChangeOfPartsEvent[] = newCOPs.map(cop => toCMMSChangeOfPartsEvent(cop))
-        setCOPEvents(newCOPEvents);
-    }, [toCMMSChangeOfPartsEvent]);
+    const updateCOPEvents = useCallback(
+        (newCOPs: CMMSChangeOfParts[]) => {
+            const newCOPEvents: CMMSChangeOfPartsEvent[] = newCOPs.map((cop) =>
+                toCMMSChangeOfPartsEvent(cop)
+            );
+            setCOPEvents(newCOPEvents);
+        },
+        [toCMMSChangeOfPartsEvent]
+    );
 
-    const toCMMSScheduleEvents = useCallback((schedule: ScheduleInfo, date: string, index: number) => {
-        const event: CMMSScheduleEvent = {
-            title: schedule.checklist_name,
-            start: schedule.start_date ? new Date(date) : "",
-            extendedProps: {
-                plant: schedule.plant,
-                plantId: schedule.plantId,
-                scheduleId: schedule.schedule_id,
-                checklistId: schedule.checklist_id,
-                date: new Date(schedule.calendar_dates[index]),
-                startDate: schedule.start_date ? new Date(schedule.start_date.toString().slice(0, 10)) : "Rescheduled",
-                endDate: schedule.end_date ? new Date(schedule.end_date.toString().slice(0, 10)) : "Rescheduled",
-                recurringPeriod: schedule.period,
-                assignedIds: schedule.assigned_ids,
-                assignedEmails: schedule.assigned_emails,
-                assignedFnames: schedule.assigned_fnames,
-                assignedLnames: schedule.assigned_lnames,
-                assignedUsernames: schedule.assigned_usernames,
-                assignedRoles: schedule.assigned_usernames,
-                timelineId: schedule.timeline_id,
-                remarks: schedule.remarks,
-                index: index,
-                isSingle: schedule.isSingle,
-                exclusionList: schedule.exclusionList,
-                status: schedule.status,
-            },
-            color: schedule.status === 5 ? "#488FB1" : "#FF6B6B", 
-            display: displayChecklist ? "block" : "none"
-        }; 
+    const toCMMSScheduleEvents = useCallback(
+        (schedule: ScheduleInfo, date: string, index: number) => {
+            const event: CMMSScheduleEvent = {
+                title: schedule.checklist_name,
+                start: schedule.start_date ? new Date(date) : "",
+                extendedProps: {
+                    plant: schedule.plant,
+                    plantId: schedule.plantId,
+                    scheduleId: schedule.schedule_id,
+                    checklistId: schedule.checklist_id,
+                    date: new Date(schedule.calendar_dates[index]),
+                    startDate: schedule.start_date
+                        ? new Date(schedule.start_date.toString().slice(0, 10))
+                        : "Rescheduled",
+                    endDate: schedule.end_date
+                        ? new Date(schedule.end_date.toString().slice(0, 10))
+                        : "Rescheduled",
+                    recurringPeriod: schedule.period,
+                    assignedIds: schedule.assigned_ids,
+                    assignedEmails: schedule.assigned_emails,
+                    assignedFnames: schedule.assigned_fnames,
+                    assignedLnames: schedule.assigned_lnames,
+                    assignedUsernames: schedule.assigned_usernames,
+                    assignedRoles: schedule.assigned_usernames,
+                    timelineId: schedule.timeline_id,
+                    remarks: schedule.remarks,
+                    index: index,
+                    isSingle: schedule.isSingle,
+                    exclusionList: schedule.exclusionList,
+                    status: schedule.status,
+                },
+                color: schedule.status === 5 ? "#488FB1" : "#FF6B6B",
+                display: displayChecklist ? "block" : "none",
+            };
 
-        return event;
-    }, [displayChecklist]);
+            return event;
+        },
+        [displayChecklist]
+    );
 
-    const updateChecklistEvents = useCallback((newList: ScheduleInfo[]) => {
-        let newEvents: CMMSScheduleEvent[] = [];
-        newList.forEach((item) => {
-            item.calendar_dates.forEach((date, index) => {
-                const event = toCMMSScheduleEvents(item, date, index);
+    const updateChecklistEvents = useCallback(
+        (newList: ScheduleInfo[]) => {
+            let newEvents: CMMSScheduleEvent[] = [];
+            newList.forEach((item) => {
+                item.calendar_dates.forEach((date, index) => {
+                    const event = toCMMSScheduleEvents(item, date, index);
 
-                if (!item.exclusionList || !item.exclusionList.includes(index)) {
-                    newEvents.push(event);
-                }
-
+                    if (!item.exclusionList || !item.exclusionList.includes(index)) {
+                        newEvents.push(event);
+                    }
+                });
+                setChecklistEvents(newEvents);
             });
-            setChecklistEvents(newEvents);
-        });
-    }, [toCMMSScheduleEvents]);
+        },
+        [toCMMSScheduleEvents]
+    );
 
     const handleEventClick = useCallback((info: EventClickArg) => {
         if (info.event._def.extendedProps.checklistId) {
+            // console.log("Checklist Modal is opened");
             setCurrentEvent({
                 title: info.event._def.title,
                 start: info.event._instance?.range.start,
@@ -224,9 +248,23 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 },
             });
             setIsChecklistModalOpen(true);
-        }
-        else {
-            console.log("COP Modal")
+        } else {
+            // console.log("COP Modal is opened");
+            setCurrentEvent({
+                title: info.event._def.title,
+                start: info.event._instance?.range.start,
+                extendedProps: {
+                    copId: info.event._def.extendedProps.copId,
+                    plant: info.event._def.extendedProps.plant,
+                    plantId: info.event._def.extendedProps.plantId,
+                    asset: info.event._def.extendedProps.asset,
+                    psaId: info.event._def.extendedProps.psaId,
+                    assignedUser: info.event._def.extendedProps.assignedUser,
+                    assignedUserId: info.event._def.extendedProps.assignedUserId,
+                    description: info.event._def.extendedProps.description,
+                    status: info.event._def.extendedProps.status,
+                },
+            });
             setIsCOPModalOpen(true);
         }
     }, []);
@@ -237,97 +275,105 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
         if (props.schedules) updateChecklistEvents(props.schedules);
 
         if (props.changeOfParts) updateCOPEvents(props.changeOfParts);
-
     }, [props.schedules, props.changeOfParts, updateCOPEvents, updateChecklistEvents]);
-    console.log(displayCOP)
+    // console.log(displayCOP)
     return (
         <>
-        <ModuleMain>
-            <ModuleHeader
-                title={props.title}
-                header={props.header}
-                leftChildren={
-                    <div className={styles.eventModalHeader}>
-                        <label className={styles.toggle}>
-                            <input
-                                type="checkbox"
-                                onChange={() => setToggleCalendarOrListView((prev) => !prev)}
-                            />
-                            <span className={styles.slider}></span>
-                        </label>
-                        
-                        <div style={{ marginLeft: "10px" }} id="top-toggle-img">
-                            {toggleCalendarOrListView ? (
-                                <BsCalendar4Week size={20} />
-                            ) : (
-                                <BsListUl size={20} />
-                            )}
+            <ModuleMain>
+                <ModuleHeader
+                    title={props.title}
+                    header={props.header}
+                    leftChildren={
+                        <div className={styles.eventModalHeader}>
+                            <label className={styles.toggle}>
+                                <input
+                                    type="checkbox"
+                                    onChange={() => setToggleCalendarOrListView((prev) => !prev)}
+                                />
+                                <span className={styles.slider}></span>
+                            </label>
+
+                            <div style={{ marginLeft: "10px" }} id="top-toggle-img">
+                                {toggleCalendarOrListView ? (
+                                    <BsCalendar4Week size={20} />
+                                ) : (
+                                    <BsListUl size={20} />
+                                )}
+                            </div>
                         </div>
-                    </div>
-                }
-            >
-                {props.children}
-            </ModuleHeader>
-            <ModuleContent>
-                {toggleCalendarOrListView ? (
-                    // Render Full calendar view
-                    <div>
-                    <FullCalendar
-                        plugins={[dayGridPlugin]}
-                        initialView="dayGridMonth"
-                        headerToolbar={{
-                            left: "today",
-                            center: "title",
-                            right: "prevYear,prev,next,nextYear",
-                        }}
-                        aspectRatio={2}
-                        handleWindowResize={true}
-                        windowResizeDelay={1}
-                        stickyHeaderDates={true}
-                        selectable={true}
-                        unselectAuto={true}
-                        events={(checklistEvents as CMMSEvent[]).concat(COPEvents)}
-                        dayMaxEvents={2}
-                        eventDisplay="block"
-                        eventBackgroundColor="#FA9494"
-                        eventBorderColor="#FFFFFF"
-                        eventTextColor="#000000"
-                        displayEventTime={false}
-                        eventClick={handleEventClick}
-                        eventMouseEnter={(info) => document.body.style.cursor = "pointer"}
-                        eventMouseLeave={() => document.body.style.cursor = "default"}
-                    />
-                        <input
-                            id="checkbox-cop"
-                            type="checkbox"
-                            onChange={() => setDisplayCOP((prev) => !prev)}
-                            checked={displayCOP}
+                    }
+                >
+                    {props.children}
+                </ModuleHeader>
+                <ModuleContent>
+                    {toggleCalendarOrListView ? (
+                        // Render Full calendar view
+                        <div>
+                            <FullCalendar
+                                plugins={[dayGridPlugin]}
+                                initialView="dayGridMonth"
+                                headerToolbar={{
+                                    left: "today",
+                                    center: "title",
+                                    right: "prevYear,prev,next,nextYear",
+                                }}
+                                aspectRatio={2}
+                                handleWindowResize={true}
+                                windowResizeDelay={1}
+                                stickyHeaderDates={true}
+                                selectable={true}
+                                unselectAuto={true}
+                                events={(checklistEvents as CMMSEvent[]).concat(COPEvents)}
+                                dayMaxEvents={2}
+                                eventDisplay="block"
+                                eventBackgroundColor="#FA9494"
+                                eventBorderColor="#FFFFFF"
+                                eventTextColor="#000000"
+                                displayEventTime={false}
+                                eventClick={handleEventClick}
+                                eventMouseEnter={(info) => (document.body.style.cursor = "pointer")}
+                                eventMouseLeave={() => (document.body.style.cursor = "default")}
+                            />
+                            <input
+                                id="checkbox-cop"
+                                type="checkbox"
+                                onChange={() => setDisplayCOP((prev) => !prev)}
+                                checked={displayCOP}
+                            />
+                            <label htmlFor="checkbox-cop">Change of Parts</label>
+                            <input
+                                id="checkbox-checklist"
+                                type="checkbox"
+                                onChange={() => setDisplayChecklist((prev) => !prev)}
+                                checked={displayChecklist}
+                            />
+                            <label htmlFor="checkbox-checklist">Checklist</label>
+                        </div>
+                    ) : (
+                        // Render list view
+                        <ScheduleTable
+                            schedules={props.schedules}
+                            viewRescheduled={router.pathname === "/Schedule/Manage"}
                         />
-                         <label htmlFor="checkbox-cop">Change of Parts</label>
-                        <input
-                            id="checkbox-checklist"
-                            type="checkbox"
-                            onChange={() => setDisplayChecklist((prev) => !prev)}
-                            checked={displayChecklist}
-                        />
-                        <label htmlFor="checkbox-checklist">Checklist</label>
-                    </div>
-                ) : (
-                    // Render list view
-                    <ScheduleTable
-                        schedules={props.schedules}
-                        viewRescheduled={router.pathname === "/Schedule/Manage"}
-                    />
-                )}
-            </ModuleContent>
-        </ModuleMain>
-        <EventModal
-            isOpen={isChecklistModalOpen}
-            closeModal={() => setIsChecklistModalOpen(false)}
-            event={currentEvent as CMMSScheduleEvent}
-            editSingle={router.pathname === `/Schedule`}
-            deleteEditDraft={router.pathname === `/Schedule/Timeline/[id]`}
-        />
+                    )}
+                </ModuleContent>
+            </ModuleMain>
+            {isChecklistModalOpen && (
+                <ChecklistEventModal
+                    isOpen={isChecklistModalOpen}
+                    closeModal={() => setIsChecklistModalOpen(false)}
+                    event={currentEvent as CMMSScheduleEvent}
+                    editSingle={router.pathname === `/Schedule`}
+                    deleteEditDraft={router.pathname === `/Schedule/Timeline/[id]`}
+                />
+            )}
+            {isCOPModalOpen && (
+                <COPEventModal
+                    isOpen={isCOPModalOpen}
+                    closeModal={() => setIsCOPModalOpen(false)}
+                    event={currentEvent as CMMSChangeOfPartsEvent}
+                />
+            )}
         </>
     );
 }
