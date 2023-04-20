@@ -327,7 +327,7 @@ export default function AssetDetails(props: {
             >
                 <COPTable changeOfParts={COPData} isDisabledSelect={true} />
 
-                <Link href={`/ChangeOfParts/New`}>
+                <Link href={`/ChangeOfParts/New?assetId=${psa_id}`}>
                     <TooltipBtn toolTip={false}>Create New Change of Parts</TooltipBtn>
                 </Link>
             </ModuleModal>
@@ -351,7 +351,7 @@ export const getServerSideProps: GetServerSideProps = async (
         headers
     );
     const COPHistory = await axios.get(
-        "http://localhost:3001/api/changeOfParts/?assetId=" + psaId,
+        "http://localhost:3001/api/changeOfParts/?psa_id=" + psaId,
         headers
     );
 

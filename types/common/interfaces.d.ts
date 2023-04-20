@@ -131,6 +131,7 @@ interface CMMSUser {
 interface CMMSEmployee extends CMMSUser {
   employee_id?: number;
   full_name: string;
+  user_id: number;
 }
 
 interface CMMSRequest {
@@ -177,7 +178,13 @@ interface CMMSPlant {
   plant_description: string;
 }
 
-interface CMMSScheduleEvent {
+interface CMMSEvent {
+  title: string;
+  start?: Date | string;
+  extendedProps: {[key: string]: any};
+}
+
+interface CMMSScheduleEvent extends CMMSEvent {
   title: string;
   start?: Date | string;
   extendedProps: {
@@ -189,8 +196,6 @@ interface CMMSScheduleEvent {
     date?: Date;
     startDate: Date | string;
     endDate: Date | string;
-    // prevStartDate?: Date | string;
-    // prevEndDate?: Date | string;
     recurringPeriod: number;
     assignedIds: number[];
     assignedEmails: string[];
@@ -203,8 +208,9 @@ interface CMMSScheduleEvent {
     isSingle?: boolean;
     index?: number;
     status?: number;
-    // prevId?: number;
   };
+  color?: string;
+  display?: string;
 }
 
 interface CMMSTimeline {
@@ -339,6 +345,24 @@ interface CMMSAddUser{
   allocatedPlants: array;
 }
 
+interface CMMSChangeOfPartsEvent extends CMMSEvent {
+  title: string;
+  start?: Date | string;
+  extendedProps: {
+    description: string;
+    assignedUserId: number;
+    assignedUser: string;
+    psaId: number;
+    asset: string;
+    copId: number;
+    plant: string;
+    plantId: number;
+    status: string
+  };
+  color?: string;
+  display?: string;
+}
+
 export {
   CMMSBaseType,
   CMMSUser,
@@ -370,5 +394,7 @@ export {
   CMMSAssetDetails,
   CMMSSubComponent1Name,
   CMMSChangeOfParts,
-  CMMSAddUser
+  CMMSAddUser,
+  CMMSChangeOfPartsEvent,
+  CMMSEvent,
 };
