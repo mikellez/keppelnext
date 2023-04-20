@@ -179,7 +179,7 @@ interface CMMSPlant {
 interface CMMSEvent {
   title: string;
   start?: Date | string;
-  extendedProps: Object;
+  extendedProps: {[key: string]: any};
 }
 
 interface CMMSScheduleEvent extends CMMSEvent {
@@ -207,6 +207,7 @@ interface CMMSScheduleEvent extends CMMSEvent {
     index?: number;
     status?: number;
   };
+  color?: string;
 }
 
 interface CMMSTimeline {
@@ -343,6 +344,7 @@ interface CMMSChangeOfPartsEvent extends CMMSEvent {
     plant: string;
     plantId: number;
   };
+  color?: string;
 }
 
 export {

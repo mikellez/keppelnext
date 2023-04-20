@@ -1,6 +1,7 @@
 import React, { PropsWithChildren, useState, useEffect, ReactNode } from "react";
 import { ModuleContent, ModuleHeader, ModuleMain } from "../";
 import FullCalendar from "@fullcalendar/react";
+import { EventClickArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import EventModal from "./EventModal";
 import axios from "axios";
@@ -112,9 +113,10 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     const [checklistEvents, setChecklistEvents] = useState<CMMSScheduleEvent[]>([]);
     const [COPEvents, setCOPEvents] = useState<CMMSChangeOfPartsEvent[]>([]);
     // Store the state of the view event modal
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [isChecklistModalOpen, setIsChecklistModalOpen] = useState<boolean>(false);
+    const [isCOPModalOpen, setIsCOPModalOpen] = useState<boolean>(false);
     // Store the current event which will pop up as a modal in a state
-    const [currentEvent, setCurrentEvent] = useState<CMMSScheduleEvent>();
+    const [currentEvent, setCurrentEvent] = useState<CMMSEvent>();
     // Store the state of the view full calendar. when set to true, view is full calendar, otherwise is list view.
     const [toggleCalendarOrListView, setToggleCalendarOrListView] = useState<boolean>(true);
 
@@ -140,7 +142,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     plant: cop.plant,
                     plantId: cop.plantId,
                 },
-                color: "#F8CBA6",
+                color: cop.changedDate ? "#36AE7C" : "#4D96FF",
                 // display: "none"
         };
     };
@@ -161,7 +163,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     };
 
     function toCMMSScheduleEvents(schedule: ScheduleInfo, date: string, index: number) {
-        const event = {
+        const event: CMMSScheduleEvent = {
             title: schedule.checklist_name,
             start: schedule.start_date ? new Date(date) : "",
             extendedProps: {
@@ -186,11 +188,49 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 exclusionList: schedule.exclusionList,
                 status: schedule.status,
             },
+            color: schedule.status === 5 ? "#488FB1" : "#FF6B6B", 
             // display: "none"
         }; 
 
         return event;
     };
+
+    function handleEventClick(info: EventClickArg) {
+        if (info.event._def.extendedProps.checklistId) {
+            setCurrentEvent({
+                title: info.event._def.title,
+                start: info.event._instance?.range.start,
+                extendedProps: {
+                    plant: info.event._def.extendedProps.plant,
+                    plantId: info.event._def.extendedProps.plantId,
+                    scheduleId: info.event._def.extendedProps.scheduleId,
+                    checklistId: info.event._def.extendedProps.checklistId,
+                    timelineId: info.event._def.extendedProps.timelineId,
+                    date: info.event._def.extendedProps.date,
+                    startDate: info.event._def.extendedProps.startDate,
+                    endDate: info.event._def.extendedProps.endDate,
+                    recurringPeriod: info.event._def.extendedProps.recurringPeriod,
+                    assignedIds: info.event._def.extendedProps.assignedIds,
+                    assignedEmails: info.event._def.extendedProps.assignedEmails,
+                    assignedFnames: info.event._def.extendedProps.assignedFnames,
+                    assignedLnames: info.event._def.extendedProps.assignedLnames,
+                    assignedUsernames: info.event._def.extendedProps.assignedUsernames,
+                    assignedRoles: info.event._def.extendedProps.assignedRoles,
+                    remarks: info.event._def.extendedProps.remarks,
+                    index: info.event._def.extendedProps.index,
+                    exclusionList: info.event._def.extendedProps.exclusionList,
+                    isSingle: info.event._def.extendedProps.isSingle,
+                    status: info.event._def.extendedProps.status,
+                },
+            });
+            setIsChecklistModalOpen(true);
+        }
+        else {
+            console.log("COP Modal")
+            setIsCOPModalOpen(true);
+        }
+    };
+    
     
     // Add events to be displayed on the calendar
     useEffect(() => {
@@ -204,9 +244,9 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     return (
         <ModuleMain>
             <EventModal
-                isOpen={isModalOpen}
-                closeModal={() => setIsModalOpen(false)}
-                event={currentEvent}
+                isOpen={isChecklistModalOpen}
+                closeModal={() => setIsChecklistModalOpen(false)}
+                event={currentEvent as CMMSScheduleEvent}
                 editSingle={router.pathname === `/Schedule`}
                 deleteEditDraft={router.pathname === `/Schedule/Timeline/[id]`}
             />
@@ -258,43 +298,9 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                         eventBorderColor="#FFFFFF"
                         eventTextColor="#000000"
                         displayEventTime={false}
-                        eventClick={() => setIsModalOpen(true)}
-                        eventMouseEnter={(info) => {
-                            document.body.style.cursor = "pointer";
-                            if (info.event._def.extendedProps.scheduleId) {
-                                const event = {
-                                    title: info.event._def.title,
-                                    start: info.event._instance?.range.start,
-                                    extendedProps: {
-                                        plant: info.event._def.extendedProps.plant,
-                                        plantId: info.event._def.extendedProps.plantId,
-                                        scheduleId: info.event._def.extendedProps.scheduleId,
-                                        checklistId: info.event._def.extendedProps.checklistId,
-                                        timelineId: info.event._def.extendedProps.timelineId,
-                                        date: info.event._def.extendedProps.date,
-                                        startDate: info.event._def.extendedProps.startDate,
-                                        endDate: info.event._def.extendedProps.endDate,
-                                        recurringPeriod: info.event._def.extendedProps.recurringPeriod,
-                                        assignedIds: info.event._def.extendedProps.assignedIds,
-                                        assignedEmails: info.event._def.extendedProps.assignedEmails,
-                                        assignedFnames: info.event._def.extendedProps.assignedFnames,
-                                        assignedLnames: info.event._def.extendedProps.assignedLnames,
-                                        assignedUsernames: info.event._def.extendedProps.assignedUsernames,
-                                        assignedRoles: info.event._def.extendedProps.assignedRoles,
-                                        remarks: info.event._def.extendedProps.remarks,
-                                        index: info.event._def.extendedProps.index,
-                                        exclusionList: info.event._def.extendedProps.exclusionList,
-                                        isSingle: info.event._def.extendedProps.isSingle,
-                                        status: info.event._def.extendedProps.status,
-                                    },
-                                };
-                                setCurrentEvent(event);
-                            }
-                            
-                        }}
-                        eventMouseLeave={() => {
-                            document.body.style.cursor = "default";
-                        }}
+                        eventClick={handleEventClick}
+                        eventMouseEnter={(info) => document.body.style.cursor = "pointer"}
+                        eventMouseLeave={() => document.body.style.cursor = "default"}
                     />
                 ) : (
                     // Render list view
