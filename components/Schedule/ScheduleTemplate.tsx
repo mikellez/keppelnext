@@ -139,7 +139,9 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     copId: cop.copId,
                     plant: cop.plant,
                     plantId: cop.plantId,
-                }
+                },
+                color: "#F8CBA6",
+                // display: "none"
         };
     };
 
@@ -152,7 +154,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 if (!item.exclusionList || !item.exclusionList.includes(index)) {
                     newEvents.push(event);
                 }
-                
+
             });
             setChecklistEvents(newEvents);
         });
@@ -184,6 +186,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 exclusionList: schedule.exclusionList,
                 status: schedule.status,
             },
+            // display: "none"
         }; 
 
         return event;
