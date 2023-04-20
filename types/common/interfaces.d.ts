@@ -208,6 +208,7 @@ interface CMMSScheduleEvent extends CMMSEvent {
     status?: number;
   };
   color?: string;
+  display?: string;
 }
 
 interface CMMSTimeline {
@@ -345,6 +346,7 @@ interface CMMSChangeOfPartsEvent extends CMMSEvent {
     plantId: number;
   };
   color?: string;
+  display?: string;
 }
 
 export {

@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useState, useEffect, ReactNode } from "react";
+import React, { PropsWithChildren, useState, useEffect, ReactNode, useCallback } from "react";
 import { ModuleContent, ModuleHeader, ModuleMain } from "../";
 import FullCalendar from "@fullcalendar/react";
 import { EventClickArg } from "@fullcalendar/core";
@@ -119,16 +119,11 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
     const [currentEvent, setCurrentEvent] = useState<CMMSEvent>();
     // Store the state of the view full calendar. when set to true, view is full calendar, otherwise is list view.
     const [toggleCalendarOrListView, setToggleCalendarOrListView] = useState<boolean>(true);
-
+    const [displayCOP, setDisplayCOP] = useState<boolean>(true);
+    const [displayChecklist, setDisplayChecklist] = useState<boolean>(true);
     const router = useRouter();
 
-
-    function updateCOPEvents(newCOPs: CMMSChangeOfParts[]) {
-        const newCOPEvents: CMMSChangeOfPartsEvent[] = newCOPs.map(cop => toCMMSChangeOfPartsEvent(cop))
-        setCOPEvents(newCOPEvents);
-    };
-
-    function toCMMSChangeOfPartsEvent(cop: CMMSChangeOfParts) {
+    const toCMMSChangeOfPartsEvent = useCallback((cop: CMMSChangeOfParts): CMMSChangeOfPartsEvent => {
         return {
             title: "Change of Parts for " + cop.asset,
                 start: new Date(cop.changedDate ? cop.changedDate : cop.scheduledDate),
@@ -143,26 +138,16 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     plantId: cop.plantId,
                 },
                 color: cop.changedDate ? "#36AE7C" : "#4D96FF",
-                // display: "none"
+                display: displayCOP ? "block" : "none"
         };
-    };
+    }, [displayCOP]);
 
-    function updateChecklistEvents(newList: ScheduleInfo[]) {
-        let newEvents: CMMSScheduleEvent[] = [];
-        newList.forEach((item) => {
-            item.calendar_dates.forEach((date, index) => {
-                const event = toCMMSScheduleEvents(item, date, index);
+    const updateCOPEvents = useCallback((newCOPs: CMMSChangeOfParts[]) => {
+        const newCOPEvents: CMMSChangeOfPartsEvent[] = newCOPs.map(cop => toCMMSChangeOfPartsEvent(cop))
+        setCOPEvents(newCOPEvents);
+    }, [toCMMSChangeOfPartsEvent]);
 
-                if (!item.exclusionList || !item.exclusionList.includes(index)) {
-                    newEvents.push(event);
-                }
-
-            });
-            setChecklistEvents(newEvents);
-        });
-    };
-
-    function toCMMSScheduleEvents(schedule: ScheduleInfo, date: string, index: number) {
+    const toCMMSScheduleEvents = useCallback((schedule: ScheduleInfo, date: string, index: number) => {
         const event: CMMSScheduleEvent = {
             title: schedule.checklist_name,
             start: schedule.start_date ? new Date(date) : "",
@@ -189,13 +174,28 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 status: schedule.status,
             },
             color: schedule.status === 5 ? "#488FB1" : "#FF6B6B", 
-            // display: "none"
+            display: displayChecklist ? "block" : "none"
         }; 
 
         return event;
-    };
+    }, [displayChecklist]);
 
-    function handleEventClick(info: EventClickArg) {
+    const updateChecklistEvents = useCallback((newList: ScheduleInfo[]) => {
+        let newEvents: CMMSScheduleEvent[] = [];
+        newList.forEach((item) => {
+            item.calendar_dates.forEach((date, index) => {
+                const event = toCMMSScheduleEvents(item, date, index);
+
+                if (!item.exclusionList || !item.exclusionList.includes(index)) {
+                    newEvents.push(event);
+                }
+
+            });
+            setChecklistEvents(newEvents);
+        });
+    }, [toCMMSScheduleEvents]);
+
+    const handleEventClick = useCallback((info: EventClickArg) => {
         if (info.event._def.extendedProps.checklistId) {
             setCurrentEvent({
                 title: info.event._def.title,
@@ -229,9 +229,8 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
             console.log("COP Modal")
             setIsCOPModalOpen(true);
         }
-    };
-    
-    
+    }, []);
+
     // Add events to be displayed on the calendar
     useEffect(() => {
         setChecklistEvents([]);
@@ -239,17 +238,11 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
 
         if (props.changeOfParts) updateCOPEvents(props.changeOfParts);
 
-    }, [props.schedules, props.changeOfParts]);
-
+    }, [props.schedules, props.changeOfParts, updateCOPEvents, updateChecklistEvents]);
+    console.log(displayCOP)
     return (
+        <>
         <ModuleMain>
-            <EventModal
-                isOpen={isChecklistModalOpen}
-                closeModal={() => setIsChecklistModalOpen(false)}
-                event={currentEvent as CMMSScheduleEvent}
-                editSingle={router.pathname === `/Schedule`}
-                deleteEditDraft={router.pathname === `/Schedule/Timeline/[id]`}
-            />
             <ModuleHeader
                 title={props.title}
                 header={props.header}
@@ -262,6 +255,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                             />
                             <span className={styles.slider}></span>
                         </label>
+                        
                         <div style={{ marginLeft: "10px" }} id="top-toggle-img">
                             {toggleCalendarOrListView ? (
                                 <BsCalendar4Week size={20} />
@@ -277,6 +271,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
             <ModuleContent>
                 {toggleCalendarOrListView ? (
                     // Render Full calendar view
+                    <div>
                     <FullCalendar
                         plugins={[dayGridPlugin]}
                         initialView="dayGridMonth"
@@ -302,6 +297,21 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                         eventMouseEnter={(info) => document.body.style.cursor = "pointer"}
                         eventMouseLeave={() => document.body.style.cursor = "default"}
                     />
+                        <input
+                            id="checkbox-cop"
+                            type="checkbox"
+                            onChange={() => setDisplayCOP((prev) => !prev)}
+                            checked={displayCOP}
+                        />
+                         <label htmlFor="checkbox-cop">Change of Parts</label>
+                        <input
+                            id="checkbox-checklist"
+                            type="checkbox"
+                            onChange={() => setDisplayChecklist((prev) => !prev)}
+                            checked={displayChecklist}
+                        />
+                        <label htmlFor="checkbox-checklist">Checklist</label>
+                    </div>
                 ) : (
                     // Render list view
                     <ScheduleTable
@@ -311,5 +321,13 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 )}
             </ModuleContent>
         </ModuleMain>
+        <EventModal
+            isOpen={isChecklistModalOpen}
+            closeModal={() => setIsChecklistModalOpen(false)}
+            event={currentEvent as CMMSScheduleEvent}
+            editSingle={router.pathname === `/Schedule`}
+            deleteEditDraft={router.pathname === `/Schedule/Timeline/[id]`}
+        />
+        </>
     );
 }
