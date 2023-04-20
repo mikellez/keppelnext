@@ -148,11 +148,7 @@ export const downloadCSV = async (type: string) => {
   }
 };
 
-<<<<<<< HEAD
-export default function Request(props: RequestProps) {
-=======
-export default function Request({ pages }: { pages: number }) {
->>>>>>> 61314b2efa77053706442af7664d0daf47a3a09d
+export default function Request({ props, pages }: { props: RequestProps, pages: number }) {
   const [requestItems, setRequestItems] = useState<RequestItem[]>([]);
   const [isReady, setReady] = useState(false);
   const [modalSrc, setModalSrc] = useState<string | undefined>();
@@ -231,24 +227,6 @@ export default function Request({ pages }: { pages: number }) {
       label: "",
       renderCell: item => (
         <div className={styles.iconsDiv}>
-<<<<<<< HEAD
-          <div
-            className={styles.editIcon}
-            style={{
-              display:
-                data?.role_id == 1 || data?.role_id == 1 || data?.role_id == 1
-                  ? "block"
-                  : "none",
-              visibility: item.status_id === 1 || item.status_id === 2 ? "visible" : "hidden",
-            }}
-            onClick={() => {
-              router.push(`/Request/Assign/${item.id}`);
-              setReady(false);
-            }}
-          >
-            <AiOutlineUserAdd size={18} title={"Assign"} />
-          </div>
-=======
           {(item.status_id === 1 || item.status_id === 2) && (
             <div
               className={styles.editIcon}
@@ -288,7 +266,6 @@ export default function Request({ pages }: { pages: number }) {
               <BiCommentCheck size={18} title={"Manage"} />
             </div>
           )}
->>>>>>> 61314b2efa77053706442af7664d0daf47a3a09d
           <div
             className={styles.editIcon}
             onClick={() => {
@@ -324,11 +301,7 @@ export default function Request({ pages }: { pages: number }) {
     error: requestFetchError,
     isValidating: requestIsFetchValidating,
     mutate: requestMutate,
-<<<<<<< HEAD
-  } = props?.filter ? useRequestFilter(props) : useRequest();
-=======
-  } = useRequest(indexedColumn[activeTabIndex]);
->>>>>>> 61314b2efa77053706442af7664d0daf47a3a09d
+  } = props?.filter ? useRequestFilter(props) : useRequest(indexedColumn[activeTabIndex]);
 
   const theme = useTheme([
     getTheme(),
@@ -442,19 +415,6 @@ export default function Request({ pages }: { pages: number }) {
                     )}
                   </li>
                   <li className={styles.tableDropdownListItem}>
-<<<<<<< HEAD
-                        {(data?.role_id === 1 || data?.role_id === 2) &&
-                          item.status_id === 3 ?
-                          <Link href={`/Request/Manage/${item.id}`}><strong>Manage</strong></Link>
-                          :
-                        (data?.role_id === 3 || data?.role_id === 4) &&
-                          (item.status_id === 2 ||
-                            item.status_id === 5) ?
-                            <Link href={`/Request/Complete/${item.id}`}><strong>Complete</strong></Link> 
-                            : 
-                            <Link href={`/Request/View/${item.id}`}><strong>View</strong></Link> 
-                        }
-=======
                     {
                       // (data?.role_id === Role.Admin ||
                       //     data?.role_id === Role.Manager) &&
@@ -475,7 +435,6 @@ export default function Request({ pages }: { pages: number }) {
                         </Link>
                       )
                     }
->>>>>>> 61314b2efa77053706442af7664d0daf47a3a09d
                   </li>
                 </ul>
               </td>
@@ -489,38 +448,6 @@ export default function Request({ pages }: { pages: number }) {
   useEffect(() => {
     // if (requestIsFetchValidating) setReady(false);
 
-<<<<<<< HEAD
-    if (requestData && !requestIsFetchValidating) {
-      setRequestItems(
-        requestData.map((row: CMMSRequest) => {
-          return {
-            id: row.request_id,
-            request_name: row.request_name,
-            created_date: row.created_date,
-            fullname: row.fullname,
-            fault_name: row.fault_name,
-            fault_id: row.fault_id,
-            asset_name: row.asset_name,
-            psa_id: row.psa_id,
-            req_id: row.req_id,
-            plant_name: row.plant_name,
-            plant_id: row.plant_id,
-            priority: row.priority,
-            priority_id: row.priority_id,
-            status: row.status,
-            status_id: row.status_id,
-            assigned_user_email: row.assigned_user_email,
-            assigned_user_id: row.assigned_user_id,
-            assigned_user_name: row.assigned_user_name,
-            fault_description: row.fault_description,
-            uploaded_file: row.uploaded_file,
-            requesthistory: row.requesthistory,
-            complete_comments: row.complete_comments,
-            completion_file: row.completion_file
-          };
-        })
-      );
-=======
     if (!isReady && requestData && !requestIsFetchValidating) {
       if (requestData.length > 0) {
         setRequestItems(
@@ -534,7 +461,6 @@ export default function Request({ pages }: { pages: number }) {
       } else {
         setRequestItems([]);
       }
->>>>>>> 61314b2efa77053706442af7664d0daf47a3a09d
       setReady(true);
     }
   }, [requestData, requestIsFetchValidating, isReady]);
