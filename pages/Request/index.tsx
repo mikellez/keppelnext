@@ -37,7 +37,7 @@ import {
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 
-import { useRequest } from "../../components/SWR";
+import { useRequest, useRequestFilter } from "../../components/SWR";
 import { CMMSRequest } from "../../types/common/interfaces";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -86,6 +86,14 @@ interface RequestItem {
   completion_file?: any;
 }
 
+export interface RequestProps {
+  filter?: boolean; 
+  status: number;
+  plant: number;
+  date: string;
+  datetype: string;
+}
+
 export const getColor = (status: string) => {
   switch (status) {
     case "PENDING":
@@ -129,7 +137,7 @@ export const downloadCSV = async (type: string) => {
   }
 };
 
-export default function Request() {
+export default function Request(props: RequestProps) {
   const [requestItems, setRequestItems] = useState<RequestItem[]>([]);
   const [isReady, setReady] = useState(false);
   const [modalSrc, setModalSrc] = useState<string | undefined>();
@@ -250,7 +258,7 @@ export default function Request() {
     error: requestFetchError,
     isValidating: requestIsFetchValidating,
     mutate: requestMutate,
-  } = useRequest();
+  } = props?.filter ? useRequestFilter(props) : useRequest();
 
   const theme = useTheme([
     getTheme(),

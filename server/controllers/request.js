@@ -183,6 +183,11 @@ const fetchRequestCounts = async (req, res, next) => {
   let date = req.params.date;
   let datetype = req.params.datetype;
   let dateCond = "";
+  let userRoleCond = "";
+  if(![1,2,3].includes(req.user.role_id)) {
+		userRoleCond = `AND (r.assigned_user_id = ${req.user.id} OR r.user_id = ${req.user.id})`;
+  }
+
   if(date !== "all"){
       switch(datetype) {
           case "week":
@@ -223,11 +228,13 @@ const fetchRequestCounts = async (req, res, next) => {
           ? `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
 				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
 				WHERE R.PLANT_ID = ${req.params.plant}
+        ${userRoleCond}
 				${dateCond}	
 				GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (name)`
           : `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
 				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
 				WHERE 1 = 1 
+        ${userRoleCond}
 				${dateCond}
 
 				GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (name)`;
@@ -241,12 +248,14 @@ const fetchRequestCounts = async (req, res, next) => {
 				WHERE R.STATUS_ID != 5 AND 
 				R.STATUS_ID != 7 AND
 				R.PLANT_ID = ${req.params.plant}
+        ${userRoleCond}
 				${dateCond}	
 				GROUP BY(FT.FAULT_TYPE, R.FAULT_ID) ORDER BY (name)`
           : `SELECT FT.FAULT_TYPE AS NAME, R.FAULT_ID AS ID, COUNT(R.FAULT_ID) AS VALUE FROM 
 				KEPPEL.REQUEST R 
 				JOIN KEPPEL.FAULT_TYPES FT ON R.FAULT_ID = FT.FAULT_ID
 				WHERE R.STATUS_ID != 5 AND R.STATUS_ID != 7
+        ${userRoleCond}
 				${dateCond}	
 				GROUP BY(FT.FAULT_TYPE, R.FAULT_ID) ORDER BY (name)`;
       break;
@@ -259,12 +268,14 @@ const fetchRequestCounts = async (req, res, next) => {
 				WHERE R.STATUS_ID != 5 AND 
 				R.STATUS_ID != 7 AND
 				R.PLANT_ID = ${req.params.plant}
+        ${userRoleCond}
 				${dateCond}	
 				GROUP BY(P.PRIORITY, R.PRIORITY_ID) ORDER BY (ID)`
           : `SELECT P.PRIORITY AS NAME, R.PRIORITY_ID AS ID, COUNT(R.PRIORITY_ID) AS VALUE FROM 
 				KEPPEL.REQUEST R 
 				JOIN KEPPEL.PRIORITY P ON R.PRIORITY_ID = P.P_ID
 				WHERE R.STATUS_ID != 5 AND R.STATUS_ID != 7
+        ${userRoleCond}
 				${dateCond}	
 				GROUP BY(P.PRIORITY, R.PRIORITY_ID) ORDER BY (ID)`;
       break;
@@ -486,6 +497,220 @@ const completeRequest = async (req, res, next) => {
   );
 };
 
+const fetchPendingRequests = async (req, res, next) => {
+  const sql =
+    req.user.role_id === 1 || req.user.role_id === 2 || req.user.role_id === 3
+      ? `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
+		rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
+		pri.priority, 
+		CASE 
+			WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
+			ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
+		END AS fullname,
+		r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
+		r.complete_comments,
+		concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
+		, r.requesthistory, r.rejection_comments, r.status_id
+		FROM    
+			keppel.users u
+			JOIN keppel.user_access ua ON u.user_id = ua.user_id
+			JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
+			left JOIN keppel.users req_u ON r.user_id = req_u.user_id
+			left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
+			left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
+			left JOIN keppel.request_type rt ON rt.req_id = r.req_id
+			left JOIN keppel.priority pri ON pri.p_id = r.priority_id
+			left JOIN keppel.role ro ON ro.role_id = r.role_id
+			left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
+			left JOIN keppel.users au ON au.user_id = r.assigned_user_id
+			left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
+				from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
+				WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
+        WHERE r.status_id = 1
+		GROUP BY (
+			r.request_id,
+			ft.fault_type,
+			pm.plant_name,
+			pm.plant_id,
+			rt.request,
+			ro.role_name,
+			sc.status,
+			pri.priority,
+			req_u.first_name,
+			tmp1.asset_name,
+			req_u.last_name,
+			au.first_name,
+			au.last_name
+		)
+		ORDER BY r.created_date DESC, r.status_id DESC;`
+      : `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
+		rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
+		pri.priority, 
+		CASE 
+			WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
+			ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
+		END AS fullname,
+		r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
+		r.complete_comments,
+		concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
+		, r.requesthistory, r.rejection_comments, r.status_id
+		FROM    
+			keppel.users u
+			JOIN keppel.user_access ua ON u.user_id = ua.user_id
+			JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
+			left JOIN keppel.users req_u ON r.user_id = req_u.user_id
+			left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
+			left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
+			left JOIN keppel.request_type rt ON rt.req_id = r.req_id
+			left JOIN keppel.priority pri ON pri.p_id = r.priority_id
+			left JOIN keppel.role ro ON ro.role_id = r.role_id
+			left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
+			left JOIN keppel.users au ON au.user_id = r.assigned_user_id
+			left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
+				from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
+				WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
+		WHERE (r.assigned_user_id = ${req.user.id} OR r.user_id = ${req.user.id})
+      AND r.status_id = 1
+		GROUP BY (
+			r.request_id,
+			ft.fault_type,
+			pm.plant_name,
+			pm.plant_id,
+			rt.request,
+			ro.role_name,
+			sc.status,
+			pri.priority,
+			req_u.first_name,
+			tmp1.asset_name,
+			req_u.last_name,
+			au.first_name,
+			au.last_name
+		)
+		ORDER BY r.created_date DESC, r.status_id DESC;`;
+
+  db.query(sql, (err, result) => {
+    if (err) return res.status(500).json({ errormsg: err });
+
+    res.status(200).json(result.rows);
+  });
+};
+
+const fetchFilteredRequests = async (req, res, next) => {
+  let date = req.params.date;
+  let datetype = req.params.datetype;
+  let status = req.params.status;
+  let plant = req.params.plant;
+  let dateCond = "";
+  let statusCond = "";
+  let plantCond = ""; 
+  let userRoleCond = "";
+
+  if(![1,2,3].includes(req.user.role_id)) {
+    userRoleCond = `AND (r.assigned_user_id = ${req.user.id} OR r.user_id = ${req.user.id})`;
+  }
+
+  if(plant && plant != 0) {
+    plantCond = `AND r.plant_id = '${plant}'`;
+  }
+
+  if(status) {
+    statusCond = `AND r.status_id = '${status}'`;
+  }
+
+  if(date !== "all"){
+      switch(datetype) {
+          case "week":
+              dateCond = `
+                  AND DATE_PART('week', R.CREATED_DATE::DATE) = DATE_PART('week', '${date}'::DATE) 
+                  AND DATE_PART('year', R.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+              break;
+
+          case "month":
+              dateCond = `
+                  AND DATE_PART('month', R.CREATED_DATE::DATE) = DATE_PART('month', '${date}'::DATE) 
+                  AND DATE_PART('year', R.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+              break;
+
+          case "year":
+              dateCond = `AND DATE_PART('year', R.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+              break;
+
+          case "quarter":
+              dateCond = `
+                  AND DATE_PART('quarter', R.CREATED_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) 
+                  AND DATE_PART('year', R.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+              break;
+          default:
+              dateCond = `AND R.CREATED_DATE::DATE = '${date}'::DATE`;
+
+      }
+  }
+
+
+
+  const sql = `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
+		rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
+		pri.priority, 
+		CASE 
+			WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
+			ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
+		END AS fullname,
+		r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
+		r.complete_comments,
+		concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
+		, r.requesthistory, r.rejection_comments, r.status_id
+		FROM    
+			keppel.users u
+			JOIN keppel.user_access ua ON u.user_id = ua.user_id
+			JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
+			left JOIN keppel.users req_u ON r.user_id = req_u.user_id
+			left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
+			left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
+			left JOIN keppel.request_type rt ON rt.req_id = r.req_id
+			left JOIN keppel.priority pri ON pri.p_id = r.priority_id
+			left JOIN keppel.role ro ON ro.role_id = r.role_id
+			left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
+			left JOIN keppel.users au ON au.user_id = r.assigned_user_id
+			left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
+				from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
+				WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
+        WHERE 1 = 1
+      ${userRoleCond}
+      ${dateCond}
+      ${statusCond}
+      ${plantCond}
+
+		GROUP BY (
+			r.request_id,
+			ft.fault_type,
+			pm.plant_name,
+			pm.plant_id,
+			rt.request,
+			ro.role_name,
+			sc.status,
+			pri.priority,
+			req_u.first_name,
+			tmp1.asset_name,
+			req_u.last_name,
+			au.first_name,
+			au.last_name
+		)
+		ORDER BY r.created_date DESC, r.status_id DESC;`;
+      
+    console.log('fetchfilteredreq',req.user);
+    console.log('fetchfilteredreq',sql);
+
+  db.query(sql, (err, result) => {
+    if (err) return res.status(500).json({ errormsg: err });
+
+    res.status(200).json(result.rows);
+  });
+};
+
 module.exports = {
   fetchRequests,
   createRequest,
@@ -497,4 +722,6 @@ module.exports = {
   updateRequest,
   approveRejectRequest,
   completeRequest,
+  fetchPendingRequests,
+  fetchFilteredRequests
 };

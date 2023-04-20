@@ -46,7 +46,6 @@ export default function Dashboad({ role_id }: { role_id: number }) {
   if (role_id === 1 || role_id === 2) return <ManagerDashboad />;
 
   if (role_id === 3) return <EngineerDashboad />;
-  return <EngineerDashboad />;
 
   return <SpecialistDashboad />;
 }

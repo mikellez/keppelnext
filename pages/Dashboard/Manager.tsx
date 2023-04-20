@@ -17,13 +17,18 @@ import type { DatePickerProps, TimePickerProps } from 'antd';
 import { Select } from 'antd';
 import PickerWithType from "../../components/PickerWithType";
 import moment from "moment";
+import Request from "../Request/index";
+import Checklist from "../Checklist";
 
 const { Option } = Select;
 
 type PickerType = 'date';
 
 export default function ManagerDashboad() {
+  const [showDiv, setShowDiv] = useState<string>();
+  const [active, setActive] = useState("");
   const [isReady, setIsReady] = useState<boolean>(false);
+  const [isChecklistReady, setIsChecklistReady] = useState<boolean>(false);
   const [plant, setPlant] = useState<number>(0);
   const [field, setField] = useState<string>("status");
   const [pickerwithtype, setPickerWithType] = useState<{
@@ -46,6 +51,12 @@ export default function ManagerDashboad() {
     setPickerWithType({ date: date || 'all', datetype: value });
   }
 
+  const handleDashboardClick = (e: { currentTarget: { id: any; }; }) => {
+      const { id } = e.currentTarget;
+      setShowDiv(id);
+      setActive(id);
+  }
+
   useEffect(() => {
     const { datetype, date } = pickerwithtype;
 
@@ -62,15 +73,20 @@ export default function ManagerDashboad() {
         setIsReady(true);
       }, 500);
     });
-  }, [plant, field, pickerwithtype]);
+  }, [plant, field, pickerwithtype, pickerwithtype.date, pickerwithtype.datetype]);
 
   useEffect(() => {
     const { datetype, date } = pickerwithtype;
 
+    setIsChecklistReady(false);
+
     fetchData("checklist", plant, "status", datetype, date).then((result) => {
-      if (result) setChecklistData(result);
+      if (result) {
+        setChecklistData(result);
+        setIsChecklistReady(true);
+      }
     });
-  }, [plant, pickerwithtype]);
+  }, [plant, pickerwithtype.date, pickerwithtype.datetype]);
 
   const pendingChecklist = checklistData?.filter((data) => data.id === 1)[0];
   const completedChecklist = checklistData?.filter((data) => data.id === 4)[0];
@@ -88,6 +104,8 @@ export default function ManagerDashboad() {
       </div>
     );
   }
+
+  const { date, datetype } = pickerwithtype;
 
   return (
     <ModuleMain>
@@ -108,22 +126,22 @@ export default function ManagerDashboad() {
       </ModuleHeader>
       <ModuleContent>
         <div className={styles.dashboardMain}>
-          <DashboardBox title="Pending Requests" style={{ gridArea: "a" }}>
+          <DashboardBox id="pending-requests-box" title="Pending Requests" style={{ gridArea: "a" }} onClick={handleDashboardClick} className={active === "pending-requests-box" ? styles.active : ""}>
             <p className={styles.dashboardPendingdNumber}>
               {request.pendingRequest ? request.pendingRequest.value : 0}
             </p>
           </DashboardBox>
-          <DashboardBox title="Closed Requests" style={{ gridArea: "b" }}>
+          <DashboardBox id="closed-requests-box" title="Closed Requests" style={{ gridArea: "b" }} onClick={handleDashboardClick} className={active === "closed-requests-box" ? styles.active : ""}>
             <p className={styles.dashboardCompletedNumber}>
               {request.closedRequest ? request.closedRequest.value : 0}
             </p>
           </DashboardBox>
-          <DashboardBox title="Pending Checklists" style={{ gridArea: "c" }}>
+          <DashboardBox id="pending-checklists-box" title="Pending Checklists" style={{ gridArea: "c" }} onClick={handleDashboardClick} className={active === "pending-checklists-box" ? styles.active : ""}>
             <p className={styles.dashboardPendingdNumber}>
               {pendingChecklist ? pendingChecklist.value : 0}
             </p>
           </DashboardBox>
-          <DashboardBox title="Completed Checklists" style={{ gridArea: "d" }}>
+          <DashboardBox id="completed-checklists-box" title="Completed Checklists" style={{ gridArea: "d" }} onClick={handleDashboardClick} className={active === "completed-checklists-box" ? styles.active : ""}>
             <p className={styles.dashboardCompletedNumber}>
               {completedChecklist ? completedChecklist.value : 0}
             </p>
@@ -165,6 +183,10 @@ export default function ManagerDashboad() {
             style={{ gridArea: "g" }}
           ></DashboardBox>
         </div>
+        {showDiv === 'pending-requests-box' && <Request filter={true} status={1} date={date} datetype={datetype} plant={plant as number}/>}
+        {showDiv === 'closed-requests-box' && <Request filter={true} status={4} date={date} datetype={datetype} plant={plant as number}/>}
+        {showDiv === 'pending-checklists-box' && <Checklist isReady={isChecklistReady} filter={true} status={1} date={date} datetype={datetype} plant={plant as number}/>}
+        {showDiv === 'completed-checklists-box' && <Checklist isReady={isChecklistReady} filter={true} status={4} date={date} datetype={datetype} plant={plant as number}/>}
       </ModuleContent>
     </ModuleMain>
   );

@@ -3,6 +3,8 @@ import useSWR from 'swr';
 import axios from 'axios';
 
 import { CMMSAsset, CMMSRequest, CMMSChecklist, CMMSActivitylog, CMMSSystemAsset, CMMSSystemAssetName, CMMSSubComponent1Name} from '../types/common/interfaces'; 
+import { RequestProps } from '../pages/Request';
+import { ChecklistProps } from '../pages/Checklist';
 
 function useRequest() {
 	const requestFetcher = (url: string) => axios.get<CMMSRequest[]>(url).then((response) => {
@@ -16,6 +18,20 @@ function useRequest() {
 	});
 
 	return useSWR<CMMSRequest[], Error>("/api/request", requestFetcher, {revalidateOnFocus: false});
+}
+
+function useRequestFilter(props: RequestProps) {
+	const requestFetcher = (url: string) => axios.get<CMMSRequest[]>(url).then((response) => {
+		response.data.forEach((s) => {
+			s.created_date = new Date(s.created_date)
+		});
+		return response.data;
+	})
+	.catch((e) => {
+		throw new Error(e);
+	});
+
+	return useSWR<CMMSRequest[], Error>(`/api/request/filter/${props.status}/${props.plant}/${props.datetype}/${props.date}`, requestFetcher, {revalidateOnFocus: false});
 }
 
 function useAsset(plant_id: number|null) {
@@ -32,6 +48,13 @@ function useChecklist(checklist_type: "pending" | "record" | "approved") {
 	})
 
 	return useSWR<CMMSChecklist[], Error>(["/api/checklist/", checklist_type], checklistFetcher, {revalidateOnFocus: false});
+}
+function useChecklistFilter(props: ChecklistProps) {
+	const checklistFetcher = (url: string) => axios.get<CMMSChecklist[]>(url).then((response) => response.data).catch((e) => {
+		throw new Error(e);
+	})
+
+	return useSWR<CMMSChecklist[], Error>(`/api/checklist/filter/${props.status}/${props.plant}/${props.datetype}/${props.date}`, checklistFetcher, {revalidateOnFocus: false});
 }
 function useAccountlog() {
 	const accountlogFetcher = (url: string) => axios.get<any[]>(url).then((response) =>
@@ -91,9 +114,11 @@ function useSubComponent1Name(plant_id: number|null, system_id: number|null, sys
 
 
 export {
-    useRequest,
+  useRequest,
+  useRequestFilter,
 	useAsset,
 	useChecklist,
+	useChecklistFilter,
 	useCurrentUser,
 	useAccountlog,
 	useSystemAsset,

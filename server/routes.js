@@ -181,6 +181,13 @@ router.get(
   checkIfLoggedInAPI,
   controllers.request.fetchRequestCounts
 );
+router.get(
+  "/request/filter/:status/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.request.fetchFilteredRequests
+);
+
+
 
 router.get(
   "/asset/systems",
@@ -266,6 +273,11 @@ router.get(
   "/checklist/csv",
   checkIfLoggedInAPI,
   controllers.checklist.createChecklistCSV
+);
+router.get(
+  "/checklist/filter/:status/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchFilteredChecklists
 );
 
 /**

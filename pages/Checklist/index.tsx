@@ -16,7 +16,7 @@ import {
   Cell,
   OnClick,
 } from "@table-library/react-table-library";
-import { useChecklist } from "../../components/SWR";
+import { useChecklist, useChecklistFilter } from "../../components/SWR";
 import { CMMSChecklist } from "../../types/common/interfaces";
 import { ThreeDots } from "react-loading-icons";
 import { downloadCSV, getColor } from "../Request";
@@ -45,17 +45,26 @@ interface ChecklistItem {
   linkedassets: string | null;
   linkedassetids: string | null;
   chl_type: string;
-  created_date: Date;
+  created_date: string;
   history: string;
   status: string;
 }
 
-export default function Checklist() {
+export interface ChecklistProps {
+  filter?: boolean; 
+  status: number;
+  plant: number;
+  date: string;
+  datetype: string;
+  isReady: boolean;
+}
+
+export default function Checklist(props: ChecklistProps) {
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const [isReady, setReady] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 
-  const { data, error, isValidating, mutate } = useChecklist(
+  const { data, error, isValidating, mutate } = props?.filter ? useChecklistFilter(props) : useChecklist(
     indexedColumn[activeTabIndex]
   );
 
@@ -83,6 +92,10 @@ export default function Checklist() {
   }, [activeTabIndex]);
 
   useEffect(() => {
+    if (!props?.isReady) {
+      setReady(props?.isReady);
+    }
+
     if (!isReady && data && !isValidating) {
       // tranform and store data
       if (data.length > 0) {
@@ -101,7 +114,7 @@ export default function Checklist() {
               linkedassets: row.linkedassets,
               linkedassetids: row.linkedassetids,
               chl_type: row.chl_type as string,
-              created_date: row.created_date,
+              created_date: row.created_date as string,
               history: row.history,
               status: row.status
             };
@@ -128,6 +141,7 @@ export default function Checklist() {
       </ModuleHeader>
 
       <ModuleContent>
+        {!props?.filter &&
         <ul className="nav nav-tabs">
           <li
             onClick={() => {
@@ -154,6 +168,7 @@ export default function Checklist() {
             <span style={{ all: "unset" }}>Approved</span>
           </li>
         </ul>
+        }
         {!isReady && (
           <div style={{ position: "absolute", top:"calc((100% - 8rem) / 2)", left:"50%", transform:"translate(-50%,-50%)"}}>
             <LoadingHourglass />

@@ -25,6 +25,11 @@
   // min-height: 200px;
 }
 
+.dashboardSection.active{
+  border: solid #c21010;
+}
+
+
 .dashboardSection div {
   display: flex;
   justify-content: center;

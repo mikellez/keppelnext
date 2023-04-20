@@ -473,6 +473,118 @@ const createChecklistCSV = async (req, res, next) => {
     });
 };
 
+const fetchFilteredChecklists = async (req, res, next) => {
+    let date = req.params.date;
+    let datetype = req.params.datetype;
+    let status = req.params.status;
+    let plant = req.params.plant;
+    let dateCond = "";
+    let statusCond = "";
+    let plantCond = ""; 
+    let userRoleCond = "";
+
+    if(![1,2,3].includes(req.user.role_id)) {
+        userRoleCond = `AND ua.user_id = ${req.user.id}`;
+    }
+
+    if(plant && plant != 0) {
+        plantCond = `AND cl.plant_id = '${plant}'`;
+    }
+
+    if(status) {
+        statusCond = `AND cl.status_id = '${status}'`;
+    }
+
+    if(date !== "all"){
+        switch(datetype) {
+            case "week":
+                dateCond = `
+                    AND DATE_PART('week', CL.CREATED_DATE::DATE) = DATE_PART('week', '${date}'::DATE) 
+                    AND DATE_PART('year', CL.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+                break;
+
+            case "month":
+                dateCond = `
+                    AND DATE_PART('month', CL.CREATED_DATE::DATE) = DATE_PART('month', '${date}'::DATE) 
+                    AND DATE_PART('year', CL.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+                break;
+
+            case "year":
+                dateCond = `AND DATE_PART('year', CL.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+                break;
+
+            case "quarter":
+                dateCond = `
+                    AND DATE_PART('quarter', CL.CREATED_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) 
+                    AND DATE_PART('year', CL.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+                break;
+            default:
+                dateCond = `AND CL.CREATED_DATE::DATE = '${date}'::DATE`;
+
+        }
+    }
+
+    const sql = `
+    SELECT 
+        cl.checklist_id, 
+        cl.chl_name, 
+        cl.description, 
+        cl.status_id,
+        concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
+        concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
+        concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
+        pm.plant_name,
+        pm.plant_id,
+        completeremarks_req,
+        tmp1.assetNames AS linkedassets,
+        linkedassetids,
+        cl.chl_type,
+        cl.created_date,
+        cl.history,
+        st.status
+    FROM 
+        keppel.users u
+        JOIN keppel.user_access ua ON u.user_id = ua.user_id
+        JOIN keppel.checklist_master cl on ua.allocatedplantids LIKE concat(concat('%',cl.plant_id::text), '%')
+        LEFT JOIN (
+            SELECT 
+                t3.checklist_id, 
+                string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id ASC) AS assetNames
+            FROM  
+                keppel.system_assets AS t1,
+                keppel.plant_system_assets AS t2, 
+                keppel.checklist_master AS t3
+            WHERE 
+                t1.system_asset_id = t2.system_asset_id_lvl4 AND 
+                t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
+            GROUP BY t3.checklist_id) tmp1 ON tmp1.checklist_id = cl.checklist_id
+        LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
+        LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
+        LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
+        LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id
+        JOIN keppel.status_cm st ON st.status_id = cl.status_id	
+    WHERE 1 = 1
+        AND ua.user_id = $1 
+        ${plantCond}
+        ${statusCond}
+        ${dateCond}
+    ORDER BY cl.checklist_id DESC;
+    `
+
+    console.log(sql)
+
+    db.query(sql, [req.user.id], (err, result) => {
+        if (err) return res.status(400).json({ msg: err });
+        if (result.rows.length == 0) return res.status(201).json({ msg: "No checklist" });
+
+        return res.status(200).json(result.rows);
+    });
+};
+
 module.exports = {
     fetchPendingChecklists,
     fetchForReviewChecklists,
@@ -485,5 +597,6 @@ module.exports = {
     createNewChecklistTemplate,
     fetchSpecificChecklistTemplate,
     fetchSpecificChecklistRecord,
-    fetchChecklistRecords
+    fetchChecklistRecords,
+    fetchFilteredChecklists
 };
