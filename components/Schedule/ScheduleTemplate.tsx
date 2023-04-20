@@ -4,7 +4,6 @@ import FullCalendar from "@fullcalendar/react";
 import { EventClickArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import ChecklistEventModal from "./ChecklistEventModal";
-import axios from "axios";
 import { useRouter } from "next/router";
 import styles from "../../styles/Schedule.module.scss";
 import { BsCalendar4Week, BsListUl } from "react-icons/bs";
@@ -12,6 +11,7 @@ import ScheduleTable from "./ScheduleTable";
 import { CMMSScheduleEvent, CMMSChangeOfPartsEvent, CMMSChangeOfParts, CMMSEvent } from "../../types/common/interfaces";
 import EventColorLegend, { EventColours } from "./EventColorLegend";
 import COPEventModal from "./COPEventModal";
+
 
 interface ScheduleTemplateInfo extends PropsWithChildren {
     title: string;
@@ -237,7 +237,6 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
             });
             setIsChecklistModalOpen(true);
         } else {
-            // console.log("COP Modal is opened");
             setCurrentEvent({
                 title: info.event._def.title,
                 start: info.event._instance?.range.start,
@@ -256,7 +255,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
             setIsCOPModalOpen(true);
         }
     }, []);
-
+    
     // Add events to be displayed on the calendar
     useEffect(() => {
         setChecklistEvents([]);
@@ -295,7 +294,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                 <ModuleContent>
                     {toggleCalendarOrListView ? (
                         // Render Full calendar view
-                        <div>
+                        <>
                             <FullCalendar
                                 plugins={[dayGridPlugin]}
                                 initialView="dayGridMonth"
@@ -321,7 +320,10 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                 eventMouseEnter={(info) => (document.body.style.cursor = "pointer")}
                                 eventMouseLeave={() => (document.body.style.cursor = "default")}
                             />
-                            <div className={styles.calendarDisplayCheckboxContainer}>
+                            <div 
+                                className={styles.calendarDisplayCheckboxContainer}
+                                style={{display: router.pathname === "/Schedule" ? "flex" : "none"}}
+                            >
                                 <div className="form-check">
                                     <input
                                         className="form-check-input"
@@ -348,7 +350,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                     <EventColorLegend />
                                 </div>
                             </div>
-                        </div>
+                        </>
                     ) : (
                         // Render list view
                         <ScheduleTable
