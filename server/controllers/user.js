@@ -1,7 +1,6 @@
 const db = require("../../db");
 const bcrypt = require('bcryptjs');
-
-
+const { generateCSV } = require("../csvGenerator");
 
 const getUsers = (req, res, next) => {
     db.query(
@@ -69,7 +68,31 @@ const addUser = async (req, res, next) => {
   
 }
 
+const getUsersCSV = (req, res, next) => {
+    db.query(`SELECT 
+    employee_id,
+    CONCAT(first_name, ' ', last_name) AS full_name,
+    role_name
+FROM 
+    keppel.user_access
+`, [], (err, result) => {
+        if (err) return res.status(400).json({ msg: err });
+        if (result.rows.length == 0) return res.status(201).json({ msg: "No Users" });
+        generateCSV(result.rows)
+            .then((buffer) => {
+                res.set({
+                    "Content-Type": "text/csv",
+                });
+                return res.status(200).send(buffer);
+            })
+            .catch((error) => {
+                res.status(500).send(`Error in generating csv file`);
+            });
+    });
+};
+
 module.exports ={
+    getUsersCSV,
     getUsers,
     addUser
 }

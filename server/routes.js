@@ -367,6 +367,7 @@ router
 
 router
     .get("/user/getUsers", checkIfLoggedInAPI, controllers.user.getUsers)
+    .get("/user/getUsersCSV", checkIfLoggedInAPI, controllers.user.getUsersCSV)
     .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser);
 
 // NO API ROUTE

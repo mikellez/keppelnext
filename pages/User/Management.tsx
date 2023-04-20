@@ -19,6 +19,25 @@ import { BsFileEarmarkPlus } from "react-icons/bs";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import { HiOutlineDownload } from "react-icons/hi";
 
+const downloadCSV = async () => {
+    try {
+        const response = await axios({
+            url: `/api/user/getUsersCSV`,
+            method: "get",
+            responseType: "arraybuffer",
+        });
+        const blob = new Blob([response.data]);
+        const url = window.URL.createObjectURL(blob);
+        const temp_link = document.createElement("a");
+        temp_link.download = `Users.csv`;
+        temp_link.href = url;
+        temp_link.click();
+        temp_link.remove();
+    } catch (e) {
+        console.log(e);
+    }
+};
+
 
 const getUser = async () => {
   const url = "/api/user/getUsers";
@@ -79,7 +98,7 @@ export default function User() {
     <ModuleMain>
       <ModuleHeader title="User Management" header="User Tables">
         <TooltipBtn
-            onClick={() => downloadCSV("checklist", activeTabIndex)}
+            onClick={() => downloadCSV()}
                     text="Export CSV">
             <HiOutlineDownload size={20} />
         </TooltipBtn>
