@@ -39,3 +39,18 @@
 .checklistViewSection {
   @extend .checklistDetailsContainer;
 }
+
+.checklistTemplatePaneContainer {
+  padding: 10px;
+}
+
+.checklistTemplatePaneTitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.checklistTemplatePaneHeading {
+  font-size: 1.2;
+  font-weight: 550;
+  margin: 0;
+}
