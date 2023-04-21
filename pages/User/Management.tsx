@@ -15,7 +15,7 @@ import axios from "axios";
 import { ModuleHeader, ModuleMain } from "../../components";
 import TooltipBtn from "../../components/TooltipBtn";
 import Link from "next/link";
-import { BsFileEarmarkPlus, BsTrashFill } from "react-icons/bs";
+import { BsFileEarmarkPlus, BsPencilSquare, BsTrashFill } from "react-icons/bs";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import { HiOutlineDownload } from "react-icons/hi";
 import ModuleSimplePopup from "../../components/ModuleLayout/ModuleSimplePopup";
@@ -147,14 +147,26 @@ export default function User() {
               <Cell>{item.employee_id}</Cell>
               <Cell>{item.full_name}</Cell>
               <Cell>{item.role_name}</Cell>
-              <Cell>
+              <Cell
+              style={{
+                display: "flex",
+                flexFlow: "row wrap",
+                justifyContent: "space-around",
+                // marginRight: "10%",
+                // marginLeft: "10%",
+              }}>
               <button
         onClick={onDeleteClick}
         name={"" + item.user_id}
-        style={{ all: "unset", cursor: "pointer" }}
+        style={{ all: "unset", cursor: "pointer", marginRight: "10px" }}
       >
         <BsTrashFill />
       </button>
+      <Link 
+      href="/User/Management"
+      style={{ all: "unset", cursor: "pointer" }}>
+        <BsPencilSquare />
+      </Link>
       </Cell>
             </Row>
           ))}
