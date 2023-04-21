@@ -20,8 +20,12 @@
     table library. It supports table dropdown features.
 */
 
-
-import React, { useState, useEffect, CSSProperties, MouseEventHandler } from "react";
+import React, {
+  useState,
+  useEffect,
+  CSSProperties,
+  MouseEventHandler,
+} from "react";
 import {
   ModuleContent,
   ModuleHeader,
@@ -99,7 +103,7 @@ export interface RequestItem {
 }
 
 export interface RequestProps {
-  filter?: boolean; 
+  filter?: boolean;
   status: number;
   plant: number;
   date: string;
@@ -150,7 +154,7 @@ export const downloadCSV = async (type: string) => {
   }
 };
 
-export default function Request( props: RequestProps ) {
+export default function Request(props: RequestProps) {
   const [requestItems, setRequestItems] = useState<RequestItem[]>([]);
   const [isReady, setReady] = useState(false);
   const [modalSrc, setModalSrc] = useState<string | undefined>();
@@ -172,25 +176,23 @@ export default function Request( props: RequestProps ) {
     {
       label: "ID",
       resize: true,
-      renderCell: item => item.id
+      renderCell: (item) => item.id,
     },
     {
       label: "Fault Type",
       resize: true,
-      renderCell: item => item.fault_name
+      renderCell: (item) => item.fault_name,
     },
     {
       label: "Location",
       resize: true,
-      renderCell: item => item.plant_name,
+      renderCell: (item) => item.plant_name,
     },
     {
       label: "Priority",
       resize: true,
-      renderCell: item => (
-        <span
-          style={{ color: getColor(item.priority), fontWeight: "bold" }}
-        >
+      renderCell: (item) => (
+        <span style={{ color: getColor(item.priority), fontWeight: "bold" }}>
           {item.priority == null ? "-" : item.priority}
         </span>
       ),
@@ -198,7 +200,7 @@ export default function Request( props: RequestProps ) {
     {
       label: "Status",
       resize: true,
-      renderCell: item => (
+      renderCell: (item) => (
         <span style={{ color: getColor(item.status), fontWeight: "bold" }}>
           {item.status}
         </span>
@@ -207,7 +209,7 @@ export default function Request( props: RequestProps ) {
     {
       label: "Date",
       resize: true,
-      renderCell: item =>
+      renderCell: (item) =>
         item.created_date.toLocaleDateString("en-US", {
           year: "numeric",
           month: "2-digit",
@@ -217,16 +219,16 @@ export default function Request( props: RequestProps ) {
     {
       label: "Asset Name",
       resize: true,
-      renderCell: item => item.asset_name,
+      renderCell: (item) => item.asset_name,
     },
     {
       label: "Requested By",
       resize: true,
-      renderCell: item => item.fullname,
+      renderCell: (item) => item.fullname,
     },
     {
       label: "",
-      renderCell: item => (
+      renderCell: (item) => (
         <div className={styles.iconsDiv}>
           {(item.status_id === 1 || item.status_id === 2) && (
             <div
@@ -302,7 +304,9 @@ export default function Request( props: RequestProps ) {
     error: requestFetchError,
     isValidating: requestIsFetchValidating,
     mutate: requestMutate,
-  } = props?.filter ? useRequestFilter(props, page) : useRequest(indexedColumn[activeTabIndex], page);
+  } = props?.filter
+    ? useRequestFilter(props, page)
+    : useRequest(indexedColumn[activeTabIndex], page);
 
   const theme = useTheme([
     getTheme(),
@@ -364,9 +368,7 @@ export default function Request( props: RequestProps ) {
                     {item.uploaded_file ? (
                       <Image
                         src={URL.createObjectURL(
-                          new Blob([
-                            new Uint8Array(item.uploaded_file.data),
-                          ])
+                          new Blob([new Uint8Array(item.uploaded_file.data)])
                         )}
                         alt=""
                         className={styles.tableDropdownImg}
@@ -393,9 +395,7 @@ export default function Request( props: RequestProps ) {
                     {item.completion_file ? (
                       <Image
                         src={URL.createObjectURL(
-                          new Blob([
-                            new Uint8Array(item.completion_file.data),
-                          ])
+                          new Blob([new Uint8Array(item.completion_file.data)])
                         )}
                         alt=""
                         className={styles.tableDropdownImg}
@@ -457,7 +457,7 @@ export default function Request( props: RequestProps ) {
             return {
               id: row.request_id,
               ...row,
-              created_date: new Date(row.created_date)
+              created_date: new Date(row.created_date),
             };
           })
         );
@@ -486,12 +486,12 @@ export default function Request( props: RequestProps ) {
         setReady(true);
       });
   }, [page]);
+  */
 
   useEffect(() => {
-
     setReady(false);
     axios
-      .get(`/api/request/${indexedColumn[activeTabIndex]}?page=${page}`)
+      .get(`/api/request/${indexedColumn[activeTabIndex]}?page=1`)
       .then((response) => {
         setRequestItems(
           response.data.rows.map((row: CMMSRequest) => {
@@ -507,7 +507,6 @@ export default function Request( props: RequestProps ) {
         setReady(true);
       });
   }, [activeTabIndex]);
-  */
 
   return (
     <ModuleMain>
@@ -527,43 +526,52 @@ export default function Request( props: RequestProps ) {
         </a>
       </ModuleHeader>
       <ModuleContent>
-        {!props?.filter && <ul className="nav nav-tabs">
-          <li
-            onClick={() => {
-              activeTabIndex !== 0 && switchColumns(0);
-            }}
-            className={"nav-link" + (activeTabIndex === 0 ? " active" : "")}
-          >
-            <span style={{ all: "unset" }}>Pending</span>
-          </li>
-          <li
-            onClick={() => {
-              activeTabIndex !== 1 && switchColumns(1);
-            }}
-            className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
-          >
-            <span style={{ all: "unset" }}>Assigned</span>
-          </li>
-          <li
-            onClick={() => {
-              activeTabIndex !== 2 && switchColumns(2);
-            }}
-            className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
-          >
-            <span style={{ all: "unset" }}>For Review</span>
-          </li>
-          <li
-            onClick={() => {
-              activeTabIndex !== 3 && switchColumns(3);
-            }}
-            className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
-          >
-            <span style={{ all: "unset" }}>Approved</span>
-          </li>
-        </ul>
-        }
+        {!props?.filter && (
+          <ul className="nav nav-tabs">
+            <li
+              onClick={() => {
+                activeTabIndex !== 0 && switchColumns(0);
+              }}
+              className={"nav-link" + (activeTabIndex === 0 ? " active" : "")}
+            >
+              <span style={{ all: "unset" }}>Pending</span>
+            </li>
+            <li
+              onClick={() => {
+                activeTabIndex !== 1 && switchColumns(1);
+              }}
+              className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
+            >
+              <span style={{ all: "unset" }}>Assigned</span>
+            </li>
+            <li
+              onClick={() => {
+                activeTabIndex !== 2 && switchColumns(2);
+              }}
+              className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
+            >
+              <span style={{ all: "unset" }}>For Review</span>
+            </li>
+            <li
+              onClick={() => {
+                activeTabIndex !== 3 && switchColumns(3);
+              }}
+              className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
+            >
+              <span style={{ all: "unset" }}>Approved</span>
+            </li>
+          </ul>
+        )}
         {!isReady && (
-          <div style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
+          <div
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              textAlign: "center",
+            }}
+          >
             <LoadingHourglass />
           </div>
         )}
@@ -579,11 +587,12 @@ export default function Request( props: RequestProps ) {
               rowProps={ROW_PROPS}
               rowOptions={ROW_OPTIONS}
             />
-              <Pagination 
-                setPage={setPage} 
-                setReady={setReady} 
-                totalPages={totalPages} 
-                page={page}/>
+            <Pagination
+              setPage={setPage}
+              setReady={setReady}
+              totalPages={totalPages}
+              page={page}
+            />
           </>
         )}
         <ModuleModal
@@ -607,22 +616,22 @@ export default function Request( props: RequestProps ) {
   );
 }
 
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  const headers = {
-    withCredentials: true,
-    headers: {
-      Cookie: context.req.headers.cookie,
-    },
-  };
+// export const getServerSideProps = async (
+//   context: GetServerSidePropsContext
+// ) => {
+//   const headers = {
+//     withCredentials: true,
+//     headers: {
+//       Cookie: context.req.headers.cookie,
+//     },
+//   };
 
-  const response = await axios.get(
-    "http://localhost:3001/api/request/pending?page=1",
-    headers
-  );
+//   const response = await axios.get(
+//     "http://localhost:3001/api/request/pending?page=1",
+//     headers
+//   );
 
-  return {
-    props: { pages: response.data.total },
-  };
-};
+//   return {
+//     props: { pages: response.data.total },
+//   };
+// };
