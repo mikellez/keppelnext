@@ -253,7 +253,7 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 		}
 	}
 
-	const fetchedPlants = await axios.get<CMMSPlant[]>("http://localhost:3001/api/plants", headers);
+	const fetchedPlants = await axios.get<CMMSPlant[]>(`http://${process.env.SERVER}:${process.env.PORT}/api/plants`, headers);
 
 	let props: AddUserProps = { plants: fetchedPlants.data }
 

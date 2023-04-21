@@ -41,17 +41,17 @@ export const getServerSideProps: GetServerSideProps = async (
             Cookie: context.req.headers.cookie,
         },
     };
-    const getUser = axios.get<CMMSUser>("http://localhost:3001/api/user", headers);
+    const getUser = axios.get<CMMSUser>(`http://${process.env.SERVER}:${process.env.PORT}/api/user`, headers);
     const getRequestTypes = axios.get<CMMSRequestTypes[]>(
-        "http://localhost:3001/api/request/types",
+        `http://${process.env.SERVER}:${process.env.PORT}/api/request/types`,
         headers
     );
     const getFaultTypes = axios.get<CMMSFaultTypes[]>(
-        "http://localhost:3001/api/fault/types",
+        `http://${process.env.SERVER}:${process.env.PORT}/api/fault/types`,
         headers
     );
     const getSpecificRequest = axios.get(
-        "http://localhost:3001/api/request/" + context.params?.id,
+        `http://${process.env.SERVER}:${process.env.PORT}/api/request/` + context.params?.id,
         headers
     );
     const values = await Promise.all([getUser, getRequestTypes, getFaultTypes, getSpecificRequest]);

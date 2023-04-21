@@ -1,9 +1,11 @@
-// require dependencies
+require('dotenv').config()
 const PDFDocument = require('pdfkit-table');
 const axios = require('axios');
 const moment = require('moment');
 const getStream = require('get-stream');
 const SVGtoPDF = require('svg-to-pdfkit');
+
+
 
 const azSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7" shape-rendering="crispEdges">
 <rect width="7" height="7" fill="#F15A23"/>
@@ -15,7 +17,7 @@ const azSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7" shape-r
 </svg>`;
 
 async function fetchChecklist(checklistId) {
-    return axios.get(`http://localhost:3001/api/checklist/record/${checklistId}`)
+    return axios.get(`http://${process.env.SERVER}:${process.env.PORT}/api/checklist/record/${checklistId}`)
         .then(res => {
             return res.data;
         })
@@ -155,7 +157,7 @@ async function generateChecklistPDF(checklistId) {
 
 // Fetch a specific request by id
 async function fetchRequest(id) {
-    return await axios.get("http://localhost:3001/api/request/" + id)
+    return await axios.get(`http://${process.env.SERVER}:${process.env.PORT}/api/request/` + id)
         .then(res => {
             return res.data;
         })

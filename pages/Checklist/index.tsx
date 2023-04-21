@@ -314,23 +314,3 @@ export default function Checklist(props: ChecklistProps) {
     </ModuleMain>
   );
 }
-
-// export const getServerSideProps = async (
-//   context: GetServerSidePropsContext
-// ) => {
-//   const headers = {
-//     withCredentials: true,
-//     headers: {
-//       Cookie: context.req.headers.cookie,
-//     },
-//   };
-
-//   const response = await axios.get(
-//     "http://localhost:3001/api/checklist/assigned?page=1",
-//     headers
-//   );
-
-//   return {
-//     props: { pages: response.data.total },
-//   };
-// };

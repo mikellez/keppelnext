@@ -217,9 +217,9 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 		}
 	}
 
-	const masterCreateInfo = await axios.get<CMMSMasterTables>("http://localhost:3001/api/master/new", headers);
+	const masterCreateInfo = await axios.get<CMMSMasterTables>(`http://${process.env.SERVER}:${process.env.PORT}/api/master/new`, headers);
 	const systems = await axios.get<CMMSSystem[]>(
-		"http://localhost:3001/api/asset/systems",
+		`http://${process.env.SERVER}:${process.env.PORT}/api/asset/systems`,
 		headers
 	  );
 

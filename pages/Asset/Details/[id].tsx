@@ -347,11 +347,11 @@ export const getServerSideProps: GetServerSideProps = async (
 
     const psaId = context.query.id;
     const assetHistory = await axios.get(
-        "http://localhost:3001/api/asset/history/" + psaId,
+        `http://${process.env.SERVER}:${process.env.PORT}/api/asset/history/` + psaId,
         headers
     );
     const COPHistory = await axios.get(
-        "http://localhost:3001/api/changeOfParts/?psa_id=" + psaId,
+        `http://${process.env.SERVER}:${process.env.PORT}/api/changeOfParts/?psa_id=` + psaId,
         headers
     );
 

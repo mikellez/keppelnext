@@ -61,7 +61,7 @@ export const getServerSideProps: GetServerSideProps = async (
     context: GetServerSidePropsContext
   ) => {
     const getSpecificRequest = await axios.get<CMMSRequest>(
-      "http://localhost:3001/api/request/" + context.params?.id
+      `http://${process.env.SERVER}:${process.env.PORT}/api/request/` + context.params?.id
     );
   
     if (

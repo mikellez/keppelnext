@@ -362,7 +362,7 @@ export const getServerSideProps = async (
   };
 
   const response = await axios.get(
-    "http://localhost:3001/api/logbook?page=1",
+    `http://${process.env.SERVER}:${process.env.PORT}/api/logbook?page=1`,
     headers
   );
 

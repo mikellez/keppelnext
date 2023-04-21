@@ -162,7 +162,7 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 		}
 	}
 
-	const masterInfo = await axios.get<any>("http://localhost:3001/api/master/" + type + "/" + id, headers);
+	const masterInfo = await axios.get<any>(`http://${process.env.SERVER}:${process.env.PORT}/api/master/` + type + "/" + id, headers);
 	console.log(masterInfo.data)
 	if(masterInfo.status === 400)
 		return { notFound: true }

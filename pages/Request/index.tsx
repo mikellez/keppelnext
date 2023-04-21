@@ -616,23 +616,3 @@ export default function Request(props: RequestProps) {
     </ModuleMain>
   );
 }
-
-// export const getServerSideProps = async (
-//   context: GetServerSidePropsContext
-// ) => {
-//   const headers = {
-//     withCredentials: true,
-//     headers: {
-//       Cookie: context.req.headers.cookie,
-//     },
-//   };
-
-//   const response = await axios.get(
-//     "http://localhost:3001/api/request/pending?page=1",
-//     headers
-//   );
-
-//   return {
-//     props: { pages: response.data.total },
-//   };
-// };
