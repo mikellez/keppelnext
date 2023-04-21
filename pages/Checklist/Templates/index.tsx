@@ -17,6 +17,7 @@ import TooltipBtn from "../../../components/TooltipBtn";
 import { useRouter } from "next/router";
 import { Role } from "../../../types/common/enums";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import ChecklistTemplatePane from "../../../components/Checklist/ChecklistTemplatePane";
 
 const deleteTemplate = async (checklistId: number) => {
     try {
@@ -105,6 +106,9 @@ const Templates = () => {
                         <table className="table">
                             <thead id="templates_list">{checklistTemplateHTML}</thead>
                         </table>
+                    </div>
+                    <div>
+                        <ChecklistTemplatePane checklist={selectedTemplate as CMMSChecklist} />
                     </div>
                 </div>
             </ModuleContent>
