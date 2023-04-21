@@ -297,12 +297,16 @@ export default function Request( props: RequestProps ) {
     }
   };
 
+  const filteredRequest = useRequestFilter(props, page);
+  const allRequest = useRequest(indexedColumn[activeTabIndex], page);
+
   const {
     data: requestData,
     error: requestFetchError,
     isValidating: requestIsFetchValidating,
     mutate: requestMutate,
-  } = props?.filter ? useRequestFilter(props, page) : useRequest(indexedColumn[activeTabIndex], page);
+  } = props?.filter ? filteredRequest : allRequest;
+ 
 
   const theme = useTheme([
     getTheme(),
