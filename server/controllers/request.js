@@ -601,7 +601,7 @@ const fetchFilteredRequests = async (req, res, next) => {
     plantCond = `AND r.plant_id = '${plant}'`;
   }
 
-  if (status) {
+  if (status && status != 'all') {
     statusCond = `AND r.status_id = '${status}'`;
   }
 
