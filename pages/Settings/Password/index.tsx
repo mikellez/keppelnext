@@ -60,6 +60,7 @@ export default function password(props: passwordProps){
 		try { let res = await axios.post("/api/setting/updatePassword", form);
 		console.log(res);
 		setSubmissionModal(true);
+		setTimeout(sendLogout, 3000);
 
 	} catch(err){
 		console.log(err);
@@ -153,7 +154,7 @@ export default function password(props: passwordProps){
             modalOpenState={submissionModal}
             setModalOpenState={setSubmissionModal}
             title="Success!"
-            text="Your password has been changed!"
+            text="Your password has been changed! Logging you out..."
             icon={SimpleIcon.Check}
             buttons={[
               <button
