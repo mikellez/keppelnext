@@ -104,8 +104,8 @@ export interface RequestItem {
 
 export interface RequestProps {
   filter?: boolean;
-  status: number;
-  plant: number;
+  status: any;
+  plant: any;
   date: string;
   datetype: string;
   isReady?: boolean;
