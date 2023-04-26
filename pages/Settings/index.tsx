@@ -1,3 +1,7 @@
+export default function Settings() {
+	return <div>what</div>
+} 
+
 /*import formStyles from "../../styles/formStyles.module.css"
 
 import React, {useState, useEffect} from 'react';
