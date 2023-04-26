@@ -56,7 +56,7 @@ function useRequestFilter(props: RequestProps, page: number) {
       });
 
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
-    `/api/request/filter/${props?.status || 'all'}/${props?.plant || 'all'}/${props.datetype || 'all'}/${props?.date || 'all'}/${page}`,
+    `/api/request/filter/${props?.status || 0}/${props?.plant || 0}/${props.datetype || 'all'}/${props?.date || 'all'}/${page}`,
     requestFetcher,
     { revalidateOnFocus: false }
   );
