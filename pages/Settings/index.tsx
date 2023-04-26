@@ -11,20 +11,27 @@ import ModuleSimplePopup, { SimpleIcon } from "../../components/ModuleLayout/Mod
 import router from "next/router";
 import Link from "next/link";
 import Head from "next/head";
-import {CMMSPlant, CMMSUserSettings } from "../../types/common/interfaces";
+import {CMMSPlant, CMMSUserInfo, CMMSUserSettings} from "../../types/common/interfaces";
 import { useCurrentUser } from "../../components/SWR";
 import { useRouter } from "next/router";
 
-interface AddUserProps {
+interface settingsProps {
 	plants: CMMSPlant[];
+	info: CMMSUserInfo;
+	sortedPlants: {value: number, label: string}[];
 }
 
-export default function settings(props: AddUserProps){
+export default function settings(props: settingsProps){
     const [form, setform] = useState<CMMSUserSettings>({
-		username: "",
-		email: "",
-		allocatedPlants: [],
+		username: props.info.username,
+		email: props.info.email,
+		userId: props.info.id,
 			});
+	const [isSameDetailsModalOpen, setIsSameDetailsModalOpen] = useState<boolean>(false);
+	const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
+	const [submissionModal, setSubmissionModal] = useState<boolean>(false);
+	const [confirmationModal, setConfirmationModal] = useState<boolean>(false);
+	const router = useRouter();
 	const handleForm = (
 		e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
 	  ) => {
@@ -32,38 +39,27 @@ export default function settings(props: AddUserProps){
 		  return { ...prevState, [e.target.name]: e.target.value };
 		});
 	  };
-	const handleFormNumber =(
-		e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-	) => {
-		setform((prevState) => {
-			return { ...prevState, [e.target.name]: Number(e.target.value) };
-		})
+
+	function validate(){
+		console.log(form);
+		if(form.username == props.info.username && form.email == props.info.email){
+			setIsSameDetailsModalOpen(true);
+		} else if (form.username == "" || form.email == ""){
+			setIsMissingDetailsModaOpen(true);
+		} else {
+			submission();
+		}
 	}
-    const user = useCurrentUser();
-	const router = useRouter();
-    console.log(user);
 
-	
+	async function submission(){
+		try { let res = await axios.post("/api/setting/update", form);
+		console.log(res);
+		setSubmissionModal(true);
 
-	// function validate(){
-	// 	// console.log(form);
-	// 	if(form.firstName == "" || form.lastName == "" || form.username == "" || form.password == "" || form.email == "" || form.roleType == 0 || form.allocatedPlants.length == 0){
-	// 		setIsMissingDetailsModaOpen(true);
-	// 	}
-	// 	else{
-	// 		submission();
-	// 	}
-	// }
-
-	// async function submission(){
-	// 	try { let res = await axios.post("/api/user/addUser", form);
-	// 	console.log(res);
-	// 	setSubmissionModal(true);
-
-	// } catch(err){
-	// 	console.log(err);
-	// }
-	// }
+	} catch(err){
+		console.log(err);
+	}
+	}
     return (
         <ModuleMain>
 			<ModuleHeader header="User Settings" title="User Settings">
@@ -74,21 +70,25 @@ export default function settings(props: AddUserProps){
 
 					<div className="form-group">
 						<label className='form-label'>
-							<RequiredIcon/> Full Name
+							Full Name
 						</label>
 
 						<div className="input-group">
 							<input type="text" 
 							className="form-control" 
 							placeholder="First Name" 
-							onChange={handleForm} 
-							name="firstName"/>
+							name="firstName"
+							value={props.info.first_name}
+							disabled
+							/>
 
 							<input type="text" 
 							className="form-control" 
 							placeholder="Last Name" 
-							onChange={handleForm} 
-							name="lastName"/>
+							name="lastName"
+							value={props.info.last_name}
+							disabled
+							/>
 						</div>
 
 					</div>
@@ -100,15 +100,19 @@ export default function settings(props: AddUserProps){
 						<input className="form-control" 
 						type="text"
 						onChange={handleForm} 
-						name="username"/>
+						name="username"
+						defaultValue={props.info.username}
+						/>
 					</div>
 
 					<div className="form-group">
 						<label className='form-label'>
-							<RequiredIcon/> Password
+							Password
 						</label>
                         <div>
+						<Link href="/Settings/Password">
 						<button className="btn btn-primary">Change password</button>
+						</Link>
                         </div>
 					</div>
 
@@ -122,8 +126,10 @@ export default function settings(props: AddUserProps){
 						</label>
 						<input className="form-control" 
 						type="text"
-						onChange={handleForm} 
-						name="employeeId"/>
+						name="employeeId"
+						value = {props.info.employee_id}
+						disabled
+						/>
 					</div>
 
 					<div className="form-group">
@@ -133,6 +139,7 @@ export default function settings(props: AddUserProps){
 						<input className="form-control" 
 						type="email"
 						onChange={handleForm}
+						defaultValue={props.info.email}
 						name="email"/>
 					</div>
 				</div>
@@ -140,54 +147,117 @@ export default function settings(props: AddUserProps){
 				<ModuleDivider style={{gridColumn: "span 2"}}/>
 
 				<div className={formStyles.halfContainer}>
-
-					<div className="form-group">
+				<div className="form-group">
 						<label className='form-label'>
-							<RequiredIcon/> Role Type
+							Role Type
 						</label>
-						<select className="form-select"
-						onChange={handleFormNumber}
-						name="roleType">
-							<option value={0} disabled hidden selected> -- Select Role -- </option>
-							<option value={1}>Admin</option>
-							<option value={2}>Manager</option>
-							<option value={3}>Engineer</option>
-							<option value={4}>Operation Specialist</option>
-						</select>
+						<input className="form-control" 
+						type="text"
+						name="roleType"
+						value={["Admin","Manager","Engineer","Operation Specialist"][props.info.role_id-1]}
+						disabled
+						/>
 					</div>
 				</div>
 
 				<div className={formStyles.halfContainer}>
 					<div className="form-group">
 						<label className='form-label'>
-							<RequiredIcon/> Allocated Plants
+						Allocated Plants
 						</label>
 						{/* TODO style this somehow */}
 						<Select classNamePrefix='form-control' 
 						isMulti={true} 
-						onChange={(e) => {
-							console.log(e)
-							setform((prevState) => {
-								return { ...prevState, allocatedPlants: e.map(p => p.value) };
-							})
-						}}
 						name="allocatedPlants"
-						options={props.plants.map(p => {
-							return {
-								value: p.plant_id,
-								label: p.plant_name
-							}
-						})}
+						defaultValue = {props.info.allocated_plants.map(p => {
+								return {
+									value: p,
+									label: props.sortedPlants[parseInt(p)-1].label
+								}
+							})}
+						isDisabled = {true}
 						/>
 					</div>
 				</div>
+				<ModuleSimplePopup
+            modalOpenState={confirmationModal}
+            setModalOpenState={setConfirmationModal}
+            title="Same Confirmation"
+            text="Are you sure you want to change your details?"
+            icon={SimpleIcon.Exclaim}
+			buttons={[
+				<button
+			  key={2}
+			  onClick={() => {
+				setConfirmationModal(false);
+				
+			  }}
+			  className="btn btn-warning"
+			>
+			  No
+		  </button>,
+		  <button
+		  key={1}
+		  onClick={() => {
+			setConfirmationModal(false);
+			validate();
+		  }}
+		  className="btn btn-primary"
+		>
+		  Yes
+	  </button>
+	  
+			  ]}
+          />
+				<ModuleSimplePopup
+            modalOpenState={isSameDetailsModalOpen}
+            setModalOpenState={setIsSameDetailsModalOpen}
+            title="Same Details"
+            text="You did not change any details."
+            icon={SimpleIcon.Cross}
+          />
+		  <ModuleSimplePopup
+            modalOpenState={isMissingDetailsModalOpen}
+            setModalOpenState={setIsMissingDetailsModaOpen}
+            title="Missing Details"
+            text="Please ensure that you have filled in all the required entries."
+            icon={SimpleIcon.Cross}
+          />
+		  <ModuleSimplePopup
+            modalOpenState={submissionModal}
+            setModalOpenState={setSubmissionModal}
+            title="Success!"
+            text="Your inputs has been submitted!"
+            icon={SimpleIcon.Check}
+            buttons={[
+              <button
+                key={2}
+                onClick={() => {
+                  setSubmissionModal(false);
+                  router.push("/Dashboard");
+                }}
+                className="btn btn-primary"
+              >
+                Ok
+            </button>
+            ]}
+            onRequestClose={() => {
+              router.push("/Dashboard");
+            }}
+          />
 			</ModuleContent>
 			<ModuleFooter>
-				<button type="submit" className="btn btn-primary">
+			<button className="btn btn-warning">
 				{
-					//isSubmitting && <LoadingIcon/>
 
 				}
+				cancel</button>
+
+				<button className="btn btn-primary"
+				onClick={() => {
+					setConfirmationModal(true);
+				}}
+				>
 				Submit</button>
 			</ModuleFooter>
 		</ModuleMain>
@@ -208,9 +278,12 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 		headers
 	  );
 	  console.log(userInfo.data);
-	//   console.log(userInfo);
-
-	let props: AddUserProps = { plants: fetchedPlants.data }
+	  let Plants: {value: number, label: string}[] = []
+	  for(let i=0;i<fetchedPlants.data.length;i++){
+		Plants.push({ value: fetchedPlants.data[i].plant_id, label: fetchedPlants.data[i].plant_name });
+	  }
+	  Plants.sort((a,b) => a.value - b.value);
+	let props: settingsProps = { plants: fetchedPlants.data, info: userInfo.data, sortedPlants: Plants}
 	return {
 		props: props
 	}

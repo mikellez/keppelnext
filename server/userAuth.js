@@ -62,7 +62,8 @@ module.exports = (server) => {
                 allocated_plants: result.rows[0].allocated_plants.map(plant => parseInt(plant)).sort(),
                 email: result.rows[0].user_email,
                 username: result.rows[0].user_name,
-                test: "test"
+                first_name: result.rows[0].first_name,
+                last_name: result.rows[0].last_name
 
             };
             // console.log(userInfo)

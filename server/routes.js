@@ -80,7 +80,9 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
         allocated_plants: req.user.allocated_plants,
         employee_id: req.user.employee_id,
         email: req.user.email,
-        username: req.user.username
+        username: req.user.username,
+        first_name: req.user.first_name,
+        last_name: req.user.last_name
     });
 });
 
@@ -396,6 +398,9 @@ router
     .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser);
 router
     .delete("/user/deleteUser/:id", checkIfLoggedInAPI, controllers.user.deleteUser);
+
+router
+    .post("/setting/update", checkIfLoggedInAPI, controllers.setting.updateUser);
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
 
