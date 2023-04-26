@@ -302,7 +302,7 @@ export default function Request( props: RequestProps ) {
     error: requestFetchError,
     isValidating: requestIsFetchValidating,
     mutate: requestMutate,
-  } = props?.filter ? useRequestFilter(props, page) : useRequest(indexedColumn[activeTabIndex], page);
+  } = useRequest(indexedColumn[activeTabIndex], page);
 
   const theme = useTheme([
     getTheme(),

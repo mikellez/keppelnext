@@ -39,6 +39,7 @@ function fetchRequestQuery(status_query, role_id, user_id, page) {
 		  left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
 			  from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
 			  WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
+    WHERE 1 = 1 
 	  ${status_query}
 	  GROUP BY (
 		  r.request_id,
@@ -120,11 +121,13 @@ const fetchPendingRequests = async (req, res, next) => {
   const page = req.query.page || 1;
 
   const sql = fetchRequestQuery(
-    "WHERE sc.status_id = 1", //PENDING
+    "AND sc.status_id = 1", //PENDING
     req.user.role_id,
     req.user.id,
     page
   );
+
+  console.log(sql)
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(1);
@@ -136,7 +139,7 @@ const fetchAssignedRequests = async (req, res, next) => {
   const page = req.query.page || 1;
 
   const sql = fetchRequestQuery(
-    "WHERE sc.status_id = 2", //ASSIGNED
+    "AND sc.status_id = 2", //ASSIGNED
     req.user.role_id,
     req.user.id,
     page
@@ -152,7 +155,7 @@ const fetchReviewRequests = async (req, res, next) => {
   const page = req.query.page || 1;
 
   const sql = fetchRequestQuery(
-    "WHERE sc.status_id = 3 OR sc.status_id = 5 OR sc.status_id = 6", //COMPLETED, REJECTED, CANCELLEd
+    "AND (sc.status_id = 3 OR sc.status_id = 5 OR sc.status_id = 6)", //COMPLETED, REJECTED, CANCELLEd
     req.user.role_id,
     req.user.id,
     page
@@ -168,7 +171,7 @@ const fetchApprovedRequests = async (req, res, next) => {
   const page = req.query.page || 1;
 
   const sql = fetchRequestQuery(
-    "WHERE sc.status_id = 4", //APPROVED
+    "AND sc.status_id = 4", //APPROVED
     req.user.role_id,
     req.user.id,
     page

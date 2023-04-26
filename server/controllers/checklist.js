@@ -452,8 +452,6 @@ const fetchChecklistCounts = (req, res, next) => {
         default:
             return res.status(404).send(`Invalid checklist type of ${req.params.field}`);
     }
-    console.log(date)
-    console.log(sql)
     db.query(sql, (err, result) => {
         if (err)
             return res
