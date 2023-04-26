@@ -7,7 +7,7 @@ const Pagination = ({
   onClick,
   setPage,
   setReady,
-  totalPages
+  totalPages,
 }: {
   page: number;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
@@ -22,21 +22,24 @@ const Pagination = ({
         className={`${styles.paginationChevron} ${
           page - 1 > 0 ? styles.active : styles.disabled
         }`}
-        onClick={() => {setPage(1); setReady(false)}}
+        onClick={() => {
+          setPage(1);
+          setReady(false);
+        }}
       />
       <span>
         {page - 1 > 0 && (
-          <PageButton setPage={setPage} onClick={()=>setReady(false)}>
-            { page - 1 }
+          <PageButton setPage={setPage} onClick={() => setReady(false)}>
+            {page - 1}
           </PageButton>
         )}
-        <PageButton active setPage={setPage} onClick={()=>setReady(false)}>
-          { page }
+        <PageButton active setPage={setPage} onClick={() => setReady(false)}>
+          {page}
         </PageButton>
 
         {page + 1 <= totalPages && (
-          <PageButton setPage={setPage} onClick={()=>setReady(false)}>
-            { page + 1 }
+          <PageButton setPage={setPage} onClick={() => setReady(false)}>
+            {page + 1}
           </PageButton>
         )}
       </span>
@@ -45,11 +48,13 @@ const Pagination = ({
         className={`${styles.paginationChevron} ${
           page < totalPages ? styles.active : styles.disabled
         }`}
-        onClick={() => {setPage(totalPages); setReady(false);}}
+        onClick={() => {
+          setPage(totalPages);
+          setReady(false);
+        }}
       />
     </div>
-
-  )
-}
+  );
+};
 
 export default Pagination;

@@ -62,7 +62,7 @@ export const getServerSideProps: GetServerSideProps = async (
   };
 
   const userInfo = await axios.get<any>(
-    "http://localhost:3001/api/user",
+    `http://${process.env.SERVER}:${process.env.PORT}/api/user`,
     headers
   );
   console.log(userInfo.data);

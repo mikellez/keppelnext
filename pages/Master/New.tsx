@@ -160,7 +160,7 @@ export default function New(props: NewMasterEntryProps) {
 			  <ModuleSimplePopup
 				modalOpenState={isNotValid}
 				setModalOpenState={setIsNotValid}
-				title="System asset ID not valid 💀💀💀"
+				title="System asset ID not valid"
 				text="Please ensure that you have chosen a valid ID from the tables."
 				icon={SimpleIcon.Cross}
 				// onRequestClose={() => {
@@ -171,7 +171,7 @@ export default function New(props: NewMasterEntryProps) {
             modalOpenState={submissionModal}
             setModalOpenState={setSubmissionModal}
             title="Success!"
-            text="Your entry has been submitted! 🔥🔥🔥"
+            text="Your entry has been submitted!"
             icon={SimpleIcon.Check}
             buttons={[
               	<button
@@ -217,9 +217,9 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 		}
 	}
 
-	const masterCreateInfo = await axios.get<CMMSMasterTables>("http://localhost:3001/api/master/new", headers);
+	const masterCreateInfo = await axios.get<CMMSMasterTables>(`http://${process.env.SERVER}:${process.env.PORT}/api/master/new`, headers);
 	const systems = await axios.get<CMMSSystem[]>(
-		"http://localhost:3001/api/asset/systems",
+		`http://${process.env.SERVER}:${process.env.PORT}/api/asset/systems`,
 		headers
 	  );
 

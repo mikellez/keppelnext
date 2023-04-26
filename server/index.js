@@ -1,3 +1,4 @@
+require("dotenv").config()
 const express = require("express");
 const next = require("next");
 const bodyParser = require("body-parser");
@@ -143,7 +144,7 @@ app.prepare().then(() => {
     return handle(req, res);
   });
 
-  server.listen(3001, () => {
-    console.log("Ready on http://localhost:3001");
+  server.listen(process.env.PORT, () => {
+    console.log(`Ready on Port ${process.env.PORT}`);
   });
 });

@@ -49,12 +49,12 @@ export const getServerSideProps: GetServerSideProps = async (
   };
 
   const getSpecificRequest = axios.get(
-    "http://localhost:3001/api/request/" + context.params?.id,
+    `http://${process.env.SERVER}:${process.env.PORT}/api/request/` + context.params?.id,
     headers
   );
 
   const getPriority = axios.get(
-    "http://localhost:3001/api/request/priority",
+    `http://${process.env.SERVER}:${process.env.PORT}/api/request/priority`,
     headers
   );
 

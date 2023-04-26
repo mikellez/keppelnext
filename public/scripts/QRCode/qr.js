@@ -1,7 +1,7 @@
 import generateQRFromURL from "./generateQR.js"
 import { Axios } from 'axios'
 
-const HOST_URL = "192.168.20.93:3001";
+const HOST_URL = `${process.env.SERVER}:${process.env.PORT}`;
 const arrAssets = [];
 
 console.log("adasdas")

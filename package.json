@@ -25,6 +25,7 @@
 		"bcryptjs": "^2.4.3",
 		"bootstrap": "^5.2.3",
 		"custom-error": "^0.2.1",
+		"dotenv": "^16.0.3",
 		"eslint": "8.27.0",
 		"eslint-config-next": "13.0.2",
 		"express": "^4.18.2",

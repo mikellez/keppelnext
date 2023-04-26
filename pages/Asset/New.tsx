@@ -666,15 +666,15 @@ export const getServerSideProps: GetServerSideProps = async (
   };
   // API to get plants, systems, asset types
   const plants = await axios.get<CMMSPlant[]>(
-    "http://localhost:3001/api/getPlants",
+    `http://${process.env.SERVER}:${process.env.PORT}/api/getPlants`,
     headers
   );
   const systems = await axios.get<CMMSSystem[]>(
-    "http://localhost:3001/api/asset/systems",
+    `http://${process.env.SERVER}:${process.env.PORT}/api/asset/systems`,
     headers
   );
   const asset_type = await axios.get<CMMSAssetType[]>(
-    "http://localhost:3001/api/asset/fetch_asset_types",
+    `http://${process.env.SERVER}:${process.env.PORT}/api/asset/fetch_asset_types`,
     headers
   );
 

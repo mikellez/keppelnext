@@ -345,6 +345,14 @@ interface CMMSAddUser{
   allocatedPlants: array;
 }
 
+interface CMMSUserSettings{
+  username: string;
+  email: string;
+  userId: number;
+}
+
+
+
 interface CMMSChangeOfPartsEvent extends CMMSEvent {
   title: string;
   start?: Date | string;
@@ -361,6 +369,25 @@ interface CMMSChangeOfPartsEvent extends CMMSEvent {
   };
   color?: string;
   display?: string;
+}
+interface CMMSUserInfo {
+  id: number,
+  name: string,
+  role_id: number,
+  role_name: string,
+  allocated_plants: [string]
+  employee_id: string,
+  email: string,
+  username: string,
+  first_name: string,
+  last_name: string,
+}
+
+interface CMMSChangePassword {
+    current_password: string,
+		new_password: string,
+		confirm_password: string,
+    id: number
 }
 
 export {
@@ -397,4 +424,7 @@ export {
   CMMSAddUser,
   CMMSChangeOfPartsEvent,
   CMMSEvent,
+  CMMSUserSettings,
+  CMMSUserInfo,
+  CMMSChangePassword
 };

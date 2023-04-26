@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 interface DropdownOptionInfo {
-    href: string;
+    // href: string;
     onClick?: React.MouseEventHandler<HTMLButtonElement>;
     children?: React.ReactNode;
 } 

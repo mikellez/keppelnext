@@ -9,19 +9,19 @@ import {
   CMMSSystemAsset,
   CMMSSystemAssetName,
   CMMSSubComponent1Name,
-  CMMSChangeOfParts
+  CMMSChangeOfParts,
 } from "../types/common/interfaces";
 
-import { RequestProps } from '../pages/Request';
-import { ChecklistProps } from '../pages/Checklist';
+import { RequestProps } from "../pages/Request";
+import { ChecklistProps } from "../pages/Checklist";
 
 function useRequest(
   request_type: "pending" | "assigned" | "review" | "approved",
-	page: number
+  page: number
 ) {
   const requestFetcher = (url: string) =>
     axios
-      .get<{ rows: CMMSRequest[], total: number }>(url)
+      .get<{ rows: CMMSRequest[]; total: number }>(url)
       .then((response) => {
         response.data.rows.forEach((s: CMMSRequest) => {
           s.created_date = new Date(s.created_date);
@@ -32,33 +32,34 @@ function useRequest(
         throw new Error(e);
       });
 
-  return useSWR<{ rows: CMMSRequest[], total: number }, Error>(
+  return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
     [`/api/request/${request_type}?page=${page}`],
     requestFetcher,
     { revalidateOnFocus: false }
   );
 }
 
-function useRequestFilter(props: RequestProps, page:number) {
-	const requestFetcher = (url: string) => 
-		axios
-		.get<{ rows: CMMSRequest[], total: number}>(url)
-		.then((response) => {
-			if(response?.data?.rows === undefined) return {rows: [], total: 0};
+function useRequestFilter(props: RequestProps, page: number) {
+  const requestFetcher = (url: string) =>
+    axios
+      .get<{ rows: CMMSRequest[]; total: number }>(url)
+      .then((response) => {
+        if (response?.data?.rows === undefined) return { rows: [], total: 0 };
 
-			response.data.rows.forEach((s) => {
-				s.created_date = new Date(s.created_date)
-			});
-			return response.data;
-		})
-		.catch((e) => {
-			throw new Error(e);
-		});
+        response.data.rows.forEach((s) => {
+          s.created_date = new Date(s.created_date);
+        });
+        return response.data;
+      })
+      .catch((e) => {
+        throw new Error(e);
+      });
 
-	return useSWR<{ rows: CMMSRequest[], total: number}, Error>(
-		`/api/request/filter/${props.status}/${props.plant}/${props.datetype}/${props.date}/${page}`, 
-		requestFetcher, 
-		{revalidateOnFocus: false});
+  return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
+    `/api/request/filter/${props.status}/${props.plant}/${props.datetype}/${props.date}/${page}`,
+    requestFetcher,
+    { revalidateOnFocus: false }
+  );
 }
 
 function useAsset(plant_id: number | null) {
@@ -77,10 +78,13 @@ function useAsset(plant_id: number | null) {
   );
 }
 
-function useChecklist(checklist_type: "assigned" | "record" | "approved", page:number) {
+function useChecklist(
+  checklist_type: "assigned" | "record" | "approved",
+  page: number
+) {
   const checklistFetcher = (url: string) =>
     axios
-      .get<CMMSChecklist[]>(url + checklist_type + `?page=${page}`)
+      .get<CMMSChecklist[]>(url)
       .then((response) => response.data)
       .catch((e) => {
         throw new Error(e);
@@ -93,19 +97,19 @@ function useChecklist(checklist_type: "assigned" | "record" | "approved", page:n
   );
 }
 function useChecklistFilter(props: ChecklistProps, page: number) {
-	const checklistFetcher = (url: string) => 
-		axios
-		.get<{ rows: CMMSChecklist[], total: number}>(url)
-		.then((response) => response.data)
-		.catch((e) => {
-			throw new Error(e);
-		})
+  const checklistFetcher = (url: string) =>
+    axios
+      .get<{ rows: CMMSChecklist[]; total: number }>(url)
+      .then((response) => response.data)
+      .catch((e) => {
+        throw new Error(e);
+      });
 
-	return useSWR<{ rows: CMMSChecklist[], total: number}, Error>(
-		`/api/checklist/filter/${props.status}/${props.plant}/${props.datetype}/${props.date}/${page}`, 
-		checklistFetcher, 
-		{revalidateOnFocus: false }
-	);
+  return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
+    `/api/checklist/filter/${props.status}/${props.plant}/${props.datetype}/${props.date}/${page}`,
+    checklistFetcher,
+    { revalidateOnFocus: false }
+  );
 }
 function useAccountlog() {
   const accountlogFetcher = (url: string) =>
@@ -139,6 +143,9 @@ function useCurrentUser() {
     role_id: number;
     role_name: string;
     allocated_plants: number[];
+    email: string;
+    username: string;
+    employee_id: string
   }
 
   const userFetcher = (url: string) =>
@@ -231,38 +238,51 @@ function useSubComponent1Name(
   );
 }
 
+function useChangeOfParts(
+  copId: number | null,
+  options?: {
+    plant_id?: number;
+    psa_id?: number;
+    type: "completed" | "scheduled" | null;
+  }
+) {
+  const changeOfPartsFetcher = async (url: string) => {
+    let apiURL = copId ? `${url}/${copId}` : url;
 
-function useChangeOfParts(copId: number | null, options?: {plant_id?: number, psa_id?: number, type: "completed" | "scheduled" | null}) {
-	const changeOfPartsFetcher = async (url: string) => {
-		let apiURL = copId ? 
-			`${url}/${copId}` : 
-			url;
-		
-		if (options) {
-			if (options.plant_id && options.type) apiURL += `?plant_id=${options.plant_id}&type=${options.type}`;
-			else if (options.plant_id) apiURL += `?plant_id=${options.plant_id}`;
-			else if (options.type) apiURL += `?type=${options.type}`;
-			else if (options.psa_id && copId === null) apiURL += `?psa_id=${options.psa_id}`;
-		}
-		
-		return await axios.get<CMMSChangeOfParts[]>(apiURL).then((response) => response.data).catch((e) => {
-			throw new Error(e);
-		});
-	}
+    if (options) {
+      if (options.plant_id && options.type)
+        apiURL += `?plant_id=${options.plant_id}&type=${options.type}`;
+      else if (options.plant_id) apiURL += `?plant_id=${options.plant_id}`;
+      else if (options.type) apiURL += `?type=${options.type}`;
+      else if (options.psa_id && copId === null)
+        apiURL += `?psa_id=${options.psa_id}`;
+    }
 
-	return useSWR<CMMSChangeOfParts[], Error>(["/api/changeOfParts", copId, options], changeOfPartsFetcher, {revalidateOnFocus: false});
-};
+    return await axios
+      .get<CMMSChangeOfParts[]>(apiURL)
+      .then((response) => response.data)
+      .catch((e) => {
+        throw new Error(e);
+      });
+  };
+
+  return useSWR<CMMSChangeOfParts[], Error>(
+    ["/api/changeOfParts", copId, options],
+    changeOfPartsFetcher,
+    { revalidateOnFocus: false }
+  );
+}
 
 export {
   useRequest,
-	useAsset,
-	useChecklist,
-	useCurrentUser,
-	useAccountlog,
-	useSystemAsset,
-	useSystemAssetName,
-	useSubComponent1Name,
-	useChangeOfParts,
-	useChecklistFilter,
-	useRequestFilter
-}
+  useAsset,
+  useChecklist,
+  useCurrentUser,
+  useAccountlog,
+  useSystemAsset,
+  useSystemAssetName,
+  useSubComponent1Name,
+  useChangeOfParts,
+  useChecklistFilter,
+  useRequestFilter,
+};
