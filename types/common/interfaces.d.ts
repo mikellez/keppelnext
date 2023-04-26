@@ -345,6 +345,14 @@ interface CMMSAddUser{
   allocatedPlants: array;
 }
 
+interface CMMSUserSettings{
+  username: string;
+  email: string;
+  allocatedPlants: array;
+}
+
+
+
 interface CMMSChangeOfPartsEvent extends CMMSEvent {
   title: string;
   start?: Date | string;
@@ -397,4 +405,5 @@ export {
   CMMSAddUser,
   CMMSChangeOfPartsEvent,
   CMMSEvent,
+  CMMSUserSettings
 };

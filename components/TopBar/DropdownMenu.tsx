@@ -4,6 +4,8 @@ import DropdownOption from "./DropdownOption";
 import styles from "../../styles/Dropdown.module.css";
 import axios from "axios";
 import useComponentVisible from "./useComponentVisible";
+import { useRouter } from "next/router";
+import { useCurrentUser } from "../SWR";
 
 export default function DropdownMenu() {
   const { ref, isComponentVisible, setIsComponentVisible } =
@@ -34,6 +36,9 @@ export default function DropdownMenu() {
     if (isComponentVisible) setIsComponentVisible(false);
     else setIsComponentVisible(true);
   };
+  
+  const router = useRouter();
+  const user = useCurrentUser();
 
   return (
     <div ref={ref}>
@@ -45,8 +50,8 @@ export default function DropdownMenu() {
       </button>
       {isComponentVisible && (
         <div className={styles.dropdownMenuContainer}>
-          <DropdownOption href="/">Settings</DropdownOption>
-          <DropdownOption href="#" onClick={logOut}>
+          <DropdownOption onClick={() => router.push("/Settings")}>Settings</DropdownOption>
+          <DropdownOption onClick={logOut}>
             Logout
           </DropdownOption>
         </div>

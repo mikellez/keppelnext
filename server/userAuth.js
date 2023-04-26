@@ -17,7 +17,7 @@ module.exports = (server) => {
     passport.use(new LocalStrategy((username, password, callback) => {
         console.log(username, password)
         db.query(`SELECT * FROM keppel.users AS u JOIN keppel.user_access AS ua
-        ON u.user_id = ua.user_id WHERE LOWER(user_name) = LOWER($1::text)`, [username], (err, result) => {
+        ON u.user_id = ua.user_id WHERE LOWER(ua.user_name) = LOWER($1::text)`, [username], (err, result) => {
             if(err)							return callback(err);
             if(result.rows.length < 1)		return callback(null, false, { message: 'Incorrect username or password.' });
 
@@ -38,6 +38,8 @@ module.exports = (server) => {
 
     passport.deserializeUser((id, cb) => {
         db.query(`SELECT 
+                user_name,
+                user_email,
                 employee_id,
                 user_id,
                 first_name,
@@ -57,8 +59,13 @@ module.exports = (server) => {
                 name: result.rows[0].first_name + " " + result.rows[0].last_name,
                 role_id: parseInt(result.rows[0].role_id),
                 role_name: result.rows[0].role_name,
-                allocated_plants: result.rows[0].allocated_plants.map(plant => parseInt(plant)).sort()
+                allocated_plants: result.rows[0].allocated_plants.map(plant => parseInt(plant)).sort(),
+                email: result.rows[0].user_email,
+                username: result.rows[0].user_name,
+                test: "test"
+
             };
+            // console.log(userInfo)
             cb(null, userInfo);
         })
     })

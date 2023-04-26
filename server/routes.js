@@ -78,6 +78,9 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
         role_id: req.user.role_id,
         role_name: req.user.role_name,
         allocated_plants: req.user.allocated_plants,
+        employee_id: req.user.employee_id,
+        email: req.user.email,
+        username: req.user.username
     });
 });
 
@@ -393,6 +396,8 @@ router
     .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser);
 router
     .delete("/user/deleteUser/:id", checkIfLoggedInAPI, controllers.user.deleteUser);
+
+// router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
 
 // NO API ROUTE
 router.all("/*", (req, res) => {

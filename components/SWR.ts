@@ -143,6 +143,9 @@ function useCurrentUser() {
     role_id: number;
     role_name: string;
     allocated_plants: number[];
+    email: string;
+    username: string;
+    employee_id: string
   }
 
   const userFetcher = (url: string) =>
