@@ -14,14 +14,35 @@ import {CMMSChangePassword, CMMSPlant, CMMSUserInfo, CMMSUserSettings} from "../
 import { useCurrentUser } from "../../../components/SWR";
 import { useRouter } from "next/router";
 
+interface passwordProps {
+	info: CMMSUserInfo;
+}
 
-export default function password(){
+const sendLogout = (): void => {
+    axios
+      .post("/api/logout")
+      .then((response) => {
+        console.log("success", response);
+        localStorage.removeItem("staff");
+        window.location.href = "/";
+      })
+      .catch((e) => {
+        console.log("error", e);
+        alert("logout fail");
+      });
+  };
+
+export default function password(props: passwordProps){
 	const [form, setform] = useState<CMMSChangePassword>({
-		oldPassword: "",
-		newPassword: "",
-		confirmPassword: "",
+		current_password: "",
+		new_password: "",
+		confirm_password: "",
+		id : props.info.id
 	})
 	const [confirmationModal, setConfirmationModal] = useState<boolean>(false);
+	const [isWrongPasswordModalOpen, setIsWrongPasswordModalOpen] = useState<boolean>(false);
+	const [isNotMatchModalOpen, setIsNotMatchModalOpen] = useState<boolean>(false);
+	const [submissionModal, setSubmissionModal] = useState<boolean>(false);
 	const handleForm = (
 		e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
 	  ) => {
@@ -29,6 +50,22 @@ export default function password(){
 		  return { ...prevState, [e.target.name]: e.target.value };
 		});
 	  };
+	function validate(){
+		if (form.new_password != form.confirm_password){
+			setIsNotMatchModalOpen(true);
+		} else {
+		submission()};
+	};
+	async function submission(){
+		try { let res = await axios.post("/api/setting/updatePassword", form);
+		console.log(res);
+		setSubmissionModal(true);
+
+	} catch(err){
+		console.log(err);
+		setIsWrongPasswordModalOpen(true);
+	}
+	}
     return(
         <ModuleMain>
 			<ModuleHeader header="Change Password" title="Change Password">
@@ -90,13 +127,48 @@ export default function password(){
 		  onClick={() => {
 			setConfirmationModal(false);
 			console.log(form);
-			// validate();
+			validate();
 		  }}
 		  className="btn btn-primary"
 		>
 		  Yes
 	  </button>
 			  ]}
+          />
+		  <ModuleSimplePopup
+            modalOpenState={isWrongPasswordModalOpen}
+            setModalOpenState={setIsWrongPasswordModalOpen}
+            title="Wrong Password"
+            text="Please ensure that you have filled in the old password correctly."
+            icon={SimpleIcon.Cross}
+          />
+		  <ModuleSimplePopup
+            modalOpenState={isNotMatchModalOpen}
+            setModalOpenState={setIsNotMatchModalOpen}
+            title="Missing Details"
+            text="Please ensure that your passwords match"
+            icon={SimpleIcon.Cross}
+          />
+		  <ModuleSimplePopup
+            modalOpenState={submissionModal}
+            setModalOpenState={setSubmissionModal}
+            title="Success!"
+            text="Your password has been changed!"
+            icon={SimpleIcon.Check}
+            buttons={[
+              <button
+                key={2}
+                onClick={() => {
+                  sendLogout();
+                }}
+                className="btn btn-primary"
+              >
+                Ok
+            </button>
+            ]}
+            onRequestClose={() => {
+				sendLogout();
+            }}
           />
 			</ModuleContent>
 			<ModuleFooter>
@@ -116,11 +188,21 @@ export default function password(){
 		</ModuleMain>
 	);
 }
-// export const getServerSideProps: GetServerSideProps = async(context: GetServerSidePropsContext) => {
+export const getServerSideProps: GetServerSideProps = async(context: GetServerSidePropsContext) => {
+	const headers = {
+		withCredentials: true,
+		headers: {
+			Cookie: context.req.headers.cookie
+		}
+	}
+	const fetchedPlants = await axios.get<CMMSPlant[]>(`http://${process.env.SERVER}:${process.env.PORT}/api/plants`, headers);
+	const userInfo = await axios.get<any>(
+		`http://${process.env.SERVER}:${process.env.PORT}/api/user`,
+		headers
+	  );
 
-
-// 	return {
-// 		props: props
-// 	} 
-
-// }
+	let props: passwordProps = {info: userInfo.data}
+	return {
+		props: props
+	}
+}

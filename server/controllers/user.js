@@ -3,9 +3,6 @@ const bcrypt = require('bcryptjs');
 const { generateCSV } = require("../csvGenerator");
 
 const getUsers = (req, res, next) => {
-  var salt = bcrypt.genSaltSync(10);
-  let hash = bcrypt.hashSync("123Tun!!!", salt);  
-  console.log(hash)
     db.query(
         `SELECT 
         employee_id,

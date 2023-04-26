@@ -384,9 +384,10 @@ interface CMMSUserInfo {
 }
 
 interface CMMSChangePassword {
-  current_password: string,
+    current_password: string,
 		new_password: string,
-		confirm_password: string
+		confirm_password: string,
+    id: number
 }
 
 export {

@@ -400,7 +400,8 @@ router
     .delete("/user/deleteUser/:id", checkIfLoggedInAPI, controllers.user.deleteUser);
 
 router
-    .post("/setting/update", checkIfLoggedInAPI, controllers.setting.updateUser);
+    .post("/setting/update", checkIfLoggedInAPI, controllers.setting.updateUser)
+    .post("/setting/updatePassword", checkIfLoggedInAPI, controllers.setting.updatePassword);
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
 
