@@ -106,7 +106,7 @@ function useChecklistFilter(props: ChecklistProps, page: number) {
       });
 
   return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
-    `/api/checklist/filter/${props.status}/${props.plant}/${props.datetype}/${props.date}/${page}`,
+    `/api/checklist/filter/${props?.status || 0}/${props?.plant || 0}/${props?.datetype || 'all'}/${props?.date || 'all'}/${page}`,
     checklistFetcher,
     { revalidateOnFocus: false }
   );
