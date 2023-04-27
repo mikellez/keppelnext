@@ -17,7 +17,7 @@ module.exports = (server) => {
     passport.use(new LocalStrategy((username, password, callback) => {
         console.log(username, password)
         db.query(`SELECT * FROM keppel.users AS u JOIN keppel.user_access AS ua
-        ON u.user_id = ua.user_id WHERE LOWER(user_name) = LOWER($1::text)`, [username], (err, result) => {
+        ON u.user_id = ua.user_id WHERE LOWER(ua.user_name) = LOWER($1::text)`, [username], (err, result) => {
             if(err)							return callback(err);
             if(result.rows.length < 1)		return callback(null, false, { message: 'Incorrect username or password.' });
 
