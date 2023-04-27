@@ -342,7 +342,7 @@ interface CMMSAddUser{
   employeeId: string;
   email: string;
   roleType: number;
-  allocatedPlants: array;
+  allocatedPlants: number[];
 }
 
 interface CMMSUserSettings{
