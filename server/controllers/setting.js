@@ -35,7 +35,23 @@ const updatePassword = async (req, res, next) => {
     });
 }
 
+const checkEmail = async (req, res, next) => {
+    const { id } = req.params;
+    const email = await db.query(`SELECT EXISTS(SELECT 1 FROM keppel.users WHERE user_email = '${id}');`);
+    console.log(email.rows[0].exists);
+    return res.status(200).json(email.rows[0].exists);
+};
+
+const checkUsername = async (req, res, next) => {
+    const { id } = req.params;
+    const username = await db.query(`SELECT EXISTS(SELECT 1 FROM keppel.users WHERE user_name = '${id}');`);
+    console.log(username.rows[0].exists);
+    return res.status(200).json(username.rows[0].exists);
+};
+
 module.exports = {
     updateUser,
-    updatePassword
+    updatePassword,
+    checkEmail,
+    checkUsername
   }

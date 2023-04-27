@@ -31,6 +31,8 @@ export default function settings(props: settingsProps){
 	const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
 	const [submissionModal, setSubmissionModal] = useState<boolean>(false);
 	const [confirmationModal, setConfirmationModal] = useState<boolean>(false);
+	const [emailModal, setEmailModal] = useState<boolean>(false);
+	const [usernameModal, setUsernameModal] = useState<boolean>(false);
 	const router = useRouter();
 	const handleForm = (
 		e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
@@ -40,14 +42,39 @@ export default function settings(props: settingsProps){
 		});
 	  };
 
-	function validate(){
+	async function validate(){
 		console.log(form);
 		if(form.username == props.info.username && form.email == props.info.email){
 			setIsSameDetailsModalOpen(true);
 		} else if (form.username == "" || form.email == ""){
 			setIsMissingDetailsModaOpen(true);
-		} else {
+		} else if((await emailValidation(form.email) == true) && (form.email != props.info.email)){
+			setEmailModal(true);
+		} else if ((await usernameValidation(form.username) == true) && (form.username != props.info.username)){
+			setUsernameModal(true);
+		}
+		  else {
 			submission();
+		}
+	}
+
+	async function emailValidation(email: string){
+		let res = await axios.get("/api/setting/check/email/" + email);
+		console.log(res);
+		if(res.data == true){
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	async function usernameValidation(username: string){
+		let res = await axios.get("/api/setting/check/username/" + username);
+		console.log(res);
+		if(res.data == true){
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -182,7 +209,7 @@ export default function settings(props: settingsProps){
 				<ModuleSimplePopup
             modalOpenState={confirmationModal}
             setModalOpenState={setConfirmationModal}
-            title="Same Confirmation"
+            title="Confirmation"
             text="Are you sure you want to change your details?"
             icon={SimpleIcon.Exclaim}
 			buttons={[
@@ -224,6 +251,20 @@ export default function settings(props: settingsProps){
             icon={SimpleIcon.Cross}
           />
 		  <ModuleSimplePopup
+            modalOpenState={emailModal}
+            setModalOpenState={setEmailModal}
+            title="Duplicate Email"
+            text="Please ensure that the email you have entered is not already in use."
+            icon={SimpleIcon.Cross}
+          />
+		  <ModuleSimplePopup
+            modalOpenState={usernameModal}
+            setModalOpenState={setUsernameModal}
+            title="Duplicate Username"
+            text="Please ensure that the username you have entered is not already in use."
+            icon={SimpleIcon.Cross}
+          />
+		  <ModuleSimplePopup
             modalOpenState={submissionModal}
             setModalOpenState={setSubmissionModal}
             title="Success!"
@@ -247,11 +288,12 @@ export default function settings(props: settingsProps){
           />
 			</ModuleContent>
 			<ModuleFooter>
-			<button className="btn btn-warning">
+			<button className="btn btn-warning" onClick={()=>{router.push("Dashboard")
+			}}>
 				{
 
 				}
-				cancel</button>
+				back</button>
 
 				<button className="btn btn-primary"
 				onClick={() => {

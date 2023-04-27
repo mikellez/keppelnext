@@ -109,7 +109,7 @@ export default function password(props: passwordProps){
 					<ModuleSimplePopup
             modalOpenState={confirmationModal}
             setModalOpenState={setConfirmationModal}
-            title="Same Confirmation"
+            title="Confirmation"
             text="Are you sure you want to change your password?"
             icon={SimpleIcon.Exclaim}
 			buttons={[
@@ -173,11 +173,15 @@ export default function password(props: passwordProps){
           />
 			</ModuleContent>
 			<ModuleFooter>
-			<button className="btn btn-warning">
+			<button className="btn btn-warning"
+			onClick={() => {
+				router.push("/Settings");
+			}}
+			>
 				{
 
 				}
-				cancel</button>
+				back</button>
 
 				<button className="btn btn-primary"
 				onClick={() => {
