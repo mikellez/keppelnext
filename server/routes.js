@@ -194,22 +194,11 @@ router.post("/asset/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAs
 router.post("/asset/editAsset", checkIfLoggedInAPI, controllers.asset.editAsset);
 router.post("/asset/deleteAsset", checkIfLoggedInAPI, controllers.asset.deleteAsset);
 
-router
-    .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
-    .get(controllers.checklist.fetchSpecificChecklistTemplate)
-    .post(controllers.checklist.createNewChecklistTemplate)
-    .delete(controllers.checklist.deleteChecklistTemplate);
+
 
 router.get("/asset/history/:psa_Id", checkIfLoggedInAPI, controllers.asset.fetchAssetHistory);
-router.post("/asset/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
-router.post("/asset/editAsset", checkIfLoggedInAPI, controllers.asset.editAsset);
-router.post("/asset/deleteAsset", checkIfLoggedInAPI, controllers.asset.deleteAsset);
 
-router
-    .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
-    .get(controllers.checklist.fetchSpecificChecklistTemplate)
-    .post(controllers.checklist.createNewChecklistTemplate)
-    .delete(controllers.checklist.deleteChecklistTemplate);
+
 
 router.get("/asset/system/:system_id", checkIfLoggedInAPI, controllers.asset.fetchSystemAssets);
 router.get(
@@ -217,14 +206,25 @@ router.get(
     checkIfLoggedInAPI,
     controllers.asset.fetchSystemAssetNames
 );
+
 router.get(
     "/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",
     checkIfLoggedInAPI,
     controllers.asset.fetchSubComponent1Names
 );
-router.post("/asset/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAsset);
-router.post("/asset/editAsset", checkIfLoggedInAPI, controllers.asset.editAsset);
-router.post("/asset/deleteAsset", checkIfLoggedInAPI, controllers.asset.deleteAsset);
+
+
+router
+    .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
+    .get(controllers.checklist.fetchSpecificChecklistTemplate)
+    .post(controllers.checklist.createNewChecklistTemplate)
+    .delete(controllers.checklist.deleteChecklistTemplate);
+
+router
+    .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
+    .get(controllers.checklist.fetchSpecificChecklistTemplate)
+    .post(controllers.checklist.createNewChecklistTemplate)
+    .delete(controllers.checklist.deleteChecklistTemplate);
 
 router
     .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
