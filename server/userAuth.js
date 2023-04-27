@@ -38,6 +38,8 @@ module.exports = (server) => {
 
     passport.deserializeUser((id, cb) => {
         db.query(`SELECT 
+                user_name,
+                user_email,
                 employee_id,
                 user_id,
                 first_name,
@@ -57,8 +59,14 @@ module.exports = (server) => {
                 name: result.rows[0].first_name + " " + result.rows[0].last_name,
                 role_id: parseInt(result.rows[0].role_id),
                 role_name: result.rows[0].role_name,
-                allocated_plants: result.rows[0].allocated_plants.map(plant => parseInt(plant)).sort()
+                allocated_plants: result.rows[0].allocated_plants.map(plant => parseInt(plant)).sort(),
+                email: result.rows[0].user_email,
+                username: result.rows[0].user_name,
+                first_name: result.rows[0].first_name,
+                last_name: result.rows[0].last_name
+
             };
+            // console.log(userInfo)
             cb(null, userInfo);
         })
     })

@@ -447,11 +447,17 @@ export default function Request(props: RequestProps) {
     },
   };
 
+  /*useEffect(() => {
+    if(props?.isReady) {
+      alert(props?.isReady);
+      setReady(props?.isReady);
+    }
+  }, [props?.isReady]);*/
+
   useEffect(() => {
     // if (requestIsFetchValidating) setReady(false);
-    if (props?.filter) setReady(props?.isReady ?? true);
 
-    if (!isReady && requestData && !requestIsFetchValidating) {
+    if (requestData && !requestIsFetchValidating) {
       if (requestData?.rows?.length > 0) {
         setRequestItems(
           requestData.rows.map((row: CMMSRequest, total: number) => {
@@ -468,7 +474,7 @@ export default function Request(props: RequestProps) {
         setRequestItems([]);
       }
     }
-  }, [requestData, requestIsFetchValidating, isReady, page]);
+  }, [requestData, requestIsFetchValidating, isReady, page, props?.isReady]);
 
   /*useEffect(() => {
     setReady(false);
@@ -489,25 +495,29 @@ export default function Request(props: RequestProps) {
   }, [page]);
   */
 
-  useEffect(() => {
-    setReady(false);
-    axios
-      .get(`/api/request/${indexedColumn[activeTabIndex]}?page=1`)
-      .then((response) => {
-        setRequestItems(
-          response.data.rows.map((row: CMMSRequest) => {
-            return {
-              ...row,
-              id: row.request_id,
-              created_date: new Date(row.created_date),
-            };
-          })
-        );
-        setTotalPages(response.data.total);
-        setPage(1);
-        setReady(true);
-      });
+  /*useEffect(() => {
+    if(!props?.filter) {
+      setReady(false);
+      axios
+        .get(`/api/request/${indexedColumn[activeTabIndex]}?page=1`)
+        .then((response) => {
+          setRequestItems(
+            response.data.rows.map((row: CMMSRequest) => {
+              return {
+                ...row,
+                id: row.request_id,
+                created_date: new Date(row.created_date),
+              };
+            })
+          );
+          setTotalPages(response.data.total);
+          setPage(1);
+          setReady(true);
+        });
+
+    }
   }, [activeTabIndex]);
+  */
 
   return (
     <ModuleMain>

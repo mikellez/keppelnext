@@ -78,6 +78,11 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
         role_id: req.user.role_id,
         role_name: req.user.role_name,
         allocated_plants: req.user.allocated_plants,
+        employee_id: req.user.employee_id,
+        email: req.user.email,
+        username: req.user.username,
+        first_name: req.user.first_name,
+        last_name: req.user.last_name
     });
 });
 
@@ -396,6 +401,14 @@ router
     .post("/user/updateUser", checkIfLoggedInAPI, controllers.user.updateUser);
 router
     .delete("/user/deleteUser/:id", checkIfLoggedInAPI, controllers.user.deleteUser);
+
+router
+    .post("/setting/update", checkIfLoggedInAPI, controllers.setting.updateUser)
+    .post("/setting/updatePassword", checkIfLoggedInAPI, controllers.setting.updatePassword)
+    .get("/setting/check/email/:id", checkIfLoggedInAPI, controllers.setting.checkEmail)
+    .get("/setting/check/username/:id", checkIfLoggedInAPI, controllers.setting.checkUsername);
+
+// router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
 
 // NO API ROUTE
 router.all("/*", (req, res) => {
