@@ -120,59 +120,69 @@ export default function Checklist(props: ChecklistProps) {
   };
 
   useEffect(() => {
-    if (props?.filter) setReady(props?.isReady ?? true);
 
-    if (!isReady && data && !isValidating) {
+    if (data && !isValidating) {
       // tranform and store data
       console.log(data);
-      if (data?.rows?.length > 0) {
-        setChecklistItems(
-          data.rows.map((row) => {
-            return {
-              id: row.checklist_id,
-              ...row,
-            };
-          })
-        );
 
-        setReady(true);
-        setTotalPages(data.total);
-      } else if (data?.length > 0) {
-        // TODO: to copy requests tab
-        setChecklistItems(
-          data.map((row) => {
-            return {
-              id: row.checklist_id,
-              ...row,
-            };
-          })
-        );
+      if(props?.filter) {
+        if (data?.rows?.length > 0) {
+          setChecklistItems(
+            data.rows.map((row) => {
+              return {
+                id: row.checklist_id,
+                ...row,
+              };
+            })
+          );
 
-        setReady(true);
-        setTotalPages(data.total);
-      } else {
-        setChecklistItems([]);
-      }
+          setReady(true);
+          setTotalPages(data.total);
+        } else {
+          setChecklistItems([]);
+        }
+      } /*else {
+        if (data?.length > 0) {
+          // TODO: to copy requests tab
+          setChecklistItems(
+            data.map((row) => {
+              return {
+                id: row.checklist_id,
+                ...row,
+              };
+            })
+          );
+
+          setReady(true);
+          setTotalPages(data.total);
+        } else {
+          setChecklistItems([]);
+        }
+
+      }*/
+      
     }
-  }, [data, isValidating, isReady, page]);
+  }, [data, isValidating, isReady, page, props?.isReady]);
 
   useEffect(() => {
-    setReady(false);
-    axios
-      .get(`/api/checklist/${indexedColumn[activeTabIndex]}?page=1`)
-      .then((response) => {
-        setChecklistItems(
-          response.data.rows.map((row: CMMSChecklist) => {
-            return {
-              id: row.checklist_id,
-              ...row,
-            };
-          })
-        );
-        setTotalPages(response.data.total);
-        setPage(1);
-        setReady(true);
-      });
+    if(!props?.filter) {
+      setReady(false);
+      axios
+        .get(`/api/checklist/${indexedColumn[activeTabIndex]}?page=1`)
+        .then((response) => {
+          setChecklistItems(
+            response.data.rows.map((row: CMMSChecklist) => {
+              return {
+                id: row.checklist_id,
+                ...row,
+              };
+            })
+          );
+          setTotalPages(response.data.total);
+          setPage(1);
+          setReady(true);
+        });
+    }
   }, [activeTabIndex]);
 
   return (
