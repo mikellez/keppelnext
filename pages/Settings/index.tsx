@@ -48,39 +48,21 @@ export default function settings(props: settingsProps){
 			setIsSameDetailsModalOpen(true);
 		} else if (form.username == "" || form.email == ""){
 			setIsMissingDetailsModaOpen(true);
-		} else if((await emailValidation(form.email) == true) && (form.email != props.info.email)){
+		} else if((await validation(form.email, "/api/setting/check/email/") == true) && (form.email != props.info.email)){
 			setEmailModal(true);
-		} else if ((await usernameValidation(form.username) == true) && (form.username != props.info.username)){
+		} else if ((await validation(form.username, "/api/setting/check/username/") == true) && (form.username != props.info.username)){
 			setUsernameModal(true);
 		}
 		  else {
 			submission();
 		}
 	}
-
-	async function emailValidation(email: string){
-		let res = await axios.get("/api/setting/check/email/" + email);
-		console.log(res);
-		if(res.data == true){
-			return true;
-		} else {
-			return false;
-		}
+	async function validation(field: string, link: string){
+		let res = await axios.get(link + field);
+		return res.data;
 	}
-
-	async function usernameValidation(username: string){
-		let res = await axios.get("/api/setting/check/username/" + username);
-		console.log(res);
-		if(res.data == true){
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	async function submission(){
 		try { let res = await axios.post("/api/setting/update", form);
-		console.log(res);
 		setSubmissionModal(true);
 
 	} catch(err){
