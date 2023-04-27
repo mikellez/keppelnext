@@ -1,8 +1,4 @@
-export default function Settings() {
-	return <div>what</div>
-} 
-
-/*import formStyles from "../../styles/formStyles.module.css"
+import formStyles from "../../styles/formStyles.module.css"
 
 import React, {useState, useEffect} from 'react';
 import Select, { defaultTheme } from "react-select";
@@ -332,4 +328,4 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 	return {
 		props: props
 	}
-}*/
+}

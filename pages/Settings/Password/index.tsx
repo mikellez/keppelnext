@@ -1,8 +1,4 @@
-export default function Password() {
-	return <div>what</div>
-} 
-
-/*import formStyles from "../../../styles/formStyles.module.css"
+import formStyles from "../../../styles/formStyles.module.css"
 import React, {useState, useEffect} from 'react';
 import Select, { defaultTheme } from "react-select";
 import { ModuleContent, ModuleDivider, ModuleFooter, ModuleHeader, ModuleMain } from '../../../components';
@@ -150,7 +146,7 @@ export default function password(props: passwordProps){
 		  <ModuleSimplePopup
             modalOpenState={isNotMatchModalOpen}
             setModalOpenState={setIsNotMatchModalOpen}
-            title="Missing Details"
+            title="Passwords do not match!"
             text="Please ensure that your passwords match"
             icon={SimpleIcon.Cross}
           />
@@ -215,4 +211,3 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 		props: props
 	}
 }
-*/
