@@ -31,12 +31,12 @@ export default function EngineerDashboad() {
     }>({ date: 'all', datetype: 'date' });
 
     const handleDateChange: DatePickerProps['onChange'] = (date, dateString) => {
-        setPickerWithType({ date: dateString ? moment(date?.toDate()).format("YYYY-MM-DD") : 'all', datetype: pickerwithtype.datetype });
+        setPickerWithType({ date: dateString ? moment(date?.toDate()).format("YYYY-MM-DD") : 'all', datetype: pickerwithtype.datetype || 'date' });
     }
 
     const handleDateTypeChange = (value: PickerType) => {
         let { date } = pickerwithtype;
-        setPickerWithType({ date: date || 'all', datetype: value });
+        setPickerWithType({ date: date || 'all', datetype: value || 'date' });
     }
 
     const handleDashboardClick = (e: { currentTarget: { id: any; }; }) => {
