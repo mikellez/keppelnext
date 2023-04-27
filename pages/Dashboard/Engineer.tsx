@@ -54,13 +54,13 @@ export default function EngineerDashboad() {
             if (result) {
                 console.log(result)
                 setPlant(result[0].plant_id)
-                fetchData("checklist", plant as number, "status", datetype, date).then(result => {
+                fetchData("checklist", result[0].plant_id as number, "status", datetype, date).then(result => {
                     if (result) {
                         setChecklistData(result) 
                         setIsChecklistReady(true)
                     }
                 });
-                fetchData("request", plant as number, "status", datetype, date).then(result => {
+                fetchData("request", result[0].plant_id as number, "status", datetype, date).then(result => {
                     if (result) {
                         setRequestData(result)
                         setIsChecklistReady(true)
