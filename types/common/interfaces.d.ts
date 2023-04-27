@@ -418,7 +418,6 @@ export {
   CMMSSystemAssetName,
   CMMSAssetDetailsState,
   postData,
-  CMMSAssetDetails,
   CMMSSubComponent1Name,
   CMMSChangeOfParts,
   CMMSAddUser,
