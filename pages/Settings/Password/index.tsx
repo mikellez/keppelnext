@@ -1,4 +1,8 @@
-import formStyles from "../../../styles/formStyles.module.css"
+export default function Password() {
+	return <div>what</div>
+} 
+
+/*import formStyles from "../../../styles/formStyles.module.css"
 import React, {useState, useEffect} from 'react';
 import Select, { defaultTheme } from "react-select";
 import { ModuleContent, ModuleDivider, ModuleFooter, ModuleHeader, ModuleMain } from '../../../components';
@@ -211,3 +215,4 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 		props: props
 	}
 }
+*/

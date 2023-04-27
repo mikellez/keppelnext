@@ -56,7 +56,7 @@ function useRequestFilter(props: RequestProps, page: number) {
       });
 
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
-    `/api/request/filter/${props.status}/${props.plant}/${props.datetype}/${props.date}/${page}`,
+    `/api/request/filter/${props?.status || 0}/${props?.plant || 0}/${props.datetype || 'all'}/${props?.date || 'all'}/${page}`,
     requestFetcher,
     { revalidateOnFocus: false }
   );
@@ -106,7 +106,7 @@ function useChecklistFilter(props: ChecklistProps, page: number) {
       });
 
   return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
-    `/api/checklist/filter/${props.status}/${props.plant}/${props.datetype}/${props.date}/${page}`,
+    `/api/checklist/filter/${props?.status || 0}/${props?.plant || 0}/${props?.datetype || 'all'}/${props?.date || 'all'}/${page}`,
     checklistFetcher,
     { revalidateOnFocus: false }
   );
