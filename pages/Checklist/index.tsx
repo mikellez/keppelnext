@@ -33,7 +33,8 @@ import { Role } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
 import { GetServerSidePropsContext } from "next";
 
-const indexedColumn: ("assigned" | "record" | "approved")[] = [
+const indexedColumn: ("pending" | "assigned" | "record" | "approved")[] = [
+  "pending",
   "assigned",
   "record",
   "approved",
@@ -115,8 +116,6 @@ export default function Checklist(props: ChecklistProps) {
 
   const editRow: OnClick<ChecklistItem> = (item, event) => {
     const checklistRow = item;
-
-    // console.log(checklistRow, event);
   };
 
   useEffect(() => {
@@ -181,7 +180,10 @@ export default function Checklist(props: ChecklistProps) {
           setTotalPages(response.data.total);
           setPage(1);
           setReady(true);
-        });
+        })
+        .catch((e) => {
+          setChecklistItems([]);
+        })
     }
   }, [activeTabIndex]);
 
@@ -210,7 +212,7 @@ export default function Checklist(props: ChecklistProps) {
               }}
               className={"nav-link" + (activeTabIndex === 0 ? " active" : "")}
             >
-              <span style={{ all: "unset" }}>Assigned</span>
+              <span style={{ all: "unset" }}>Pending</span>
             </li>
             <li
               onClick={() => {
@@ -218,13 +220,21 @@ export default function Checklist(props: ChecklistProps) {
               }}
               className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
             >
-              <span style={{ all: "unset" }}>For Review</span>
+              <span style={{ all: "unset" }}>Assigned</span>
             </li>
             <li
               onClick={() => {
                 activeTabIndex !== 2 && switchColumns(2);
               }}
               className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
+            >
+              <span style={{ all: "unset" }}>For Review</span>
+            </li>
+            <li
+              onClick={() => {
+                activeTabIndex !== 3 && switchColumns(3);
+              }}
+              className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
             >
               <span style={{ all: "unset" }}>Approved</span>
             </li>
@@ -242,8 +252,9 @@ export default function Checklist(props: ChecklistProps) {
             <LoadingHourglass />
           </div>
         )}
-        {error && <div>{error.toString()}</div>}
-        {error && <div>error</div>}
+        {/* {error && <div>{error.toString()}</div>}
+        {error && <div>error</div>} */}
+        {checklistItems.length === 0 && <div>No Checklists</div>}
         {isReady && (
           <>
             <Table

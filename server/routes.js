@@ -249,6 +249,12 @@ router.get(
 );
 
 router.get(
+    "/checklist/pending",
+    checkIfLoggedInAPI,
+    controllers.checklist.fetchPendingChecklists
+);
+
+router.get(
     "/checklist/templateNames/:id?",
     checkIfLoggedInAPI,
     controllers.checklist.fetchChecklistTemplateNames

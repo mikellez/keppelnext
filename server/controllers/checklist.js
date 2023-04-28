@@ -4,7 +4,7 @@ const moment = require("moment");
 
 const ITEMS_PER_PAGE = 10;
 
-const fetchAssignedChecklistsQuery = `
+const fetchAllChecklistQuery = `
 SELECT 
     cl.checklist_id, 
     cl.chl_name, 
@@ -43,6 +43,9 @@ FROM
     LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
     LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id
     JOIN keppel.status_cm st ON st.status_id = cl.status_id	
+`;
+
+const fetchAssignedChecklistsQuery = fetchAllChecklistQuery + `
 WHERE 
     ua.user_id = $1 AND 
     (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3)
@@ -63,7 +66,7 @@ const fetchAssignedChecklists = async (req, res, next) => {
   try {
     const result = await db.query(query, [req.user.id]);
     if (result.rows.length == 0)
-      return res.status(201).json({ msg: "No checklist" });
+      return res.status(404).json({ msg: "No checklist" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {
@@ -71,49 +74,44 @@ const fetchAssignedChecklists = async (req, res, next) => {
   }
 };
 
-const fetchForReviewChecklistsQuery = `
-SELECT 
-    cl.checklist_id, 
-    cl.chl_name, 
-    cl.description, 
-    cl.status_id,
-    concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
-    concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
-    concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
-    pm.plant_name,
-    pm.plant_id,
-    completeremarks_req, 
-    tmp1.assetNames AS linkedassets, 
-    cl.chl_type, 
-    cl.created_date, 
-    cl.history, 
-    st.status 
-FROM  
-    keppel.users u
-    JOIN keppel.user_access ua ON u.user_id = ua.user_id
-    JOIN keppel.checklist_master cl ON ua.allocatedplantids LIKE concat(concat('%',cl.plant_id::text) , '%')
-    LEFT JOIN (
-        SELECT  
-            t3.checklist_id, 
-            string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id ASC) AS assetNames
-        FROM  
-            keppel.system_assets AS t1,
-            keppel.plant_system_assets AS t2, 
-            keppel.checklist_master AS t3
-        WHERE 
-            t1.system_asset_id = t2.system_asset_id_lvl4 AND  
-            t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
-        GROUP BY t3.checklist_id) tmp1 ON tmp1.checklist_id = cl.checklist_id
-    LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
-    LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
-    LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
-    LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id 
-    JOIN keppel.status_cm st ON st.status_id = cl.status_id						
+const fetchPendingChecklistsQuery =  fetchAllChecklistQuery + `
+WHERE 
+    ua.user_id = $1 AND 
+    (cl.status_id = 1)
+ORDER BY cl.checklist_id DESC
+`;
+
+const fetchPendingChecklists = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+
+  const totalRows = await db.query(fetchForReviewChecklistsQuery, [
+    req.user.id,
+  ]);
+  const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+
+  const query =
+    fetchPendingChecklistsQuery +
+    ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+
+  try {
+    const result = await db.query(query, [req.user.id]);
+    if (result.rows.length == 0)
+      return res.status(404).json({ msg: "No checklist" });
+
+    return res.status(200).json({ rows: result.rows, total: totalPages });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+}
+
+const fetchForReviewChecklistsQuery = fetchAllChecklistQuery + `				
 WHERE 
     ua.user_id = $1 AND 
     (cl.status_id = 4 OR cl.status_id = 6)
 ORDER BY cl.checklist_id desc
 `;
+
 const fetchForReviewChecklists = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
@@ -130,7 +128,7 @@ const fetchForReviewChecklists = async (req, res, next) => {
   try {
     const result = await db.query(query, [req.user.id]);
     if (result.rows.length == 0)
-      return res.status(201).json({ msg: "No checklist" });
+      return res.status(404).json({ msg: "No checklist" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {
@@ -138,46 +136,7 @@ const fetchForReviewChecklists = async (req, res, next) => {
   }
 };
 
-const fetchApprovedChecklistsQuery = `
-SELECT 
-    cl.checklist_id, 
-    cl.chl_name, 
-    cl.description, 
-    cl.status_id,
-    concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
-    concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
-    concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
-    pm.plant_name,
-    pm.plant_id,
-    completeremarks_req, 
-    tmp1.assetNames as linkedassets, 
-    cl.chl_type, 
-    cl.created_date, 
-    cl.history, 
-    st.status 
-FROM 
-    keppel.users u 
-    JOIN keppel.user_access ua ON u.user_id = ua.user_id
-    JOIN keppel.checklist_master cl ON ua.allocatedplantids LIKE concat(concat('%',cl.plant_id::text) , '%')
-    LEFT JOIN (
-        SELECT  
-            t3.checklist_id, 
-            string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id asc) as assetNames
-        FROM  
-            keppel.system_assets AS t1,
-            keppel.plant_system_assets AS t2, 
-            keppel.checklist_master AS t3
-        WHERE 
-            t1.system_asset_id = t2.system_asset_id_lvl4 AND  
-            t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
-        group by 
-            t3.checklist_id) tmp1 ON tmp1.checklist_id = cl.checklist_id
-    LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
-    LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
-    LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
-    LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id 
-    JOIN keppel.status_cm st ON st.status_id = cl.status_id
-                    
+const fetchApprovedChecklistsQuery = fetchAllChecklistQuery + `
 WHERE 
     ua.user_id = $1 AND 
     (cl.status_id = 5 OR cl.status_id = 7)
@@ -197,7 +156,7 @@ const fetchApprovedChecklists = async (req, res, next) => {
   try {
     const result = await db.query(query, [req.user.id]);
     if (result.rows.length == 0)
-      return res.status(201).json({ msg: "No checklist" });
+      return res.status(404).json({ msg: "No checklist" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {
@@ -241,49 +200,7 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
 };
 
 const fetchSpecificChecklistRecord = async (req, res, next) => {
-  const sql = `
-        SELECT 
-            cm.checklist_id,
-            cm.chl_name,
-            cm.description,
-            cm.datajson,
-            cm.created_date,
-            cm.status_id,
-            cm.history,
-            pm.plant_id,
-            pm.plant_name,
-            u1.user_id as assigned_user_id,
-            concat(u1.first_name, ' ', u1.last_name) as assigneduser,
-            u1.user_email as assigned_user_email,
-            u2.user_id as assigned_user_id,
-            concat(u2.first_name, ' ', u2.last_name) as signoffuser,
-            u2.user_email as signoff_user_email,
-            u3.user_id as created_by_user_id,
-            concat(u3.first_name, ' ', u3.last_name) as createdbyuser,
-            u3.user_email as created_by_user_email,
-            tmp1.assetNames as linkedassets
-            
-        FROM
-            keppel.checklist_master cm
-            JOIN keppel.users u1 ON u1.user_id = cm.assigned_user_id
-            JOIN keppel.users u2 ON u2.user_id = cm.signoff_user_id
-            JOIN keppel.users u3 ON u3.user_id = cm.created_user_id
-            JOIN keppel.plant_master pm ON pm.plant_id = cm.plant_id
-            JOIN (
-                SELECT  
-                            t3.checklist_id, 
-                            string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id asc) as assetNames
-                        FROM  
-                            keppel.system_assets AS t1,
-                            keppel.plant_system_assets AS t2, 
-                            keppel.checklist_master AS t3
-                        WHERE 
-                            t1.system_asset_id = t2.system_asset_id_lvl4 AND  
-                            t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
-                        group by 
-                            t3.checklist_id
-            ) tmp1 ON tmp1.checklist_id = cm.checklist_id
-            
+  const sql = fetchAllChecklistQuery + ` 
         WHERE 
             cm.checklist_id = $1
     `;
@@ -503,7 +420,7 @@ const createChecklistCSV = async (req, res, next) => {
   db.query(activeTabQuery, [req.user.id], (err, result) => {
     if (err) return res.status(400).json({ msg: err });
     if (result.rows.length == 0)
-      return res.status(201).json({ msg: "No checklist" });
+      return res.status(404).json({ msg: "No checklist" });
     generateCSV(result.rows)
       .then((buffer) => {
         res.set({
@@ -711,45 +628,7 @@ const fetchFilteredChecklists = async (req, res, next) => {
     }
   }
 
-  const sql = `
-    SELECT 
-        cl.checklist_id, 
-        cl.chl_name, 
-        cl.description, 
-        cl.status_id,
-        concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
-        concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
-        concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
-        pm.plant_name,
-        pm.plant_id,
-        completeremarks_req,
-        tmp1.assetNames AS linkedassets,
-        linkedassetids,
-        cl.chl_type,
-        cl.created_date,
-        cl.history,
-        st.status
-    FROM 
-        keppel.users u
-        JOIN keppel.user_access ua ON u.user_id = ua.user_id
-        JOIN keppel.checklist_master cl on ua.allocatedplantids LIKE concat(concat('%',cl.plant_id::text), '%')
-        LEFT JOIN (
-            SELECT 
-                t3.checklist_id, 
-                string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id ASC) AS assetNames
-            FROM  
-                keppel.system_assets AS t1,
-                keppel.plant_system_assets AS t2, 
-                keppel.checklist_master AS t3
-            WHERE 
-                t1.system_asset_id = t2.system_asset_id_lvl4 AND 
-                t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
-            GROUP BY t3.checklist_id) tmp1 ON tmp1.checklist_id = cl.checklist_id
-        LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
-        LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
-        LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
-        LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id
-        JOIN keppel.status_cm st ON st.status_id = cl.status_id	
+  const sql = fetchAllChecklistQuery + `
     WHERE 1 = 1
         AND ua.user_id = ${req.user.id} 
         ${plantCond}
@@ -767,7 +646,7 @@ const fetchFilteredChecklists = async (req, res, next) => {
   db.query(sql + pageCond, (err, result) => {
     if (err) return res.status(400).json({ msg: err });
     if (result.rows.length == 0)
-      return res.status(201).json({ msg: "No checklist" });
+      return res.status(404).json({ msg: "No checklist" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   });
@@ -789,4 +668,5 @@ module.exports = {
   updateChecklist,
   deleteChecklistTemplate,
   fetchFilteredChecklists,
+  fetchPendingChecklists,
 };
