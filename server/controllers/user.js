@@ -112,9 +112,84 @@ const deleteUser = async (req, res, next) => {
         console.log(err);}
 };
 
+const getUsersData = async(req, res, next) => {
+    const { id } = req.params;
+    const query =
+    `SELECT
+    CONCAT(first_name, ' ', last_name) AS full_name,
+    employee_id,
+    allocated_plants,
+    allocatedplantids
+    FROM keppel.user_access
+    WHERE user_id = ${id};`
+    console.log(query);
+    try {const result = await db.query(query); return res.status(200).json(result.rows[0]);}
+        catch (err) {
+            console.log(err);}
+};
+
+
+const getUsersplantData = async(req, res, next) => {
+    const { id } = req.params;
+    const query = `SELECT plant_id FROM keppel.request WHERE user_id = ${id}
+    UNION ALL
+    SELECT plant_id FROM keppel.schedule_checklist WHERE user_id = ${id}
+    UNION ALL
+    SELECT plant_id FROM keppel.checklist_master WHERE assigned_user_id = ${id} OR signoff_user_id = ${id};
+    `
+    console.log(query);
+    try {const result = await db.query(query); return res.status(200).json(result.rows);}
+        catch (err) {
+            console.log(err);}
+};
+
+
+const updateUser = async (req, res, next) => {
+    const { user_id, full_name, employee_id, addplantids,removeplantids, password} = req.body;
+    console.log(req.body);
+    query = `UPDATE keppel.users SET first_name = '${full_name.split(' ')[0]}', last_name = '${full_name.split(' ')[1]}', employee_id = '${employee_id}' WHERE user_id = ${user_id};
+    `
+
+    if (password != '' && password != undefined && password != null) {
+        var salt = bcrypt.genSaltSync(10);
+        let hash = bcrypt.hashSync(password, salt);
+        query += `UPDATE keppel.users SET user_pass = '${hash}' WHERE user_id = ${user_id};`
+    }
+
+    plants = ``
+    for (const plant of addplantids) {
+      plants += `INSERT INTO keppel.user_plant
+      (plant_id, user_id)
+      VALUES
+      (${plant}, ${user_id});
+      `
+    }  
+    for (const plant of removeplantids) {
+        plants += `DELETE FROM keppel.user_plant
+        WHERE plant_id = ${plant} AND user_id = ${user_id};
+        `
+        }
+
+    plants += query;
+    console.log(plants)
+
+    try {await db.query(plants); return res.status(200).json("success");} catch (err) {console.log(err);
+    
+    }
+}
+
+
+
+
+
+
+
 module.exports ={
     getUsersCSV,
     getUsers,
     addUser,
-    deleteUser
+    deleteUser,
+    getUsersData,
+    getUsersplantData,
+    updateUser
 }

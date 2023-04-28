@@ -37,7 +37,7 @@ function QRImg({asset}: {asset: CMMSAsset}) {
 	return (
 		<button className={"btn btn-secondary " + styles.btnQr} onClick={downloadQR}>
 			<SVG 
-				text={window.location.origin + "/" + asset.psa_id}
+				text={window.location.origin + "/Asset/Details/" + asset.psa_id}
 				options={{
 					level: 'H',
 					margin: 0,

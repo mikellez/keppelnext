@@ -31,12 +31,12 @@ export default function EngineerDashboad() {
     }>({ date: 'all', datetype: 'date' });
 
     const handleDateChange: DatePickerProps['onChange'] = (date, dateString) => {
-        setPickerWithType({ date: dateString ? moment(date?.toDate()).format("YYYY-MM-DD") : 'all', datetype: pickerwithtype.datetype });
+        setPickerWithType({ date: dateString ? moment(date?.toDate()).format("YYYY-MM-DD") : 'all', datetype: pickerwithtype.datetype || 'date' });
     }
 
     const handleDateTypeChange = (value: PickerType) => {
         let { date } = pickerwithtype;
-        setPickerWithType({ date: date || 'all', datetype: value });
+        setPickerWithType({ date: date || 'all', datetype: value || 'date' });
     }
 
     const handleDashboardClick = (e: { currentTarget: { id: any; }; }) => {
@@ -54,13 +54,13 @@ export default function EngineerDashboad() {
             if (result) {
                 console.log(result)
                 setPlant(result[0].plant_id)
-                fetchData("checklist", plant as number, "status", datetype, date).then(result => {
+                fetchData("checklist", result[0].plant_id as number, "status", datetype, date).then(result => {
                     if (result) {
                         setChecklistData(result) 
                         setIsChecklistReady(true)
                     }
                 });
-                fetchData("request", plant as number, "status", datetype, date).then(result => {
+                fetchData("request", result[0].plant_id as number, "status", datetype, date).then(result => {
                     if (result) {
                         setRequestData(result)
                         setIsChecklistReady(true)

@@ -139,14 +139,6 @@ export default function AddUser(props: AddUserProps) {
 						onChange={handleForm}
 						name="email"/>
 					</div>
-
-					{/* <div className="form-group">
-						<label className='form-label'>
-							<RequiredIcon/> Mobile Number
-						</label>
-						<input className="form-control" type="text"/>
-					</div> */}
-
 				</div>
 
 				<ModuleDivider style={{gridColumn: "span 2"}}/>
