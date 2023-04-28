@@ -163,8 +163,8 @@ export default function User() {
         <BsTrashFill />
       </button>
       <Link 
-      href="/User/Management"
-      style={{ all: "unset", cursor: "pointer" }}>
+      href={`/User/Edit/${item.user_id}`}
+          style={{ all: "unset", cursor: "pointer" }}>
         <BsPencilSquare />
       </Link>
       </Cell>
