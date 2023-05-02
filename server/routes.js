@@ -397,8 +397,11 @@ router
     .get("/user/getUsersCSV", checkIfLoggedInAPI, controllers.user.getUsersCSV)
     .get("/user/getUsersData/:id", checkIfLoggedInAPI, controllers.user.getUsersData)
     .get("/user/getUsersplantData/:id", checkIfLoggedInAPI, controllers.user.getUsersplantData)
+    .get("/user/check/email", checkIfLoggedInAPI, controllers.user.checkEmail)
+    .get("/user/check/user", checkIfLoggedInAPI, controllers.user.checkUsername)
     .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser)
     .post("/user/updateUser", checkIfLoggedInAPI, controllers.user.updateUser);
+
 router
     .delete("/user/deleteUser/:id", checkIfLoggedInAPI, controllers.user.deleteUser);
 

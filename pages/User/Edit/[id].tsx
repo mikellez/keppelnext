@@ -8,7 +8,8 @@ import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/
 import formStyles from "../../../styles/formStyles.module.css";
 
 interface CMMSUserEdit {
-    full_name: string;
+    first_name?: string;
+    last_name?: string;
     employee_id: string;
     allocated_plants: string[];
     allocatedplantids: number[];
@@ -16,7 +17,13 @@ interface CMMSUserEdit {
     removeplantids: number[];
     password?: string;
     password_confirm?: string;
+    user_name: string;
+    user_email: string;
 
+}
+interface checkdetails {
+    username: string;
+    email: string;
 }
 
 const getUsersData = async (id:number) => {
@@ -56,14 +63,25 @@ export default function EditUser() {
     const [currentplant, setCurrentplant] = useState<number>(0);
     const [submissionModal, setSubmissionModal] = useState<boolean>(false);
     const [passwordError, setPasswordError] = useState<boolean>(false);
+    const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
+    const [emailModal, setEmailModal] = useState<boolean>(false);
+    const [usernameModal, setUsernameModal] = useState<boolean>(false);
+    const [checkdetails, setcheckdetails] = useState<checkdetails>({
+        username: "",
+        email: "",
+    });
+
     const [userDetails, setuserDetails] = useState<CMMSUserEdit>({
-        full_name: "",
+        first_name: "",
+        last_name: "",
         employee_id: "",
         allocated_plants: [], 
         allocatedplantids: [],
         addplantids: [],
         removeplantids: [],
         password: "",
+        user_name: "",
+        user_email: "",
     });
     const handleForm = (
         e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
@@ -109,23 +127,49 @@ export default function EditUser() {
         axios
           .post(url, {
             user_id: user_id,
-            full_name: userDetails.full_name,
+            first_name: userDetails.first_name,
+            last_name: userDetails.last_name,
             employee_id: userDetails.employee_id,
             addplantids: userDetails.addplantids,
             removeplantids: userDetails.removeplantids,
             password: userDetails.password ? userDetails.password : null,
+            user_name: userDetails.user_name,
+            user_email: userDetails.user_email,
           })
           .then((res) => {
             console.log(res);
             setSubmissionModal(true);
           })
         }
-      
+
+      	async function validate(){
+          console.log(userDetails);
+
+          if (userDetails.user_name == "" || userDetails.user_email == ""){
+            setIsMissingDetailsModaOpen(true);
+          } else if((await validation(userDetails.user_email, "/api/setting/check/email/") == true) && (userDetails.user_email != checkdetails.email)){
+            setEmailModal(true);
+          } else if ((await validation(userDetails.user_name, "/api/setting/check/username/") == true) && (userDetails.user_name != checkdetails.username)){
+            setUsernameModal(true);
+          }
+            else {
+            submission();
+          }
+        }
+
+        async function validation(value: string, url: string){
+          let res = await axios.get(url + value);
+          return res.data;
+        }
 
     useEffect(() => {
         getUsersData(parseInt(user_id as string)).then((result) => {
             console.log(result);
             setuserDetails(result)
+            setcheckdetails({
+                username: result.user_name,
+                email: result.user_email,
+            });
         });
         // set user details to the result of the api call
 
@@ -159,12 +203,43 @@ export default function EditUser() {
 
         <div className={formStyles.halfContainer}>
           <div className="form-group">
-            <label className="form-label">Name</label>
+            <label className="form-label">Username</label>
+            <input
+              type="text"
+              className="form-control"
+              name="user_name"
+              defaultValue={userDetails.user_name}
+              onChange={handleForm}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">First Name</label>
             <input
               type="text"
               className="form-control"
               name="full_name"
-              defaultValue={userDetails.full_name}
+              defaultValue={userDetails.first_name}
+              onChange={handleForm}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Last Name</label>
+            <input
+              type="text"
+              className="form-control"
+              name="full_name"
+              defaultValue={userDetails.last_name}
+              onChange={handleForm}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Email</label>
+            <input
+              type="text"
+              className="form-control"
+              name="user_email"
+              defaultValue={userDetails.user_email}
               onChange={handleForm}
             />
           </div>
@@ -306,6 +381,27 @@ export default function EditUser() {
             router.push("/User/Management");
           }}
         />
+        <ModuleSimplePopup
+            modalOpenState={isMissingDetailsModalOpen}
+            setModalOpenState={setIsMissingDetailsModaOpen}
+            title="Missing Details"
+            text="Please ensure that you have filled in all the required entries."
+            icon={SimpleIcon.Cross}
+          />
+		  <ModuleSimplePopup
+            modalOpenState={emailModal}
+            setModalOpenState={setEmailModal}
+            title="Duplicate Email"
+            text="Please ensure that the email you have entered is not already in use."
+            icon={SimpleIcon.Cross}
+          />
+		  <ModuleSimplePopup
+            modalOpenState={usernameModal}
+            setModalOpenState={setUsernameModal}
+            title="Duplicate Username"
+            text="Please ensure that the username you have entered is not already in use."
+            icon={SimpleIcon.Cross}
+          />
       </ModuleContent>
       <ModuleFooter>
         <Link href={{ pathname: "/User/Management" }}>
@@ -322,7 +418,7 @@ export default function EditUser() {
           //check if submission function is running
           onClick = {() => {
             if (userDetails.password == userDetails.password_confirm) {
-              submission();
+              validate();
             }
             else {
               setPasswordError(true);

@@ -116,10 +116,13 @@ const getUsersData = async(req, res, next) => {
     const { id } = req.params;
     const query =
     `SELECT
-    CONCAT(first_name, ' ', last_name) AS full_name,
+    first_name,
+    last_name,
     employee_id,
     allocated_plants,
-    allocatedplantids
+    allocatedplantids,
+    user_name,
+    user_email
     FROM keppel.user_access
     WHERE user_id = ${id};`
     console.log(query);
@@ -145,9 +148,9 @@ const getUsersplantData = async(req, res, next) => {
 
 
 const updateUser = async (req, res, next) => {
-    const { user_id, full_name, employee_id, addplantids,removeplantids, password} = req.body;
+    const { user_id, first_name,last_name, employee_id, addplantids,removeplantids, password, user_name, user_email} = req.body;
     console.log(req.body);
-    query = `UPDATE keppel.users SET first_name = '${full_name.split(' ')[0]}', last_name = '${full_name.split(' ')[1]}', employee_id = '${employee_id}' WHERE user_id = ${user_id};
+    query = `UPDATE keppel.users SET first_name = '${first_name}', last_name = '${last_name}', employee_id = '${employee_id}', user_name = '${user_name}', user_email = '${user_email}' WHERE user_id = ${user_id};
     `
 
     if (password != '' && password != undefined && password != null) {
@@ -179,7 +182,19 @@ const updateUser = async (req, res, next) => {
 }
 
 
+const checkEmail = async (req, res, next) => {
+    const { id } = req.params;
+    const email = await db.query(`SELECT EXISTS(SELECT 1 FROM keppel.users WHERE user_email = '${id}');`);
+    console.log(email.rows[0].exists);
+    return res.status(200).json(email.rows[0].exists);
+};
 
+const checkUsername = async (req, res, next) => {
+    const { id } = req.params;
+    const username = await db.query(`SELECT EXISTS(SELECT 1 FROM keppel.users WHERE user_name = '${id}');`);
+    console.log(username.rows[0].exists);
+    return res.status(200).json(username.rows[0].exists);
+};
 
 
 
@@ -191,5 +206,7 @@ module.exports ={
     deleteUser,
     getUsersData,
     getUsersplantData,
-    updateUser
+    updateUser,
+    checkEmail,
+    checkUsername
 }

@@ -101,9 +101,9 @@ export default function NavBar() {
                     <NavLink     name="Master"            path="/Master"        icon={<AiOutlineControl size={21} />} />
                     <NavDropdown name="User Management"   path="/User" navOpen={navDisplay} icon={<AiOutlineUser size={21} />}>
                         <NavDropdownLink href="/User/Management">User Management</NavDropdownLink>
-                        <NavDropdownLink href="/">Access Control</NavDropdownLink>
+                        {/* <NavDropdownLink href="/">Access Control</NavDropdownLink> */}
                         <NavDropdownLink href="/User/Add">Add New User</NavDropdownLink>
-                        <NavDropdownLink href="/">Password Policy</NavDropdownLink>
+                        {/* <NavDropdownLink href="/">Password Policy</NavDropdownLink> */}
                     </NavDropdown>
                     <NavDropdown name="Activity Log"      path="/Activity" navOpen={navDisplay} icon={<AiOutlineHistory size={21} />}>
                         <NavDropdownLink href="/Activity/Account_log">Account Activity Log</NavDropdownLink>
