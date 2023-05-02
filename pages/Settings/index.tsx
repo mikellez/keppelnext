@@ -21,7 +21,7 @@ interface settingsProps {
 	sortedPlants: {value: number, label: string}[];
 }
 
-export default function settings(props: settingsProps){
+export default function SettingsPage(props: settingsProps){
     const [form, setform] = useState<CMMSUserSettings>({
 		username: props.info.username,
 		email: props.info.email,

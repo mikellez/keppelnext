@@ -7,7 +7,7 @@ import {
     ModuleModal,
 } from "../../../components";
 import { useRouter } from "next/router";
-import instance from '../../axios.config.js';
+import instance from '../../../axios.config.js';
 import {
     CMMSAssetDetails,
     CMMSAssetRequestHistory,

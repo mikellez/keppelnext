@@ -4,7 +4,7 @@ import Select, { defaultTheme } from "react-select";
 import { ModuleContent, ModuleDivider, ModuleFooter, ModuleHeader, ModuleMain } from '../../../components';
 import RequiredIcon from "../../../components/RequiredIcon";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import instance from '../../axios.config.js';
+import instance from '../../../axios.config.js';
 import LoadingIcon from "../../../components/LoadingIcon";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import router from "next/router";
@@ -19,7 +19,7 @@ interface passwordProps {
 }
 
 const sendLogout = (): void => {
-    axios
+    instance
       .post("/api/logout")
       .then((response) => {
         console.log("success", response);
@@ -32,7 +32,7 @@ const sendLogout = (): void => {
       });
   };
 
-export default function password(props: passwordProps){
+export default function PasswordPage(props: passwordProps){
 	const [form, setform] = useState<CMMSChangePassword>({
 		current_password: "",
 		new_password: "",
