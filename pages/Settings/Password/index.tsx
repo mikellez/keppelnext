@@ -8,7 +8,7 @@ import Select, { defaultTheme } from "react-select";
 import { ModuleContent, ModuleDivider, ModuleFooter, ModuleHeader, ModuleMain } from '../../../components';
 import RequiredIcon from "../../../components/RequiredIcon";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import LoadingIcon from "../../../components/LoadingIcon";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import router from "next/router";
@@ -61,7 +61,7 @@ export default function password(props: passwordProps){
 		submission()};
 	};
 	async function submission(){
-		try { let res = await axios.post("/api/setting/updatePassword", form);
+		try { let res = await instance.post("/api/setting/updatePassword", form);
 		console.log(res);
 		setSubmissionModal(true);
 		setTimeout(sendLogout, 3000);
@@ -200,9 +200,9 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 			Cookie: context.req.headers.cookie
 		}
 	}
-	const fetchedPlants = await axios.get<CMMSPlant[]>(`http://${process.env.SERVER}:${process.env.PORT}/api/plants`, headers);
-	const userInfo = await axios.get<any>(
-		`http://${process.env.SERVER}:${process.env.PORT}/api/user`,
+	const fetchedPlants = await instance.get<CMMSPlant[]>(`/api/plants`, headers);
+	const userInfo = await instance.get<any>(
+		`/api/user`,
 		headers
 	  );
 

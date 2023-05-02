@@ -1,6 +1,6 @@
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { CMMSChecklist, CMMSChangeOfParts, CMMSAssetDetails } from "./interfaces";
-import axios from "axios";
+import instance from '../../axios.config.js';
 
 const createChecklistGetServerSideProps = (checklistType: string, allowedStatuses?: number[]) => {
 
@@ -16,7 +16,7 @@ const createChecklistGetServerSideProps = (checklistType: string, allowedStatuse
 
 		if (context.query.id) {
 			const { id }  = context.query;
-			const response = await axios.get<CMMSChecklist>(`http://${process.env.SERVER}:${process.env.PORT}/api/checklist/${checklistType}/${id}`, headers);
+			const response = await instance.get<CMMSChecklist>(`/api/checklist/${checklistType}/${id}`, headers);
 			if (
 				response.status == 500 || 
 				(allowedStatuses && !allowedStatuses.includes(response.data.status_id))
@@ -56,14 +56,14 @@ const createChangeOfPartsServerSideProps = (specificCOP: boolean, conditionalFun
 		};
 
 		const url = specificCOP && context.params?.id ? 
-			`http://${process.env.SERVER}:${process.env.PORT}/api/changeOfParts/${context.params!.id}` : 
+			`/api/changeOfParts/${context.params!.id}` : 
 			specificCOP && context.query.copId? 
-			`http://${process.env.SERVER}:${process.env.PORT}/api/changeOfParts/${context.query!.copId}` :
+			`/api/changeOfParts/${context.query!.copId}` :
 			specificCOP && context.query.assetId?
-			`http://${process.env.SERVER}:${process.env.PORT}/api/assetDetails/${context.query!.assetId}` :
-			`http://${process.env.SERVER}:${process.env.PORT}/api/changeOfParts`;
+			`/api/assetDetails/${context.query!.assetId}` :
+			`/api/changeOfParts`;
 	
-		const response = await axios.get<CMMSChangeOfParts[] | CMMSAssetDetails[]>(url, headers);
+		const response = await instance.get<CMMSChangeOfParts[] | CMMSAssetDetails[]>(url, headers);
 
 		if (conditionalFunc && conditionalFunc(response) == false) {
 			return {

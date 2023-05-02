@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CMMSTimeline } from "../../types/common/interfaces";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import { CSSProperties } from "preact/compat";
 
 interface PendingEventInfo extends CMMSTimeline {
@@ -14,7 +14,7 @@ interface EventSelectProps {
 }
 
 const fetchPendingEvents = async () => {
-    return await axios.get<PendingEventInfo[]>("/api/event/")
+    return await instance.get<PendingEventInfo[]>("/api/event/")
         .then(res => {
             return res.data
         })

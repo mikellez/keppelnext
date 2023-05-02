@@ -11,7 +11,7 @@ import {
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import { CMMSEmployee } from "../../types/common/interfaces";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import { ModuleHeader, ModuleMain } from "../../components";
 import TooltipBtn from "../../components/TooltipBtn";
 import Link from "next/link";
@@ -23,7 +23,7 @@ import { useRouter } from "next/router";
 
 const downloadCSV = async () => {
     try {
-        const response = await axios({
+        const response = await instance({
             url: `/api/user/getUsersCSV`,
             method: "get",
             responseType: "arraybuffer",
@@ -43,7 +43,7 @@ const downloadCSV = async () => {
 
 const getUser = async () => {
   const url = "/api/user/getUsers";
-  return await axios
+  return await instance
     .get(url)
     .then((res) => {
       console.log(res.data);
@@ -105,7 +105,7 @@ export default function User() {
   };
   async function deleteMaster() {
     try {
-      let res = await axios.delete(`/api/user/deleteUser/${deleteModalID}`);
+      let res = await instance.delete(`/api/user/deleteUser/${deleteModalID}`);
       console.log(res);
       setDeleteSuccess(true);}
     catch (e) { console.log(e); }}

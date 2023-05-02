@@ -21,7 +21,7 @@ function downloadHTML(filename, blob) {
 //Get all plant lists
 async function getPlants()
 {
-	return await axios.get("/api/request/getPlantlist")
+	return await instance.get("/api/request/getPlantlist")
 	.then((response) => {
 		return response.data;
 	})
@@ -34,7 +34,7 @@ async function getPlants()
 // gets assets depending on plant_id
 async function getAssets(plant_id)
 {
-	return await axios.get("/api/request/getAssets/" + plant_id)
+	return await instance.get("/api/request/getAssets/" + plant_id)
 	.then((response) => {
 		return response.data;
 	})

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CMMSTimeline } from "../../types/common/interfaces";
-import axios from "axios";
+import instance from '../../axios.config.js';
 
 interface TimelineSelectProps {
     onChange: React.ChangeEventHandler<HTMLSelectElement>;
@@ -14,7 +14,7 @@ export async function getTimelinesByStatus(status: number, userCreated: boolean 
     const url = userCreated
         ? "/api/timeline/status/" + status + "/1"
         : "/api/timeline/status/" + status;
-    return await axios
+    return await instance
         .get<CMMSTimeline[]>(url)
         .then((res) => {
             return res.data;

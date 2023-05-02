@@ -9,7 +9,7 @@ import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup
 import { ModuleModal, ModalProps } from "../";
 import { useRouter } from "next/router";
 import { ThreeDots } from "react-loading-icons";
-import axios from "axios";
+import instance from '../../axios.config.js';
 
 interface ScheduleMaintenanceModalProps extends ModalProps {
     timeline?: CMMSTimeline; // use to add schedule in draft
@@ -18,7 +18,7 @@ interface ScheduleMaintenanceModalProps extends ModalProps {
 
 // Makes a post request to schedule a new maintenance
 export async function scheduleMaintenance(schedule: CMMSSchedule) {
-    return await axios
+    return await instance
         .post("/api/insertSchedule", { schedule })
         .then((res) => {
             console.log(res);
@@ -29,7 +29,7 @@ export async function scheduleMaintenance(schedule: CMMSSchedule) {
 }
 
 async function editDraftSchedule(schedule: CMMSSchedule) {
-    return await axios
+    return await instance
         .patch("/api/updateSchedule", { schedule })
         .then((res) => {
             return res.data;

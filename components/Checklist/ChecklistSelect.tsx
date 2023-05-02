@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CMMSChecklist } from "../../types/common/interfaces";
-import axios from "axios";
+import instance from '../../axios.config.js';
 
 interface ChecklistSelectProps {
     onChange: React.ChangeEventHandler<HTMLSelectElement>;
@@ -11,7 +11,7 @@ interface ChecklistSelectProps {
 
 // Axios call to get all checklist templates
 async function getChecklistTemplates(plantId: number) {
-    return await axios
+    return await instance
         .get<CMMSChecklist[]>("/api/checklist/templateNames/" + plantId)
         .then((res) => {
             return res.data;

@@ -1,5 +1,5 @@
 import formStyles from "../../styles/formStyles.module.css";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import React, { useState } from "react";
 import {
@@ -665,16 +665,16 @@ export const getServerSideProps: GetServerSideProps = async (
     },
   };
   // API to get plants, systems, asset types
-  const plants = await axios.get<CMMSPlant[]>(
-    `http://${process.env.SERVER}:${process.env.PORT}/api/getPlants`,
+  const plants = await instance.get<CMMSPlant[]>(
+    `/api/getPlants`,
     headers
   );
-  const systems = await axios.get<CMMSSystem[]>(
-    `http://${process.env.SERVER}:${process.env.PORT}/api/asset/systems`,
+  const systems = await instance.get<CMMSSystem[]>(
+    `/api/asset/systems`,
     headers
   );
-  const asset_type = await axios.get<CMMSAssetType[]>(
-    `http://${process.env.SERVER}:${process.env.PORT}/api/asset/fetch_asset_types`,
+  const asset_type = await instance.get<CMMSAssetType[]>(
+    `/api/asset/fetch_asset_types`,
     headers
   );
 

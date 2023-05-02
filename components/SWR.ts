@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import axios from "axios";
+import instance from "../axios.config";
 
 import {
   CMMSAsset,
@@ -20,7 +20,7 @@ function useRequest(
   page: number
 ) {
   const requestFetcher = (url: string) =>
-    axios
+    instance
       .get<{ rows: CMMSRequest[]; total: number }>(url)
       .then((response) => {
         response.data.rows.forEach((s: CMMSRequest) => {
@@ -41,7 +41,7 @@ function useRequest(
 
 function useRequestFilter(props: RequestProps, page: number) {
   const requestFetcher = (url: string) =>
-    axios
+    instance
       .get<{ rows: CMMSRequest[]; total: number }>(url)
       .then((response) => {
         if (response?.data?.rows === undefined) return { rows: [], total: 0 };
@@ -64,7 +64,7 @@ function useRequestFilter(props: RequestProps, page: number) {
 
 function useAsset(plant_id: number | null) {
   const assetFetcher = (url: string) =>
-    axios
+    instance
       .get<CMMSAsset[]>(url + plant_id)
       .then((response) => response.data)
       .catch((e) => {
@@ -83,7 +83,7 @@ function useChecklist(
   page: number
 ) {
   const checklistFetcher = (url: string) =>
-    axios
+    instance
       .get<CMMSChecklist[]>(url)
       .then((response) => response.data)
       .catch((e) => {
@@ -98,7 +98,7 @@ function useChecklist(
 }
 function useChecklistFilter(props: ChecklistProps, page: number) {
   const checklistFetcher = (url: string) =>
-    axios
+    instance
       .get<{ rows: CMMSChecklist[]; total: number }>(url)
       .then((response) => response.data)
       .catch((e) => {
@@ -113,7 +113,7 @@ function useChecklistFilter(props: ChecklistProps, page: number) {
 }
 function useAccountlog() {
   const accountlogFetcher = (url: string) =>
-    axios
+    instance
       .get<any[]>(url)
       .then((response) =>
         response.data.map((singleLog) => {
@@ -149,7 +149,7 @@ function useCurrentUser() {
   }
 
   const userFetcher = (url: string) =>
-    axios
+    instance
       .get<CMMSCurrentUser>(url)
       .then((response) => response.data)
       .catch((e) => {
@@ -164,7 +164,7 @@ function useCurrentUser() {
 
 function useSystemAsset(system_id: number | null) {
   const systemAssetFetcher = (url: string) =>
-    axios
+    instance
       .get<CMMSSystemAsset[]>(url + system_id)
       .then((response) => response.data)
       .catch((e) => {
@@ -183,7 +183,7 @@ function useSystemAssetName(
   system_asset_id: number | null
 ) {
   const systemAssetFetcher = (url: string) =>
-    axios
+    instance
       .get<CMMSSystemAssetName[]>(
         url + plant_id + "/" + system_id + "/" + system_asset_id
       )
@@ -207,7 +207,7 @@ function useSubComponent1Name(
   system_asset_name_id: string | null
 ) {
   const systemAssetFetcher = (url: string) =>
-    axios
+    instance
       .get<CMMSSubComponent1Name[]>(
         url +
           plant_id +
@@ -258,7 +258,7 @@ function useChangeOfParts(
         apiURL += `?psa_id=${options.psa_id}`;
     }
 
-    return await axios
+    return await instance
       .get<CMMSChangeOfParts[]>(apiURL)
       .then((response) => response.data)
       .catch((e) => {

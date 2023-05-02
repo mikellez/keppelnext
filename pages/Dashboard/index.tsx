@@ -1,12 +1,11 @@
 import React from "react";
 
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import axios from "axios";
+import instance from "../../axios.config";
 import ManagerDashboad from "./Manager";
 import EngineerDashboad from "./Engineer";
 import SpecialistDashboad from "./Specialist";
 import { CMMSDashboardData } from "../../types/common/interfaces";
-import { Role } from "../../types/common/enums";
 
 export async function fetchData(
   type: string,
@@ -27,7 +26,7 @@ export async function fetchData(
 
   console.log(url)
 
-  return await axios
+  return await instance
     .get(url)
     .then((res) => {
       if (res) {
@@ -44,9 +43,9 @@ export async function fetchData(
 }
 
 export default function Dashboad({ role_id }: { role_id: number }) {
-  if (role_id === Role.Admin || role_id === Role.Manager) return <ManagerDashboad />;
+  if (role_id === 1 || role_id === 2) return <ManagerDashboad />;
 
-  if (role_id === Role.Engineer) return <EngineerDashboad />;
+  if (role_id === 3) return <EngineerDashboad />;
 
   return <SpecialistDashboad />;
 }
@@ -54,6 +53,7 @@ export default function Dashboad({ role_id }: { role_id: number }) {
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
+  console.log('cookie', context.req.headers.cookie);
   const headers = {
     withCredentials: true,
     headers: {
@@ -61,8 +61,8 @@ export const getServerSideProps: GetServerSideProps = async (
     },
   };
 
-  const userInfo = await axios.get<any>(
-    `http://${process.env.SERVER}:${process.env.PORT}/api/user`,
+  const userInfo = await instance.get<any>(
+    "/api/user",
     headers
   );
   console.log(userInfo.data);

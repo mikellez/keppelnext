@@ -14,7 +14,7 @@ import RequestPreview, {
   RequestPreviewProps,
   RequestAction,
 } from "../../../components/Request/RequestPreview";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import { CMMSRequest } from "../../../types/common/interfaces";
 import { useRouter } from "next/router";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
@@ -24,7 +24,7 @@ import styles from "../../../styles/Manage.module.css";
 import { downloadPDF } from "../View/[id]";
 
 const manageRequest = async (id: number, status: number, comments?: string) => {
-  return await axios({
+  return await instance({
     url: `/api/request/${id}/${status}`,
     method: "patch",
     data: { comments: comments },
@@ -133,8 +133,8 @@ export default function CompleteRequest(props: RequestPreviewProps) {
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const getSpecificRequest = await axios.get<CMMSRequest>(
-    `http://${process.env.SERVER}:${process.env.PORT}/api/request/` + context.params?.id
+  const getSpecificRequest = await instance.get<CMMSRequest>(
+    `/api/request/` + context.params?.id
   );
 
   if (

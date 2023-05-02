@@ -25,7 +25,7 @@ import { HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../components/TooltipBtn";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import LoadingHourglass from "../../components/LoadingHourglass";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import PageButton from "../../components/PageButton";
 import styles from "../../styles/Request.module.scss";
@@ -68,7 +68,7 @@ export interface ChecklistProps {
 
 const downloadCSV = async (type: string, activeTabIndex: number) => {
   try {
-    const response = await axios({
+    const response = await instance({
       url: `/api/${type}/csv?activeTab=${JSON.stringify(activeTabIndex)}`,
       method: "get",
       responseType: "arraybuffer",
@@ -167,7 +167,7 @@ export default function Checklist(props: ChecklistProps) {
   useEffect(() => {
     if(!props?.filter) {
       setReady(false);
-      axios
+      instance
         .get(`/api/checklist/${indexedColumn[activeTabIndex]}?page=1`)
         .then((response) => {
           setChecklistItems(

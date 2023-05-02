@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import formStyles from "../../../styles/formStyles.module.css";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import { CMMSAssetDetails } from "../../../types/common/interfaces";
 import { useRouter } from "next/router";
 import { useCurrentUser } from "../../../components/SWR";
@@ -15,7 +15,7 @@ interface EditAssetProps {
 // get asset details query
 const getAsset = async (id: number) => {
   const url = "/api/assetDetails/";
-  return await axios
+  return await instance
     .get(url + id)
     .then((res) => {
       // console.log(res.data)

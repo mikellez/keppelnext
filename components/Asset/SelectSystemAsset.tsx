@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import ModuleSelect, { ModuleSelectOption } from '../ModuleLayout/ModuleSelect';
-import axios from "axios";
+import instance from '../../axios.config.js';
 
 async function getSystems() : Promise<ModuleSelectOption[]> {
-    return await axios.get("/api/master/system_asset_lvl5")
+    return await instance.get("/api/master/system_asset_lvl5")
         .then(res => {
             const uniqueValues = new Set();
             return res.data.rows.reduce((acc: ModuleSelectOption[], plant_system_assets: any) => {

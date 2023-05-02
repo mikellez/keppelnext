@@ -8,7 +8,7 @@ import React, { MouseEvent, useEffect, useState } from "react";
 import { ModuleMain, ModuleHeader, ModuleContent } from "../../components";
 import { Nullish } from "@table-library/react-table-library/types/common";
 import useSWR from "swr";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import {
   Table,
   Header,

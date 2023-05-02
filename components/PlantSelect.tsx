@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CMMSPlant } from "../types/common/interfaces";
-import axios from "axios";
+import instance from "../axios.config";
 
 interface PlantSelectProps {
     onChange: React.ChangeEventHandler<HTMLSelectElement>;
@@ -14,7 +14,7 @@ interface PlantSelectProps {
 
 // No access control for managers and engineers
 export async function getPlants(url: string) {
-    return await axios
+    return await instance
         .get<CMMSPlant[]>(url)
         .then((res) => {
             return res.data.sort((a, b) => a.plant_id - b.plant_id);
