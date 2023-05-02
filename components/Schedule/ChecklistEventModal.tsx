@@ -15,7 +15,7 @@ import TooltipBtn from "../TooltipBtn";
 import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import styles from "../../styles/Schedule.module.scss";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import ScheduleModal, { scheduleMaintenance, scheduleValidator } from "./ScheduleModal";
 import { Role } from "../../types/common/enums";
 
@@ -37,7 +37,7 @@ export interface ModalProps extends PropsWithChildren {
 
 // Delete individual schedules during the draft phase
 async function deleteSchedule(id: number) {
-    return await axios
+    return await instance
         .delete("/api/schedule/" + id)
         .then((res) => {
             return res;

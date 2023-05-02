@@ -32,7 +32,7 @@ import PlantSelect from "../PlantSelect";
 import TimelineSelect from "./TimelineSelect";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import { CMMSTimeline, CMMSSchedule } from "../../types/common/interfaces";
 import { ScheduleCreateOptions } from "../../pages/Schedule/Create";
 import { getTimeline } from "../../pages/Schedule/Timeline/[id]";
@@ -54,7 +54,7 @@ interface CreateScheduleModalProps extends ModalProps {
 
 // Create a new timeline
 async function createTimeline(data: CMMSTimeline) {
-    return await axios
+    return await instance
         .post("/api/timeline", { data })
         .then((res) => {
             return res.data;
@@ -64,7 +64,7 @@ async function createTimeline(data: CMMSTimeline) {
 
 // Edit only certain timeline details
 async function editTimeline(data: CMMSTimeline, id: number) {
-    return await axios
+    return await instance
         .patch("/api/timeline/" + id, { data })
         .then((res) => {
             return res.data;

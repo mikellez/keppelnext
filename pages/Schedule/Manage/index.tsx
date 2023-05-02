@@ -9,7 +9,7 @@ import {
 import { HiOutlineSwitchHorizontal } from "react-icons/hi";
 import TooltipBtn from "../../../components/TooltipBtn";
 import styles from "../../../styles/Schedule.module.scss";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import TimelineSelect from "../../../components/Schedule/TimelineSelect";
 import EventSelect from "../../../components/Schedule/EventSelect";
 import { getSchedules } from "../Timeline/[id]";
@@ -20,7 +20,7 @@ import { useRouter } from "next/router";
 
 // Function to change the status of a timeline
 export async function changeTimelineStatus(newStatus: number, timelineId: number) {
-    return await axios.post(`/api/timeline/status/${newStatus}/${timelineId}`)
+    return await instance.post(`/api/timeline/status/${newStatus}/${timelineId}`)
         .then(res => {
             return res.data;
         })
@@ -30,7 +30,7 @@ export async function changeTimelineStatus(newStatus: number, timelineId: number
 };
 
 async function getScheduleById(id: number) {
-    return await axios.get<ScheduleInfo[]>("/api/schedule/event/" + id)
+    return await instance.get<ScheduleInfo[]>("/api/schedule/event/" + id)
         .then(res => {
             return res.data
         })
@@ -38,7 +38,7 @@ async function getScheduleById(id: number) {
 };
 
 export async function manageSingleEvent(schedule: ScheduleInfo, action: string) {
-    return await axios({
+    return await instance({
         url: "/api/event/",
         method: "patch",
         data: {schedule: schedule, action: action}

@@ -5,7 +5,7 @@ import Select, { defaultTheme } from "react-select";
 import { ModuleContent, ModuleDivider, ModuleFooter, ModuleHeader, ModuleMain } from '../../components';
 import RequiredIcon from "../../components/RequiredIcon";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import LoadingIcon from "../../components/LoadingIcon";
 import ModuleSimplePopup, { SimpleIcon } from "../../components/ModuleLayout/ModuleSimplePopup";
 import router from "next/router";
@@ -58,11 +58,12 @@ export default function settings(props: settingsProps){
 		}
 	}
 	async function validation(field: string, link: string){
-		let res = await axios.get(link + field);
+		let res = await instance.get(link + field);
 		return res.data;
 	}
 	async function submission(){
-		try { let res = await axios.post("/api/setting/update", form);
+		try { let res = await instance.post("/api/setting/update", form);
+		console.log(res);
 		setSubmissionModal(true);
 
 	} catch(err){
@@ -295,9 +296,9 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 		}
 	}
 
-	const fetchedPlants = await axios.get<CMMSPlant[]>(`http://${process.env.SERVER}:${process.env.PORT}/api/plants`, headers);
-	const userInfo = await axios.get<any>(
-		`http://${process.env.SERVER}:${process.env.PORT}/api/user`,
+	const fetchedPlants = await instance.get<CMMSPlant[]>(`/api/plants`, headers);
+	const userInfo = await instance.get<any>(
+		`/api/user`,
 		headers
 	  );
 	  console.log(userInfo.data);

@@ -5,7 +5,7 @@ import { createChecklistGetServerSideProps } from "../../../types/common/props";
 import { GetServerSideProps } from "next";
 import Link from "next/link";
 import TooltipBtn from "../../../components/TooltipBtn";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import { useRouter } from "next/router";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { HiOutlineDownload } from "react-icons/hi";
@@ -13,7 +13,7 @@ import ChecklistPreview from "../../../components/Checklist/ChecklistPreview";
 import { downloadChecklistPDF } from "../View/[id]";
 
 const manageChecklist = async (id: number, action: string, remarks: string) => {
-    return await axios({
+    return await instance({
         url: `/api/checklist/${action}/${id}`,
         method: "patch",
         data: { remarks: remarks },

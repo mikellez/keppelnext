@@ -7,7 +7,7 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import TooltipBtn from "../../components/TooltipBtn";
 import { RiFileAddLine } from "react-icons/ri";
 import Link from "next/link";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import { GridApi, ValueGetterParams } from "ag-grid-enterprise";
 import { ColDef, IRowNode, GridOptions, RowDoubleClickedEvent } from "ag-grid-community";
 import { AiOutlineSearch } from "react-icons/ai";
@@ -16,7 +16,7 @@ import { useRouter } from "next/router";
 
 // Get request to fetch all the assets from db
 const getAssets = async () => {
-    return await axios
+    return await instance
         .get("/api/asset")
         .then((res) => {
             return res.data;

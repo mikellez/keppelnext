@@ -6,7 +6,7 @@ import { ModuleContent, ModuleDivider, ModuleFooter, ModuleHeader, ModuleMain } 
 import RequiredIcon from "../../components/RequiredIcon";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { CMMSPlant, CMMSAddUser } from "../../types/common/interfaces";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import LoadingIcon from "../../components/LoadingIcon";
 import ModuleSimplePopup, { SimpleIcon } from "../../components/ModuleLayout/ModuleSimplePopup";
 import router from "next/router";
@@ -54,7 +54,7 @@ export default function AddUser(props: AddUserProps) {
 	}
 
 	async function submission(){
-		try { let res = await axios.post("/api/user/addUser", form);
+		try { let res = await instance.post("/api/user/addUser", form);
 		console.log(res);
 		setSubmissionModal(true);
 
@@ -139,14 +139,6 @@ export default function AddUser(props: AddUserProps) {
 						onChange={handleForm}
 						name="email"/>
 					</div>
-
-					{/* <div className="form-group">
-						<label className='form-label'>
-							<RequiredIcon/> Mobile Number
-						</label>
-						<input className="form-control" type="text"/>
-					</div> */}
-
 				</div>
 
 				<ModuleDivider style={{gridColumn: "span 2"}}/>
@@ -253,7 +245,7 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 		}
 	}
 
-	const fetchedPlants = await axios.get<CMMSPlant[]>(`http://${process.env.SERVER}:${process.env.PORT}/api/plants`, headers);
+	const fetchedPlants = await instance.get<CMMSPlant[]>(`/api/plants`, headers);
 
 	let props: AddUserProps = { plants: fetchedPlants.data }
 

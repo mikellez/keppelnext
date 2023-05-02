@@ -7,7 +7,7 @@ import colours from '../../styles/colours.module.scss'
 import Link from 'next/link';
 import { useCurrentUser } from '../SWR';
 import useComponentVisible from './useComponentVisible';
-import axios from 'axios';
+import instance from '../../axios.config.js';
 import { useRouter } from 'next/router';
 import { useContext } from 'react';
 

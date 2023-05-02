@@ -14,13 +14,13 @@ import RequestPreview, {
 import TooltipBtn from "../../../components/TooltipBtn";
 import { HiOutlineDownload } from 'react-icons/hi';
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import axios from "axios";
+import instance from '../../../axios.config.js';
 import { CMMSRequest } from "../../../types/common/interfaces";
 import { useRouter } from "next/router";
 
 export const downloadPDF = async (id: number) => {
   try {
-    const response = await axios({
+    const response = await instance({
       url: `/api/request/pdf/${id}`,
       method: "get",
       responseType: "arraybuffer",
@@ -60,8 +60,8 @@ export default function ViewRequest(props: RequestPreviewProps) {
 export const getServerSideProps: GetServerSideProps = async (
     context: GetServerSidePropsContext
   ) => {
-    const getSpecificRequest = await axios.get<CMMSRequest>(
-      `http://${process.env.SERVER}:${process.env.PORT}/api/request/` + context.params?.id
+    const getSpecificRequest = await instance.get<CMMSRequest>(
+      `/api/request/` + context.params?.id
     );
   
     if (

@@ -1,7 +1,7 @@
 import formStyles from '../../styles/formStyles.module.css'
 import React, { useEffect, useState } from 'react'
 import { CMMSMasterField, CMMSMasterSubmission, CMMSSystem } from '../../types/common/interfaces'
-import axios from 'axios'
+import instance from '../../axios.config.js'
 
 interface FieldProps {
 	label: string

@@ -1,7 +1,7 @@
 import styles from '../styles/Login.module.css'
 import React, { useState } from 'react'
 import Image from 'next/image'
-import axios from 'axios';
+import instance from '../axios.config';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/router';
 import { SubmitHandler } from 'react-hook-form/dist/types';
@@ -24,18 +24,20 @@ function Login() {
 
 	const formSubmit: SubmitHandler<FormValues> = async (data) => {
 		console.log(data);
-		await axios.post("/api/login", data)
+		await instance.post("/api/login", data)
 		.then((response) => {
 			setErrorSubmitting("");
 			console.log("success", response);
 			router.push("/Dashboard");
 		}).catch((e) => {
+			alert(e)
 			console.log("error", e);
 			let reason:string = ""
 			if(e.response.status === 429)
 				reason = ": Too many Login attempts. Try again later."
 			if(e.response.status === 401)
 				reason = ": Username and password combination does not match."
+			
 
 			setErrorSubmitting("Login Failed" + reason);
 		});

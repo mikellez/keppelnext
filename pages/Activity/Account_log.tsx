@@ -25,10 +25,25 @@ import TooltipBtn from "../../components/TooltipBtn";
 export default function AccountLog() {
   const [activityItems, setActivityItems] = useState<CMMSActivitylog[]>([]);
   const [isReady, setReady] = useState(false);
+  // const [sortDirectionDate, setSortDirectionDate] = useState<"asc" | "desc" | "null">("null");
+  const [date, setDate]= useState<string>("Date & Time");
+
+  function sortDate() {
+    if (date == "Date & Time" || date == "Date & Time ▲") {
+      setDate("Date & Time ▼");
+      setActivityItems(activityItems.sort((a, b) => new Date(b.event_time) - new Date(a.event_time)));
+      console.log(activityItems);
+    } else if (date == "Date & Time ▼") {
+      setDate("Date & Time ▲");
+      setActivityItems(activityItems.sort((a, b) => new Date(a.event_time) - new Date(b.event_time)));
+      console.log(activityItems);
+    }
+  }
+
 
   const { data, error, isValidating, mutate } = useAccountlog();
-  console.log(data);
-
+  // console.log(data);
+  console.log(activityItems)
   const theme = useTheme([
     getTheme(),
     {
@@ -59,7 +74,10 @@ export default function AccountLog() {
                 <HeaderRow>
                   <HeaderCell resize>User ID</HeaderCell>
                   <HeaderCell resize>Activity</HeaderCell>
-                  <HeaderCell resize>Date & Time</HeaderCell>
+                  <HeaderCell resize
+                  onClick={() => sortDate()}
+                  style={{cursor: "pointer"}}
+                  >{date}</HeaderCell>
                 </HeaderRow>
               </Header>
 

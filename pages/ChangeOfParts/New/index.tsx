@@ -20,7 +20,7 @@ import LoadingHourglass from "../../../components/LoadingHourglass";
 import { useCurrentUser } from "../../../components/SWR";
 
 const createChangeOfParts = async (formData: CMMSChangeOfParts) => {
-    return await axios
+    return await instance
         .post(`/api/changeOfParts/`, { formData })
         .then((res) => {
             return res.data;

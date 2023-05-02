@@ -25,7 +25,7 @@
 import formStyles from "../../styles/formStyles.module.css";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import instance from '../../axios.config.js';
 
 import { ModuleContent, ModuleDivider, ModuleFooter } from "../../components";
 import ImagePreview from "../../components/Request/ImagePreview";
@@ -60,7 +60,7 @@ type FormValues = {
 };
 
 async function getAssets(plant_id: number) {
-  return await axios
+  return await instance
     .get("/api/asset/" + plant_id)
     .then((response) => {
       return response.data;
@@ -89,7 +89,7 @@ async function createRequest(
 
   console.log('formData', formData)
 
-  return await axios
+  return await instance
     .post("/api/request/", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     })
@@ -108,7 +108,7 @@ async function updateRequest(
   priority: CMMSRequestPriority,
   assignedUser: AssignedUserOption
 ) {
-  return await axios({
+  return await instance({
     method: "patch",
     url: "/api/request/" + id,
     data: {

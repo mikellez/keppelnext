@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import Select, {
   ActionMeta,
   GroupBase,
@@ -33,7 +33,7 @@ export interface AssignedUserOption {
 
 // Axios call to get all assigned users based on plant_id
 async function getAssignedUsers(plantId: number | number[]) {
-  return await axios
+  return await instance
     .get<CMMSUser[]>("/api/getAssignedUsers/" + plantId)
     .then((res) => {
       return res.data;

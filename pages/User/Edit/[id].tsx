@@ -6,6 +6,7 @@ import { ModuleContent, ModuleFooter, ModuleHeader, ModuleMain } from "../../../
 import Link from "next/link";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import formStyles from "../../../styles/formStyles.module.css";
+import instance from "../../../axios.config";
 
 interface CMMSUserEdit {
     first_name?: string;
@@ -28,7 +29,7 @@ interface checkdetails {
 
 const getUsersData = async (id:number) => {
     const url = "/api/user/getUsersData/";
-    return await axios
+    return await instance
         .get(url + id)
         .then((res) => {
         return res.data;
@@ -41,7 +42,7 @@ const getUsersData = async (id:number) => {
 
 const getUsersplantData = async (id:number) => {
     const url = "/api/user/getUsersplantData/";
-    return await axios
+    return await instance
         .get(url + id)
         .then((res) => {
         return res.data;

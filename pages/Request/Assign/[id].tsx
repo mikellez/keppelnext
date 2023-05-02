@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import instance from '../../../axios.config.js';
 import { useRouter } from "next/router";
 import {
   ModuleContent,
@@ -48,13 +48,13 @@ export const getServerSideProps: GetServerSideProps = async (
     },
   };
 
-  const getSpecificRequest = axios.get(
-    `http://${process.env.SERVER}:${process.env.PORT}/api/request/` + context.params?.id,
+  const getSpecificRequest = instance.get(
+    `/api/request/` + context.params?.id,
     headers
   );
 
-  const getPriority = axios.get(
-    `http://${process.env.SERVER}:${process.env.PORT}/api/request/priority`,
+  const getPriority = instance.get(
+    `/api/request/priority`,
     headers
   );
 

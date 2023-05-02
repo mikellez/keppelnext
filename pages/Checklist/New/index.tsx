@@ -11,7 +11,7 @@ import {
 import ChecklistTemplateCreator from "../../../components/Checklist/ChecklistTemplateCreator";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { CMMSPlant, CMMSChecklist } from "../../../types/common/interfaces";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import { useCurrentUser } from "../../../components/SWR";
 import PlantSelect from "../../../components/PlantSelect";
 import AssignToSelect, { AssignedUserOption } from "../../../components/Schedule/AssignToSelect";
@@ -30,7 +30,7 @@ interface ChecklistPageProps {
 }
 
 const createChecklist = async (checklist: CMMSChecklist, type: string) => {
-    return await axios
+    return await instance
         .post(`/api/checklist/${type}`, { checklist })
         .then((res) => {
             return res.data;
