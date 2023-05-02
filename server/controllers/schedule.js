@@ -43,8 +43,8 @@ const updateDates = async (scheduleList) => {
   for (let i = 0; i < scheduleList.length; i++) {
     if (scheduleList[i].isSingle) {
       const result = await db.query(`SELECT 
-                (SC.START_DATE  + interval '8 hour' ), 
-                (SC.END_DATE  + interval '8 hour' ),
+                (SC.START_DATE  + interval '8 hour' ) AS START_DATE, 
+                (SC.END_DATE  + interval '8 hour' ) AS END_DATE,
                 SC.RECURRENCE_PERIOD
                 FROM 
                 KEPPEL.SCHEDULE_CHECKLIST SC
