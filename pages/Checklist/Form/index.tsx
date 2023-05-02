@@ -9,23 +9,16 @@ import {
     ModuleFooter,
 } from "../../../components";
 import ChecklistTemplateCreator from "../../../components/Checklist/ChecklistTemplateCreator";
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { CMMSPlant, CMMSChecklist } from "../../../types/common/interfaces";
 import instance from "../../../axios.config"
 import { useCurrentUser } from "../../../components/SWR";
-import PlantSelect from "../../../components/PlantSelect";
-import AssignToSelect, { AssignedUserOption } from "../../../components/Schedule/AssignToSelect";
-import AssetSelect from "../../../components/Checklist/AssetSelect";
 import { CheckSection } from "../../../types/common/classes";
 import LoadingHourglass from "../../../components/LoadingHourglass";
-import { SingleValue } from "react-select";
 import TooltipBtn from "../../../components/TooltipBtn";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
 import { createChecklistGetServerSideProps } from "../../../types/common/props";
-import RequiredIcon from "../../../components/RequiredIcon";
 import ChecklistCreationForm from "../../../components/Checklist/ChecklistCreationForm";
-import { ch } from "@fullcalendar/core/internal-common";
 
 interface ChecklistPageProps {
     checklist: CMMSChecklist | null;
@@ -247,6 +240,6 @@ export default function ChecklistNew(props: ChecklistPageProps) {
     );
 }
 
-const getServerSideProps = createChecklistGetServerSideProps();
+const getServerSideProps = createChecklistGetServerSideProps([1, 2, 3]);
 
 export { type ChecklistPageProps, getServerSideProps };

@@ -17,7 +17,7 @@ import {
 import ChecklistTemplateCreator from "../../../components/Checklist/ChecklistTemplateCreator";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { CMMSPlant, CMMSChecklist } from "../../../types/common/interfaces";
-import instance from '../../axios.config.js';
+import instance from '../../../axios.config.js';
 import { useAsset, useCurrentUser } from "../../../components/SWR";
 
 import PlantSelect from "../../../components/PlantSelect";

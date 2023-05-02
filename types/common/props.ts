@@ -31,7 +31,6 @@ const createChecklistGetServerSideProps = (allowedStatuses?: number[]) => {
 					}
 				}
 			}
-			console.log(response.data)
 			checklist = response.data
 		}
 

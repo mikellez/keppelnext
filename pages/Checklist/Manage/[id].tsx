@@ -5,7 +5,7 @@ import { createChecklistGetServerSideProps } from "../../../types/common/props";
 import { GetServerSideProps } from "next";
 import Link from "next/link";
 import TooltipBtn from "../../../components/TooltipBtn";
-import instance from '../../axios.config.js';
+import instance from '../../../axios.config.js';
 import { useRouter } from "next/router";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { HiOutlineDownload } from "react-icons/hi";

@@ -23,6 +23,7 @@ SELECT
     cl.history,
     cl.datajson,
     cl.signoff_user_id,
+    cl.assigned_user_id,
     st.status
 FROM 
     keppel.users u

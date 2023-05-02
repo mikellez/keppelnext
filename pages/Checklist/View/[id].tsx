@@ -7,7 +7,7 @@ import ChecklistPreview from "../../../components/Checklist/ChecklistPreview";
 import Link from "next/link";
 import TooltipBtn from "../../../components/TooltipBtn";
 import { HiOutlineDownload } from "react-icons/hi";
-import instance from '../../axios.config.js';
+import instance from '../../../axios.config.js';
 import { useRouter } from "next/router";
 import styles from "../../../styles/Checklist.module.scss";
 

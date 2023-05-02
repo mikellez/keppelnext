@@ -27,6 +27,7 @@ import { BsFileEarmarkPlus } from "react-icons/bs";
 import LoadingHourglass from "../../components/LoadingHourglass";
 import instance from '../../axios.config.js';
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { AiOutlineEdit, AiOutlineFolderView, AiOutlineFileDone, AiOutlineFileProtect } from  "react-icons/ai"
 import PageButton from "../../components/PageButton";
 import styles from "../../styles/Request.module.scss";
 import { Role } from "../../types/common/enums";
@@ -300,20 +301,25 @@ export default function Checklist(props: ChecklistProps) {
                               user.data!.role_id === Role.Engineer) &&
                             item.status_id === 4 ? (
                               <Link href={`/Checklist/Manage/${item.id}`}>
-                                <strong>Manage</strong>
+                                <AiOutlineFileProtect size={22} />
                               </Link>
                             ) : item.status_id === 2 || item.status_id === 3 ? (
+                              <>
                               <Link href={`/Checklist/Complete/${item.id}`}>
-                                <strong>Complete</strong>
+                                <AiOutlineFileDone size={22} />
                               </Link>
-                            ) : item.status_id === 1 ? 
+                              <Link href={`/Checklist/Form/?action=Edit&id=${item.id}`}>
+                                <AiOutlineEdit size={22} />
+                              </Link>
+                              </>
+                            ) : item.status_id === 1 ?
                             (
                               <Link href={`/Checklist/Form/?action=Edit&id=${item.id}`}>
-                                <strong>Assign</strong>
+                                <AiOutlineEdit size={22} />
                               </Link>
                             ) : (
                               <Link href={`/Checklist/View/${item.id}`}>
-                                <strong>View</strong>
+                                <AiOutlineFolderView size={22} />
                               </Link>
                             )}
                           </Cell>

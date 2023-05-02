@@ -126,6 +126,11 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
                     }}
                     plantId={props.checklistData.plant_id}
                     isSingle
+                    defaultIds={
+                        props.checklistData && props.checklistData.assigned_user_id
+                            ? [props.checklistData.assigned_user_id as number]
+                            : []
+                    }
                 />
             </div>
 
