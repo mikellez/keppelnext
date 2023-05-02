@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { CheckSection } from "../../types/common/classes";
 import { ModuleContent, ModuleDivider } from "../";
-import { ChecklistPageProps } from "../../pages/Checklist/New";
+import { ChecklistPageProps } from "../../pages/Checklist/Form";
 import ChecklistDetails from "./ChecklistDetails";
 import ChecklistViewForm from "./ChecklistViewForm";
 

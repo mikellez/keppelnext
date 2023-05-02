@@ -1,6 +1,6 @@
 import React from "react";
 import { ModuleMain, ModuleHeader, ModuleContent } from "../../../components";
-import { ChecklistPageProps } from "../New";
+import { ChecklistPageProps } from "../Form";
 import { createChecklistGetServerSideProps } from "../../../types/common/props";
 import { GetServerSideProps } from "next";
 import ChecklistPreview from "../../../components/Checklist/ChecklistPreview";
@@ -69,6 +69,6 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
 };
 
 export default ManageChecklistPage;
-const getServerSideProps: GetServerSideProps = createChecklistGetServerSideProps("record");
+const getServerSideProps: GetServerSideProps = createChecklistGetServerSideProps();
 
 export { getServerSideProps, downloadChecklistPDF };

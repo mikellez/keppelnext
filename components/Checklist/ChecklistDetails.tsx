@@ -1,6 +1,6 @@
 import React from "react";
 import { CMMSChecklist } from "../../types/common/interfaces";
-import { ChecklistPageProps } from "../../pages/Checklist/New";
+import { ChecklistPageProps } from "../../pages/Checklist/Form";
 import styles from "../../styles/Checklist.module.scss";
 import { dateFormat } from "../Schedule/ScheduleTemplate";
 

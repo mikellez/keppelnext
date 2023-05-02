@@ -131,7 +131,7 @@ const Templates = () => {
                     toolTip={false} 
                     disabled={!selectedTemplate}
                     onClick={() => {
-                        router.push(`/Checklist/New?id=${selectedTemplate?.checklist_id}`)
+                        router.push(`/Checklist/Form?action=New&id=${selectedTemplate?.checklist_id}`)
                     }}
                     style={{backgroundColor: "#539165", borderColor: "#539165"}}
                 >

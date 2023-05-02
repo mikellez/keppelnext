@@ -79,7 +79,7 @@ function useAsset(plant_id: number | null) {
 }
 
 function useChecklist(
-  checklist_type: "assigned" | "record" | "approved",
+  checklist_type: "pending" | "assigned" | "record" | "approved",
   page: number
 ) {
   const checklistFetcher = (url: string) =>

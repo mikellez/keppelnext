@@ -2,7 +2,7 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { CMMSChecklist, CMMSChangeOfParts, CMMSAssetDetails } from "./interfaces";
 import instance from '../../axios.config.js';
 
-const createChecklistGetServerSideProps = (checklistType: string, allowedStatuses?: number[]) => {
+const createChecklistGetServerSideProps = (allowedStatuses?: number[]) => {
 
 	const x: GetServerSideProps = async (context: GetServerSidePropsContext) => {
 		const headers = {
@@ -15,8 +15,9 @@ const createChecklistGetServerSideProps = (checklistType: string, allowedStatuse
         let checklist = null;
 
 		if (context.query.id) {
-			const { id }  = context.query;
-			const response = await instance.get<CMMSChecklist>(`/api/checklist/${checklistType}/${id}`, headers);
+			const { id, action }  = context.query;
+			const chltype = action === "New" ? "template" : "record"
+			const response = await instance.get<CMMSChecklist>(`http://${process.env.SERVER}:${process.env.PORT}/api/checklist/${chltype}/${id}`, headers);
 			if (
 				response.status == 500 || 
 				(allowedStatuses && !allowedStatuses.includes(response.data.status_id))

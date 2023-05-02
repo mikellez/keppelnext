@@ -33,7 +33,8 @@ import { Role } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
 import { GetServerSidePropsContext } from "next";
 
-const indexedColumn: ("assigned" | "record" | "approved")[] = [
+const indexedColumn: ("pending" | "assigned" | "record" | "approved")[] = [
+  "pending",
   "assigned",
   "record",
   "approved",
@@ -57,6 +58,7 @@ export interface ChecklistItem {
   history: string;
   status: string;
 }
+
 export interface ChecklistProps {
   filter?: boolean;
   status: number;
@@ -115,15 +117,11 @@ export default function Checklist(props: ChecklistProps) {
 
   const editRow: OnClick<ChecklistItem> = (item, event) => {
     const checklistRow = item;
-
-    // console.log(checklistRow, event);
   };
 
   useEffect(() => {
 
     if (data && !isValidating) {
-      // tranform and store data
-      console.log(data);
 
       if(props?.filter) {
         if (data?.rows?.length > 0) {
@@ -181,16 +179,19 @@ export default function Checklist(props: ChecklistProps) {
           setTotalPages(response.data.total);
           setPage(1);
           setReady(true);
-        });
+        })
+        .catch((e) => {
+          setChecklistItems([]);
+        })
     }
   }, [activeTabIndex]);
 
   return (
     <ModuleMain>
       <ModuleHeader title="Checklist" header="Checklist">
-        <Link href="/Checklist/New">
+        <Link href="/Checklist/Form?action=New">
           <TooltipBtn text="New Checklist">
-            <BsFileEarmarkPlus href="/Checklist/New" size={20} />
+            <BsFileEarmarkPlus size={20} />
           </TooltipBtn>
         </Link>
         <TooltipBtn
@@ -210,7 +211,7 @@ export default function Checklist(props: ChecklistProps) {
               }}
               className={"nav-link" + (activeTabIndex === 0 ? " active" : "")}
             >
-              <span style={{ all: "unset" }}>Assigned</span>
+              <span style={{ all: "unset" }}>Pending</span>
             </li>
             <li
               onClick={() => {
@@ -218,13 +219,21 @@ export default function Checklist(props: ChecklistProps) {
               }}
               className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
             >
-              <span style={{ all: "unset" }}>For Review</span>
+              <span style={{ all: "unset" }}>Assigned</span>
             </li>
             <li
               onClick={() => {
                 activeTabIndex !== 2 && switchColumns(2);
               }}
               className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
+            >
+              <span style={{ all: "unset" }}>For Review</span>
+            </li>
+            <li
+              onClick={() => {
+                activeTabIndex !== 3 && switchColumns(3);
+              }}
+              className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
             >
               <span style={{ all: "unset" }}>Approved</span>
             </li>
@@ -242,8 +251,7 @@ export default function Checklist(props: ChecklistProps) {
             <LoadingHourglass />
           </div>
         )}
-        {error && <div>{error.toString()}</div>}
-        {error && <div>error</div>}
+        {checklistItems.length === 0 && <div>No Checklists</div>}
         {isReady && (
           <>
             <Table
@@ -297,6 +305,11 @@ export default function Checklist(props: ChecklistProps) {
                             ) : item.status_id === 2 || item.status_id === 3 ? (
                               <Link href={`/Checklist/Complete/${item.id}`}>
                                 <strong>Complete</strong>
+                              </Link>
+                            ) : item.status_id === 1 ? 
+                            (
+                              <Link href={`/Checklist/Form/?action=Edit&id=${item.id}`}>
+                                <strong>Assign</strong>
                               </Link>
                             ) : (
                               <Link href={`/Checklist/View/${item.id}`}>
