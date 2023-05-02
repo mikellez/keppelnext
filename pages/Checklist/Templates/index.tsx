@@ -11,7 +11,7 @@ import {
 } from "../../../components";
 import ModuleSimplePopup, {SimpleIcon} from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { CMMSChecklist } from "../../../types/common/interfaces";
-import axios from "axios";
+import instance from '../../../axios.config.js';
 import { useCurrentUser } from "../../../components/SWR";
 import TooltipBtn from "../../../components/TooltipBtn";
 import { useRouter } from "next/router";
@@ -21,7 +21,7 @@ import ChecklistTemplatePane from "../../../components/Checklist/ChecklistTempla
 
 const deleteTemplate = async (checklistId: number) => {
     try {
-        await axios.delete("/api/checklist/template/" + checklistId)
+        await instance.delete("/api/checklist/template/" + checklistId)
     }
     catch (err) {
         console.log(err);
@@ -39,7 +39,7 @@ const Templates = () => {
     const router = useRouter();
 
     async function getChecklistTemplates(plants: number[]) {
-        return await axios({
+        return await instance({
             method: "get",
             url: `/api/checklist/templateNames?test=${JSON.stringify(plants)}`,
         })

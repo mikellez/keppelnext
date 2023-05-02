@@ -16,7 +16,7 @@ import ChecklistEditableForm from "../../../components/Checklist/ChecklistEditab
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { HiOutlineDownload } from "react-icons/hi";
 import { useRouter } from "next/router";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import Link from "next/link";
 import { downloadChecklistPDF } from "../View/[id]";
 
@@ -26,7 +26,7 @@ export const SectionsContext = createContext({
 });
 
 const submitCompletedChecklist = async (data: CheckSection[], id: number) => {
-    return await axios({
+    return await instance({
         url: "/api/checklist/complete/" + id,
         method: "patch",
         data: {

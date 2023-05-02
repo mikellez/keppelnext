@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, forwardRef } from "react";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import Select, { ActionMeta, MultiValue, StylesConfig, SingleValue } from "react-select";
 import { CMMSAsset } from "../../types/common/interfaces";
 import { useAsset } from "../SWR";

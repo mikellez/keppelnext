@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import instance from '../../../axios.config.js';
 import { useRouter } from "next/router";
 
 import {
@@ -47,13 +47,14 @@ export const getServerSideProps: GetServerSideProps = async (
         },
     };
 
-    const getUser = axios.get<CMMSUser>(`http://${process.env.SERVER}:${process.env.PORT}/api/user`, headers);
-    const getRequestTypes = axios.get<CMMSRequestTypes[]>(
-        `http://${process.env.SERVER}:${process.env.PORT}/api/request/types`,
+    const getUser = instance
+        .get<CMMSUser>(`/api/user`, headers);
+    const getRequestTypes = instance.get<CMMSRequestTypes[]>(
+        `/api/request/types`,
         headers
     );
-    const getFaultTypes = axios.get<CMMSFaultTypes[]>(
-        `http://${process.env.SERVER}:${process.env.PORT}/api/fault/types`,
+    const getFaultTypes = instance.get<CMMSFaultTypes[]>(
+        `/api/fault/types`,
         headers
     );
 

@@ -17,7 +17,7 @@ import {
 } from "@table-library/react-table-library";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import { useTheme } from "@table-library/react-table-library/theme";
-import axios from "axios";
+import instance from '../axios.config.js';
 import { GetServerSidePropsContext } from "next";
 import styles from "../styles/Logbook.module.css";
 import { SlLock, SlLockOpen } from "react-icons/sl";
@@ -113,7 +113,7 @@ const Logbook = ({
     console.log(labelValue, entryValue, staff);
 
     try {
-      const result = await axios.post("/api/logbook", {
+      const result = await instance.post("/api/logbook", {
         label: labelValue,
         entry: entryValue,
         staff,
@@ -149,7 +149,7 @@ const Logbook = ({
 
   useEffect(() => {
     const getLogbook = async (pageNumber: number) => {
-      const response = await axios.get(`/api/logbook?page=${pageNumber}`);
+      const response = await instance.get(`/api/logbook?page=${pageNumber}`);
 
       setLogbookData(response.data.rows);
     };
@@ -361,8 +361,8 @@ export const getServerSideProps = async (
     },
   };
 
-  const response = await axios.get(
-    `http://${process.env.SERVER}:${process.env.PORT}/api/logbook?page=1`,
+  const response = await instance.get(
+    `/api/logbook?page=1`,
     headers
   );
 

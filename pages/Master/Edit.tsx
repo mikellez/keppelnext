@@ -1,6 +1,6 @@
 import formStyles from '../../styles/formStyles.module.css'
 
-import axios from 'axios';
+import instance from '../../axios.config.js';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
@@ -60,7 +60,7 @@ export default function Edit(props: EditMasterProps) {
 	const formSubmit: SubmitHandler<FormValues> = async (data) => {
 		console.log(data);
 		setSubmissionModal(true);
-		return await axios.post(`/api/master/${type}/${id}`, data)
+		return await instance.post(`/api/master/${type}/${id}`, data)
 				.then(res => {
 					console.log(res.data)
 
@@ -162,7 +162,7 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 		}
 	}
 
-	const masterInfo = await axios.get<any>(`http://${process.env.SERVER}:${process.env.PORT}/api/master/` + type + "/" + id, headers);
+	const masterInfo = await instance.get<any>(`/api/master/` + type + "/" + id, headers);
 	console.log(masterInfo.data)
 	if(masterInfo.status === 400)
 		return { notFound: true }

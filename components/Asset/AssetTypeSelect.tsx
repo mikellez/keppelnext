@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import instance from '../../axios.config.js';
 import ModuleSelect, { ModuleSelectOption } from '../ModuleLayout/ModuleSelect';
 
 
 const getAssetTypes = async () : Promise<ModuleSelectOption[]> => {
-    return await axios.get("/api/master/asset_type")
+    return await instance.get("/api/master/asset_type")
         .then(res => {
             return res.data.rows.map((asset: any)=> {
                 return {

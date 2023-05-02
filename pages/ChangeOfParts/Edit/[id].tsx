@@ -12,7 +12,7 @@ import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/
 import axios, { AxiosResponse } from "axios";
 
 export const editChangeOfParts = async (formData: CMMSChangeOfParts) => {
-    return await axios
+    return await instance
         .patch(`/api/changeOfParts`, { formData })
         .then((res) => {
             return res.data;

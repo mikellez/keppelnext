@@ -4,7 +4,7 @@ import { FiSend, FiPlusSquare } from "react-icons/fi";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import TooltipBtn from "../../../components/TooltipBtn";
 import styles from "../../styles/Schedule.module.scss";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import { useRouter } from "next/router";
 import { CMMSTimeline } from "../../../types/common/interfaces";
 import { ThreeDots } from "react-loading-icons";
@@ -15,7 +15,7 @@ import ScheduleModal from "../../../components/Schedule/ScheduleModal";
 
 // Get timeline details
 export async function getTimeline(id: number): Promise<CMMSTimeline> {
-    return await axios
+    return await instance
         .get("/api/timeline/" + id)
         .then((res) => {
             return res.data;
@@ -41,7 +41,7 @@ export async function getSchedules(id: number) {
 
 // Delete a timeline
 async function deleteTimeline(id: number) {
-    return await axios
+    return await instance
         .delete("/api/timeline/" + id)
         .then((res) => {
             return res.data;

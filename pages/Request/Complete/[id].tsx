@@ -15,7 +15,7 @@ import RequestPreview, {
   RequestAction,
 } from "../../../components/Request/RequestPreview";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import axios from "axios";
+import instance from '../../../axios.config.js';
 import { CMMSRequest } from "../../../types/common/interfaces";
 import { HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../../components/TooltipBtn";
@@ -35,7 +35,7 @@ const completeRequest = async (data: CompletionRequestInfo, id: string) => {
   sentData.append("complete_comments", data.complete_comments);
   sentData.append("completion_file", data.completion_file!);
 
-  return await axios({
+  return await instance({
     url: "/api/request/complete/" + id,
     method: "patch",
     data: sentData,
@@ -189,8 +189,8 @@ export default function CompleteRequest(props: RequestPreviewProps) {
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const getSpecificRequest = await axios.get<CMMSRequest>(
-    `http://${process.env.SERVER}:${process.env.PORT}/api/request/` + context.params?.id + "?restrict=true"
+  const getSpecificRequest = await instance.get<CMMSRequest>(
+    `/api/request/` + context.params?.id + "?restrict=true"
   );
 
   if (

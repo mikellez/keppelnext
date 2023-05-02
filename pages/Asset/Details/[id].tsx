@@ -7,7 +7,7 @@ import {
     ModuleModal,
 } from "../../../components";
 import { useRouter } from "next/router";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import {
     CMMSAssetDetails,
     CMMSAssetRequestHistory,
@@ -32,7 +32,7 @@ import COPTable from "../../../components/ChangeOfParts/COPTable";
 // Get asset detail by psa id
 const getAsset = async (id: number) => {
     const url = "/api/assetDetails/";
-    return await axios
+    return await instance
         .get(url + id)
         .then((res) => {
             return res.data;
@@ -46,7 +46,7 @@ const getAsset = async (id: number) => {
 // Fetch asset history
 const getAssetHistory = async (id: number, type: string = "request") => {
     const url = "/api/asset/history/" + type + "/";
-    const history = await axios
+    const history = await instance
         .get(url + id)
         .then((res) => {
             return res.data;
@@ -346,12 +346,12 @@ export const getServerSideProps: GetServerSideProps = async (
     };
 
     const psaId = context.query.id;
-    const assetHistory = await axios.get(
-        `http://${process.env.SERVER}:${process.env.PORT}/api/asset/history/` + psaId,
+    const assetHistory = await instance.get(
+        `/api/asset/history/` + psaId,
         headers
     );
-    const COPHistory = await axios.get(
-        `http://${process.env.SERVER}:${process.env.PORT}/api/changeOfParts/?psa_id=` + psaId,
+    const COPHistory = await instance.get(
+        `/api/changeOfParts/?psa_id=` + psaId,
         headers
     );
 

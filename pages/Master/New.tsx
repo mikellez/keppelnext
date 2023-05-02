@@ -7,7 +7,7 @@ import { ModuleMain, ModuleHeader, ModuleContent, ModuleFooter } from '../../com
 import { Controller, useForm } from 'react-hook-form';
 import { FieldErrorsImpl, SubmitHandler } from 'react-hook-form/dist/types';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import axios from 'axios';
+import instance from '../../axios.config.js';
 import LoadingIcon from '../../components/LoadingIcon';
 import { CMMSMasterField, CMMSMasterSubmission, CMMSMasterTables, CMMSSystem } from '../../types/common/interfaces';
 import { MultiFields } from '../../components/Master/MultiField';
@@ -62,7 +62,7 @@ export default function New(props: NewMasterEntryProps) {
 			setIsMissingDetailsModaOpen2(true);
 		}
 		else{
-			return await axios.post("/api/master/new/add", data)
+			return await instance.post("/api/master/new/add", data)
 				.then(res => {
 					console.log(res.data)
 					setSubmissionModal(true)
@@ -217,9 +217,9 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 		}
 	}
 
-	const masterCreateInfo = await axios.get<CMMSMasterTables>(`http://${process.env.SERVER}:${process.env.PORT}/api/master/new`, headers);
-	const systems = await axios.get<CMMSSystem[]>(
-		`http://${process.env.SERVER}:${process.env.PORT}/api/asset/systems`,
+	const masterCreateInfo = await instance.get<CMMSMasterTables>(`/api/master/new`, headers);
+	const systems = await instance.get<CMMSSystem[]>(
+		`/api/asset/systems`,
 		headers
 	  );
 

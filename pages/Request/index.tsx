@@ -46,7 +46,7 @@ import { CMMSRequest } from "../../types/common/interfaces";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import styles from "../../styles/Request.module.scss";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import TooltipBtn from "../../components/TooltipBtn";
 import { FiChevronsLeft, FiChevronsRight, FiRefreshCw } from "react-icons/fi";
 import { HiOutlineDownload, HiOutlineLink } from "react-icons/hi";
@@ -137,7 +137,7 @@ export const getColor = (status: string) => {
 
 export const downloadCSV = async (type: string) => {
   try {
-    const response = await axios({
+    const response = await instance({
       url: `/api/${type}/csv`,
       method: "get",
       responseType: "arraybuffer",

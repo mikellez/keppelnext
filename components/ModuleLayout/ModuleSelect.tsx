@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import instance from '../../axios.config.js';
 
 export interface ModuleSelectOption {
     id: number;

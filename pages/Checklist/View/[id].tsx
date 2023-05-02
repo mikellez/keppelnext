@@ -7,13 +7,13 @@ import ChecklistPreview from "../../../components/Checklist/ChecklistPreview";
 import Link from "next/link";
 import TooltipBtn from "../../../components/TooltipBtn";
 import { HiOutlineDownload } from "react-icons/hi";
-import axios from "axios";
+import instance from '../../axios.config.js';
 import { useRouter } from "next/router";
 import styles from "../../../styles/Checklist.module.scss";
 
 const downloadChecklistPDF = async (checklistId: number) => {
     try {
-        const response = await axios({
+        const response = await instance({
             url: "/api/checklist/pdf/" + checklistId,
             method: "get",
             responseType: "arraybuffer",
