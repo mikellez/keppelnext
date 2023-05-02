@@ -21,6 +21,8 @@ SELECT
     cl.chl_type,
     cl.created_date,
     cl.history,
+    cl.datajson,
+    cl.signoff_user_id,
     st.status
 FROM 
     keppel.users u
@@ -202,7 +204,7 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
 const fetchSpecificChecklistRecord = async (req, res, next) => {
   const sql = fetchAllChecklistQuery + ` 
         WHERE 
-            cm.checklist_id = $1
+            cl.checklist_id = $1
     `;
 
   db.query(sql, [req.params.checklist_id], (err, found) => {
@@ -236,6 +238,7 @@ const submitNewChecklistTemplate = async (req, res, next) => {
 const createNewChecklistRecord = async (req, res, next) => {
   // console.log(req.body.checklist)
   const { checklist } = req.body;
+  const statusId = req.body.checklist.assigned_user_id ? 2 : 1;
   sql = `INSERT INTO
         keppel.checklist_master
         (
@@ -256,7 +259,7 @@ const createNewChecklistRecord = async (req, res, next) => {
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
-  const history = `Created Record_ASSIGNED_${today}_${req.user.name}_NIL`;
+  const history = `Created Record_${statusId === 2 ? "ASSIGNED" : "PENDING"}_${today}_${req.user.name}_NIL`;
 
   db.query(
     sql,
@@ -272,7 +275,7 @@ const createNewChecklistRecord = async (req, res, next) => {
       today,
       req.user.id,
       history,
-      2,
+      statusId,
     ],
     (err) => {
       if (err) {
@@ -456,6 +459,51 @@ const completeChecklist = async (req, res, next) => {
       return res.status(500).json("Failure to update checklist completion");
     }
     return res.status(200).json("Checklist successfully completed");
+  });
+};
+
+const editChecklistRecord = async (req, res, next) => {
+  const data = req.body.checklist
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
+  const updatehistory = data.assigned_user_id ? 
+    `,Assigned Record_ASSIGNED_${today}_${req.user.name}` :
+    `,Edited Record_PENDING_${today}_${req.user.name}`;
+  const statusId = data.assigned_user_id ? 2 : 1;
+
+  const sql = `
+        UPDATE
+            keppel.checklist_master
+        SET 
+            datajson = $1,
+            status_id = $2,
+            history = concat(history,'${updatehistory}'),
+            chl_name = $3,
+            description = $4,
+            assigned_user_id = $5,
+            signoff_user_id = $6,
+            linkedassetids = $7,
+            plant_id = $8
+        WHERE 
+            checklist_id = $9
+    `;
+
+  db.query(sql, [
+    data.datajson, 
+      statusId,
+      data.chl_name, 
+      data.description,
+      data.assigned_user_id,
+      data.signoff_user_id,
+      data.linkedassetids,
+      data.plant_id,
+      req.params.checklist_id
+    ], (err) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json("Failure to update checklist completion");
+    }
+    return res.status(200).json("Checklist successfully assigned");
   });
 };
 
@@ -669,4 +717,5 @@ module.exports = {
   deleteChecklistTemplate,
   fetchFilteredChecklists,
   fetchPendingChecklists,
+  editChecklistRecord,
 };

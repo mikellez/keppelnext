@@ -9,7 +9,7 @@ import {
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import ChecklistDetails from "../../../components/Checklist/ChecklistDetails";
 import TooltipBtn from "../../../components/TooltipBtn";
-import { ChecklistPageProps } from "../New";
+import { ChecklistPageProps } from "../Form";
 import { createChecklistGetServerSideProps } from "../../../types/common/props";
 import { CheckSection } from "../../../types/common/classes";
 import ChecklistEditableForm from "../../../components/Checklist/ChecklistEditableForm";
@@ -127,6 +127,6 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
 };
 
 export default CompleteChecklistPage;
-const getServerSideProps: GetServerSideProps = createChecklistGetServerSideProps("record", [2, 3]);
+const getServerSideProps: GetServerSideProps = createChecklistGetServerSideProps([2, 3]);
 
 export { getServerSideProps };

@@ -58,6 +58,7 @@ export interface ChecklistItem {
   history: string;
   status: string;
 }
+
 export interface ChecklistProps {
   filter?: boolean;
   status: number;
@@ -121,8 +122,6 @@ export default function Checklist(props: ChecklistProps) {
   useEffect(() => {
 
     if (data && !isValidating) {
-      // tranform and store data
-      console.log(data);
 
       if(props?.filter) {
         if (data?.rows?.length > 0) {
@@ -190,9 +189,9 @@ export default function Checklist(props: ChecklistProps) {
   return (
     <ModuleMain>
       <ModuleHeader title="Checklist" header="Checklist">
-        <Link href="/Checklist/New">
+        <Link href="/Checklist/Form?action=New">
           <TooltipBtn text="New Checklist">
-            <BsFileEarmarkPlus href="/Checklist/New" size={20} />
+            <BsFileEarmarkPlus size={20} />
           </TooltipBtn>
         </Link>
         <TooltipBtn
@@ -252,8 +251,6 @@ export default function Checklist(props: ChecklistProps) {
             <LoadingHourglass />
           </div>
         )}
-        {/* {error && <div>{error.toString()}</div>}
-        {error && <div>error</div>} */}
         {checklistItems.length === 0 && <div>No Checklists</div>}
         {isReady && (
           <>
@@ -308,6 +305,11 @@ export default function Checklist(props: ChecklistProps) {
                             ) : item.status_id === 2 || item.status_id === 3 ? (
                               <Link href={`/Checklist/Complete/${item.id}`}>
                                 <strong>Complete</strong>
+                              </Link>
+                            ) : item.status_id === 1 ? 
+                            (
+                              <Link href={`/Checklist/Form/?action=Edit&id=${item.id}`}>
+                                <strong>Assign</strong>
                               </Link>
                             ) : (
                               <Link href={`/Checklist/View/${item.id}`}>

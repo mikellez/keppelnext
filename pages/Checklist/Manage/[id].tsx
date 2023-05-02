@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ModuleContent, ModuleMain, ModuleHeader, ModuleFooter } from "../../../components";
-import { ChecklistPageProps } from "../New";
+import { ChecklistPageProps } from "../Form";
 import { createChecklistGetServerSideProps } from "../../../types/common/props";
 import { GetServerSideProps } from "next";
 import Link from "next/link";
@@ -111,6 +111,6 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
 };
 
 export default ManageChecklistPage;
-const getServerSideProps: GetServerSideProps = createChecklistGetServerSideProps("record", [4]);
+const getServerSideProps: GetServerSideProps = createChecklistGetServerSideProps([4]);
 
 export { getServerSideProps };

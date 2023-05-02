@@ -231,16 +231,18 @@ router
     .get(controllers.checklist.fetchSpecificChecklistTemplate)
     .post(controllers.checklist.createNewChecklistTemplate);
 
-router.get(
+router.route(
     "/checklist/assigned",
-    checkIfLoggedInAPI,
-    controllers.checklist.fetchAssignedChecklists
-);
+    checkIfLoggedInAPI)
+    .get(controllers.checklist.fetchAssignedChecklists)
+    
+
 
 router
     .route("/checklist/record/:checklist_id?", checkIfLoggedInAPI)
     .get(controllers.checklist.fetchChecklistRecords)
-    .post(controllers.checklist.createNewChecklistRecord);
+    .post(controllers.checklist.createNewChecklistRecord)
+    .patch(controllers.checklist.editChecklistRecord)
 
 router.get(
     "/checklist/approved",
