@@ -14,7 +14,7 @@ export default function DropdownMenu() {
   const [isDropdowned, setIsDropdowned] = useState(false);
 
   const sendLogout = (): void => {
-    axios
+    instance
       .post("/api/logout")
       .then((response) => {
         console.log("success", response);
