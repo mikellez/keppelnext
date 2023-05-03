@@ -62,8 +62,8 @@ function useMaster(type: string) {
     fields: any[];
   }
 
-  const requestFetcher = (url: string) =>
-    axios
+  const requestFetcher = async(url: string, type:string) => {
+      return await instance
       .get<CMMSMasterInfo>(url + type)
       .then((response) => {
         let info: CMMSMaster = {
@@ -78,6 +78,7 @@ function useMaster(type: string) {
         console.log(e);
         throw new Error(e);
       });
+  };
 
   return useSWR<CMMSMaster, Error>(["/api/master/", type], requestFetcher, {
     revalidateOnFocus: false,
@@ -148,7 +149,7 @@ export default function Master() {
 
   const deleteMaster = () => {
     setDeleting(true);
-    axios
+    instance
       .delete(`/api/master/${indexedColumn[activeTabIndex]}/${deleteModalID}`)
       .then(() => {
         setDeleteSuccess(true);

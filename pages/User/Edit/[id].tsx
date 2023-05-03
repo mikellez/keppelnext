@@ -125,7 +125,7 @@ export default function EditUser() {
         //if no errors, submit form
         //post data
         const url = "/api/user/updateUser/";
-        axios
+        instance
           .post(url, {
             user_id: user_id,
             first_name: userDetails.first_name,
@@ -159,7 +159,8 @@ export default function EditUser() {
         }
 
         async function validation(value: string, url: string){
-          let res = await axios.get(url + value);
+          // let res = await axios.get(url + value);
+          let res = await instance.get(url + value);
           return res.data;
         }
 
