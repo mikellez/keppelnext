@@ -148,13 +148,9 @@ export default function EditAsset(props: EditAssetProps) {
     };
     console.log(postData);
     //post data to API
-    fetch("/api/asset/editAsset", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(postData),
-    });
+    instance.post("/api/asset/editAsset",
+        postData
+      );
     //open modal to show success
     setSubmissionModal(true);
   }
