@@ -72,7 +72,8 @@ export default function AccountLog() {
             <>
               <Header>
                 <HeaderRow>
-                  <HeaderCell resize>User ID</HeaderCell>
+                  <HeaderCell resize>User Name</HeaderCell>
+                  <HeaderCell resize>Type</HeaderCell>
                   <HeaderCell resize>Activity</HeaderCell>
                   <HeaderCell resize
                   onClick={() => sortDate()}
@@ -85,7 +86,8 @@ export default function AccountLog() {
                 {tableList.map((item) => {
                   return (
                     <Row key={item.id} item={item}>
-                      <Cell>{item.user_id}</Cell>
+                      <Cell>{item.user_name}</Cell>
+                      <Cell>{item.type}</Cell>
                       <Cell>{item.description}</Cell>
                       <Cell>
                         {new Date(
