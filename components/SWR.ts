@@ -119,7 +119,8 @@ function useAccountlog() {
         response.data.map((singleLog) => {
           return {
             id: singleLog.id,
-            user_id: singleLog.user_id,
+            user_name: singleLog.user_name,
+            type: singleLog.type,
             description: singleLog.description,
             event_time: singleLog.event_time,
           };
