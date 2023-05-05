@@ -239,13 +239,9 @@ export default function NewAsset(props: NewAssetProps) {
 
       console.log(postData);
       //post data to API
-      fetch("/api/asset/addNewAsset", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(postData),
-      });
+      instance.post("/api/asset/addNewAsset", 
+        postData
+      );
       //open modal to show success
       setSubmissionModal(true);
     }
