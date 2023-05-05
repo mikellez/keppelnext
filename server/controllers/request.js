@@ -184,6 +184,7 @@ const fetchApprovedRequests = async (req, res, next) => {
 };
 
 const createRequest = async (req, res, next) => {
+
   const {
     requestTypeID,
     faultTypeID,
@@ -194,29 +195,57 @@ const createRequest = async (req, res, next) => {
   const fileBuffer = req.file === undefined ? null : req.file.buffer;
   const fileType = req.file === undefined ? null : req.file.mimetype;
   const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
-  const history = `PENDING_Request Created_${today}_${req.user.role_name}_${req.user.name}`;
-  const activity_log = [
-    {
-      date: today,
-      name: req.user.name,
-      role: req.user.role_name,
-      activity: "Request Created",
-      activity_type: "PENDING",
-    },
-  ];
+  let user_id = '';
+  let role_id = '';
+  let history = '';
+  let activity_log = '';
+
+  if(req?.user) {
+
+    user_id = req.user.id;
+    role_id = req.user.role_id;
+
+    history = `PENDING_Request Created_${today}_${req.user.role_name}_${req.user.name}`;
+    activity_log = [
+      {
+        date: today,
+        name: req.user.name,
+        role: req.user.role_name,
+        activity: "Request Created",
+        activity_type: "PENDING",
+      },
+    ];
+
+  } else {
+    //guest
+    user_id = 55;
+    role_id = 0;
+
+    history = `PENDING_Request Created_${today}_GUEST_${req.body.name}`;
+    activity_log = [
+      {
+        date: today,
+        name: req.body.name,
+        role: "GUEST",
+        activity: "Request Created",
+        activity_type: "PENDING",
+      },
+    ];
+  }
+
   db.query(
     `INSERT INTO keppel.request(
-			fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
-		) VALUES (
-			$1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
-		)`,
+      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+    ) VALUES (
+      $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
+    )`,
     [
       faultTypeID,
       description,
       plantLocationID,
       requestTypeID,
-      req.user.id,
-      req.user.role_id,
+      user_id,
+      role_id,
       taggedAssetID,
       fileBuffer,
       fileType,
