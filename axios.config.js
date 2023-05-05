@@ -1,10 +1,10 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: 'http://localhost:3002'
+  baseURL: 'http://localhost:3001'
 });
 
-instance.interceptors.request.use(
+/*instance.interceptors.request.use(
   (config) => {
 
     config.withCredentials = true;
@@ -22,6 +22,6 @@ instance.interceptors.response.use((response) => {
       window.location = "/Login";
     }
     return Promise.reject(error); 
-});
+});*/
 
 export default instance;

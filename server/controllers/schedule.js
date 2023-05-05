@@ -43,13 +43,13 @@ const updateDates = async (scheduleList) => {
   for (let i = 0; i < scheduleList.length; i++) {
     if (scheduleList[i].isSingle) {
       const result = await db.query(`SELECT 
-                (SC.START_DATE  + interval '8 hour' ) AS START_DATE, 
-                (SC.END_DATE  + interval '8 hour' ) AS END_DATE,
-                SC.RECURRENCE_PERIOD
-                FROM 
-                KEPPEL.SCHEDULE_CHECKLIST SC
-                WHERE 
-                SC.SCHEDULE_ID = GET_ROOT_ID(${scheduleList[i].schedule_id})`);
+      (SC.START_DATE  + interval '8 hour' ) AS START_DATE, 
+      (SC.END_DATE  + interval '8 hour' ) AS END_DATE,
+      SC.RECURRENCE_PERIOD
+      FROM 
+      KEPPEL.SCHEDULE_CHECKLIST SC
+      WHERE 
+      SC.SCHEDULE_ID = GET_ROOT_ID(${scheduleList[i].schedule_id})`);
 
       scheduleList[i].start_date = result.rows[0].start_date;
       scheduleList[i].end_date = result.rows[0].end_date;
@@ -179,6 +179,19 @@ const getPlants = async (req, res, next) => {
       }
     });
   }
+};
+
+const getPlantById = async (req, res, next) => {
+  db.query(
+    "SELECT * from keppel.plant_master WHERE plant_id = $1::integer",
+    [req.params.id],
+    (err, result) => {
+      if (err) throw err;
+      if (result) {
+        res.status(200).send(result.rows);
+      }
+    }
+  );
 };
 
 const getUserPlants = async (req, res, next) => {
@@ -702,4 +715,5 @@ module.exports = {
   getPendingSingleEvents,
   getScheduleById,
   updateSchedule,
+  getPlantById
 };

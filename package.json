@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "next dev -p 3001",
+		"dev": "nodemon server/index.js",
 		"debug": "nodemon --inspect server/index.js",
 		"build": "next build",
 		"start": "NODE_ENV=production node server/index.js",
@@ -24,6 +24,7 @@
 		"axios": "^1.2.1",
 		"bcryptjs": "^2.4.3",
 		"bootstrap": "^5.2.3",
+		"cors": "^2.8.5",
 		"custom-error": "^0.2.1",
 		"dotenv": "^16.0.3",
 		"eslint": "8.27.0",

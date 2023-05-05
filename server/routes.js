@@ -10,6 +10,7 @@ const { sendRequestPDF, sendChecklistPDF } = require("./pdfGenerator");
 
 // checkIfLoggedInAPI   - auth failures send 401 requrest. use this for API routes
 function checkIfLoggedInAPI(req, res, next) {
+    console.log(req);
     if (req.user === undefined) return res.status(401).json("you are not logged in");
     next();
 }
@@ -149,7 +150,7 @@ router.post(
  * @apiSuccess {number} -.req_id ID of the request type
  * @apiSuccess {string} -.request Name of the request type
  */
-router.get("/request/types", checkIfLoggedInAPI, controllers.request.fetchRequestTypes);
+router.get("/request/types", controllers.request.fetchRequestTypes);
 // router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
 router.get("/request/priority", checkIfLoggedInAPI, controllers.request.fetchRequestPriority);
 router.get("/request/csv", checkIfLoggedInAPI, controllers.request.createRequestCSV);
@@ -194,24 +195,20 @@ router.post("/asset/addNewAsset", checkIfLoggedInAPI, controllers.asset.addNewAs
 router.post("/asset/editAsset", checkIfLoggedInAPI, controllers.asset.editAsset);
 router.post("/asset/deleteAsset", checkIfLoggedInAPI, controllers.asset.deleteAsset);
 
-
-
-router.get("/asset/history/:psa_Id", checkIfLoggedInAPI, controllers.asset.fetchAssetHistory);
-
-
-
 router.get("/asset/system/:system_id", checkIfLoggedInAPI, controllers.asset.fetchSystemAssets);
 router.get(
     "/asset/system/:plant_id/:system_id/:system_asset_id",
     checkIfLoggedInAPI,
     controllers.asset.fetchSystemAssetNames
 );
-
 router.get(
     "/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",
     checkIfLoggedInAPI,
     controllers.asset.fetchSubComponent1Names
 );
+
+router.get("/asset/history/:psa_Id", checkIfLoggedInAPI, controllers.asset.fetchAssetHistory);
+
 
 
 router
@@ -325,11 +322,11 @@ router.post(
  * @apiSuccess {number} -.fault_id ID of the fault type
  * @apiSuccess {string} -.fault_type Name of the fault type
  */
-router.get("/fault/types", checkIfLoggedInAPI, controllers.fault.fetchFaultTypes);
+router.get("/fault/types", controllers.fault.fetchFaultTypes);
 
-router.get("/asset/:plant_id", checkIfLoggedInAPI, controllers.asset.getAssetsFromPlant);
-router.get("/asset", checkIfLoggedInAPI, controllers.asset.getAssetHierarchy);
-router.get("/assetDetails/:psa_id", checkIfLoggedInAPI, controllers.asset.getAssetDetails);
+router.get("/asset/:plant_id", controllers.asset.getAssetsFromPlant);
+router.get("/asset", controllers.asset.getAssetHierarchy);
+router.get("/assetDetails/:psa_id", controllers.asset.getAssetDetails);
 router.get("/asset/history/:type/:id", checkIfLoggedInAPI, controllers.asset.getAssetHistory);
 router.get("/asset/Details/:psa_id", checkIfLoggedInAPI, controllers.asset.getAssetDetails);
 
@@ -350,7 +347,8 @@ router.get("/master/:type/:id", checkIfLoggedInAPI, controllers.master.fetchMast
 router.post("/master/:type/:id", checkIfLoggedInAPI, controllers.master.updateMasterTypeSingle);
 router.delete("/master/:type/:id", checkIfLoggedInAPI, controllers.master.deleteMasterTypeSingle);
 
-router.get("/plants", checkIfLoggedInAPI, controllers.schedule.getPlants);
+router.get("/plants", controllers.schedule.getPlants);
+router.get("/plant/:id", controllers.schedule.getPlantById);
 
 router.get("/getPlants", checkIfLoggedInAPI, controllers.schedule.getPlants);
 router.get("/getUserPlants", checkIfLoggedInAPI, controllers.schedule.getUserPlants);
@@ -403,21 +401,13 @@ router
 router 
     .get("/user/getUsers", checkIfLoggedInAPI, controllers.user.getUsers)
     .get("/user/getUsersCSV", checkIfLoggedInAPI, controllers.user.getUsersCSV)
-    .get("/user/getUsersData/:id", checkIfLoggedInAPI, controllers.user.getUsersData)
-    .get("/user/getUsersplantData/:id", checkIfLoggedInAPI, controllers.user.getUsersplantData)
-    .get("/user/check/email", checkIfLoggedInAPI, controllers.user.checkEmail)
-    .get("/user/check/user", checkIfLoggedInAPI, controllers.user.checkUsername)
-    .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser)
-    .post("/user/updateUser", checkIfLoggedInAPI, controllers.user.updateUser);
-
+    .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser);
 router
     .delete("/user/deleteUser/:id", checkIfLoggedInAPI, controllers.user.deleteUser);
 
 router
     .post("/setting/update", checkIfLoggedInAPI, controllers.setting.updateUser)
-    .post("/setting/updatePassword", checkIfLoggedInAPI, controllers.setting.updatePassword)
-    .get("/setting/check/email/:id", checkIfLoggedInAPI, controllers.setting.checkEmail)
-    .get("/setting/check/username/:id", checkIfLoggedInAPI, controllers.setting.checkUsername);
+    .post("/setting/updatePassword", checkIfLoggedInAPI, controllers.setting.updatePassword);
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
 
