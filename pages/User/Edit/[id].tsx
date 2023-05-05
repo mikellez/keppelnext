@@ -352,7 +352,7 @@ export default function EditUser() {
         text="Passwords do not match"
         icon={SimpleIcon.Exclaim}
         buttons={[
-        <button
+        <button key={1}
               onClick={() => {
                 setPasswordError(false);
               }}
