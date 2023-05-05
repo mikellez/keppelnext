@@ -118,7 +118,7 @@ function useAccountlog() {
       .then((response) =>
         response.data.map((singleLog) => {
           return {
-            id: singleLog.id,
+            id: singleLog.event_time,
             user_name: singleLog.user_name,
             type: singleLog.type,
             description: singleLog.description,

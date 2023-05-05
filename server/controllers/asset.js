@@ -510,12 +510,9 @@ const editAsset = async (req, res, next) => {
   const updated = await db.query(assetQuery);
 
   const fields = compare(old.rows[0], updated.rows[0]).join(", ");
- const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
   await db.query(
-    `INSERT INTO keppel.history (action, user_id, fields, date, asset_id) VALUES ('EDITED', '${
-      req.body.user_id
-    }', '${fields}', '${today}', '${psa_id}');
-    
+    `
     UPDATE keppel.plant_system_assets
     SET activity_log = activity_log || 
     jsonb_build_object(
@@ -706,9 +703,7 @@ const addNewAsset = (req, res, next) => {
   let psa_id;
   db.query(sql)
     .then((result) => {
-      today = moment(new Date()).format(
-        "YYYY-MM-DD HH:mm:ss"
-      )
+      const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
       psa_id = result.rows[0].psa_id;
       const activity_log = [
         {
@@ -720,14 +715,12 @@ const addNewAsset = (req, res, next) => {
         },
       ];
     
-      const query = `INSERT INTO keppel.history (action, user_id, fields, date, asset_id) VALUES ('CREATED', '${
-        req.body.user_id
-      }', '-', '${today}', '${parseInt(psa_id)}');
-      UPDATE keppel.plant_system_assets 
-      SET created_date = '${today}', activity_log = '${JSON.stringify(activity_log)}'
-      WHERE psa_id = '${parseInt(psa_id)}'
-      ;
+      const query = 
+      `UPDATE keppel.plant_system_assets 
+      SET activity_log = '${JSON.stringify(activity_log)}'
+      WHERE psa_id = '${parseInt(psa_id)}';
       `;
+      console.log(query);
       return db.query(query);
     })
     .then((rows) => {
