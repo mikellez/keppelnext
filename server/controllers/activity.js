@@ -2,11 +2,9 @@ const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 
 const getEventtHistory = async (req, res, next) => {
-    db.query(`SELECT E.id, E.type, E.description, E.event_time, E.user_id, U.user_name, U.user_email, U.first_name, U.last_name 
-            FROM keppel.events E INNER JOIN keppel.users U
-            ON U.user_id = E.user_id
-            ORDER BY id ASC
+    db.query(`SELECT user_name,type,event_time,description FROM keppel.activity_log;
         `, (err, result) => {
+        console.log(result.rows);
         if (err) return res.status(400).json({ msg: err });
         if (result.rows.length == 0) return res.status(201).json({ msg: "No assets added" });
         return res.status(200).json(result.rows);
