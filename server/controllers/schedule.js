@@ -160,7 +160,7 @@ const getViewSchedules = async (req, res, next) => {
 
 // Get plants based on the user role
 const getPlants = async (req, res, next) => {
-  if (req.user.role_id === 0 || req.user.role_id === 4) {
+  if (req?.user && (req.user.role_id === 0 || req.user.role_id === 4)) {
     db.query(
       "SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) FROM keppel.user_access WHERE user_id = $1::integer)",
       [req.user.id],
