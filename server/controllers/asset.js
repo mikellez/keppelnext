@@ -20,6 +20,20 @@ const getAssetsFromPlant = async (req, res, next) => {
   );
 };
 
+const getAllAssets = async (req, res, next) => {
+
+  db.query(
+    `SELECT psa_id, concat( system_asset , ' | ' , plant_asset_instrument) as "asset_name"  
+            FROM keppel.system_assets AS t1 ,keppel.plant_system_assets AS t2
+            WHERE t1.system_asset_id = t2.system_asset_id_lvl4`,
+    (err, result) => {
+      if (err) return res.status(500).json({ msg: err });
+
+      res.status(200).json(result.rows);
+    }
+  );
+};
+
 // Get all assets for AG Grid
 const getAssetHierarchy = async (req, res, next) => {
   db.query(
@@ -788,4 +802,5 @@ module.exports = {
   addNewAsset,
   editAsset,
   deleteAsset,
+  getAllAssets
 };

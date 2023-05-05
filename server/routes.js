@@ -325,6 +325,7 @@ router.post(
 router.get("/fault/types", controllers.fault.fetchFaultTypes);
 
 router.get("/asset/:plant_id", controllers.asset.getAssetsFromPlant);
+router.get("/assets", controllers.asset.getAssetHierarchy);
 router.get("/asset", controllers.asset.getAssetHierarchy);
 router.get("/assetDetails/:psa_id", controllers.asset.getAssetDetails);
 router.get("/asset/history/:type/:id", checkIfLoggedInAPI, controllers.asset.getAssetHistory);
