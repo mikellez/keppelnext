@@ -186,7 +186,8 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
             ct.description,
             ct.datajson,
             ct.plant_id,
-            ct.signoff_user_id
+            ct.signoff_user_id,
+            ct.status_id
         FROM
             keppel.checklist_templates ct
         WHERE 

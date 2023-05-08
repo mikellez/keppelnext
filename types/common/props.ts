@@ -18,6 +18,7 @@ const createChecklistGetServerSideProps = (allowedStatuses?: number[]) => {
 			const { id, action }  = context.query;
 			const chltype = action === "New" ? "template" : "record"
 			const response = await instance.get<CMMSChecklist>(`http://${process.env.SERVER}:${process.env.PORT}/api/checklist/${chltype}/${id}`, headers);
+			
 			if (
 				response.status == 500 || 
 				(allowedStatuses && !allowedStatuses.includes(response.data.status_id))
