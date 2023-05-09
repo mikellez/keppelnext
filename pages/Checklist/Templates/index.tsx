@@ -9,9 +9,9 @@ import {
     ModuleMain,
     ModuleFooter,
 } from "../../../components";
-import ModuleSimplePopup, {SimpleIcon} from "../../../components/ModuleLayout/ModuleSimplePopup";
+import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { CMMSChecklist } from "../../../types/common/interfaces";
-import instance from '../../../axios.config.js';
+import instance from "../../../axios.config.js";
 import { useCurrentUser } from "../../../components/SWR";
 import TooltipBtn from "../../../components/TooltipBtn";
 import { useRouter } from "next/router";
@@ -21,9 +21,8 @@ import ChecklistTemplatePane from "../../../components/Checklist/ChecklistTempla
 
 const deleteTemplate = async (checklistId: number) => {
     try {
-        await instance.delete("/api/checklist/template/" + checklistId)
-    }
-    catch (err) {
+        await instance.delete("/api/checklist/template/" + checklistId);
+    } catch (err) {
         console.log(err);
     }
 };
@@ -41,7 +40,7 @@ const Templates = () => {
     async function getChecklistTemplates(plants: number[]) {
         return await instance({
             method: "get",
-            url: `/api/checklist/templateNames?test=${JSON.stringify(plants)}`,
+            url: `/api/checklist/templateNames`,
         })
             .then((res) => {
                 return res.data;
@@ -63,10 +62,13 @@ const Templates = () => {
 
     const checklistTemplateHTML = checklistTemplates?.map((checklist) => {
         return (
-            <tr 
+            <tr
                 key={checklist.checklist_id}
                 style={{
-                    backgroundColor: selectedTemplate?.checklist_id == checklist.checklist_id ? "#B2B2B2" : "transparent"
+                    backgroundColor:
+                        selectedTemplate?.checklist_id == checklist.checklist_id
+                            ? "#B2B2B2"
+                            : "transparent",
                 }}
             >
                 <th
@@ -87,83 +89,82 @@ const Templates = () => {
         await deleteTemplate(selectedTemplate?.checklist_id as number);
         setSuccessModal(true);
         setTimeout(() => {
-            router.reload()
+            router.reload();
         }, 1000);
     };
 
     return (
         <>
-        <ModuleMain>
-            <ModuleHeader title="Checklist Templates" header="Create From Checklist Templates">
-                <Link href="/Checklist" className="btn btn-secondary">
-                    Back
-                </Link>
-            </ModuleHeader>
+            <ModuleMain>
+                <ModuleHeader title="Checklist Templates" header="Create From Checklist Templates">
+                    <Link href="/Checklist" className="btn btn-secondary">
+                        Back
+                    </Link>
+                </ModuleHeader>
 
-            <ModuleContent includeGreyContainer>
-                <div className={styles.gridContainer}>
-                    <div style={{ maxHeight: "800px", overflow: "auto" }}>
-                        <table className="table">
-                            <thead id="templates_list">{checklistTemplateHTML}</thead>
-                        </table>
+                <ModuleContent includeGreyContainer>
+                    <div className={styles.gridContainer}>
+                        <div style={{ maxHeight: "800px", overflow: "auto" }}>
+                            <table className="table">
+                                <thead id="templates_list">{checklistTemplateHTML}</thead>
+                            </table>
+                        </div>
+                        <div>
+                            <ChecklistTemplatePane checklist={selectedTemplate as CMMSChecklist} />
+                        </div>
                     </div>
-                    <div>
-                        <ChecklistTemplatePane checklist={selectedTemplate as CMMSChecklist} />
-                    </div>
-                </div>
-            </ModuleContent>
+                </ModuleContent>
 
-            <ModuleFooter>
-                {
-                    (user.data?.role_id === Role.Engineer ||
-                    user.data?.role_id === Role.Manager ||
-                    user.data?.role_id === Role.Admin)
-                &&
-                <TooltipBtn 
-                    toolTip={false} 
-                    disabled={!selectedTemplate}
-                    onClick={() => setConfirmModal(true)}
-                >
-                    <RiDeleteBin6Line size={25} />
-                </TooltipBtn>}
+                <ModuleFooter>
+                    {(user.data?.role_id === Role.Engineer ||
+                        user.data?.role_id === Role.Manager ||
+                        user.data?.role_id === Role.Admin) && (
+                        <TooltipBtn
+                            toolTip={false}
+                            disabled={!selectedTemplate}
+                            onClick={() => setConfirmModal(true)}
+                        >
+                            <RiDeleteBin6Line size={25} />
+                        </TooltipBtn>
+                    )}
 
-                <TooltipBtn 
-                    toolTip={false} 
-                    disabled={!selectedTemplate}
-                    onClick={() => {
-                        router.push(`/Checklist/Form?action=New&id=${selectedTemplate?.checklist_id}`)
-                    }}
-                    style={{backgroundColor: "#539165", borderColor: "#539165"}}
-                >
-                    Use
-                </TooltipBtn>
-            </ModuleFooter>
-        </ModuleMain>
+                    <TooltipBtn
+                        toolTip={false}
+                        disabled={!selectedTemplate}
+                        onClick={() => {
+                            router.push(
+                                `/Checklist/Form?action=New&id=${selectedTemplate?.checklist_id}`
+                            );
+                        }}
+                        style={{ backgroundColor: "#539165", borderColor: "#539165" }}
+                    >
+                        Use
+                    </TooltipBtn>
+                </ModuleFooter>
+            </ModuleMain>
 
-        <ModuleSimplePopup 
-            modalOpenState={confirmModal}
-            setModalOpenState={setConfirmModal}
-            text="The following action will permanently delete the template and all related checklist & schedules"
-            title="Confirm"
-            icon={SimpleIcon.Exclaim}
-            buttons={
-                <TooltipBtn 
-                    toolTip={false}
-                    onClick={handleConfirmDelete}
-                >Confirm</TooltipBtn>
-            }
-        />
+            <ModuleSimplePopup
+                modalOpenState={confirmModal}
+                setModalOpenState={setConfirmModal}
+                text="The following action will permanently delete the template and all related checklist & schedules"
+                title="Confirm"
+                icon={SimpleIcon.Exclaim}
+                buttons={
+                    <TooltipBtn toolTip={false} onClick={handleConfirmDelete}>
+                        Confirm
+                    </TooltipBtn>
+                }
+            />
 
-        <ModuleSimplePopup 
-            modalOpenState={successModal}
-            setModalOpenState={setSuccessModal}
-            text="Template successfully deleted"
-            title="Success"
-            icon={SimpleIcon.Check}
-        />
+            <ModuleSimplePopup
+                modalOpenState={successModal}
+                setModalOpenState={setSuccessModal}
+                text="Template successfully deleted"
+                title="Success"
+                icon={SimpleIcon.Check}
+            />
         </>
     );
 };
 
 export default Templates;
-
