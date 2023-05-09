@@ -186,7 +186,8 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
             ct.description,
             ct.datajson,
             ct.plant_id,
-            ct.signoff_user_id
+            ct.signoff_user_id,
+            ct.status_id
         FROM
             keppel.checklist_templates ct
         WHERE 
@@ -254,13 +255,22 @@ const createNewChecklistRecord = async (req, res, next) => {
             created_date,
             created_user_id,
             history,
-            status_id
+            status_id,
+            activity_log
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`;
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`;
 
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  
   const history = `Created Record_${statusId === 2 ? "ASSIGNED" : "PENDING"}_${today}_${req.user.name}_NIL`;
+  const activity_log = [
+    {
+      date: today,
+      name: req.user.name,
+      activity: `${statusId === 2 ? "ASSIGNED" : "PENDING"}`,
+      activity_type: "Created Record",
+    },
+  ];
 
   db.query(
     sql,
@@ -277,6 +287,7 @@ const createNewChecklistRecord = async (req, res, next) => {
       req.user.id,
       history,
       statusId,
+      JSON.stringify(activity_log),
     ],
     (err) => {
       if (err) {
@@ -306,7 +317,7 @@ const createNewChecklistTemplate = async (req, res, next) => {
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
 
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
 
   const history = `Created Template_PENDING_${today}_${req.user.name}_NIL`;
 
@@ -439,7 +450,7 @@ const createChecklistCSV = async (req, res, next) => {
 };
 
 const completeChecklist = async (req, res, next) => {
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
 
   const updatehistory = `,Updated Record_WORK DONE_${today}_${req.user.name}`;
 
@@ -449,7 +460,14 @@ const completeChecklist = async (req, res, next) => {
         SET 
             datajson = $1,
             status_id = 4,
-            history = concat(history,'${updatehistory}')
+            history = concat(history,'${updatehistory}'),
+            activity_log = activity_log || 
+        jsonb_build_object(
+          'date', '${today}',
+          'name', '${req.user.name}',
+          'activity', 'WORK DONE',
+          'activity_type', 'Updated Record'
+        )
         WHERE 
             checklist_id = $2
     `;
@@ -465,12 +483,25 @@ const completeChecklist = async (req, res, next) => {
 
 const editChecklistRecord = async (req, res, next) => {
   const data = req.body.checklist
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
 
   const updatehistory = data.assigned_user_id ? 
     `,Assigned Record_ASSIGNED_${today}_${req.user.name}` :
     `,Edited Record_PENDING_${today}_${req.user.name}`;
   const statusId = data.assigned_user_id ? 2 : 1;
+  const activity_log = data.assigned_user_id
+  ? {
+      date: today,
+      name: req.user.name,
+      activity: 'ASSIGNED',
+      activity_type: 'Assigned Record',
+    }
+  : {
+      date: today,
+      name: req.user.name,
+      activity: 'PENDING',
+      activity_type: 'Edited Record',
+    };
 
   const sql = `
         UPDATE
@@ -484,9 +515,10 @@ const editChecklistRecord = async (req, res, next) => {
             assigned_user_id = $5,
             signoff_user_id = $6,
             linkedassetids = $7,
-            plant_id = $8
+            plant_id = $8,
+            activity_log = activity_log || $9
         WHERE 
-            checklist_id = $9
+            checklist_id = $10
     `;
 
   db.query(sql, [
@@ -498,6 +530,7 @@ const editChecklistRecord = async (req, res, next) => {
       data.signoff_user_id,
       data.linkedassetids,
       data.plant_id,
+      JSON.stringify(activity_log),
       req.params.checklist_id
     ], (err) => {
     if (err) {
@@ -509,21 +542,29 @@ const editChecklistRecord = async (req, res, next) => {
 };
 
 const approveChecklist = async (req, res, next) => {
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
 
   const updatehistory = `,Updated Record_APPROVE_${today}_${req.user.name}`;
+  const activity_log = {
+    date: today,
+    name: req.user.name,
+    activity: 'APPROVED',
+    activity_type: 'Updated Record',
+  };
 
   const sql = `
         UPDATE
             keppel.checklist_master
         SET 
             status_id = 5,
-            history = concat(history,'${updatehistory}')
+            history = concat(history,'${updatehistory}'),
+            activity_log = activity_log || $1
         WHERE 
-            checklist_id = $1
+            checklist_id = $2
     `;
 
-  db.query(sql, [req.params.checklist_id], (err) => {
+  db.query(sql, 
+    [JSON.stringify(activity_log), req.params.checklist_id], (err) => {
     if (err) {
       console.log(err);
       return res.status(500).json("Failure to update checklist completion");
@@ -533,22 +574,30 @@ const approveChecklist = async (req, res, next) => {
 };
 
 const rejectChecklist = async (req, res, next) => {
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
   const rejectionComments = req.body.remarks; // todo add rejected comment here
 
   const updatehistory = `,Updated Record_REJECTED_${today}_${req.user.name}_${rejectionComments}`;
+  const activity_log = {
+    date: today,
+    name: req.user.name,
+    activity: 'REJECTED',
+    activity_type: 'Updated Record',
+  };
 
   const sql = `
         UPDATE
             keppel.checklist_master
         SET 
             status_id = 6,
-            history = concat(history,'${updatehistory}')
+            history = concat(history,'${updatehistory}'),
+            activity_log = activity_log || $1
         WHERE 
-            checklist_id = $1
+            checklist_id = $2
     `;
 
-  db.query(sql, [req.params.checklist_id], (err) => {
+  db.query(sql, 
+    [JSON.stringify(activity_log),req.params.checklist_id], (err) => {
     if (err) {
       console.log(err);
       return res.status(500).json("Failure to update checklist completion");
@@ -558,10 +607,17 @@ const rejectChecklist = async (req, res, next) => {
 };
 
 const cancelChecklist = async (req, res, next) => {
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
   const cancelledComments = ""; // todo add cancelled comment here
 
   const updatehistory = `,Updated Record_CANCELLED_${today}_${req.user.name}_${cancelledComments}`;
+  const activity_log = {
+    date: today,
+    name: req.user.name,
+    activity: 'CANCELLED',
+    activity_type: 'Updated Record',
+    comments: cancelledComments,
+  };
 
   const sql = `
         UPDATE
@@ -569,11 +625,13 @@ const cancelChecklist = async (req, res, next) => {
         SET 
             status_id = 7,
             history = concat(history,'${updatehistory}')
+            activity_log = activity_log || $1
         WHERE 
-            checklist_id = $1
+            checklist_id = $2
     `;
 
-  db.query(sql, [req.params.checklist_id], (err) => {
+  db.query(sql, 
+    [JSON.stringify(activity_log),req.params.checklist_id], (err) => {
     if (err) {
       console.log(err);
       return res.status(500).json("Failure to update checklist completion");

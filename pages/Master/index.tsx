@@ -137,6 +137,7 @@ export default function Master() {
   const [isDeleteFailed, setDeleteFailed] = useState<boolean>(false);
 
   const [isEditModalOpen, setEditModalOpen] = useState<boolean>(false);
+  const [tablelist1, setTableList1] = useState<boolean>(false);
 
   const { data, error, isValidating, mutate } = useMaster(
     indexedColumn[activeTabIndex]
@@ -200,7 +201,7 @@ export default function Master() {
 
   useEffect(() => {
     if (!isReady && data && !isValidating) {
-      let len = Object.keys(data.data[0]).length - 1;
+      let len = Object.keys(data.data[0]).length - 3;
       let sizes = "";
       for (let i = 0; i < len; i++)
         sizes += "calc((100% - 12em) / " + len + ") ";
@@ -208,11 +209,14 @@ export default function Master() {
 
       setMasterItems(
         data.data.map((row): CMMSMasterData => {
+          const { activity_log, created_date, ...newRow } = row;
           return Object.assign({}, {
             id: row[data.idName],
-          }, row);
+          }, newRow);
         })
       );
+      
+      
 
       setReady(true);
     }
@@ -367,11 +371,16 @@ export default function Master() {
         </ul>
         {isReady && (
           <Table
-            data={{ nodes: masterItems }}
-            theme={theme}
-            layout={{ custom: true }}
-          >
-            {(tableList: CMMSMasterData[]) => (
+          data={{ nodes: masterItems }}
+          theme={theme}
+          layout={{ custom: true }}
+        >
+          {(tableList: CMMSMasterData[]) => {
+            const newtableList = tableList.map((item) => {
+              const {activity_log, created_date, ...newItem } = item;
+              return newItem;
+            });
+            return (
               <>
                 <Header>
                   <HeaderRow>
@@ -383,7 +392,7 @@ export default function Master() {
                           </HeaderCell>
                         );
                       })}
-                    <HeaderCell resize>Actions</HeaderCell>
+                  <HeaderCell resize>Actions</HeaderCell>
                   </HeaderRow>
                 </Header>
                 <Body>
@@ -409,8 +418,12 @@ export default function Master() {
                   ))}
                 </Body>
               </>
-            )}
-          </Table>
+            );
+          }}
+        </Table>
+        
+        
+        
         )}
       </ModuleContent>
     </ModuleMain>

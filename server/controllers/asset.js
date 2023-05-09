@@ -20,6 +20,20 @@ const getAssetsFromPlant = async (req, res, next) => {
   );
 };
 
+const getAllAssets = async (req, res, next) => {
+
+  db.query(
+    `SELECT plant_id, psa_id, concat( system_asset , ' | ' , plant_asset_instrument) as "asset_name"  
+            FROM keppel.system_assets AS t1 ,keppel.plant_system_assets AS t2
+            WHERE t1.system_asset_id = t2.system_asset_id_lvl4`,
+    (err, result) => {
+      if (err) return res.status(500).json({ msg: err });
+
+      res.status(200).json(result.rows);
+    }
+  );
+};
+
 // Get all assets for AG Grid
 const getAssetHierarchy = async (req, res, next) => {
   db.query(
@@ -510,13 +524,20 @@ const editAsset = async (req, res, next) => {
   const updated = await db.query(assetQuery);
 
   const fields = compare(old.rows[0], updated.rows[0]).join(", ");
-
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
   await db.query(
-    `INSERT INTO keppel.history (action, user_id, fields, date, asset_id) VALUES ('EDITED', '${
-      req.body.user_id
-    }', '${fields}', '${moment(new Date()).format(
-      "YYYY-MM-DD HH:mm:ss"
-    )}', '${psa_id}')`
+    `
+    UPDATE keppel.plant_system_assets
+    SET activity_log = activity_log || 
+    jsonb_build_object(
+      'date', '${today}',
+      'name', '${req.user.name}',
+      'role', '${req.user.role_name}',
+      'activity', 'Edited Asset ${psa_id}: ${fields}',
+      'activity_type', 'EDITED'
+    )
+    WHERE psa_id = '${psa_id}';
+    `
   );
 
   res.status(200).send({
@@ -696,12 +717,25 @@ const addNewAsset = (req, res, next) => {
   let psa_id;
   db.query(sql)
     .then((result) => {
+      const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
       psa_id = result.rows[0].psa_id;
-      const query = `INSERT INTO keppel.history (action, user_id, fields, date, asset_id) VALUES ('CREATED', '${
-        req.body.user_id
-      }', '-', '${moment(new Date()).format(
-        "YYYY-MM-DD HH:mm:ss"
-      )}', '${parseInt(psa_id)}')`;
+      const activity_log = [
+        {
+          date: today,
+          name: req.user.name,
+          role: req.user.role_name,
+          activity: "Created Asset " + psa_id,
+          activity_type: "CREATED",
+        },
+      ];
+    
+      const query = 
+      `UPDATE keppel.plant_system_assets 
+      SET activity_log = '${JSON.stringify(activity_log)}',
+      created_date = now()
+      WHERE psa_id = '${parseInt(psa_id)}';
+      `;
+      console.log(query);
       return db.query(query);
     })
     .then((rows) => {
@@ -769,4 +803,5 @@ module.exports = {
   addNewAsset,
   editAsset,
   deleteAsset,
+  getAllAssets
 };

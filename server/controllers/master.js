@@ -1,5 +1,6 @@
 const  tableInfo = require("../../public/master.json");
 const db = require("../../db");
+const moment = require('moment');
 
 const fetchMasterInfo = async (req, res, next) => {
 
@@ -41,6 +42,8 @@ const fetchMasterTypeEntry = async (req, res, next) => {
 const createMasterTypeEntry = async (req, res, next) => {
 	console.log(req.body);
 	let table=tableInfo[req.body.type].internalName;
+	console.log(tableInfo)
+	const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
 	let sql;
 	let insert =[];
 	// if asset_type
@@ -58,10 +61,21 @@ const createMasterTypeEntry = async (req, res, next) => {
 		num += "$"+(i+1)+",";
 	}
 	columns = columns.slice(0, -1);
+	columns += ",created_date, activity_log";
 	columns += ")";
+	let activity_log = [{
+		date: today,
+		name: req.user.name,
+		role: req.user.role_name,
+		activity: `Created ${tableInfo[req.body.type].name} Master ${insert[0]} ${tableInfo[req.body.type].name} `
+	}];
+	activity_log_json = JSON.stringify(activity_log);
+
 	num = num.slice(0, -1);
+	num += `, NOW(), '${activity_log_json}'`;
 	num += ")";
-	sql = `INSERT INTO keppel.${table} ${columns} VALUES ${num}`;
+	sql = `INSERT INTO keppel.${table} ${columns} VALUES ${num} `;
+	console.log(sql)
 	db.query(sql,insert)	
 		.then(result => {
 			return res.status(200).send({
@@ -113,6 +127,17 @@ const updateMasterTypeSingle = async (req, res, next) => {
 	// verifies if all the columns have been provided
 	// returns false if failed
 	// returns queryFields if success
+	const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+	const activity_log = {
+		date: today,
+		name: req.user.name,
+		role: req.user.role_name,
+		activity: `Updated ${tableInfo[req.params.type].name} Master ${tableInfo[req.params.type].id} ${req.params.id}`
+	};
+	console.log(tableInfo)
+	const activity_log_json = JSON.stringify(activity_log);
+	
+
 	function verifyColumns(tableName /*string*/, entries /*([column:string]: string)[]*/) {
 		const columns = Object.keys(entries)
 		if (tableName == 'plant_master')
@@ -175,11 +200,10 @@ const updateMasterTypeSingle = async (req, res, next) => {
 	let setQ = q.map(x => "" + x.name + "=$" + (i++)).join(",");
 
 	let query = `UPDATE keppel.${table} SET
-			${setQ}
+			${setQ}, activity_log = activity_log || '${activity_log_json}'
             WHERE ${idColumn}=$${i}`
 
 	console.log(query);
-
 	const p = q.map(x => x.value)
 	p.push(req.params.id);
 	console.log(p)
@@ -199,7 +223,6 @@ const updateMasterTypeSingle = async (req, res, next) => {
 		}
 		return res.status(200).json("success");
 	});
-
 };
 
 const deleteMasterTypeSingle = async (req, res, next) => {

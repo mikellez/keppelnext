@@ -17,7 +17,7 @@ const azSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7" shape-r
 </svg>`;
 
 async function fetchChecklist(checklistId) {
-    return instance.get(`/api/checklist/record/${checklistId}`)
+    return axios.get(`http://${process.env.SERVER}:${process.env.PORT}/api/checklist/record/${checklistId}`)
         .then(res => {
             return res.data;
         })
@@ -157,7 +157,7 @@ async function generateChecklistPDF(checklistId) {
 
 // Fetch a specific request by id
 async function fetchRequest(id) {
-    return await instance.get(`/api/request/` + id)
+    return await axios.get(`http://${process.env.SERVER}:${process.env.PORT}/api/request/` + id)
         .then(res => {
             return res.data;
         })

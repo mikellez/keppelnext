@@ -111,15 +111,16 @@ function useChecklistFilter(props: ChecklistProps, page: number) {
     { revalidateOnFocus: false }
   );
 }
-function useAccountlog() {
+function useAccountlog(url: string) {
   const accountlogFetcher = (url: string) =>
     instance
       .get<any[]>(url)
       .then((response) =>
         response.data.map((singleLog) => {
           return {
-            id: singleLog.id,
-            user_id: singleLog.user_id,
+            id: singleLog.event_time,
+            user_name: singleLog.user_name,
+            type: singleLog.type,
             description: singleLog.description,
             event_time: singleLog.event_time,
           };
@@ -130,7 +131,7 @@ function useAccountlog() {
       });
 
   return useSWR<CMMSActivitylog[], Error>(
-    "/api/activity/account_log",
+    url,
     accountlogFetcher,
     { revalidateOnFocus: false }
   );

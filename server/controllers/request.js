@@ -184,6 +184,7 @@ const fetchApprovedRequests = async (req, res, next) => {
 };
 
 const createRequest = async (req, res, next) => {
+
   const {
     requestTypeID,
     faultTypeID,
@@ -194,25 +195,63 @@ const createRequest = async (req, res, next) => {
   const fileBuffer = req.file === undefined ? null : req.file.buffer;
   const fileType = req.file === undefined ? null : req.file.mimetype;
   const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
-  const history = `PENDING_Request Created_${today}_${req.user.role_name}_${req.user.name}`;
+  let user_id = '';
+  let role_id = '';
+  let history = '';
+  let activity_log = '';
+
+  if(req?.user) {
+
+    user_id = req.user.id;
+    role_id = req.user.role_id;
+
+    history = `PENDING_Request Created_${today}_${req.user.role_name}_${req.user.name}`;
+    activity_log = [
+      {
+        date: today,
+        name: req.user.name,
+        role: req.user.role_name,
+        activity: "Request Created",
+        activity_type: "PENDING",
+      },
+    ];
+
+  } else {
+    //guest
+    user_id = 55;
+    role_id = 0;
+
+    history = `PENDING_Request Created_${today}_GUEST_${req.body.name}`;
+    activity_log = [
+      {
+        date: today,
+        name: req.body.name,
+        role: "GUEST",
+        activity: "Request Created",
+        activity_type: "PENDING",
+      },
+    ];
+  }
+
   db.query(
     `INSERT INTO keppel.request(
-			fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid
-		) VALUES (
-			$1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11
-		)`,
+      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+    ) VALUES (
+      $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
+    )`,
     [
       faultTypeID,
       description,
       plantLocationID,
       requestTypeID,
-      req.user.id,
-      req.user.role_id,
+      user_id,
+      role_id,
       taggedAssetID,
       fileBuffer,
       fileType,
       history,
       req.body.linkedRequestId,
+      JSON.stringify(activity_log),
     ],
     (err, result) => {
       if (err) return res.status(500).json({ errormsg: err });
@@ -226,14 +265,23 @@ const updateRequest = async (req, res, next) => {
   const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
   const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
   const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;
+  
   db.query(
     `
 		UPDATE keppel.request SET 
-		assigned_user_id = $1,
-		priority_id = $2,
-		requesthistory = concat(requesthistory, $3::text),
-		status_id = 2
-		WHERE request_id = $4
+      assigned_user_id = $1,
+      priority_id = $2,
+      requesthistory = concat(requesthistory, $3::text),
+      status_id = 2,
+      activity_log = activity_log || 
+        jsonb_build_object(
+          'date', '${today}',
+          'name', '${req.user.name}',
+          'role', '${req.user.role_name}',
+          'activity', 'Assigned ${assignUserName} to Case ID: ${req.params.request_id}',
+          'activity_type', 'ASSIGNED'
+        )
+    WHERE request_id = $4
 	`,
     [
       req.body.assignedUser.value,
@@ -532,7 +580,15 @@ const approveRejectRequest = async (req, res, next) => {
 	UPDATE keppel.request SET 
 	status_id = $1,
 	rejection_comments = $2,
-	requesthistory = concat(requesthistory, $3::text)
+	requesthistory = concat(requesthistory, $3::text),
+  activity_log = activity_log || 
+        jsonb_build_object(
+          'date', '${today}',
+          'name', '${req.user.name}',
+          'role', '${req.user.role_name}',
+          'activity', '${text} request',
+          'activity_type', '${status}'
+        )
 	WHERE request_id = $4`;
   db.query(
     sql,
@@ -555,7 +611,15 @@ const completeRequest = async (req, res, next) => {
 		completion_file = $2,
 		completedfilemimetype = $3,
 		status_id = 3,
-		requesthistory = concat(requesthistory, $4::text)
+		requesthistory = concat(requesthistory, $4::text),
+    activity_log = activity_log || 
+        jsonb_build_object(
+          'date', '${today}',
+          'name', '${req.user.name}',
+          'role', '${req.user.role_name}',
+          'activity', 'Completed request',
+          'activity_type', 'COMPLETED'
+        )
 		WHERE request_id = $5`;
   db.query(
     sql,

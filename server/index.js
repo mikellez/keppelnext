@@ -1,5 +1,6 @@
 require("dotenv").config()
 const express = require("express");
+const cors = require("cors");
 const next = require("next");
 const bodyParser = require("body-parser");
 const userAuth = require("./userAuth");
@@ -15,6 +16,10 @@ const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
   const server = express();
+  server.use(cors({
+    origin: 'http://localhost:3001',
+    credentials: true
+  }))
   server.use(bodyParser.json({limit: '50mb', extended: true}));
   server.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
   server.use(bodyParser.text({ limit: '200mb' }));
