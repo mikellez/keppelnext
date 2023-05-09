@@ -537,6 +537,8 @@ router.delete(
   checkIfLoggedInAPI,
   controllers.user.deleteUser
 );
+router
+    .get("/user/logouthistory",checkIfLoggedInAPI, controllers.user.logout)
 
 router
   .post("/setting/update", checkIfLoggedInAPI, controllers.setting.updateUser)

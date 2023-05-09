@@ -4,6 +4,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const bcrypt = require("bcryptjs");
 const session = require('express-session')
+const moment = require('moment');
 
 module.exports = (server) => {
     server.use(session({
@@ -27,7 +28,19 @@ module.exports = (server) => {
 
                 if (bErr)		return callback(null, false, { message: 'Incorrect username or password.', detailedmsg: bErr });
                 if(!bRes)		return callback(null, false, { message: 'Incorrect username or password.' });
-                                console.log("success"); return callback(null, result.rows[0]);
+                                console.log("success"); 
+                                let newdate = moment(new Date()).format("L HH:mm A");
+                                var sql = `INSERT INTO keppel.loginevents (userid,datetime,activity) VALUES (${result.rows[0].user_id},'${newdate}','logged in')`;
+                                db.query(sql ,function(err, result) {
+                                    if(err){
+                                       console.log(err);
+                                      }
+                                      return callback(null, result.rows[0]);
+                                    
+                                  });
+
+                                return callback(null, result.rows[0]);
+                                
             })
         })
     }));

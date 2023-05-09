@@ -1,6 +1,7 @@
 const db = require("../../db");
 const bcrypt = require('bcryptjs');
 const { generateCSV } = require("../csvGenerator");
+const moment = require("moment");
 
 const getUsers = (req, res, next) => {
     db.query(
@@ -112,9 +113,23 @@ const deleteUser = async (req, res, next) => {
         console.log(err);}
 };
 
+const logout = async (req, res, next) => {
+    const  id  = req.user.id;
+    let newdate = moment(new Date()).format("L HH:mm A");
+    var sql = `INSERT INTO keppel.loginevents (userid,datetime,activity) VALUES (${id},'${newdate}','logged out')`;
+    try {
+        await db.query(sql);
+        return res.status(200).json("success");
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+
 module.exports ={
     getUsersCSV,
     getUsers,
     addUser,
-    deleteUser
-}
+    deleteUser,
+    logout,
+};
