@@ -62,7 +62,7 @@ const query =
 
 const getEventtHistory = async (req, res, next) => {
     let q = `SELECT * FROM (${query}) AS activity_log WHERE event_time >= date_trunc('month', CURRENT_DATE) ORDER BY event_time DESC;`
-    console.log(q);
+    // console.log(q);
     db.query(q, (err, result) => {
         // console.log(result.rows);
         if (err) return res.status(400).json({ msg: err });
@@ -86,29 +86,20 @@ const getEventtHistoryDate = async (req, res, next) => {
     db.query(q, (err, result) => {
         // console.log(result.rows);
         if (err) return res.status(400).json({ msg: err });
-        if (result.rows.length == 0) return res.status(201).json({ msg: "No assets added" });
+        if (result.rows.length == 0) return res.status(201).json([{}]);
         return res.status(200).json(result.rows);
     });
 };
 
 const createActivityCSV = async (req, res, next) => {
-    db.query(`SELECT keppel.events.user_id, description, event_time 
-        FROM keppel.events, keppel.users 
-        WHERE keppel.events.user_id = keppel.users.user_id
-        `, (err, result) => {
-        if (err) return res.status(400).json({ msg: err });
-        if (result.rows.length == 0) return res.status(201).json({ msg: "No assets added" });
-        
-        generateCSV(result.rows).then(buffer => {
-            res.set({
-                'Content-Type': 'text/csv',
-            })
-            return res.status(200).send(buffer);
-        })
-        .catch(err => {
-            return res.status(500).send("Error in generating csv file");
-        })      
-  });
+    console.log(req.body);
+    generateCSV(req.body)
+      .then((buffer) => {
+        res.set({
+          "Content-Type": "text/csv",
+        });
+        return res.status(200).send(buffer);
+      })
 }
 
 
