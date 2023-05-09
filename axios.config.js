@@ -1,7 +1,7 @@
-import axios from 'axios';
+import axios from "axios";
 
 const instance = axios.create({
-  baseURL: 'http://localhost:3001'
+  baseURL: "http://localhost:3001",
 });
 
 /*instance.interceptors.request.use(
@@ -17,6 +17,12 @@ instance.interceptors.response.use((response) => {
   return response;
 }, (error) => {
 
+instance.interceptors.response.use(
+  (response) => {
+    console.log(`response ${response}`);
+    return response;
+  },
+  (error) => {
     const statusCode = error.response ? error.response.status : null;
     if (statusCode === 401) {
       window.location = "/Login";

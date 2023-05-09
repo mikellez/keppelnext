@@ -48,7 +48,9 @@ FROM
     JOIN keppel.status_cm st ON st.status_id = cl.status_id	
 `;
 
-const fetchAssignedChecklistsQuery = fetchAllChecklistQuery + `
+const fetchAssignedChecklistsQuery =
+    fetchAllChecklistQuery +
+    `
 WHERE 
     ua.user_id = $1 AND 
     (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3)
@@ -56,28 +58,27 @@ ORDER BY cl.checklist_id DESC
 `;
 
 const fetchAssignedChecklists = async (req, res, next) => {
-  const page = req.query.page || 1;
-  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+    const page = req.query.page || 1;
+    const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await db.query(fetchAssignedChecklistsQuery, [req.user.id]);
-  const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+    const totalRows = await db.query(fetchAssignedChecklistsQuery, [req.user.id]);
+    const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
-  const query =
-    fetchAssignedChecklistsQuery +
-    ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+    const query = fetchAssignedChecklistsQuery + ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
-  try {
-    const result = await db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      return res.status(404).json({ msg: "No checklist" });
+    try {
+        const result = await db.query(query, [req.user.id]);
+        if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
 
-    return res.status(200).json({ rows: result.rows, total: totalPages });
-  } catch (error) {
-    return res.status(500).json({ msg: error });
-  }
+        return res.status(200).json({ rows: result.rows, total: totalPages });
+    } catch (error) {
+        return res.status(500).json({ msg: error });
+    }
 };
 
-const fetchPendingChecklistsQuery =  fetchAllChecklistQuery + `
+const fetchPendingChecklistsQuery =
+    fetchAllChecklistQuery +
+    `
 WHERE 
     ua.user_id = $1 AND 
     (cl.status_id = 1)
@@ -85,30 +86,27 @@ ORDER BY cl.checklist_id DESC
 `;
 
 const fetchPendingChecklists = async (req, res, next) => {
-  const page = req.query.page || 1;
-  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+    const page = req.query.page || 1;
+    const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await db.query(fetchForReviewChecklistsQuery, [
-    req.user.id,
-  ]);
-  const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+    const totalRows = await db.query(fetchForReviewChecklistsQuery, [req.user.id]);
+    const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
-  const query =
-    fetchPendingChecklistsQuery +
-    ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+    const query = fetchPendingChecklistsQuery + ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
-  try {
-    const result = await db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      return res.status(404).json({ msg: "No checklist" });
+    try {
+        const result = await db.query(query, [req.user.id]);
+        if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
 
-    return res.status(200).json({ rows: result.rows, total: totalPages });
-  } catch (error) {
-    return res.status(500).json({ msg: error });
-  }
-}
+        return res.status(200).json({ rows: result.rows, total: totalPages });
+    } catch (error) {
+        return res.status(500).json({ msg: error });
+    }
+};
 
-const fetchForReviewChecklistsQuery = fetchAllChecklistQuery + `				
+const fetchForReviewChecklistsQuery =
+    fetchAllChecklistQuery +
+    `				
 WHERE 
     ua.user_id = $1 AND 
     (cl.status_id = 4 OR cl.status_id = 6)
@@ -116,71 +114,68 @@ ORDER BY cl.checklist_id desc
 `;
 
 const fetchForReviewChecklists = async (req, res, next) => {
-  const page = req.query.page || 1;
-  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+    const page = req.query.page || 1;
+    const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await db.query(fetchForReviewChecklistsQuery, [
-    req.user.id,
-  ]);
-  const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+    const totalRows = await db.query(fetchForReviewChecklistsQuery, [req.user.id]);
+    const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
-  const query =
-    fetchForReviewChecklistsQuery +
-    ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+    const query = fetchForReviewChecklistsQuery + ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
-  try {
-    const result = await db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      return res.status(404).json({ msg: "No checklist" });
+    try {
+        const result = await db.query(query, [req.user.id]);
+        if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
 
-    return res.status(200).json({ rows: result.rows, total: totalPages });
-  } catch (error) {
-    return res.status(500).json({ msg: error });
-  }
+        return res.status(200).json({ rows: result.rows, total: totalPages });
+    } catch (error) {
+        return res.status(500).json({ msg: error });
+    }
 };
 
-const fetchApprovedChecklistsQuery = fetchAllChecklistQuery + `
+const fetchApprovedChecklistsQuery =
+    fetchAllChecklistQuery +
+    `
 WHERE 
     ua.user_id = $1 AND 
     (cl.status_id = 5 OR cl.status_id = 7)
 ORDER BY cl.checklist_id DESC
 `;
 const fetchApprovedChecklists = async (req, res, next) => {
-  const page = req.query.page || 1;
-  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+    const page = req.query.page || 1;
+    const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await db.query(fetchApprovedChecklistsQuery, [req.user.id]);
-  const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+    const totalRows = await db.query(fetchApprovedChecklistsQuery, [req.user.id]);
+    const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
-  const query =
-    fetchApprovedChecklistsQuery +
-    ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+    const query = fetchApprovedChecklistsQuery + ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
-  try {
-    const result = await db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      return res.status(404).json({ msg: "No checklist" });
+    try {
+        const result = await db.query(query, [req.user.id]);
+        if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
 
-    return res.status(200).json({ rows: result.rows, total: totalPages });
-  } catch (error) {
-    return res.status(500).json({ msg: error });
-  }
+        return res.status(200).json({ rows: result.rows, total: totalPages });
+    } catch (error) {
+        return res.status(500).json({ msg: error });
+    }
 };
 
 // get checklist templates
 const fetchChecklistTemplateNames = async (req, res, next) => {
-  const sql = req.params.id
-    ? `SELECT * from keppel.checklist_templates WHERE plant_id = ${req.params.id}` // templates are plant specificed (from that plant only)
-    : `SELECT * from keppel.checklist_templates WHERE plant_id = any(ARRAY${req.query.test}::int[])
-            ORDER BY keppel.checklist_templates.checklist_id DESC;`; // templates are plants specificed depending on user access(1 use can be assigned multiple plants)
-  db.query(sql, (err, result) => {
-    if (err) throw err;
-    if (result) return res.status(200).json(result.rows);
-  });
+    console.log(req.user.allocated_plants);
+    const sql = req.params.id
+        ? `SELECT * from keppel.checklist_templates WHERE plant_id = ${req.params.id} 
+          ORDER BY keppel.checklist_templates.checklist_id DESC;` // templates are plant specificed (from that plant only)
+        : `SELECT * from keppel.checklist_templates WHERE plant_id = any(ARRAY[${req.user.allocated_plants}]::int[])
+          ORDER BY keppel.checklist_templates.checklist_id DESC;`; // templates are plants specificed depending on user access(1 use can be assigned multiple plants)
+
+    db.query(sql, (err, result) => {
+        if (err) throw err;
+        if (result) return res.status(200).json(result.rows);
+    });
 };
 
 const fetchSpecificChecklistTemplate = async (req, res, next) => {
-  const sql = `
+    const sql = `
         SELECT 
             ct.chl_name,
             ct.description,
@@ -194,54 +189,55 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
             checklist_id = $1
     `;
 
-  db.query(sql, [req.params.checklist_id], (err, found) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json("No checklist template found");
-    }
-    res.status(200).send(found.rows[0]);
-  });
+    db.query(sql, [req.params.checklist_id], (err, found) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("No checklist template found");
+        }
+        res.status(200).send(found.rows[0]);
+    });
 };
 
 const fetchSpecificChecklistRecord = async (req, res, next) => {
-  const sql = fetchAllChecklistQuery + ` 
+    const sql =
+        fetchAllChecklistQuery +
+        ` 
         WHERE 
             cl.checklist_id = $1
     `;
 
-  db.query(sql, [req.params.checklist_id], (err, found) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json("No checklist template found");
-    }
-    res.status(200).send(found.rows[0]);
-  });
+    db.query(sql, [req.params.checklist_id], (err, found) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("No checklist template found");
+        }
+        res.status(200).send(found.rows[0]);
+    });
 };
 
 const fetchChecklistRecords = async (req, res, next) => {
-  if (req.params.checklist_id) {
-    return fetchSpecificChecklistRecord(req, res, next);
-  } else {
-    return fetchForReviewChecklists(req, res, next);
-  }
+    if (req.params.checklist_id) {
+        return fetchSpecificChecklistRecord(req, res, next);
+    } else {
+        return fetchForReviewChecklists(req, res, next);
+    }
 };
 
 const submitNewChecklistTemplate = async (req, res, next) => {
-  if (req.body.checklistSections === undefined)
-    return res.status(400).json("ayo?");
+    if (req.body.checklistSections === undefined) return res.status(400).json("ayo?");
 
-  console.log(req.body.checklistSections);
+    console.log(req.body.checklistSections);
 
-  return res.status(200).json({
-    msg: "awesome",
-  });
+    return res.status(200).json({
+        msg: "awesome",
+    });
 };
 
 const createNewChecklistRecord = async (req, res, next) => {
-  // console.log(req.body.checklist)
-  const { checklist } = req.body;
-  const statusId = req.body.checklist.assigned_user_id ? 2 : 1;
-  sql = `INSERT INTO
+    // console.log(req.body.checklist)
+    const { checklist } = req.body;
+    const statusId = req.body.checklist.assigned_user_id ? 2 : 1;
+    sql = `INSERT INTO
         keppel.checklist_master
         (
             chl_name,
@@ -260,48 +256,50 @@ const createNewChecklistRecord = async (req, res, next) => {
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`;
 
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
-  
-  const history = `Created Record_${statusId === 2 ? "ASSIGNED" : "PENDING"}_${today}_${req.user.name}_NIL`;
-  const activity_log = [
-    {
-      date: today,
-      name: req.user.name,
-      activity: `${statusId === 2 ? "ASSIGNED" : "PENDING"}`,
-      activity_type: "Created Record",
-    },
-  ];
+    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
 
-  db.query(
-    sql,
-    [
-      checklist.chl_name,
-      checklist.description,
-      checklist.assigned_user_id,
-      checklist.signoff_user_id,
-      checklist.linkedassetids,
-      checklist.datajson,
-      "Record",
-      checklist.plant_id,
-      today,
-      req.user.id,
-      history,
-      statusId,
-      JSON.stringify(activity_log),
-    ],
-    (err) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json("Failure to create new checklist");
-      }
-      return res.status(200).json("New checklist successfully created");
-    }
-  );
+    const history = `Created Record_${statusId === 2 ? "ASSIGNED" : "PENDING"}_${today}_${
+        req.user.name
+    }_NIL`;
+    const activity_log = [
+        {
+            date: today,
+            name: req.user.name,
+            activity: `${statusId === 2 ? "ASSIGNED" : "PENDING"}`,
+            activity_type: "Created Record",
+        },
+    ];
+
+    db.query(
+        sql,
+        [
+            checklist.chl_name,
+            checklist.description,
+            checklist.assigned_user_id,
+            checklist.signoff_user_id,
+            checklist.linkedassetids,
+            checklist.datajson,
+            "Record",
+            checklist.plant_id,
+            today,
+            req.user.id,
+            history,
+            statusId,
+            JSON.stringify(activity_log),
+        ],
+        (err) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json("Failure to create new checklist");
+            }
+            return res.status(200).json("New checklist successfully created");
+        }
+    );
 };
 
 const createNewChecklistTemplate = async (req, res, next) => {
-  const { checklist } = req.body;
-  sql = `INSERT INTO
+    const { checklist } = req.body;
+    sql = `INSERT INTO
         keppel.checklist_templates
         (
             chl_name,
@@ -317,144 +315,141 @@ const createNewChecklistTemplate = async (req, res, next) => {
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
 
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
 
-  const history = `Created Template_PENDING_${today}_${req.user.name}_NIL`;
+    const history = `Created Template_PENDING_${today}_${req.user.name}_NIL`;
 
-  db.query(
-    sql,
-    [
-      checklist.chl_name,
-      checklist.description,
-      checklist.signoff_user_id,
-      checklist.datajson,
-      "Template",
-      checklist.plant_id,
-      today,
-      req.user.id,
-      history,
-      1,
-    ],
-    (err) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json("Failure to create new checklist");
-      }
-      return res.status(200).json("New checklist successfully created");
-    }
-  );
+    db.query(
+        sql,
+        [
+            checklist.chl_name,
+            checklist.description,
+            checklist.signoff_user_id,
+            checklist.datajson,
+            "Template",
+            checklist.plant_id,
+            today,
+            req.user.id,
+            history,
+            1,
+        ],
+        (err) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json("Failure to create new checklist");
+            }
+            return res.status(200).json("New checklist successfully created");
+        }
+    );
 };
 
 const fetchChecklistCounts = (req, res, next) => {
-  let sql;
-  let date = req.params.date;
-  let datetype = req.params.datetype;
-  let dateCond = "";
-  let dateSplit = {};
-  let year, month, week, quarter;
+    let sql;
+    let date = req.params.date;
+    let datetype = req.params.datetype;
+    let dateCond = "";
+    let dateSplit = {};
+    let year, month, week, quarter;
 
-  if (date !== "all") {
-    switch (datetype) {
-      case "week":
-        dateCond = `
+    if (date !== "all") {
+        switch (datetype) {
+            case "week":
+                dateCond = `
                     AND DATE_PART('week', CM.CREATED_DATE::DATE) = DATE_PART('week', '${date}'::DATE) 
                     AND DATE_PART('year', CM.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
 
-        break;
+                break;
 
-      case "month":
-        dateCond = `
+            case "month":
+                dateCond = `
                     AND DATE_PART('month', CM.CREATED_DATE::DATE) = DATE_PART('month', '${date}'::DATE) 
                     AND DATE_PART('year', CM.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
 
-        break;
+                break;
 
-      case "year":
-        dateCond = `
+            case "year":
+                dateCond = `
                     AND DATE_PART('year', CM.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
 
-        break;
+                break;
 
-      case "quarter":
-        dateCond = `
+            case "quarter":
+                dateCond = `
                     AND DATE_PART('quarter', CM.CREATED_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) 
                     AND DATE_PART('year', CM.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
 
-        break;
-      default:
-        dateCond = `AND CM.CREATED_DATE::DATE = '${date}'::DATE`;
+                break;
+            default:
+                dateCond = `AND CM.CREATED_DATE::DATE = '${date}'::DATE`;
+        }
     }
-  }
 
-  switch (req.params.field) {
-    case "status":
-      sql =
-        req.params.plant != 0
-          ? `SELECT S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
+    switch (req.params.field) {
+        case "status":
+            sql =
+                req.params.plant != 0
+                    ? `SELECT S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
 				JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
 				WHERE CM.PLANT_ID = ${req.params.plant}
                 ${dateCond}
 				GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)`
-          : `SELECT  S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
+                    : `SELECT  S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
 				JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
                 WHERE 1 = 1
                 ${dateCond}
 				GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)`;
-      break;
-    default:
-      return res
-        .status(404)
-        .send(`Invalid checklist type of ${req.params.field}`);
-  }
-  console.log(date);
-  console.log(sql);
-  db.query(sql, (err, result) => {
-    if (err)
-      return res
-        .status(500)
-        .send(`Error in fetching checklist ${req.params.field} for dashboard`);
-    return res.status(200).send(result.rows);
-  });
+            break;
+        default:
+            return res.status(404).send(`Invalid checklist type of ${req.params.field}`);
+    }
+    console.log(date);
+    console.log(sql);
+    db.query(sql, (err, result) => {
+        if (err)
+            return res
+                .status(500)
+                .send(`Error in fetching checklist ${req.params.field} for dashboard`);
+        return res.status(200).send(result.rows);
+    });
 };
 
 const createChecklistCSV = async (req, res, next) => {
-  let activeTabQuery;
-  switch (req.query.activeTab) {
-    case "0":
-      activeTabQuery = fetchAssignedChecklistsQuery;
-      break;
-    case "1":
-      activeTabQuery = fetchForReviewChecklistsQuery;
-      break;
-    case "2":
-      activeTabQuery = fetchApprovedChecklistsQuery;
-      break;
-    default:
-      activeTabQuery = `fetch error`;
-  }
-  db.query(activeTabQuery, [req.user.id], (err, result) => {
-    if (err) return res.status(400).json({ msg: err });
-    if (result.rows.length == 0)
-      return res.status(404).json({ msg: "No checklist" });
-    generateCSV(result.rows)
-      .then((buffer) => {
-        res.set({
-          "Content-Type": "text/csv",
-        });
-        return res.status(200).send(buffer);
-      })
-      .catch((error) => {
-        res.status(500).send(`Error in generating csv file`);
-      });
-  });
+    let activeTabQuery;
+    switch (req.query.activeTab) {
+        case "0":
+            activeTabQuery = fetchAssignedChecklistsQuery;
+            break;
+        case "1":
+            activeTabQuery = fetchForReviewChecklistsQuery;
+            break;
+        case "2":
+            activeTabQuery = fetchApprovedChecklistsQuery;
+            break;
+        default:
+            activeTabQuery = `fetch error`;
+    }
+    db.query(activeTabQuery, [req.user.id], (err, result) => {
+        if (err) return res.status(400).json({ msg: err });
+        if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
+        generateCSV(result.rows)
+            .then((buffer) => {
+                res.set({
+                    "Content-Type": "text/csv",
+                });
+                return res.status(200).send(buffer);
+            })
+            .catch((error) => {
+                res.status(500).send(`Error in generating csv file`);
+            });
+    });
 };
 
 const completeChecklist = async (req, res, next) => {
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
 
-  const updatehistory = `,Updated Record_WORK DONE_${today}_${req.user.name}`;
+    const updatehistory = `,Updated Record_WORK DONE_${today}_${req.user.name}`;
 
-  const sql = `
+    const sql = `
         UPDATE
             keppel.checklist_master
         SET 
@@ -472,38 +467,38 @@ const completeChecklist = async (req, res, next) => {
             checklist_id = $2
     `;
 
-  db.query(sql, [req.body.datajson, req.params.checklist_id], (err) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json("Failure to update checklist completion");
-    }
-    return res.status(200).json("Checklist successfully completed");
-  });
+    db.query(sql, [req.body.datajson, req.params.checklist_id], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to update checklist completion");
+        }
+        return res.status(200).json("Checklist successfully completed");
+    });
 };
 
 const editChecklistRecord = async (req, res, next) => {
-  const data = req.body.checklist
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+    const data = req.body.checklist;
+    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
 
-  const updatehistory = data.assigned_user_id ? 
-    `,Assigned Record_ASSIGNED_${today}_${req.user.name}` :
-    `,Edited Record_PENDING_${today}_${req.user.name}`;
-  const statusId = data.assigned_user_id ? 2 : 1;
-  const activity_log = data.assigned_user_id
-  ? {
-      date: today,
-      name: req.user.name,
-      activity: 'ASSIGNED',
-      activity_type: 'Assigned Record',
-    }
-  : {
-      date: today,
-      name: req.user.name,
-      activity: 'PENDING',
-      activity_type: 'Edited Record',
-    };
+    const updatehistory = data.assigned_user_id
+        ? `,Assigned Record_ASSIGNED_${today}_${req.user.name}`
+        : `,Edited Record_PENDING_${today}_${req.user.name}`;
+    const statusId = data.assigned_user_id ? 2 : 1;
+    const activity_log = data.assigned_user_id
+        ? {
+              date: today,
+              name: req.user.name,
+              activity: "ASSIGNED",
+              activity_type: "Assigned Record",
+          }
+        : {
+              date: today,
+              name: req.user.name,
+              activity: "PENDING",
+              activity_type: "Edited Record",
+          };
 
-  const sql = `
+    const sql = `
         UPDATE
             keppel.checklist_master
         SET 
@@ -521,38 +516,42 @@ const editChecklistRecord = async (req, res, next) => {
             checklist_id = $10
     `;
 
-  db.query(sql, [
-    data.datajson, 
-      statusId,
-      data.chl_name, 
-      data.description,
-      data.assigned_user_id,
-      data.signoff_user_id,
-      data.linkedassetids,
-      data.plant_id,
-      JSON.stringify(activity_log),
-      req.params.checklist_id
-    ], (err) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json("Failure to update checklist completion");
-    }
-    return res.status(200).json("Checklist successfully assigned");
-  });
+    db.query(
+        sql,
+        [
+            data.datajson,
+            statusId,
+            data.chl_name,
+            data.description,
+            data.assigned_user_id,
+            data.signoff_user_id,
+            data.linkedassetids,
+            data.plant_id,
+            JSON.stringify(activity_log),
+            req.params.checklist_id,
+        ],
+        (err) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json("Failure to update checklist completion");
+            }
+            return res.status(200).json("Checklist successfully assigned");
+        }
+    );
 };
 
 const approveChecklist = async (req, res, next) => {
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
 
-  const updatehistory = `,Updated Record_APPROVE_${today}_${req.user.name}`;
-  const activity_log = {
-    date: today,
-    name: req.user.name,
-    activity: 'APPROVED',
-    activity_type: 'Updated Record',
-  };
+    const updatehistory = `,Updated Record_APPROVE_${today}_${req.user.name}`;
+    const activity_log = {
+        date: today,
+        name: req.user.name,
+        activity: "APPROVED",
+        activity_type: "Updated Record",
+    };
 
-  const sql = `
+    const sql = `
         UPDATE
             keppel.checklist_master
         SET 
@@ -563,29 +562,28 @@ const approveChecklist = async (req, res, next) => {
             checklist_id = $2
     `;
 
-  db.query(sql, 
-    [JSON.stringify(activity_log), req.params.checklist_id], (err) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json("Failure to update checklist completion");
-    }
-    return res.status(200).json("Checklist successfully approved");
-  });
+    db.query(sql, [JSON.stringify(activity_log), req.params.checklist_id], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to update checklist completion");
+        }
+        return res.status(200).json("Checklist successfully approved");
+    });
 };
 
 const rejectChecklist = async (req, res, next) => {
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
-  const rejectionComments = req.body.remarks; // todo add rejected comment here
+    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+    const rejectionComments = req.body.remarks; // todo add rejected comment here
 
-  const updatehistory = `,Updated Record_REJECTED_${today}_${req.user.name}_${rejectionComments}`;
-  const activity_log = {
-    date: today,
-    name: req.user.name,
-    activity: 'REJECTED',
-    activity_type: 'Updated Record',
-  };
+    const updatehistory = `,Updated Record_REJECTED_${today}_${req.user.name}_${rejectionComments}`;
+    const activity_log = {
+        date: today,
+        name: req.user.name,
+        activity: "REJECTED",
+        activity_type: "Updated Record",
+    };
 
-  const sql = `
+    const sql = `
         UPDATE
             keppel.checklist_master
         SET 
@@ -596,30 +594,29 @@ const rejectChecklist = async (req, res, next) => {
             checklist_id = $2
     `;
 
-  db.query(sql, 
-    [JSON.stringify(activity_log),req.params.checklist_id], (err) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json("Failure to update checklist completion");
-    }
-    return res.status(200).json("Checklist successfully cancelled");
-  });
+    db.query(sql, [JSON.stringify(activity_log), req.params.checklist_id], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to update checklist completion");
+        }
+        return res.status(200).json("Checklist successfully cancelled");
+    });
 };
 
 const cancelChecklist = async (req, res, next) => {
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
-  const cancelledComments = ""; // todo add cancelled comment here
+    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+    const cancelledComments = ""; // todo add cancelled comment here
 
-  const updatehistory = `,Updated Record_CANCELLED_${today}_${req.user.name}_${cancelledComments}`;
-  const activity_log = {
-    date: today,
-    name: req.user.name,
-    activity: 'CANCELLED',
-    activity_type: 'Updated Record',
-    comments: cancelledComments,
-  };
+    const updatehistory = `,Updated Record_CANCELLED_${today}_${req.user.name}_${cancelledComments}`;
+    const activity_log = {
+        date: today,
+        name: req.user.name,
+        activity: "CANCELLED",
+        activity_type: "Updated Record",
+        comments: cancelledComments,
+    };
 
-  const sql = `
+    const sql = `
         UPDATE
             keppel.checklist_master
         SET 
@@ -630,33 +627,32 @@ const cancelChecklist = async (req, res, next) => {
             checklist_id = $2
     `;
 
-  db.query(sql, 
-    [JSON.stringify(activity_log),req.params.checklist_id], (err) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json("Failure to update checklist completion");
-    }
-    return res.status(200).json("Checklist successfully rejected");
-  });
+    db.query(sql, [JSON.stringify(activity_log), req.params.checklist_id], (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("Failure to update checklist completion");
+        }
+        return res.status(200).json("Checklist successfully rejected");
+    });
 };
 
 function updateChecklist(updateType) {
-  switch (updateType) {
-    case "complete":
-      return completeChecklist;
-    case "approve":
-      return approveChecklist;
-    case "reject":
-      return rejectChecklist;
-    case "cancel":
-      return cancelChecklist;
-    default:
-      return console.log("update checklist type error");
-  }
+    switch (updateType) {
+        case "complete":
+            return completeChecklist;
+        case "approve":
+            return approveChecklist;
+        case "reject":
+            return rejectChecklist;
+        case "cancel":
+            return cancelChecklist;
+        default:
+            return console.log("update checklist type error");
+    }
 }
 
 const deleteChecklistTemplate = async (req, res, next) => {
-  const sql = `
+    const sql = `
         DELETE FROM
             keppel.schedule_checklist
         WHERE 
@@ -668,74 +664,76 @@ const deleteChecklistTemplate = async (req, res, next) => {
             checklist_id = ${req.params.checklist_id}
     `;
 
-  db.query(sql, (err) => {
-    if (err) return res.status(500).json("Failure to delete template");
-    return res.status(200).json("Template successfully deleted");
-  });
+    db.query(sql, (err) => {
+        if (err) return res.status(500).json("Failure to delete template");
+        return res.status(200).json("Template successfully deleted");
+    });
 };
 
 const fetchFilteredChecklists = async (req, res, next) => {
-  let date = req.params.date;
-  let datetype = req.params.datetype;
-  let status = req.params.status;
-  let plant = req.params.plant;
-  let page = req.params?.page;
-  let dateCond = "";
-  let statusCond = "";
-  let plantCond = "";
-  let userRoleCond = "";
-  let pageCond = "";
+    let date = req.params.date;
+    let datetype = req.params.datetype;
+    let status = req.params.status;
+    let plant = req.params.plant;
+    let page = req.params?.page;
+    let dateCond = "";
+    let statusCond = "";
+    let plantCond = "";
+    let userRoleCond = "";
+    let pageCond = "";
 
-  if (page) {
-    const offsetItems = (page - 1) * ITEMS_PER_PAGE;
-    pageCond = `OFFSET ${offsetItems} LIMIT ${ITEMS_PER_PAGE}`;
-  }
+    if (page) {
+        const offsetItems = (page - 1) * ITEMS_PER_PAGE;
+        pageCond = `OFFSET ${offsetItems} LIMIT ${ITEMS_PER_PAGE}`;
+    }
 
-  if (![1, 2, 3].includes(req.user.role_id)) {
-    userRoleCond = `AND ua.user_id = ${req.user.id}`;
-  }
+    if (![1, 2, 3].includes(req.user.role_id)) {
+        userRoleCond = `AND ua.user_id = ${req.user.id}`;
+    }
 
-  if (plant && plant != 0) {
-    plantCond = `AND cl.plant_id = '${plant}'`;
-  }
+    if (plant && plant != 0) {
+        plantCond = `AND cl.plant_id = '${plant}'`;
+    }
 
-  if (status) {
-    statusCond = `AND cl.status_id = '${status}'`;
-  }
+    if (status) {
+        statusCond = `AND cl.status_id = '${status}'`;
+    }
 
-  if (date !== "all") {
-    switch (datetype) {
-      case "week":
-        dateCond = `
+    if (date !== "all") {
+        switch (datetype) {
+            case "week":
+                dateCond = `
                     AND DATE_PART('week', CL.CREATED_DATE::DATE) = DATE_PART('week', '${date}'::DATE) 
                     AND DATE_PART('year', CL.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
 
-        break;
+                break;
 
-      case "month":
-        dateCond = `
+            case "month":
+                dateCond = `
                     AND DATE_PART('month', CL.CREATED_DATE::DATE) = DATE_PART('month', '${date}'::DATE) 
                     AND DATE_PART('year', CL.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
 
-        break;
+                break;
 
-      case "year":
-        dateCond = `AND DATE_PART('year', CL.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+            case "year":
+                dateCond = `AND DATE_PART('year', CL.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
 
-        break;
+                break;
 
-      case "quarter":
-        dateCond = `
+            case "quarter":
+                dateCond = `
                     AND DATE_PART('quarter', CL.CREATED_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) 
                     AND DATE_PART('year', CL.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
 
-        break;
-      default:
-        dateCond = `AND CL.CREATED_DATE::DATE = '${date}'::DATE`;
+                break;
+            default:
+                dateCond = `AND CL.CREATED_DATE::DATE = '${date}'::DATE`;
+        }
     }
-  }
 
-  const sql = fetchAllChecklistQuery + `
+    const sql =
+        fetchAllChecklistQuery +
+        `
     WHERE 1 = 1
         AND ua.user_id = ${req.user.id} 
         ${plantCond}
@@ -744,37 +742,36 @@ const fetchFilteredChecklists = async (req, res, next) => {
     ORDER BY cl.checklist_id DESC
     `;
 
-  const countSql = `SELECT COUNT(*) AS total FROM (${sql}) AS t1`;
+    const countSql = `SELECT COUNT(*) AS total FROM (${sql}) AS t1`;
 
-  const totalRows = await db.query(countSql);
-  const totalPages = Math.ceil(+totalRows.rows[0].total / ITEMS_PER_PAGE);
-  console.log(sql);
+    const totalRows = await db.query(countSql);
+    const totalPages = Math.ceil(+totalRows.rows[0].total / ITEMS_PER_PAGE);
+    console.log(sql);
 
-  db.query(sql + pageCond, (err, result) => {
-    if (err) return res.status(400).json({ msg: err });
-    if (result.rows.length == 0)
-      return res.status(404).json({ msg: "No checklist" });
+    db.query(sql + pageCond, (err, result) => {
+        if (err) return res.status(400).json({ msg: err });
+        if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
 
-    return res.status(200).json({ rows: result.rows, total: totalPages });
-  });
+        return res.status(200).json({ rows: result.rows, total: totalPages });
+    });
 };
 
 module.exports = {
-  fetchAssignedChecklists,
-  fetchForReviewChecklists,
-  fetchApprovedChecklists,
-  fetchChecklistTemplateNames,
-  submitNewChecklistTemplate,
-  fetchChecklistCounts,
-  createChecklistCSV,
-  createNewChecklistRecord,
-  createNewChecklistTemplate,
-  fetchSpecificChecklistTemplate,
-  fetchSpecificChecklistRecord,
-  fetchChecklistRecords,
-  updateChecklist,
-  deleteChecklistTemplate,
-  fetchFilteredChecklists,
-  fetchPendingChecklists,
-  editChecklistRecord,
+    fetchAssignedChecklists,
+    fetchForReviewChecklists,
+    fetchApprovedChecklists,
+    fetchChecklistTemplateNames,
+    submitNewChecklistTemplate,
+    fetchChecklistCounts,
+    createChecklistCSV,
+    createNewChecklistRecord,
+    createNewChecklistTemplate,
+    fetchSpecificChecklistTemplate,
+    fetchSpecificChecklistRecord,
+    fetchChecklistRecords,
+    updateChecklist,
+    deleteChecklistTemplate,
+    fetchFilteredChecklists,
+    fetchPendingChecklists,
+    editChecklistRecord,
 };
