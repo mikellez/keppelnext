@@ -1,6 +1,162 @@
 const db = require("../../db");
 const moment = require("moment");
 
+const getSystemsFromPlant = async (req, res, next) => {
+  const plant_id = +req.params.plant_id;
+
+  if (plant_id === undefined)
+    res.status(400).json({ msg: "plant id not provided" });
+
+  db.query(
+    `SELECT DISTINCT(sm.system_name), sm.system_id FROM keppel.plant_system_assets as psa
+    JOIN keppel.system_master as sm
+    ON psa.system_id_lvl3 = sm.system_id
+    WHERE psa.plant_id = $1`,
+    [plant_id],
+    (err, result) => {
+      if (err) return res.status(500).json({ msg: err });
+
+      res.status(200).json(result.rows);
+    }
+  );
+};
+
+const getSystemAssetsFromPlant = async (req, res, next) => {
+  const plant_id = +req.params.plant_id;
+  const system_id = +req.params.system_id;
+
+  let q = `SELECT DISTINCT(psa.system_asset_lvl5) FROM keppel.plant_system_assets as psa
+          JOIN keppel.system_master as sm
+          ON psa.system_id_lvl3 = sm.system_id
+          JOIN keppel.system_assets as sa
+          ON psa.system_asset_id_lvl4 = sa.system_asset_id
+          WHERE psa.plant_id = ${plant_id}
+          AND psa.system_id_lvl3 = ${system_id}`;
+  db.query(q, (err1, result) => {
+    if (err1) {
+      // throw err;
+      console.log(err1);
+      return res.status(400).send({
+        msg: err1,
+      });
+    }
+
+    return res.status(200).send(result.rows);
+  });
+};
+
+const getSystemAssetNamesFromPlant = async (req, res, next) => {
+  const plant_id = +req.params.plant_id;
+  const system_id = +req.params.system_id;
+  const system_asset = req.params.system_asset_id.replaceAll("_", " ");
+
+  let q = `SELECT DISTINCT(psa.system_asset_lvl6) FROM keppel.plant_system_assets as psa
+          JOIN keppel.system_master as sm
+          ON psa.system_id_lvl3 = sm.system_id
+          JOIN keppel.system_assets as sa
+          ON psa.system_asset_id_lvl4 = sa.system_asset_id
+          WHERE psa.plant_id = ${plant_id}
+          AND psa.system_id_lvl3 = ${system_id}
+          AND psa.system_asset_lvl5 = '${system_asset}'`;
+
+  try {
+    const result = await db.query(q);
+
+    if (result.rows[0].system_asset_lvl6 === "") {
+      const d = await checkAssetType(plant_id, system_id, system_asset);
+      return res.status(200).send(d);
+    }
+
+    return res.status(200).send(result.rows);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getSubComponentsFromPlant = async (req, res, next) => {
+  const plant_id = +req.params.plant_id;
+  const system_id = +req.params.system_id;
+  const system_asset = req.params.system_asset_id.replaceAll("_", " ");
+  const system_asset_name = req.params.system_asset_name.replaceAll("_", " ");
+
+  let q = `SELECT DISTINCT(psa.system_asset_lvl7) FROM keppel.plant_system_assets as psa
+          JOIN keppel.system_master as sm
+          ON psa.system_id_lvl3 = sm.system_id
+          JOIN keppel.system_assets as sa
+          ON psa.system_asset_id_lvl4 = sa.system_asset_id
+          WHERE psa.plant_id = ${plant_id}
+          AND psa.system_id_lvl3 = ${system_id}
+          AND psa.system_asset_lvl5 = '${system_asset}'
+          AND psa.system_asset_lvl6 = '${system_asset_name}'`;
+
+  try {
+    const result = await db.query(q);
+
+    if (result.rows[0].system_asset_lvl7 === "") {
+      const d = await checkAssetType(
+        plant_id,
+        system_id,
+        system_asset,
+        system_asset_name
+      );
+      return res.status(200).send(d);
+    } else {
+      const d = await checkAssetType(
+        plant_id,
+        system_id,
+        system_asset,
+        system_asset_name,
+        result.rows[0].system_asset_lvl7
+      );
+
+      d["subComponents"] = result.rows;
+      return res.status(200).send(d);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const checkAssetType = async (...args) => {
+  // console.log(args);
+  let q = `SELECT psa.parent_asset, psa.asset_type, psa.plant_asset_instrument, psa.psa_id FROM keppel.plant_system_assets as psa
+          WHERE psa.plant_id = ${args[0]}
+          AND psa.system_id_lvl3 = ${args[1]}
+          AND psa.system_asset_lvl5 = '${args[2]}'`;
+  if (args[3]) {
+    q += `AND psa.system_asset_lvl6 = '${args[3]}'`;
+  }
+  if (args[4]) {
+    q += `AND psa.system_asset_lvl7 = '${args[4]}'`;
+  }
+
+  try {
+    const result = await db.query(q);
+    d = {};
+    arr = [];
+    for (const row of result.rows) {
+      if (row.parent_asset !== row.asset_type) {
+        if (!(row.asset_type in d)) {
+          d[row.asset_type] = [
+            { psa_id: row.psa_id, pai: row.plant_asset_instrument },
+          ];
+        } else {
+          d[row.asset_type].push({
+            psa_id: row.psa_id,
+            pai: row.plant_asset_instrument,
+          });
+        }
+      } else {
+        arr.push({ psa_id: row.psa_id, pai: row.plant_asset_instrument });
+      }
+    }
+
+    return { dict: d, pai: arr };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const getAssetsFromPlant = async (req, res, next) => {
   const { plant_id } = req.params;
 
@@ -21,7 +177,6 @@ const getAssetsFromPlant = async (req, res, next) => {
 };
 
 const getAllAssets = async (req, res, next) => {
-
   db.query(
     `SELECT plant_id, psa_id, concat( system_asset , ' | ' , plant_asset_instrument) as "asset_name"  
             FROM keppel.system_assets AS t1 ,keppel.plant_system_assets AS t2
@@ -728,9 +883,8 @@ const addNewAsset = (req, res, next) => {
           activity_type: "CREATED",
         },
       ];
-    
-      const query = 
-      `UPDATE keppel.plant_system_assets 
+
+      const query = `UPDATE keppel.plant_system_assets 
       SET activity_log = '${JSON.stringify(activity_log)}',
       created_date = now()
       WHERE psa_id = '${parseInt(psa_id)}';
@@ -790,6 +944,10 @@ const fetchAssetHistory = (req, res, next) => {
 };
 
 module.exports = {
+  getSystemsFromPlant,
+  getSystemAssetsFromPlant,
+  getSystemAssetNamesFromPlant,
+  getSubComponentsFromPlant,
   getAssetsFromPlant,
   getAssetHierarchy,
   getAssetDetails,
@@ -803,5 +961,5 @@ module.exports = {
   addNewAsset,
   editAsset,
   deleteAsset,
-  getAllAssets
+  getAllAssets,
 };
