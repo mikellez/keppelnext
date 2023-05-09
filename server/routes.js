@@ -387,6 +387,7 @@ router.get("/schedule/event/:id", checkIfLoggedInAPI, controllers.schedule.getSc
 
 router.get("/activity/account_log", checkIfLoggedInAPI, controllers.activity.getEventtHistory);
 router.get("/activity/csv", checkIfLoggedInAPI, controllers.activity.createActivityCSV);
+router.get("/activity/account_log/:type/:date", checkIfLoggedInAPI, controllers.activity.getEventtHistoryDate);
 
 router
     .route("/logbook", checkIfLoggedInAPI)

@@ -731,7 +731,8 @@ const addNewAsset = (req, res, next) => {
     
       const query = 
       `UPDATE keppel.plant_system_assets 
-      SET activity_log = '${JSON.stringify(activity_log)}'
+      SET activity_log = '${JSON.stringify(activity_log)}',
+      created_date = now()
       WHERE psa_id = '${parseInt(psa_id)}';
       `;
       console.log(query);
