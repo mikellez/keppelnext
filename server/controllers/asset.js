@@ -23,7 +23,7 @@ const getAssetsFromPlant = async (req, res, next) => {
 const getAllAssets = async (req, res, next) => {
 
   db.query(
-    `SELECT psa_id, concat( system_asset , ' | ' , plant_asset_instrument) as "asset_name"  
+    `SELECT plant_id, psa_id, concat( system_asset , ' | ' , plant_asset_instrument) as "asset_name"  
             FROM keppel.system_assets AS t1 ,keppel.plant_system_assets AS t2
             WHERE t1.system_asset_id = t2.system_asset_id_lvl4`,
     (err, result) => {

@@ -135,7 +135,6 @@ router.get("/request/approved", checkIfLoggedInAPI, controllers.request.fetchApp
  */
 router.post(
     "/request/",
-    checkIfLoggedInAPI,
     upload.single("image"),
     controllers.request.createRequest
 );
