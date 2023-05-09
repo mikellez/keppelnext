@@ -450,7 +450,8 @@ const fetchSpecificRequest = async (req, res, next) => {
   r.completion_file,
   r.complete_comments,
   r.rejection_comments,
-  r.requesthistory
+  r.requesthistory,
+  r.created_date
   FROM keppel.request AS r
   JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
   JOIN keppel.fault_types  AS ft ON ft.fault_id = r.fault_id

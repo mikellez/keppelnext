@@ -169,6 +169,8 @@ async function fetchRequest(id) {
 // Generate a PDF file for request
 async function generateRequestPDF(id) {
     const request = await fetchRequest(id);
+    console.log("^&*^*(*(")
+    console.log(Object.keys(request));
 
     if (!request)
         return null;

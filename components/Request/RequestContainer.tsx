@@ -32,7 +32,6 @@ import ImagePreview from "../../components/Request/ImagePreview";
 
 import { useForm } from "react-hook-form";
 import { SubmitHandler } from "react-hook-form/dist/types";
-
 import {
   CMMSBaseType,
   CMMSRequestTypes,
@@ -300,7 +299,7 @@ export default function RequestContainer(props: RequestContainerProps) {
       setAvailableAssets(options);
     });
   };
-
+  const sortedAssets = availableAssets.sort((a, b) => a.asset_name.localeCompare(b.asset_name));
   const plantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPlantId(parseInt(e.target.value));
     updateAssetLists(parseInt(e.target.value));
@@ -408,7 +407,7 @@ export default function RequestContainer(props: RequestContainerProps) {
               <RequiredIcon /> Tag Asset:
             </label>
             <select
-              className="form-control"
+              className="form-select"
               id="formControlTagAsset"
               {...register("taggedAssetID", { required: true })}
               disabled={props.assignRequestData || !plantId ? true : false}
@@ -418,7 +417,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                 Select asset
               </option>
               {!props.assignRequestData &&
-                availableAssets.map((asset: CMMSAssetOption) => {
+                sortedAssets.map((asset: CMMSAssetOption) => {
                   return (
                     <option
                       key={asset.psa_id + "|" + asset.asset_name}
@@ -433,6 +432,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                 <option value={-1}>{assignRequestData.asset_name}</option>
               )}
             </select>
+
           </div>
         </div>
         <div
