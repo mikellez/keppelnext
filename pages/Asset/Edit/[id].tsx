@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from "react";
 import formStyles from "../../../styles/formStyles.module.css";
-import instance from '../../../axios.config.js';
+import instance from "../../../axios.config.js";
 import { CMMSAssetDetails } from "../../../types/common/interfaces";
 import { useRouter } from "next/router";
 import { useCurrentUser } from "../../../components/SWR";
 import RequiredIcon from "../../../components/RequiredIcon";
 import Link from "next/link";
-import { ModuleContent, ModuleFooter, ModuleHeader, ModuleMain } from "../../../components";
-import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
+import {
+  ModuleContent,
+  ModuleFooter,
+  ModuleHeader,
+  ModuleMain,
+} from "../../../components";
+import ModuleSimplePopup, {
+  SimpleIcon,
+} from "../../../components/ModuleLayout/ModuleSimplePopup";
+import AssetDetails from "../Details/[id]";
 
 interface EditAssetProps {
   header: string;
@@ -15,13 +23,16 @@ interface EditAssetProps {
 // get asset details query
 const getAsset = async (id: number) => {
   const url = "/api/assetDetails/";
+  console.log(url + id);
   return await instance
     .get(url + id)
     .then((res) => {
-      // console.log(res.data)
+      console.log("test");
+      console.log(res.data);
       return res.data;
     })
     .catch((err) => {
+      console.log("test1");
       console.log(err.response);
       return err.response.status;
     });
@@ -94,7 +105,18 @@ export default function EditAsset(props: EditAssetProps) {
 
           // If all files have been processed, update the state
           if (uploadedFiles.length === files.length) {
-            setfileraw((prevState) => [...prevState, ...uploadedFiles]);
+            setfileraw((prevState) => {
+              console.log(prevState);
+              if (
+                prevState === undefined ||
+                prevState === null ||
+                prevState.length === 0
+              ) {
+                return [...uploadedFiles];
+              } else {
+                return [...prevState, ...uploadedFiles];
+              }
+            });
           }
         };
 
@@ -148,9 +170,7 @@ export default function EditAsset(props: EditAssetProps) {
     };
     console.log(postData);
     //post data to API
-    instance.post("/api/asset/editAsset",
-        postData
-      );
+    instance.post("/api/asset/editAsset", postData);
     //open modal to show success
     setSubmissionModal(true);
   }
@@ -158,8 +178,10 @@ export default function EditAsset(props: EditAssetProps) {
   //Function to get asset details and set image and files states **when loading page**
   useEffect(() => {
     getAsset(parseInt(psa_id as string)).then((result) => {
-      console.log(result);
+      // console.log(result);
+      console.log(result[0]);
       if (!result[0].system_asset_lvl5) {
+        console.log(11);
         setAssetDetail({
           ...result[0],
           system_asset_lvl5: result[0].asset_name,
@@ -168,6 +190,7 @@ export default function EditAsset(props: EditAssetProps) {
         setImagePreview(result[0].uploaded_image);
         setfileraw(result[0].uploaded_files);
       } else if (!result[0].system_asset_lvl6) {
+        console.log(22);
         setAssetDetail({
           ...result[0],
           system_asset_lvl6: result[0].asset_name,
@@ -177,6 +200,7 @@ export default function EditAsset(props: EditAssetProps) {
         setImagePreview(result[0].uploaded_image);
         setfileraw(result[0].uploaded_files);
       } else if (!result[0].system_asset_lvl7) {
+        console.log(33);
         setAssetDetail({
           ...result[0],
           system_asset_lvl7: result[0].asset_name,
@@ -184,9 +208,15 @@ export default function EditAsset(props: EditAssetProps) {
         });
         setImagePreview(result[0].uploaded_image);
         setfileraw(result[0].uploaded_files);
+      } else {
+        setAssetDetail({
+          ...result[0],
+        });
       }
     });
   }, []);
+  console.log(assetDetail, 1);
+  console.log(assetDetail.plant_name, 2);
   //function TO MAP file name and value to variables
   var filename = [""];
   var filevalue = [""];
@@ -198,9 +228,9 @@ export default function EditAsset(props: EditAssetProps) {
   const filesToDownload = filevalue.map((file, index) => {
     return (
       <tr key={index}>
-      <Link href={file} download={filename[index]}>
-        {filename[index]}
-      </Link>
+        <Link href={file} download={filename[index]}>
+          {filename[index]}
+        </Link>
       </tr>
     );
   });
@@ -356,7 +386,8 @@ export default function EditAsset(props: EditAssetProps) {
               type="text"
               className="form-control"
               onChange={handleForm}
-              onBlur={handleForm} name="asset_description"
+              onBlur={handleForm}
+              name="asset_description"
               placeholder="Enter Description"
               defaultValue={assetDetail.asset_description}
             />
@@ -368,7 +399,8 @@ export default function EditAsset(props: EditAssetProps) {
               type="text"
               className="form-control"
               onChange={handleForm}
-              onBlur={handleForm} name="asset_location"
+              onBlur={handleForm}
+              name="asset_location"
               placeholder="Enter Location"
               defaultValue={assetDetail.asset_location}
             />
@@ -380,7 +412,8 @@ export default function EditAsset(props: EditAssetProps) {
               type="text"
               className="form-control"
               onChange={handleForm}
-              onBlur={handleForm} name="brand"
+              onBlur={handleForm}
+              name="brand"
               placeholder="Enter Brand"
               defaultValue={assetDetail.brand}
             />
@@ -392,7 +425,8 @@ export default function EditAsset(props: EditAssetProps) {
               type="text"
               className="form-control"
               onChange={handleForm}
-              onBlur={handleForm} name="model_number"
+              onBlur={handleForm}
+              name="model_number"
               placeholder="Enter Model Number"
               defaultValue={assetDetail.model_number}
             />
@@ -404,7 +438,8 @@ export default function EditAsset(props: EditAssetProps) {
               type="text"
               className="form-control"
               onChange={handleForm}
-              onBlur={handleForm} name="warranty"
+              onBlur={handleForm}
+              name="warranty"
               placeholder="Enter Warranty"
               defaultValue={assetDetail.warranty}
             />
@@ -416,7 +451,8 @@ export default function EditAsset(props: EditAssetProps) {
               type="text"
               className="form-control"
               onChange={handleForm}
-              onBlur={handleForm} name="technical_specs"
+              onBlur={handleForm}
+              name="technical_specs"
               placeholder="Enter Tech Specs"
               defaultValue={assetDetail.technical_specs}
             />
@@ -428,7 +464,8 @@ export default function EditAsset(props: EditAssetProps) {
               type="text"
               className="form-control"
               onChange={handleForm}
-              onBlur={handleForm} name="manufacture_country"
+              onBlur={handleForm}
+              name="manufacture_country"
               placeholder="Enter Country"
               defaultValue={assetDetail.manufacture_country}
             />
@@ -526,17 +563,17 @@ export default function EditAsset(props: EditAssetProps) {
               Cancel
             </button>,
             <button
-            key={2}
-            onClick={() => {
-              deletion();
-              setdeleteModal(false);
-              // route back to assets
-              router.push("/Asset")
-            }}
-            className="btn btn-primary"
+              key={2}
+              onClick={() => {
+                deletion();
+                setdeleteModal(false);
+                // route back to assets
+                router.push("/Asset");
+              }}
+              className="btn btn-primary"
             >
               Confirm
-            </button>
+            </button>,
           ]}
           onRequestClose={() => {
             router.push("/Asset");
@@ -566,6 +603,3 @@ export default function EditAsset(props: EditAssetProps) {
     </ModuleMain>
   );
 }
-
-;
-

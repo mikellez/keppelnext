@@ -294,7 +294,8 @@ const getAssetDetails = async (req, res, next) => {
     [req.params.psa_id],
     (err, result) => {
       if (err) throw err;
-      else res.status(200).json(result.rows);
+      
+      else console.log(result.rows); res.status(200).json(result.rows);
     }
   );
 };
