@@ -11,6 +11,7 @@ const ITEMS_PER_PAGE = 10;
 
 function fetchRequestQuery(status_query, role_id, user_id, page) {
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
+  console.log(role_id)
 
   return role_id === 1 || role_id === 2 || role_id === 3
     ? `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
@@ -85,7 +86,7 @@ function fetchRequestQuery(status_query, role_id, user_id, page) {
 		  left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
 			  from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
 			  WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
-	  WHERE r.assigned_user_id = ${user_id} OR r.user_id = ${user_id}
+	  WHERE (r.assigned_user_id = ${user_id} OR r.user_id = ${user_id})
 	  ${status_query}
 	  GROUP BY (
 		  r.request_id,
@@ -218,7 +219,7 @@ const createRequest = async (req, res, next) => {
 
   } else {
     //guest
-    user_id = 55;
+    user_id = process.env.GUESTID;
     role_id = 0;
 
     history = `PENDING_Request Created_${today}_GUEST_${req.body.name}`;
@@ -450,7 +451,10 @@ const fetchSpecificRequest = async (req, res, next) => {
   r.completion_file,
   r.complete_comments,
   r.rejection_comments,
-  r.requesthistory
+  r.requesthistory,
+  concat( concat(u.first_name,' '), u.last_name) AS assigned_user_name,
+  concat( concat(ua.first_name,' '), ua.last_name) AS created_by,
+  r.created_date
   FROM keppel.request AS r
   JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
   JOIN keppel.fault_types  AS ft ON ft.fault_id = r.fault_id
@@ -458,6 +462,7 @@ const fetchSpecificRequest = async (req, res, next) => {
   JOIN keppel.plant_system_assets AS psa ON psa.psa_id = r.psa_id
   LEFT JOIN keppel.priority AS pr ON r.priority_id = pr.p_id
   LEFT JOIN keppel.users AS u ON r.assigned_user_id = u.user_id
+	JOIN keppel.user_access ua ON u.user_id = ua.user_id
   JOIN keppel.status_pm AS s ON r.status_id = s.status_id
   WHERE request_id = $1`;
   db.query(sql, [req.params.request_id], (err, result) => {
