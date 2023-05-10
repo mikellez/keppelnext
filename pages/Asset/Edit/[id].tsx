@@ -8,6 +8,7 @@ import RequiredIcon from "../../../components/RequiredIcon";
 import Link from "next/link";
 import { ModuleContent, ModuleFooter, ModuleHeader, ModuleMain } from "../../../components";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
+import AssetDetails from "../Details/[id]";
 
 interface EditAssetProps {
   header: string;
@@ -15,13 +16,16 @@ interface EditAssetProps {
 // get asset details query
 const getAsset = async (id: number) => {
   const url = "/api/assetDetails/";
+  console.log(url + id);
   return await instance
     .get(url + id)
     .then((res) => {
-      // console.log(res.data)
+      console.log('test')
+      console.log(res.data)
       return res.data;
     })
     .catch((err) => {
+      console.log('test1')
       console.log(err.response);
       return err.response.status;
     });
@@ -158,8 +162,10 @@ export default function EditAsset(props: EditAssetProps) {
   //Function to get asset details and set image and files states **when loading page**
   useEffect(() => {
     getAsset(parseInt(psa_id as string)).then((result) => {
-      console.log(result);
+      // console.log(result);
+      console.log(result[0])
       if (!result[0].system_asset_lvl5) {
+        console.log(11);
         setAssetDetail({
           ...result[0],
           system_asset_lvl5: result[0].asset_name,
@@ -168,6 +174,7 @@ export default function EditAsset(props: EditAssetProps) {
         setImagePreview(result[0].uploaded_image);
         setfileraw(result[0].uploaded_files);
       } else if (!result[0].system_asset_lvl6) {
+        console.log(22);
         setAssetDetail({
           ...result[0],
           system_asset_lvl6: result[0].asset_name,
@@ -177,6 +184,7 @@ export default function EditAsset(props: EditAssetProps) {
         setImagePreview(result[0].uploaded_image);
         setfileraw(result[0].uploaded_files);
       } else if (!result[0].system_asset_lvl7) {
+        console.log(33);
         setAssetDetail({
           ...result[0],
           system_asset_lvl7: result[0].asset_name,
@@ -185,8 +193,15 @@ export default function EditAsset(props: EditAssetProps) {
         setImagePreview(result[0].uploaded_image);
         setfileraw(result[0].uploaded_files);
       }
+      else {
+        setAssetDetail({
+          ...result[0],
+        });
+      }
     });
   }, []);
+  console.log(assetDetail,1);
+  console.log(assetDetail.plant_name,2);
   //function TO MAP file name and value to variables
   var filename = [""];
   var filevalue = [""];
