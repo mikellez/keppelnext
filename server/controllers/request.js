@@ -200,6 +200,7 @@ const createRequest = async (req, res, next) => {
   let role_id = '';
   let history = '';
   let activity_log = '';
+  let guestfullname='';
 
   if(req?.user) {
 
@@ -219,14 +220,15 @@ const createRequest = async (req, res, next) => {
 
   } else {
     //guest
-    user_id = process.env.GUESTID;
+    user_id = null;
     role_id = 0;
+    guestfullname = req.body.name;
 
     history = `PENDING_Request Created_${today}_GUEST_${req.body.name}`;
     activity_log = [
       {
         date: today,
-        name: req.body.name,
+        name: guestfullname,
         role: "GUEST",
         activity: "Request Created",
         activity_type: "PENDING",
@@ -236,9 +238,9 @@ const createRequest = async (req, res, next) => {
 
   db.query(
     `INSERT INTO keppel.request(
-      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
     ) VALUES (
-      $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
+      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
     )`,
     [
       faultTypeID,
@@ -248,6 +250,7 @@ const createRequest = async (req, res, next) => {
       user_id,
       role_id,
       taggedAssetID,
+      guestfullname,
       fileBuffer,
       fileType,
       history,
@@ -429,6 +432,7 @@ const fetchRequestPriority = async (req, res, next) => {
 };
 
 const fetchSpecificRequest = async (req, res, next) => {
+  console.log(req.params.request_id)
   const sql = `SELECT 
   r.request_id,
   rt.request as request_name, 
@@ -462,7 +466,7 @@ const fetchSpecificRequest = async (req, res, next) => {
   JOIN keppel.plant_system_assets AS psa ON psa.psa_id = r.psa_id
   LEFT JOIN keppel.priority AS pr ON r.priority_id = pr.p_id
   LEFT JOIN keppel.users AS u ON r.assigned_user_id = u.user_id
-	JOIN keppel.user_access ua ON u.user_id = ua.user_id
+	LEFT JOIN keppel.user_access ua ON u.user_id = ua.user_id
   JOIN keppel.status_pm AS s ON r.status_id = s.status_id
   WHERE request_id = $1`;
   db.query(sql, [req.params.request_id], (err, result) => {
