@@ -234,7 +234,6 @@ const submitNewChecklistTemplate = async (req, res, next) => {
 };
 
 const createNewChecklistRecord = async (req, res, next) => {
-    // console.log(req.body.checklist)
     const { checklist } = req.body;
     const statusId = req.body.checklist.assigned_user_id ? 2 : 1;
     sql = `INSERT INTO
@@ -256,8 +255,8 @@ const createNewChecklistRecord = async (req, res, next) => {
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`;
 
-    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
-
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    
     const history = `Created Record_${statusId === 2 ? "ASSIGNED" : "PENDING"}_${today}_${
         req.user.name
     }_NIL`;
@@ -278,7 +277,7 @@ const createNewChecklistRecord = async (req, res, next) => {
             checklist.assigned_user_id,
             checklist.signoff_user_id,
             checklist.linkedassetids,
-            checklist.datajson,
+            JSON.stringify(checklist.datajson),
             "Record",
             checklist.plant_id,
             today,
