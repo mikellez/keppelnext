@@ -202,10 +202,15 @@ const createRequest = async (req, res, next) => {
   let activity_log = '';
   let guestfullname='';
 
-  if(req?.user) {
+  if(req?.user || req?.body?.user_id) {
 
-    user_id = req.user.id;
-    role_id = req.user.role_id;
+    if(req?.body?.user_id) {
+      user_id = req.body.user_id;
+      role_id = req.body.role_id;
+    } else {
+      user_id = req.user.id;
+      role_id = req.user.role_id;
+    }
 
     history = `PENDING_Request Created_${today}_${req.user.role_name}_${req.user.name}`;
     activity_log = [
