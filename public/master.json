@@ -1,4 +1,4 @@
-{
+ {
 	"plant": {
 		"internalName": "plant_master",
 		"name": "Plant",
@@ -37,6 +37,30 @@
 			"column_label": "Name",
 			"column_name": "asset_type"
 		}]
+	},
+	"plant_location":{
+		"internalName": "plant_location",
+		"name": "Plant Location",
+		"id": "loc_id",
+		"fields": [{
+			"column_label": "Plant",
+			"column_name": "plant_id",
+			"type" : "dropdown",
+			"url" : "/api/plants",
+			"value" : "plant_id",
+			"options" : "plant_name"
+		},
+		{
+			"column_label": "Floor",
+			"column_name": "loc_floor"
+		},
+		{
+			"column_label": "Room",
+			"column_name": "loc_room"
+		}
+	]
+		
 	}
+	
 }
 
