@@ -10,7 +10,6 @@ const { sendRequestPDF, sendChecklistPDF } = require("./pdfGenerator");
 
 // checkIfLoggedInAPI   - auth failures send 401 requrest. use this for API routes
 function checkIfLoggedInAPI(req, res, next) {
-  console.log(req);
   if (req.user === undefined)
     return res.status(401).json("you are not logged in");
   next();

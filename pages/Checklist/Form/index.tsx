@@ -141,11 +141,11 @@ export default function ChecklistNew(props: ChecklistPageProps) {
         setChecklistData((prev) => {
             return {
                 ...prev,
-                datajson: JSON.stringify(json),
+                datajson: json,
             };
         });
     }, [sections]);
-
+    console.log(checklistData.datajson)
     return (
         <>
             <ModuleMain>
