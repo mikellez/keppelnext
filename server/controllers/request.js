@@ -471,6 +471,7 @@ const fetchSpecificRequest = async (req, res, next) => {
   WHERE request_id = $1`;
   db.query(sql, [req.params.request_id], (err, result) => {
     if (err) return res.status(500).send("Error in fetching request");
+    if(result.rows.length === 0) return res.status(404).send("Request not found");
     return res.status(200).send(result.rows[0]);
   });
 };
@@ -775,6 +776,43 @@ const fetchFilteredRequests = async (req, res, next) => {
   });
 };
 
+const fetchRequestUploadedFile = async (req, res, next) => {
+  console.log(req.params.request_id)
+  const sql = `SELECT 
+  r.uploaded_file,
+  r.uploadfilemimetype
+  FROM keppel.request AS r
+  JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
+  JOIN keppel.fault_types  AS ft ON ft.fault_id = r.fault_id
+  JOIN keppel.plant_master AS pm ON pm.plant_id = r.plant_id
+  JOIN keppel.plant_system_assets AS psa ON psa.psa_id = r.psa_id
+  LEFT JOIN keppel.priority AS pr ON r.priority_id = pr.p_id
+  LEFT JOIN keppel.users AS u ON r.assigned_user_id = u.user_id
+	LEFT JOIN keppel.user_access ua ON u.user_id = ua.user_id
+  JOIN keppel.status_pm AS s ON r.status_id = s.status_id
+  WHERE request_id = $1`;
+  db.query(sql, [req.params.request_id], (err, result) => {
+
+    if (err) return res.status(500).send("Error in fetching request");
+    if(result.rows.length === 0 || result.rows[0].uploaded_file === null) return res.status(404).send("File not found");
+
+    const { uploaded_file, uploadfilemimetype } = result.rows[0];
+
+    const arrayBuffer = new Uint8Array(uploaded_file);
+    const buffer = Buffer.from(arrayBuffer).toString('base64');
+    const img = Buffer.from(buffer, 'base64');
+
+     res.writeHead(200, {
+      'Content-Type': uploadfilemimetype,
+      'Content-Length': img.length
+    });
+
+    res.end(img);
+
+    //return res.status(200).send(result.rows[0]);
+  });
+};
+
 module.exports = {
   fetchPendingRequests,
   fetchAssignedRequests,
@@ -791,4 +829,5 @@ module.exports = {
   completeRequest,
   fetchPendingRequests,
   fetchFilteredRequests,
+  fetchRequestUploadedFile
 };
