@@ -190,6 +190,10 @@ router
   .get(controllers.request.fetchSpecificRequest)
   .patch(controllers.request.updateRequest);
 
+router
+  .route("/request/:request_id/uploadedfile")
+  .get(controllers.request.fetchRequestUploadedFile)
+
 router.patch(
   "/request/:request_id/:status_id",
   checkIfLoggedInAPI,
@@ -512,21 +516,9 @@ router.get(
   controllers.schedule.getScheduleById
 );
 
-router.get(
-  "/activity/account_log",
-  checkIfLoggedInAPI,
-  controllers.activity.getEventtHistory
-);
-router.get(
-  "/activity/csv",
-  checkIfLoggedInAPI,
-  controllers.activity.createActivityCSV
-);
-router.get(
-  "/activity/account_log/:type/:date",
-  checkIfLoggedInAPI,
-  controllers.activity.getEventtHistoryDate
-);
+router.get("/activity/account_log", checkIfLoggedInAPI, controllers.activity.getEventtHistory);
+router.post("/activity/csv", checkIfLoggedInAPI, controllers.activity.createActivityCSV);
+router.get("/activity/account_log/:type/:date", checkIfLoggedInAPI, controllers.activity.getEventtHistoryDate);
 
 router
   .route("/logbook", checkIfLoggedInAPI)
@@ -548,6 +540,8 @@ router.delete(
   checkIfLoggedInAPI,
   controllers.user.deleteUser
 );
+router
+    .get("/user/logouthistory",checkIfLoggedInAPI, controllers.user.logout)
 
 router
   .post("/setting/update", checkIfLoggedInAPI, controllers.setting.updateUser)

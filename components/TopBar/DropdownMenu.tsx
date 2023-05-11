@@ -15,7 +15,10 @@ export default function DropdownMenu() {
 
   const sendLogout = (): void => {
     instance
-      .post("/api/logout")
+      .get("/api/user/logouthistory")
+      .then((response) => {
+
+      instance.post("/api/logout")
       .then((response) => {
         console.log("success", response);
         localStorage.removeItem("staff");
@@ -25,7 +28,7 @@ export default function DropdownMenu() {
         console.log("error", e);
         alert("logout fail");
       });
-  };
+  })};
 
   const logOut = (): boolean => {
     sendLogout();

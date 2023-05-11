@@ -18,7 +18,6 @@ import {
 } from "@table-library/react-table-library";
 import { useAccountlog } from "../../components/SWR";
 import { CMMSActivitylog } from "../../types/common/interfaces";
-import { downloadCSV } from "../Request";
 import { HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../components/TooltipBtn";
 import instance from "../../axios.config";
@@ -38,7 +37,9 @@ export default function AccountLog() {
 }>({ date: null, datetype: 'day' });
 
 const handleDateChange: DatePickerProps['onChange'] = (date, dateString) => {
-    setPickerWithType((prevState)=>{return{ date: dateString ? moment(date?.toDate()).format("YYYY-MM-DD") : moment().format('YYYY-MM-DD'), datetype: prevState.datetype || 'month' }});
+    setPickerWithType((prevState)=>
+    {return{ date: dateString ? moment(date?.toDate()).format("YYYY-MM-DD") : moment().startOf('month').format('YYYY-MM-DD')
+    , datetype: dateString ? prevState.datetype || 'month' : 'month'}});
   }
 
 const handleDateTypeChange = (value: PickerType) => {
@@ -56,7 +57,6 @@ const { date, datetype } = pickerwithtype;
         newState.sort((a, b) => new Date(b.event_time) > new Date(a.event_time) ? 1 : -1)
         return newState
       });
-      console.log(activityItems)
     } else if (datee == "Date & Time ▼") {
       setDate("Date & Time ▲");
       setActivityItems((prevState)=>{
@@ -64,7 +64,6 @@ const { date, datetype } = pickerwithtype;
         newState.sort((a, b) => new Date(a.event_time) > new Date(b.event_time) ? 1 : -1)
         return newState
       });
-      console.log(activityItems)
     } 
   }
   async function sortType() {
@@ -104,6 +103,25 @@ const { date, datetype } = pickerwithtype;
     }
   }
 
+  async function downloadCSV(){
+    try {
+      const response = await instance.post("/api/activity/csv", activityItems)
+      const blob = new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
+      const temp_link = document.createElement("a");
+      if (date) {
+        temp_link.download = `${date}_${datetype}_activity_log.csv`;
+      } else {
+        temp_link.download = `activity_log.csv`;
+      }
+      temp_link.href = url;
+      temp_link.click();
+      temp_link.remove();
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
 
   const updateTable = (foo: Function) => {
     setReady(false);
@@ -133,7 +151,16 @@ const { date, datetype } = pickerwithtype;
       console.log(res.data);
       setActivityItems(res.data);
       setReady(true);
-    });}
+    });} else {
+      console.log('test')
+      setReady(false);
+      console.log(`/api/activity/account_log`);
+      instance(`/api/activity/account_log`).then((res: any) => {
+        console.log(res.data);
+        setActivityItems(res.data);
+        setReady(true);
+      });
+    }
 
 }, [date]);
 
@@ -146,7 +173,7 @@ const { date, datetype } = pickerwithtype;
                     <Option value="year">Year</Option>
                 </Select>
                 <PickerWithType type={pickerwithtype.datetype} onChange={handleDateChange}/>
-        <TooltipBtn text="Export CSV" onClick={() => downloadCSV("activity")}>
+        <TooltipBtn text="Export CSV" onClick={() => downloadCSV()}>
           <HiOutlineDownload size={20} />
         </TooltipBtn>
       </ModuleHeader>
@@ -181,9 +208,9 @@ const { date, datetype } = pickerwithtype;
                       <Cell>{item.type}</Cell>
                       <Cell>{item.description}</Cell>
                       <Cell>
-                        {new Date(
+                        {item.event_time?new Date(
                           item.event_time
-                        ).toLocaleString()}
+                        ).toLocaleString(): " "}
                       </Cell>
                     </Row>
                   );
