@@ -1,14 +1,23 @@
 import formStyles from '../../styles/formStyles.module.css'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { CMMSMasterField, CMMSMasterSubmission, CMMSSystem } from '../../types/common/interfaces'
 import instance from '../../axios.config.js'
 import { Select } from 'antd'
 import { get } from 'http'
+import { type } from 'os'
 
 interface FieldProps {
 	label: string
 	name: string
 	value?: string
+	onChange: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement>
+	system?: CMMSSystem[]
+}
+
+interface Int_FieldProps {
+	label: string
+	name: string
+	value?: number
 	onChange: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement>
 	system?: CMMSSystem[]
 }
@@ -28,32 +37,6 @@ function Field(props: FieldProps) {
 	useEffect(() => {
 		console.log("val", value)
 	})
-	
-
-	if (props.name === "system_id") {
-		return (
-			<div className="form-group">
-				<label className='form-label'>{props.label}</label>
-				<select 
-					className="form-select"
-					onChange={(e) => {
-						setValue(e.target.value)
-						props.onChange(e)
-					}}
-					value={value}
-				>
-					<option hidden>--Select--</option>
-					{
-						props.system!.map(system => (
-							<option key={system.system_id} value={system.system_id}>
-								{system.system_name}
-							</option>
-              			))
-					}
-				</select>
-			</div>
-		)
-	} else {
 		return (
 			<div className="form-group">
 				<label className='form-label'>{props.label}</label>
@@ -67,8 +50,27 @@ function Field(props: FieldProps) {
 				/>
 			</div>
 		)
-	}
-	
+}
+function Int_Field(props: Int_FieldProps) {
+	const [value, setValue] = useState<number>(props.value === undefined ? 0 : props.value)
+
+	useEffect(() => {
+		console.log("val", value)
+	})
+		return (
+			<div className="form-group">
+				<label className='form-label'>{props.label}</label>
+				<input className="form-control"
+					min={0}
+					type="number"
+					onChange={(e) => {
+						setValue(+e.target.value)
+						props.onChange(e)
+					}}
+					value={value}
+				/>
+			</div>
+		)
 }
 
 export function MultiFields(props: MultiFieldProps) {
@@ -76,6 +78,8 @@ export function MultiFields(props: MultiFieldProps) {
 	const [entries, setEntries] = useState<CMMSMasterSubmission>(props.values === undefined ? props.fields.reduce(toProps,{}) : props.values )
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [values, setValues] = useState(null)
+	const [fieldE, setFieldE] = useState<JSX.Element[]>([])
+
 	
 
 	useEffect(() => {
@@ -88,6 +92,9 @@ export function MultiFields(props: MultiFieldProps) {
 				value: newEntries
 			}
 		});
+
+		toJSX(props.fields).then((jsx: JSX.Element[]) => setFieldE(jsx))
+
 	}, [props.fields])
 
 	console.log(entries)
@@ -121,10 +128,8 @@ export function MultiFields(props: MultiFieldProps) {
 
 	if (isLoading) {
 		return <p>Loading...</p>
-	}
+	}	
 
-	const [fieldE, setFieldE] = useState<JSX.Element[]>([])
-	
 	const toJSX = async (fields: any) => {
 
 		const dropdowns = await Promise.all(fields.map(async(f: any) => {
@@ -137,7 +142,9 @@ export function MultiFields(props: MultiFieldProps) {
 
 			if (dropdowns[i]) {
 				return (
-					<div className="form-group">
+					<div className="form-group"
+					key={f.column_name} 
+					>
 				<label className='form-label'>{f.column_label}</label>
 
 					<select className="form-select" 
@@ -147,7 +154,10 @@ export function MultiFields(props: MultiFieldProps) {
 						}} >
 						<option hidden>--Select--</option>
 						{
-							dropdowns[i].map((d) => {
+							dropdowns[i].map((d: {label: string, value: string}) => {
+								if (v && d.value == v) return <option value={d.value} key={d.value} selected>{d.label}
+								</option>
+								else
 								return <option value={d.value} key={d.value}>{d.label}</option>
 							})
 						}
@@ -155,7 +165,38 @@ export function MultiFields(props: MultiFieldProps) {
 				</div>
 				)
 			}
-
+			if (f.type == "boolean_dropdown"){
+				return (
+					<div className="form-group"
+					key = {f.column_name}
+					>
+				<label className='form-label'>{f.column_label}</label>
+					<select className="form-select"
+					onChange={(e) => {
+						getValueOnChange(e, f.column_name);
+						// console.log("e", e.target.value)
+						}} >
+						<option hidden>--Select--</option>
+						<option value="true">Yes</option>
+						<option value="false">No</option>
+					</select>
+				</div>
+				)
+			} 
+			else if(f.type == "int_input"){
+				return(
+					<Int_Field 
+					label={f.column_label} 
+					name={f.column_name} 
+					value={0} 
+					key={f.column_name} 
+					onChange={(e) => {getValueOnChange(e, f.column_name)}} 
+					system={props.system}
+				/>	
+				) 
+			}
+			
+			
 			return (
 				<Field 
 					label={f.column_label} 
@@ -166,13 +207,13 @@ export function MultiFields(props: MultiFieldProps) {
 					system={props.system}
 				/>
 			)
+			
 		})
+		
 	}
 
-	useEffect(() => {
-		toJSX(props.fields).then((jsx) => setFieldE(jsx))
-		
-	}, [props.fields])
+
+
 
 	return (
 		<div className={formStyles.halfContainer}>
