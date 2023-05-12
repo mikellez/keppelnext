@@ -20,13 +20,13 @@ const query =
     UNION ALL
      SELECT btrim(((activity.value -> 'name'::text)::character varying)::text, '"'::text) AS user_name,
         'Checklist'::text AS type,
-        to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'dd-mm-yyyy HH24:MI'::text) AS event_time,
+        to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'yyyy-mm-dd HH24:MI'::text) AS event_time,
         btrim(concat(activity.value -> 'activity'::text), '"'::text) AS description
        FROM keppel.checklist_master,
         LATERAL jsonb_array_elements(checklist_master.activity_log) activity(value)
     UNION ALL
      SELECT btrim(((activity.value -> 'name'::text)::character varying)::text, '"'::text) AS user_name,
-        'Checklist'::text AS type,
+        'Assets'::text AS type,
         to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'dd-mm-yyyy HH24:MI'::text) AS event_time,
         btrim(concat(activity.value -> 'activity'::text), '"'::text) AS description
        FROM keppel.plant_system_assets,
