@@ -24,7 +24,7 @@ function fetchRequestQuery(status_query, role_id, user_id, page) {
 	  r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
 	  r.complete_comments,
 	  concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-	  , r.requesthistory, r.rejection_comments, r.status_id, r.psa_id
+	  , r.requesthistory, r.rejection_comments, r.status_id, r.psa_id, r.fault_id
 	  FROM    
 		  keppel.users u
 		  JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -70,7 +70,7 @@ function fetchRequestQuery(status_query, role_id, user_id, page) {
 	  r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
 	  r.complete_comments,
 	  concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-	  , r.requesthistory, r.rejection_comments, r.status_id, r.psa_id
+	  , r.requesthistory, r.rejection_comments, r.status_id, r.psa_id, r.fault_id
 	  FROM    
 		  keppel.users u
 		  JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -806,6 +806,8 @@ const fetchRequestUploadedFile = async (req, res, next) => {
     const arrayBuffer = new Uint8Array(uploaded_file);
     const buffer = Buffer.from(arrayBuffer).toString('base64');
     const img = Buffer.from(buffer, 'base64');
+
+    const filename = `request_${req.params.request_id}.${uploadfilemimetype.split('/')[1]}`;
 
      res.writeHead(200, {
       'Content-Type': uploadfilemimetype,
