@@ -467,7 +467,7 @@ const completeChecklist = async (req, res, next) => {
             checklist_id = $2
     `;
 
-    db.query(sql, [req.body.datajson, req.params.checklist_id], (err) => {
+    db.query(sql, [JSON.stringify(req.body.datajson), req.params.checklist_id], (err) => {
         if (err) {
             console.log(err);
             return res.status(500).json("Failure to update checklist completion");
