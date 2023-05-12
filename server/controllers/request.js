@@ -811,8 +811,7 @@ const fetchRequestUploadedFile = async (req, res, next) => {
 
      res.writeHead(200, {
       'Content-Type': uploadfilemimetype,
-      'Content-Length': img.length,
-      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Length': img.length
     });
 
     res.end(img);
