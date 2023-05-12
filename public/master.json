@@ -1,4 +1,4 @@
-{
+ {
 	"plant": {
 		"internalName": "plant_master",
 		"name": "Plant",
@@ -37,6 +37,159 @@
 			"column_label": "Name",
 			"column_name": "asset_type"
 		}]
+	},
+	"plant_location":{
+		"internalName": "plant_location",
+		"name": "Plant Location",
+		"id": "loc_id",
+		"fields": [{
+			"column_label": "Plant",
+			"column_name": "plant_id",
+			"type" : "dropdown",
+			"url" : "/api/plants",
+			"value" : "plant_id",
+			"options" : "plant_name"
+		},
+		{
+			"column_label": "Floor",
+			"column_name": "loc_floor"
+		},
+		{
+			"column_label": "Room",
+			"column_name": "loc_room"
+		}
+	]
+	},
+	"priority":{
+		"internalName": "priority",
+		"name": "Priority",
+		"id": "p_id",
+		"fields": [{
+			"column_label": "Priority",
+			"column_name": "priority"
+		}]
+	},
+	"rca_code":{
+		"internalName": "rca_code",
+		"name": "RCA Code",
+		"id": "rca_id",
+		"fields": [{
+			"column_label": "RCA Code",
+			"column_name": "code"
+		}]
+	},
+	"page":{
+		"internalName": "page",
+		"name": "Page",
+		"id": "page_id",
+		"fields": [{
+			"column_label": "Page",
+			"column_name": "page_name"
+		}]
+	},
+	"maintenance_category":{
+		"internalName": "maintenance_category",
+		"name": "Maintenance Category",
+		"id": "m_id",
+		"fields": [{
+			"column_label": "Category",
+			"column_name": "category"
+		}]
+	},
+	"request_type":{
+		"internalName": "request_type",
+		"name": "Request Type",
+		"id": "req_id",
+		"fields": [{
+			"column_label": "Request Type",
+			"column_name": "request"
+		}]
+	},
+	"role":{
+		"internalName": "role",
+		"name": "Role",
+		"id": "role_id",
+		"fields": [{
+			"column_label": "Role",
+			"column_name": "role_name"
+		}]
+	},
+	"role_privileges":{
+		"internalName": "role_privileges",
+		"name": "Role Privileges",
+		"id": "role_privilege_id",
+		"fields": [{
+			"column_label": "Role id",
+			"column_name": "role_id",
+			"type": "int_input"
+
+		},
+		{
+			"column_label": "Create Privilege",
+			"column_name": "create_privilege",
+			"type": "boolean_dropdown"
+		},
+		{
+			"column_label": "Read Privilege",
+			"column_name": "read_privilege",
+			"type": "boolean_dropdown"
+		},
+		{
+			"column_label": "Update Privilege",
+			"column_name": "update_privilege",
+			"type": "boolean_dropdown"
+		},
+		{
+			"column_label": "Approve Privilege",
+			"column_name": "approve_privilege",
+			"type": "boolean_dropdown"
+		}]
+	},
+	"status_cm":{
+		"internalName": "status_cm",
+		"name": "Checklist Status",
+		"id": "status_id",
+		"fields": [{
+			"column_label": "Status",
+			"column_name": "status"
+		}]
+	},
+	"status_pm":{
+		"internalName": "status_pm",
+		"name": "Request Status",
+		"id": "status_id",
+		"fields": [{
+			"column_label": "Status",
+			"column_name": "status"
+		}]
+	},
+	"status_sm":{
+		"internalName": "status_sm",
+		"name": "Schedule Status",
+		"id": "status_id",
+		"fields": [{
+			"column_label": "Status",
+			"column_name": "status"
+		}]
+	},
+	"system_assets":{
+		"internalName": "system_assets",
+		"name": "System Assets",
+		"id": "system_asset_id",
+		"fields":[{
+			"column_label": "System",
+			"column_name": "system_id",
+			"type" : "dropdown",
+			"url" : "/api/asset/systems",
+			"value" : "system_id",
+			"options" : "system_name"
+		},
+		{
+			"column_label": "System Asset",
+			"column_name": "system_asset"
+		}
+	]
 	}
+	
 }
 

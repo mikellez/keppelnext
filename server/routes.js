@@ -190,6 +190,10 @@ router
   .get(controllers.request.fetchSpecificRequest)
   .patch(controllers.request.updateRequest);
 
+router
+  .route("/request/:request_id/uploadedfile")
+  .get(controllers.request.fetchRequestUploadedFile)
+
 router.patch(
   "/request/:request_id/:status_id",
   checkIfLoggedInAPI,

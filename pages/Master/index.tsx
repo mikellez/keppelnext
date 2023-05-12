@@ -2,7 +2,6 @@ import { CompactTable } from "@table-library/react-table-library/compact";
 
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
-
 import Link from "next/link";
 import React, { MouseEvent, useEffect, useState } from "react";
 import { ModuleMain, ModuleHeader, ModuleContent } from "../../components";
@@ -25,6 +24,8 @@ import ModuleSimplePopup from "../../components/ModuleLayout/ModuleSimplePopup";
 import LoadingIcon from "../../components/LoadingIcon";
 import TooltipBtn from "../../components/TooltipBtn";
 import { FiRefreshCw } from "react-icons/fi";
+import info from "../../public/master.json";
+console.log(info);
 
 /*
 	CMMSMaster: {
@@ -54,7 +55,7 @@ interface CMMSMasterData {
   [column_name: string]: string;
 }
 
-const indexedColumn = ["plant", "system",  "asset_type", "fault_types",];
+const indexedColumn: string[] = Object.keys(info)
 
 function useMaster(type: string) {
   interface CMMSMasterInfo {
@@ -200,7 +201,7 @@ export default function Master() {
   };
 
   useEffect(() => {
-    if (!isReady && data && !isValidating) {
+    if (!isReady && data && !isValidating && (data.data.length > 0)) {
       let len = Object.keys(data.data[0]).length - 3;
       let sizes = "";
       for (let i = 0; i < len; i++)
@@ -234,30 +235,6 @@ export default function Master() {
           </TooltipBtn>
         </Link>
       </ModuleHeader>
-
-      {/* <Modal
-				isOpen={isEditModalOpen}
-				ariaHideApp={false}
-				onRequestClose={closeEdit}
-				style={{
-					overlay: {
-						zIndex: 10000,
-						margin: "auto",
-						width: "100%",
-						height: "100%",
-						backgroundColor: "rgba(0,0,0,0.4)",
-					},
-					content: {
-						backgroundColor: "#F0F0F0",
-						height: "50%",
-						width: "50%",
-						margin: "auto",
-						border: "2px solid #393E46",
-					},
-				}}
-        	>
-				<p>test</p>
-			</Modal> */}
 
       <ModuleSimplePopup
         modalOpenState={isModalOpen}
@@ -328,46 +305,18 @@ export default function Master() {
 
       <ModuleContent>
         <ul className="nav nav-tabs">
-          <li
-            onClick={() => {
-              activeTabIndex !== 0 && switchColumns(0);
-            }}
-            className={"nav-link" + (activeTabIndex === 0 ? " active" : "")}
-          >
-            <span style={{ all: "unset" }}>Plant</span>
-          </li>
-          <li
-            onClick={() => {
-              activeTabIndex !== 1 && switchColumns(1);
-            }}
-            className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
-          >
-            <span style={{ all: "unset" }}>System</span>
-          </li>
-          <li
-            onClick={() => {
-              activeTabIndex !== 2 && switchColumns(2);
-            }}
-            className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
-          >
-            {/* <span style={{ all: "unset" }}>System Assets</span>
-          </li>
-          <li
-            onClick={() => {
-              activeTabIndex !== 3 && switchColumns(3);
-            }}
-            className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
-          > */}
-            <span style={{ all: "unset" }}>Asset Types</span>
-          </li>
-          <li
-            onClick={() => {
-              activeTabIndex !== 3 && switchColumns(3);
-            }}
-            className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
-          >
-            <span style={{ all: "unset" }}>Fault Types</span>
-          </li>
+          {indexedColumn.map((item, index) => (
+            <li
+              key={index}
+              onClick={() => {
+                activeTabIndex !== index && switchColumns(index);
+              }}
+              className={"nav-link" + (activeTabIndex === index ? " active" : "")}
+            > 
+              <span style={{ all: "unset" }}>{item}</span>
+            </li>
+          ))}
+          
         </ul>
         {isReady && (
           <Table
@@ -400,7 +349,11 @@ export default function Master() {
                     <Row key={item.id} item={item} onClick={editRow}>
                       {tableList.length > 1 &&
                         Object.keys(tableList[0]).slice(1).map((k) => {
+                          if (typeof item[k] === "boolean"){
+                            return <Cell key={item[k]}>{item[k] ? "Yes" : "No"} </Cell>;
+                          } else{
                           return <Cell key={item[k]}>{item[k]}</Cell>;
+                          }
                         })}
                       <Cell>
                         <MasterActions
