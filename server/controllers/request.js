@@ -807,9 +807,12 @@ const fetchRequestUploadedFile = async (req, res, next) => {
     const buffer = Buffer.from(arrayBuffer).toString('base64');
     const img = Buffer.from(buffer, 'base64');
 
+    const filename = `request_${req.params.request_id}.${uploadfilemimetype.split('/')[1]}`;
+
      res.writeHead(200, {
       'Content-Type': uploadfilemimetype,
-      'Content-Length': img.length
+      'Content-Length': img.length,
+      'Content-Disposition': `attachment; filename="${filename}"`,
     });
 
     res.end(img);
