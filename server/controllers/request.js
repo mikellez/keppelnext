@@ -264,6 +264,7 @@ const createRequest = async (req, res, next) => {
     ],
     (err, result) => {
       if (err) return res.status(500).json({ errormsg: err });
+      if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
 
       res.status(200).json("success");
     }
