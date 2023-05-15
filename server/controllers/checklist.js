@@ -314,7 +314,7 @@ const createNewChecklistTemplate = async (req, res, next) => {
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
 
-    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
     const history = `Created Template_PENDING_${today}_${req.user.name}_NIL`;
 
@@ -444,7 +444,7 @@ const createChecklistCSV = async (req, res, next) => {
 };
 
 const completeChecklist = async (req, res, next) => {
-    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
     const updatehistory = `,Updated Record_WORK DONE_${today}_${req.user.name}`;
 
@@ -477,7 +477,7 @@ const completeChecklist = async (req, res, next) => {
 
 const editChecklistRecord = async (req, res, next) => {
     const data = req.body.checklist;
-    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
     const updatehistory = data.assigned_user_id
         ? `,Assigned Record_ASSIGNED_${today}_${req.user.name}`
@@ -540,7 +540,7 @@ const editChecklistRecord = async (req, res, next) => {
 };
 
 const approveChecklist = async (req, res, next) => {
-    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
     const updatehistory = `,Updated Record_APPROVE_${today}_${req.user.name}`;
     const activity_log = {
@@ -571,7 +571,7 @@ const approveChecklist = async (req, res, next) => {
 };
 
 const rejectChecklist = async (req, res, next) => {
-    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
     const rejectionComments = req.body.remarks; // todo add rejected comment here
 
     const updatehistory = `,Updated Record_REJECTED_${today}_${req.user.name}_${rejectionComments}`;
@@ -603,7 +603,7 @@ const rejectChecklist = async (req, res, next) => {
 };
 
 const cancelChecklist = async (req, res, next) => {
-    const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
     const cancelledComments = ""; // todo add cancelled comment here
 
     const updatehistory = `,Updated Record_CANCELLED_${today}_${req.user.name}_${cancelledComments}`;

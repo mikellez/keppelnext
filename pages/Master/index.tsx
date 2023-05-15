@@ -201,7 +201,7 @@ export default function Master() {
   };
 
   useEffect(() => {
-    if (!isReady && data && !isValidating) {
+    if (!isReady && data && !isValidating && (data.data.length > 0)) {
       let len = Object.keys(data.data[0]).length - 3;
       let sizes = "";
       for (let i = 0; i < len; i++)
@@ -349,7 +349,11 @@ export default function Master() {
                     <Row key={item.id} item={item} onClick={editRow}>
                       {tableList.length > 1 &&
                         Object.keys(tableList[0]).slice(1).map((k) => {
+                          if (typeof item[k] === "boolean"){
+                            return <Cell key={item[k]}>{item[k] ? "Yes" : "No"} </Cell>;
+                          } else{
                           return <Cell key={item[k]}>{item[k]}</Cell>;
+                          }
                         })}
                       <Cell>
                         <MasterActions

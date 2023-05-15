@@ -18,7 +18,7 @@ const ChecklistViewFormSection = ({section}: {section: CheckSection}) => {
     return (
         <div>
             <h5>{section.description}</h5>
-            <div className={styles.checklistViewSection}>
+            <div>
             {
                section.rows.map((row, index) => {
                     return <ChecklistViewFormRow key={row.id} row={row} />
@@ -32,15 +32,18 @@ const ChecklistViewFormSection = ({section}: {section: CheckSection}) => {
 
 const ChecklistViewFormRow = ({row}: {row: CheckRow}) => {
     return (
-        <React.Fragment>
-            {
-                row.checks.map(check => 
-                    <React.Fragment key={check.id}>
-                        {check.renderViewOnlyForm()}
-                    </React.Fragment>
-                )
-            }
-        </React.Fragment>
+        <div>
+            <h6>{row.description}</h6>
+                <div className={styles.checklistViewRow}>
+                {
+                    row.checks.map(check => 
+                        <React.Fragment key={check.id}>
+                            {check.renderViewOnlyForm()}
+                        </React.Fragment>
+                    )
+                }
+                </div>
+        </div>
     );
 };
 
