@@ -11,7 +11,7 @@ const getUploadedFile = async (req, res, next) => {
     `SELECT psa.uploaded_files from keppel.plant_system_assets as psa WHERE psa.psa_id = ${psa_id}`
   );
   const base64Img = result.rows[0].uploaded_files[index][1].replace(
-    /^data:image\/jpeg;base64,/,
+    /^data:image\/jpeg;base64/,
     ""
   );
 
