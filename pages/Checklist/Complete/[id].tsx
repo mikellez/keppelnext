@@ -30,7 +30,7 @@ const submitCompletedChecklist = async (data: CheckSection[], id: number) => {
         url: "/api/checklist/complete/" + id,
         method: "patch",
         data: {
-            datajson: JSON.stringify(data.map((section) => section.toJSON())),
+            datajson: data.map((section) => section.toJSON()),
         },
     })
         .then((res) => res.data)
