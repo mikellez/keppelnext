@@ -551,7 +551,12 @@ router
 router
   .get("/user/getUsers", checkIfLoggedInAPI, controllers.user.getUsers)
   .get("/user/getUsersCSV", checkIfLoggedInAPI, controllers.user.getUsersCSV)
-  .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser);
+  .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser)
+  .get("/user/getUsersData/:id", checkIfLoggedInAPI, controllers.user.getUsersData)
+  .get("/user/getUsersplantData/:id", checkIfLoggedInAPI, controllers.user.getUsersplantData)
+  .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser)
+  .post("/user/updateUser", checkIfLoggedInAPI, controllers.user.updateUser);
+
 router.delete(
   "/user/deleteUser/:id",
   checkIfLoggedInAPI,
