@@ -1,8 +1,9 @@
 .dashboardMain {
   display: grid;
   grid-template-areas:
-    "a b c d g"
-    "e e f f g";
+    "a b c d"
+    "e f g h"
+    "i i i i";
   gap: 10px;
 }
 
@@ -51,6 +52,11 @@
 .dashboardPendingdNumber {
   @extend .dashboardNumber;
   color: #c21010;
+}
+
+.dashboardOutstandingNumber {
+  @extend .dashboardNumber;
+  color: purple;
 }
 
 .dashboardCompletedNumber {

@@ -24,12 +24,14 @@ import RequestContainer, {
 } from "../../../components/Request/RequestContainer";
 
 export default function AssignRequestPage(props: AssignRequestProps) {
+  const router = useRouter();
+
   return (
     <ModuleMain>
       <ModuleHeader title="Assign Request" header="Assign Request">
-        <Link href="/Request" className="btn btn-secondary">
+        <button className={"btn btn-secondary"} type="button" onClick={() => router.back()}>
           Back
-        </Link>
+        </button>
       </ModuleHeader>
       <ModuleContent>
         <RequestContainer assignRequestData={props} />

@@ -1,6 +1,32 @@
 const db = require("../../db");
 const moment = require("moment");
 
+const getUploadedFile = async (req, res, next) => {
+  const psa_id = +req.params.psa_id;
+  const index = +req.params.index;
+  console.log(psa_id);
+  console.log(index);
+
+  const result = await db.query(
+    `SELECT psa.uploaded_files from keppel.plant_system_assets as psa WHERE psa.psa_id = ${psa_id}`
+  );
+  const base64Img = result.rows[0].uploaded_files[index][1].replace(
+    /^data:image\/jpeg;base64,/,
+    ""
+  );
+
+  const img = Buffer.from(base64Img, "base64");
+
+  return res
+    .writeHead(200, {
+      "Content-Type": "image/jpeg",
+      "Content-Length": img.length,
+    })
+    .end(img);
+
+  // res.send(img);
+};
+
 const getSystemsFromPlant = async (req, res, next) => {
   const plant_id = +req.params.plant_id;
 
@@ -16,6 +42,7 @@ const getSystemsFromPlant = async (req, res, next) => {
     (err, result) => {
       if (err) return res.status(500).json({ msg: err });
 
+      console.log;
       res.status(200).json(result.rows);
     }
   );
@@ -77,7 +104,9 @@ const getSubComponentsFromPlant = async (req, res, next) => {
   const plant_id = +req.params.plant_id;
   const system_id = +req.params.system_id;
   const system_asset = req.params.system_asset_id.replaceAll("_", " ");
-  const system_asset_name = req.params.system_asset_name.replaceAll("_", " ");
+  const system_asset_name = req.params.system_asset_name
+    .replaceAll("_", " ")
+    .replaceAll(",", "/");
 
   let q = `SELECT DISTINCT(psa.system_asset_lvl7) FROM keppel.plant_system_assets as psa
           JOIN keppel.system_master as sm
@@ -294,8 +323,8 @@ const getAssetDetails = async (req, res, next) => {
     [req.params.psa_id],
     (err, result) => {
       if (err) throw err;
-      
-      else console.log(result.rows); res.status(200).json(result.rows);
+      else console.log(result.rows);
+      res.status(200).json(result.rows);
     }
   );
 };
@@ -945,6 +974,7 @@ const fetchAssetHistory = (req, res, next) => {
 };
 
 module.exports = {
+  getUploadedFile,
   getSystemsFromPlant,
   getSystemAssetsFromPlant,
   getSystemAssetNamesFromPlant,

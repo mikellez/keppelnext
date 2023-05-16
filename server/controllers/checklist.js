@@ -687,7 +687,7 @@ const fetchFilteredChecklists = async (req, res, next) => {
     }
 
     if (![1, 2, 3].includes(req.user.role_id)) {
-        userRoleCond = `AND ua.user_id = ${req.user.id}`;
+        userRoleCond = `AND (ua.user_id = ${req.user.id} OR cl.assigned_user_id = ${req.user.id})`;
     }
 
     if (plant && plant != 0) {
@@ -695,7 +695,11 @@ const fetchFilteredChecklists = async (req, res, next) => {
     }
 
     if (status) {
-        statusCond = `AND cl.status_id = '${status}'`;
+        if(status.includes(",")) {
+            statusCond = `AND cl.status_id IN (${status})`;
+        } else {
+            statusCond = `AND cl.status_id = '${status}'`;
+        }
     }
 
     if (date !== "all") {

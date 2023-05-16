@@ -62,7 +62,7 @@ export interface ChecklistItem {
 
 export interface ChecklistProps {
   filter?: boolean;
-  status: number;
+  status: number | string;
   plant: number;
   date: string;
   datetype: string;
