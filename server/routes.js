@@ -277,7 +277,6 @@ router.get(
 
 router.get(
   "/asset/mobile/:psa_id/uploadedFile/:index",
-  checkIfLoggedInAPI,
   controllers.asset.getUploadedFile
 );
 

@@ -87,9 +87,9 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
                     >
                         <HiOutlineDownload size={24} />
                     </TooltipBtn>
-                    <Link href="/Checklist" className="btn btn-secondary">
+                    <button className={"btn btn-secondary"} type="button" onClick={() => router.back()}>
                         Back
-                    </Link>
+                    </button>
                 </ModuleHeader>
                 <ModuleContent>
                     <ChecklistDetails checklist={props.checklist} />

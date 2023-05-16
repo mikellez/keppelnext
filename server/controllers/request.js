@@ -132,6 +132,8 @@ const fetchPendingRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(1);
+  if (result.rows.length == 0)
+    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -148,6 +150,8 @@ const fetchAssignedRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(2);
+  if (result.rows.length == 0)
+    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -164,6 +168,8 @@ const fetchReviewRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(`ANY('{3, 5, 6}')`);
+  if (result.rows.length == 0)
+    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -180,6 +186,9 @@ const fetchApprovedRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(4);
+  console.log(result.rows.length)
+  if (result.rows.length == 0)
+    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -421,6 +430,8 @@ const fetchRequestCounts = async (req, res, next) => {
         .status(404)
         .send(`Invalid request type of ${req.params.field}`);
   }
+
+  console.log(sql)
   db.query(sql, (err, result) => {
     if (err)
       return res
@@ -682,7 +693,11 @@ const fetchFilteredRequests = async (req, res, next) => {
   }
 
   if (status && status != 0) {
-    statusCond = `AND r.status_id = '${status}'`;
+    if(status.includes(",")) {
+      statusCond = `AND r.status_id IN (${status})`;
+    } else {
+      statusCond = `AND r.status_id = '${status}'`;
+    }
   }
 
   if (date !== "all") {
@@ -772,11 +787,13 @@ const fetchFilteredRequests = async (req, res, next) => {
 
   const totalRows = await db.query(countSql);
   const totalPages = Math.ceil(+totalRows.rows[0].total / ITEMS_PER_PAGE);
+  console.log(sql)
+  console.log(status)
 
   db.query(sql + pageCond, (err, result) => {
     if (err) return res.status(400).json({ errormsg: err });
     if (result.rows.length == 0)
-      return res.status(201).json({ msg: "No requests" });
+      return res.status(404).json({ msg: "No requests" });
 
     res.status(200).json({ rows: result.rows, total: totalPages });
   });
