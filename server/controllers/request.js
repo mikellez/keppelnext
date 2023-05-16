@@ -184,7 +184,6 @@ const fetchApprovedRequests = async (req, res, next) => {
 };
 
 const createRequest = async (req, res, next) => {
-
   const {
     requestTypeID,
     faultTypeID,
@@ -192,6 +191,8 @@ const createRequest = async (req, res, next) => {
     plantLocationID,
     taggedAssetID,
   } = req.body;
+  console.log("^&*()")
+  console.log(req)
   const fileBuffer = req.file === undefined ? null : req.file.buffer;
   const fileType = req.file === undefined ? null : req.file.mimetype;
   const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
@@ -199,7 +200,7 @@ const createRequest = async (req, res, next) => {
   let role_id = '';
   let history = '';
   let activity_log = '';
-
+  if(!req.linkedRequestId) {
   if(req?.user) {
 
     user_id = req.user.id;
@@ -232,13 +233,47 @@ const createRequest = async (req, res, next) => {
       },
     ];
   }
+} else {
+  if(req?.user) {
 
-  db.query(
-    `INSERT INTO keppel.request(
-      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
-    ) VALUES (
-      $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
-    )`,
+    user_id = req.user.id;
+    role_id = req.user.role_id;
+
+    history = `CORRECTIVE_Request Created_${today}_${req.user.role_name}_${req.user.name}`;
+    activity_log = [
+      {
+        date: today,
+        name: req.user.name,
+        role: req.user.role_name,
+        activity: "Request Created",
+        activity_type: "PENDING",
+      },
+    ];
+
+  } else {
+    //guest
+    user_id = 55;
+    role_id = 0;
+
+    history = `CORRECTIVE_Request Created_${today}_GUEST_${req.body.name}`;
+    activity_log = [
+      {
+        date: today,
+        name: req.body.name,
+        role: "GUEST",
+        activity: "Request Created",
+        activity_type: "PENDING",
+      },
+    ];
+  }
+}
+  if(!req.linkedRequestId){
+  const q =     `INSERT INTO keppel.request(
+    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+  ) VALUES (
+    $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
+  )`;
+  db.query(q,
     [
       faultTypeID,
       description,
@@ -254,12 +289,60 @@ const createRequest = async (req, res, next) => {
       JSON.stringify(activity_log),
     ],
     (err, result) => {
-      if (err) return res.status(500).json({ errormsg: err });
-
-      res.status(200).json("success");
+      if (err) {
+        console.log(err);
+        return next(err);
+      }
+      console.log(q)
+      console.log("^&*(")
+      res.status(200).send({ message: "Request created successfully" });
     }
   );
+}
+else if (req.linkedRequestId){
+  const q = 
+
+  `
+  BEGIN TRANSACTION;
+  INSERT INTO keppel.request(
+    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+  ) VALUES (
+    $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
+  )
+  UPDATE keppel.request SET status_id = 3 WHERE request_id = $11;
+  
+  COMMIT;
+
+  `;
+  db.query(q,
+    [
+      faultTypeID,
+      description,
+      plantLocationID,
+      requestTypeID,
+      user_id,
+      role_id,
+      taggedAssetID,
+      fileBuffer,
+      fileType,
+      history,
+      req.body.linkedRequestId,
+      JSON.stringify(activity_log),
+    ],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        return next(err);
+      }
+      console.log(q)
+      console.log("^&*(")
+      res.status(200).send({ message: "Request created successfully" });
+    }
+  );
+}
+
 };
+
 
 const updateRequest = async (req, res, next) => {
   const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
@@ -470,13 +553,13 @@ const fetchSpecificRequest = async (req, res, next) => {
 const createRequestCSV = (req, res, next) => {
   const sql =
     req.user.role_id === 1 || req.user.role_id === 2 || req.user.role_id === 3
-      ? `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
+      ? `SELECT r.request_id , ft.fault_type, pm.plant_name,
 	rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
 	pri.priority, 
 	CASE 
 		WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
 		ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-	END AS fullname,
+	END AS Approver,
 	r.created_date,tmp1.asset_name, 
 	r.complete_comments,
 	concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
@@ -557,6 +640,7 @@ const createRequestCSV = (req, res, next) => {
 	ORDER BY r.created_date DESC, r.status_id DESC;`;
 
   db.query(sql, (err, result) => {
+    console.log(sql)
     if (err) return res.status(500).json({ errormsg: err });
     generateCSV(result.rows)
       .then((buffer) => {
