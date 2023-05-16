@@ -120,8 +120,14 @@ const getSubComponentsFromPlant = async (req, res, next) => {
 
   try {
     const result = await db.query(q);
+    let lvl7 = [];
+    if (result.rows.length > 1) {
+      lvl7 = result.rows.map((row) => `'${row.system_asset_lvl7}'`);
+    } else {
+      lvl7 = [`'${result.rows[0].system_asset_lvl7}'`];
+    }
 
-    if (result.rows[0].system_asset_lvl7 === "") {
+    if (lvl7[0] === "") {
       const d = await checkAssetType(
         plant_id,
         system_id,
@@ -135,7 +141,7 @@ const getSubComponentsFromPlant = async (req, res, next) => {
         system_id,
         system_asset,
         system_asset_name,
-        result.rows[0].system_asset_lvl7
+        lvl7
       );
 
       d["subComponents"] = result.rows;
@@ -156,7 +162,7 @@ const checkAssetType = async (...args) => {
     q += `AND psa.system_asset_lvl6 = '${args[3]}'`;
   }
   if (args[4]) {
-    q += `AND psa.system_asset_lvl7 = '${args[4]}'`;
+    q += `AND psa.system_asset_lvl7 = ANY(ARRAY[${args[4]}]::varchar[])`;
   }
 
   try {
@@ -176,7 +182,11 @@ const checkAssetType = async (...args) => {
           });
         }
       } else {
-        arr.push({ psa_id: row.psa_id, pai: row.plant_asset_instrument });
+        arr.push({
+          psa_id: row.psa_id,
+          pai: row.plant_asset_instrument,
+          prev_level: row.asset_type,
+        });
       }
     }
 
