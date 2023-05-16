@@ -151,6 +151,7 @@ interface CMMSAssetOption extends CMMSAsset {
 }
 
 export default function RequestContainer(props: RequestContainerProps) {
+
   const [selectedFile, setSelectedFile] = useState<File>();
   const [previewedFile, setPreviewedFile] = useState<string>();
   const requestTypes = props.requestData?.requestTypes as CMMSRequestTypes[];
@@ -305,7 +306,7 @@ export default function RequestContainer(props: RequestContainerProps) {
     updateAssetLists(parseInt(e.target.value));
     resetField("taggedAssetID");
   };
-
+  console.log(props.linkedRequestData);
   return (
     <form onSubmit={handleSubmit(formSubmit)}>
       <ModuleContent includeGreyContainer grid>
@@ -404,7 +405,7 @@ export default function RequestContainer(props: RequestContainerProps) {
 
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon /> Tag Asset:
+              <RequiredIcon /> Tag Asset
             </label>
             <select
               className="form-select"
@@ -434,6 +435,19 @@ export default function RequestContainer(props: RequestContainerProps) {
             </select>
 
           </div>
+          {props.linkedRequestData && (
+            <div className="form-group">
+              <label className="form-label">Linked Request</label>
+              <input
+                className="form-control"
+                type="text"
+                id="formControlLinkedRequest"
+                disabled
+                defaultValue={props.linkedRequestData.request_id}
+                />
+              </div>
+          )}
+         
         </div>
         <div
           className={formStyles.halfContainer}

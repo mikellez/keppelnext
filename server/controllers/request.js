@@ -128,7 +128,6 @@ const fetchPendingRequests = async (req, res, next) => {
     page
   );
 
-  console.log(sql)
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(1);
@@ -186,7 +185,6 @@ const fetchApprovedRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(4);
-  console.log(result.rows.length)
   if (result.rows.length == 0)
     return res.status(404).json({ msg: "No requests" });
 
@@ -201,8 +199,8 @@ const createRequest = async (req, res, next) => {
     plantLocationID,
     taggedAssetID,
   } = req.body;
-  console.log("^&*()")
-  console.log(req)
+  console.log(req.body.linkedRequestId);
+  console.log("^&*")
   const fileBuffer = req.file === undefined ? null : req.file.buffer;
   const fileType = req.file === undefined ? null : req.file.mimetype;
   const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
@@ -251,12 +249,13 @@ const createRequest = async (req, res, next) => {
     ];
   }
 if(!req.body.linkedRequestId) {
-  db.query(
-    `INSERT INTO keppel.request(
-      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
-    ) VALUES (
-      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
-    )`,
+  const q = `INSERT INTO keppel.request(
+    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+  ) VALUES (
+    $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
+  )`;
+  db.query(q
+    ,
     [
       faultTypeID,
       description,
@@ -276,49 +275,51 @@ if(!req.body.linkedRequestId) {
       if (err) return res.status(500).json({ errormsg: err });
       if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
       res.status(200).send({ msg: "Request created successfully" });
+
     }
   );
 }
 else if (req.body.linkedRequestId){
-    const q = 
-  
-    `
-    BEGIN TRANSACTION;
-    INSERT INTO keppel.request(
-      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
-    ) VALUES (
-      $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
-    )
-    UPDATE keppel.request SET status_id = 3 WHERE request_id = $11;
-    
-    COMMIT;
-  
-    `;
-    db.query(q,
-      [
-        faultTypeID,
-        description,
-        plantLocationID,
-        requestTypeID,
-        user_id,
-        role_id,
-        taggedAssetID,
-        fileBuffer,
-        fileType,
-        history,
-        req.body.linkedRequestId,
-        JSON.stringify(activity_log),
-      ],
-      (err, result) => {
-        if (err) {
-          console.log(err);
-          return next(err);
-        }
-        console.log(q)
-        console.log("^&*(")
-        res.status(200).send({ message: "Request created successfully" });
-      }
-    );
+  const insertQuery = `
+  INSERT INTO keppel.request(
+    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+  ) VALUES (
+    $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
+  );
+`;
+const updateQuery = `
+UPDATE keppel.request SET status_id = 3 WHERE request_id = $1;
+`;
+
+db.query(insertQuery, [
+  faultTypeID,
+  description,
+  plantLocationID,
+  requestTypeID,
+  user_id,
+  role_id,
+  taggedAssetID,
+  fileBuffer,
+  fileType,
+  history,
+  req.body.linkedRequestId,
+  JSON.stringify(activity_log),
+], (err, result) => {
+  if (err) {
+    console.log(err);
+    return next(err);
+  }
+
+  db.query(updateQuery, [req.body.linkedRequestId], (err, result) => {
+    if (err) {
+      console.log(err);
+      return next(err);
+    }
+
+    res.status(200).send({ message: "Request created successfully" });
+  });
+});
+
   }
 };
 
@@ -327,7 +328,6 @@ const updateRequest = async (req, res, next) => {
   const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
   const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
   const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;
-  
   db.query(
     `
 		UPDATE keppel.request SET 
@@ -474,7 +474,6 @@ const fetchRequestCounts = async (req, res, next) => {
         .send(`Invalid request type of ${req.params.field}`);
   }
 
-  console.log(sql)
   db.query(sql, (err, result) => {
     if (err)
       return res
@@ -626,7 +625,6 @@ const createRequestCSV = (req, res, next) => {
 	ORDER BY r.created_date DESC, r.status_id DESC;`;
 
   db.query(sql, (err, result) => {
-    console.log(sql)
     if (err) return res.status(500).json({ errormsg: err });
     generateCSV(result.rows)
       .then((buffer) => {
@@ -831,8 +829,6 @@ const fetchFilteredRequests = async (req, res, next) => {
 
   const totalRows = await db.query(countSql);
   const totalPages = Math.ceil(+totalRows.rows[0].total / ITEMS_PER_PAGE);
-  console.log(sql)
-  console.log(status)
 
   db.query(sql + pageCond, (err, result) => {
     if (err) return res.status(400).json({ errormsg: err });
@@ -844,7 +840,6 @@ const fetchFilteredRequests = async (req, res, next) => {
 };
 
 const fetchRequestUploadedFile = async (req, res, next) => {
-  console.log(req.params.request_id)
   const sql = `SELECT 
   r.uploaded_file,
   r.uploadfilemimetype
