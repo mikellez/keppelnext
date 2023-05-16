@@ -518,7 +518,7 @@ const editChecklistRecord = async (req, res, next) => {
     db.query(
         sql,
         [
-            data.datajson,
+            JSON.stringify(data.datajson),
             statusId,
             data.chl_name,
             data.description,

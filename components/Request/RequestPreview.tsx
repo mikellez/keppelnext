@@ -19,6 +19,13 @@ export default function RequestPreview(props: RequestPreviewProps) {
   const [completeUrl, setCompleteUrl] = useState("");
   const [completionModal, setCompletionModal] = useState(false);
   const [faultModal, setFaultModal] = useState(false);
+  let date; // declare the date variable outside the if block
+
+  const createdDate = props.request.requesthistory;
+  if (createdDate != null) {
+    const parts = createdDate.split('_');
+    date = parts[2]; // assign the value to the global date variable
+  }
 
   useEffect(() => {
     if (props.request.uploaded_file) {
@@ -75,7 +82,19 @@ export default function RequestPreview(props: RequestPreviewProps) {
                   className={styles.viewImage}
                   onClick={() => setFaultModal(true)}
                 >
-                  View Image
+                <Image
+                  src={faultUrl}
+                  width={150}
+                  height={150}
+                  style={{ objectFit: "contain" }}
+                  alt="Fault Image"
+                />
+              <div style={{ paddingTop: "10px", paddingBottom: "10px" }}>
+              <a href={faultUrl} download="FaultImage.jpg" >
+                <button className="btn btn-primary" style = {{fontSize: "0.8rem"}}>Download</button>
+              </a> 
+              </div>
+              
                 </span>
               ) : (
                 "No File"
@@ -90,13 +109,14 @@ export default function RequestPreview(props: RequestPreviewProps) {
                   closeOnOverlayClick={true}
                   hideHeader
                 >
-                  <Image
-                    src={faultUrl}
-                    width={550}
-                    height={550}
-                    style={{ objectFit: "contain" }}
-                    alt="Fault Image"
-                  />
+
+              <Image
+                  src={faultUrl}
+                  width={550}
+                  height={550}
+                  style={{ objectFit: "contain" }}
+                  alt="Fault Image"
+                />
                 </ModuleModal>
               )}
             </td>
@@ -123,7 +143,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
                       onClick={() => setCompletionModal(true)}
                       className={styles.viewImage}
                     >
-                      View Image
+                    {completionModal}
                     </span>
                   ) : (
                     "No File"
@@ -150,6 +170,12 @@ export default function RequestPreview(props: RequestPreviewProps) {
                   )}
                 </td>
               </tr>
+              <tr>
+              <th>Completion Date</th>
+              <td style={{ color: date === "NIL" ? "#73777B" : "inherit", fontWeight: date === "NIL" ? "bold" : "normal" }}>
+                {date || "NIL"}
+              </td>
+            </tr> 
             </>
           )}
         </tbody>
