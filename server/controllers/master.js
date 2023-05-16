@@ -11,13 +11,13 @@ const fetchMasterInfo = async (req, res, next) => {
 	let idColumn    = tableInfo[req.params.type].id;
 	let q = `SELECT * FROM keppel.${table} ORDER BY ${idColumn}`;
 
-	if(table == 'system_assets'){
-		q = `SELECT keppel.system_assets.system_asset_id,keppel.system_assets.system_id,keppel.system_assets.system_asset_id,keppel.system_master.system_name,keppel.system_assets.system_asset
-		FROM keppel.system_assets
-		JOIN keppel.system_master
-		ON keppel.system_assets.system_id = keppel.system_master.system_id ORDER BY keppel.system_assets.system_asset_id
-		`;
-	}
+	// if(table == 'system_assets'){
+	// 	q = `SELECT keppel.system_assets.system_asset_id,keppel.system_assets.system_id,keppel.system_assets.system_asset_id,keppel.system_master.system_name,keppel.system_assets.system_asset
+	// 	FROM keppel.system_assets
+	// 	JOIN keppel.system_master
+	// 	ON keppel.system_assets.system_id = keppel.system_master.system_id ORDER BY keppel.system_assets.system_asset_id
+	// 	`;
+	// }
 	
 	db.query(q, (err1, result) => {
 		if (err1) {
@@ -67,7 +67,7 @@ const createMasterTypeEntry = async (req, res, next) => {
 		date: today,
 		name: req.user.name,
 		role: req.user.role_name,
-		activity: `Created ${tableInfo[req.body.type].name} Master ${insert[0]} ${tableInfo[req.body.type].name} `
+		activity: `Created ${tableInfo[req.body.type].name} Master ${tableInfo[req.body.type].name} `
 	}];
 	activity_log_json = JSON.stringify(activity_log);
 
@@ -76,6 +76,7 @@ const createMasterTypeEntry = async (req, res, next) => {
 	num += ")";
 	sql = `INSERT INTO keppel.${table} ${columns} VALUES ${num} `;
 	console.log(sql)
+	console.log(insert)
 	db.query(sql,insert)	
 		.then(result => {
 			return res.status(200).send({

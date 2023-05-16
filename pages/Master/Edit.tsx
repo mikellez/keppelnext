@@ -59,10 +59,10 @@ export default function Edit(props: EditMasterProps) {
 	
 	const formSubmit: SubmitHandler<FormValues> = async (data) => {
 		console.log(data);
-		setSubmissionModal(true);
 		return await instance.post(`/api/master/${type}/${id}`, data)
 				.then(res => {
 					console.log(res.data)
+					setSubmissionModal(true);
 
 					return res.data;
 				})

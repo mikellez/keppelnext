@@ -105,7 +105,7 @@ export interface RequestItem {
 
 export interface RequestProps {
   filter?: boolean;
-  status: number;
+  status: number | string;
   plant: number;
   date: string;
   datetype: string;
@@ -173,6 +173,7 @@ export default function Request(props: RequestProps) {
   const switchColumns = (index: number) => {
     setReady(false);
     setActiveTabIndex(index);
+    setRequestItems([]);
   };
 
   const COLUMNS: Column<RequestItem>[] = [
@@ -477,6 +478,10 @@ export default function Request(props: RequestProps) {
         setRequestItems([]);
       }
     }
+
+    if(!requestData) {
+      setReady(true);
+    }
   }, [requestData, requestIsFetchValidating, isReady, page, props?.isReady]);
 
   /*useEffect(() => {
@@ -589,8 +594,8 @@ export default function Request(props: RequestProps) {
             <LoadingHourglass />
           </div>
         )}
-        {requestFetchError && <div>{requestFetchError.toString()}</div>}
-        {requestFetchError && <div>error</div>}
+        {/*requestFetchError && <div>{requestFetchError.toString()}</div>*/}
+        {/*requestFetchError && <div>error</div>*/}
         {isReady && (
           <>
             <CompactTable
@@ -601,6 +606,7 @@ export default function Request(props: RequestProps) {
               rowProps={ROW_PROPS}
               rowOptions={ROW_OPTIONS}
             />
+            {requestItems.length === 0 && <div>No Requests</div>}
             <Pagination
               setPage={setPage}
               setReady={setReady}

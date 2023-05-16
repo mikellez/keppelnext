@@ -111,7 +111,7 @@ function useChecklistFilter(props: ChecklistProps, page: number) {
     { revalidateOnFocus: false }
   );
 }
-function useAccountlog() {
+function useAccountlog(url: string) {
   const accountlogFetcher = (url: string) =>
     instance
       .get<any[]>(url)
@@ -131,7 +131,7 @@ function useAccountlog() {
       });
 
   return useSWR<CMMSActivitylog[], Error>(
-    "/api/activity/account_log",
+    url,
     accountlogFetcher,
     { revalidateOnFocus: false }
   );

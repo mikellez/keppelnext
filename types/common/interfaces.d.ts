@@ -304,6 +304,10 @@ interface CMMSMasterSubmission {
 interface CMMSMasterField {
   column_label: string;
   column_name: string;
+  type?: string;
+  url?: string;
+  value?: any;
+  options?: any;
 }
 
 interface CMMSMasterTables {

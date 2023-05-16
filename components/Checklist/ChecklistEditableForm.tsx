@@ -26,7 +26,7 @@ const ChecklistEditableFormSection = (
     return (
         <div>
             <h5>{section.description}</h5>
-            <div className={styles.checklistViewSection}>
+            <div>
             {
                section.rows.map((row, index) => {
                     return <ChecklistEditableFormRow key={row.id} row={row} rowId={row.id} sectionId={sectionId} />
@@ -43,7 +43,9 @@ const ChecklistEditableFormRow = (
 ) => {
 
     return (
-        <React.Fragment>
+        <div>
+            <h6>{row.description}</h6>
+            <div className={styles.checklistViewRow}>
             {
                 row.checks.map(check => 
                     <React.Fragment key={check.id}>
@@ -51,7 +53,8 @@ const ChecklistEditableFormRow = (
                     </React.Fragment>
                 )
             }
-        </React.Fragment>
+            </div>
+        </div>
     );
 };
 

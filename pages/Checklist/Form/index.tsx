@@ -141,11 +141,11 @@ export default function ChecklistNew(props: ChecklistPageProps) {
         setChecklistData((prev) => {
             return {
                 ...prev,
-                datajson: JSON.stringify(json),
+                datajson: json,
             };
         });
     }, [sections]);
-
+    console.log(checklistData.datajson)
     return (
         <>
             <ModuleMain>
@@ -153,9 +153,9 @@ export default function ChecklistNew(props: ChecklistPageProps) {
                     <Link href="/Checklist/Templates" className="btn btn-primary">
                         Templates
                     </Link>
-                    <Link href="/Checklist" className="btn btn-secondary">
+                    <button className={"btn btn-secondary"} type="button" onClick={() => router.back()}>
                         Back
-                    </Link>
+                    </button>
                 </ModuleHeader>
                 {isReady ? (
                     <>

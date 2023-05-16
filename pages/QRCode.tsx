@@ -22,7 +22,7 @@ function saveSvg(svgEl: SVGSVGElement, name: string) {
 	document.body.removeChild(downloadLink);
 }
 
-function QRImg({asset}: {asset: CMMSAsset}) {
+function QRImg({asset, plant}: {asset: CMMSAsset; plant: number|null}) {
 	const { SVG } = useQRCode();
 
 	function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
@@ -37,7 +37,7 @@ function QRImg({asset}: {asset: CMMSAsset}) {
 	return (
 		<button className={"btn btn-secondary " + styles.btnQr} onClick={downloadQR}>
 			<SVG 
-				text={window.location.origin + "/Asset/Details/" + asset.psa_id}
+				text={window.location.origin + "/" + plant + "/" + asset.psa_id}
 				options={{
 					level: 'H',
 					margin: 0,
@@ -106,7 +106,7 @@ function QRCode() {
 					{
 						selectedAssets.map((asset) => {
 							return (
-								<QRImg key={asset.psa_id} asset={asset}/>
+								<QRImg key={asset.psa_id} asset={asset} plant={selectedPlant}/>
 							)
 						})
 					}

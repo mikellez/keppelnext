@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "next/router";
 import {
     ModuleContent,
     ModuleDivider,
@@ -18,12 +19,14 @@ interface CorrenctiveRequestProps {
 };
 
 export default function CorrenctiveRequest(props: CorrenctiveRequestProps) {
+    const router = useRouter();
+
     return (
         <ModuleMain>
             <ModuleHeader header="Create Corrective Request">
-                <Link href="/Request" className="btn btn-secondary">
+                <button className={"btn btn-secondary"} type="button" onClick={() => router.back()}>
                     Back
-                </Link>
+                </button>
             </ModuleHeader>
             <ModuleContent>
                 <RequestContainer requestData={props.requestData} linkedRequestData={props.linkedRequestData} />

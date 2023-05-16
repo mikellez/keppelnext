@@ -11,6 +11,7 @@ const ITEMS_PER_PAGE = 10;
 
 function fetchRequestQuery(status_query, role_id, user_id, page) {
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
+  console.log(role_id)
 
   return role_id === 1 || role_id === 2 || role_id === 3
     ? `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
@@ -23,7 +24,7 @@ function fetchRequestQuery(status_query, role_id, user_id, page) {
 	  r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
 	  r.complete_comments,
 	  concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-	  , r.requesthistory, r.rejection_comments, r.status_id
+	  , r.requesthistory, r.rejection_comments, r.status_id, r.psa_id, r.fault_id
 	  FROM    
 		  keppel.users u
 		  JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -69,7 +70,7 @@ function fetchRequestQuery(status_query, role_id, user_id, page) {
 	  r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
 	  r.complete_comments,
 	  concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-	  , r.requesthistory, r.rejection_comments, r.status_id
+	  , r.requesthistory, r.rejection_comments, r.status_id, r.psa_id, r.fault_id
 	  FROM    
 		  keppel.users u
 		  JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -85,7 +86,7 @@ function fetchRequestQuery(status_query, role_id, user_id, page) {
 		  left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
 			  from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
 			  WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
-	  WHERE r.assigned_user_id = ${user_id} OR r.user_id = ${user_id}
+	  WHERE (r.assigned_user_id = ${user_id} OR r.user_id = ${user_id})
 	  ${status_query}
 	  GROUP BY (
 		  r.request_id,
@@ -131,6 +132,8 @@ const fetchPendingRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(1);
+  if (result.rows.length == 0)
+    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -147,6 +150,8 @@ const fetchAssignedRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(2);
+  if (result.rows.length == 0)
+    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -163,6 +168,8 @@ const fetchReviewRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(`ANY('{3, 5, 6}')`);
+  if (result.rows.length == 0)
+    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -179,6 +186,9 @@ const fetchApprovedRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(4);
+  console.log(result.rows.length)
+  if (result.rows.length == 0)
+    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -200,11 +210,17 @@ const createRequest = async (req, res, next) => {
   let role_id = '';
   let history = '';
   let activity_log = '';
-  if(!req.linkedRequestId) {
-  if(req?.user) {
+  let guestfullname='';
 
-    user_id = req.user.id;
-    role_id = req.user.role_id;
+  if(req?.user || req?.body?.user_id) {
+
+    if(req?.body?.user_id) {
+      user_id = req.body.user_id;
+      role_id = req.body.role_id;
+    } else {
+      user_id = req.user.id;
+      role_id = req.user.role_id;
+    }
 
     history = `PENDING_Request Created_${today}_${req.user.role_name}_${req.user.name}`;
     activity_log = [
@@ -219,61 +235,28 @@ const createRequest = async (req, res, next) => {
 
   } else {
     //guest
-    user_id = 55;
+    user_id = null;
     role_id = 0;
+    guestfullname = req.body.name;
 
     history = `PENDING_Request Created_${today}_GUEST_${req.body.name}`;
     activity_log = [
       {
         date: today,
-        name: req.body.name,
+        name: guestfullname,
         role: "GUEST",
         activity: "Request Created",
         activity_type: "PENDING",
       },
     ];
   }
-} else {
-  if(req?.user) {
-
-    user_id = req.user.id;
-    role_id = req.user.role_id;
-
-    history = `CORRECTIVE_Request Created_${today}_${req.user.role_name}_${req.user.name}`;
-    activity_log = [
-      {
-        date: today,
-        name: req.user.name,
-        role: req.user.role_name,
-        activity: "Request Created",
-        activity_type: "PENDING",
-      },
-    ];
-
-  } else {
-    //guest
-    user_id = 55;
-    role_id = 0;
-
-    history = `CORRECTIVE_Request Created_${today}_GUEST_${req.body.name}`;
-    activity_log = [
-      {
-        date: today,
-        name: req.body.name,
-        role: "GUEST",
-        activity: "Request Created",
-        activity_type: "PENDING",
-      },
-    ];
-  }
-}
-  if(!req.linkedRequestId){
-  const q =     `INSERT INTO keppel.request(
-    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
-  ) VALUES (
-    $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
-  )`;
-  db.query(q,
+if(!req.body.linkedRequestId) {
+  db.query(
+    `INSERT INTO keppel.request(
+      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+    ) VALUES (
+      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
+    )`,
     [
       faultTypeID,
       description,
@@ -282,6 +265,7 @@ const createRequest = async (req, res, next) => {
       user_id,
       role_id,
       taggedAssetID,
+      guestfullname,
       fileBuffer,
       fileType,
       history,
@@ -289,58 +273,53 @@ const createRequest = async (req, res, next) => {
       JSON.stringify(activity_log),
     ],
     (err, result) => {
-      if (err) {
-        console.log(err);
-        return next(err);
-      }
-      console.log(q)
-      console.log("^&*(")
-      res.status(200).send({ message: "Request created successfully" });
+      if (err) return res.status(500).json({ errormsg: err });
+      if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
+      res.status(200).send({ msg: "Request created successfully" });
     }
   );
 }
-else if (req.linkedRequestId){
-  const q = 
-
-  `
-  BEGIN TRANSACTION;
-  INSERT INTO keppel.request(
-    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
-  ) VALUES (
-    $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
-  )
-  UPDATE keppel.request SET status_id = 3 WHERE request_id = $11;
+else if (req.body.linkedRequestId){
+    const q = 
   
-  COMMIT;
-
-  `;
-  db.query(q,
-    [
-      faultTypeID,
-      description,
-      plantLocationID,
-      requestTypeID,
-      user_id,
-      role_id,
-      taggedAssetID,
-      fileBuffer,
-      fileType,
-      history,
-      req.body.linkedRequestId,
-      JSON.stringify(activity_log),
-    ],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-        return next(err);
+    `
+    BEGIN TRANSACTION;
+    INSERT INTO keppel.request(
+      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+    ) VALUES (
+      $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
+    )
+    UPDATE keppel.request SET status_id = 3 WHERE request_id = $11;
+    
+    COMMIT;
+  
+    `;
+    db.query(q,
+      [
+        faultTypeID,
+        description,
+        plantLocationID,
+        requestTypeID,
+        user_id,
+        role_id,
+        taggedAssetID,
+        fileBuffer,
+        fileType,
+        history,
+        req.body.linkedRequestId,
+        JSON.stringify(activity_log),
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          return next(err);
+        }
+        console.log(q)
+        console.log("^&*(")
+        res.status(200).send({ message: "Request created successfully" });
       }
-      console.log(q)
-      console.log("^&*(")
-      res.status(200).send({ message: "Request created successfully" });
-    }
-  );
-}
-
+    );
+  }
 };
 
 
@@ -494,6 +473,8 @@ const fetchRequestCounts = async (req, res, next) => {
         .status(404)
         .send(`Invalid request type of ${req.params.field}`);
   }
+
+  console.log(sql)
   db.query(sql, (err, result) => {
     if (err)
       return res
@@ -511,6 +492,7 @@ const fetchRequestPriority = async (req, res, next) => {
 };
 
 const fetchSpecificRequest = async (req, res, next) => {
+  console.log(req.params.request_id)
   const sql = `SELECT 
   r.request_id,
   rt.request as request_name, 
@@ -534,6 +516,8 @@ const fetchSpecificRequest = async (req, res, next) => {
   r.complete_comments,
   r.rejection_comments,
   r.requesthistory,
+  concat( concat(u.first_name,' '), u.last_name) AS assigned_user_name,
+  concat( concat(ua.first_name,' '), ua.last_name) AS created_by,
   r.created_date
   FROM keppel.request AS r
   JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
@@ -542,10 +526,12 @@ const fetchSpecificRequest = async (req, res, next) => {
   JOIN keppel.plant_system_assets AS psa ON psa.psa_id = r.psa_id
   LEFT JOIN keppel.priority AS pr ON r.priority_id = pr.p_id
   LEFT JOIN keppel.users AS u ON r.assigned_user_id = u.user_id
+	LEFT JOIN keppel.user_access ua ON u.user_id = ua.user_id
   JOIN keppel.status_pm AS s ON r.status_id = s.status_id
   WHERE request_id = $1`;
   db.query(sql, [req.params.request_id], (err, result) => {
     if (err) return res.status(500).send("Error in fetching request");
+    if(result.rows.length === 0) return res.status(404).send("Request not found");
     return res.status(200).send(result.rows[0]);
   });
 };
@@ -751,7 +737,11 @@ const fetchFilteredRequests = async (req, res, next) => {
   }
 
   if (status && status != 0) {
-    statusCond = `AND r.status_id = '${status}'`;
+    if(status.includes(",")) {
+      statusCond = `AND r.status_id IN (${status})`;
+    } else {
+      statusCond = `AND r.status_id = '${status}'`;
+    }
   }
 
   if (date !== "all") {
@@ -841,13 +831,54 @@ const fetchFilteredRequests = async (req, res, next) => {
 
   const totalRows = await db.query(countSql);
   const totalPages = Math.ceil(+totalRows.rows[0].total / ITEMS_PER_PAGE);
+  console.log(sql)
+  console.log(status)
 
   db.query(sql + pageCond, (err, result) => {
     if (err) return res.status(400).json({ errormsg: err });
     if (result.rows.length == 0)
-      return res.status(201).json({ msg: "No requests" });
+      return res.status(404).json({ msg: "No requests" });
 
     res.status(200).json({ rows: result.rows, total: totalPages });
+  });
+};
+
+const fetchRequestUploadedFile = async (req, res, next) => {
+  console.log(req.params.request_id)
+  const sql = `SELECT 
+  r.uploaded_file,
+  r.uploadfilemimetype
+  FROM keppel.request AS r
+  JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
+  JOIN keppel.fault_types  AS ft ON ft.fault_id = r.fault_id
+  JOIN keppel.plant_master AS pm ON pm.plant_id = r.plant_id
+  JOIN keppel.plant_system_assets AS psa ON psa.psa_id = r.psa_id
+  LEFT JOIN keppel.priority AS pr ON r.priority_id = pr.p_id
+  LEFT JOIN keppel.users AS u ON r.assigned_user_id = u.user_id
+	LEFT JOIN keppel.user_access ua ON u.user_id = ua.user_id
+  JOIN keppel.status_pm AS s ON r.status_id = s.status_id
+  WHERE request_id = $1`;
+  db.query(sql, [req.params.request_id], (err, result) => {
+
+    if (err) return res.status(500).send("Error in fetching request");
+    if(result.rows.length === 0 || result.rows[0].uploaded_file === null) return res.status(404).send("File not found");
+
+    const { uploaded_file, uploadfilemimetype } = result.rows[0];
+
+    const arrayBuffer = new Uint8Array(uploaded_file);
+    const buffer = Buffer.from(arrayBuffer).toString('base64');
+    const img = Buffer.from(buffer, 'base64');
+
+    const filename = `request_${req.params.request_id}.${uploadfilemimetype.split('/')[1]}`;
+
+     res.writeHead(200, {
+      'Content-Type': uploadfilemimetype,
+      'Content-Length': img.length
+    });
+
+    res.end(img);
+
+    //return res.status(200).send(result.rows[0]);
   });
 };
 
@@ -867,4 +898,5 @@ module.exports = {
   completeRequest,
   fetchPendingRequests,
   fetchFilteredRequests,
+  fetchRequestUploadedFile
 };

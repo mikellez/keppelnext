@@ -9,7 +9,7 @@ import { FieldErrorsImpl, SubmitHandler } from 'react-hook-form/dist/types';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import instance from '../../axios.config.js';
 import LoadingIcon from '../../components/LoadingIcon';
-import { CMMSMasterField, CMMSMasterSubmission, CMMSMasterTables, CMMSSystem } from '../../types/common/interfaces';
+import { CMMSMasterField, CMMSMasterSubmission, CMMSMasterTables, CMMSPlant, CMMSSystem } from '../../types/common/interfaces';
 import { MultiFields } from '../../components/Master/MultiField';
 import ModuleSimplePopup, { SimpleIcon } from '../../components/ModuleLayout/ModuleSimplePopup';
 import router from 'next/router';
@@ -32,9 +32,11 @@ type FormValues = {
 interface NewMasterEntryProps {
 	tables: CMMSMasterTables
 	systems: CMMSSystem[]
+	plants: CMMSPlant[]
 }
 
 export default function New(props: NewMasterEntryProps) {
+	console.log(props.plants);
 	const [masterType, setMasterType] = useState<string | null>(null)
 	const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] =
     useState<boolean>(true);
@@ -222,8 +224,12 @@ export const getServerSideProps: GetServerSideProps = async(context: GetServerSi
 		`/api/asset/systems`,
 		headers
 	  );
+	const plants = await instance.get<CMMSPlant[]>(
+		`/api/plants`,
+		headers
+	);
 
-	let props: NewMasterEntryProps = { tables: masterCreateInfo.data, systems: systems.data}
+	let props: NewMasterEntryProps = { tables: masterCreateInfo.data, systems: systems.data, plants: plants.data };
 
 	return {
 		props: props
