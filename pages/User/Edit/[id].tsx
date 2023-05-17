@@ -42,6 +42,7 @@ const getUsersData = async (id:number) => {
 
 const getUsersplantData = async (id:number) => {
     const url = "/api/user/getUsersplantData/";
+    console.log(url + id);
     return await instance
         .get(url + id)
         .then((res) => {

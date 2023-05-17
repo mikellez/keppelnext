@@ -128,10 +128,11 @@ const fetchPendingRequests = async (req, res, next) => {
     page
   );
 
-  console.log(sql)
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(1);
+  if (result.rows.length == 0)
+    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -148,6 +149,8 @@ const fetchAssignedRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(2);
+  if (result.rows.length == 0)
+    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -164,6 +167,8 @@ const fetchReviewRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(`ANY('{3, 5, 6}')`);
+  if (result.rows.length == 0)
+    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -180,12 +185,13 @@ const fetchApprovedRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(4);
+  if (result.rows.length == 0)
+    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
 
 const createRequest = async (req, res, next) => {
-
   const {
     requestTypeID,
     faultTypeID,
@@ -193,6 +199,8 @@ const createRequest = async (req, res, next) => {
     plantLocationID,
     taggedAssetID,
   } = req.body;
+  console.log(req.body.linkedRequestId);
+  console.log("^&*")
   const fileBuffer = req.file === undefined ? null : req.file.buffer;
   const fileType = req.file === undefined ? null : req.file.mimetype;
   const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
@@ -240,13 +248,14 @@ const createRequest = async (req, res, next) => {
       },
     ];
   }
-
-  db.query(
-    `INSERT INTO keppel.request(
-      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
-    ) VALUES (
-      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
-    )`,
+if(!req.body.linkedRequestId) {
+  const q = `INSERT INTO keppel.request(
+    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+  ) VALUES (
+    $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
+  )`;
+  db.query(q
+    ,
     [
       faultTypeID,
       description,
@@ -265,17 +274,60 @@ const createRequest = async (req, res, next) => {
     (err, result) => {
       if (err) return res.status(500).json({ errormsg: err });
       if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
+      res.status(200).send({ msg: "Request created successfully" });
 
-      res.status(200).json("success");
     }
   );
+}
+else if (req.body.linkedRequestId){
+  const insertQuery = `
+  INSERT INTO keppel.request(
+    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+  ) VALUES (
+    $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
+  );
+`;
+const updateQuery = `
+UPDATE keppel.request SET status_id = 3 WHERE request_id = $1;
+`;
+
+db.query(insertQuery, [
+  faultTypeID,
+  description,
+  plantLocationID,
+  requestTypeID,
+  user_id,
+  role_id,
+  taggedAssetID,
+  fileBuffer,
+  fileType,
+  history,
+  req.body.linkedRequestId,
+  JSON.stringify(activity_log),
+], (err, result) => {
+  if (err) {
+    console.log(err);
+    return next(err);
+  }
+
+  db.query(updateQuery, [req.body.linkedRequestId], (err, result) => {
+    if (err) {
+      console.log(err);
+      return next(err);
+    }
+
+    res.status(200).send({ message: "Request created successfully" });
+  });
+});
+
+  }
 };
+
 
 const updateRequest = async (req, res, next) => {
   const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
   const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
   const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;
-  
   db.query(
     `
 		UPDATE keppel.request SET 
@@ -421,6 +473,7 @@ const fetchRequestCounts = async (req, res, next) => {
         .status(404)
         .send(`Invalid request type of ${req.params.field}`);
   }
+
   db.query(sql, (err, result) => {
     if (err)
       return res
@@ -485,13 +538,13 @@ const fetchSpecificRequest = async (req, res, next) => {
 const createRequestCSV = (req, res, next) => {
   const sql =
     req.user.role_id === 1 || req.user.role_id === 2 || req.user.role_id === 3
-      ? `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
+      ? `SELECT r.request_id , ft.fault_type, pm.plant_name,
 	rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
 	pri.priority, 
 	CASE 
 		WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
 		ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-	END AS fullname,
+	END AS Approver,
 	r.created_date,tmp1.asset_name, 
 	r.complete_comments,
 	concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
@@ -682,7 +735,11 @@ const fetchFilteredRequests = async (req, res, next) => {
   }
 
   if (status && status != 0) {
-    statusCond = `AND r.status_id = '${status}'`;
+    if(status.includes(",")) {
+      statusCond = `AND r.status_id IN (${status})`;
+    } else {
+      statusCond = `AND r.status_id = '${status}'`;
+    }
   }
 
   if (date !== "all") {
@@ -776,14 +833,13 @@ const fetchFilteredRequests = async (req, res, next) => {
   db.query(sql + pageCond, (err, result) => {
     if (err) return res.status(400).json({ errormsg: err });
     if (result.rows.length == 0)
-      return res.status(201).json({ msg: "No requests" });
+      return res.status(404).json({ msg: "No requests" });
 
     res.status(200).json({ rows: result.rows, total: totalPages });
   });
 };
 
 const fetchRequestUploadedFile = async (req, res, next) => {
-  console.log(req.params.request_id)
   const sql = `SELECT 
   r.uploaded_file,
   r.uploadfilemimetype

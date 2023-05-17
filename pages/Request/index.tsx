@@ -62,6 +62,7 @@ import PageButton from "../../components/PageButton";
 import { Role } from "../../types/common/enums";
 import { GetServerSidePropsContext } from "next";
 import Pagination from "../../components/Pagination";
+import moment from "moment";
 
 /*export type TableNode<T> = {
   id: string;
@@ -104,7 +105,7 @@ export interface RequestItem {
 
 export interface RequestProps {
   filter?: boolean;
-  status: number;
+  status: number | string;
   plant: number;
   date: string;
   datetype: string;
@@ -135,17 +136,18 @@ export const getColor = (status: string) => {
   }
 };
 
-export const downloadCSV = async (type: string) => {
+export const downloadCSV = async (type: string, filename?: string) => {
   try {
     const response = await instance({
       url: `/api/${type}/csv`,
       method: "get",
       responseType: "arraybuffer",
     });
+    console.log(response)
     const blob = new Blob([response.data]);
     const url = window.URL.createObjectURL(blob);
     const temp_link = document.createElement("a");
-    temp_link.download = `${type}.csv`;
+    temp_link.download = filename || `${type}_${moment().format("YYYY-MM-DD")}.csv`;
     temp_link.href = url;
     temp_link.click();
     temp_link.remove();
@@ -163,13 +165,15 @@ export default function Request(props: RequestProps) {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
+  const currentDate = moment().format("YYYY-MM-DD");
+  const filename = `${currentDate} Request History.csv`;
   const router = useRouter();
   const { data } = useCurrentUser();
 
   const switchColumns = (index: number) => {
     setReady(false);
     setActiveTabIndex(index);
+    setRequestItems([]);
   };
 
   const COLUMNS: Column<RequestItem>[] = [
@@ -474,6 +478,10 @@ export default function Request(props: RequestProps) {
         setRequestItems([]);
       }
     }
+
+    if(!requestData) {
+      setReady(true);
+    }
   }, [requestData, requestIsFetchValidating, isReady, page, props?.isReady]);
 
   /*useEffect(() => {
@@ -531,7 +539,7 @@ export default function Request(props: RequestProps) {
           </TooltipBtn>
         </Link>
         <a>
-          <TooltipBtn text="Export CSV" onClick={() => downloadCSV("request")}>
+        <TooltipBtn text="Export CSV" onClick={() => downloadCSV("request", filename)}>
             <HiOutlineDownload size={20} />
           </TooltipBtn>
         </a>
@@ -586,8 +594,8 @@ export default function Request(props: RequestProps) {
             <LoadingHourglass />
           </div>
         )}
-        {requestFetchError && <div>{requestFetchError.toString()}</div>}
-        {requestFetchError && <div>error</div>}
+        {/*requestFetchError && <div>{requestFetchError.toString()}</div>*/}
+        {/*requestFetchError && <div>error</div>*/}
         {isReady && (
           <>
             <CompactTable
@@ -598,6 +606,7 @@ export default function Request(props: RequestProps) {
               rowProps={ROW_PROPS}
               rowOptions={ROW_OPTIONS}
             />
+            {requestItems.length === 0 && <div>No Requests</div>}
             <Pagination
               setPage={setPage}
               setReady={setReady}

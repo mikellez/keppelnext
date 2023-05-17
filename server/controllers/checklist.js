@@ -466,7 +466,7 @@ const completeChecklist = async (req, res, next) => {
             checklist_id = $2
     `;
 
-    db.query(sql, [req.body.datajson, req.params.checklist_id], (err) => {
+    db.query(sql, [JSON.stringify(req.body.datajson), req.params.checklist_id], (err) => {
         if (err) {
             console.log(err);
             return res.status(500).json("Failure to update checklist completion");
@@ -518,7 +518,7 @@ const editChecklistRecord = async (req, res, next) => {
     db.query(
         sql,
         [
-            data.datajson,
+            JSON.stringify(data.datajson),
             statusId,
             data.chl_name,
             data.description,
@@ -687,7 +687,7 @@ const fetchFilteredChecklists = async (req, res, next) => {
     }
 
     if (![1, 2, 3].includes(req.user.role_id)) {
-        userRoleCond = `AND ua.user_id = ${req.user.id}`;
+        userRoleCond = `AND (ua.user_id = ${req.user.id} OR cl.assigned_user_id = ${req.user.id})`;
     }
 
     if (plant && plant != 0) {
@@ -695,7 +695,11 @@ const fetchFilteredChecklists = async (req, res, next) => {
     }
 
     if (status) {
-        statusCond = `AND cl.status_id = '${status}'`;
+        if(status.includes(",")) {
+            statusCond = `AND cl.status_id IN (${status})`;
+        } else {
+            statusCond = `AND cl.status_id = '${status}'`;
+        }
     }
 
     if (date !== "all") {
