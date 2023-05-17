@@ -1,0 +1,13 @@
+{   "Requests":{
+        "table": "keppel.request",
+        "format": "dd-mm-yyyy HH24:MI::text"
+},
+    "Checklist":{
+        "table": "keppel.checklist_master",
+        "format": "yyyy-mm-dd HH24:MI::text"
+    },
+    "Assets":{
+        "table": "keppel.plant_system_assets",
+        "format": "dd-mm-yyyy HH24:MI::text"
+    }
+}

@@ -32,7 +32,6 @@ import ImagePreview from "../../components/Request/ImagePreview";
 
 import { useForm } from "react-hook-form";
 import { SubmitHandler } from "react-hook-form/dist/types";
-
 import {
   CMMSBaseType,
   CMMSRequestTypes,
@@ -152,6 +151,7 @@ interface CMMSAssetOption extends CMMSAsset {
 }
 
 export default function RequestContainer(props: RequestContainerProps) {
+
   const [selectedFile, setSelectedFile] = useState<File>();
   const [previewedFile, setPreviewedFile] = useState<string>();
   const requestTypes = props.requestData?.requestTypes as CMMSRequestTypes[];
@@ -300,13 +300,13 @@ export default function RequestContainer(props: RequestContainerProps) {
       setAvailableAssets(options);
     });
   };
-
+  const sortedAssets = availableAssets.sort((a, b) => a.asset_name.localeCompare(b.asset_name));
   const plantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPlantId(parseInt(e.target.value));
     updateAssetLists(parseInt(e.target.value));
     resetField("taggedAssetID");
   };
-
+  console.log(props.linkedRequestData);
   return (
     <form onSubmit={handleSubmit(formSubmit)}>
       <ModuleContent includeGreyContainer grid>
@@ -405,10 +405,10 @@ export default function RequestContainer(props: RequestContainerProps) {
 
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon /> Tag Asset:
+              <RequiredIcon /> Tag Asset
             </label>
             <select
-              className="form-control"
+              className="form-select"
               id="formControlTagAsset"
               {...register("taggedAssetID", { required: true })}
               disabled={props.assignRequestData || !plantId ? true : false}
@@ -418,7 +418,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                 Select asset
               </option>
               {!props.assignRequestData &&
-                availableAssets.map((asset: CMMSAssetOption) => {
+                sortedAssets.map((asset: CMMSAssetOption) => {
                   return (
                     <option
                       key={asset.psa_id + "|" + asset.asset_name}
@@ -433,7 +433,21 @@ export default function RequestContainer(props: RequestContainerProps) {
                 <option value={-1}>{assignRequestData.asset_name}</option>
               )}
             </select>
+
           </div>
+          {props.linkedRequestData && (
+            <div className="form-group">
+              <label className="form-label">Linked Request</label>
+              <input
+                className="form-control"
+                type="text"
+                id="formControlLinkedRequest"
+                disabled
+                defaultValue={props.linkedRequestData.request_id}
+                />
+              </div>
+          )}
+         
         </div>
         <div
           className={formStyles.halfContainer}

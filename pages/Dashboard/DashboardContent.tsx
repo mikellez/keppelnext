@@ -7,7 +7,7 @@ import {
 } from "../../components";
 import styles from "../../styles/Dashboard.module.scss";
 import DashboardBox from "../../components/Dashboard/DashboardBox";
-import PlantSelect from "../../components/PlantSelect";
+import PlantSelect, { getPlants } from "../../components/PlantSelect";
 import { CMMSDashboardData } from "../../types/common/interfaces";
 import PChart from "../../components/Dashboard/PChart";
 import { fetchData } from ".";
@@ -25,7 +25,8 @@ const { Option } = Select;
 
 type PickerType = 'date';
 
-export default function ManagerDashboad() {
+export default function DashboardContent({ role_id }: { role_id: number }) {
+  const [showTotalContainer, setShowTotalContainer] = useState<boolean>(true);
   const [page, setPage] = useState(1);
   const [showDiv, setShowDiv] = useState<string>();
   const [active, setActive] = useState("");
@@ -66,8 +67,9 @@ export default function ManagerDashboad() {
       setActive(id);
   }
 
-  useEffect(() => {
-    const { datetype, date } = pickerwithtype;
+  const fetchRequests = () => {
+    const { datetype, date } = pickerwithtype; 
+
     setIsRequestReady(false);
 
     fetchData("request", plant, field, datetype, date).then((result) => {
@@ -90,10 +92,10 @@ export default function ManagerDashboad() {
       }, 500);
       setIsRequestReady(true);
     });
-  }, [plant, field, pickerwithtype, active]);
+  }
 
-  useEffect(() => {
-    const { datetype, date } = pickerwithtype;
+  const fetchChecklists = () => {
+    const { datetype, date } = pickerwithtype; 
 
     setIsChecklistReady(false);
 
@@ -112,7 +114,29 @@ export default function ManagerDashboad() {
         });
       }
     });
+  }
+
+  useEffect(() => {
+    const { datetype, date } = pickerwithtype;
+
+    if([3, 4].includes(role_id)) { // engineer, specialist
+      getPlants("/api/getUserPlants").then(result => {
+          if (result) {
+            setPlant(result[0].plant_id)
+          }
+      })
+
+      if(role_id == 4) {
+        setShowTotalContainer(false);
+      }
+
+    }     
+    
+    fetchRequests();
+    fetchChecklists();
+
   }, [plant, field, pickerwithtype, active]);
+
 
   const totalRequest = requestData?.reduce((accumulator, currentValue) => {
     return accumulator + currentValue.value;
@@ -168,7 +192,7 @@ export default function ManagerDashboad() {
               {totalClosedRequest}
             </p>
           </DashboardBox>
-          <DashboardBox
+          {showTotalContainer && <DashboardBox
             title={"Total Requests: " + totalRequest}
             filter={
               <select
@@ -190,6 +214,7 @@ export default function ManagerDashboad() {
               <p className={styles.dashboardNoChart}>No requests</p>
             )}
           </DashboardBox>
+          }
           <DashboardBox id="pending-checklists-box" title="Pending Checklists" style={{ gridArea: "e" }} onClick={handleDashboardClick} className={active === "pending-checklists-box" ? styles.active : ""}>
             <p className={styles.dashboardPendingdNumber}>
               {totalPendingChecklist}
@@ -205,7 +230,7 @@ export default function ManagerDashboad() {
               {totalClosedChecklist}
             </p>
           </DashboardBox>
-          <DashboardBox
+          {showTotalContainer && <DashboardBox
             title={"Total Checklists: " + totalChecklist}
             style={{ gridArea: "h" }}
           >
@@ -215,10 +240,13 @@ export default function ManagerDashboad() {
               <p className={styles.dashboardNoChart}>No requests</p>
             )}
           </DashboardBox>
+          }
+          {showTotalContainer && 
           <DashboardBox
             title="Change of Parts Requested"
             style={{ gridArea: "i" }}
           ></DashboardBox>
+          }
         </div>
         {showDiv === 'pending-requests-box' && 
           <Request 

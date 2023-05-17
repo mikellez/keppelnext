@@ -75,9 +75,9 @@ export default function CompleteRequest(props: RequestPreviewProps) {
           <TooltipBtn text="Download PDF" onClick={() => downloadPDF(parseInt(id as string))}>
             <HiOutlineDownload size={20} />
           </TooltipBtn>
-          <Link href="/Request" className="btn btn-secondary">
-            Back
-          </Link>
+          <button className={"btn btn-secondary"} type="button" onClick={() => router.back()}>
+              Back
+          </button>
         </ModuleHeader>
         <ModuleContent>
           <RequestPreview

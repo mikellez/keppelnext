@@ -30,7 +30,7 @@ const submitCompletedChecklist = async (data: CheckSection[], id: number) => {
         url: "/api/checklist/complete/" + id,
         method: "patch",
         data: {
-            datajson: JSON.stringify(data.map((section) => section.toJSON())),
+            datajson: data.map((section) => section.toJSON()),
         },
     })
         .then((res) => res.data)
@@ -87,9 +87,9 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
                     >
                         <HiOutlineDownload size={24} />
                     </TooltipBtn>
-                    <Link href="/Checklist" className="btn btn-secondary">
+                    <button className={"btn btn-secondary"} type="button" onClick={() => router.back()}>
                         Back
-                    </Link>
+                    </button>
                 </ModuleHeader>
                 <ModuleContent>
                     <ChecklistDetails checklist={props.checklist} />

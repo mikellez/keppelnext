@@ -192,7 +192,7 @@ router
 
 router
   .route("/request/:request_id/uploadedfile")
-  .get(controllers.request.fetchRequestUploadedFile)
+  .get(controllers.request.fetchRequestUploadedFile);
 
 router.patch(
   "/request/:request_id/:status_id",
@@ -273,6 +273,11 @@ router.get(
   "/asset/mobile/:plant_id/:system_id",
   checkIfLoggedInAPI,
   controllers.asset.getSystemAssetsFromPlant
+);
+
+router.get(
+  "/asset/mobile/:psa_id/uploadedFile/:index",
+  controllers.asset.getUploadedFile
 );
 
 router.get(
@@ -516,9 +521,21 @@ router.get(
   controllers.schedule.getScheduleById
 );
 
-router.get("/activity/account_log", checkIfLoggedInAPI, controllers.activity.getEventtHistory);
-router.post("/activity/csv", checkIfLoggedInAPI, controllers.activity.createActivityCSV);
-router.get("/activity/account_log/:type/:date", checkIfLoggedInAPI, controllers.activity.getEventtHistoryDate);
+router.get(
+  "/activity/account_log",
+  checkIfLoggedInAPI,
+  controllers.activity.getEventtHistory
+);
+router.post(
+  "/activity/csv",
+  checkIfLoggedInAPI,
+  controllers.activity.createActivityCSV
+);
+router.get(
+  "/activity/account_log/:type/:date",
+  checkIfLoggedInAPI,
+  controllers.activity.getEventtHistoryDate
+);
 
 router
   .route("/logbook", checkIfLoggedInAPI)
@@ -534,14 +551,18 @@ router
 router
   .get("/user/getUsers", checkIfLoggedInAPI, controllers.user.getUsers)
   .get("/user/getUsersCSV", checkIfLoggedInAPI, controllers.user.getUsersCSV)
-  .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser);
+  .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser)
+  .get("/user/getUsersData/:id", checkIfLoggedInAPI, controllers.user.getUsersData)
+  .get("/user/getUsersplantData/:id", checkIfLoggedInAPI, controllers.user.getUsersplantData)
+  .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser)
+  .post("/user/updateUser", checkIfLoggedInAPI, controllers.user.updateUser);
+
 router.delete(
   "/user/deleteUser/:id",
   checkIfLoggedInAPI,
   controllers.user.deleteUser
 );
-router
-    .get("/user/logouthistory",checkIfLoggedInAPI, controllers.user.logout)
+router.get("/user/logouthistory", checkIfLoggedInAPI, controllers.user.logout);
 
 router
   .post("/setting/update", checkIfLoggedInAPI, controllers.setting.updateUser)

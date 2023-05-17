@@ -6,6 +6,7 @@ import ManagerDashboad from "./Manager";
 import EngineerDashboad from "./Engineer";
 import SpecialistDashboad from "./Specialist";
 import { CMMSDashboardData } from "../../types/common/interfaces";
+import DashboardContent from "./DashboardContent";
 
 export async function fetchData(
   type: string,
@@ -43,11 +44,12 @@ export async function fetchData(
 }
 
 export default function Dashboad({ role_id }: { role_id: number }) {
-  if (role_id === 1 || role_id === 2) return <ManagerDashboad />;
+  /*if (role_id === 1 || role_id === 2) return <ManagerDashboad />;
 
   if (role_id === 3) return <EngineerDashboad />;
 
-  return <SpecialistDashboad />;
+  return <SpecialistDashboad />;*/
+  return <DashboardContent role_id={role_id}/>
 }
 
 export const getServerSideProps: GetServerSideProps = async (
