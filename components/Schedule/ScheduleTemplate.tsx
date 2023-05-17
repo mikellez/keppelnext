@@ -8,10 +8,14 @@ import { useRouter } from "next/router";
 import styles from "../../styles/Schedule.module.scss";
 import { BsCalendar4Week, BsListUl } from "react-icons/bs";
 import ScheduleTable from "./ScheduleTable";
-import { CMMSScheduleEvent, CMMSChangeOfPartsEvent, CMMSChangeOfParts, CMMSEvent } from "../../types/common/interfaces";
+import {
+    CMMSScheduleEvent,
+    CMMSChangeOfPartsEvent,
+    CMMSChangeOfParts,
+    CMMSEvent,
+} from "../../types/common/interfaces";
 import EventColorLegend, { EventColours } from "./EventColorLegend";
 import COPEventModal from "./COPEventModal";
-
 
 interface ScheduleTemplateInfo extends PropsWithChildren {
     title: string;
@@ -139,10 +143,14 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     plantId: cop.plantId,
                     status: cop.changedDate ? "Completed" : "Scheduled",
                 },
-                color: cop.changedDate ? EventColours.completedCOP.color : EventColours.scheduledCOP.color,
-                display: displayCOP ? "block" : "none"
-        };
-    }, [displayCOP]);
+                color: cop.changedDate
+                    ? EventColours.completedCOP.color
+                    : EventColours.scheduledCOP.color,
+                display: displayCOP ? "block" : "none",
+            };
+        },
+        [displayCOP]
+    );
 
     const updateCOPEvents = useCallback(
         (newCOPs: CMMSChangeOfParts[]) => {
@@ -154,35 +162,43 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
         [toCMMSChangeOfPartsEvent]
     );
 
-    const toCMMSScheduleEvents = useCallback((schedule: ScheduleInfo, date: string, index: number) => {
-        const event: CMMSScheduleEvent = {
-            title: schedule.checklist_name,
-            start: schedule.start_date ? new Date(date) : "",
-            extendedProps: {
-                plant: schedule.plant,
-                plantId: schedule.plantId,
-                scheduleId: schedule.schedule_id,
-                checklistId: schedule.checklist_id,
-                date: new Date(schedule.calendar_dates[index]),
-                startDate: schedule.start_date ? new Date(schedule.start_date.toString().slice(0, 10)) : "Rescheduled",
-                endDate: schedule.end_date ? new Date(schedule.end_date.toString().slice(0, 10)) : "Rescheduled",
-                recurringPeriod: schedule.period,
-                assignedIds: schedule.assigned_ids,
-                assignedEmails: schedule.assigned_emails,
-                assignedFnames: schedule.assigned_fnames,
-                assignedLnames: schedule.assigned_lnames,
-                assignedUsernames: schedule.assigned_usernames,
-                assignedRoles: schedule.assigned_usernames,
-                timelineId: schedule.timeline_id,
-                remarks: schedule.remarks,
-                index: index,
-                isSingle: schedule.isSingle,
-                exclusionList: schedule.exclusionList,
-                status: schedule.status,
-            },
-            color: schedule.status === 5 ? EventColours.completedTimeline.color : EventColours.approvedTimeline.color, 
-            display: displayChecklist ? "block" : "none"
-        }; 
+    const toCMMSScheduleEvents = useCallback(
+        (schedule: ScheduleInfo, date: string, index: number) => {
+            const event: CMMSScheduleEvent = {
+                title: schedule.checklist_name,
+                start: schedule.start_date ? new Date(date) : "",
+                extendedProps: {
+                    plant: schedule.plant,
+                    plantId: schedule.plantId,
+                    scheduleId: schedule.schedule_id,
+                    checklistId: schedule.checklist_id,
+                    date: new Date(schedule.calendar_dates[index]),
+                    startDate: schedule.start_date
+                        ? new Date(schedule.start_date.toString().slice(0, 10))
+                        : "Rescheduled",
+                    endDate: schedule.end_date
+                        ? new Date(schedule.end_date.toString().slice(0, 10))
+                        : "Rescheduled",
+                    recurringPeriod: schedule.period,
+                    assignedIds: schedule.assigned_ids,
+                    assignedEmails: schedule.assigned_emails,
+                    assignedFnames: schedule.assigned_fnames,
+                    assignedLnames: schedule.assigned_lnames,
+                    assignedUsernames: schedule.assigned_usernames,
+                    assignedRoles: schedule.assigned_usernames,
+                    timelineId: schedule.timeline_id,
+                    remarks: schedule.remarks,
+                    index: index,
+                    isSingle: schedule.isSingle,
+                    exclusionList: schedule.exclusionList,
+                    status: schedule.status,
+                },
+                color:
+                    schedule.status === 5
+                        ? EventColours.completedTimeline.color
+                        : EventColours.approvedTimeline.color,
+                display: displayChecklist ? "block" : "none",
+            };
 
             return event;
         },
@@ -255,7 +271,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
             setIsCOPModalOpen(true);
         }
     }, []);
-    
+
     // Add events to be displayed on the calendar
     useEffect(() => {
         setChecklistEvents([]);
@@ -320,9 +336,11 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                 eventMouseEnter={(info) => (document.body.style.cursor = "pointer")}
                                 eventMouseLeave={() => (document.body.style.cursor = "default")}
                             />
-                            <div 
+                            <div
                                 className={styles.calendarDisplayCheckboxContainer}
-                                style={{display: router.pathname === "/Schedule" ? "flex" : "none"}}
+                                style={{
+                                    display: router.pathname === "/Schedule" ? "flex" : "none",
+                                }}
                             >
                                 <div className="form-check">
                                     <input
@@ -331,9 +349,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                         onChange={() => setDisplayCOP((prev) => !prev)}
                                         checked={displayCOP}
                                     />
-                                    <label className="form-check-label">
-                                        Change of Parts
-                                    </label>
+                                    <label className="form-check-label">Change of Parts</label>
                                 </div>
                                 <div className="form-check">
                                     <input
@@ -342,11 +358,9 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                         onChange={() => setDisplayChecklist((prev) => !prev)}
                                         checked={displayChecklist}
                                     />
-                                    <label className="form-check-label">
-                                        Checklist
-                                    </label>
+                                    <label className="form-check-label">Checklist</label>
                                 </div>
-                                <div style={{marginLeft: "auto"}}>
+                                <div style={{ marginLeft: "auto" }}>
                                     <EventColorLegend />
                                 </div>
                             </div>
@@ -360,22 +374,19 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     )}
                 </ModuleContent>
             </ModuleMain>
-            {isChecklistModalOpen && (
-                <ChecklistEventModal
-                    isOpen={isChecklistModalOpen}
-                    closeModal={() => setIsChecklistModalOpen(false)}
-                    event={currentEvent as CMMSScheduleEvent}
-                    editSingle={router.pathname === `/Schedule`}
-                    deleteEditDraft={router.pathname === `/Schedule/Timeline/[id]`}
-                />
-            )}
-            {isCOPModalOpen && (
-                <COPEventModal
-                    isOpen={isCOPModalOpen}
-                    closeModal={() => setIsCOPModalOpen(false)}
-                    event={currentEvent as CMMSChangeOfPartsEvent}
-                />
-            )}
+            <ChecklistEventModal
+                isOpen={isChecklistModalOpen}
+                closeModal={() => setIsChecklistModalOpen(false)}
+                event={currentEvent as CMMSScheduleEvent}
+                editSingle={router.pathname === `/Schedule`}
+                deleteEditDraft={router.pathname === `/Schedule/Timeline/[id]`}
+            />
+
+            <COPEventModal
+                isOpen={isCOPModalOpen}
+                closeModal={() => setIsCOPModalOpen(false)}
+                event={currentEvent as CMMSChangeOfPartsEvent}
+            />
         </>
     );
 }
