@@ -183,7 +183,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
             color: schedule.status === 5 ? EventColours.completedTimeline.color : EventColours.approvedTimeline.color, 
             display: displayChecklist ? "block" : "none"
         }; 
-
+            console.log(event.extendedProps.status)
             return event;
         },
         [displayChecklist]
