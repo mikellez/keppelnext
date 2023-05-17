@@ -304,20 +304,30 @@ export default function Master() {
       />
 
       <ModuleContent>
-        <ul className="nav nav-tabs">
-          {indexedColumn.map((item, index) => (
-            <li
-              key={index}
-              onClick={() => {
-                activeTabIndex !== index && switchColumns(index);
-              }}
-              className={"nav-link" + (activeTabIndex === index ? " active" : "")}
-            > 
-              <span style={{ all: "unset" }}>{item}</span>
-            </li>
-          ))}
-          
-        </ul>
+      <div className="scrollable-tabs" style={{ overflowX: "auto"}}>
+  <ul className="nav nav-tabs" style={{ display: "flex", flexWrap: "nowrap", padding: 0, margin: 0, listStyleType: "none" }}>
+    {indexedColumn.map((item, index) => (
+      <li
+        key={index}
+        onClick={() => {
+          activeTabIndex !== index && switchColumns(index);
+        }}
+        className={"nav-link" + (activeTabIndex === index ? " active" : "")}
+        style={{ padding: "10px" }}
+      >
+        <span style={{ all: "unset" }}>{item}</span>
+      </li>
+    ))}
+  </ul>
+  <style>
+        {`
+          .scrollable-tabs::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+          }
+        `}
+      </style>
+</div>
         {isReady && (
           <Table
           data={{ nodes: masterItems }}
@@ -343,7 +353,7 @@ export default function Master() {
                       })}
                   <HeaderCell resize>Actions</HeaderCell>
                   </HeaderRow>
-                </Header>
+                </Header>               
                 <Body>
                   {tableList.map((item) => (
                     <Row key={item.id} item={item} onClick={editRow}>
