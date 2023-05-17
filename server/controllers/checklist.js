@@ -68,7 +68,7 @@ const fetchAssignedChecklists = async (req, res, next) => {
 
     try {
         const result = await db.query(query, [req.user.id]);
-        if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
+        if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
 
         return res.status(200).json({ rows: result.rows, total: totalPages });
     } catch (error) {
@@ -96,7 +96,7 @@ const fetchPendingChecklists = async (req, res, next) => {
 
     try {
         const result = await db.query(query, [req.user.id]);
-        if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
+        if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
 
         return res.status(200).json({ rows: result.rows, total: totalPages });
     } catch (error) {
@@ -124,7 +124,7 @@ const fetchForReviewChecklists = async (req, res, next) => {
 
     try {
         const result = await db.query(query, [req.user.id]);
-        if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
+        if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
 
         return res.status(200).json({ rows: result.rows, total: totalPages });
     } catch (error) {
@@ -151,7 +151,7 @@ const fetchApprovedChecklists = async (req, res, next) => {
 
     try {
         const result = await db.query(query, [req.user.id]);
-        if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
+        if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
 
         return res.status(200).json({ rows: result.rows, total: totalPages });
     } catch (error) {
@@ -256,7 +256,7 @@ const createNewChecklistRecord = async (req, res, next) => {
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`;
 
     const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-    
+
     const history = `Created Record_${statusId === 2 ? "ASSIGNED" : "PENDING"}_${today}_${
         req.user.name
     }_NIL`;
@@ -429,7 +429,7 @@ const createChecklistCSV = async (req, res, next) => {
     }
     db.query(activeTabQuery, [req.user.id], (err, result) => {
         if (err) return res.status(400).json({ msg: err });
-        if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
+        if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
         generateCSV(result.rows)
             .then((buffer) => {
                 res.set({
@@ -695,7 +695,7 @@ const fetchFilteredChecklists = async (req, res, next) => {
     }
 
     if (status) {
-        if(status.includes(",")) {
+        if (status.includes(",")) {
             statusCond = `AND cl.status_id IN (${status})`;
         } else {
             statusCond = `AND cl.status_id = '${status}'`;
@@ -753,7 +753,7 @@ const fetchFilteredChecklists = async (req, res, next) => {
 
     db.query(sql + pageCond, (err, result) => {
         if (err) return res.status(400).json({ msg: err });
-        if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
+        if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
 
         return res.status(200).json({ rows: result.rows, total: totalPages });
     });
