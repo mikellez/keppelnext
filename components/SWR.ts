@@ -84,18 +84,19 @@ function useChecklist(
 ) {
   const checklistFetcher = (url: string) =>
     instance
-      .get<CMMSChecklist[]>(url)
+      .get<{ rows: CMMSChecklist[]; total:number}>(url)
       .then((response) => response.data)
       .catch((e) => {
         throw new Error(e);
       });
 
-  return useSWR<CMMSChecklist[], Error>(
+  return useSWR<{ rows: CMMSChecklist[]; total:number}, Error>(
     [`/api/checklist/${checklist_type}?page=${page}`],
     checklistFetcher,
     { revalidateOnFocus: false }
   );
 }
+
 function useChecklistFilter(props: ChecklistProps, page: number) {
   const checklistFetcher = (url: string) =>
     instance

@@ -282,7 +282,7 @@ interface CMMSChecklist {
   plant_id: number;
   linkedassets: string | null;
   linkedassetids: string | null;
-  chl_type?: "Template";
+  chl_type?: string
   created_date: Date | string;
   history: string;
   status: string;

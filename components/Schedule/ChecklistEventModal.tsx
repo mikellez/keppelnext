@@ -15,7 +15,7 @@ import TooltipBtn from "../TooltipBtn";
 import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import styles from "../../styles/Schedule.module.scss";
-import instance from '../../axios.config.js';
+import instance from "../../axios.config.js";
 import ScheduleModal, { scheduleMaintenance, scheduleValidator } from "./ScheduleModal";
 import { Role } from "../../types/common/enums";
 
@@ -373,7 +373,6 @@ export default function ChecklistEventModal(props: ModalProps) {
                                         onClick={() => {
                                             setScheduleModal(true);
                                             closeModal();
-                                            // console.log(scheduleObject);
                                         }}
                                         style={{ marginRight: "10px" }}
                                     >
@@ -455,14 +454,15 @@ export default function ChecklistEventModal(props: ModalProps) {
                 text="Please fill in the missing details for the maintenance."
                 icon={SimpleIcon.Cross}
             />
-            {
-                <ScheduleModal
-                    isOpen={scheduleModal}
-                    closeModal={() => setScheduleModal(false)}
-                    title="Schedule Maintenance"
-                    scheduleEvent={newSchedule}
-                />
-            }
+
+            <ScheduleModal
+                isOpen={scheduleModal}
+                closeModal={() => {
+                    setScheduleModal(false);
+                }}
+                title="Schedule Maintenance"
+                scheduleEvent={newSchedule}
+            />
         </div>
     );
 }
