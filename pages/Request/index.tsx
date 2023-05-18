@@ -101,6 +101,8 @@ export interface RequestItem {
   requesthistory?: string;
   complete_comments?: string;
   completion_file?: any;
+  activity_log?: { [key: string]: string }[];
+
 }
 
 export interface RequestProps {
@@ -161,7 +163,7 @@ export default function Request(props: RequestProps) {
   const [isReady, setReady] = useState(false);
   const [modalSrc, setModalSrc] = useState<string | undefined>();
   const [ids, setIds] = React.useState<string[]>([]);
-  const [currentHistory, setCurrentHistory] = useState<string | undefined>();
+  const [currentHistory, setCurrentHistory] = useState< { [key: string]: string }[] | undefined>();
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -170,6 +172,7 @@ export default function Request(props: RequestProps) {
   const router = useRouter();
   const { data } = useCurrentUser();
 
+  console.log(currentHistory);
   const switchColumns = (index: number) => {
     setReady(false);
     setActiveTabIndex(index);
@@ -285,7 +288,7 @@ export default function Request(props: RequestProps) {
           <div
             className={styles.editIcon}
             onClick={() => {
-              setCurrentHistory(item.requesthistory);
+              setCurrentHistory(item.activity_log);
             }}
           >
             <AiOutlineHistory size={18} title={"View History"} />
@@ -624,13 +627,13 @@ export default function Request(props: RequestProps) {
         >
           <Image src={modalSrc as string} alt="" width={500} height={500} />
         </ModuleModal>
-        <ModuleModal
+        {currentHistory && <ModuleModal
           isOpen={!!currentHistory}
           closeModal={() => setCurrentHistory(undefined)}
           closeOnOverlayClick={true}
         >
-          <RequestHistory history={currentHistory} />
-        </ModuleModal>
+          <RequestHistory history={currentHistory!} />
+        </ModuleModal>}
       </ModuleContent>
     </ModuleMain>
   );

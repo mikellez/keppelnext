@@ -129,6 +129,7 @@ const { date, datetype } = pickerwithtype;
   };
 
   let { data, error, isValidating, mutate } = useAccountlog("/api/activity/account_log");
+  console.log(data);
   const theme = useTheme([
     getTheme(),
     {

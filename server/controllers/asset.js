@@ -729,7 +729,8 @@ const editAsset = async (req, res, next) => {
       'name', '${req.user.name}',
       'role', '${req.user.role_name}',
       'activity', 'Edited Asset ${psa_id}: ${fields}',
-      'activity_type', 'EDITED'
+      'activity_type', 'EDITED',
+      'fields', '${fields}'
     )
     WHERE psa_id = '${psa_id}';
     `
@@ -921,6 +922,7 @@ const addNewAsset = (req, res, next) => {
           role: req.user.role_name,
           activity: "Created Asset " + psa_id,
           activity_type: "CREATED",
+          fields: "-",
         },
       ];
 
@@ -967,10 +969,20 @@ const deleteAsset = (req, res, next) => {
 
 const fetchAssetHistory = (req, res, next) => {
   db.query(
-    `SELECT h.history_id, h.action, h.user_id, h.fields, h.date, CONCAT(u.first_name, ' ', u.last_name) as name FROM keppel.history h
-        JOIN keppel.users u
-        ON u.user_id = h.user_id
-      WHERE asset_id = ${req.params.psa_Id}`,
+    // `SELECT h.history_id, h.action, h.user_id, h.fields, h.date, CONCAT(u.first_name, ' ', u.last_name) as name FROM keppel.history h
+    //     JOIN keppel.users u
+    //     ON u.user_id = h.user_id
+    //   WHERE asset_id = ${req.params.psa_Id}`,
+    `
+    SELECT 
+        to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'dd-mm-yyyy HH24:MI'::text) AS history_id,
+		btrim(concat(activity.value -> 'activity_type'::text), '"'::text) AS action,
+		btrim(((activity.value -> 'name'::text)::character varying)::text, '"'::text) AS name,
+        to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'dd-mm-yyyy HH24:MI'::text) AS date,
+		btrim(concat(activity.value -> 'fields'::text), '"'::text) AS fields
+         FROM keppel.plant_system_assets,
+        LATERAL jsonb_array_elements(plant_system_assets.activity_log) activity(value)
+		WHERE psa_id = ${req.params.psa_Id}`,
     (err, result) => {
       if (err) {
         return res.status(400).send({

@@ -24,7 +24,7 @@ function fetchRequestQuery(status_query, role_id, user_id, page) {
 	  r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
 	  r.complete_comments,
 	  concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-	  , r.requesthistory, r.rejection_comments, r.status_id, r.psa_id, r.fault_id
+	  , r.activity_log, r.rejection_comments, r.status_id, r.psa_id, r.fault_id
 	  FROM    
 		  keppel.users u
 		  JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -70,7 +70,7 @@ function fetchRequestQuery(status_query, role_id, user_id, page) {
 	  r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
 	  r.complete_comments,
 	  concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-	  , r.requesthistory, r.rejection_comments, r.status_id, r.psa_id, r.fault_id
+	  , r.activity_log, r.rejection_comments, r.status_id, r.psa_id, r.fault_id
 	  FROM    
 		  keppel.users u
 		  JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -250,7 +250,7 @@ const createRequest = async (req, res, next) => {
   }
 if(!req.body.linkedRequestId) {
   const q = `INSERT INTO keppel.request(
-    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, activity_log, associatedrequestid, activity_log
   ) VALUES (
     $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
   )`;
@@ -282,7 +282,7 @@ if(!req.body.linkedRequestId) {
 else if (req.body.linkedRequestId){
   const insertQuery = `
   INSERT INTO keppel.request(
-    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, activity_log, associatedrequestid, activity_log
   ) VALUES (
     $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
   );
@@ -514,7 +514,7 @@ const fetchSpecificRequest = async (req, res, next) => {
   r.completion_file,
   r.complete_comments,
   r.rejection_comments,
-  r.requesthistory,
+  r.activity_log,
   concat( concat(u.first_name,' '), u.last_name) AS assigned_user_name,
   concat( concat(ua.first_name,' '), ua.last_name) AS created_by,
   r.created_date
@@ -784,7 +784,7 @@ const fetchFilteredRequests = async (req, res, next) => {
 		r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
 		r.complete_comments,
 		concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-		, r.requesthistory, r.rejection_comments, r.status_id
+		, r.activity_log, r.rejection_comments, r.status_id
 		FROM    
 			keppel.users u
 			JOIN keppel.user_access ua ON u.user_id = ua.user_id
