@@ -145,7 +145,6 @@ export const downloadCSV = async (type: string, filename?: string) => {
 };
 
 export default function Request(props: RequestProps) {
-<<<<<<< HEAD
   const [requestItems, setRequestItems] = useState<RequestItem[]>([]);
   const [isReady, setReady] = useState(false);
   const [modalSrc, setModalSrc] = useState<string | undefined>();
@@ -163,6 +162,7 @@ export default function Request(props: RequestProps) {
     setReady(false);
     setActiveTabIndex(index);
     setRequestItems([]);
+    setPage(1);
   };
 
   const COLUMNS: Column<RequestItem>[] = [
@@ -283,146 +283,6 @@ export default function Request(props: RequestProps) {
       ),
     },
   ];
-=======
-    const [requestItems, setRequestItems] = useState<RequestItem[]>([]);
-    const [isReady, setReady] = useState(false);
-    const [modalSrc, setModalSrc] = useState<string | undefined>();
-    const [ids, setIds] = React.useState<string[]>([]);
-    const [currentHistory, setCurrentHistory] = useState<string | undefined>();
-    const [activeTabIndex, setActiveTabIndex] = useState(0);
-    const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const currentDate = moment().format("YYYY-MM-DD");
-    const filename = `${currentDate} Request History.csv`;
-    const router = useRouter();
-    const { data } = useCurrentUser();
-
-    const switchColumns = (index: number) => {
-        setReady(false);
-        setActiveTabIndex(index);
-        setRequestItems([]);
-        setPage(1);
-    };
-
-    const COLUMNS: Column<RequestItem>[] = [
-        {
-            label: "ID",
-            resize: true,
-            renderCell: (item) => item.id,
-        },
-        {
-            label: "Fault Type",
-            resize: true,
-            renderCell: (item) => item.fault_name,
-        },
-        {
-            label: "Location",
-            resize: true,
-            renderCell: (item) => item.plant_name,
-        },
-        {
-            label: "Priority",
-            resize: true,
-            renderCell: (item) => (
-                <span style={{ color: getColor(item.priority), fontWeight: "bold" }}>
-                    {item.priority == null ? "-" : item.priority}
-                </span>
-            ),
-        },
-        {
-            label: "Status",
-            resize: true,
-            renderCell: (item) => (
-                <span style={{ color: getColor(item.status), fontWeight: "bold" }}>
-                    {item.status}
-                </span>
-            ),
-        },
-        {
-            label: "Date",
-            resize: true,
-            renderCell: (item) =>
-                item.created_date.toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                }),
-        },
-        {
-            label: "Asset Name",
-            resize: true,
-            renderCell: (item) => item.asset_name,
-        },
-        {
-            label: "Requested By",
-            resize: true,
-            renderCell: (item) => item.fullname,
-        },
-        {
-            label: "",
-            renderCell: (item) => (
-                <div className={styles.iconsDiv}>
-                    {(item.status_id === 1 || item.status_id === 2) && (
-                        <div
-                            className={styles.editIcon}
-                            style={{
-                                display:
-                                    data?.role_id == Role.Admin ||
-                                    data?.role_id == Role.Manager ||
-                                    data?.role_id == Role.Engineer
-                                        ? "block"
-                                        : "none",
-                                // visibility:
-                                //     item.status_id === 1 || item.status_id === 2 ? "visible" : "hidden",
-                            }}
-                            onClick={() => {
-                                router.push(`/Request/Assign/${item.id}`);
-                                setReady(false);
-                            }}
-                        >
-                            <AiOutlineUserAdd size={18} title={"Assign"} />
-                        </div>
-                    )}
-                    {item.status_id === 3 && (
-                        <div
-                            className={styles.editIcon}
-                            style={{
-                                display:
-                                    data?.role_id == Role.Admin || data?.role_id == Role.Manager
-                                        ? "block"
-                                        : "none",
-                                // visibility: item.status_id === 3 ? "visible" : "hidden",
-                            }}
-                            onClick={() => {
-                                router.push(`/Request/Manage/${item.id}`);
-                                setReady(false);
-                            }}
-                        >
-                            <BiCommentCheck size={18} title={"Manage"} />
-                        </div>
-                    )}
-                    <div
-                        className={styles.editIcon}
-                        onClick={() => {
-                            router.push(`/Request/CorrectiveRequest/${item.id}`);
-                            setReady(false);
-                        }}
-                    >
-                        <HiOutlineLink size={18} title={"Create Corrective Request"} />
-                    </div>
-                    <div
-                        className={styles.editIcon}
-                        onClick={() => {
-                            setCurrentHistory(item.activity_log);
-                        }}
-                    >
-                        <AiOutlineHistory size={18} title={"View History"} />
-                    </div>
-                </div>
-            ),
-        },
-    ];
->>>>>>> e1fa42ab25bb0dc06f3b3aba9322cc84efc5d470
 
     const handleExpand = (item: RequestItem) => {
         if (ids.includes(item.id)) {
@@ -664,7 +524,6 @@ export default function Request(props: RequestProps) {
   }, [activeTabIndex]);
   */
 
-<<<<<<< HEAD
   return (
     <ModuleMain>
       <ModuleHeader title="Request" header="Request">
@@ -772,113 +631,4 @@ export default function Request(props: RequestProps) {
       </ModuleContent>
     </ModuleMain>
   );
-=======
-    return (
-        <ModuleMain>
-            <ModuleHeader title="Request" header="Request">
-                <TooltipBtn onClick={() => requestMutate()} text="Refresh">
-                    <FiRefreshCw size={20} />
-                </TooltipBtn>
-                <Link href="./Request/New">
-                    <TooltipBtn text="New Request">
-                        <BsFileEarmarkPlus href="./Request/New" size={20} />
-                    </TooltipBtn>
-                </Link>
-                <a>
-                    <TooltipBtn text="Export CSV" onClick={() => downloadCSV("request", filename)}>
-                        <HiOutlineDownload size={20} />
-                    </TooltipBtn>
-                </a>
-            </ModuleHeader>
-            <ModuleContent>
-                {!props?.filter && (
-                    <ul className="nav nav-tabs">
-                        <li
-                            onClick={() => {
-                                activeTabIndex !== 0 && switchColumns(0);
-                            }}
-                            className={"nav-link" + (activeTabIndex === 0 ? " active" : "")}
-                        >
-                            <span style={{ all: "unset" }}>Pending</span>
-                        </li>
-                        <li
-                            onClick={() => {
-                                activeTabIndex !== 1 && switchColumns(1);
-                            }}
-                            className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
-                        >
-                            <span style={{ all: "unset" }}>Assigned</span>
-                        </li>
-                        <li
-                            onClick={() => {
-                                activeTabIndex !== 2 && switchColumns(2);
-                            }}
-                            className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
-                        >
-                            <span style={{ all: "unset" }}>For Review</span>
-                        </li>
-                        <li
-                            onClick={() => {
-                                activeTabIndex !== 3 && switchColumns(3);
-                            }}
-                            className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
-                        >
-                            <span style={{ all: "unset" }}>Approved</span>
-                        </li>
-                    </ul>
-                )}
-                {!isReady && (
-                    <div
-                        style={{
-                            position: "absolute",
-                            top: "50%",
-                            left: "50%",
-                            transform: "translate(-50%, -50%)",
-                            textAlign: "center",
-                        }}
-                    >
-                        <LoadingHourglass />
-                    </div>
-                )}
-                {/*requestFetchError && <div>{requestFetchError.toString()}</div>*/}
-                {/*requestFetchError && <div>error</div>*/}
-                {isReady && (
-                    <>
-                        <CompactTable
-                            columns={COLUMNS}
-                            data={{ nodes: requestItems }}
-                            theme={theme}
-                            layout={{ custom: true }}
-                            rowProps={ROW_PROPS}
-                            rowOptions={ROW_OPTIONS}
-                        />
-                        {requestItems.length === 0 && <div>No Requests</div>}
-                        <Pagination
-                            setPage={setPage}
-                            setReady={setReady}
-                            totalPages={totalPages}
-                            page={page}
-                        />
-                    </>
-                )}
-                <ModuleModal
-                    isOpen={!!modalSrc}
-                    closeModal={() => setModalSrc(undefined)}
-                    closeOnOverlayClick={true}
-                    hideHeader={true}
-                    className={styles.imageModal}
-                >
-                    <Image src={modalSrc as string} alt="" width={500} height={500} />
-                </ModuleModal>
-                <ModuleModal
-                    isOpen={!!currentHistory}
-                    closeModal={() => setCurrentHistory(undefined)}
-                    closeOnOverlayClick={true}
-                >
-                    <RequestHistory history={currentHistory!} />
-                </ModuleModal>
-            </ModuleContent>
-        </ModuleMain>
-    );
->>>>>>> e1fa42ab25bb0dc06f3b3aba9322cc84efc5d470
 }
