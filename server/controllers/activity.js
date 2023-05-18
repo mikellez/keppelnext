@@ -14,7 +14,6 @@ let query = `
         GROUP BY (to_timestamp(substr(i.datetime::text, 1, length(i.datetime::text) - 3), 'mm-dd-yyyy HH24:MI'::text)), ii.user_name, i.activity, ii.first_name, ii.last_name
        
 `
-
 for (const key in activityLog){
     query += `
     UNION ALL
@@ -26,7 +25,6 @@ for (const key in activityLog){
     LATERAL jsonb_array_elements(${activityLog[key].table}.activity_log) activity(value)
     `
 }
-
 for (const key in tableInfo) {
     query += ` UNION ALL
     SELECT btrim(((activity.value -> 'name'::text)::character varying)::text, '"'::text) AS user_name,
@@ -40,7 +38,7 @@ for (const key in tableInfo) {
 
 const getEventtHistory = async (req, res, next) => {
     let q = `SELECT * FROM (${query}) AS activity_log WHERE event_time >= date_trunc('month', CURRENT_DATE) ORDER BY event_time DESC;`
-    // console.log(q);
+    console.log(q);
     db.query(q, (err, result) => {
         // console.log(result.rows);
         if (err) return res.status(400).json({ msg: err });
