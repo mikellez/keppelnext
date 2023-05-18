@@ -34,6 +34,7 @@ const makeScheduleDict = (arr) => {
       isSingle: item["index"] != null ? true : false,
       index: item["index"],
       prev_schedule_id: item["prev_schedule_id"],
+      status: item["status"],
     });
   });
   return newArr;
@@ -338,34 +339,42 @@ const changeTimelineStatus = (req, res, next) => {
   const queryS =
     status === 1
       ? `
-    UPDATE keppel.schedule_checklist
-    SET start_date = NULL, end_date = NULL
-    WHERE timeline_id = (SELECT timeline_id FROM keppel.schedule_timelines 
-                         WHERE status = 1 AND plant_id = (SELECT plant_id FROM keppel.schedule_timelines
-                                                         WHERE timeline_id = ${req.params.id})) AND
-    start_date > CURRENT_DATE + interval '8 hour';
-    
-    UPDATE keppel.schedule_checklist AS SC 
-    SET scheduler_history = ''||scheduler_history||', end date updated from '||end_date,
-    end_date = CURRENT_DATE + interval '8 hour' - interval '1 day'
-    WHERE timeline_id = (SELECT timeline_id FROM keppel.schedule_timelines 
-                         WHERE status = 1 AND plant_id = (SELECT plant_id FROM keppel.schedule_timelines
-                                                         WHERE timeline_id = ${req.params.id}))
-    AND start_date IS NOT NULL;
-     
-    UPDATE keppel.schedule_timelines 
-    SET status = 5 
-    WHERE status = 1 AND plant_id = (SELECT plant_id FROM keppel.schedule_timelines
-                                                         WHERE timeline_id = ${req.params.id});
-
-    UPDATE keppel.schedule_checklist
-    SET status = 5 
-    WHERE timeline_id = ${req.params.id};
-    
-                                                         
-    UPDATE keppel.schedule_timelines SET status = 1 WHERE timeline_id = ${req.params.id} RETURNING *;
-    
-    UPDATE keppel.schedule_checklist SET status = 1 WHERE timeline_id = ${req.params.id};
+      UPDATE keppel.schedule_checklist
+      SET start_date = NULL, end_date = NULL
+      WHERE timeline_id = (SELECT timeline_id FROM keppel.schedule_timelines 
+                           WHERE status = 1 AND plant_id = (SELECT plant_id FROM keppel.schedule_timelines
+                                                           WHERE timeline_id = ${req.params.id})) AND
+      start_date > CURRENT_DATE + interval '8 hour';
+      
+      UPDATE keppel.schedule_checklist AS SC 
+      SET scheduler_history = ''||scheduler_history||', end date updated from '||end_date,
+      end_date = CURRENT_DATE + interval '8 hour' - interval '1 day'
+      WHERE timeline_id = (SELECT timeline_id FROM keppel.schedule_timelines 
+                WHERE status = 1 AND plant_id = (SELECT plant_id FROM keppel.schedule_timelines
+                                WHERE timeline_id = ${req.params.id}))
+      AND start_date IS NOT NULL;
+      
+      UPDATE keppel.schedule_checklist sc
+      SET status = 5 
+      WHERE timeline_id IN (
+        SELECT timeline_id FROM keppel.schedule_timelines st WHERE st.plant_id = (
+          SELECT plant_id FROM keppel.schedule_timelines
+            WHERE timeline_id = ${req.params.id}
+        ) AND st.status = 1
+      );
+      
+      
+      UPDATE keppel.schedule_timelines 
+      SET status = 5 
+      WHERE status = 1 AND plant_id = (SELECT plant_id FROM keppel.schedule_timelines
+                                WHERE timeline_id = ${req.params.id});
+      
+      
+      
+      
+      UPDATE keppel.schedule_timelines SET status = 1 WHERE timeline_id = ${req.params.id} RETURNING *;
+      
+      UPDATE keppel.schedule_checklist SET status = 1 WHERE timeline_id = ${req.params.id};
     `
       : `
     UPDATE keppel.schedule_checklist SET status = ${req.params.status} WHERE timeline_id = ${req.params.id};

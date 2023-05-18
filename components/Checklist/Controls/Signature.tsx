@@ -125,9 +125,11 @@ function SignatureEditable({
 	return (
 		<div className={styles.checkViewContainer}>
 			<h6>{signatureControlObj.question}</h6>
-			<div className="form-group" style={{border: "black dashed 1px"}}>
+			<div className="form-group" style={{border: "black dashed 1px", 
+                                          height: "300", 
+                                          width: "200"}}>
             	<SignatureCanvas 
-					canvasProps={{width: "100%", height: "70%"}}
+					canvasProps={{width: "300", height: "200"}}
 					backgroundColor="#E4DCCF"
 					penColor='black'
 					ref={sigRef}
