@@ -72,7 +72,7 @@ const getViewSchedules = async (req, res, next) => {
 		  STRING_AGG(U.last_name, ' ,') AS LNAME,
 			PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, SC.REMARKS, SC.TIMELINE_ID, SC.STATUS, SC.PREV_SCHEDULE_ID
             FROM 
-            KEPPEL.SCHEDULE_CHECKLIST  as SCD,
+            KEPPEL.SCHEDULE_CHECKLIST  as SC,
             KEPPEL.USERS AS U,
 			KEPPEL.USER_ACCESS AS UA,
             KEPPEL.PLANT_MASTER  AS PM,
@@ -144,7 +144,7 @@ const getViewSchedules = async (req, res, next) => {
         
         GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
   }
-  // console.log(queryS[0]);
+   console.log(queryS[0]);
   db.query(queryS[0], (err, schedules) => {
     if (err) throw err;
     if (schedules) {
