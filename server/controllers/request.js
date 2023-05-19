@@ -131,8 +131,6 @@ const fetchPendingRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(1);
-  if (result.rows.length == 0)
-    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -149,8 +147,6 @@ const fetchAssignedRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(2);
-  if (result.rows.length == 0)
-    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -167,8 +163,6 @@ const fetchReviewRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(`ANY('{3, 5, 6}')`);
-  if (result.rows.length == 0)
-    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -185,8 +179,6 @@ const fetchApprovedRequests = async (req, res, next) => {
 
   const result = await db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(4);
-  if (result.rows.length == 0)
-    return res.status(404).json({ msg: "No requests" });
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -205,6 +197,8 @@ const createRequest = async (req, res, next) => {
   const fileType = req.file === undefined ? null : req.file.mimetype;
   const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
   let user_id = '';
+  let name = '';
+  let role_name = '';
   let role_id = '';
   let history = '';
   let activity_log = '';
@@ -215,17 +209,21 @@ const createRequest = async (req, res, next) => {
     if(req?.body?.user_id) {
       user_id = req.body.user_id;
       role_id = req.body.role_id;
+      role_name = req.body.role_name;
+      name = req.body.name;
     } else {
       user_id = req.user.id;
       role_id = req.user.role_id;
+      role_name = req.user.role_name;
+      name = req.user.name;
     }
 
-    history = `PENDING_Request Created_${today}_${req.user.role_name}_${req.user.name}`;
+    history = `PENDING_Request Created_${today}_${role_name}_${name}`;
     activity_log = [
       {
         date: today,
-        name: req.user.name,
-        role: req.user.role_name,
+        name: name,
+        role: role_name,
         activity: "Request Created",
         activity_type: "PENDING",
       },
@@ -832,8 +830,6 @@ const fetchFilteredRequests = async (req, res, next) => {
 
   db.query(sql + pageCond, (err, result) => {
     if (err) return res.status(400).json({ errormsg: err });
-    if (result.rows.length == 0)
-      return res.status(404).json({ msg: "No requests" });
 
     res.status(200).json({ rows: result.rows, total: totalPages });
   });
