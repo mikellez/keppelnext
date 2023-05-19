@@ -61,8 +61,8 @@ export default function CompleteRequest(props: RequestPreviewProps) {
   const { data } = useCurrentUser();
 
   useEffect(() => {
-    if (data?.id != props.request.assigned_user_id) {
-      router.push("/404");
+    if (data?.role_id == 4 && data?.id != props.request.assigned_user_id) {
+      router.push("/403");
     } else {
       setIsReady(true);
     }
