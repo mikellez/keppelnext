@@ -28,7 +28,25 @@ let user: boolean = false;
 
 export default function RequestNew(props: RequestProps) {
     const router = useRouter();
+    const [userbool, setUserbool] = useState(false);
     console.log(props)
+    useEffect(() => {
+        instance
+            .get<CMMSUser>(`/api/user`)
+            .then((response) => {
+                console.log(response.data)
+                console.log(1)
+                setUserbool(true);
+                console.log(userbool)
+                return true;
+            })
+            .catch((e) => {
+                console.log(e)
+                console.log(2)
+                console.log(userbool)
+                return false;
+            })
+    }, []);
 
 
     return (
@@ -39,7 +57,7 @@ export default function RequestNew(props: RequestProps) {
                 </Link>
             </ModuleHeader>
             <ModuleContent>
-                <RequestGuestContainer requestData={props}/>
+                <RequestGuestContainer requestData={props} user={userbool}/>
             </ModuleContent>
         </ModuleMain>
     );
@@ -74,20 +92,6 @@ export const getServerSideProps: GetServerSideProps = async (
         headers
     );
 
-    const user: boolean = await instance
-            .get<CMMSUser>(`/api/user`)
-            .then((response) => {
-                console.log(response.data)
-                return true;
-            })
-            .catch((e) => {
-                console.log(e)
-                return false;
-            })
-            .finally(() => {
-                return false;
-            });
-    console.log(user);
      
 
 
@@ -107,13 +111,12 @@ export const getServerSideProps: GetServerSideProps = async (
         faultTypes: CMMSFaultTypes[];
         plant: any;
         asset: any;
-        user: boolean;
 
     }
 
     let props: GuestRequestProps = { 
         requestTypes: r, faultTypes: f
-        , plant: p, asset: a, user: user
+        , plant: p, asset: a
     };
 
     return {

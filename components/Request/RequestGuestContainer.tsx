@@ -48,10 +48,12 @@ import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
 import Select, { ActionMeta, MultiValue, StylesConfig } from "react-select";
 import Image from "next/image";
 import { set } from "nprogress";
+import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 
 
 
 export default function RequestGuestContainer(props: any) {
+  const router = useRouter();
 
   const [form, setForm]  = useState<{
     name : string,
@@ -73,16 +75,26 @@ export default function RequestGuestContainer(props: any) {
     image: undefined
   }
   );
+  useEffect(() => {
+    console.log(props.user)
+    if (props.user){
+      setForm((prevState) => {
+        return {...prevState, name: "user"}
+      })
+    }
+  }, [])
   const [selectedFile, setSelectedFile] = useState<File>();
   const [previewedFile, setPreviewedFile] = useState<string>();
   const [isImage, setIsImage] = useState<boolean>(true);
-  // console.log(props.requestData.plant);
-  // console.log(props.requestData.plant[0].plant_name);
+  const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
+  const [submissionModal, setSubmissionModal] = useState<boolean>(false);
 
 
   async function submitform() {
-    // console.log(form);
-    // console.log(form["image"]);
+    console.log(form)
+    if (form.requestTypeID == "" || form.faultTypeID == "" || form.name == "") {
+      setIsMissingDetailsModaOpen(true);
+    } else {
     const formData = new FormData();
     for (const key in form) {
       if ( key == "image" ) {
@@ -99,6 +111,7 @@ export default function RequestGuestContainer(props: any) {
     })
     .then((response) => {
       console.log("ni hao")
+      setSubmissionModal(true);
       return response.data;
     })
     .catch((e) => {
@@ -106,7 +119,7 @@ export default function RequestGuestContainer(props: any) {
       console.log(e);
       return null;
     }); 
-  }
+  }}
 
   useEffect(() => {
     if (selectedFile) {
@@ -129,7 +142,7 @@ export default function RequestGuestContainer(props: any) {
     <div>
       <ModuleContent includeGreyContainer grid>
         <div className={formStyles.halfContainer}>
-        <div className="form-group">
+        {!props.user && (<div className="form-group">
             <label className="form-label">
               <RequiredIcon /> Name
               <textarea
@@ -143,7 +156,7 @@ export default function RequestGuestContainer(props: any) {
               }}
             ></textarea>
             </label>
-            </div>
+            </div>)}
           <div className="form-group">
             <label className="form-label">
               <RequiredIcon /> Request Type
@@ -310,6 +323,35 @@ export default function RequestGuestContainer(props: any) {
           }
           Submit
         </button>
+        <ModuleSimplePopup
+            modalOpenState={isMissingDetailsModalOpen}
+            setModalOpenState={setIsMissingDetailsModaOpen}
+            title="Missing Details"
+            text="Please ensure that you have filled in all the required entries."
+            icon={SimpleIcon.Cross}
+          />
+          <ModuleSimplePopup
+            modalOpenState={submissionModal}
+            setModalOpenState={setSubmissionModal}
+            title="Success!"
+            text="Your inputs has been submitted!"
+            icon={SimpleIcon.Check}
+            buttons={[
+              <button
+                  key={1}
+                  onClick={() => {
+                    setSubmissionModal(false);
+                    router.reload();
+                  }}
+                  className="btn btn-secondary"
+                >
+                  Submit another request
+              </button>, 
+            ]}
+            onRequestClose={() => {
+              router.reload();
+            }}
+          />
       </ModuleFooter>
     </div>
   );
