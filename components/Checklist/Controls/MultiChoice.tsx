@@ -228,13 +228,13 @@ function MultiChoiceEditable ({ multiChoiceObj, rowId, sectionId }: {
 
 	const addEventTargetValue = (current: string, value: string) => {
 		if (current.trim().length > 0) {
-			return Array.from(new Set((current + ", " + value).split(", "))).join(", ");
+			return Array.from(new Set((current + "," + value).split(","))).join(",");
 		}
 		return value;
 	};
 
 	const removeEventTargetValue = (current: string, value: string) => {
-		return current.split(", ").filter(item => item != value).join(", ");
+		return current.split(",").filter(item => item != value).join(",");
 	};
 
 	return (
@@ -274,7 +274,7 @@ function MultiChoiceView ({multiChoiceObj}: {multiChoiceObj: MultiChoiceControl}
 								type="checkbox"
 								className="form-check-input"
                 disabled
-                checked={multiChoiceObj.value.split(", ").includes(choice)}
+                checked={multiChoiceObj.value.split(",").includes(choice)}
 							/>
 							<label className="form-check-label">
 								{choice}
