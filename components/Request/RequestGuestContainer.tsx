@@ -24,7 +24,7 @@
 
 import formStyles from "../../styles/formStyles.module.css";
 
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import instance from '../../axios.config.js';
 
 import { ModuleContent, ModuleDivider, ModuleFooter } from "../../components";
@@ -47,33 +47,81 @@ import { useRouter } from "next/router";
 import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
 import Select, { ActionMeta, MultiValue, StylesConfig } from "react-select";
 import Image from "next/image";
+import { set } from "nprogress";
 
 
 
 export default function RequestGuestContainer(props: any) {
 
   const [form, setForm]  = useState<{
-    request_type: string,
-    fault_type: string,
+    name : string,
+    requestTypeID: string,
+    faultTypeID: string,
     description: string
-    plant: string,
-    asset: string,
-    image?: string
+    plantLocationID: string,
+    taggedAssetID: string,
+    image?: FileList
 
   }>(
     {
-    request_type: "",
-    fault_type: "",
+    name: "",
+    requestTypeID: "",
+    faultTypeID: "",
     description: "",
-    plant: props.plant,
-    asset: props.asset,
+    plantLocationID: props.requestData.plant[0].plant_id,
+    taggedAssetID: props.requestData.asset[0].psa_id,
     image: undefined
   }
   );
+  const [selectedFile, setSelectedFile] = useState<File>();
+  const [previewedFile, setPreviewedFile] = useState<string>();
+  const [isImage, setIsImage] = useState<boolean>(true);
+  // console.log(props.requestData.plant);
+  // console.log(props.requestData.plant[0].plant_name);
+
 
   async function submitform() {
-      console.log(form);
+    // console.log(form);
+    // console.log(form["image"]);
+    const formData = new FormData();
+    for (const key in form) {
+      if ( key == "image" ) {
+        if (form[key]) {
+          formData.append(key, form[key]);
+        }
+      } else{
+        formData.append(key, form[key]);
+      }
+    }
+    return await instance
+    .post("/api/request/", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+    .then((response) => {
+      console.log("ni hao")
+      return response.data;
+    })
+    .catch((e) => {
+      console.log("error creating request");
+      console.log(e);
+      return null;
+    }); 
   }
+
+  useEffect(() => {
+    if (selectedFile) {
+      const reader = new FileReader();
+  
+      reader.onload = () => {
+        setPreviewedFile(reader.result as string);
+        setIsImage(true);
+        setForm((prevState) => {
+          return {...prevState, image: selectedFile}
+        })
+      };
+      reader.readAsDataURL(selectedFile);
+    }
+  }, [selectedFile]);
   
 
 
@@ -81,6 +129,21 @@ export default function RequestGuestContainer(props: any) {
     <div>
       <ModuleContent includeGreyContainer grid>
         <div className={formStyles.halfContainer}>
+        <div className="form-group">
+            <label className="form-label">
+              <RequiredIcon /> Name
+              <textarea
+              className="form-control"
+              rows={1}
+              onChange = {(e) => {
+                // console.log(e.target.value);
+                setForm((prevState) => {
+                  return {...prevState, name: e.target.value}
+                })
+              }}
+            ></textarea>
+            </label>
+            </div>
           <div className="form-group">
             <label className="form-label">
               <RequiredIcon /> Request Type
@@ -88,9 +151,9 @@ export default function RequestGuestContainer(props: any) {
             <select
               className="form-control"
               onChange = {(e) => {
-                console.log(e.target.value);
+                // console.log(e.target.value);
                 setForm((prevState) => {
-                  return {...prevState, request_type: e.target.value}
+                  return {...prevState, requestTypeID: e.target.value}
                 })
               }}
             >
@@ -113,9 +176,9 @@ export default function RequestGuestContainer(props: any) {
             <select
               className="form-control"
               onChange = {(e) => {
-                console.log(e.target.value);
+                // console.log(e.target.value);
                 setForm((prevState) => {
-                  return {...prevState, fault_type: e.target.value}
+                  return {...prevState, faultTypeID: e.target.value}
                 })
               }}
             >
@@ -136,7 +199,7 @@ export default function RequestGuestContainer(props: any) {
               className="form-control"
               rows={6}
               onChange = {(e) => {
-                console.log(e.target.value);
+                // console.log(e.target.value);
                 setForm((prevState) => {
                   return {...prevState, description: e.target.value}
                 })
@@ -149,8 +212,8 @@ export default function RequestGuestContainer(props: any) {
             </label>
               <select className="form-select" disabled={true}
               >
-                <option value={props.plant}>
-                  {props.plant}
+                <option value={props.requestData.plant[0].plant_id}>
+                  {props.requestData.plant[0].plant_name}
                 </option>
               </select>
           </div>
@@ -163,7 +226,9 @@ export default function RequestGuestContainer(props: any) {
               className="form-select"
               disabled = {true}
             >
-              <option value={props.asset}> {props.asset}</option>
+              <option value={props.requestData.asset[0].psa_id}> 
+              {props.requestData.asset[0].psa_id + " | " + props.requestData.asset[0].plant_asset_instrument}
+              </option>
             </select>
 
           </div>
@@ -187,29 +252,20 @@ export default function RequestGuestContainer(props: any) {
                 accept="image/jpeg,image/png,image/gif"
                 id="formFile"
                 onChange={(e) => {
-                  console.log(e.target.files);
-                  setForm((prevState) => {
-                    return {...prevState, image: e.target.files![0]}
-                  })
-                }}
+                  setIsImage(false);
+                  // console.log(e.target.files);
+                  setSelectedFile(e.target.files![0]);
+                //   setForm((prevState) => {
+                //     return {...prevState, image: e.target.files![0]}
+                //   })
+                // }
+              }}
               />
             </div>
           )}
 
-          { form.image
-          &&
-          // (
-          //   <div style={{ height: "100%", position: "relative" }}>
-          //     <Image
-          //       src={form.image}
-          //       alt="File error"
-          //       fill
-          //       // width={200}
-          //       // height={200}
-          //     />
-          //   </div>
-          // ) : (
-            (<ImagePreview previewObjURL={form.image} />
+          { isImage && previewedFile && (
+            <ImagePreview previewObjURL={previewedFile} />
           )}
 
           {props.assignRequestData && (
@@ -218,15 +274,6 @@ export default function RequestGuestContainer(props: any) {
                 <RequiredIcon />
                 Assign to:
               </label>
-
-              {/* <AssignToSelect
-                plantId={plantId as number}
-                isSingle={true}
-                // onChange={}
-                defaultIds={[
-                  props.assignRequestData.requestData.assigned_user_id,
-                ]}
-              /> */}
             </div>
           )}
 
