@@ -52,9 +52,6 @@ export default function RequestNew(props: RequestProps) {
     return (
         <ModuleMain>
             <ModuleHeader title="New Request" header="Create New Request">
-                <Link href="/Request" className="btn btn-secondary">
-                    Back
-                </Link>
             </ModuleHeader>
             <ModuleContent>
                 <RequestGuestContainer requestData={props} user={userbool}/>
