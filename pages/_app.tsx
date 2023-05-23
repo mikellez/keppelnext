@@ -33,9 +33,9 @@ export default function App({ Component, pageProps }: AppProps) {
     };
   }, [router.events]);
 
-  // console.log(asPath, route, pathname);
+  console.log(asPath, route, pathname);
 
-  if (asPath === "/Login" || pathname === "/404" || pathname === "/500")
+  if (asPath === "/Login" || pathname === "/404" || pathname === "/500" || pathname === "/403" || asPath.includes("/Guest/Asset/"))
     return (
       <div>
         <Component {...pageProps} />

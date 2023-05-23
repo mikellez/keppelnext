@@ -214,6 +214,15 @@ router.get(
   checkIfLoggedInAPI,
   controllers.request.fetchFilteredRequests
 );
+router.get(
+  "/request/plant/:plant_id",
+  controllers.request.fetchPlantRequest
+);
+router.get(
+  "/request/asset/:psa_id",
+  controllers.request.fetchAssetRequest
+);
+
 
 router.get(
   "/asset/systems",

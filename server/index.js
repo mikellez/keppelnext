@@ -96,7 +96,7 @@ app.prepare().then(() => {
   // this is more of a bandaid solution but whatever >w<
   //--------------------------
   server.all(
-    "/_next/static/chunks/pages/(\\_app|Login|404|500)*",
+    "/_next/static/chunks/pages/(\\_app|Login|404|500|403|Guest)*",
     (req, res) => {
       return handle(req, res);
     }
@@ -143,6 +143,9 @@ app.prepare().then(() => {
     return handle(req, res);
   });
   server.get("/User*", checkIfLoggedIn, accessControl, (req, res) => {
+    return handle(req, res);
+  });
+  server.get("/Guest*", (req, res) => {
     return handle(req, res);
   });
   server.get("*", (req, res) => {
