@@ -1,4 +1,5 @@
-import axios from "axios";
+// import axios from "axios";
+const axios = require('axios')
 
 const instance = axios.create({
   baseURL: "http://localhost:3001",
@@ -30,4 +31,4 @@ instance.interceptors.response.use(
     return Promise.reject(error); 
 });*/
 
-export default instance;
+module.exports = instance;
