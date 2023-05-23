@@ -8,7 +8,7 @@ import styles from "../../styles/Schedule.module.scss";
 
 interface ScheduleTableProps {
     schedules?: ScheduleInfo[];
-    viewRescheduled?: boolean
+    viewRescheduled?: boolean;
 }
 
 interface ScheduleInfoItem {
@@ -40,31 +40,32 @@ interface ScheduleInfoItem {
 const COLUMNS: Column<ScheduleInfoItem>[] = [
     {
         label: "Checklist Name",
-        renderCell: item => item.checklist_name,
+        renderCell: (item) => item.checklist_name,
         pinLeft: true,
     },
     {
         label: "Frequency",
-        renderCell: item => toPeriodString(item.period),
+        renderCell: (item) => toPeriodString(item.period),
         pinLeft: true,
     },
     {
         label: "Start",
-        renderCell: item => item.start_date ? dateFormat(new Date(item.start_date)) : "Rescheduled",
+        renderCell: (item) =>
+            item.start_date ? dateFormat(new Date(item.start_date)) : "Rescheduled",
     },
     {
         label: "End",
-        renderCell: item => item.end_date ? dateFormat(new Date(item.end_date)) : "Rescheduled",
+        renderCell: (item) => (item.end_date ? dateFormat(new Date(item.end_date)) : "Rescheduled"),
     },
     {
         label: "Assigned",
-        renderCell: item => {
+        renderCell: (item) => {
             let assignedUsers = [];
-            const noOfAssigned = item.assigned_ids.length;
+            const noOfAssigned = item.assigned_ids ? item.assigned_ids.length : 0;
             for (let i = 0; i < noOfAssigned; i++) {
                 assignedUsers.push(
                     <EventModalUser
-                        key={item.id} 
+                        key={item.id}
                         serial={i + 1}
                         role_name={item.assigned_roles[i]}
                         fname={item.assigned_fnames[i]}
@@ -78,7 +79,7 @@ const COLUMNS: Column<ScheduleInfoItem>[] = [
             return assignedUsers;
         },
     },
-    { label: "Remarks", renderCell: item => item.remarks },
+    { label: "Remarks", renderCell: (item) => item.remarks },
 ];
 
 export default function ScheduleTable(props: ScheduleTableProps) {
@@ -87,35 +88,37 @@ export default function ScheduleTable(props: ScheduleTableProps) {
         if (props.schedules) {
             let schedules = props.schedules;
             if (!props.viewRescheduled) {
-                schedules = schedules.filter(schedule => schedule.end_date != null)
+                schedules = schedules.filter((schedule) => schedule.end_date != null);
             }
-            setScheduleItems(schedules.map((row) => {
-                return {
-                    id: row.schedule_id,
-                    assigned_fnames: row.assigned_fnames,
-                    assigned_lnames: row.assigned_lnames,
-                    assigned_roles: row.assigned_roles,
-                    assigned_emails: row.assigned_emails,
-                    assigned_usernames: row.assigned_usernames,
-                    assigned_ids: row.assigned_ids,
-                    calendar_dates: row.calendar_dates,
-                    checklist_id: row.checklist_id,
-                    checklist_name: row.checklist_name,
-                    start_date: row.start_date,
-                    end_date: row.end_date,
-                    prev_start_date: row.prev_end_date,
-                    prev_end_date: row.prev_end_date,
-                    period: row.period,
-                    plant: row.plant,
-                    plantId: row.plantId,
-                    remarks: row.remarks,
-                    timeline_id: row.timeline_id,
-                    exclusionList: row.exclusionList,
-                    isSingle: row.isSingle,
-                    index: row.index,
-                    status: row.status
-                }
-            }));
+            setScheduleItems(
+                schedules.map((row) => {
+                    return {
+                        id: row.schedule_id,
+                        assigned_fnames: row.assigned_fnames,
+                        assigned_lnames: row.assigned_lnames,
+                        assigned_roles: row.assigned_roles,
+                        assigned_emails: row.assigned_emails,
+                        assigned_usernames: row.assigned_usernames,
+                        assigned_ids: row.assigned_ids,
+                        calendar_dates: row.calendar_dates,
+                        checklist_id: row.checklist_id,
+                        checklist_name: row.checklist_name,
+                        start_date: row.start_date,
+                        end_date: row.end_date,
+                        prev_start_date: row.prev_end_date,
+                        prev_end_date: row.prev_end_date,
+                        period: row.period,
+                        plant: row.plant,
+                        plantId: row.plantId,
+                        remarks: row.remarks,
+                        timeline_id: row.timeline_id,
+                        exclusionList: row.exclusionList,
+                        isSingle: row.isSingle,
+                        index: row.index,
+                        status: row.status,
+                    };
+                })
+            );
         }
     }, [props.schedules, props.viewRescheduled]);
 

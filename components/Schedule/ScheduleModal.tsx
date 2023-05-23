@@ -9,7 +9,7 @@ import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup
 import { ModuleModal, ModalProps } from "../";
 import { useRouter } from "next/router";
 import { ThreeDots } from "react-loading-icons";
-import instance from '../../axios.config.js';
+import instance from "../../axios.config.js";
 
 interface ScheduleMaintenanceModalProps extends ModalProps {
     timeline?: CMMSTimeline; // use to add schedule in draft
@@ -39,6 +39,7 @@ async function editDraftSchedule(schedule: CMMSSchedule) {
         });
 }
 
+// return false if schedule is invalid
 export function scheduleValidator(schedule: CMMSSchedule) {
     return !(
         !schedule.checklistId ||
@@ -48,8 +49,6 @@ export function scheduleValidator(schedule: CMMSSchedule) {
         !schedule.recurringPeriod ||
         schedule.recurringPeriod === -1 ||
         (!schedule.reminderRecurrence && schedule.reminderRecurrence != 0) ||
-        !schedule.assignedIds ||
-        schedule.assignedIds.length === 0 ||
         !schedule.remarks
     );
 }
@@ -115,18 +114,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
         // Disable submit button
         setDisableSubmit(true);
         // Check for missing entries
-        if (
-            !newSchedule.checklistId ||
-            !newSchedule.startDate ||
-            !newSchedule.endDate ||
-            !newSchedule.checklistId ||
-            !newSchedule.recurringPeriod ||
-            newSchedule.recurringPeriod === -1 ||
-            (!newSchedule.reminderRecurrence && newSchedule.reminderRecurrence != 0) ||
-            !newSchedule.assignedIds ||
-            newSchedule.assignedIds.length === 0 ||
-            !newSchedule.remarks
-        ) {
+        if (!scheduleValidator(newSchedule)) {
             setFailureModal(true);
             // Enable submit button
             setDisableSubmit(false);
