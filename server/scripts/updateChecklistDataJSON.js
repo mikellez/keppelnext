@@ -1,19 +1,43 @@
-const db = require('../../db');
+const { Client } = require("pg");
 
-const getOldChecklistTemplates = async () => {
-    try {
-        const result = await db.query(`SELECT * from keppel.checklist_templates`)
-        return result.rows
-            .filter(c => c.datajson.constructor != Array)
-            .map(c => {return {id: c.checklist_id, datajson: c.datajson}});
+const getOldChecklists = async (checklistType) => {
+    if (!validateChecklistType(checklistType)) throw new Error("Invalid checklist type.");
 
-    } catch (err) {
-        console.log(err);
-    }
+    const checklists = await queryChecklists(checklistType);
+    return checklists
+        .filter(c => c.datajson.constructor != Array)
+        .map(c => {return {id: c.checklist_id, datajson: c.datajson}});
 };
 
-const changeTemplates = async (templates) => {
-    return templates.map(t => {
+const validateChecklistType = (checklistType) => {
+    return  (checklistType != "template" || checklistType != "record");
+};
+
+const queryChecklists = async (checklistType) => {
+    const client = connectDB();
+    const table = checklistType === "templates" ? "checklist_templates" : "checklist_master";
+    const result = await client.query(`SELECT * from keppel.${table}`);
+
+    client.end();
+    return result.rows
+};
+
+const connectDB = () => {
+    const client = new Client({
+        user: "postgres",
+        host: "192.168.20.96",
+        database: "cmms",
+        password: "123Az!!!",
+        port: 5432,
+        application_name: "Keppel CMMS (Next.js)",
+    });
+
+    client.connect();
+    return client;
+};
+
+const changeChecklist = async (checklists) => {
+    return checklists.map(t => {
         return {
             ...t,
             datajson: changeJSONFormat(t.datajson)
@@ -48,7 +72,6 @@ const changeSectionFormat = (section) => {
 };
 
 const changeRowFormat = (row) => {
-
     return {
         description: row.rowDescription, 
         checks: row.checks.map(c => changeCheckFormat(c))
@@ -86,26 +109,30 @@ const changeCheckType = (type) => {
     };
 };
 
-const updateDB = async (templates) => {
-    for (const template of templates) {
-        try {
-            await db.query(`
-                UPDATE keppel.checklist_templates SET
-                datajson = $1
-                WHERE checklist_id = $2
-            `, [JSON.stringify(template.datajson), template.id]);
-        } catch (err) {
-            console.log(err);
-        }
+const updateDB = async (checklists, checklistType) => {
+    if (!validateChecklistType(checklistType)) throw new Error("Invalid checklist type.");
+    const table = checklistType === "templates" ? "checklist_templates" : "checklist_master";
+
+    for (const checklist of checklists) {
+        const client = connectDB();  
+
+        await client.query(`
+            UPDATE keppel.${table} SET
+            datajson = $1
+            WHERE checklist_id = $2
+        `, [JSON.stringify(checklist.datajson), checklist.id]);
+
+        client.end();
     }
 };
 
-const main = async () => {
-    const templates = await getOldChecklistTemplates();
-    const newTemplates = await changeTemplates(templates);
-    await updateDB(newTemplates);
+const main = async (checklistType) => {
+    const checklists = await getOldChecklists(checklistType);
+    const newChecklists = await changeChecklist(checklists);
+    await updateDB(newChecklists, checklistType);
 };
 
-// module.exports = main;
-main();
+main("record")
+.then(r => console.log("Successfull updated checklists"))
+.catch(err => console.log(err))
 
