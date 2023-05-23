@@ -308,17 +308,6 @@ router
   .delete(controllers.checklist.deleteChecklistTemplate);
 
 router
-  .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
-  .get(controllers.checklist.fetchSpecificChecklistTemplate)
-  .post(controllers.checklist.createNewChecklistTemplate)
-  .delete(controllers.checklist.deleteChecklistTemplate);
-
-router
-  .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
-  .get(controllers.checklist.fetchSpecificChecklistTemplate)
-  .post(controllers.checklist.createNewChecklistTemplate);
-
-router
   .route("/checklist/assigned", checkIfLoggedInAPI)
   .get(controllers.checklist.fetchAssignedChecklists);
 
@@ -582,6 +571,7 @@ router
   );
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
+
 
 // NO API ROUTE
 router.all("/*", (req, res) => {

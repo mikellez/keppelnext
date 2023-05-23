@@ -253,7 +253,21 @@ const createNewChecklistRecord = async (req, res, next) => {
             status_id,
             activity_log
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`;
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        
+    `;
+
+    // RETURNING (
+    //     SELECT 
+    //         u1.user_email as assigned_user_email,
+    //         u2.user_email as signoff_user_email
+    //     FROM 
+    //         keppel.checklist_master cm
+    //         LEFT JOIN keppel.users u1 ON cm.assigned_user_id = u1.user_id
+    //         LEFT JOIN keppel.users u2 ON cm.signoff_user_id = u2.user_id
+    //     WHERE
+    //         cm.checklist_id = checklist_id
+    // )
 
     const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
@@ -286,11 +300,13 @@ const createNewChecklistRecord = async (req, res, next) => {
             statusId,
             JSON.stringify(activity_log),
         ],
-        (err) => {
+        (err, found) => {
             if (err) {
                 console.log(err);
                 return res.status(500).json("Failure to create new checklist");
-            }
+            }   
+            console.log(found.rows)
+            // const { assigned_user_email, signoff_user_email } = found.rows
             return res.status(200).json("New checklist successfully created");
         }
     );
@@ -324,7 +340,7 @@ const createNewChecklistTemplate = async (req, res, next) => {
             checklist.chl_name,
             checklist.description,
             checklist.signoff_user_id,
-            checklist.datajson,
+            JSON.stringify(checklist.datajson),
             "Template",
             checklist.plant_id,
             today,
