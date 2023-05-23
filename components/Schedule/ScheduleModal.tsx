@@ -207,6 +207,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                                                     : minDate
                                             }
                                             onChange={updateSchedule}
+                                            onKeyDown={(e) => e.preventDefault()}
                                         />
                                     </td>
                                 </tr>
@@ -224,6 +225,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                                                     : minDate
                                             }
                                             onChange={updateSchedule}
+                                            onKeyDown={(e) => e.preventDefault()}
                                         />
                                     </td>
                                 </tr>
