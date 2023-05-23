@@ -22,20 +22,39 @@ import Link from "next/link";
 import {RequestProps } from "../../../../components/Request/RequestContainer";
 import RequestGuestContainer from "../../../../components/Request/RequestGuestContainer";
 
-// import RequestGuestContainer from "../../../../components/Request/RequestGuestContainer.jsx";
+let user: boolean = false;
+
+
 
 export default function RequestNew(props: RequestProps) {
     const router = useRouter();
+    const [userbool, setUserbool] = useState(false);
+    console.log(props)
+    useEffect(() => {
+        instance
+            .get<CMMSUser>(`/api/user`)
+            .then((response) => {
+                console.log(response.data)
+                console.log(1)
+                setUserbool(true);
+                console.log(userbool)
+                return true;
+            })
+            .catch((e) => {
+                console.log(e)
+                console.log(2)
+                console.log(userbool)
+                return false;
+            })
+    }, []);
+
 
     return (
         <ModuleMain>
             <ModuleHeader title="New Request" header="Create New Request">
-                <Link href="/Request" className="btn btn-secondary">
-                    Back
-                </Link>
             </ModuleHeader>
             <ModuleContent>
-                <RequestGuestContainer requestData={props} plant ={+router.query.plants!} asset ={+router.query.id!}/>
+                <RequestGuestContainer requestData={props} user={userbool}/>
             </ModuleContent>
         </ModuleMain>
     );
@@ -43,7 +62,10 @@ export default function RequestNew(props: RequestProps) {
 
 export const getServerSideProps: GetServerSideProps = async (
     context: GetServerSidePropsContext
+
 ) => {
+    
+
     const headers = {
         withCredentials: true,
         headers: {
@@ -58,21 +80,41 @@ export const getServerSideProps: GetServerSideProps = async (
         `/api/fault/types`,
         headers
     );
+    const getPlant = instance.get<any>(
+        `/api/request/plant/${context.query.plants}`,
+        headers
+    );
+    const getAsset = instance.get<any>(
+        `/api/request/asset/${context.query.id}`,
+        headers
+    );
+
+     
+
 
     const values = await Promise.all([
-        getRequestTypes, getFaultTypes]);
+        getRequestTypes, getFaultTypes
+        , getPlant, getAsset
+    ]);
 
     const r: CMMSRequestTypes[] = values[0].data;
     const f: CMMSFaultTypes[] = values[1].data;
+    const p: CMMSBaseType = values[2].data;
+    const a: CMMSBaseType = values[3].data;
 
 
     interface GuestRequestProps {
         requestTypes: CMMSRequestTypes[];
         faultTypes: CMMSFaultTypes[];
+        plant: any;
+        asset: any;
+
     }
 
     let props: GuestRequestProps = { 
-        requestTypes: r, faultTypes: f};
+        requestTypes: r, faultTypes: f
+        , plant: p, asset: a
+    };
 
     return {
         props: props,

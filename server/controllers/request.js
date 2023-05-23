@@ -11,7 +11,7 @@ const ITEMS_PER_PAGE = 10;
 
 function fetchRequestQuery(status_query, role_id, user_id, page) {
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
-  console.log(role_id)
+  // console.log(role_id)
 
   return role_id === 1 || role_id === 2 || role_id === 3
     ? `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
@@ -184,6 +184,8 @@ const fetchApprovedRequests = async (req, res, next) => {
 };
 
 const createRequest = async (req, res, next) => {
+  // console.log(req.body)
+  // console.log(req.file)
   const {
     requestTypeID,
     faultTypeID,
@@ -191,8 +193,8 @@ const createRequest = async (req, res, next) => {
     plantLocationID,
     taggedAssetID,
   } = req.body;
-  console.log(req.body.linkedRequestId);
-  console.log("^&*")
+  // console.log(req.body.linkedRequestId);
+  // console.log("^&*")
   const fileBuffer = req.file === undefined ? null : req.file.buffer;
   const fileType = req.file === undefined ? null : req.file.mimetype;
   const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
@@ -248,7 +250,7 @@ const createRequest = async (req, res, next) => {
   }
 if(!req.body.linkedRequestId) {
   const q = `INSERT INTO keppel.request(
-    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, activity_log, associatedrequestid, activity_log
+    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
   ) VALUES (
     $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
   )`;
@@ -271,7 +273,6 @@ if(!req.body.linkedRequestId) {
     ],
     (err, result) => {
       if (err) return res.status(500).json({ errormsg: err });
-      if (result.rows.length == 0) return res.status(404).json({ msg: "No checklist" });
       res.status(200).send({ msg: "Request created successfully" });
 
     }
@@ -280,7 +281,7 @@ if(!req.body.linkedRequestId) {
 else if (req.body.linkedRequestId){
   const insertQuery = `
   INSERT INTO keppel.request(
-    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, activity_log, associatedrequestid, activity_log
+    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
   ) VALUES (
     $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
   );
@@ -304,13 +305,13 @@ db.query(insertQuery, [
   JSON.stringify(activity_log),
 ], (err, result) => {
   if (err) {
-    console.log(err);
+    // console.log(err);
     return next(err);
   }
 
   db.query(updateQuery, [req.body.linkedRequestId], (err, result) => {
     if (err) {
-      console.log(err);
+      // console.log(err);
       return next(err);
     }
 
@@ -489,7 +490,7 @@ const fetchRequestPriority = async (req, res, next) => {
 };
 
 const fetchSpecificRequest = async (req, res, next) => {
-  console.log(req.params.request_id)
+  // console.log(req.params.request_id)
   const sql = `SELECT 
   r.request_id,
   rt.request as request_name, 
@@ -642,7 +643,7 @@ const approveRejectRequest = async (req, res, next) => {
   const status = req.params.status_id == 4 ? "APPROVED" : "REJECTED";
   const text = req.params.status_id == 4 ? "Approved" : "Rejected";
   const history = `!${status}_${text} request_${today}_${req.user.role_name}_${req.user.name}`;
-  console.log(req.body);
+  // console.log(req.body);
   const sql = `
 	UPDATE keppel.request SET 
 	status_id = $1,
@@ -699,7 +700,7 @@ const completeRequest = async (req, res, next) => {
     ],
     (err, result) => {
       if (err) {
-        console.log(err);
+        // console.log(err);
         return res.status(500).send("Error in updating status");
       }
       return res.status(200).json("Request successfully updated");
@@ -873,6 +874,24 @@ const fetchRequestUploadedFile = async (req, res, next) => {
   });
 };
 
+const fetchPlantRequest = async (req, res, next) => {
+  const sql = `SELECT plant_id, plant_name FROM keppel.plant_master WHERE plant_id = ${req.params.plant_id}`;
+  db.query(sql, (err, result) => {
+    if (err) return res.status(500).send("Error in fetching plant");
+    return res.status(200).json(result.rows);
+  });
+}
+
+const fetchAssetRequest = async (req, res, next) => {
+  const sql = `SELECT psa_id, plant_asset_instrument FROM keppel.plant_system_assets WHERE psa_id = ${req.params.psa_id}`;
+  // console.log(sql);
+  db.query(sql, (err, result) => {
+    if (err) return res.status(500).send("Error in fetching Asset");
+    return res.status(200).json(result.rows);
+  });
+}
+
+
 module.exports = {
   fetchPendingRequests,
   fetchAssignedRequests,
@@ -889,5 +908,7 @@ module.exports = {
   completeRequest,
   fetchPendingRequests,
   fetchFilteredRequests,
-  fetchRequestUploadedFile
+  fetchRequestUploadedFile,
+  fetchPlantRequest,
+  fetchAssetRequest
 };
