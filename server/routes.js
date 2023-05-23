@@ -572,7 +572,6 @@ router
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
 
-
 // NO API ROUTE
 router.all("/*", (req, res) => {
   return res.status(404).send("no route");
