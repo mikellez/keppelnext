@@ -320,6 +320,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                                                     onChange={updateSchedule}
                                                     min={lowerStr.toISOString().slice(0, 10)}
                                                     max={upperStr.toISOString().slice(0, 10)}
+                                                    onKeyDown={(e) => e.preventDefault()}
                                                 />
                                             </td>
                                         ) : (
