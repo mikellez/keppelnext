@@ -3,23 +3,67 @@ const Mail = require('./Mail');
 class ChecklistMail extends Mail {
 
     constructor(recipient, subject, content, checklist, carbon_copy = null) {
+        // const assetLists = checklist.assets.split(', ')
+        // const assetElements = assetLists.length > 0 ? 
+        //     `
+        //         ${assetLists.map(asset => {
+        //             return `
+        //                 <ul>${asset}</ul>
+        //             `
+        //         })}
+        //     ` : `NIL`;
         const emailContent = `
-            <strong>Details: </strong></br>
-            <p>ID: ${checklist.id}</p></br>
-            <p>Name: ${checklist.name}</p></br>
-            <p>Description: ${checklist.description}</p></br>
-            <p>Plant: ${checklist.plant}</p></br>
-            <p>Assets: ${checklist.assets}</p></br>
-            <p>Assigned To: ${checklist.assignedTo}</p></br>
-            <p>Sign Off: ${checklist.signoff}</p></br>
-            <p>Created By: ${checklist.createdBy}</p></br>
-            <p>Created On: ${checklist.date}</p></br>
-            <p>Status: ${checklist.status}</p></br>
+            <strong>Checklist Details: </strong></br>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>ID:</td>
+                        <td>${checklist.id}</td>
+                    </tr>
+                    <tr>
+                        <td>Name:</td>
+                        <td>${checklist.name}</td>
+                    </tr>
+                    <tr>
+                        <td>Description:</td>
+                        <td>${checklist.description}</td>
+                    </tr>
+                    <tr>
+                        <td>Plant:</td>
+                        <td>${checklist.plant}</td>
+                    </tr>
+                    <tr>
+                        <td>Assets:</td>
+                        <td>
+                            ${checklist.assets}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Assigned To:</td>
+                        <td>${checklist.assignedTo}</td>
+                    </tr>
+                    <tr>
+                        <td>Sign Off:</td>
+                        <td>${checklist.signoff}</td>
+                    </tr>
+                    <tr>
+                        <td>Created By:</td>
+                        <td>${checklist.createdBy}</td>
+                    </tr>
+                    <tr>
+                        <td>Created On:</td>
+                        <td>${checklist.date}</td>
+                    </tr>
+                    <tr>
+                        <td>Status:</td>
+                        <td>${checklist.status}</td>
+                    </tr>
+                </tbody>
+            </table></br>
             ${content}</br>
         `;
         super(recipient, subject, emailContent, carbon_copy);
     };
-
 };
 
 class ApproveChecklistMail extends ChecklistMail {
@@ -43,10 +87,17 @@ class ReminderChecklistMail extends ChecklistMail {
     }; 
 };
 
-class CreatedChecklistMail extends ChecklistMail {
+class CreateChecklistMail extends ChecklistMail {
     constructor(recipient, checklist, content = "", carbon_copy = null) {
         const emailContent = content;
-        super(recipient, "New Checklist", emailContent, checklist, carbon_copy);
+        super(recipient, "New Checklist Created", emailContent, checklist, carbon_copy);
+    }; 
+};
+
+class CompleteChecklistMail extends ChecklistMail {
+    constructor(recipient, checklist, content = "", carbon_copy = null) {
+        const emailContent = content;
+        super(recipient, "Checklist Completed", emailContent, checklist, carbon_copy);
     }; 
 };
 
@@ -55,5 +106,6 @@ module.exports = {
     ApproveChecklistMail, 
     RejectChecklistMail, 
     ReminderChecklistMail, 
-    CreatedChecklistMail 
+    CreateChecklistMail,
+    CompleteChecklistMail
 };
