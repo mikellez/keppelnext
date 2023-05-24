@@ -568,7 +568,9 @@ router
     "/setting/updatePassword",
     checkIfLoggedInAPI,
     controllers.setting.updatePassword
-  );
+  )
+  .get("/setting/check/email/:id", checkIfLoggedInAPI, controllers.setting.checkEmail)
+  .get("/setting/check/username/:id", checkIfLoggedInAPI, controllers.setting.checkUsername);
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
 
