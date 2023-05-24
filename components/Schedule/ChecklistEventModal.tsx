@@ -125,6 +125,42 @@ export default function ChecklistEventModal(props: ModalProps) {
         }
     }
 
+    // check if remarks are the same
+    function isRemarkSame(oldRemark: string, newRemark: string) {
+        return oldRemark == newRemark;
+    }
+
+    // check if dates are the same
+    function isDateSame(oldDate: Date, newDate: Date) {
+        return oldDate.toISOString().slice(0, 10) == newDate.toISOString().slice(0, 10);
+    }
+
+    // check if assigned users are the same
+    function isAssignedSame(oldAssigned: number[], newAssigned: number[]) {
+        // if there are assigned users initially
+        if (oldAssigned) {
+            return oldAssigned.sort().join("") == newAssigned.sort().join("");
+        }
+        // if no assigned users initially, return true if no new assign or new assignment array is empty
+        else {
+            return !newAssigned || newAssigned.length == 0;
+        }
+    }
+
+    // function to handle boolean logic for submit button for edit single event
+    function isDisabled(
+        oldSchedule: CMMSScheduleEvent,
+        newSchedule: CMMSSchedule,
+        disabled: boolean
+    ) {
+        return (
+            isRemarkSame(oldSchedule.extendedProps.remarks, newSchedule.remarks) &&
+            isDateSame(oldSchedule.extendedProps.date as Date, newSchedule.date as Date) &&
+            isAssignedSame(oldSchedule.extendedProps.assignedIds, newSchedule.assignedIds) &&
+            disabled
+        );
+    }
+
     // Start and end dates of the schedule
     const startDate = new Date(props.event?.extendedProps.startDate as Date);
     const endDate = new Date(props.event?.extendedProps.endDate as Date);
@@ -150,11 +186,13 @@ export default function ChecklistEventModal(props: ModalProps) {
     useEffect(() => {
         setEditDeleteModal(false);
         setSubmitModal(false);
-        setDisableSubmit(false);
+        setDisableSubmit(true);
 
         if (props.event) {
             const users: CMMSUser[] = [];
-            const noOfAssigned = props.event.extendedProps.assignedIds.length;
+            const noOfAssigned = props.event.extendedProps.assignedIds
+                ? props.event.extendedProps.assignedIds.length
+                : 0;
             for (let i = 0; i < noOfAssigned; i++) {
                 users.push({
                     id: props.event.extendedProps.assignedIds[i],
@@ -217,6 +255,7 @@ export default function ChecklistEventModal(props: ModalProps) {
             />
         );
     });
+    console.log(newSchedule);
 
     return (
         <div>
@@ -281,6 +320,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                                                     onChange={updateSchedule}
                                                     min={lowerStr.toISOString().slice(0, 10)}
                                                     max={upperStr.toISOString().slice(0, 10)}
+                                                    onKeyDown={(e) => e.preventDefault()}
                                                 />
                                             </td>
                                         ) : (
@@ -408,20 +448,11 @@ export default function ChecklistEventModal(props: ModalProps) {
                                             <TooltipBtn
                                                 toolTip={false}
                                                 style={{ backgroundColor: "#EB1D36" }}
-                                                disabled={
-                                                    ((newSchedule.remarks ==
-                                                        props.event.extendedProps.remarks &&
-                                                        newSchedule.date ==
-                                                            props.event.extendedProps.date &&
-                                                        newSchedule.assignedIds.sort().join("") ==
-                                                            props.event.extendedProps.assignedIds
-                                                                .sort()
-                                                                .join("")) ||
-                                                        newSchedule.assignedIds.length == 0 ||
-                                                        !newSchedule.date ||
-                                                        newSchedule.date == null) &&
+                                                disabled={isDisabled(
+                                                    props.event,
+                                                    newSchedule,
                                                     disableSubmit
-                                                }
+                                                )}
                                                 onClick={submitEvent}
                                             >
                                                 Confirm

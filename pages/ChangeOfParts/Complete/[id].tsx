@@ -73,6 +73,7 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                                 className="form-control"
                                 onChange={handleOnChange}
                                 max={new Date().toISOString().slice(0, 10)}
+                                onKeyDown={(e) => e.preventDefault()}
                             />
                         </div>
                     </ModuleContent>

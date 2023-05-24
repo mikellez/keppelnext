@@ -49,6 +49,7 @@ export default function ApprovedScheduleInput(props: ApprovedScheduleInputProps)
                     type="date"
                     onChange={props.onChange}
                     style={inputRowStyles}
+                    onKeyDown={(e) => e.preventDefault()}
                 />
             </td>
 
@@ -61,6 +62,7 @@ export default function ApprovedScheduleInput(props: ApprovedScheduleInputProps)
                     type="date"
                     onChange={props.onChange}
                     style={{ ...inputRowStyles }}
+                    onKeyDown={(e) => e.preventDefault()}
                 />
             </td>
 

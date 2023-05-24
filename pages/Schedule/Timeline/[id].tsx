@@ -4,12 +4,12 @@ import { FiSend, FiPlusSquare } from "react-icons/fi";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import TooltipBtn from "../../../components/TooltipBtn";
 import styles from "../../styles/Schedule.module.scss";
-import instance from '../../../axios.config.js';
+import instance from "../../../axios.config.js";
 import { useRouter } from "next/router";
 import { CMMSTimeline } from "../../../types/common/interfaces";
 import { ThreeDots } from "react-loading-icons";
 import { changeTimelineStatus } from "../Manage";
-import ModuleSimplePopup, { SimpleIcon} from "../../../components/ModuleLayout/ModuleSimplePopup";
+import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { getTimelinesByStatus } from "../../../components/Schedule/TimelineSelect";
 import ScheduleModal from "../../../components/Schedule/ScheduleModal";
 
@@ -24,8 +24,7 @@ export async function getTimeline(id: number): Promise<CMMSTimeline> {
             console.log(err.response);
             return err.response.status;
         });
-};
-
+}
 
 // Get schedules by timeline id
 export async function getSchedules(id: number) {
@@ -35,9 +34,9 @@ export async function getSchedules(id: number) {
             return res.data;
         })
         .catch((err) => {
-            console.log(err.status)
+            console.log(err.status);
         });
-};
+}
 
 // Delete a timeline
 async function deleteTimeline(id: number) {
@@ -47,7 +46,7 @@ async function deleteTimeline(id: number) {
             return res.data;
         })
         .catch((err) => console.log(err));
-};
+}
 
 // Check if the timeline is valid for the user
 async function validateTimeline(id: number) {
@@ -61,7 +60,7 @@ async function validateTimeline(id: number) {
             if (timeline.id === currentTimeline.id) return timeline;
         }
     }
-};
+}
 
 export default function Timeline() {
     const router = useRouter();
@@ -80,13 +79,14 @@ export default function Timeline() {
         setIsLoading(true);
         if (timelineId) {
             const id = parseInt(timelineId as string);
-            validateTimeline(id).then(result => {
-                if (!result) router.replace("/404")
+            validateTimeline(id).then((result) => {
+                if (!result) router.replace("/404");
                 else {
                     setTimelineData(result);
                     getSchedules(id).then((schedules) => {
                         if (schedules) {
                             setScheduleList(schedules);
+                            console.log(schedules);
                         }
                     });
                 }
@@ -105,12 +105,12 @@ export default function Timeline() {
             //     if (result && result.filter(item => item.plantId === timelineData?.plantId)[0]) {
             //         setInvalidModal(true);
             //     } else {
-                    changeTimelineStatus(4, parseInt(timelineId as string)).then(result => {
-                        setSubmitModal(true);
-                        setTimeout(() => {
-                            router.replace("/Schedule/Create")
-                        }, 500);
-                    });
+            changeTimelineStatus(4, parseInt(timelineId as string)).then((result) => {
+                setSubmitModal(true);
+                setTimeout(() => {
+                    router.replace("/Schedule/Create");
+                }, 500);
+            });
             //     }
             // })
         }
@@ -122,9 +122,7 @@ export default function Timeline() {
                 <ThreeDots fill="black" />
             </div>
         );
-    } 
-    else if (isLoading == false 
-        ) {
+    } else if (isLoading == false) {
         return (
             <>
                 <ScheduleTemplate
@@ -141,60 +139,70 @@ export default function Timeline() {
                         <RiDeleteBin6Line size={22} />
                     </TooltipBtn>
 
-                    <TooltipBtn text="Submit for approval" onClick={submitTimeline} >
+                    <TooltipBtn text="Submit for approval" onClick={submitTimeline}>
                         <FiSend size={22} />
                     </TooltipBtn>
 
-                    <TooltipBtn text="Schedule a maintenance" onClick={() => {setScheduleModal(true)}}>
+                    <TooltipBtn
+                        text="Schedule a maintenance"
+                        onClick={() => {
+                            setScheduleModal(true);
+                        }}
+                    >
                         <FiPlusSquare size={22} />
                     </TooltipBtn>
-
-                    
-
-
                 </ScheduleTemplate>
-                <ModuleSimplePopup 
-                    modalOpenState={submitModal} 
-                    setModalOpenState={setSubmitModal} 
+                <ModuleSimplePopup
+                    modalOpenState={submitModal}
+                    setModalOpenState={setSubmitModal}
                     title="Sucess"
                     text="Your schedule has been submitted for your supervisor's approval."
                     icon={SimpleIcon.Check}
                 />
 
-                <ModuleSimplePopup 
-                    modalOpenState={emptyModal} 
+                <ModuleSimplePopup
+                    modalOpenState={emptyModal}
                     setModalOpenState={setEmptyModal}
                     title="Empty Schedule"
                     text="You cannot submit an empty schedule for approval. Please schedule a maintenance."
                     icon={SimpleIcon.Cross}
                 />
 
-                <ModuleSimplePopup 
-                    modalOpenState={invalidModal} 
+                <ModuleSimplePopup
+                    modalOpenState={invalidModal}
                     setModalOpenState={setInvalidModal}
                     title="Queue Full"
                     text="There is already another schedule that is pending for approval."
                     icon={SimpleIcon.Exclaim}
                 />
 
-                <ScheduleModal 
-                    isOpen={scheduleModal} 
-                    closeModal={() => setScheduleModal(false)} 
+                <ScheduleModal
+                    isOpen={scheduleModal}
+                    closeModal={() => setScheduleModal(false)}
                     title="Schedule Maintenance"
                     timeline={timelineData as CMMSTimeline}
                 />
 
-                <ModuleSimplePopup 
-                    modalOpenState={deleteModal} 
+                <ModuleSimplePopup
+                    modalOpenState={deleteModal}
                     setModalOpenState={setDeleteModal}
                     title="Delete Schedule"
                     text="Are you sure you want to delete this schedule? This action cannot be undone"
                     icon={SimpleIcon.Exclaim}
-                    buttons={ <TooltipBtn toolTip={false} onClick={() => {
-                        return deleteTimeline(parseInt(timelineId as string)).then((res) => {
-                            router.replace("/Schedule/Create");
-                        });
-                    }} >Confirm</TooltipBtn> }
+                    buttons={
+                        <TooltipBtn
+                            toolTip={false}
+                            onClick={() => {
+                                return deleteTimeline(parseInt(timelineId as string)).then(
+                                    (res) => {
+                                        router.replace("/Schedule/Create");
+                                    }
+                                );
+                            }}
+                        >
+                            Confirm
+                        </TooltipBtn>
+                    }
                 />
             </>
         );
