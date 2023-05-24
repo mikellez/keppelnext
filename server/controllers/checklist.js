@@ -1,6 +1,7 @@
 const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
+const { CreatedChecklistMail } = require('../mailer/ChecklistMail');
 
 const ITEMS_PER_PAGE = 10;
 
@@ -161,7 +162,6 @@ const fetchApprovedChecklists = async (req, res, next) => {
 
 // get checklist templates
 const fetchChecklistTemplateNames = async (req, res, next) => {
-    console.log(req.user.allocated_plants);
     const sql = req.params.id
         ? `SELECT * from keppel.checklist_templates WHERE plant_id = ${req.params.id} 
           ORDER BY keppel.checklist_templates.checklist_id DESC;` // templates are plant specificed (from that plant only)
@@ -226,8 +226,6 @@ const fetchChecklistRecords = async (req, res, next) => {
 const submitNewChecklistTemplate = async (req, res, next) => {
     if (req.body.checklistSections === undefined) return res.status(400).json("ayo?");
 
-    console.log(req.body.checklistSections);
-
     return res.status(200).json({
         msg: "awesome",
     });
@@ -235,6 +233,7 @@ const submitNewChecklistTemplate = async (req, res, next) => {
 
 const createNewChecklistRecord = async (req, res, next) => {
     const { checklist } = req.body;
+
     const statusId = req.body.checklist.assigned_user_id ? 2 : 1;
     sql = `INSERT INTO
         keppel.checklist_master
@@ -249,31 +248,15 @@ const createNewChecklistRecord = async (req, res, next) => {
             plant_id,
             created_date,
             created_user_id,
-            history,
             status_id,
             activity_log
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-        
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)    
+        RETURNING checklist_id    
     `;
-
-    // RETURNING (
-    //     SELECT 
-    //         u1.user_email as assigned_user_email,
-    //         u2.user_email as signoff_user_email
-    //     FROM 
-    //         keppel.checklist_master cm
-    //         LEFT JOIN keppel.users u1 ON cm.assigned_user_id = u1.user_id
-    //         LEFT JOIN keppel.users u2 ON cm.signoff_user_id = u2.user_id
-    //     WHERE
-    //         cm.checklist_id = checklist_id
-    // )
 
     const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
-    const history = `Created Record_${statusId === 2 ? "ASSIGNED" : "PENDING"}_${today}_${
-        req.user.name
-    }_NIL`;
     const activity_log = [
         {
             date: today,
@@ -283,33 +266,60 @@ const createNewChecklistRecord = async (req, res, next) => {
         },
     ];
 
-    db.query(
-        sql,
-        [
-            checklist.chl_name,
-            checklist.description,
-            checklist.assigned_user_id,
-            checklist.signoff_user_id,
-            checklist.linkedassetids,
-            JSON.stringify(checklist.datajson),
-            "Record",
-            checklist.plant_id,
-            today,
-            req.user.id,
-            history,
-            statusId,
-            JSON.stringify(activity_log),
-        ],
-        (err, found) => {
-            if (err) {
-                console.log(err);
-                return res.status(500).json("Failure to create new checklist");
-            }   
-            console.log(found.rows)
-            // const { assigned_user_email, signoff_user_email } = found.rows
-            return res.status(200).json("New checklist successfully created");
+    try {
+        const data = await db.query(
+            sql,
+            [
+                checklist.chl_name,
+                checklist.description,
+                checklist.assigned_user_id,
+                checklist.signoff_user_id,
+                checklist.linkedassetids,
+                JSON.stringify(checklist.datajson),
+                "Record",
+                checklist.plant_id,
+                today,
+                req.user.id,
+                statusId,
+                JSON.stringify(activity_log),
+            ]
+        ); 
+        
+        if (statusId === 2) {
+            const { checklist_id } = data.rows[0];
+            const { 
+                assigned_user_email, 
+                signoff_user_email, 
+                creator_email, 
+                plant_name, 
+                assets,
+                status
+            } = await fetchEmailDetailsForSpecificChecklist(checklist_id);
+
+            const mail = new CreatedChecklistMail(["zwezeya02@gmail.com"],
+                {
+                    id: checklist_id,
+                    name: checklist.chl_name,
+                    description: checklist.description,
+                    date: today,
+                    plant: plant_name,
+                    assets: assets,
+                    assignedTo: assigned_user_email,
+                    signoff: signoff_user_email,
+                    createdBy: creator_email,
+                    status: status
+                }
+            , "", ["chinnu4148@gmail.com"]);
+
+            await mail.send();
         }
-    );
+        
+        return res.status(200).json("New checklist successfully created");
+            
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json("Failure to create new checklist");
+    }
 };
 
 const createNewChecklistTemplate = async (req, res, next) => {
@@ -417,8 +427,6 @@ const fetchChecklistCounts = (req, res, next) => {
         default:
             return res.status(404).send(`Invalid checklist type of ${req.params.field}`);
     }
-    console.log(date);
-    console.log(sql);
     db.query(sql, (err, result) => {
         if (err)
             return res
@@ -765,7 +773,6 @@ const fetchFilteredChecklists = async (req, res, next) => {
 
     const totalRows = await db.query(countSql);
     const totalPages = Math.ceil(+totalRows.rows[0].total / ITEMS_PER_PAGE);
-    console.log(sql);
 
     db.query(sql + pageCond, (err, result) => {
         if (err) return res.status(400).json({ msg: err });
@@ -773,6 +780,43 @@ const fetchFilteredChecklists = async (req, res, next) => {
 
         return res.status(200).json({ rows: result.rows, total: totalPages });
     });
+};
+
+const fetchEmailDetailsForSpecificChecklist = async (checklist_id) => {
+    const data = await db.query(`
+        SELECT 
+            u1.user_email as assigned_user_email,
+            u2.user_email as signoff_user_email,
+            u3.user_email as creator_email,
+            pm.plant_name,
+            tmp.assetNames AS assets,
+            s.status
+            
+        FROM 
+            keppel.checklist_master cm 
+                JOIN keppel.users u1 ON cm.assigned_user_id = u1.user_id
+                JOIN keppel.users u2 ON cm.signoff_user_id = u2.user_id
+                JOIN keppel.users u3 ON cm.created_user_id = u3.user_id
+                JOIN keppel.plant_master pm ON cm.plant_id = pm.plant_id
+                LEFT JOIN (
+                    SELECT 
+                        t3.checklist_id, 
+                        string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id ASC) AS assetNames
+                    FROM  
+                        keppel.system_assets AS t1,
+                        keppel.plant_system_assets AS t2, 
+                        keppel.checklist_master AS t3
+                    WHERE 
+                        t1.system_asset_id = t2.system_asset_id_lvl4 AND 
+                        t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
+                    GROUP BY t3.checklist_id
+                ) tmp ON tmp.checklist_id = cm.checklist_id
+                JOIN keppel.status_cm s ON cm.status_id = s.status_id
+        WHERE
+            cm.checklist_id = $1
+    `, [checklist_id]);
+
+    return data.rows[0];
 };
 
 module.exports = {
