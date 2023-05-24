@@ -4,22 +4,18 @@ const moment = require("moment");
 const getUploadedFile = async (req, res, next) => {
   const psa_id = +req.params.psa_id;
   const index = +req.params.index;
-  console.log(psa_id);
-  console.log(index);
 
   const result = await db.query(
     `SELECT psa.uploaded_files from keppel.plant_system_assets as psa WHERE psa.psa_id = ${psa_id}`
   );
-  const base64Img = result.rows[0].uploaded_files[index][1].replace(
-    /^data:image\/jpeg;base64,/,
-    ""
-  );
+  const uploaded_file = result.rows[0].uploaded_files[index][1];
+  const [mimetype, base64Img] = uploaded_file.split(";");
 
-  const img = Buffer.from(base64Img, "base64");
+  const img = Buffer.from(base64Img.split(",")[1], "base64");
 
   return res
     .writeHead(200, {
-      "Content-Type": "image/jpeg",
+      "Content-Type": mimetype.split(":")[1],
       "Content-Length": img.length,
     })
     .end(img);
