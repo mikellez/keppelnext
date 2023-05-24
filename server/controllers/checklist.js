@@ -1,7 +1,7 @@
 const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
-const { CreatedChecklistMail } = require('../mailer/classes');
+const { CreatedChecklistMail } = require('../mailer/ChecklistMail');
 
 const ITEMS_PER_PAGE = 10;
 
@@ -292,10 +292,11 @@ const createNewChecklistRecord = async (req, res, next) => {
                 signoff_user_email, 
                 creator_email, 
                 plant_name, 
-                assets
+                assets,
+                status
             } = await fetchEmailDetailsForSpecificChecklist(checklist_id);
 
-            const mail = new CreatedChecklistMail([assigned_user_email, signoff_user_email],
+            const mail = new CreatedChecklistMail(["zwezeya02@gmail.com"],
                 {
                     id: checklist_id,
                     name: checklist.chl_name,
@@ -306,8 +307,9 @@ const createNewChecklistRecord = async (req, res, next) => {
                     assignedTo: assigned_user_email,
                     signoff: signoff_user_email,
                     createdBy: creator_email,
+                    status: status
                 }
-            , [creator_email]);
+            , "", ["chinnu4148@gmail.com"]);
 
             await mail.send();
         }
@@ -787,7 +789,8 @@ const fetchEmailDetailsForSpecificChecklist = async (checklist_id) => {
             u2.user_email as signoff_user_email,
             u3.user_email as creator_email,
             pm.plant_name,
-            tmp.assetNames AS assets
+            tmp.assetNames AS assets,
+            s.status
             
         FROM 
             keppel.checklist_master cm 
@@ -808,6 +811,7 @@ const fetchEmailDetailsForSpecificChecklist = async (checklist_id) => {
                         t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
                     GROUP BY t3.checklist_id
                 ) tmp ON tmp.checklist_id = cm.checklist_id
+                JOIN keppel.status_cm s ON cm.status_id = s.status_id
         WHERE
             cm.checklist_id = $1
     `, [checklist_id]);
