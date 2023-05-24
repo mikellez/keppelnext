@@ -271,7 +271,6 @@ function ChecklistCheckRow({
 		r.checks[i] = check;*/
 
     r.checks = checks;
-    // console.log("handleCheck")
     onChange(r);
   };
 
@@ -388,6 +387,7 @@ function ChecklistSection({
             className="form-control"
             style={{ border: "none" }}
             onChange={handleText}
+            value={section.description}
           ></input>
         </td>
         <td>
@@ -470,8 +470,6 @@ export default function ChecklistTemplateCreator({
   useEffect(() => {
     if (sections.length < 1) return;
 
-    // console.log(CheckSection.fromJSON(JSON.stringify(sections[0])))
-    // console.log(JSON.stringify(CheckSection.fromJSON(JSON.stringify(sections[0]))))
   }, [sections]);
 
   return (

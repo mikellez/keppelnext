@@ -4,15 +4,22 @@ const nodemailer = require("nodemailer");
 class Mail {
     source;
     recipient;
+    carbon_copy;
     subject;
     content;
 
-    constructor(recipient, subject, content) {
+    static validateEmail(email) {
+        // const emailRegex = new RegExp("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
+        // return emailRegex.test(email);
+    };
+
+    constructor(recipient, subject, content, carbon_copy = null) {
         this.source = {
             user: process.env.NM_MAIL,
             pass: process.env.NM_PASS
         };
         this.recipient = recipient;
+        this.carbon_copy = carbon_copy
         this.subject = subject;
         this.content = content;
     };
@@ -39,13 +46,14 @@ class Mail {
 
     async send() {
         try {
-            if (!validateEmail(this.recipient)) throw new Error("Invalid email")
+            // if (!Mail.validateEmail(this.recipient)) throw new Error("Invalid email")
 
             const transporter = this.createTransport();
         
             await transporter.sendMail({
                 from: this.source.user, 
                 to: this.recipient,
+                cc: this.carbon_copy,
                 subject: this.subject,
                 html: this.content + this.footer(),
             });
@@ -54,11 +62,6 @@ class Mail {
         catch (err) {
             console.error(err);
         }
-    };
-
-    static validateEmail(email) {
-        const emailRegex = new RegExp("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
-        return emailRegex.test(email);
     };
 };
 
