@@ -666,7 +666,7 @@ const approveChecklist = async (req, res, next) => {
             created_date
         } = await fetchEmailDetailsForSpecificChecklist(req.params.checklist_id);
 
-        const mail = new ApproveChecklistMail(['zwezeya02@gmail.com', 'seanwcx02@gmail.com'],
+        const mail = new ApproveChecklistMail([assigned_user_email, signoff_user_email],
                 {
                     id: req.params.checklist_id,
                     name: name,
@@ -679,7 +679,7 @@ const approveChecklist = async (req, res, next) => {
                     createdBy: creator_email,
                     status: status
                 }
-            , "", ['chinnu4148@gmail.com']);
+            , "", [creator_email]);
 
         await mail.send();
 

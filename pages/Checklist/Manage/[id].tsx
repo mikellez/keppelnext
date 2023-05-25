@@ -11,15 +11,18 @@ import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/
 import { HiOutlineDownload } from "react-icons/hi";
 import ChecklistPreview from "../../../components/Checklist/ChecklistPreview";
 import { downloadChecklistPDF } from "../View/[id]";
+import { Action } from "../../../types/common/enums";
 
 const manageChecklist = async (id: number, action: string, remarks: string) => {
-    return await instance({
-        url: `/api/checklist/${action}/${id}`,
-        method: "patch",
-        data: { remarks: remarks },
-    })
-        .then((res) => res.data)
-        .catch((err) => console.log(err));
+    try {
+        await instance({
+            url: `/api/checklist/${action}/${id}`,
+            method: "patch",
+            data: { remarks: remarks },
+        })
+    } catch (err) {
+        console.log(err);
+    }
 };
 
 const ManageChecklistPage = (props: ChecklistPageProps) => {
@@ -27,12 +30,14 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
     const [missingRemarksModal, setMissingRemarksModal] = useState<boolean>(false);
     const [successModal, setSuccessModal] = useState<boolean>(false);
     const [disableBtns, setDisableBtns] = useState<boolean>(false);
+    const [managerAction, setManagerAction] = useState<Action>();
     const router = useRouter();
 
-    const handleClick = (action: string) => {
+    const handleClick = (action: Action) => {
         setDisableBtns(true);
+        setManagerAction(action);
 
-        if (action === "reject" && remarks.trim() === "") {
+        if (action === Action.Reject && remarks.trim() === "") {
             setMissingRemarksModal(true);
             setDisableBtns(false);
             return;
@@ -75,7 +80,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
                 <ModuleFooter>
                     <TooltipBtn
                         toolTip={false}
-                        onClick={() => handleClick("reject")}
+                        onClick={() => handleClick(Action.Reject)}
                         disabled={disableBtns}
                     >
                         Reject
@@ -83,7 +88,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
                     <TooltipBtn
                         toolTip={false}
                         style={{ backgroundColor: "#91BD3A", borderColor: "#91BD3A" }}
-                        onClick={() => handleClick("approve")}
+                        onClick={() => handleClick(Action.Approve)}
                         disabled={disableBtns}
                     >
                         Approve
@@ -103,7 +108,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
                 setModalOpenState={setSuccessModal}
                 modalOpenState={successModal}
                 text="Success"
-                title="Your action has been recorded"
+                title={Action.Approve ? "Checklist has been approved." : "Checklist has been rejected."}
                 icon={SimpleIcon.Check}
             />
         </>
