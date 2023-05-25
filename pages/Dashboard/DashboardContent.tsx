@@ -123,6 +123,8 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
       getPlants("/api/getUserPlants").then(result => {
           if (result) {
             setPlant(result[0].plant_id)
+            fetchRequests();
+            fetchChecklists();
           }
       })
 
@@ -130,10 +132,13 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
         setShowTotalContainer(false);
       }
 
-    }     
+    } else {
+
+      fetchRequests();
+      fetchChecklists();
+
+    }
     
-    fetchRequests();
-    fetchChecklists();
 
   }, [plant, field, pickerwithtype, active]);
 
@@ -170,10 +175,17 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
           </Select>
           <PickerWithType type={pickerwithtype.datetype} onChange={handleDateChange}/>
 
-        <PlantSelect
+        {[3,4].includes(role_id) 
+          ?<PlantSelect
+            onChange={(e) => setPlant(parseInt(e.target.value))}
+            accessControl
+            default
+          />
+          :<PlantSelect
           onChange={(e) => setPlant(parseInt(e.target.value))}
           allPlants
         />
+        }
       </ModuleHeader>
       <ModuleContent>
         <div className={styles.dashboardMain}>
