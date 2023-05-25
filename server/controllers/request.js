@@ -12,6 +12,10 @@ const ITEMS_PER_PAGE = 10;
 function fetchRequestQuery(status_query, role_id, user_id, page) {
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
   // console.log(role_id)
+  let userCond = "";
+  if(role_id == 3) {
+    userCond = `AND u.user_id = ${user_id}`;
+  }
 
   return role_id === 1 || role_id === 2 || role_id === 3
     ? `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
@@ -42,6 +46,7 @@ function fetchRequestQuery(status_query, role_id, user_id, page) {
 			  WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
     WHERE 1 = 1 
 	  ${status_query}
+    ${userCond}
 	  GROUP BY (
 		  r.request_id,
 		  ft.fault_type,
@@ -127,6 +132,7 @@ const fetchPendingRequests = async (req, res, next) => {
     req.user.id,
     page
   );
+  console.log(sql)
 
 
   const result = await db.query(sql);
@@ -268,7 +274,7 @@ if(!req.body.linkedRequestId) {
       fileBuffer,
       fileType,
       history,
-      req.body.linkedRequestId,
+      null,
       JSON.stringify(activity_log),
     ],
     (err, result) => {
