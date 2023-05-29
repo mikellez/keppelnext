@@ -16,6 +16,7 @@ SELECT
     cl.chl_name, 
     cl.description, 
     cl.status_id,
+    cl.activity_log,
     concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
     concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
     concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
@@ -216,6 +217,7 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
             console.log(err);
             return res.status(500).json("No checklist template found");
         }
+        // console.log(found.rows[0]);
         res.status(200).send(found.rows[0]);
     });
 };
