@@ -745,7 +745,7 @@ const rejectChecklist = async (req, res, next) => {
                     createdBy: creator_email,
                     status: status
                 }
-            , "", [creator_email]);
+            , "", rejectionComments, [creator_email]);
 
         // await mail.send();
 
