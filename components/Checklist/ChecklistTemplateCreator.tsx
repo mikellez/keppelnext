@@ -193,35 +193,35 @@ function ChecklistChecks({
           onClick={addCheck}
           className="btn btn-sm btn-outline-secondary"
         >
-          Add Check
+          Single-Choice
         </button>
         <button
           type="button"
           onClick={addMulti}
           className="btn btn-sm btn-outline-secondary"
         >
-          Add Multi
+          Multi-Choice
         </button>
         <button
           type="button"
           onClick={addFree}
           className="btn btn-sm btn-outline-secondary"
         >
-          Add Free
+          Free-Response
         </button>
         <button
           type="button"
           onClick={addUpload}
           className="btn btn-sm btn-outline-secondary"
         >
-          Add File Upload
+          File Upload
         </button>
         <button
           type="button"
           onClick={addSig}
           className="btn btn-sm btn-outline-secondary"
         >
-          Add Signature
+          Signature
         </button>
       </div>
 
@@ -469,7 +469,6 @@ export default function ChecklistTemplateCreator({
 
   useEffect(() => {
     if (sections.length < 1) return;
-
   }, [sections]);
 
   return (
