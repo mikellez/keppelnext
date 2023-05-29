@@ -318,7 +318,7 @@ const createNewChecklistRecord = async (req, res, next) => {
                 }
             , "", [creator_email]);
 
-            await mail.send();
+            // await mail.send();
         }
         
         return res.status(200).json("New checklist successfully created");
@@ -527,7 +527,7 @@ const completeChecklist = async (req, res, next) => {
                 }
             , "", [creator_email]);
 
-        await mail.send();
+        // await mail.send();
 
         return res.status(200).json("Checklist successfully completed");
     } catch (err) {
@@ -621,7 +621,7 @@ const editChecklistRecord = async (req, res, next) => {
                 }
             , "", [creator_email]);
 
-            await mail.send();
+            // await mail.send();
         }
 
         return res.status(200).json("Checklist successfully assigned");
@@ -683,7 +683,7 @@ const approveChecklist = async (req, res, next) => {
                 }
             , "", [creator_email]);
 
-        await mail.send();
+        // await mail.send();
 
         return res.status(200).json("Checklist successfully approved");
     } catch (err) {
@@ -707,7 +707,7 @@ const rejectChecklist = async (req, res, next) => {
         UPDATE
             keppel.checklist_master
         SET 
-            status_id = 6,
+            status_id = 2,
             history = concat(history,'${updatehistory}'),
             activity_log = activity_log || $1
         WHERE 
@@ -744,7 +744,7 @@ const rejectChecklist = async (req, res, next) => {
                 }
             , "", [creator_email]);
 
-        await mail.send();
+        // await mail.send();
 
         return res.status(200).json("Checklist successfully rejected");
 
