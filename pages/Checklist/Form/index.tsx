@@ -79,17 +79,12 @@ export default function ChecklistNew(props: ChecklistPageProps) {
             }, 1000);
         }
     };
-
     const checkInputFields = (checklistType: string) => {
         switch (checklistType) {
             case "record":
                 return (
                     // checklistData.assigned_user_id &&
                     checklistData.signoff_user_id &&
-                    checklistData.chl_name &&
-                    checklistData.chl_name != "" &&
-                    checklistData.description &&
-                    checklistData.description != "" &&
                     checklistData.plant_id &&
                     checklistData.linkedassetids &&
                     checklistData.linkedassetids != ""
@@ -97,10 +92,6 @@ export default function ChecklistNew(props: ChecklistPageProps) {
             case "template":
                 return (
                     checklistData.signoff_user_id &&
-                    checklistData.chl_name &&
-                    checklistData.chl_name != "" &&
-                    checklistData.description &&
-                    checklistData.description != "" &&
                     checklistData.plant_id
                 );
         }
