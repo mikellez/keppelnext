@@ -1,7 +1,12 @@
 const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
-const { CreatedChecklistMail } = require('../mailer/ChecklistMail');
+const { 
+    CreateChecklistMail, 
+    CompleteChecklistMail, 
+    RejectChecklistMail, 
+    ApproveChecklistMail 
+} = require('../mailer/ChecklistMail');
 
 const ITEMS_PER_PAGE = 10;
 
@@ -296,7 +301,7 @@ const createNewChecklistRecord = async (req, res, next) => {
                 status
             } = await fetchEmailDetailsForSpecificChecklist(checklist_id);
 
-            const mail = new CreatedChecklistMail(["zwezeya02@gmail.com"],
+            const mail = new CreateChecklistMail([assigned_user_email, signoff_user_email],
                 {
                     id: checklist_id,
                     name: checklist.chl_name,
@@ -309,9 +314,9 @@ const createNewChecklistRecord = async (req, res, next) => {
                     createdBy: creator_email,
                     status: status
                 }
-            , "", ["chinnu4148@gmail.com"]);
+            , "", [creator_email]);
 
-            await mail.send();
+            // await mail.send();
         }
         
         return res.status(200).json("New checklist successfully created");
@@ -490,13 +495,44 @@ const completeChecklist = async (req, res, next) => {
             checklist_id = $2
     `;
 
-    db.query(sql, [JSON.stringify(req.body.datajson), req.params.checklist_id], (err) => {
-        if (err) {
-            console.log(err);
-            return res.status(500).json("Failure to update checklist completion");
-        }
+    try {
+        await db.query(sql, [JSON.stringify(req.body.datajson), req.params.checklist_id]);
+
+        const { 
+            assigned_user_email, 
+            signoff_user_email, 
+            creator_email, 
+            plant_name, 
+            assets,
+            status,
+            name,
+            description,
+            created_date
+        } = await fetchEmailDetailsForSpecificChecklist(req.params.checklist_id);
+
+        const mail = new CompleteChecklistMail([assigned_user_email, signoff_user_email],
+                {
+                    id: req.params.checklist_id,
+                    name: name,
+                    description: description,
+                    date: created_date,
+                    plant: plant_name,
+                    assets: assets,
+                    assignedTo: assigned_user_email,
+                    signoff: signoff_user_email,
+                    createdBy: creator_email,
+                    status: status
+                }
+            , "", [creator_email]);
+
+        // await mail.send();
+
         return res.status(200).json("Checklist successfully completed");
-    });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json("Failure to update checklist completion");
+    }
+
 };
 
 const editChecklistRecord = async (req, res, next) => {
@@ -539,28 +575,58 @@ const editChecklistRecord = async (req, res, next) => {
             checklist_id = $10
     `;
 
-    db.query(
-        sql,
-        [
-            JSON.stringify(data.datajson),
-            statusId,
-            data.chl_name,
-            data.description,
-            data.assigned_user_id,
-            data.signoff_user_id,
-            data.linkedassetids,
-            data.plant_id,
-            JSON.stringify(activity_log),
-            req.params.checklist_id,
-        ],
-        (err) => {
-            if (err) {
-                console.log(err);
-                return res.status(500).json("Failure to update checklist completion");
-            }
-            return res.status(200).json("Checklist successfully assigned");
+    try {
+        await db.query(
+            sql,
+            [
+                JSON.stringify(data.datajson),
+                statusId,
+                data.chl_name,
+                data.description,
+                data.assigned_user_id,
+                data.signoff_user_id,
+                data.linkedassetids,
+                data.plant_id,
+                JSON.stringify(activity_log),
+                req.params.checklist_id,
+            ]
+        );
+
+        if (statusId === 2) {
+            const { 
+                assigned_user_email, 
+                signoff_user_email, 
+                creator_email, 
+                plant_name, 
+                assets,
+                status,
+                name,
+                description
+            } = await fetchEmailDetailsForSpecificChecklist(req.params.checklist_id);
+
+            const mail = new CreateChecklistMail([assigned_user_email, signoff_user_email],
+                {
+                    id: req.params.checklist_id,
+                    name: name,
+                    description: description,
+                    date: today,
+                    plant: plant_name,
+                    assets: assets,
+                    assignedTo: assigned_user_email,
+                    signoff: signoff_user_email,
+                    createdBy: creator_email,
+                    status: status
+                }
+            , "", [creator_email]);
+
+            // await mail.send();
         }
-    );
+
+        return res.status(200).json("Checklist successfully assigned");
+        
+    } catch (err) {
+        return res.status(500).json("Failure to update checklist");
+    }
 };
 
 const approveChecklist = async (req, res, next) => {
@@ -585,13 +651,42 @@ const approveChecklist = async (req, res, next) => {
             checklist_id = $2
     `;
 
-    db.query(sql, [JSON.stringify(activity_log), req.params.checklist_id], (err) => {
-        if (err) {
-            console.log(err);
-            return res.status(500).json("Failure to update checklist completion");
-        }
+    try {
+        await db.query(sql, [JSON.stringify(activity_log), req.params.checklist_id]);
+
+        const { 
+            assigned_user_email, 
+            signoff_user_email, 
+            creator_email, 
+            plant_name, 
+            assets,
+            status,
+            name,
+            description,
+            created_date
+        } = await fetchEmailDetailsForSpecificChecklist(req.params.checklist_id);
+
+        const mail = new ApproveChecklistMail([assigned_user_email, signoff_user_email],
+                {
+                    id: req.params.checklist_id,
+                    name: name,
+                    description: description,
+                    date: created_date,
+                    plant: plant_name,
+                    assets: assets,
+                    assignedTo: assigned_user_email,
+                    signoff: signoff_user_email,
+                    createdBy: creator_email,
+                    status: status
+                }
+            , "", [creator_email]);
+
+        // await mail.send();
+
         return res.status(200).json("Checklist successfully approved");
-    });
+    } catch (err) {
+        return res.status(500).json("Failure to update checklist completion");
+    }
 };
 
 const rejectChecklist = async (req, res, next) => {
@@ -617,13 +712,43 @@ const rejectChecklist = async (req, res, next) => {
             checklist_id = $2
     `;
 
-    db.query(sql, [JSON.stringify(activity_log), req.params.checklist_id], (err) => {
-        if (err) {
-            console.log(err);
-            return res.status(500).json("Failure to update checklist completion");
-        }
-        return res.status(200).json("Checklist successfully cancelled");
-    });
+    try {
+        await db.query(sql, [JSON.stringify(activity_log), req.params.checklist_id]);
+
+        const { 
+            assigned_user_email, 
+            signoff_user_email, 
+            creator_email, 
+            plant_name, 
+            assets,
+            status,
+            name,
+            description,
+            created_date
+        } = await fetchEmailDetailsForSpecificChecklist(req.params.checklist_id);
+
+        const mail = new RejectChecklistMail([assigned_user_email, signoff_user_email],
+                {
+                    id: req.params.checklist_id,
+                    name: name,
+                    description: description,
+                    date: created_date,
+                    plant: plant_name,
+                    assets: assets,
+                    assignedTo: assigned_user_email,
+                    signoff: signoff_user_email,
+                    createdBy: creator_email,
+                    status: status
+                }
+            , "", [creator_email]);
+
+        // await mail.send();
+
+        return res.status(200).json("Checklist successfully rejected");
+
+    } catch (err) {
+        return res.status(500).json("Failure to update checklist rejection");
+    }
 };
 
 const cancelChecklist = async (req, res, next) => {
@@ -653,9 +778,9 @@ const cancelChecklist = async (req, res, next) => {
     db.query(sql, [JSON.stringify(activity_log), req.params.checklist_id], (err) => {
         if (err) {
             console.log(err);
-            return res.status(500).json("Failure to update checklist completion");
+            return res.status(500).json("Failure to update checklist cancellation");
         }
-        return res.status(200).json("Checklist successfully rejected");
+        return res.status(200).json("Checklist successfully cancelled");
     });
 };
 
@@ -790,7 +915,10 @@ const fetchEmailDetailsForSpecificChecklist = async (checklist_id) => {
             u3.user_email as creator_email,
             pm.plant_name,
             tmp.assetNames AS assets,
-            s.status
+            s.status,
+            cm.chl_name as name,
+            cm.description,
+            cm.created_date
             
         FROM 
             keppel.checklist_master cm 

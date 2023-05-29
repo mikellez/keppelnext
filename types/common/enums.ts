@@ -5,7 +5,13 @@ enum Role {
     Specialist = 4,
 };
 
+enum Action {
+    Approve = "approve",
+    Reject = "reject",
+};
+
 
 export {
-    Role
+    Role,
+    Action
 }
