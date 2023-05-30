@@ -89,50 +89,94 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
 });
 
 /**
- * @api {get} /request Get All Requests
- * @apiDescription Gets all requests
- * @apiName GetAllRequests
+ * @api {get} /request/approved Get Approved Requests
+ * @apiDescription Gets all approved requests. 
+ * 
+ * For operation specialists, only relevant approved requests will be returned. 
+ * @apiName GetApprovedRequests
  * @apiGroup Request
  *
  * @apiSuccess {Object[]} - Array of all requests, sorted by creation date
- * @apiSuccess {number} -.request_id Request ID
- * @apiSuccess {string} -.fault_name Type of the fault request
- * @apiSuccess {string} -.plant_name Name of the request plant
- * @apiSuccess {number} -.plant_id ID of the request plant
- * @apiSuccess {string} -.request_type Type of request
- * @apiSuccess {string} -.role_name Name of the role name ??
- * @apiSuccess {string} -.status Current request status
- * @apiSuccess {string} -.fault_description Description of fault request
- * @apiSuccess {string|null} -.priority Priority of fault request
- * @apiSuccess {string} -.fullname Full name of request creator
- * @apiSuccess {string} -.created_date Date and time of request creation
- * @apiSuccess {string} -.asset_name Name of asset linked to the specified request
- * @apiSuccess {string|null} -.uploadfilemimetype MIME-Type of uploaded fault request file
- * @apiSuccess {string|null} -.complete_comments Completion comments of fault request
- * @apiSuccess {string|null} -.assigned_user_name User name assigned to fault request
- * @apiSuccess {string|null} -.associated_request_id Request ID of fault request for corrective requests
- * @apiSuccess {string} -.requesthistory Request history
- * @apiSuccess {string|null} -.rejection_comments Rejection comments of fault request
+ * @apiSuccess {Number} request_id ID of request
+ * @apiSuccess {Number} fault_id ID of fault type
+ * @apiSuccess {String} fault_name Name of the fault
+ * @apiSuccess {String} fault_description Description of fault request
+ * @apiSuccess {Number} plant_id ID of associated plant
+ * @apiSuccess {String} plant_name Name of associated plant
+ * @apiSuccess {String} role_name Role of request creator
+ * @apiSuccess {String} fullname Full name of request creator
+ * @apiSuccess {Number} status_id Current Status ID
+ * @apiSuccess {String} status Current request status
+ * @apiSuccess {String} request_type Type of request
+ * @apiSuccess {String|NULL} priority Priority of fault request
+ * @apiSuccess {Number} psa_id ID of associated asset
+ * @apiSuccess {String} asset_name Name of of associated asset
+ * @apiSuccess {String} created_date Date and time of request creation
+ * @apiSuccess {JSON} activity_log JSON to store the history
+ * @apiSuccess {String|NULL} uploadfilemimetype MIME-Type of uploaded fault request file
+ * @apiSuccess {Binary|NULL} uploaded_file Uploaded fault request file
+ * @apiSuccess {String|NULL} completedfilemimetype MIME-Type of uploaded completion file
+ * @apiSuccess {Binary|NULL} completion_file Uploaded completion file
+ * @apiSuccess {String|NULL} assigned_user_name User name assigned to fault request
+ * @apiSuccess {Number|NULL} associatedrequestid Request ID of fault request for corrective requests
+ * @apiSuccess {String|NULL} rejection_comments Rejection comments of fault request
+ * @apiSuccess {String|NULL} complete_comments Completion comments of fault request
  */
 router.get(
-  "/request/pending",
+  "/request/approved",
   checkIfLoggedInAPI,
-  controllers.request.fetchPendingRequests
+  controllers.request.fetchApprovedRequests
 );
+
+/** 
+ * @api {get} /request/assigned Get Assigned Requests
+ * @apiDescription Gets assigned requests. 
+ * 
+ * For operation specialists, only relevant assigned requests will be returned. 
+ * 
+ * Returns the same output schema as `/request/approved`
+ * @apiName GetAssignedRequests
+ * @apiGroup Request
+ * 
+ */
 router.get(
   "/request/assigned",
   checkIfLoggedInAPI,
   controllers.request.fetchAssignedRequests
 );
+/** 
+ * @api {get} /request/review Get For Review Requests
+ * @apiDescription Gets for review requests. 
+ * 
+ * For operation specialists, only relevant for review requests will be returned. 
+ * 
+ * 
+ * Returns the same output schema as `/request/approved`
+ * @apiName GetForReviewRequests
+ * @apiGroup Request
+ * 
+ */
 router.get(
   "/request/review",
   checkIfLoggedInAPI,
   controllers.request.fetchReviewRequests
 );
+/** 
+ * @api {get} /request/pending Get Pending Requests
+ * @apiDescription Gets pending requests. 
+ * 
+ * For operation specialists, only relevant pending requests will be returned. 
+ * 
+ * Returns the same output schema as `/request/approved`
+ * @apiName GetPendingRequests
+ * @apiGroup Request
+ * 
+ */
+
 router.get(
-  "/request/approved",
+  "/request/pending",
   checkIfLoggedInAPI,
-  controllers.request.fetchApprovedRequests
+  controllers.request.fetchPendingRequests
 );
 
 /**
@@ -141,14 +185,14 @@ router.get(
  * @apiName CreateRequest
  * @apiGroup Request
  *
- * @apiBody {number} requestTypeID ID of the request type
- * @apiBody {number} faultTypeID ID of the fault type
- * @apiBody {number} plantLocationID ID of the plant location
- * @apiBody {number} taggedAssetID ID of the asset that is being reported on
- * @apiBody {string} description Description of the created request
+ * @apiBody {Number} requestTypeID ID of the request type
+ * @apiBody {Number} faultTypeID ID of the fault type
+ * @apiBody {Number} plantLocationID ID of the plant location
+ * @apiBody {Number} taggedAssetID ID of the asset that is being reported on
+ * @apiBody {String} description Description of the created request
  * @apiBody {Object} [image] Image of the asset that is being reported on
  *
- * @apiSuccess {string} - "success"
+ * @apiSuccess {String} message `'Request created successfully'`
  */
 router.post(
   "/request/",
@@ -163,22 +207,37 @@ router.post(
  * @apiGroup Request
  *
  * @apiSuccess {Object[]} - Array containing the different request types and their corresponding ID
- * @apiSuccess {number} -.req_id ID of the request type
- * @apiSuccess {string} -.request Name of the request type
+ * @apiSuccess {Number} req_id ID of the request type
+ * @apiSuccess {String} request Name of the request type
+ * 
  */
 router.get("/request/types", controllers.request.fetchRequestTypes);
-// router.get("/request/status/:plant", checkIfLoggedInAPI, controllers.request.fetchRequestStatus);
+
+/**
+ * @api {get} /request/priority Get Request Priorities
+ * @apiDescription Gets request priorities
+ * @apiName GetRequestPriorities
+ * @apiGroup Request
+ *
+ * @apiSuccess {Number} p_id ID of priority
+ * @apiSuccess {String} priority Name of priority
+ * @apiSuccess {String} created_date Creation date of priority
+ * @apiSuccess {JSON} activity_log JSON to store the history
+ */
 router.get(
   "/request/priority",
   checkIfLoggedInAPI,
   controllers.request.fetchRequestPriority
 );
+
 router.get(
   "/request/csv",
   checkIfLoggedInAPI,
   controllers.request.createRequestCSV
 );
+
 router.get("/request/pdf/:request_id", checkIfLoggedInAPI, sendRequestPDF);
+
 router.patch(
   "/request/complete/:request_id",
   checkIfLoggedInAPI,
