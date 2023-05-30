@@ -10,6 +10,7 @@ import {
   CMMSSystemAssetName,
   CMMSSubComponent1Name,
   CMMSChangeOfParts,
+  CMMSWorkflow,
 } from "../types/common/interfaces";
 
 import { RequestProps } from "../pages/Request";
@@ -275,6 +276,27 @@ function useChangeOfParts(
   );
 }
 
+function useWorkflow() {
+  const workflowFetcher = (url: string) =>
+    instance
+      .get< CMMSWorkflow[] >(url)
+      .then((response) => {
+        response.data.forEach((s: CMMSWorkflow) => {
+          s.created_date = new Date(s.created_date);
+        });
+        return response.data;
+      })
+      .catch((e) => {
+        throw new Error(e);
+      });
+
+  return useSWR<CMMSWorkflow[], Error>(
+    [`/api/workflows`],
+    workflowFetcher,
+    { revalidateOnFocus: false }
+  );
+}
+
 export {
   useRequest,
   useAsset,
@@ -287,4 +309,5 @@ export {
   useChangeOfParts,
   useChecklistFilter,
   useRequestFilter,
+  useWorkflow
 };

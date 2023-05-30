@@ -570,6 +570,12 @@ router
     controllers.setting.updatePassword
   );
 
+router
+    .get("/workflows", controllers.workflow.listWorkflow)
+    .get("/workflow/run/request", controllers.workflow.runWorkflowRequest)
+    .post("/workflow/create", checkIfLoggedInAPI, controllers.workflow.create);
+    //.get("/workflow/run/checklist", controllers.workflow.runWorkflowChecklist);
+
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
 
 // NO API ROUTE

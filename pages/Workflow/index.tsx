@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ModuleContent, ModuleHeader, ModuleMain } from "../../components";
 import TooltipBtn from "../../components/TooltipBtn";
@@ -9,18 +9,55 @@ import { useTheme } from '@table-library/react-table-library/theme';
 import { getTheme } from '@table-library/react-table-library/baseline';
 
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import { Switch, Tag } from "antd";
+import { useCurrentUser, useWorkflow } from "../../components/SWR";
+import { Role } from "../../types/common/enums";
+import { AiOutlineEdit, AiOutlineFolderView, AiFillDelete } from "react-icons/ai";
 
 interface WorkflowItem {
   sn: string;
   id: string;
   statement: string;
   created_at: Date;
-  times_ran: boolean;
+  is_active: number;
+  action: number;
 }
 
 const Workflow = () => {
+  const { data, error, isValidating, mutate } = useWorkflow();
+  const [workflow, setWorkflow] = useState<WorkflowItem[]>([]);
+  const [isReady, setIsReady] = useState<boolean>(false);
+  const user = useCurrentUser();
 
-  const nodes = [
+  useEffect(() => {
+    if(data && !isValidating) {
+      setWorkflow(data.map((item, index) => {
+        let statement = '';
+        if(item.is_assign_to) {
+          statement = `When fault type at ${item.plant_id} is of type ${item.fault_id} then assign to ${item.user_id}`;
+        } else if (item.is_send_email) {
+          statement = `When fault type at ${item.plant_id} is of type ${item.fault_id} then send email to ${item.user_email}`;
+        }
+
+        return {
+          sn: (index + 1).toString(),
+          id: item.id.toString(),
+          statement: statement,
+          created_at: new Date(item.created_at),
+          is_active: item.is_active,
+          action: 1
+        }
+      }));
+
+      setIsReady(true);
+    }
+  }, [data]);
+  
+
+
+  const key = 'Compact Table';
+
+  /*const nodes = [
     {
       sn: '1',
       id: '1',
@@ -29,20 +66,20 @@ const Workflow = () => {
       times_ran: 3,
     },
   ];
-
-  const key = 'Compact Table';
-
-  const data = { nodes };
+  const data = { nodes };*/
 
   const theme = useTheme([
     getTheme(),
     {
       Table: `
-        --data-table-library_grid-template-columns:  5em 5em calc(100% - 30em) 10em 10em;
+        --data-table-library_grid-template-columns:  5em 5em calc(100% - 30em) 7em 5em 8em;
         overflow-x: hidden
       `
     }
   ]);
+
+  const onChange = (e) => {
+  }
 
   const COLUMNS: Column<WorkflowItem>[] = [
     { label: 'S/N', renderCell: (item) => item.sn },
@@ -58,9 +95,37 @@ const Workflow = () => {
         }),
     },
     {
-      label: 'Times Ran',
-      renderCell: (item) => item.times_ran.toString(),
-    }
+      label: 'Active',
+      renderCell: (item) => item.is_active ? <Tag color="success"> active </Tag> : <Tag color="error"> inactive </Tag>,
+    },
+    {
+      label: 'Action',
+      renderCell: (item) => {
+        if (
+          user.data!.role_id === Role.Admin ||
+          user.data!.role_id === Role.Manager ||
+          user.data!.role_id === Role.Engineer
+        ) {
+          return (
+            <>
+            <Switch defaultChecked onChange={onChange} />
+            <Link href={`/Workflow/Delete/${item.id}`}>
+              <AiFillDelete size={22} />
+            </Link>
+            {/*<Link href={`/Workflow/View/${item.id}`}>
+              <AiOutlineFolderView size={22} />
+            </Link>
+            <Link href={`/Workflow/Edit/${item.id}`}>
+              <AiOutlineEdit size={22} />
+          </Link>*/}
+            </>
+          )
+        } else {
+          <></>
+        }
+      },
+    },
+
   ];
 
 
@@ -74,7 +139,7 @@ const Workflow = () => {
         </Link>
       </ModuleHeader>
       <ModuleContent>
-        <CompactTable columns={COLUMNS} data={data} theme={theme} layout={{ custom: true }}/>
+        {isReady && workflow && <CompactTable columns={COLUMNS} data={{nodes: workflow}} theme={theme} layout={{ custom: true }}/>}
       </ModuleContent>
     </ModuleMain>
   )

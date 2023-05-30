@@ -395,6 +395,20 @@ interface CMMSChangePassword {
     id: number
 }
 
+interface CMMSWorkflow {
+  id: number,
+  type: string,
+  fault_id: string,
+  plant_id: string,
+  is_assign_to: number;
+  is_send_email: number;
+  is_active: number;
+  assignTo: string,
+  user_id: number;
+  user_email: string,
+  created_at: string
+}
+
 export {
   CMMSBaseType,
   CMMSUser,
@@ -430,5 +444,6 @@ export {
   CMMSEvent,
   CMMSUserSettings,
   CMMSUserInfo,
-  CMMSChangePassword
+  CMMSChangePassword,
+  CMMSWorkflow
 };

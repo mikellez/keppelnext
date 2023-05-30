@@ -26,9 +26,9 @@ export default function RequestNew(props: RequestProps) {
     return (
         <ModuleMain>
             <ModuleHeader title="New Request" header="Create New Request">
-                <Link href="/Request" className="btn btn-secondary">
+                <button className={"btn btn-secondary"} type="button" onClick={() => router.back()}>
                     Back
-                </Link>
+                </button>
             </ModuleHeader>
             <ModuleContent>
                 <RequestContainer requestData={props} />
