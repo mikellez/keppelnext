@@ -5,7 +5,7 @@ import Select, { defaultTheme } from "react-select";
 import { ModuleContent, ModuleDivider, ModuleFooter, ModuleHeader, ModuleMain } from '../../components';
 import RequiredIcon from "../../components/RequiredIcon";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 import LoadingIcon from "../../components/LoadingIcon";
 import ModuleSimplePopup, { SimpleIcon } from "../../components/ModuleLayout/ModuleSimplePopup";
 import router from "next/router";

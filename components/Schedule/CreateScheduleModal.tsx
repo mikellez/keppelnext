@@ -32,7 +32,7 @@ import PlantSelect from "../PlantSelect";
 import TimelineSelect from "./TimelineSelect";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 import { CMMSTimeline, CMMSSchedule } from "../../types/common/interfaces";
 import { ScheduleCreateOptions } from "../../pages/Schedule/Create";
 import { getTimeline } from "../../pages/Schedule/Timeline/[id]";

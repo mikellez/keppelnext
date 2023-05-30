@@ -16,6 +16,7 @@ SELECT
     cl.chl_name, 
     cl.description, 
     cl.status_id,
+    cl.activity_log,
     concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
     concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
     concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
@@ -216,6 +217,7 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
             console.log(err);
             return res.status(500).json("No checklist template found");
         }
+        // console.log(found.rows[0]);
         res.status(200).send(found.rows[0]);
     });
 };
@@ -631,6 +633,7 @@ const editChecklistRecord = async (req, res, next) => {
 
 const approveChecklist = async (req, res, next) => {
     const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    const approvalComments = req.body.remarks;
 
     const updatehistory = `,Updated Record_APPROVE_${today}_${req.user.name}`;
     const activity_log = {
@@ -638,6 +641,7 @@ const approveChecklist = async (req, res, next) => {
         name: req.user.name,
         activity: "APPROVED",
         activity_type: "Updated Record",
+        remarks: approvalComments,
     };
 
     const sql = `
@@ -699,13 +703,14 @@ const rejectChecklist = async (req, res, next) => {
         name: req.user.name,
         activity: "REJECTED",
         activity_type: "Updated Record",
+        remarks: rejectChecklist,
     };
 
     const sql = `
         UPDATE
             keppel.checklist_master
         SET 
-            status_id = 6,
+            status_id = 3,
             history = concat(history,'${updatehistory}'),
             activity_log = activity_log || $1
         WHERE 
@@ -740,7 +745,7 @@ const rejectChecklist = async (req, res, next) => {
                     createdBy: creator_email,
                     status: status
                 }
-            , "", [creator_email]);
+            , "", rejectionComments, [creator_email]);
 
         // await mail.send();
 

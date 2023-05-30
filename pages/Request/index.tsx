@@ -119,6 +119,8 @@ export const getColor = (status: string) => {
         case "REJECTED":
         case "CANCELLED":
             return "red";
+        case "REASSIGNED":
+            return "#B71375";
         default:
             return "#757575";
     }

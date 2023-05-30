@@ -11,7 +11,7 @@ import {
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import { CMMSEmployee } from "../../types/common/interfaces";
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 import { ModuleHeader, ModuleMain } from "../../components";
 import TooltipBtn from "../../components/TooltipBtn";
 import Link from "next/link";

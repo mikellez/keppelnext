@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CMMSTimeline } from "../../types/common/interfaces";
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 
 interface TimelineSelectProps {
     onChange: React.ChangeEventHandler<HTMLSelectElement>;

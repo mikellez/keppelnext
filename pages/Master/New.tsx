@@ -7,7 +7,7 @@ import { ModuleMain, ModuleHeader, ModuleContent, ModuleFooter } from '../../com
 import { Controller, useForm } from 'react-hook-form';
 import { FieldErrorsImpl, SubmitHandler } from 'react-hook-form/dist/types';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 import LoadingIcon from '../../components/LoadingIcon';
 import { CMMSMasterField, CMMSMasterSubmission, CMMSMasterTables, CMMSPlant, CMMSSystem } from '../../types/common/interfaces';
 import { MultiFields } from '../../components/Master/MultiField';

@@ -55,6 +55,19 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
                     <p className={styles.checklistDetailsHeading}>Linked Assets</p>
                     {assetHTMLElements.length > 0 ? assetHTMLElements : "NIL"}
                 </div>
+                {props.checklist?.status_id == 4 && <div>
+                    <p className={styles.checklistDetailsHeading}>Time of Completion</p>
+                    {props.checklist?.activity_log.findLast(activity => activity["activity"] == "WORK DONE")!["date"]}
+                </div>}
+                {props.checklist?.status_id == 5 && <div>
+                    <p className={styles.checklistDetailsHeading}>Time of Approval</p>
+                    {props.checklist?.activity_log.findLast(activity => activity["activity"] == "APPROVED")!["date"]}
+                </div>}
+                {props.checklist?.status_id == 3 || props.checklist?.status_id == 6 && <div>
+                    <p className={styles.checklistDetailsHeading}>Time of Rejection</p>
+                    {props.checklist?.activity_log.findLast(activity => activity["activity"] == "REJECTED")!["date"]}
+                </div>}
+
             </div>
         </div>
     );

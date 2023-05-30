@@ -10,7 +10,7 @@ import {
 } from "../../../components";
 import ChecklistTemplateCreator from "../../../components/Checklist/ChecklistTemplateCreator";
 import { CMMSPlant, CMMSChecklist } from "../../../types/common/interfaces";
-import instance from "../../../axios.config"
+import instance from "../../../types/common/axios.config"
 import { useCurrentUser } from "../../../components/SWR";
 import { CheckSection } from "../../../types/common/classes";
 import LoadingHourglass from "../../../components/LoadingHourglass";
@@ -146,10 +146,11 @@ export default function ChecklistNew(props: ChecklistPageProps) {
         });
     }, [sections]);
     console.log(checklistData.datajson)
+    console.log(checklistData.status_id);
     return (
         <>
             <ModuleMain>
-                <ModuleHeader title="New Checklist" header="Create New Checklist">
+                <ModuleHeader title="New Checklist" header={checklistData.status_id ? "Edit Checklist" : "Create New Checklist"}>
                     <Link href="/Checklist/Templates" className="btn btn-primary">
                         Templates
                     </Link>

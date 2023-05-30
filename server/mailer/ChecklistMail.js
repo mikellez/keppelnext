@@ -3,15 +3,6 @@ const Mail = require('./Mail');
 class ChecklistMail extends Mail {
 
     constructor(recipient, subject, content, checklist, carbon_copy = null) {
-        // const assetLists = checklist.assets.split(', ')
-        // const assetElements = assetLists.length > 0 ? 
-        //     `
-        //         ${assetLists.map(asset => {
-        //             return `
-        //                 <ul>${asset}</ul>
-        //             `
-        //         })}
-        //     ` : `NIL`;
         const emailContent = `
             <strong>Checklist Details: </strong></br>
             <table>
@@ -74,8 +65,11 @@ class ApproveChecklistMail extends ChecklistMail {
 };
 
 class RejectChecklistMail extends ChecklistMail {
-    constructor(recipient, checklist, content = "", carbon_copy = null) {
-        const emailContent = content;
+    constructor(recipient, checklist, content = "", remarks, carbon_copy = null) {
+        const emailContent = content + `
+            <strong>Reason for Rejection</strong>
+            <p>${remarks}</p>
+        `;
         super(recipient, "Checklist Rejected", emailContent, checklist, carbon_copy);
     }; 
 };

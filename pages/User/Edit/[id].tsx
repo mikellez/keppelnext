@@ -6,7 +6,7 @@ import { ModuleContent, ModuleFooter, ModuleHeader, ModuleMain } from "../../../
 import Link from "next/link";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import formStyles from "../../../styles/formStyles.module.css";
-import instance from "../../../axios.config";
+import instance from "../../../types/common/axios.config";
 
 interface CMMSUserEdit {
     first_name?: string;
