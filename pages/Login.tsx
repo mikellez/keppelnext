@@ -1,7 +1,7 @@
 import styles from '../styles/Login.module.css'
 import React, { useState } from 'react'
 import Image from 'next/image'
-import instance from '../axios.config';
+import instance from '../types/common/axios.config';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/router';
 import { SubmitHandler } from 'react-hook-form/dist/types';

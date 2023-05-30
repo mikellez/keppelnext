@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { SlArrowDown } from "react-icons/sl";
 import DropdownOption from "./DropdownOption";
 import styles from "../../styles/Dropdown.module.css";
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 import useComponentVisible from "./useComponentVisible";
 import { useRouter } from "next/router";
 import { useCurrentUser } from "../SWR";

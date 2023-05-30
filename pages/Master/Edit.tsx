@@ -1,6 +1,6 @@
 import formStyles from '../../styles/formStyles.module.css'
 
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'

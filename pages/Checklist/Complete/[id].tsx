@@ -16,7 +16,7 @@ import ChecklistEditableForm from "../../../components/Checklist/ChecklistEditab
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { HiOutlineDownload } from "react-icons/hi";
 import { useRouter } from "next/router";
-import instance from '../../../axios.config.js';
+import instance from '../../../types/common/axios.config';
 import Link from "next/link";
 import { downloadChecklistPDF } from "../View/[id]";
 

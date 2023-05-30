@@ -7,7 +7,7 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import TooltipBtn from "../../components/TooltipBtn";
 import { RiFileAddLine } from "react-icons/ri";
 import Link from "next/link";
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 import { GridApi, ValueGetterParams } from "ag-grid-enterprise";
 import { ColDef, IRowNode, GridOptions, RowDoubleClickedEvent } from "ag-grid-community";
 import { AiOutlineSearch } from "react-icons/ai";

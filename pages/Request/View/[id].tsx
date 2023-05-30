@@ -14,7 +14,7 @@ import RequestPreview, {
 import TooltipBtn from "../../../components/TooltipBtn";
 import { HiOutlineDownload } from 'react-icons/hi';
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import instance from '../../../axios.config.js';
+import instance from '../../../types/common/axios.config';
 import { CMMSRequest } from "../../../types/common/interfaces";
 import { useRouter } from "next/router";
 

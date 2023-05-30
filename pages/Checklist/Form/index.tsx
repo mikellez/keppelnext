@@ -10,7 +10,7 @@ import {
 } from "../../../components";
 import ChecklistTemplateCreator from "../../../components/Checklist/ChecklistTemplateCreator";
 import { CMMSPlant, CMMSChecklist } from "../../../types/common/interfaces";
-import instance from "../../../axios.config"
+import instance from "../../../types/common/axios.config"
 import { useCurrentUser } from "../../../components/SWR";
 import { CheckSection } from "../../../types/common/classes";
 import LoadingHourglass from "../../../components/LoadingHourglass";

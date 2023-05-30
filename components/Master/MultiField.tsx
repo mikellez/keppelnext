@@ -1,7 +1,7 @@
 import formStyles from '../../styles/formStyles.module.css'
 import React, { useEffect, useState, useCallback } from 'react'
 import { CMMSMasterField, CMMSMasterSubmission, CMMSSystem } from '../../types/common/interfaces'
-import instance from '../../axios.config.js'
+import instance from '../../types/common/axios.config'
 import { Select } from 'antd'
 import { get } from 'http'
 import { type } from 'os'

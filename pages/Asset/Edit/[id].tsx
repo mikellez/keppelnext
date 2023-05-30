@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import formStyles from "../../../styles/formStyles.module.css";
-import instance from "../../../axios.config.js";
+import instance from "../../../types/common/axios.config";
 import { CMMSAssetDetails } from "../../../types/common/interfaces";
 import { useRouter } from "next/router";
 import { useCurrentUser } from "../../../components/SWR";

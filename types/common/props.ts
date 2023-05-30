@@ -1,6 +1,6 @@
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { CMMSChecklist, CMMSChangeOfParts, CMMSAssetDetails } from "./interfaces";
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 
 const createChecklistGetServerSideProps = (allowedStatuses?: number[]) => {
 
