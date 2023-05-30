@@ -1,14 +1,29 @@
 import Link from "next/link";
+import styles from "../../styles/Dropdown.module.css"
 
 interface DropdownOptionInfo {
-    // href: string;
-    onClick?: React.MouseEventHandler<HTMLButtonElement>;
-    children?: React.ReactNode;
-} 
+  // href: string;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  children?: React.ReactNode;
+}
 
 export default function DropdownOption(props: DropdownOptionInfo) {
-    return <div style={{
-        padding: "0.3em 0.5em 0.5em 0.3em",
-        margin: "0 5em 0 0.3em"
-    }}><button onClick={props.onClick}>{props.children}</button></div>
+  return (
+    <div
+      style={{
+        margin: 0,
+        padding: 4,
+        paddingLeft: 10,
+        paddingRight: 10,
+      }}
+    >
+      <button
+        onClick={props.onClick}
+        style={{ border: "none", backgroundColor: "white", opacity: 0.8 }}
+        className={styles.button}
+      >
+        {props.children}
+      </button>
+    </div>
+  );
 }

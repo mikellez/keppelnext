@@ -1,18 +1,26 @@
 .dropdownMenuContainer {
-	position: absolute;
-	top: 4em;
-	right: 0.5em;
+  position: absolute;
+  top: 4em;
+  right: 0;
 
-	background-color: white;
-	border: solid #cccccc 1px;
-	border-radius: 5px;
+  background-color: white;
+  border: solid #cccccc 1px;
+  border-radius: 5px;
 
-	padding: 0.5em;
+  padding: 0.5em;
 }
 
 .dropdownButton {
-	border: none;
-	cursor: pointer;
-	appearance: none;
-	background-color: inherit;
+  border: none;
+  cursor: pointer;
+  appearance: none;
+  background-color: inherit;
+}
+
+.button {
+	width: 100%;
+}
+
+.button:hover {
+  opacity: 1!important;
 }
