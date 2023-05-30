@@ -4,7 +4,7 @@ import { FiSend, FiPlusSquare } from "react-icons/fi";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import TooltipBtn from "../../../components/TooltipBtn";
 import styles from "../../styles/Schedule.module.scss";
-import instance from "../../../axios.config.js";
+import instance from "../../../types/common/axios.config";
 import { useRouter } from "next/router";
 import { CMMSTimeline } from "../../../types/common/interfaces";
 import { ThreeDots } from "react-loading-icons";

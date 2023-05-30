@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 import Select, {
   ActionMeta,
   GroupBase,

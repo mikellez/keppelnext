@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CMMSChecklist } from "../../types/common/interfaces";
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 
 interface ChecklistSelectProps {
     onChange: React.ChangeEventHandler<HTMLSelectElement>;

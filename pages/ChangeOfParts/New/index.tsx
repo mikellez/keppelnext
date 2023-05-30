@@ -18,7 +18,7 @@ import { GetServerSideProps } from "next";
 import { ChangeOfPartsPageProps } from "..";
 import LoadingHourglass from "../../../components/LoadingHourglass";
 import { useCurrentUser } from "../../../components/SWR";
-import instance from "../../../axios.config";
+import instance from "../../../types/common/axios.config";
 
 const createChangeOfParts = async (formData: CMMSChangeOfParts) => {
     return await instance

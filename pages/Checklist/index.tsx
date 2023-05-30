@@ -21,7 +21,7 @@ import { HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../components/TooltipBtn";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import LoadingHourglass from "../../components/LoadingHourglass";
-import instance from "../../axios.config.js";
+import instance from "../../types/common/axios.config";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import {
     AiOutlineEdit,

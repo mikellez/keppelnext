@@ -9,7 +9,7 @@ import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup
 import { ModuleModal, ModalProps } from "../";
 import { useRouter } from "next/router";
 import { ThreeDots } from "react-loading-icons";
-import instance from "../../axios.config.js";
+import instance from "../../types/common/axios.config";
 
 interface ScheduleMaintenanceModalProps extends ModalProps {
     timeline?: CMMSTimeline; // use to add schedule in draft

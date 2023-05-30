@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ModuleSelect, { ModuleSelectOption } from '../ModuleLayout/ModuleSelect';
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 
 async function getSystems() : Promise<ModuleSelectOption[]> {
     return await instance.get("/api/master/system")

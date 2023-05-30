@@ -633,6 +633,7 @@ const editChecklistRecord = async (req, res, next) => {
 
 const approveChecklist = async (req, res, next) => {
     const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    const approvalComments = req.body.remarks;
 
     const updatehistory = `,Updated Record_APPROVE_${today}_${req.user.name}`;
     const activity_log = {
@@ -640,6 +641,7 @@ const approveChecklist = async (req, res, next) => {
         name: req.user.name,
         activity: "APPROVED",
         activity_type: "Updated Record",
+        remarks: approvalComments,
     };
 
     const sql = `
@@ -701,13 +703,14 @@ const rejectChecklist = async (req, res, next) => {
         name: req.user.name,
         activity: "REJECTED",
         activity_type: "Updated Record",
+        remarks: rejectChecklist,
     };
 
     const sql = `
         UPDATE
             keppel.checklist_master
         SET 
-            status_id = 2,
+            status_id = 3,
             history = concat(history,'${updatehistory}'),
             activity_log = activity_log || $1
         WHERE 
@@ -742,7 +745,7 @@ const rejectChecklist = async (req, res, next) => {
                     createdBy: creator_email,
                     status: status
                 }
-            , "", [creator_email]);
+            , "", rejectionComments, [creator_email]);
 
         // await mail.send();
 
