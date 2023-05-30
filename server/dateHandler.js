@@ -8,9 +8,9 @@ module.exports.getDateRange = (start,period,end) => {
 	    //Add only for Recurring events
 	{   
 		if (period >0) {
-		  add_days = module.exports.get_no_of_days(next_date,period);
+		//   add_days = module.exports.get_no_of_days(next_date,period);
 
-			temp_date = new Date(next_date.setDate(next_date.getDate() + add_days ));
+			temp_date = new Date(next_date.setDate(next_date.getDate() + period ));
 						
 			next_date = temp_date;
 						
@@ -45,12 +45,12 @@ module.exports.get_no_of_days = (current_startdate, period_stated) => {
     daysInMonth = 0;
 		cut_off = Math.round(period_stated/30);
 		//console.log("Cut off ="+ cut_off + "period =" + period_stated);
-		for (let mon = 1; mon <= cut_off; mon++)
-		{
+		for (let mon = 1; mon <= cut_off; mon++) {
 		 // console.log( "mon=" + mon);
-      daysInMonth += new Date(current_startdate.getFullYear(), current_startdate.getMonth()+ mon, 0).getDate();
-    }
+      		daysInMonth += new Date(current_startdate.getFullYear(), current_startdate.getMonth()+ mon, 0).getDate();
+    	}
 	  //console.log("Days in Month (monthly) : " + current_startdate.getMonth() + " =" + daysInMonth);
+	  console.log(`Days in month: ${daysInMonth}`);
     break; 
 }//end switch
 return (daysInMonth)

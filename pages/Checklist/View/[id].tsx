@@ -36,7 +36,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
 
     return (
         <ModuleMain>
-            <ModuleHeader header="Mange Checklist">
+            <ModuleHeader header="Manage Checklist">
                 <TooltipBtn
                     text="Download PDF"
                     onClick={() => downloadChecklistPDF(parseInt(router.query.id as string))}

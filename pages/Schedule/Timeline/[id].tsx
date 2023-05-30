@@ -155,7 +155,7 @@ export default function Timeline() {
                 <ModuleSimplePopup
                     modalOpenState={submitModal}
                     setModalOpenState={setSubmitModal}
-                    title="Sucess"
+                    title="Success"
                     text="Your schedule has been submitted for your supervisor's approval."
                     icon={SimpleIcon.Check}
                 />

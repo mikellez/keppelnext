@@ -334,11 +334,7 @@ export default function Checklist(props: ChecklistProps) {
                                                                 <AiOutlineFolderView size={22} title={"View"}/>
                                                             </Link>
                                                         )}
-                                                        {/* <div> */}
-                                                        {/* <Link> */}
                                                             <AiOutlineHistory color={"#C70F2B"} onClick={() => setHistory(item.activity_log)} size={22} title={"View History"} />
-                                                        {/* </Link> */}
-                                                        {/* </div> */}
                                                     </Cell>
                                                 </Row>
                                             );
