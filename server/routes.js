@@ -223,84 +223,6 @@ router.get(
   controllers.request.fetchAssetRequest
 );
 
-
-router.get(
-  "/asset/systems",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchSystems
-);
-router.get(
-  "/asset/fetch_asset_types",
-  checkIfLoggedInAPI,
-  controllers.asset.fetch_asset_types
-);
-router.post(
-  "/asset/addNewAsset",
-  checkIfLoggedInAPI,
-  controllers.asset.addNewAsset
-);
-router.post(
-  "/asset/editAsset",
-  checkIfLoggedInAPI,
-  controllers.asset.editAsset
-);
-router.post(
-  "/asset/deleteAsset",
-  checkIfLoggedInAPI,
-  controllers.asset.deleteAsset
-);
-
-router.get(
-  "/asset/system/:system_id",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchSystemAssets
-);
-router.get(
-  "/asset/system/:plant_id/:system_id/:system_asset_id",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchSystemAssetNames
-);
-router.get(
-  "/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchSubComponent1Names
-);
-
-router.get(
-  "/asset/history/:psa_Id",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchAssetHistory
-);
-
-router.get(
-  "/asset/mobile/:plant_id",
-  checkIfLoggedInAPI,
-  controllers.asset.getSystemsFromPlant
-);
-
-router.get(
-  "/asset/mobile/:plant_id/:system_id",
-  checkIfLoggedInAPI,
-  controllers.asset.getSystemAssetsFromPlant
-);
-
-router.get(
-  "/asset/mobile/:psa_id/uploadedFile/:index",
-  controllers.asset.getUploadedFile
-);
-
-router.get(
-  "/asset/mobile/:plant_id/:system_id/:system_asset_id",
-  checkIfLoggedInAPI,
-  controllers.asset.getSystemAssetNamesFromPlant
-);
-
-router.get(
-  "/asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name",
-  checkIfLoggedInAPI,
-  controllers.asset.getSubComponentsFromPlant
-);
-
 router
   .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
   .get(controllers.checklist.fetchSpecificChecklistTemplate)
@@ -406,6 +328,7 @@ router.post(
  * @apiSuccess {number} -.fault_id ID of the fault type
  * @apiSuccess {string} -.fault_type Name of the fault type
  */
+
 router.get("/fault/types", controllers.fault.fetchFaultTypes);
 
 router.get("/asset/:plant_id", controllers.asset.getAssetsFromPlant);
@@ -421,6 +344,83 @@ router.get(
   "/asset/Details/:psa_id",
   checkIfLoggedInAPI,
   controllers.asset.getAssetDetails
+);
+
+router.get(
+  "/asset/systems",
+  checkIfLoggedInAPI,
+  controllers.asset.fetchSystems
+);
+router.get(
+  "/asset/fetch_asset_types",
+  checkIfLoggedInAPI,
+  controllers.asset.fetch_asset_types
+);
+router.post(
+  "/asset/addNewAsset",
+  checkIfLoggedInAPI,
+  controllers.asset.addNewAsset
+);
+router.post(
+  "/asset/editAsset",
+  checkIfLoggedInAPI,
+  controllers.asset.editAsset
+);
+router.post(
+  "/asset/deleteAsset",
+  checkIfLoggedInAPI,
+  controllers.asset.deleteAsset
+);
+
+router.get(
+  "/asset/system/:system_id",
+  checkIfLoggedInAPI,
+  controllers.asset.fetchSystemAssets
+);
+router.get(
+  "/asset/system/:plant_id/:system_id/:system_asset_id",
+  checkIfLoggedInAPI,
+  controllers.asset.fetchSystemAssetNames
+);
+router.get(
+  "/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",
+  checkIfLoggedInAPI,
+  controllers.asset.fetchSubComponent1Names
+);
+
+router.get(
+  "/asset/history/:psa_Id",
+  checkIfLoggedInAPI,
+  controllers.asset.fetchAssetHistory
+);
+
+router.get(
+  "/asset/mobile/:plant_id",
+  checkIfLoggedInAPI,
+  controllers.asset.getSystemsFromPlant
+);
+
+router.get(
+  "/asset/mobile/:plant_id/:system_id",
+  checkIfLoggedInAPI,
+  controllers.asset.getSystemAssetsFromPlant
+);
+
+router.get(
+  "/asset/mobile/:psa_id/uploadedFile/:index",
+  controllers.asset.getUploadedFile
+);
+
+router.get(
+  "/asset/mobile/:plant_id/:system_id/:system_asset_id",
+  checkIfLoggedInAPI,
+  controllers.asset.getSystemAssetNamesFromPlant
+);
+
+router.get(
+  "/asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name",
+  checkIfLoggedInAPI,
+  controllers.asset.getSubComponentsFromPlant
 );
 
 /**
