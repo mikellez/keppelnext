@@ -18,10 +18,10 @@ const recurrencePeriodList: recurrencePeriod[] = [
     { label: "Daily", value: 1 },
     { label: "Weekly", value: 7 },
     { label: "Fortnightly", value: 14 },
-    { label: "Monthly", value: 30 },
-    { label: "Quarterly", value: 90 },
-    { label: "Semi-Annually", value: 180 },
-    { label: "Yearly", value: 360 },
+    { label: "Monthly", value: 35 },
+    { label: "Quarterly", value: 98 },
+    { label: "Semi-Annually", value: 189 },
+    { label: "Yearly", value: 371 },
 ];
 
 export default function RecurrenceSelect(props: RecurrenceSelectProps) {

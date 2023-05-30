@@ -1,115 +1,117 @@
 @use "colours.module.scss" as global;
 
 .navMain {
-    position: fixed;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 10;
 
-    left: 0;
-    top: 0;
-    z-index: 10;
+  width: 20rem;
+  height: 100%;
 
-    width: 20rem;
-    height: 100%;
+  color: global.$gray;
+  background-color: #eeeeee;
 
-    color: global.$gray;
-    background-color: #EEEEEE;
-
-    
-    transition: transform 0.2s ease-out;
+  transition: transform 0.2s ease-out;
 }
 
 .navHead {
-    background-color: #E3E3E3;
-    height: 4rem;
-    padding: 0rem 2rem;
-    margin-bottom: 4rem;
-    display: flex;
-    align-items: center;
-    border-bottom: 4px solid global.$primary;
+  background-color: #e3e3e3;
+  height: 4rem;
+  padding: 0rem 2rem;
+  display: flex;
+  align-items: center;
+  border-bottom: 4px solid global.$primary;
 }
 
 .navItems {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.navScroll {
+  overflow-y: auto;
 }
 
 .navItem {
-    color: global.$gray;
-    background-color: #f7f7f7;
-    margin: 0.4rem 0 0 0;
-    padding: 0.3rem 2rem;
-    border-left: rgba(0,0,0,0.2) solid 6px;
-    // display: flex;
-    // flex-direction: row;
-    align-items: center;
-    display: grid;
-    grid-template-columns: 20% auto 10%;
+  color: global.$gray;
+  background-color: #f7f7f7;
+  margin: 0.4rem 0 0 0;
+  padding: 0.3rem 2rem;
+  border-left: rgba(0, 0, 0, 0.2) solid 6px;
+  // display: flex;
+  // flex-direction: row;
+  align-items: center;
+  display: grid;
+  grid-template-columns: 20% auto 10%;
 }
 
 .navItemSelected {
-    color: white;
-    background-color: global.$primary;
+  color: white;
+  background-color: global.$primary;
 }
 
 .navItem:hover {
-    color: global.$primary;
-    border-left: global.$primary solid 6px;
-    cursor: pointer;
+  color: global.$primary;
+  border-left: global.$primary solid 6px;
+  cursor: pointer;
 }
 
 .navItemSelected:hover {
-    color: white;
-    border-left: rgba(0,0,0,0.2) solid 6px;
+  color: white;
+  border-left: rgba(0, 0, 0, 0.2) solid 6px;
 }
 
 .navItemText {
-    margin: auto 0 auto 0;
-    padding: 0.2rem 0 0.2rem 0;
-    color: global.$gray;
+  margin: auto 0 auto 0;
+  padding: 0.2rem 0 0.2rem 0;
+  color: global.$gray;
 }
 
 .navItemTextSelected {
-    color: white;
+  color: white;
 }
 
 .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    background-color: rgba(0,0,0,0.6);
-    transition: opacity 0.2s ease-out, visibility 0.2s;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  transition: opacity 0.2s ease-out, visibility 0.2s;
 }
 
 .navDropdownItems {
-    flex-direction: column;
-    color: global.$gray;
+  flex-direction: column;
+  color: global.$gray;
 }
 
 .navDropdownItem {
-    color: global.$gray;
-    padding: 0.2rem 2rem;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    font-size: 0.9rem;
-    
-    background-color: #f7f7f7;
-    padding: 0.3rem 5.5rem;
-    border-left: rgba(0,0,0,0.2) solid 6px;
+  color: global.$gray;
+  padding: 0.2rem 2rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 0.9rem;
+
+  background-color: #f7f7f7;
+  padding: 0.3rem 5.5rem;
+  border-left: rgba(0, 0, 0, 0.2) solid 6px;
 }
 
 .navDropdownItem:hover {
-    color: global.$primary;
-    border-color: global.$primary;
+  color: global.$primary;
+  border-color: global.$primary;
 }
 
 .navDropdownSelected {
-    background-color: global.$primary;
-    color: white;
+  background-color: global.$primary;
+  color: white;
 }
 
 .navDropdownSelected:hover {
-    color: white;
-    border-left: rgba(0,0,0,0.2) solid 6px;
+  color: white;
+  border-left: rgba(0, 0, 0, 0.2) solid 6px;
 }
