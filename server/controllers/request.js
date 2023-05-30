@@ -19,7 +19,7 @@ function fetchRequestQuery(status_query, role_id, user_id, page) {
 
   return role_id === 1 || role_id === 2 || role_id === 3
     ? `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
-	  rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
+    ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
 	  pri.priority, 
 	  CASE 
 		  WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
@@ -66,7 +66,7 @@ function fetchRequestQuery(status_query, role_id, user_id, page) {
 	  LIMIT ${ITEMS_PER_PAGE}
 	  OFFSET ${offsetItems};`
     : `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
-	  rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
+	  ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
 	  pri.priority, 
 	  CASE 
 		  WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
@@ -311,13 +311,11 @@ db.query(insertQuery, [
   JSON.stringify(activity_log),
 ], (err, result) => {
   if (err) {
-    // console.log(err);
     return next(err);
   }
 
   db.query(updateQuery, [req.body.linkedRequestId], (err, result) => {
     if (err) {
-      // console.log(err);
       return next(err);
     }
 
