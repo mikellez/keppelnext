@@ -33,7 +33,7 @@ const Pagination = ({
             {page - 1}
           </PageButton>
         )}
-        <PageButton active setPage={setPage} onClick={() => setReady(false)}>
+        <PageButton active setPage={setPage}>
           {page}
         </PageButton>
 

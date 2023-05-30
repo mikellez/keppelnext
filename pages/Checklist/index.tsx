@@ -103,7 +103,7 @@ export default function Checklist(props: ChecklistProps) {
     const filteredData = useChecklistFilter(props, page);
     const columnData = useChecklist(indexedColumn[activeTabIndex], page);
 
-    const { data, error, isValidating, mutate } = props?.filter ? filteredData : columnData;
+    const { data, error, isValidating, mutate } = props.filter ? filteredData : columnData;
 
     const theme = useTheme([
         getTheme(),
@@ -113,8 +113,11 @@ export default function Checklist(props: ChecklistProps) {
     ]);
 
     const switchColumns = (index: number) => {
-        setReady(false);
-        setActiveTabIndex(index);
+        if (isReady) {
+            setReady(false);
+            setActiveTabIndex(index);
+            setPage(1);
+        }
     };
 
     const editRow: OnClick<ChecklistItem> = (item, event) => {
@@ -137,39 +140,20 @@ export default function Checklist(props: ChecklistProps) {
                     setReady(true);
                     setTotalPages(data.total);
                 }
-            } /*else {
-        if (data?.length > 0) {
-          // TODO: to copy requests tab
-          setChecklistItems(
-            data.map((row) => {
-              return {
-                id: row.checklist_id,
-                ...row,
-              };
-            })
-          );
-
-          setReady(true);
-          setTotalPages(data.total);
-        } else {
-          setChecklistItems([]);
+            } 
         }
-
-      }*/
-        }
-
-        if (!data) {
-            setReady(true);
-            setChecklistItems([]);
-            setTotalPages(1);
-        }
+        // if (!data) {
+        //     setReady(false);
+        //     setChecklistItems([]);
+        //     setTotalPages(1);
+        // }
     }, [data, isValidating, isReady, page, props?.isReady]);
 
     useEffect(() => {
         if (!props?.filter) {
             setReady(false);
             instance
-                .get(`/api/checklist/${indexedColumn[activeTabIndex]}?page=1`)
+                .get(`/api/checklist/${indexedColumn[activeTabIndex]}?page=${page}`)
                 .then((response) => {
                     setChecklistItems(
                         response.data.rows.map((row: CMMSChecklist) => {
@@ -180,14 +164,13 @@ export default function Checklist(props: ChecklistProps) {
                         })
                     );
                     setTotalPages(response.data.total);
-                    setPage(1);
                     setReady(true);
                 })
                 .catch((e) => {
                     setChecklistItems([]);
                 });
         }
-    }, [activeTabIndex]);
+    }, [activeTabIndex, page]);
 
     return (
         <ModuleMain>
@@ -242,20 +225,8 @@ export default function Checklist(props: ChecklistProps) {
                         </li>
                     </ul>
                 )}
-                {!isReady && (
-                    <div
-                        style={{
-                            position: "absolute",
-                            top: "calc((100% - 8rem) / 2)",
-                            left: "50%",
-                            transform: "translate(-50%,-50%)",
-                        }}
-                    >
-                        <LoadingHourglass />
-                    </div>
-                )}
-                {checklistItems.length === 0 && <div>No Checklists</div>}
-                {isReady && (
+                {isReady && checklistItems.length === 0 && <div>No Checklists</div>}
+                {isReady ? (
                     <>
                         <Table
                             data={{ nodes: checklistItems }}
@@ -334,11 +305,7 @@ export default function Checklist(props: ChecklistProps) {
                                                                 <AiOutlineFolderView size={22} title={"View"}/>
                                                             </Link>
                                                         )}
-                                                        {/* <div> */}
-                                                        {/* <Link> */}
-                                                            <AiOutlineHistory color={"#C70F2B"} onClick={() => setHistory(item.activity_log)} size={22} title={"View History"} />
-                                                        {/* </Link> */}
-                                                        {/* </div> */}
+                                                        <AiOutlineHistory color={"#C70F2B"} onClick={() => setHistory(item.activity_log)} size={22} title={"View History"} />
                                                     </Cell>
                                                 </Row>
                                             );
@@ -355,13 +322,14 @@ export default function Checklist(props: ChecklistProps) {
                             page={page}
                         />
                     </>
-                )}
-                {history && <ModuleModal
-                    isOpen={!!history}
-                    closeModal={() => setHistory(undefined)}
-                    closeOnOverlayClick={true}
+                ) : <LoadingHourglass /> }
+                {history && 
+                    <ModuleModal
+                        isOpen={!!history}
+                        closeModal={() => setHistory(undefined)}
+                        closeOnOverlayClick={true}
                     >
-                    <ChecklistHistory history={history!} />
+                        <ChecklistHistory history={history!} />
                     </ModuleModal>}
             </ModuleContent>
         </ModuleMain>
