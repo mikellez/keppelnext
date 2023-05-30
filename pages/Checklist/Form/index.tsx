@@ -146,10 +146,11 @@ export default function ChecklistNew(props: ChecklistPageProps) {
         });
     }, [sections]);
     console.log(checklistData.datajson)
+    console.log(checklistData.status_id);
     return (
         <>
             <ModuleMain>
-                <ModuleHeader title="New Checklist" header="Create New Checklist">
+                <ModuleHeader title="New Checklist" header={checklistData.status_id ? "Edit Checklist" : "Create New Checklist"}>
                     <Link href="/Checklist/Templates" className="btn btn-primary">
                         Templates
                     </Link>

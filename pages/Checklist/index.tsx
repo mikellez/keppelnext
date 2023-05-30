@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { ModuleContent, ModuleHeader, ModuleMain } from "../../components";
+import { ModuleContent, ModuleHeader, ModuleMain, ModuleModal } from "../../components";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import {
@@ -28,12 +28,14 @@ import {
     AiOutlineFolderView,
     AiOutlineFileDone,
     AiOutlineFileProtect,
+    AiOutlineHistory,
 } from "react-icons/ai";
 import PageButton from "../../components/PageButton";
 import styles from "../../styles/Request.module.scss";
 import { Role } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
 import { GetServerSidePropsContext } from "next";
+import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 
 const indexedColumn: ("pending" | "assigned" | "record" | "approved")[] = [
     "pending",
@@ -59,6 +61,7 @@ export interface ChecklistItem {
     created_date: Date | string;
     history: string;
     status: string;
+    activity_log?: { [key: string]: string }[];
 }
 
 export interface ChecklistProps {
@@ -96,7 +99,7 @@ export default function Checklist(props: ChecklistProps) {
     const user = useCurrentUser();
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-
+    const [history, setHistory] = useState< {[key : string] : string}[] | undefined>(undefined);
     const filteredData = useChecklistFilter(props, page);
     const columnData = useChecklist(indexedColumn[activeTabIndex], page);
 
@@ -302,7 +305,7 @@ export default function Checklist(props: ChecklistProps) {
                                                             <Link
                                                                 href={`/Checklist/Manage/${item.id}`}
                                                             >
-                                                                <AiOutlineFileProtect size={22} />
+                                                                <AiOutlineFileProtect size={22} title={"Manage"} />
                                                             </Link>
                                                         ) : item.status_id === 2 ||
                                                           item.status_id === 3 ? (
@@ -310,27 +313,32 @@ export default function Checklist(props: ChecklistProps) {
                                                                 <Link
                                                                     href={`/Checklist/Complete/${item.id}`}
                                                                 >
-                                                                    <AiOutlineFileDone size={22} />
+                                                                    <AiOutlineFileDone size={22} title={"Complete"} />
                                                                 </Link>
                                                                 <Link
                                                                     href={`/Checklist/Form/?action=Edit&id=${item.id}`}
                                                                 >
-                                                                    <AiOutlineEdit size={22} />
+                                                                    <AiOutlineEdit size={22} title={"Edit"}/>
                                                                 </Link>
                                                             </>
                                                         ) : item.status_id === 1 ? (
                                                             <Link
                                                                 href={`/Checklist/Form/?action=Edit&id=${item.id}`}
                                                             >
-                                                                <AiOutlineEdit size={22} />
+                                                                <AiOutlineEdit size={22} title={"Assign"} />
                                                             </Link>
                                                         ) : (
                                                             <Link
                                                                 href={`/Checklist/View/${item.id}`}
                                                             >
-                                                                <AiOutlineFolderView size={22} />
+                                                                <AiOutlineFolderView size={22} title={"View"}/>
                                                             </Link>
                                                         )}
+                                                        {/* <div> */}
+                                                        {/* <Link> */}
+                                                            <AiOutlineHistory color={"#C70F2B"} onClick={() => setHistory(item.activity_log)} size={22} title={"View History"} />
+                                                        {/* </Link> */}
+                                                        {/* </div> */}
                                                     </Cell>
                                                 </Row>
                                             );
@@ -348,6 +356,13 @@ export default function Checklist(props: ChecklistProps) {
                         />
                     </>
                 )}
+                {history && <ModuleModal
+                    isOpen={!!history}
+                    closeModal={() => setHistory(undefined)}
+                    closeOnOverlayClick={true}
+                    >
+                    <ChecklistHistory history={history!} />
+                    </ModuleModal>}
             </ModuleContent>
         </ModuleMain>
     );

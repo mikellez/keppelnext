@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ModuleMain, ModuleHeader, ModuleContent } from "../../../components";
 import { ChecklistPageProps } from "../Form";
 import { createChecklistGetServerSideProps } from "../../../types/common/props";
@@ -32,7 +32,14 @@ const downloadChecklistPDF = async (checklistId: number) => {
 };
 
 const ManageChecklistPage = (props: ChecklistPageProps) => {
+    const [remarks, setRemarks] = useState<string>();
     const router = useRouter();
+
+    useEffect(() => {
+        if (props.checklist?.status_id == 5) {
+            setRemarks(props.checklist?.activity_log.at(-1).remarks as string)
+        } 
+    }, [props.checklist])
 
     return (
         <ModuleMain>
@@ -49,20 +56,12 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
             </ModuleHeader>
             <ChecklistPreview checklist={props.checklist} />
             <ModuleContent>
-                {props.checklist?.status_id == 6 && (
+                {remarks &&
                     <>
                         <label className={styles.checklistDetailsHeading}>Remarks</label>
-                        <p className={styles.checklistDetailsContent}>
-                            {
-                                props.checklist?.history
-                                    .split(",")
-                                    .slice(-1)[0]
-                                    .split("_")
-                                    .slice(-1)[0]
-                            }
-                        </p>
+                        <p>{ remarks }</p>
                     </>
-                )}
+                }
             </ModuleContent>
         </ModuleMain>
     );
