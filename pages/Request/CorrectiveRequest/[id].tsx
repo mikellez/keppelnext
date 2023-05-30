@@ -10,7 +10,7 @@ import {
 import Link from "next/link";
 import RequestContainer, {RequestProps} from "../../../components/Request/RequestContainer";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import instance from '../../../axios.config.js';
+import instance from '../../../types/common/axios.config';
 import { CMMSUser, CMMSRequestTypes, CMMSRequest, CMMSFaultTypes } from "../../../types/common/interfaces";
 
 interface CorrenctiveRequestProps {

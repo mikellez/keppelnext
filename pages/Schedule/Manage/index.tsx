@@ -9,7 +9,7 @@ import {
 import { HiOutlineSwitchHorizontal } from "react-icons/hi";
 import TooltipBtn from "../../../components/TooltipBtn";
 import styles from "../../../styles/Schedule.module.scss";
-import instance from '../../../axios.config.js';
+import instance from '../../../types/common/axios.config';
 import TimelineSelect from "../../../components/Schedule/TimelineSelect";
 import EventSelect from "../../../components/Schedule/EventSelect";
 import { getSchedules } from "../Timeline/[id]";

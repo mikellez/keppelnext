@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { ModuleContent, ModuleHeader, ModuleMain } from "../../components";
+import { ModuleContent, ModuleHeader, ModuleMain, ModuleModal } from "../../components";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import {
@@ -21,19 +21,21 @@ import { HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../components/TooltipBtn";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import LoadingHourglass from "../../components/LoadingHourglass";
-import instance from "../../axios.config.js";
+import instance from "../../types/common/axios.config";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import {
     AiOutlineEdit,
     AiOutlineFolderView,
     AiOutlineFileDone,
     AiOutlineFileProtect,
+    AiOutlineHistory,
 } from "react-icons/ai";
 import PageButton from "../../components/PageButton";
 import styles from "../../styles/Request.module.scss";
 import { Role } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
 import { GetServerSidePropsContext } from "next";
+import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 
 const indexedColumn: ("pending" | "assigned" | "record" | "approved")[] = [
     "pending",
@@ -59,6 +61,7 @@ export interface ChecklistItem {
     created_date: Date | string;
     history: string;
     status: string;
+    activity_log?: { [key: string]: string }[];
 }
 
 export interface ChecklistProps {
@@ -96,11 +99,11 @@ export default function Checklist(props: ChecklistProps) {
     const user = useCurrentUser();
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-
+    const [history, setHistory] = useState< {[key : string] : string}[] | undefined>(undefined);
     const filteredData = useChecklistFilter(props, page);
     const columnData = useChecklist(indexedColumn[activeTabIndex], page);
 
-    const { data, error, isValidating, mutate } = props?.filter ? filteredData : columnData;
+    const { data, error, isValidating, mutate } = props.filter ? filteredData : columnData;
 
     const theme = useTheme([
         getTheme(),
@@ -110,8 +113,11 @@ export default function Checklist(props: ChecklistProps) {
     ]);
 
     const switchColumns = (index: number) => {
-        setReady(false);
-        setActiveTabIndex(index);
+        if (isReady) {
+            setReady(false);
+            setActiveTabIndex(index);
+            setPage(1);
+        }
     };
 
     const editRow: OnClick<ChecklistItem> = (item, event) => {
@@ -134,39 +140,20 @@ export default function Checklist(props: ChecklistProps) {
                     setReady(true);
                     setTotalPages(data.total);
                 }
-            } /*else {
-        if (data?.length > 0) {
-          // TODO: to copy requests tab
-          setChecklistItems(
-            data.map((row) => {
-              return {
-                id: row.checklist_id,
-                ...row,
-              };
-            })
-          );
-
-          setReady(true);
-          setTotalPages(data.total);
-        } else {
-          setChecklistItems([]);
+            } 
         }
-
-      }*/
-        }
-
-        if (!data) {
-            setReady(true);
-            setChecklistItems([]);
-            setTotalPages(1);
-        }
+        // if (!data) {
+        //     setReady(false);
+        //     setChecklistItems([]);
+        //     setTotalPages(1);
+        // }
     }, [data, isValidating, isReady, page, props?.isReady]);
 
     useEffect(() => {
         if (!props?.filter) {
             setReady(false);
             instance
-                .get(`/api/checklist/${indexedColumn[activeTabIndex]}?page=1`)
+                .get(`/api/checklist/${indexedColumn[activeTabIndex]}?page=${page}`)
                 .then((response) => {
                     setChecklistItems(
                         response.data.rows.map((row: CMMSChecklist) => {
@@ -177,14 +164,13 @@ export default function Checklist(props: ChecklistProps) {
                         })
                     );
                     setTotalPages(response.data.total);
-                    setPage(1);
                     setReady(true);
                 })
                 .catch((e) => {
                     setChecklistItems([]);
                 });
         }
-    }, [activeTabIndex]);
+    }, [activeTabIndex, page]);
 
     return (
         <ModuleMain>
@@ -239,20 +225,8 @@ export default function Checklist(props: ChecklistProps) {
                         </li>
                     </ul>
                 )}
-                {!isReady && (
-                    <div
-                        style={{
-                            position: "absolute",
-                            top: "calc((100% - 8rem) / 2)",
-                            left: "50%",
-                            transform: "translate(-50%,-50%)",
-                        }}
-                    >
-                        <LoadingHourglass />
-                    </div>
-                )}
-                {checklistItems.length === 0 && <div>No Checklists</div>}
-                {isReady && (
+                {isReady && checklistItems.length === 0 && <div>No Checklists</div>}
+                {isReady ? (
                     <>
                         <Table
                             data={{ nodes: checklistItems }}
@@ -302,7 +276,7 @@ export default function Checklist(props: ChecklistProps) {
                                                             <Link
                                                                 href={`/Checklist/Manage/${item.id}`}
                                                             >
-                                                                <AiOutlineFileProtect size={22} />
+                                                                <AiOutlineFileProtect size={22} title={"Manage"} />
                                                             </Link>
                                                         ) : item.status_id === 2 ||
                                                           item.status_id === 3 ? (
@@ -310,27 +284,28 @@ export default function Checklist(props: ChecklistProps) {
                                                                 <Link
                                                                     href={`/Checklist/Complete/${item.id}`}
                                                                 >
-                                                                    <AiOutlineFileDone size={22} />
+                                                                    <AiOutlineFileDone size={22} title={"Complete"} />
                                                                 </Link>
                                                                 <Link
                                                                     href={`/Checklist/Form/?action=Edit&id=${item.id}`}
                                                                 >
-                                                                    <AiOutlineEdit size={22} />
+                                                                    <AiOutlineEdit size={22} title={"Edit"}/>
                                                                 </Link>
                                                             </>
                                                         ) : item.status_id === 1 ? (
                                                             <Link
                                                                 href={`/Checklist/Form/?action=Edit&id=${item.id}`}
                                                             >
-                                                                <AiOutlineEdit size={22} />
+                                                                <AiOutlineEdit size={22} title={"Assign"} />
                                                             </Link>
                                                         ) : (
                                                             <Link
                                                                 href={`/Checklist/View/${item.id}`}
                                                             >
-                                                                <AiOutlineFolderView size={22} />
+                                                                <AiOutlineFolderView size={22} title={"View"}/>
                                                             </Link>
                                                         )}
+                                                        <AiOutlineHistory color={"#C70F2B"} onClick={() => setHistory(item.activity_log)} size={22} title={"View History"} />
                                                     </Cell>
                                                 </Row>
                                             );
@@ -347,7 +322,15 @@ export default function Checklist(props: ChecklistProps) {
                             page={page}
                         />
                     </>
-                )}
+                ) : <LoadingHourglass /> }
+                {history && 
+                    <ModuleModal
+                        isOpen={!!history}
+                        closeModal={() => setHistory(undefined)}
+                        closeOnOverlayClick={true}
+                    >
+                        <ChecklistHistory history={history!} />
+                    </ModuleModal>}
             </ModuleContent>
         </ModuleMain>
     );

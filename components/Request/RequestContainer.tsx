@@ -25,7 +25,7 @@
 import formStyles from "../../styles/formStyles.module.css";
 
 import React, { useEffect, useState } from "react";
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 
 import { ModuleContent, ModuleDivider, ModuleFooter } from "../../components";
 import ImagePreview from "../../components/Request/ImagePreview";

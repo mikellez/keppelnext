@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CMMSPlant } from "../types/common/interfaces";
-import instance from "../axios.config";
+import instance from "../types/common/axios.config";
 
 interface PlantSelectProps {
     onChange: React.ChangeEventHandler<HTMLSelectElement>;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import ScheduleTemplate, { ScheduleInfo } from '../../components/Schedule/ScheduleTemplate';
 import { CMMSChangeOfParts, CMMSPlant } from '../../types/common/interfaces';
 import PlantSelect from '../../components/PlantSelect';
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 import { MdOutlineLocationOn } from "react-icons/md"
 import styles from "../../styles/Schedule.module.scss";
 import { useChangeOfParts } from '../../components/SWR';

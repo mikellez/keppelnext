@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ModuleContent, ModuleMain, ModuleHeader, ModuleFooter } from "../../../components";
 import { ChecklistPageProps } from "../Form";
 import { createChecklistGetServerSideProps } from "../../../types/common/props";
@@ -12,6 +12,9 @@ import { HiOutlineDownload } from "react-icons/hi";
 import ChecklistPreview from "../../../components/Checklist/ChecklistPreview";
 import { downloadChecklistPDF } from "../View/[id]";
 import { Action } from "../../../types/common/enums";
+import { useCurrentUser } from "../../../components/SWR";
+import LoadingHourglass from "../../../components/LoadingHourglass";
+import { Role } from "../../../types/common/enums";
 
 const manageChecklist = async (id: number, action: string, remarks: string) => {
     try {
@@ -31,7 +34,9 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
     const [successModal, setSuccessModal] = useState<boolean>(false);
     const [disableBtns, setDisableBtns] = useState<boolean>(false);
     const [managerAction, setManagerAction] = useState<Action>();
+    const [isLoading, setLoading] = useState<boolean>(false);
     const router = useRouter();
+    const user = useCurrentUser();
 
     const handleClick = (action: Action) => {
         setDisableBtns(true);
@@ -51,6 +56,23 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
         });
     };
 
+    useEffect(() => {
+        setLoading(true);
+
+        if (
+            (user.data && props.checklist) && 
+            user.data?.id != props.checklist?.signoff_user_id &&
+            user.data.role_id != Role.Admin
+        ) {
+            router.push("/403");
+        } else {
+            setTimeout(() => {
+                setLoading(false);
+            }, 1000)
+        }
+
+    }, [props.checklist, user.data, router]);
+
     return (
         <>
             <ModuleMain>
@@ -65,6 +87,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
                         Back
                     </button>
                 </ModuleHeader>
+                {isLoading ? <LoadingHourglass /> : <>
                 <ChecklistPreview checklist={props.checklist} />
                 <ModuleContent>
                     <label>Remarks</label>
@@ -94,6 +117,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
                         Approve
                     </TooltipBtn>
                 </ModuleFooter>
+                </>}
             </ModuleMain>
 
             <ModuleSimplePopup
@@ -107,8 +131,8 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
             <ModuleSimplePopup
                 setModalOpenState={setSuccessModal}
                 modalOpenState={successModal}
-                text="Success"
-                title={Action.Approve ? "Checklist has been approved." : "Checklist has been rejected."}
+                text={managerAction === Action.Approve ? "Checklist has been approved." : "Checklist has been rejected."}
+                title="Success"
                 icon={SimpleIcon.Check}
             />
         </>

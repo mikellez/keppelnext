@@ -1,7 +1,7 @@
 import React from "react";
 
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import instance from "../../axios.config";
+import instance from "../../types/common/axios.config";
 import ManagerDashboad from "./Manager";
 import EngineerDashboad from "./Engineer";
 import SpecialistDashboad from "./Specialist";

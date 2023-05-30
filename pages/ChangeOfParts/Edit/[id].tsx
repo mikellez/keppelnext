@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
 import { CMMSChangeOfParts } from "../../../types/common/interfaces";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import axios, { AxiosResponse } from "axios";
-import instance from "../../../axios.config";
+import instance from "../../../types/common/axios.config";
 
 export const editChangeOfParts = async (formData: CMMSChangeOfParts) => {
     return await instance
