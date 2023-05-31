@@ -486,7 +486,37 @@ router.get("/asset/fetch_asset_types",checkIfLoggedInAPI,controllers.asset.fetch
  *
  */
 router.post("/asset/addNewAsset",checkIfLoggedInAPI,controllers.asset.addNewAsset);
+
+/**
+ * @api {post} /editAsset Edit Asset
+ * @apiDescription Edit an asset. Not allowed to edit hierarchy of the asset.
+ * @apiGroup Asset
+
+ * @apiSuccess {number} -.psa_id Psa ID of the asset
+
+ */
 router.post("/asset/editAsset",checkIfLoggedInAPI,controllers.asset.editAsset);
+
+/**
+ * @api {post} /deleteAsset Delete Asset
+ * @apiDescription Delete an asset. 
+ * @apiGroup Asset
+
+ * @apiSuccess {string} -.asset_description Description of the asset
+ * @apiSuccess {string} -.asset_location location of the asset
+ * @apiSuccess {string} -.brand Brand of the asset
+ * @apiSuccess {string} -.plant_asset_instrument Asset Name of the asset
+ * @apiSuccess {string} -.model_number Model Number of the asset
+ * @apiSuccess {string} -.technical_specs Technical specs of the asset
+ * @apiSuccess {string} -.manufacture_country Manufacture country of the asset
+ * @apiSuccess {string} -.warranty Warranty of the asset
+ * @apiSuccess {string} -.remarks Remarks for the asset
+ * @apiSuccess {string} -.uploaded_image Image of the asset
+ * @apiSuccess {jsonb} -.uploaded_files Files pertaining to the asset
+  * @apiSuccess {string} -.plant_id Plant ID of the asset       
+ * 
+ *
+ */
 router.post("/asset/deleteAsset",checkIfLoggedInAPI,controllers.asset.deleteAsset);
 
 router.get("/asset/system/:system_id",checkIfLoggedInAPI,controllers.asset.fetchSystemAssets);
