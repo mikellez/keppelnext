@@ -481,7 +481,7 @@ router.get("/asset/fetch_asset_types",checkIfLoggedInAPI,controllers.asset.fetch
  * @apiSuccess {number} -.system_asset_lvl7 System_asset_lvl7 of the asset
  * @apiSuccess {string} -.uploaded_image Image of the asset
  * @apiSuccess {jsonb} -.uploaded_files Files pertaining to the asset
-  * @apiSuccess {string} -.plant_id Plant ID of the asset       
+ * @apiSuccess {string} -.plant_id Plant ID of the asset       
  * 
  *
  */
@@ -490,16 +490,6 @@ router.post("/asset/addNewAsset",checkIfLoggedInAPI,controllers.asset.addNewAsse
 /**
  * @api {post} /editAsset Edit Asset
  * @apiDescription Edit an asset. Not allowed to edit hierarchy of the asset.
- * @apiGroup Asset
-
- * @apiSuccess {number} -.psa_id Psa ID of the asset
-
- */
-router.post("/asset/editAsset",checkIfLoggedInAPI,controllers.asset.editAsset);
-
-/**
- * @api {post} /deleteAsset Delete Asset
- * @apiDescription Delete an asset. 
  * @apiGroup Asset
 
  * @apiSuccess {string} -.asset_description Description of the asset
@@ -513,23 +503,119 @@ router.post("/asset/editAsset",checkIfLoggedInAPI,controllers.asset.editAsset);
  * @apiSuccess {string} -.remarks Remarks for the asset
  * @apiSuccess {string} -.uploaded_image Image of the asset
  * @apiSuccess {jsonb} -.uploaded_files Files pertaining to the asset
-  * @apiSuccess {string} -.plant_id Plant ID of the asset       
  * 
+ *
+ */
+router.post("/asset/editAsset",checkIfLoggedInAPI,controllers.asset.editAsset);
+
+/**
+ * @api {post} /deleteAsset Delete Asset
+ * @apiDescription Delete an asset. 
+ * @apiGroup Asset
+ * @apiSuccess {number} -.psa_id Psa ID of the asset
  *
  */
 router.post("/asset/deleteAsset",checkIfLoggedInAPI,controllers.asset.deleteAsset);
 
-router.get("/asset/system/:system_id",checkIfLoggedInAPI,controllers.asset.fetchSystemAssets);
-router.get("/asset/system/:plant_id/:system_id/:system_asset_id",checkIfLoggedInAPI,controllers.asset.fetchSystemAssetNames);
-router.get("/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",checkIfLoggedInAPI,controllers.asset.fetchSubComponent1Names);
 
+/**
+ * @api {get} /fetchSystemAsset Gets all system assets(lvl 5) for the asset table
+ * @apiDescription Gets all the system assets to display on the asset table
+ * @apiName fetchSystemAsset
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset System Assets
+ * @apiSuccess {nukber} -.system_asset_id System Asset IDs
+ *
+ */
+router.get("/asset/system/:system_id",checkIfLoggedInAPI,controllers.asset.fetchSystemAssets);
+/**
+ * @api {get} /fetchSystemAssetNames Gets all system asset names(lvl 6) for the asset table
+ * @apiDescription Gets all the system asset names to display on the asset table
+ * @apiName fetchSystemAssetName
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl6 System Asset Names
+ *
+ */
+router.get("/asset/system/:plant_id/:system_id/:system_asset_id",checkIfLoggedInAPI,controllers.asset.fetchSystemAssetNames);
+/**
+ * @api {get} /fetchSubComponent1Names Gets all Sub-Component-1 Names(lvl 7) for the asset table
+ * @apiDescription Gets all the Component names to display on the asset table
+ * @apiName fetchSubComponent1Names
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl7 Component Names
+ *
+ */
+router.get("/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",checkIfLoggedInAPI,controllers.asset.fetchSubComponent1Names);
+/**
+ * @api {get} /fetchAssetHistory Gets History of the asset 
+ * @apiDescription Retrieves Asset History when viewing the asset details page
+ * @apiName fetchAssetHistory
+ * @apiGroup Asset
+ * @apiSuccess {string} -.history_id History ID of the asset
+ * @apiSuccess {string} -.action What was changed of the asset
+ * @apiSuccess {string} -.name User who changed the Asset
+ * @apiSuccess {string} -.date Date of the change
+ * @apiSuccess {string} -.fields Which particular fields that were changed
+
+ *
+ */
 router.get("/asset/history/:psa_Id",checkIfLoggedInAPI,controllers.asset.fetchAssetHistory);
 
+/**
+ * @api {get} /getSystemsFromPlant Gets all systems from plant
+ * @apiDescription Gets list of all Systems for Mobile Asset Table
+ * @apiName getSystemsFromPlant
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_id System IDs for particular plant
 
+
+ *
+ */
 router.get("/asset/mobile/:plant_id",checkIfLoggedInAPI,controllers.asset.getSystemsFromPlant);
+
+/**
+ * @api {get} /getSystemAssetsFromPlant Gets all Systems Assets from plant
+ * @apiDescription Gets list of all Systems Assets for Mobile Asset Table
+ * @apiName getSystemAssetsFromPlant
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl5 System Assets for particular plant
+
+
+ *
+ */
 router.get("/asset/mobile/:plant_id/:system_id",checkIfLoggedInAPI,controllers.asset.getSystemAssetsFromPlant);
+/**
+ * @api {get} /getUploadedFile Gets File for Asset
+ * @apiDescription Retrieves Asset file when viewing the asset details page on Mobile
+ * @apiName getUploadedFile
+ * @apiGroup Asset
+ * @apiSuccess {jsonb} -.uploaded_files Uploaded Files for the Asset
+
+
+ *
+ */
 router.get("/asset/mobile/:psa_id/uploadedFile/:index",controllers.asset.getUploadedFile);
+/**
+ * @api {get} /getSystemAssetNamesFromPlant Gets all Systems Asset Names from plant
+ * @apiDescription Gets list of all Systems Asset Names for Mobile Asset Table
+ * @apiName getSystemAssetNamesFromPlant
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl6 System Asset Names for particular plant
+
+
+ *
+ */
 router.get("/asset/mobile/:plant_id/:system_id/:system_asset_id",checkIfLoggedInAPI,controllers.asset.getSystemAssetNamesFromPlant);
+/**
+ * @api {get} /getSubComponentsFromPlant Gets all Sub Components from plant
+ * @apiDescription Gets list of all Sub Components for Mobile Asset Table
+ * @apiName getSubComponentsFromPlant
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl7  Sub Components for particular plant
+
+
+ *
+ */
 router.get("/asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name",checkIfLoggedInAPI,controllers.asset.getSubComponentsFromPlant);
 
 /**
