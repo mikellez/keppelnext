@@ -400,13 +400,16 @@ interface CMMSWorkflow {
   id: number,
   type: string,
   fault_id: string,
+  fault_type: string,
   plant_id: string,
+  plant_name: string,
   is_assign_to: number;
   is_send_email: number;
   is_active: number;
   assignTo: string,
   user_id: number;
   user_email: string,
+  user_name: string,
   created_at: string
 }
 

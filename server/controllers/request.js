@@ -189,6 +189,39 @@ const fetchApprovedRequests = async (req, res, next) => {
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
 
+const createWorkflow = (requestID, faultTypeID, plantLocationID) => {
+
+  const insertRequestWorkflow = `
+    INSERT INTO keppel.request_workflow (request_id, set_assign, set_email, is_active, created_at)
+    SELECT
+      $1,
+      is_assign_to,
+      is_send_email,
+      is_active,
+      CURRENT_TIMESTAMP
+    FROM
+      keppel.workflow
+    WHERE
+      fault_id = $2
+      AND plant_id = $3;
+  `;
+
+  db.query(
+    insertRequestWorkflow,
+    [
+      requestID,
+      faultTypeID,
+      plantLocationID,
+    ],
+    (err, result) => {
+      if (err) {
+        // console.log(err);
+        return next(err);
+      }
+    }
+  );
+}
+
 const createRequest = async (req, res, next) => {
   // console.log(req.body)
   // console.log(req.file)
@@ -254,15 +287,50 @@ const createRequest = async (req, res, next) => {
       },
     ];
   }
-if(!req.body.linkedRequestId) {
-  const q = `INSERT INTO keppel.request(
-    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
-  ) VALUES (
-    $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
-  )`;
-  db.query(q
-    ,
-    [
+  if(!req.body.linkedRequestId) {
+    const q = `INSERT INTO keppel.request(
+      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+    ) VALUES (
+      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
+    ) RETURNING request_id;`;
+    db.query(q
+      ,
+      [
+        faultTypeID,
+        description,
+        plantLocationID,
+        requestTypeID,
+        user_id,
+        role_id,
+        taggedAssetID,
+        guestfullname,
+        fileBuffer,
+        fileType,
+        history,
+        null,
+        JSON.stringify(activity_log),
+      ],
+      (err, result) => {
+        if (err) return res.status(500).json({ errormsg: err });
+        createWorkflow(result.rows[0].request_id, faultTypeID, plantLocationID);
+        res.status(200).send({ msg: "Request created successfully" });
+
+      }
+    );
+  }
+  else if (req.body.linkedRequestId){
+    const insertQuery = `
+      INSERT INTO keppel.request(
+        fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+      ) VALUES (
+        $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
+      ) RETURNING request_id;
+    `;
+    const updateQuery = `
+    UPDATE keppel.request SET status_id = 3 WHERE request_id = $1;
+    `;
+
+    db.query(insertQuery, [
       faultTypeID,
       description,
       plantLocationID,
@@ -270,62 +338,31 @@ if(!req.body.linkedRequestId) {
       user_id,
       role_id,
       taggedAssetID,
-      guestfullname,
       fileBuffer,
       fileType,
       history,
-      null,
+      req.body.linkedRequestId,
       JSON.stringify(activity_log),
-    ],
-    (err, result) => {
-      if (err) return res.status(500).json({ errormsg: err });
-      res.status(200).send({ msg: "Request created successfully" });
+    ], (err, result) => {
+      if (err) {
+        // console.log(err);
+        return next(err);
+      }
 
-    }
-  );
-}
-else if (req.body.linkedRequestId){
-  const insertQuery = `
-  INSERT INTO keppel.request(
-    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
-  ) VALUES (
-    $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
-  );
-`;
-const updateQuery = `
-UPDATE keppel.request SET status_id = 3 WHERE request_id = $1;
-`;
+      db.query(updateQuery, [req.body.linkedRequestId], (err, result) => {
+        if (err) {
+          // console.log(err);
+          return next(err);
+        }
 
-db.query(insertQuery, [
-  faultTypeID,
-  description,
-  plantLocationID,
-  requestTypeID,
-  user_id,
-  role_id,
-  taggedAssetID,
-  fileBuffer,
-  fileType,
-  history,
-  req.body.linkedRequestId,
-  JSON.stringify(activity_log),
-], (err, result) => {
-  if (err) {
-    // console.log(err);
-    return next(err);
-  }
+        res.status(200).send({ message: "Request created successfully" });
+      });
 
-  db.query(updateQuery, [req.body.linkedRequestId], (err, result) => {
-    if (err) {
-      // console.log(err);
-      return next(err);
-    }
-
-    res.status(200).send({ message: "Request created successfully" });
-  });
-});
+      createWorkflow(result.rows[0].request_id, faultTypeID, plantLocationID);
+    });
 
   }
+
 };
 
 

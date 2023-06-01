@@ -51,7 +51,7 @@ type FormData = {
     faultType: number;
     action: string;
     assignTo: number;
-    sendEmail: string;
+    sendEmail: number;
 }
 
 const WorkflowNew = ({ 
@@ -135,7 +135,9 @@ const WorkflowNew = ({
             hidden: true,
             dependOn: 'action',
             fieldContent: [
-                { type: 'text', label: 'Enter email address', required: true }
+                { 
+                    type: 'select', label: 'Send email to', required: true, options: assignTo.map(item=>({label: item.name +' | '+item.email, value: item.id}))
+                }
             ]
         }
     ];
@@ -149,7 +151,7 @@ const WorkflowNew = ({
         faultType: 0,
         action: "",
         assignTo: 0,
-        sendEmail: ""
+        sendEmail: 0 
     } as FormData);
     const [isSaveSuccess, setSaveSuccess] = useState<boolean>(false);
     const [isModalOpen, setModalOpen] = useState<boolean>(false);
@@ -220,7 +222,7 @@ const WorkflowNew = ({
             return;
         }
 
-        await instance.post('/api/workflow/create', formData)
+        await instance.post('/api/workflow', formData)
         .then((res) => {
             console.log(res.data)
             setSaveSuccess(true);

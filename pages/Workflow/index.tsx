@@ -13,6 +13,11 @@ import { Switch, Tag } from "antd";
 import { useCurrentUser, useWorkflow } from "../../components/SWR";
 import { Role } from "../../types/common/enums";
 import { AiOutlineEdit, AiOutlineFolderView, AiFillDelete } from "react-icons/ai";
+import instance from "../../axios.config";
+import ModuleSimplePopup from "../../components/ModuleLayout/ModuleSimplePopup";
+import LoadingIcon from "../../components/LoadingIcon";
+import { set } from "nprogress";
+import router from "next/router";
 
 interface WorkflowItem {
   sn: string;
@@ -28,15 +33,20 @@ const Workflow = () => {
   const [workflow, setWorkflow] = useState<WorkflowItem[]>([]);
   const [isReady, setIsReady] = useState<boolean>(false);
   const user = useCurrentUser();
+  const [isUpdateModalOpen, setUpdateModalOpen] = useState<boolean>(false);
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+  const [isDeleteSuccess, setDeleteSuccess] = useState<boolean>(false);
+  const [isDeleting, setDeleting] = useState<boolean>(false);
+  const [deleteModalID, setDeleteModalID] = useState<string>('');
 
   useEffect(() => {
     if(data && !isValidating) {
       setWorkflow(data.map((item, index) => {
         let statement = '';
         if(item.is_assign_to) {
-          statement = `When fault type at ${item.plant_id} is of type ${item.fault_id} then assign to ${item.user_id}`;
+          statement = `When fault type at ${item.plant_name} is of type ${item.fault_type} then assign to ${item.user_name}`;
         } else if (item.is_send_email) {
-          statement = `When fault type at ${item.plant_id} is of type ${item.fault_id} then send email to ${item.user_email}`;
+          statement = `When fault type at ${item.plant_name} is of type ${item.fault_type} then send email to ${item.user_email}`;
         }
 
         return {
@@ -78,8 +88,39 @@ const Workflow = () => {
     }
   ]);
 
-  const onChange = (e) => {
+  const onHandleToggle = async (id: string, checked: boolean) => {
+    await instance
+    .put(`/api/workflow/${id}`, {is_active: checked})
+    .then((res) => {
+      setUpdateModalOpen(true);
+    })
+    .catch((err) => {
+      alert('Updated failed!');
+      console.log(err.response);
+      console.log('Unable to update workflow!');
+    })
   }
+
+  const handleDelete = (id: string) => {
+    setDeleteModalID(id);
+    setDeleteModalOpen(true);
+  }
+
+  const deleteWorkflow = async () => {
+    await instance
+    .delete(`/api/workflow/${deleteModalID}`)
+    .then((res) => {
+      setDeleteModalOpen(false);
+      setDeleteSuccess(true);
+      mutate();
+    })
+    .catch((err) => {
+      alert('Delete failed!');
+      console.log(err.response);
+      console.log('Unable to delete workflow!');
+    });
+  }
+
 
   const COLUMNS: Column<WorkflowItem>[] = [
     { label: 'S/N', renderCell: (item) => item.sn },
@@ -96,8 +137,12 @@ const Workflow = () => {
     },
     {
       label: 'Active',
-      renderCell: (item) => item.is_active ? <Tag color="success"> active </Tag> : <Tag color="error"> inactive </Tag>,
+      renderCell: (item) => <Switch defaultChecked={!!item.is_active} onChange={(checked)=>onHandleToggle(item.id, checked)} size={'small'}/>
     },
+    /*{
+      label: 'Active',
+      renderCell: (item) => item.is_active ? <Tag color="success"> active </Tag> : <Tag color="error"> inactive </Tag>,
+    },*/
     {
       label: 'Action',
       renderCell: (item) => {
@@ -107,18 +152,9 @@ const Workflow = () => {
           user.data!.role_id === Role.Engineer
         ) {
           return (
-            <>
-            <Switch defaultChecked onChange={onChange} />
-            <Link href={`/Workflow/Delete/${item.id}`}>
+            <Link href="" onClick={(e) => handleDelete(item.id)}>
               <AiFillDelete size={22} />
             </Link>
-            {/*<Link href={`/Workflow/View/${item.id}`}>
-              <AiOutlineFolderView size={22} />
-            </Link>
-            <Link href={`/Workflow/Edit/${item.id}`}>
-              <AiOutlineEdit size={22} />
-          </Link>*/}
-            </>
           )
         } else {
           <></>
@@ -141,6 +177,72 @@ const Workflow = () => {
       <ModuleContent>
         {isReady && workflow && <CompactTable columns={COLUMNS} data={{nodes: workflow}} theme={theme} layout={{ custom: true }}/>}
       </ModuleContent>
+      <ModuleSimplePopup
+          modalOpenState={isUpdateModalOpen}
+          setModalOpenState={setUpdateModalOpen}
+          title="Success"
+          text={
+          // "ID " + deleteModalID + 
+          "Workflow updated successfully!"}
+          icon={1}
+          buttons={
+          <button
+              onClick={() => {
+                  setUpdateModalOpen(false);
+              }}
+              className="btn btn-primary"
+          >
+              Ok
+          </button>
+          }
+      />
+      <ModuleSimplePopup
+        modalOpenState={isDeleteModalOpen}
+        setModalOpenState={setDeleteModalOpen}
+        title="Confirm Deletion"
+        text={
+          "Are you sure you want to delete workflow record of ID " +
+          deleteModalID +
+          "?"
+        }
+        icon={2}
+        buttons={[
+          <button
+            key="deleteConfirm"
+            onClick={deleteWorkflow}
+            className="btn btn-primary"
+          >
+            {isDeleting && <LoadingIcon />}
+            Delete
+          </button>,
+          <button
+            key="deleteCancel"
+            onClick={() => setDeleteModalOpen(false)}
+            className="btn btn-secondary"
+          >
+            Cancel
+          </button>,
+        ]}
+      />
+      <ModuleSimplePopup
+          modalOpenState={isDeleteSuccess}
+          setModalOpenState={setDeleteSuccess}
+          title="Success"
+          text={
+          // "ID " + deleteModalID + 
+          "Workflow delete successfully!"}
+          icon={1}
+          buttons={
+          <button
+              onClick={() => {
+                  setDeleteSuccess(false);
+              }}
+              className="btn btn-primary"
+          >
+              Ok
+          </button>
+          }
+      />
     </ModuleMain>
   )
 };
