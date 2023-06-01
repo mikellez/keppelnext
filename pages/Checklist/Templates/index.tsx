@@ -11,7 +11,7 @@ import {
 } from "../../../components";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { CMMSChecklist } from "../../../types/common/interfaces";
-import instance from "../../../axios.config.js";
+import instance from "../../../types/common/axios.config";
 import { useCurrentUser } from "../../../components/SWR";
 import TooltipBtn from "../../../components/TooltipBtn";
 import { useRouter } from "next/router";

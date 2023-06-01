@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const userAuth = require("./userAuth");
 const cron = require("node-cron");
 const axios = require("axios");
+const { dbConnection } = require("./db/dbAPI");
 
 const controllers = require("./controllers");
 const { apiLimiter, loginLimiter } = require("./rateLimiter");
@@ -25,6 +26,7 @@ app.prepare().then(() => {
   server.use(bodyParser.json({limit: '50mb', extended: true}));
   server.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
   server.use(bodyParser.text({ limit: '200mb' }));
+  server.use(dbConnection);
   userAuth(server);
   server.use("/api/login", loginLimiter);
   server.use("/api/*", apiLimiter);
@@ -40,7 +42,6 @@ app.prepare().then(() => {
   // checkIfLoggdeIn      - auth failures redirect to /Login page. use this for front facing page routes
 
   function checkIfLoggedIn(req, res, next) {
-    console.log("check");
     if (req.user === undefined) return res.redirect("/Login");
     next();
   }

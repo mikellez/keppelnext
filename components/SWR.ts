@@ -1,6 +1,4 @@
 import useSWR from "swr";
-import instance from "../axios.config";
-
 import {
   CMMSAsset,
   CMMSRequest,
@@ -12,9 +10,9 @@ import {
   CMMSChangeOfParts,
   CMMSWorkflow,
 } from "../types/common/interfaces";
-
 import { RequestProps } from "../pages/Request";
 import { ChecklistProps } from "../pages/Checklist";
+import instance from "../types/common/axios.config";
 
 function useRequest(
   request_type: "pending" | "assigned" | "review" | "approved",

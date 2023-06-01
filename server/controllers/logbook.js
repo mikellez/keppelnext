@@ -7,7 +7,7 @@ exports.getLogbook = async (req, res, next) => {
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
 
   const result =
-    await db.query(`SELECT concat(u1.first_name, ' ', u1.last_name) AS staff1, 
+    await global.db.query(`SELECT concat(u1.first_name, ' ', u1.last_name) AS staff1, 
     concat(u2.first_name, ' ', u2.last_name)  AS staff2, 
     lb.date, lb.label, lb.entry FROM keppel.logbook lb 
     JOIN keppel.users u1
@@ -19,7 +19,7 @@ exports.getLogbook = async (req, res, next) => {
     OFFSET ${offsetItems}
   `);
 
-  const totalRows = await db.query(`SELECT COUNT(*) FROM keppel.logbook`);
+  const totalRows = await global.db.query(`SELECT COUNT(*) FROM keppel.logbook`);
   const totalPages = Math.ceil(+totalRows.rows[0].count / ITEMS_PER_PAGE);
 
   res.status(200).send({ rows: result.rows, total: totalPages });
@@ -28,7 +28,7 @@ exports.getLogbook = async (req, res, next) => {
 exports.addEntryToLogbook = async (req, res, next) => {
   const { label, entry, staff } = req.body;
 
-  const data = await db.query(
+  const data = await global.db.query(
     `SELECT user_id, concat(first_name, ' ', last_name) AS name FROM keppel.users`
   );
   const users = data.rows.map((row) => row.user_id);
@@ -37,7 +37,7 @@ exports.addEntryToLogbook = async (req, res, next) => {
   }
 
   const result =
-    await db.query(`INSERT INTO keppel.logbook (label, entry, date, staff1, staff2)
+    await global.db.query(`INSERT INTO keppel.logbook (label, entry, date, staff1, staff2)
   VALUES ('${label}', '${entry}', '${moment(new Date()).format(
       "YYYY-MM-DD HH:mm:ss"
     )}', '${staff.first}', '${staff.second}') RETURNING *`);

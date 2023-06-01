@@ -1,5 +1,5 @@
 import formStyles from "../../styles/formStyles.module.css";
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import React, { useState } from "react";
 import {

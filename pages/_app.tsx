@@ -1,8 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/globals.scss";
 import "../styles/index.scss";
-//import "nprogress/nprogress.css"
-
 import type { AppProps } from "next/app";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
@@ -33,7 +31,6 @@ export default function App({ Component, pageProps }: AppProps) {
     };
   }, [router.events]);
 
-  console.log(asPath, route, pathname);
 
   if (asPath === "/Login" || pathname === "/404" || pathname === "/500" || pathname === "/403" || asPath.includes("/Guest/Asset/"))
     return (
@@ -63,4 +60,5 @@ export default function App({ Component, pageProps }: AppProps) {
       </div>
     </div>
   );
-}
+};
+

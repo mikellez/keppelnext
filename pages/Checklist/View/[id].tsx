@@ -7,7 +7,7 @@ import ChecklistPreview from "../../../components/Checklist/ChecklistPreview";
 import Link from "next/link";
 import TooltipBtn from "../../../components/TooltipBtn";
 import { HiOutlineDownload } from "react-icons/hi";
-import instance from '../../../axios.config.js';
+import instance from '../../../types/common/axios.config';
 import { useRouter } from "next/router";
 import styles from "../../../styles/Checklist.module.scss";
 
@@ -43,7 +43,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
 
     return (
         <ModuleMain>
-            <ModuleHeader header="Mange Checklist">
+            <ModuleHeader header="Manage Checklist">
                 <TooltipBtn
                     text="Download PDF"
                     onClick={() => downloadChecklistPDF(parseInt(router.query.id as string))}

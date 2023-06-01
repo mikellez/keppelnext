@@ -15,7 +15,7 @@ import TooltipBtn from "../TooltipBtn";
 import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import styles from "../../styles/Schedule.module.scss";
-import instance from "../../axios.config.js";
+import instance from "../../types/common/axios.config";
 import ScheduleModal, { scheduleMaintenance, scheduleValidator } from "./ScheduleModal";
 import { Role } from "../../types/common/enums";
 

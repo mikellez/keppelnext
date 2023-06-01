@@ -10,7 +10,7 @@ import {
 } from "../../../components";
 import ChecklistTemplateCreator from "../../../components/Checklist/ChecklistTemplateCreator";
 import { CMMSPlant, CMMSChecklist } from "../../../types/common/interfaces";
-import instance from "../../../axios.config"
+import instance from "../../../types/common/axios.config"
 import { useCurrentUser } from "../../../components/SWR";
 import { CheckSection } from "../../../types/common/classes";
 import LoadingHourglass from "../../../components/LoadingHourglass";
@@ -79,17 +79,12 @@ export default function ChecklistNew(props: ChecklistPageProps) {
             }, 1000);
         }
     };
-
     const checkInputFields = (checklistType: string) => {
         switch (checklistType) {
             case "record":
                 return (
                     // checklistData.assigned_user_id &&
                     checklistData.signoff_user_id &&
-                    checklistData.chl_name &&
-                    checklistData.chl_name != "" &&
-                    checklistData.description &&
-                    checklistData.description != "" &&
                     checklistData.plant_id &&
                     checklistData.linkedassetids &&
                     checklistData.linkedassetids != ""
@@ -97,10 +92,6 @@ export default function ChecklistNew(props: ChecklistPageProps) {
             case "template":
                 return (
                     checklistData.signoff_user_id &&
-                    checklistData.chl_name &&
-                    checklistData.chl_name != "" &&
-                    checklistData.description &&
-                    checklistData.description != "" &&
                     checklistData.plant_id
                 );
         }

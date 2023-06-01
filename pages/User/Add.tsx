@@ -6,7 +6,7 @@ import { ModuleContent, ModuleDivider, ModuleFooter, ModuleHeader, ModuleMain } 
 import RequiredIcon from "../../components/RequiredIcon";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { CMMSPlant, CMMSAddUser } from "../../types/common/interfaces";
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 import LoadingIcon from "../../components/LoadingIcon";
 import ModuleSimplePopup, { SimpleIcon } from "../../components/ModuleLayout/ModuleSimplePopup";
 import router from "next/router";
