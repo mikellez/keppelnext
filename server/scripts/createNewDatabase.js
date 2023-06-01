@@ -39,20 +39,69 @@ const connectDB = (dbName) => {
     return client;
 };
 
-// const changeSchemaName = async (dbName) => {
-//     const client = connectDB(dbName);
+// const changeSchemaName = async (client) => {
 //     await client.query(`
 //         ALTER SCHEMA keppel RENAME TO company_schema
 //     `);
-//     client.end();
 // };
 
-const createAdminUser = async (dbName) => {
+const createAdminRole = async (dbName) => {
     const client = connectDB(dbName);
+    await client.query(`
+        INSERT INTO 
+            keppel.role (
+                role_name
+            )
+        VALUES (
+            $1
+        )
+    `, [
+        'Admin'
+    ]);
+    client.end()
+};
 
+const createAdminRolePrivileges = async (dbName) => {
+    const client = connectDB(dbName);
+    await client.query(`
+        INSERT INTO 
+            keppel.role_privileges (
+                role_id,
+                create_privilege,
+                read_privilege,
+                update_privilege,
+                approve_privilege
+            )
+        VALUES (
+            $1, $2, $3, $4, $5
+        )
+    `, [
+        1, true, true, true, true
+    ]);
+    client.end();
+};
+
+const createAdminRoleParent = async (dbName) => {
+    const client = connectDB(dbName);
+    await client.query(`
+        INSERT INTO 
+            keppel.role_parent (
+                role_id,
+                parent_ids
+            )
+        VALUES (
+            $1, $2
+        )
+    `, [
+        1, '1'
+    ]);
+    client.end();
+};
+
+const createAdminUser = async (dbName) => {
     const salt = bcrypt.genSaltSync(10);
     const hash = await bcrypt.hash('123Az!!!', salt);  
-
+    const client = connectDB(dbName);
     await client.query(`
         INSERT INTO 
             keppel.users (
@@ -73,6 +122,39 @@ const createAdminUser = async (dbName) => {
         '',
         'Adminstrator',
         '-'
+    ]);
+    client.end();
+};
+
+const createAdminUserRole = async (dbName) => {
+    const client = connectDB(dbName);
+    await client.query(`
+        INSERT INTO 
+            keppel.user_role (
+                role_parent_id
+            )
+        VALUES (
+            $1
+        )
+    `, [
+        1
+    ]);
+    client.end();
+};
+
+const createAdminUserRolePrivileges = async (dbName) => {
+    const client = connectDB(dbName);
+    await client.query(`
+        INSERT INTO 
+            keppel.user_role_privileges (
+                role_parent_id,
+                user_id
+            )
+        VALUES (
+            $1, $2
+        )
+    `, [
+        1, 1
     ]);
     client.end();
 };
@@ -101,8 +183,13 @@ const main = async (newDB) => {
     try {
         checkIfDatabaseExists(newDB);
         await createNewDatabase(newDB)
-        // await changeSchemaName(newDB);
-        await createAdminUser(newDB)
+        // await changeSchemaName(client);
+        await createAdminRole(newDB);
+        await createAdminRolePrivileges(newDB);
+        await createAdminRoleParent(newDB);
+        await createAdminUser(newDB);
+        await createAdminUserRole(newDB);
+        await createAdminUserRolePrivileges(newDB);
         addToJSONFile(newDB);
     } catch (err) {
         console.log(err);
@@ -110,4 +197,4 @@ const main = async (newDB) => {
 };
 
 
-main("test_db");
+main("test_db2");

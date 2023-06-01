@@ -1,1 +1,1 @@
-{"cmms_dev":{"host":"192.168.20.96","port":5432,"database":"cmms_dev","user":"postgres","password":"123Az!!!"},"test_db":{"host":"192.168.20.96","port":5432,"database":"test_db","user":"postgres","password":"123Az!!!"}}
+{"cmms_dev":{"host":"192.168.20.96","port":5432,"database":"cmms_dev","user":"postgres","password":"123Az!!!"},"test_db2":{"host":"192.168.20.96","port":5432,"database":"test_db2","user":"postgres","password":"123Az!!!"}}

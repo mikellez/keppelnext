@@ -11,10 +11,6 @@ const dbConnection = (req, res, next) => {
         connectDB(database);
     } 
 
-    // if (global.db) {
-    //     connectDB(global.db);
-    // }
-
     next();
 };
 
