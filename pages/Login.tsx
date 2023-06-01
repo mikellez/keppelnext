@@ -53,7 +53,7 @@ function Login({ databases }: { databases: string[] }) {
 				<h1 className={styles.headerLogin}>Login</h1>
 				<form onSubmit={handleSubmit(formSubmit)}>
 
-					<div className={`form-group ${styles.group}`}>
+					{/* <div className={`form-group ${styles.group}`}>
 						<select className='form-select' placeholder='Select' defaultValue="" {...register("database", {required: true})}>
 							<option value="" disabled>Select a database</option>
 							{ databaseOptions }
@@ -61,7 +61,7 @@ function Login({ databases }: { databases: string[] }) {
 						{errors.database && (
 							<div className={styles.loginErrorInfoText}>Please select a database</div>
 						)}
-					</div>
+					</div> */}
 
 					<div className={`form-group ${styles.group}`}>
 						<input className="form-control" type="text" placeholder="Username" {...register("username", {required: true})} />

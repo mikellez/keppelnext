@@ -8,7 +8,8 @@ const fetchDBNames = async (req, res, next) => {
 const dbConnection = (req, res, next) => {
     if (req.path == '/api/login') {
         const { database } = req.body;
-        connectDB(database);
+        if (!database) connectDB("cmms_dev")
+        else connectDB(database);
     } 
 
     next();
