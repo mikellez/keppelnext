@@ -4,7 +4,7 @@ const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
 
 const getUsers = (req, res, next) => {
-    db.query(
+    global.db.query(
         `SELECT 
         employee_id,
         CONCAT(first_name, ' ', last_name) AS full_name,
@@ -66,12 +66,12 @@ const addUser = async (req, res, next) => {
   }  
   q += plants + ` END $$;`
   console.log(q);
-  try {await db.query(q); return res.status(200).json("success");} catch (err) {console.log(err);}
+  try {await global.db.query(q); return res.status(200).json("success");} catch (err) {console.log(err);}
   
 }
 
 const getUsersCSV = (req, res, next) => {
-    db.query(`SELECT 
+    global.db.query(`SELECT 
     employee_id,
     CONCAT(first_name, ' ', last_name) AS full_name,
     role_name
@@ -108,7 +108,7 @@ const deleteUser = async (req, res, next) => {
     DELETE FROM keppel.users
     WHERE user_id = ${id};`
     console.log(query);
-    try {await db.query(query); return res.status(200).json("success");} 
+    try {await global.db.query(query); return res.status(200).json("success");} 
       catch (err) {
         console.log(err);}
 };
@@ -118,7 +118,7 @@ const logout = async (req, res, next) => {
     let newdate = moment(new Date()).format("L HH:mm A");
     var sql = `INSERT INTO keppel.loginevents (userid,datetime,activity) VALUES (${id},'${newdate}','logged out')`;
     try {
-        await db.query(sql);
+        await global.db.query(sql);
         return res.status(200).json("success");
     } catch (err) {
         console.log(err);
@@ -139,7 +139,7 @@ const getUsersData = async(req, res, next) => {
     FROM keppel.user_access
     WHERE user_id = ${id};`
     console.log(query);
-    try {const result = await db.query(query); return res.status(200).json(result.rows[0]);}
+    try {const result = await global.db.query(query); return res.status(200).json(result.rows[0]);}
         catch (err) {
             console.log(err);}
 };
@@ -154,7 +154,7 @@ const getUsersplantData = async(req, res, next) => {
     SELECT plant_id FROM keppel.checklist_master WHERE assigned_user_id = ${id} OR signoff_user_id = ${id};
     `
     console.log(query);
-    try {const result = await db.query(query); return res.status(200).json(result.rows);}
+    try {const result = await global.db.query(query); return res.status(200).json(result.rows);}
         catch (err) {
             console.log(err);}
 };
@@ -189,7 +189,7 @@ const updateUser = async (req, res, next) => {
     plants += query;
     console.log(plants)
 
-    try {await db.query(plants); return res.status(200).json("success");} catch (err) {console.log(err);
+    try {await global.db.query(plants); return res.status(200).json("success");} catch (err) {console.log(err);
     
     }
 }
@@ -197,14 +197,14 @@ const updateUser = async (req, res, next) => {
 
 const checkEmail = async (req, res, next) => {
     const { id } = req.params;
-    const email = await db.query(`SELECT EXISTS(SELECT 1 FROM keppel.users WHERE user_email = '${id}');`);
+    const email = await global.db.query(`SELECT EXISTS(SELECT 1 FROM keppel.users WHERE user_email = '${id}');`);
     console.log(email.rows[0].exists);
     return res.status(200).json(email.rows[0].exists);
 };
 
 const checkUsername = async (req, res, next) => {
     const { id } = req.params;
-    const username = await db.query(`SELECT EXISTS(SELECT 1 FROM keppel.users WHERE user_name = '${id}');`);
+    const username = await global.db.query(`SELECT EXISTS(SELECT 1 FROM keppel.users WHERE user_name = '${id}');`);
     console.log(username.rows[0].exists);
     return res.status(200).json(username.rows[0].exists);
 };

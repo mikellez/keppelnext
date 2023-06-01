@@ -11,16 +11,16 @@ const updateUser = async (req, res, next) => {
     WHERE user_id = ${req.body.userId};`
 
     console.log(q);
-    try {await db.query(q); return res.status(200).json("success");} catch (err) {console.log(err);}
+    try {await global.db.query(q); return res.status(200).json("success");} catch (err) {console.log(err);}
 };
 
 const updatePassword = async (req, res, next) => {
     console.log(req.body);
-    const password = await db.query(`SELECT user_pass FROM keppel.users WHERE user_id = ${req.body.id};`);
+    const password = await global.db.query(`SELECT user_pass FROM keppel.users WHERE user_id = ${req.body.id};`);
     let password2 = password.rows[0].user_pass.toString();
     console.log(password2)
     console.log(req.body.current_password)
-    await bcrypt.compare(req.body.current_password, password2, async (err, result) => {
+    bcrypt.compare(req.body.current_password, password2, async (err, result) => {
         // console.log(err);
         console.log(result);
         if (result == true) {
@@ -28,7 +28,7 @@ const updatePassword = async (req, res, next) => {
             let hash = bcrypt.hashSync(req.body.new_password, salt);  
             q = `UPDATE keppel.users SET user_pass = '${hash}' WHERE user_id = ${req.body.id};`
             console.log(q);
-            try {await db.query(q); return res.status(200).json("success");} catch (err) {console.log(err);}
+            try {await global.db.query(q); return res.status(200).json("success");} catch (err) {console.log(err);}
         } else {
             return res.status(400).json("error");
         }

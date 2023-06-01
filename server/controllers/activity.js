@@ -39,7 +39,7 @@ for (const key in tableInfo) {
 const getEventtHistory = async (req, res, next) => {
     let q = `SELECT * FROM (${query}) AS activity_log WHERE event_time >= date_trunc('month', CURRENT_DATE) ORDER BY event_time DESC;`
     console.log(q);
-    db.query(q, (err, result) => {
+    global.db.query(q, (err, result) => {
         // console.log(result.rows);
         if (err) return res.status(400).json({ msg: err });
         if (result.rows.length == 0) return res.status(201).json({ msg: "No assets added" });
@@ -59,7 +59,7 @@ const getEventtHistoryDate = async (req, res, next) => {
         date_trunc = `WHERE date_trunc('year', event_time) = date_trunc('year', '${date}'::date)`
     }
     let q = `SELECT * FROM (${query}) AS activity_log ${date_trunc} ORDER BY event_time DESC;`
-    db.query(q, (err, result) => {
+    global.db.query(q, (err, result) => {
         // console.log(result.rows);
         if (err) return res.status(400).json({ msg: err });
         if (result.rows.length == 0) return res.status(201).json([{}]);

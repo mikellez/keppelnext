@@ -5,7 +5,7 @@ const getUploadedFile = async (req, res, next) => {
   const psa_id = +req.params.psa_id;
   const index = +req.params.index;
 
-  const result = await db.query(
+  const result = await global.db.query(
     `SELECT psa.uploaded_files from keppel.plant_system_assets as psa WHERE psa.psa_id = ${psa_id}`
   );
   const uploaded_file = result.rows[0].uploaded_files[index][1];
@@ -29,7 +29,7 @@ const getSystemsFromPlant = async (req, res, next) => {
   if (plant_id === undefined)
     res.status(400).json({ msg: "plant id not provided" });
 
-  db.query(
+  global.db.query(
     `SELECT DISTINCT(sm.system_name), sm.system_id FROM keppel.plant_system_assets as psa
     JOIN keppel.system_master as sm
     ON psa.system_id_lvl3 = sm.system_id
@@ -55,7 +55,7 @@ const getSystemAssetsFromPlant = async (req, res, next) => {
           ON psa.system_asset_id_lvl4 = sa.system_asset_id
           WHERE psa.plant_id = ${plant_id}
           AND psa.system_id_lvl3 = ${system_id}`;
-  db.query(q, (err1, result) => {
+  global.db.query(q, (err1, result) => {
     if (err1) {
       // throw err;
       console.log(err1);
@@ -83,7 +83,7 @@ const getSystemAssetNamesFromPlant = async (req, res, next) => {
           AND psa.system_asset_lvl5 = '${system_asset}'`;
 
   try {
-    const result = await db.query(q);
+    const result = await global.db.query(q);
 
     if (result.rows[0].system_asset_lvl6 === "") {
       const d = await checkAssetType(plant_id, system_id, system_asset);
@@ -115,7 +115,7 @@ const getSubComponentsFromPlant = async (req, res, next) => {
           AND psa.system_asset_lvl6 = '${system_asset_name}'`;
 
   try {
-    const result = await db.query(q);
+    const result = await global.db.query(q);
     let lvl7 = [];
     if (result.rows.length > 1) {
       lvl7 = result.rows.map((row) => `'${row.system_asset_lvl7}'`);
@@ -162,7 +162,7 @@ const checkAssetType = async (...args) => {
   }
 
   try {
-    const result = await db.query(q);
+    const result = await global.db.query(q);
     d = {};
     arr = [];
     for (const row of result.rows) {
@@ -198,7 +198,7 @@ const getAssetsFromPlant = async (req, res, next) => {
   if (plant_id === undefined)
     res.status(400).json({ msg: "plant id not provided" });
 
-  db.query(
+  global.db.query(
     `SELECT psa_id, concat( system_asset , ' | ' , plant_asset_instrument) as "asset_name"  
             FROM keppel.system_assets AS t1 ,keppel.plant_system_assets AS t2
             WHERE t1.system_asset_id = t2.system_asset_id_lvl4 AND plant_id = $1`,
@@ -212,7 +212,7 @@ const getAssetsFromPlant = async (req, res, next) => {
 };
 
 const getAllAssets = async (req, res, next) => {
-  db.query(
+  global.db.query(
     `SELECT plant_id, psa_id, concat( system_asset , ' | ' , plant_asset_instrument) as "asset_name"  
             FROM keppel.system_assets AS t1 ,keppel.plant_system_assets AS t2
             WHERE t1.system_asset_id = t2.system_asset_id_lvl4`,
@@ -226,7 +226,7 @@ const getAllAssets = async (req, res, next) => {
 
 // Get all assets for AG Grid
 const getAssetHierarchy = async (req, res, next) => {
-  db.query(
+  global.db.query(
     `
     SELECT 
     pm.plant_name,
@@ -297,7 +297,7 @@ const getAssetHierarchy = async (req, res, next) => {
 };
 
 const getAssetDetails = async (req, res, next) => {
-  db.query(
+  global.db.query(
     `SELECT pm.plant_name, 
     sm.system_name, 
     sa.system_asset, 
@@ -343,7 +343,7 @@ const getAssetHistory = async (req, res, next) => {
         LEFT JOIN keppel.priority AS pt ON pt.p_id = rt.priority_id
         LEFT JOIN keppel.fault_types AS ft ON ft.fault_id = rt.fault_id
         WHERE psa_id = $1 AND requesthistory IS NOT NULL`;
-    db.query(queryS, [req.params.id], (err, found) => {
+    global.db.query(queryS, [req.params.id], (err, found) => {
       if (err) throw err;
       if (found.rows.length === 0) {
         return res.status(200).json("no history");
@@ -380,7 +380,7 @@ const getAssetHistory = async (req, res, next) => {
         LEFT JOIN keppel.status_cm AS s ON cm.status_id = s.status_id
         WHERE linkedassetids LIKE concat(concat('%', $1::text), '%') AND history IS NOT NULL`;
 
-    db.query(queryS, [req.params.id], (err, found) => {
+    global.db.query(queryS, [req.params.id], (err, found) => {
       if (err) throw err;
       if (found.rows.length === 0) return res.status(200).json("no history");
       else {
@@ -411,7 +411,7 @@ const getAssetHistory = async (req, res, next) => {
 };
 
 const fetchSystems = async (req, res, next) => {
-  db.query(
+  global.db.query(
     `SELECT system_id, system_name FROM keppel.system_master`,
     (err, result) => {
       if (err) res.status(500);
@@ -423,7 +423,7 @@ const fetchSystems = async (req, res, next) => {
 const fetchSystemAssets = async (req, res, next) => {
   let q = `SELECT system_asset, system_asset_id from keppel.system_assets
         where keppel.system_assets.system_id = ${req.params.system_id};`;
-  db.query(q, (err1, result) => {
+  global.db.query(q, (err1, result) => {
     if (err1) {
       // throw err;
       console.log(err1);
@@ -442,7 +442,7 @@ const fetchSystemAssetNames = async (req, res, next) => {
         plant_id = ${req.params.plant_id} AND
         system_id_lvl3 = ${req.params.system_id} AND
         system_asset_id_lvl4= ${req.params.system_asset_id};`;
-  db.query(q, (err1, result) => {
+  global.db.query(q, (err1, result) => {
     if (err1) {
       // throw err;
       console.log(err1);
@@ -463,7 +463,7 @@ const fetchSubComponent1Names = async (req, res, next) => {
         system_asset_id_lvl4= ${req.params.system_asset_id} AND
         system_asset_lvl6 = '${req.params.system_asset_name_id}' AND
         system_asset_lvl7 != '';`;
-  db.query(q, (err1, result) => {
+  global.db.query(q, (err1, result) => {
     if (err1) {
       // throw err;
       console.log(err1);
@@ -479,7 +479,7 @@ const fetchSubComponent1Names = async (req, res, next) => {
 const fetch_asset_types = async (req, res, next) => {
   let q = `SELECT * FROM keppel.asset_type
     ORDER BY asset_type.asset_type ASC `;
-  db.query(q, (err1, result) => {
+  global.db.query(q, (err1, result) => {
     if (err1) {
       // throw err;
       console.log(err1);
@@ -709,14 +709,14 @@ const editAsset = async (req, res, next) => {
   WHERE psa_id = '${psa_id}'
   `;
 
-  const old = await db.query(assetQuery);
+  const old = await global.db.query(assetQuery);
 
-  await db.query(sql);
-  const updated = await db.query(assetQuery);
+  await global.db.query(sql);
+  const updated = await global.db.query(assetQuery);
 
   const fields = compare(old.rows[0], updated.rows[0]).join(", ");
   const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
-  await db.query(
+  await global.db.query(
     `
     UPDATE keppel.plant_system_assets
     SET activity_log = activity_log || 
@@ -907,7 +907,7 @@ const addNewAsset = (req, res, next) => {
   sql += "RETURNING psa_id";
 
   let psa_id;
-  db.query(sql)
+  global.db.query(sql)
     .then((result) => {
       const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
       psa_id = result.rows[0].psa_id;
@@ -928,7 +928,7 @@ const addNewAsset = (req, res, next) => {
       WHERE psa_id = '${parseInt(psa_id)}';
       `;
       console.log(query);
-      return db.query(query);
+      return global.db.query(query);
     })
     .then((rows) => {
       return res.status(200).send({
@@ -937,7 +937,7 @@ const addNewAsset = (req, res, next) => {
     })
     .catch((err) => console.log(err));
 
-  //   db.query(sql, function (err, result) {
+  //   global.db.query(sql, function (err, result) {
   //     if (err) {
   //       console.log(err);
   //     }
@@ -952,7 +952,7 @@ const deleteAsset = (req, res, next) => {
   var q = `DELETE from keppel.history where asset_id = '${psa_id}';
   DELETE from keppel.plant_system_assets where psa_id = '${psa_id}'`;
   console.log(q);
-  db.query(q, function (err, result) {
+  global.db.query(q, function (err, result) {
     if (err) {
       console.log(err);
     }
@@ -964,7 +964,7 @@ const deleteAsset = (req, res, next) => {
 };
 
 const fetchAssetHistory = (req, res, next) => {
-  db.query(
+  global.db.query(
     // `SELECT h.history_id, h.action, h.user_id, h.fields, h.date, CONCAT(u.first_name, ' ', u.last_name) as name FROM keppel.history h
     //     JOIN keppel.users u
     //     ON u.user_id = h.user_id
