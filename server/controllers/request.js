@@ -115,7 +115,7 @@ function fetchRequestQuery(status_query, role_id, user_id, page) {
 
 const getTotalPagesForRequestStatus = async (status) => {
   const totalRows =
-    await db.query(`SELECT COUNT(DISTINCT(r.request_id)) FROM keppel.request r
+    await global.db.query(`SELECT COUNT(DISTINCT(r.request_id)) FROM keppel.request r
 	JOIN keppel.status_pm s ON r.status_id = s.status_id
 	WHERE s.status_id = ${status}`);
 
@@ -135,7 +135,7 @@ const fetchPendingRequests = async (req, res, next) => {
   console.log(sql)
 
 
-  const result = await db.query(sql);
+  const result = await global.db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(1);
 
   res.status(200).send({ rows: result.rows, total: totalPages });
@@ -151,7 +151,7 @@ const fetchAssignedRequests = async (req, res, next) => {
     page
   );
 
-  const result = await db.query(sql);
+  const result = await global.db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(2);
 
   res.status(200).send({ rows: result.rows, total: totalPages });
@@ -167,7 +167,7 @@ const fetchReviewRequests = async (req, res, next) => {
     page
   );
 
-  const result = await db.query(sql);
+  const result = await global.db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(`ANY('{3, 5, 6}')`);
 
   res.status(200).send({ rows: result.rows, total: totalPages });
@@ -183,7 +183,7 @@ const fetchApprovedRequests = async (req, res, next) => {
     page
   );
 
-  const result = await db.query(sql);
+  const result = await global.db.query(sql);
   const totalPages = await getTotalPagesForRequestStatus(4);
 
   res.status(200).send({ rows: result.rows, total: totalPages });
@@ -260,7 +260,7 @@ if(!req.body.linkedRequestId) {
   ) VALUES (
     $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
   )`;
-  db.query(q
+  global.db.query(q
     ,
     [
       faultTypeID,
@@ -296,7 +296,7 @@ const updateQuery = `
 UPDATE keppel.request SET status_id = 3 WHERE request_id = $1;
 `;
 
-db.query(insertQuery, [
+global.db.query(insertQuery, [
   faultTypeID,
   description,
   plantLocationID,
@@ -314,7 +314,7 @@ db.query(insertQuery, [
     return next(err);
   }
 
-  db.query(updateQuery, [req.body.linkedRequestId], (err, result) => {
+  global.db.query(updateQuery, [req.body.linkedRequestId], (err, result) => {
     if (err) {
       return next(err);
     }
@@ -331,7 +331,7 @@ const updateRequest = async (req, res, next) => {
   const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
   const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
   const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;
-  db.query(
+  global.db.query(
     `
 		UPDATE keppel.request SET 
       assigned_user_id = $1,
@@ -362,7 +362,7 @@ const updateRequest = async (req, res, next) => {
 };
 
 const fetchRequestTypes = async (req, res, next) => {
-  db.query(
+  global.db.query(
     `SELECT * FROM keppel.request_type ORDER BY req_id ASC`,
     (err, result) => {
       if (err) return res.status(500).json({ errormsg: err });
@@ -477,7 +477,7 @@ const fetchRequestCounts = async (req, res, next) => {
         .send(`Invalid request type of ${req.params.field}`);
   }
 
-  db.query(sql, (err, result) => {
+  global.db.query(sql, (err, result) => {
     if (err)
       return res
         .status(500)
@@ -487,7 +487,7 @@ const fetchRequestCounts = async (req, res, next) => {
 };
 
 const fetchRequestPriority = async (req, res, next) => {
-  db.query(`SELECT * from keppel.priority`, (err, result) => {
+  global.db.query(`SELECT * from keppel.priority`, (err, result) => {
     if (err) return res.status(500).send("Error in priority");
     return res.status(200).json(result.rows);
   });
@@ -531,7 +531,7 @@ const fetchSpecificRequest = async (req, res, next) => {
 	LEFT JOIN keppel.user_access ua ON u.user_id = ua.user_id
   JOIN keppel.status_pm AS s ON r.status_id = s.status_id
   WHERE request_id = $1`;
-  db.query(sql, [req.params.request_id], (err, result) => {
+  global.db.query(sql, [req.params.request_id], (err, result) => {
     if (err) return res.status(500).send("Error in fetching request");
     if(result.rows.length === 0) return res.status(404).send("Request not found");
     return res.status(200).send(result.rows[0]);
@@ -627,7 +627,7 @@ const createRequestCSV = (req, res, next) => {
 	)
 	ORDER BY r.created_date DESC, r.status_id DESC;`;
 
-  db.query(sql, (err, result) => {
+  global.db.query(sql, (err, result) => {
     if (err) return res.status(500).json({ errormsg: err });
     generateCSV(result.rows)
       .then((buffer) => {
@@ -662,7 +662,7 @@ const approveRejectRequest = async (req, res, next) => {
           'activity_type', '${status}'
         )
 	WHERE request_id = $4`;
-  db.query(
+  global.db.query(
     sql,
     [req.params.status_id, req.body.comments, history, req.params.request_id],
     (err, result) => {
@@ -693,7 +693,7 @@ const completeRequest = async (req, res, next) => {
           'activity_type', 'COMPLETED'
         )
 		WHERE request_id = $5`;
-  db.query(
+  global.db.query(
     sql,
     [
       req.body.complete_comments,
@@ -830,10 +830,10 @@ const fetchFilteredRequests = async (req, res, next) => {
 
   const countSql = `SELECT COUNT(*) AS total FROM (${sql}) AS t1`;
 
-  const totalRows = await db.query(countSql);
+  const totalRows = await global.db.query(countSql);
   const totalPages = Math.ceil(+totalRows.rows[0].total / ITEMS_PER_PAGE);
 
-  db.query(sql + pageCond, (err, result) => {
+  global.db.query(sql + pageCond, (err, result) => {
     if (err) return res.status(400).json({ errormsg: err });
 
     res.status(200).json({ rows: result.rows, total: totalPages });
@@ -854,7 +854,7 @@ const fetchRequestUploadedFile = async (req, res, next) => {
 	LEFT JOIN keppel.user_access ua ON u.user_id = ua.user_id
   JOIN keppel.status_pm AS s ON r.status_id = s.status_id
   WHERE request_id = $1`;
-  db.query(sql, [req.params.request_id], (err, result) => {
+  global.db.query(sql, [req.params.request_id], (err, result) => {
 
     if (err) return res.status(500).send("Error in fetching request");
     if(result.rows.length === 0 || result.rows[0].uploaded_file === null) return res.status(404).send("File not found");
@@ -880,7 +880,7 @@ const fetchRequestUploadedFile = async (req, res, next) => {
 
 const fetchPlantRequest = async (req, res, next) => {
   const sql = `SELECT plant_id, plant_name FROM keppel.plant_master WHERE plant_id = ${req.params.plant_id}`;
-  db.query(sql, (err, result) => {
+  global.db.query(sql, (err, result) => {
     if (err) return res.status(500).send("Error in fetching plant");
     return res.status(200).json(result.rows);
   });
@@ -889,7 +889,7 @@ const fetchPlantRequest = async (req, res, next) => {
 const fetchAssetRequest = async (req, res, next) => {
   const sql = `SELECT psa_id, plant_asset_instrument FROM keppel.plant_system_assets WHERE psa_id = ${req.params.psa_id}`;
   // console.log(sql);
-  db.query(sql, (err, result) => {
+  global.db.query(sql, (err, result) => {
     if (err) return res.status(500).send("Error in fetching Asset");
     return res.status(200).json(result.rows);
   });

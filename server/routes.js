@@ -2,6 +2,7 @@ const passport = require("passport");
 const controllers = require("./controllers");
 const session = require("express-session");
 const multer = require("multer");
+const { fetchDBNames, dellocateGlobalDB } = require('./db/dbAPI');
 
 const express = require("express");
 
@@ -55,6 +56,8 @@ router.post("/login", passport.authenticate("local", {}), (req, res) => {
  * @apiSuccess {string} - "success"
  */
 router.post("/logout", (req, res) => {
+  dellocateGlobalDB();
+  
   if (req.user === undefined)
     return res.status(400).json({ errormsg: "you are not logged in" });
 
@@ -949,22 +952,236 @@ router.get(
  * @apiSuccess {number} -.fault_id ID of the fault type
  * @apiSuccess {string} -.fault_type Name of the fault type
  */
+
 router.get("/fault/types", controllers.fault.fetchFaultTypes);
 
+/**
+ * @api {get} /asset Get Asset Table
+ * @apiDescription Gets table information/structure for all assets
+ * @apiName getAssetHierarchy
+ * @apiGroup Asset
+ *
+ * @apiSuccess {string} -.plant_name Plant name of the asset
+ * @apiSuccess {string} -.system_name System name of the asset
+ * @apiSuccess {string} -.system_asset System Asset of the asset
+ * @apiSuccess {string} -.parent_asset Parent Asset of the asset
+ * @apiSuccess {string} -.asset_type Asset Type of the asset
+ * @apiSuccess {number} -.system_asset_lvl5 System_asset_lvl5 of the asset
+ * @apiSuccess {number} -.system_asset_lvl6 System_asset_lvl6 of the asset
+ * @apiSuccess {number} -.system_asset_lvl7 System_asset_lvl7 of the asset
+ * @apiSuccess {string} -.plant_asset_instrument Asset Name of the asset
+ * @apiSuccess {string} -.asset_description Description of the asset
+ * @apiSuccess {string} -.asset_location location of the asset
+ * @apiSuccess {string} -.brand Brand of the asset
+ * @apiSuccess {string} -.model_number Model Number of the asset
+ * @apiSuccess {string} -.technical_specs Technical_specs of the asset
+ * @apiSuccess {string} -.manufacture_country Manufacture_country of the asset
+ * @apiSuccess {string} -.warranty Warranty of the asset
+ * @apiSuccess {string} -.remarks Remarks for the asset
+ * @apiSuccess {number} -.psa_id Psa ID of the asset
+ */
 router.get("/asset/:plant_id", controllers.asset.getAssetsFromPlant);
 router.get("/assets", controllers.asset.getAllAssets);
 router.get("/asset", controllers.asset.getAssetHierarchy);
+
+
+/**
+ * @api {get} /assetDetails/:psa_id Get Asset Details 
+ * @apiDescription Gets Asset details for a single asset for details page
+ * @apiName getAssetDetails
+ * @apiGroup Asset
+ *
+ * @apiSuccess {string} -.plant_name Plant name of the asset
+ * @apiSuccess {string} -.system_name System name of the asset
+ * @apiSuccess {string} -.system_asset System Asset of the asset
+ * @apiSuccess {string} -.parent_asset Parent Asset of the asset
+ * @apiSuccess {string} -.plant_asset_instrument Asset Name of the asset
+ * @apiSuccess {string} -.asset_type Asset Type of the asset
+ * @apiSuccess {string} -.asset_description Description of the asset
+ * @apiSuccess {string} -.asset_location location of the asset
+ * @apiSuccess {string} -.brand Brand of the asset
+ * @apiSuccess {string} -.model_number Model Number of the asset
+ * @apiSuccess {string} -.technical_specs Technical_specs of the asset
+ * @apiSuccess {string} -.manufacture_country Manufacture_country of the asset
+ * @apiSuccess {string} -.warranty Warranty of the asset
+ * @apiSuccess {string} -.remarks Remarks for the asset
+ * @apiSuccess {string} -.uploaded_image Image of the asset
+ * @apiSuccess {jsonb} -.uploaded_files Files pertaining to the asset
+ * @apiSuccess {string} -.plant_id Plant ID of the asset
+ * @apiSuccess {string} -.system_id System ID of the asset
+ * @apiSuccess {string} -.system_asset_id System Asset ID of the asset
+ * @apiSuccess {number} -.psa_id Psa ID of the asset
+ * @apiSuccess {number} -.system_asset_lvl5 System_asset_lvl5 of the asset
+ * @apiSuccess {number} -.system_asset_lvl6 System_asset_lvl6 of the asset
+ * @apiSuccess {number} -.system_asset_lvl7 System_asset_lvl7 of the asset
+
+ */
 router.get("/assetDetails/:psa_id", controllers.asset.getAssetDetails);
-router.get(
-  "/asset/history/:type/:id",
-  checkIfLoggedInAPI,
-  controllers.asset.getAssetHistory
-);
-router.get(
-  "/asset/Details/:psa_id",
-  checkIfLoggedInAPI,
-  controllers.asset.getAssetDetails
-);
+router.get("/asset/history/:type/:id",checkIfLoggedInAPI,controllers.asset.getAssetHistory);
+router.get("/asset/Details/:psa_id",checkIfLoggedInAPI,controllers.asset.getAssetDetails);
+router.get("/asset/systems",checkIfLoggedInAPI,controllers.asset.fetchSystems);
+router.get("/asset/fetch_asset_types",checkIfLoggedInAPI,controllers.asset.fetch_asset_types);
+
+
+/**
+ * @api {post} /addNewAsset Add New Asset
+ * @apiDescription Adds a new asset
+ * @apiName addNewAsset
+ * @apiGroup Asset
+ * @apiSuccess {number} -.system_id_lvl3 System id lvl3(System Asset) of the asset
+ * @apiSuccess {number} -.system_asset_id_lvl4 System id lvl4(System Asset Name) of the asset
+ * @apiSuccess {string} -.parent_asset Parent Asset of the asset
+ * @apiSuccess {string} -.asset_type Asset Type of the asset
+ * @apiSuccess {string} -.asset_description Description of the asset
+ * @apiSuccess {string} -.asset_location location of the asset
+ * @apiSuccess {string} -.brand Brand of the asset
+ * @apiSuccess {string} -.plant_asset_instrument Asset Name of the asset
+ * @apiSuccess {string} -.model_number Model Number of the asset
+ * @apiSuccess {string} -.technical_specs Technical specs of the asset
+ * @apiSuccess {string} -.manufacture_country Manufacture country of the asset
+ * @apiSuccess {string} -.warranty Warranty of the asset
+ * @apiSuccess {string} -.remarks Remarks for the asset
+ * @apiSuccess {number} -.system_asset_lvl5 System_asset_lvl5 of the asset
+ * @apiSuccess {number} -.system_asset_lvl6 System_asset_lvl6 of the asset
+ * @apiSuccess {number} -.system_asset_lvl7 System_asset_lvl7 of the asset
+ * @apiSuccess {string} -.uploaded_image Image of the asset
+ * @apiSuccess {jsonb} -.uploaded_files Files pertaining to the asset
+ * @apiSuccess {string} -.plant_id Plant ID of the asset       
+ * 
+ *
+ */
+router.post("/asset/addNewAsset",checkIfLoggedInAPI,controllers.asset.addNewAsset);
+
+/**
+ * @api {post} /editAsset Edit Asset
+ * @apiDescription Edit an asset. Not allowed to edit hierarchy of the asset.
+ * @apiGroup Asset
+
+ * @apiSuccess {string} -.asset_description Description of the asset
+ * @apiSuccess {string} -.asset_location location of the asset
+ * @apiSuccess {string} -.brand Brand of the asset
+ * @apiSuccess {string} -.plant_asset_instrument Asset Name of the asset
+ * @apiSuccess {string} -.model_number Model Number of the asset
+ * @apiSuccess {string} -.technical_specs Technical specs of the asset
+ * @apiSuccess {string} -.manufacture_country Manufacture country of the asset
+ * @apiSuccess {string} -.warranty Warranty of the asset
+ * @apiSuccess {string} -.remarks Remarks for the asset
+ * @apiSuccess {string} -.uploaded_image Image of the asset
+ * @apiSuccess {jsonb} -.uploaded_files Files pertaining to the asset
+ * 
+ *
+ */
+router.post("/asset/editAsset",checkIfLoggedInAPI,controllers.asset.editAsset);
+
+/**
+ * @api {post} /deleteAsset Delete Asset
+ * @apiDescription Delete an asset. 
+ * @apiGroup Asset
+ * @apiSuccess {number} -.psa_id Psa ID of the asset
+ *
+ */
+router.post("/asset/deleteAsset",checkIfLoggedInAPI,controllers.asset.deleteAsset);
+
+
+/**
+ * @api {get} /fetchSystemAsset Gets all system assets(lvl 5) for the asset table
+ * @apiDescription Gets all the system assets to display on the asset table
+ * @apiName fetchSystemAsset
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset System Assets
+ * @apiSuccess {nukber} -.system_asset_id System Asset IDs
+ *
+ */
+router.get("/asset/system/:system_id",checkIfLoggedInAPI,controllers.asset.fetchSystemAssets);
+/**
+ * @api {get} /fetchSystemAssetNames Gets all system asset names(lvl 6) for the asset table
+ * @apiDescription Gets all the system asset names to display on the asset table
+ * @apiName fetchSystemAssetName
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl6 System Asset Names
+ *
+ */
+router.get("/asset/system/:plant_id/:system_id/:system_asset_id",checkIfLoggedInAPI,controllers.asset.fetchSystemAssetNames);
+/**
+ * @api {get} /fetchSubComponent1Names Gets all Sub-Component-1 Names(lvl 7) for the asset table
+ * @apiDescription Gets all the Component names to display on the asset table
+ * @apiName fetchSubComponent1Names
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl7 Component Names
+ *
+ */
+router.get("/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",checkIfLoggedInAPI,controllers.asset.fetchSubComponent1Names);
+/**
+ * @api {get} /fetchAssetHistory Gets History of the asset 
+ * @apiDescription Retrieves Asset History when viewing the asset details page
+ * @apiName fetchAssetHistory
+ * @apiGroup Asset
+ * @apiSuccess {string} -.history_id History ID of the asset
+ * @apiSuccess {string} -.action What was changed of the asset
+ * @apiSuccess {string} -.name User who changed the Asset
+ * @apiSuccess {string} -.date Date of the change
+ * @apiSuccess {string} -.fields Which particular fields that were changed
+
+ *
+ */
+router.get("/asset/history/:psa_Id",checkIfLoggedInAPI,controllers.asset.fetchAssetHistory);
+
+/**
+ * @api {get} /getSystemsFromPlant Gets all systems from plant
+ * @apiDescription Gets list of all Systems for Mobile Asset Table
+ * @apiName getSystemsFromPlant
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_id System IDs for particular plant
+
+
+ *
+ */
+router.get("/asset/mobile/:plant_id",checkIfLoggedInAPI,controllers.asset.getSystemsFromPlant);
+
+/**
+ * @api {get} /getSystemAssetsFromPlant Gets all Systems Assets from plant
+ * @apiDescription Gets list of all Systems Assets for Mobile Asset Table
+ * @apiName getSystemAssetsFromPlant
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl5 System Assets for particular plant
+
+
+ *
+ */
+router.get("/asset/mobile/:plant_id/:system_id",checkIfLoggedInAPI,controllers.asset.getSystemAssetsFromPlant);
+/**
+ * @api {get} /getUploadedFile Gets File for Asset
+ * @apiDescription Retrieves Asset file when viewing the asset details page on Mobile
+ * @apiName getUploadedFile
+ * @apiGroup Asset
+ * @apiSuccess {jsonb} -.uploaded_files Uploaded Files for the Asset
+
+
+ *
+ */
+router.get("/asset/mobile/:psa_id/uploadedFile/:index",controllers.asset.getUploadedFile);
+/**
+ * @api {get} /getSystemAssetNamesFromPlant Gets all Systems Asset Names from plant
+ * @apiDescription Gets list of all Systems Asset Names for Mobile Asset Table
+ * @apiName getSystemAssetNamesFromPlant
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl6 System Asset Names for particular plant
+
+
+ *
+ */
+router.get("/asset/mobile/:plant_id/:system_id/:system_asset_id",checkIfLoggedInAPI,controllers.asset.getSystemAssetNamesFromPlant);
+/**
+ * @api {get} /getSubComponentsFromPlant Gets all Sub Components from plant
+ * @apiDescription Gets list of all Sub Components for Mobile Asset Table
+ * @apiName getSubComponentsFromPlant
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl7  Sub Components for particular plant
+
+
+ *
+ */
+router.get("/asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name",checkIfLoggedInAPI,controllers.asset.getSubComponentsFromPlant);
 
 /**
  * @api {get} /master/new Get Table Metadata
@@ -1111,9 +1328,13 @@ router
     "/setting/updatePassword",
     checkIfLoggedInAPI,
     controllers.setting.updatePassword
-  );
+  )
+  .get("/setting/check/email/:id", checkIfLoggedInAPI, controllers.setting.checkEmail)
+  .get("/setting/check/username/:id", checkIfLoggedInAPI, controllers.setting.checkUsername);
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
+
+router.get("/db/names", fetchDBNames);
 
 // NO API ROUTE
 router.all("/*", (req, res) => {

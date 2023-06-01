@@ -39,7 +39,7 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
         <div className={formStyles.halfContainer}>
             <div className="form-group">
                 <label className="form-label">
-                    <RequiredIcon /> Checklist Name
+                    Checklist Name
                 </label>
                 <input
                     type="text"
@@ -52,7 +52,7 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
 
             <div className="form-group">
                 <label className="form-label">
-                    <RequiredIcon /> Description
+                    Description
                 </label>
                 <input
                     type="text"

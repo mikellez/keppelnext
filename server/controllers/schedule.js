@@ -43,7 +43,7 @@ const makeScheduleDict = (arr) => {
 const updateDates = async (scheduleList) => {
     for (let i = 0; i < scheduleList.length; i++) {
         if (scheduleList[i].isSingle) {
-            const result = await db.query(`SELECT 
+            const result = await global.db.query(`SELECT 
       (SC.START_DATE  + interval '8 hour' ) AS START_DATE, 
       (SC.END_DATE  + interval '8 hour' ) AS END_DATE,
       SC.RECURRENCE_PERIOD
@@ -210,7 +210,7 @@ const getViewSchedules = async (req, res, next) => {
             GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID)`);
     }
     console.log(queryS[0]);
-    db.query(queryS[0], (err, schedules) => {
+    global.db.query(queryS[0], (err, schedules) => {
         if (err) throw err;
         if (schedules) {
             const response_dict = makeScheduleDict(schedules.rows);
@@ -226,7 +226,7 @@ const getViewSchedules = async (req, res, next) => {
 // Get plants based on the user role
 const getPlants = async (req, res, next) => {
     if (req?.user && (req.user.role_id === 0 || req.user.role_id === 4)) {
-        db.query(
+        global.db.query(
             "SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) FROM keppel.user_access WHERE user_id = $1::integer)",
             [req.user.id],
             (err, result) => {
@@ -237,7 +237,7 @@ const getPlants = async (req, res, next) => {
             }
         );
     } else {
-        db.query(`SELECT * FROM keppel.plant_master`, (err, result) => {
+        global.db.query(`SELECT * FROM keppel.plant_master`, (err, result) => {
             if (err) throw err;
             if (result) {
                 return res.status(200).send(result.rows);
@@ -247,7 +247,7 @@ const getPlants = async (req, res, next) => {
 };
 
 const getPlantById = async (req, res, next) => {
-    db.query(
+    global.db.query(
         "SELECT * from keppel.plant_master WHERE plant_id = $1::integer",
         [req.params.id],
         (err, result) => {
@@ -260,7 +260,7 @@ const getPlantById = async (req, res, next) => {
 };
 
 const getUserPlants = async (req, res, next) => {
-    db.query(
+    global.db.query(
         "SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) FROM keppel.user_access WHERE user_id = $1::integer)",
         [req.user.id],
         (err, result) => {
@@ -274,7 +274,7 @@ const getUserPlants = async (req, res, next) => {
 
 // Create a new timeline
 const createTimeline = async (req, res, next) => {
-    db.query(
+    global.db.query(
         "INSERT INTO keppel.schedule_timelines (timeline_name, description, created_date, created_by, status, plant_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING timeline_id",
         [
             req.body.data.name,
@@ -293,7 +293,7 @@ const createTimeline = async (req, res, next) => {
 
 // Get timeline details
 const getTimeline = async (req, res, next) => {
-    db.query(
+    global.db.query(
         `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, ST.status, PM.plant_name
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM 
@@ -315,7 +315,7 @@ const getTimeline = async (req, res, next) => {
 
 // Get timeline specific schedules
 const getSchedulesTimeline = async (req, res, next) => {
-    db.query(
+    global.db.query(
         // first select is for schedules that are assigned to specific users
         // second select is for schedules with no specific users assigned
         // union together to return all related schedules (both assignned and not assigned)
@@ -393,7 +393,7 @@ const getTimelineByStatus = (req, res, next) => {
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
     WHERE status = $1`;
-    db.query(queryS, [req.params.status], (err, found) => {
+    global.db.query(queryS, [req.params.status], (err, found) => {
         if (err) throw err;
         if (found.rows.length != 0) {
             found.rows.map((timeline) => {
@@ -410,7 +410,7 @@ const getTimelineByStatus = (req, res, next) => {
 
 // Edit timeline details
 const editTimeline = (req, res, next) => {
-    db.query(
+    global.db.query(
         `UPDATE keppel.schedule_timelines SET timeline_name = $1, description = $2 WHERE timeline_id = $3 RETURNING timeline_id`,
         [req.body.data.name, req.body.data.description, req.params.id],
         (err, found) => {
@@ -467,7 +467,7 @@ const changeTimelineStatus = (req, res, next) => {
     UPDATE keppel.schedule_checklist SET status = ${req.params.status} WHERE timeline_id = ${req.params.id};
     UPDATE keppel.schedule_timelines SET status = ${req.params.status} WHERE timeline_id = ${req.params.id} RETURNING *;
     `;
-    db.query(queryS, (err, found) => {
+    global.db.query(queryS, (err, found) => {
         if (err) throw err;
         if (found) return res.status(200).json(req.params.id);
     });
@@ -475,13 +475,13 @@ const changeTimelineStatus = (req, res, next) => {
 
 // Delete a timeline in draft
 const deleteTimeline = async (req, res, next) => {
-    db.query(
+    global.db.query(
         `DELETE FROM keppel.schedule_checklist WHERE timeline_id = $1;`,
         [req.params.id],
         (err) => {
             if (err) throw err;
             else {
-                db.query(
+                global.db.query(
                     `DELETE FROM keppel.schedule_timelines WHERE timeline_id = $1;`,
                     [req.params.id],
                     (err) => {
@@ -496,7 +496,7 @@ const deleteTimeline = async (req, res, next) => {
 
 // Delete a schedule in a timeline
 const deleteSchedule = async (req, res, next) => {
-    db.query(
+    global.db.query(
         `DELETE FROM KEPPEL.SCHEDULE_CHECKLIST WHERE SCHEDULE_ID = $1`,
         [req.params.id],
         (err) => {
@@ -529,7 +529,7 @@ const getOpsAndEngineers = async (req, res, next) => {
             and (r.role_name = 'Operation Specialist' or r.role_name = 'Engineer' or r.role_name = 'Manager')
             and up.plant_id = $1;`;
     }
-    db.query(
+    global.db.query(
         sql,
         [req.params.plant_id.toString().length > 1 ? arr : req.params.plant_id],
         (err, result) => {
@@ -549,7 +549,7 @@ const getOpsAndEngineers = async (req, res, next) => {
 };
 
 const insertSchedule = async (req, res, next) => {
-    db.query(
+    global.db.query(
         `INSERT INTO keppel.schedule_checklist
         (checklist_template_id, remarks, start_date, end_date, recurrence_period, reminder_recurrence, scheduler_history, user_id, scheduler_userids_for_email, plant_id, timeline_id, prev_schedule_id, status, index) 
         VALUES ($1, $2, $3, $4, $5, $6, CONCAT('created by',$7::varchar), $8, $9::int[], $10, $11, $12, $13, $14);`,
@@ -578,13 +578,13 @@ const insertSchedule = async (req, res, next) => {
 
 const manageSingleEvent = (req, res, next) => {
     if (req.body.action === "approve") {
-        db.query(
+        global.db.query(
             "UPDATE KEPPEL.SCHEDULE_CHECKLIST SET STATUS = 1 WHERE SCHEDULE_ID = $1 RETURNING INDEX, PREV_SCHEDULE_ID",
             [req.body.schedule.schedule_id],
             (err, found) => {
                 if (err) throw err;
                 // console.log(found.rows);
-                db.query(
+                global.db.query(
                     `UPDATE KEPPEL.SCHEDULE_CHECKLIST 
             SET EXCLUSION_LIST = ARRAY_APPEND(EXCLUSION_LIST, ${found.rows[0].index}) 
             WHERE SCHEDULE_ID = ${found.rows[0].prev_schedule_id}; 
@@ -611,7 +611,7 @@ const manageSingleEvent = (req, res, next) => {
             }
         );
     } else if (req.body.action === "reject") {
-        db.query(
+        global.db.query(
             "UPDATE KEPPEL.SCHEDULE_CHECKLIST SET STATUS = 2 WHERE SCHEDULE_ID = $1",
             [req.body.schedule.schedule_id],
             (err, found) => {
@@ -621,7 +621,7 @@ const manageSingleEvent = (req, res, next) => {
         );
     } else if (req.body.action === "edit") {
         const data = req.body.scheduleData;
-        db.query(
+        global.db.query(
             `UPDATE KEPPEL.SCHEDULE_CHECKLIST 
             SET START_DATE = $1,
             END_DATE = $2,
@@ -641,7 +641,7 @@ const manageSingleEvent = (req, res, next) => {
 
 const createSingleEvent = (req, res, next) => {
     const data = req.body.schedule;
-    db.query(
+    global.db.query(
         `INSERT INTO KEPPEL.SCHEDULE_CHECKLIST 
             (
                 CHECKLIST_TEMPLATE_ID, 
@@ -680,7 +680,7 @@ const createSingleEvent = (req, res, next) => {
 };
 
 const getPendingSingleEvents = (req, res, next) => {
-    db.query(
+    global.db.query(
         `SELECT 
         ST.TIMELINE_ID,
         ST.TIMELINE_NAME,
@@ -714,7 +714,7 @@ const getPendingSingleEvents = (req, res, next) => {
 };
 
 const getScheduleById = (req, res, next) => {
-    db.query(
+    global.db.query(
         `SELECT SC.SCHEDULE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
             SC.RECURRENCE_PERIOD,SC.REMINDER_RECURRENCE, SC.SCHEDULER_USERIDS_FOR_EMAIL,
             PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME,SC.CHECKLIST_TEMPLATE_ID, STRING_AGG(U.user_name, ' ,') AS USERNAME,
@@ -773,7 +773,7 @@ const getScheduleById = (req, res, next) => {
 };
 
 const updateSchedule = async (req, res, next) => {
-    db.query(
+    global.db.query(
         `
     UPDATE keppel.schedule_checklist SET
         checklist_template_id = $1,
