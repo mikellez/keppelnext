@@ -360,40 +360,383 @@ router.get(
   controllers.asset.getSubComponentsFromPlant
 );
 
+
+
+/**
+ * @apiDefine ChecklistDataJSON
+ * @apiSuccess {Object[]} -.datajson Checklist Data
+ * @apiSuccess {Object[]} -.datajson.rows Checklist Section (Each Section contain rows)
+ * @apiSuccess {String} -.datajson.description Checklist Section Description
+ * @apiSuccess {Object[]} -.datajson.rows.checks Checklist Row (Each Row contains checks)
+ * @apiSuccess {String} -.datajson.rows.description Checklist Row Description 
+ * @apiSuccess {String} -.datajson.rows.checks.type Check Type 
+ * @apiSuccess {String} -.datajson.rows.checks.question Check Question
+ * @apiSuccess {Array} -.datajson.rows.checks.choices Check Choices for given Question
+ * @apiSuccess {String} -.datajson.rows.checks.value Inputted Check Value
+ */
+
+/**
+ * @apiDefine SubmitChecklistDataJSON
+ * 
+ * @apiBody {Object[]} -.datajson Checklist Data
+ * @apiBody {Object[]} -.datajson.rows Checklist Section (Each Section contain rows)
+ * @apiBody {String} -.datajson.description Checklist Section Description
+ * @apiBody {Object[]} -.datajson.rows.checks Checklist Row (Each Row contains checks)
+ * @apiBody {String} -.datajson.rows.description Checklist Row Description 
+ * @apiBody {String} -.datajson.rows.checks.type Check Type 
+ * @apiBody {String} -.datajson.rows.checks.question Check Question
+ * @apiBody {Array} -.datajson.rows.checks.choices Check Choices for given Question
+ * @apiBody {String} -.datajson.rows.checks.value Inputted Check Value
+ */
+
+/**
+ * @api {get} /notAnActualRoute ! Explaining Checklist
+ * @apiDescription the /checklist handles 2 tables, namely checklist_templates and checklists_records
+ * @apiDescription checklist_records are implemented versions of checklist_templates (multiple checklist_records can follow  the samechecklist_templates)
+ * @apiName ChecklistExplanation
+ * @apiGroup Checklist
+ */
+
+/**
+ * @api {get} /notAnActualRoute Checklist DataJSON format
+ * @apiDescription Checklist DataJSON format
+ * @apiGroup Checklist
+ * 
+ * @apiSuccess {Object[]} datajson Checklist Data
+ * @apiSuccess {Object[]} datajson.rows Checklist Section (Each Section contain rows)
+ * @apiSuccess {Object[]} datajson.rows.checks Checklist Row (Each Row contains checks)
+ * @apiSuccess {String} datajson.rows.description Checklist Row Description 
+ * @apiSuccess {String} datajson.rows.checks.type Check Type 
+ * @apiSuccess {String} datajson.rows.checks.question Check Question
+ * @apiSuccess {Array} datajson.rows.checks.choices Check Choices for given Question
+ * @apiSuccess {String} datajson.rows.checks.value Inputted Check Value
+ * @apiSuccess {String} datajson.description Checklist Section Description
+ */
+
+/**
+ * @api {get} /checklist/template/:checklist_id Get Single Checklist Template
+ * @apiDescription Gets a single checklist template based on given checklist_id
+ * @apiName GetSingleChecklistTemplate
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} checklist_id Checklist Template unique ID
+ * 
+ * @apiSuccess {Object} - Object containing the specified checklist template's details
+ * @apiSuccess {String} -.chl_name Checklist Name 
+ * @apiSuccess {String} -.description Checklist Description
+ * @apiSuccess {Number} -.plant_id Plant ID
+ * @apiSuccess {Number} -.signoff_user_id Signoff User ID
+ * @apiSuccess {Number} -.status_id Template Status (currently deprecated)
+ * @apiUse ChecklistDataJSON
+ * 
+ * @apiError (Error 500) {String} InternalServerError "No checklist template found"
+ */
+
+/**
+ * @api {post} /checklist/template Create Checklist Template
+ * @apiDescription Create a new checklist template for later submission as record
+ * @apiName CreateChecklistTemplate
+ * @apiGroup Checklist
+ *
+ * @apiBody {Object} checklist Checklist Template
+ * @apiBody {String} checklist.chl_name Checklist Template Name
+ * @apiBody {String} checklist.description Checklist Description
+ * @apiBody {Number} checklist.signoff_user_id Signoff User ID
+ * @apiBody {Number} checklist.plant_id Plant ID of Checklist
+ * @apiUse SubmitChecklistDataJSON 
+ * 
+ * @apiSuccess {String} Created New checklist successfully created
+ * 
+ * @apiError (Error 500) {String} InternalServerError Failure to create new checklist
+ */
+
+/**
+ * @api {delete} /checklist/template/:checklist_id Delete Checklist Template
+ * @apiDescription Delete a Checklist Template based on given Checklist ID
+ * @apiName DeleteChecklistTemplate
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} checklist_id Checklist Template unique ID
+ * 
+ * @apiSuccess {String} Template successfully deleted
+ * 
+ * @apiError (Error 500) {String} InternalServerError Failure to delete template
+ */
 router
   .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
   .get(controllers.checklist.fetchSpecificChecklistTemplate)
   .post(controllers.checklist.createNewChecklistTemplate)
   .delete(controllers.checklist.deleteChecklistTemplate);
 
+/**
+ * @api {get} /checklist/assigned Get Assigned Checklists
+ * @apiDescription Get all Assigned Checklists
+ * @apiName GetAssignedChecklists
+ * @apiGroup Checklist
+ * 
+ * @apiQuery {String} page Page Number
+ * 
+ * @apiSuccess {Object} - Object containing "Assigned" Checklists Array and side information
+ * @apiSuccess {Object[]} -.rows Checklists Array
+ * @apiSuccess {Number} -.rows.checklist_id Checklist ID
+ * @apiSuccess {String} -.rows.chl_name Checklist Name
+ * @apiSuccess {String} -.rows.description Checklist Description
+ * @apiSuccess {Number} -.rows.status_id Checklist Status (2 for Assigned)
+ * @apiSuccess {Object[]} -.rows.activity_log Checklist History
+ * @apiSuccess {String} -.rows.createdbyuser User who created Checklist
+ * @apiSuccess {String} -.rows.assigneduser Name of assigned user
+ * @apiSuccess {String} -.rows.signoffuser Name of signoff user
+ * @apiSuccess {String} -.rows.plant_name Plant Name of plant associated with Checklist
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist
+ * @apiSuccess {String} -.rows.completeremarks_req Completed Request Remarks
+ * @apiSuccess {String} -.rows.linkedassets Assets associated with Checklist
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Record
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist was created
+ * @apiSuccess {String} -.rows.history Deprecated. Use activity_log instead
+ * @apiSuccess {Object[]} -.rows.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {Number} -.rows.signoff_user_id Signoff user ID
+ * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
+ * @apiSuccess {String} -.rows.status Status (Should be "ASSIGNED")
+ * @apiSuccess {Number} -.total Total Pages of "Assigned" Checklists
+ * 
+ * @apiError (Error 204) {Object} NoContent {msg: "No Checklist"}
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
 router
   .route("/checklist/assigned", checkIfLoggedInAPI)
   .get(controllers.checklist.fetchAssignedChecklists);
 
+
+/**
+ * @api {get} /checklist/record Get For Review Checklists
+ * @apiDescription Get all For Review Checklists
+ * @apiName GetForReviewChecklists
+ * @apiGroup Checklist
+ * 
+ * @apiQuery {String} page Page Number
+ * 
+ * @apiSuccess {Object} - Object containing "For Review" Checklists Array and side information
+ * @apiSuccess {Object[]} -.rows "For Review" Checklists Array
+ * @apiSuccess {Number} -.rows.checklist_id Checklist ID
+ * @apiSuccess {String} -.rows.chl_name Checklist Name
+ * @apiSuccess {String} -.rows.description Checklist Description
+ * @apiSuccess {Number} -.rows.status_id Checklist Status (4 for Work Done, 6 for Rejected) - Rejected is deprecated
+ * @apiSuccess {Object[]} -.rows.activity_log Checklist History
+ * @apiSuccess {String} -.rows.createdbyuser User who created Checklist
+ * @apiSuccess {String} -.rows.assigneduser Name of assigned user
+ * @apiSuccess {String} -.rows.signoffuser Name of signoff user
+ * @apiSuccess {String} -.rows.plant_name Plant Name of plant associated with Checklist
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist
+ * @apiSuccess {String} -.rows.completeremarks_req Completed Request Remarks
+ * @apiSuccess {String} -.rows.linkedassets Assets associated with Checklist
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Record
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist was created
+ * @apiSuccess {String} -.rows.history Deprecated. Use activity_log instead
+ * @apiSuccess {Object[]} -.rows.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {Number} -.rows.signoff_user_id Signoff user ID
+ * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
+ * @apiSuccess {String} -.rows.status Status (Should be "WORK DONE / REJECTED") - REJECTED is deprecated
+ * @apiSuccess {Number} -.total Total Pages of "For Review" Checklists
+ * 
+ * @apiError (Error 204) {Object} NoContent {msg: "No Checklist"}
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
+
+/**
+ * @api {get} /checklist/record/:checklist_id Get Single Checklist Record
+ * @apiDescription Gets a single checklist record based on the given checklist_id
+ * @apiName GetSingleChecklistRecord
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} checklist_id Record unique ID
+ * 
+ * @apiSuccess {Object} - Object containing the specified checklist record's details
+ * @apiSuccess {Number} -.checklist_id Checklist(record) ID
+ * @apiSuccess {Number} -.chl_name Checklist(record) Name
+ * 
+ * @apiError (Error 500) {String} InternalServerError No checklist template found
+ */
+
+/**
+ * @api {post} /checklist/record Create Checklist Record
+ * @apiDescription Create a new Checklist Record
+ * @apiName CreateChecklistRecord
+ * @apiGroup Checklist
+ * 
+ * @apiBody {Object} checklist Checklist Record
+ * @apiBody {String} checklist.chl_name Checklist Template Name
+ * @apiBody {String} checklist.description Checklist Description
+ * @apiBody {String} [checklist.assigned_user_id] The user ID of assignee to the checklist
+ * @apiBody {Number} checklist.signoff_user_id Signoff User ID
+ * @apiBody {String} checklist.linkedassetids IDs of assets linked to the checklist
+ * @apiBody {Number} checklist.plant_id Plant ID of Checklist
+ * @apiUse SubmitChecklistDataJSON
+ * 
+ * @apiSuccess {String} Created New checklist successfully created
+ * 
+ * @apiError (Error 500) {String} InternalServerError Failure to create new checklist
+ */
+
+/**
+ * @api {patch} /checklist/record/:checklist_id Edit a Pending Checklist Record
+ * @apiDescription Edit an existing Pending Checklist Record
+ * @apiName EditPendingChecklistRecord
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} checklist_id The ID of the Pending Checklist Record
+ * 
+ * @apiBody {Object} checklist Checklist Record
+ * @apiBody {String} checklist.chl_name Checklist Template Name
+ * @apiBody {String} checklist.description Checklist Description
+ * @apiBody {Number} [checklist.assigned_user_id] The user ID of assignee to the checklist. If filled, Checklist Record is updated to Status of "ASSIGNED"
+ * @apiBody {Number} checklist.signoff_user_id Signoff User ID
+ * @apiBody {String} checklist.linkedassetids IDs of assets linked to the checklist
+ * @apiBody {Number} checklist.plant_id Plant ID of Checklist
+ * 
+ * @apiSuccess {String} Success Checklist successfully assigned/updated
+ * 
+ * @apiError (Error 500) {String} InternalServerError Failure to update checklist
+ */
 router
   .route("/checklist/record/:checklist_id?", checkIfLoggedInAPI)
   .get(controllers.checklist.fetchChecklistRecords)
   .post(controllers.checklist.createNewChecklistRecord)
   .patch(controllers.checklist.editChecklistRecord);
 
+
+/**
+ * @api {get} /checklist/approved Get Approved Checklists
+ * @apiDescription Get all Approved Checklists
+ * @apiName GetApprovedChecklists
+ * @apiGroup Checklist
+ * 
+ * @apiQuery {String} page Page Number
+ * 
+ * @apiSuccess {Object} - Object containing "Approved" Checklists Array and side information
+ * @apiSuccess {Object[]} -.rows Checklists Array
+ * @apiSuccess {Number} -.rows.checklist_id Checklist ID
+ * @apiSuccess {String} -.rows.chl_name Checklist Name
+ * @apiSuccess {String} -.rows.description Checklist Description
+ * @apiSuccess {Number} -.rows.status_id Checklist Status (5 for Approved)
+ * @apiSuccess {Object[]} -.rows.activity_log Checklist History
+ * @apiSuccess {String} -.rows.createdbyuser User who created Checklist
+ * @apiSuccess {String} -.rows.assigneduser Name of assigned user
+ * @apiSuccess {String} -.rows.signoffuser Name of signoff user
+ * @apiSuccess {String} -.rows.plant_name Plant Name of plant associated with Checklist
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist
+ * @apiSuccess {String} -.rows.completeremarks_req Completed Request Remarks
+ * @apiSuccess {String} -.rows.linkedassets Assets associated with Checklist
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Record
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist was created
+ * @apiSuccess {String} -.rows.history Deprecated. Use activity_log instead
+ * @apiSuccess {Object[]} -.rows.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {Number} -.rows.signoff_user_id Signoff user ID
+ * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
+ * @apiSuccess {String} -.rows.status Status (Should be "APPROVED")
+ * @apiSuccess {Number} -.total Total Pages of "Approved" Checklists
+ * 
+ * @apiError (Error 204) {Object} NoContent {msg: "No Checklist"}
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
 router.get(
   "/checklist/approved",
   checkIfLoggedInAPI,
   controllers.checklist.fetchApprovedChecklists
 );
 
+
+/**
+ * @api {get} /checklist/pending Get Pending Checklists
+ * @apiDescription Get all Pending Checklists
+ * @apiName GetPendingChecklists
+ * @apiGroup Checklist
+ * 
+ * @apiQuery {String} page Page Number
+ * 
+ * @apiSuccess {Object} - Object containing "Pending" Checklists Array and side information
+ * @apiSuccess {Object[]} -.rows Checklists Array
+ * @apiSuccess {Number} -.rows.checklist_id Checklist ID
+ * @apiSuccess {String} -.rows.chl_name Checklist Name
+ * @apiSuccess {String} -.rows.description Checklist Description
+ * @apiSuccess {Number} -.rows.status_id Checklist Status (1 for Pending)
+ * @apiSuccess {Object[]} -.rows.activity_log Checklist History
+ * @apiSuccess {String} -.rows.createdbyuser User who created Checklist
+ * @apiSuccess {String} -.rows.assigneduser Name of assigned user
+ * @apiSuccess {String} -.rows.signoffuser Name of signoff user
+ * @apiSuccess {String} -.rows.plant_name Plant Name of plant associated with Checklist
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist
+ * @apiSuccess {String} -.rows.completeremarks_req Completed Request Remarks
+ * @apiSuccess {String} -.rows.linkedassets Assets associated with Checklist
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Record
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist was created
+ * @apiSuccess {String} -.rows.history Deprecated. Use activity_log instead
+ * @apiSuccess {Object[]} -.rows.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {Number} -.rows.signoff_user_id Signoff user ID
+ * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
+ * @apiSuccess {String} -.rows.status Status (Should be "PENDING")
+ * @apiSuccess {Number} -.total Total Pages of "Pending" Checklists
+ * 
+ * @apiError (Error 204) {Object} NoContent {msg: "No Checklist"}
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
 router.get(
   "/checklist/pending",
   checkIfLoggedInAPI,
   controllers.checklist.fetchPendingChecklists
 );
 
+/**
+ * @api {get} /checklist/templateNames/:id Get Template Names
+ * @apiDescription Get all Template Names
+ * @apiName GetTemplateNames
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} id Plant ID
+ * 
+ * @apiSuccess  {Object[]} - Array of Template Objects
+ * @apiSuccess {Number} -.checklist_id Checklist Template ID
+ * @apiSuccess {String} -.chl_name Checklist Name
+ * @apiSuccess {String} -.description Checklist Description
+ * @apiSuccess {Number} -.assigned_user_id Assigned User ID if available
+ * @apiSuccess {Number} -.signoff_user_id Signoff User ID
+ * @apiSuccess {String} -.completeremarks_req Completed Template Remarks (Should be null)
+ * @apiSuccess {String} -.linkedassetsids Linked Asset IDs
+ * @apiSuccess {Object[]} -.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Template
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist Template
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist Template was created
+ * @apiSuccess {Number} -.rows.created_user_id User ID of user who created the Checklist Template
+ * @apiSuccess {String} -.rows.history Deprecated.
+ * @apiSuccess {Number} -.rows.status_id Deprecated.
+ * @apiSuccess {String} -.rows.fromtemplateid Deprecated.
+ * 
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
 router.get(
   "/checklist/templateNames/:id?",
   checkIfLoggedInAPI,
   controllers.checklist.fetchChecklistTemplateNames
 );
 
+/**
+ * @api {get} /checklist/counts/:field/:plant/:datetype/:date Get Checklist Records Counts
+ * @apiDescription Get Checklist Records Counts organised by status 
+ * @apiName GetChecklistRecordsCount
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} field "status", else there will be error status of 404 thrown
+ * @apiParam {String} plant Plant ID, 0 for all Plants or respective plant IDs
+ * @apiParam {String} datetype "date", "week", "month", "quarter" or "year"
+ * @apiParam {String} date "all" or "YYYY-MM-DD"
+ * 
+ * @apiSuccess {Object[]} - Array of Checklist Records Counts organised by status
+ * @apiSuccess {String} -.name Checklist Record Status Name
+ * @apiSuccess {Number} -.name Checklist Record Status ID
+ * @apiSuccess {String} -.name Number of Checklist Records of given status
+ * 
+ * @apiError (Error 404) {String} NotFound Invalid Checklist Type of ${field}
+ * @apiError (Error 500) {String} InternalServerError Error in fetching checklist status for dashboard 
+ */
 router.get(
   "/checklist/counts/:field/:plant/:datetype/:date",
   checkIfLoggedInAPI,
@@ -440,20 +783,6 @@ router.get(
   controllers.checklist.createChecklistCSV
 );
 
-/**
- * @api {post} /checklist/template Create Checklist Template
- * @apiDescription Create a new checklist template for later submission as record
- * @apiName CreateChecklistTemplate
- * @apiGroup Checklist
- *
- * @apiSuccess {string} - yeah
- */
-
-router.post(
-  "/checklist/template",
-  checkIfLoggedInAPI,
-  controllers.checklist.submitNewChecklistTemplate
-);
 
 /**
  * @api {get} /fault/type Get Fault Types

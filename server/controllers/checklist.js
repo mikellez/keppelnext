@@ -76,7 +76,8 @@ const fetchAssignedChecklists = async (req, res, next) => {
     try {
         const result = await db.query(query, [req.user.id]);
         if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
-
+        console.log(result.rows);
+        console.log(totalPages);
         return res.status(200).json({ rows: result.rows, total: totalPages });
     } catch (error) {
         return res.status(500).json({ msg: error });
@@ -175,7 +176,7 @@ const fetchChecklistTemplateNames = async (req, res, next) => {
           ORDER BY keppel.checklist_templates.checklist_id DESC;`; // templates are plants specificed depending on user access(1 use can be assigned multiple plants)
 
     db.query(sql, (err, result) => {
-        if (err) throw err;
+        if (err) return res.status(500).json({msg: error});
         if (result) return res.status(200).json(result.rows);
     });
 };
@@ -200,6 +201,7 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
             console.log(err);
             return res.status(500).json("No checklist template found");
         }
+        console.log(found);
         res.status(200).send(found.rows[0]);
     });
 };
@@ -621,10 +623,8 @@ const editChecklistRecord = async (req, res, next) => {
                 }
             , "", [creator_email]);
 
-            // await mail.send();
         }
-
-        return res.status(200).json("Checklist successfully assigned");
+        return res.status(200).json(`Checklist successfully ${data.assigned_user_id ? "assigned" : "updated"}`);
         
     } catch (err) {
         return res.status(500).json("Failure to update checklist");
