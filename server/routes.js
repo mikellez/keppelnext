@@ -2,6 +2,7 @@ const passport = require("passport");
 const controllers = require("./controllers");
 const session = require("express-session");
 const multer = require("multer");
+const { fetchDBNames, dellocateGlobalDB } = require('./db/dbAPI');
 
 const express = require("express");
 
@@ -55,6 +56,8 @@ router.post("/login", passport.authenticate("local", {}), (req, res) => {
  * @apiSuccess {string} - "success"
  */
 router.post("/logout", (req, res) => {
+  dellocateGlobalDB();
+  
   if (req.user === undefined)
     return res.status(400).json({ errormsg: "you are not logged in" });
 
@@ -630,6 +633,8 @@ router
   );
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
+
+router.get("/db/names", fetchDBNames);
 
 // NO API ROUTE
 router.all("/*", (req, res) => {

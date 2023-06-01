@@ -68,13 +68,13 @@ const fetchAssignedChecklists = async (req, res, next) => {
     const page = req.query.page || 1;
     const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-    const totalRows = await db.query(fetchAssignedChecklistsQuery, [req.user.id]);
+    const totalRows = await global.db.query(fetchAssignedChecklistsQuery, [req.user.id]);
     const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
     const query = fetchAssignedChecklistsQuery + ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
     try {
-        const result = await db.query(query, [req.user.id]);
+        const result = await global.db.query(query, [req.user.id]);
         if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
 
         return res.status(200).json({ rows: result.rows, total: totalPages });
@@ -96,13 +96,13 @@ const fetchPendingChecklists = async (req, res, next) => {
     const page = req.query.page || 1;
     const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-    const totalRows = await db.query(fetchForReviewChecklistsQuery, [req.user.id]);
+    const totalRows = await global.db.query(fetchForReviewChecklistsQuery, [req.user.id]);
     const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
     const query = fetchPendingChecklistsQuery + ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
     try {
-        const result = await db.query(query, [req.user.id]);
+        const result = await global.db.query(query, [req.user.id]);
         if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
 
         return res.status(200).json({ rows: result.rows, total: totalPages });
@@ -124,13 +124,13 @@ const fetchForReviewChecklists = async (req, res, next) => {
     const page = req.query.page || 1;
     const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-    const totalRows = await db.query(fetchForReviewChecklistsQuery, [req.user.id]);
+    const totalRows = await global.db.query(fetchForReviewChecklistsQuery, [req.user.id]);
     const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
     const query = fetchForReviewChecklistsQuery + ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
     try {
-        const result = await db.query(query, [req.user.id]);
+        const result = await global.db.query(query, [req.user.id]);
         if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
 
         return res.status(200).json({ rows: result.rows, total: totalPages });
@@ -151,13 +151,13 @@ const fetchApprovedChecklists = async (req, res, next) => {
     const page = req.query.page || 1;
     const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-    const totalRows = await db.query(fetchApprovedChecklistsQuery, [req.user.id]);
+    const totalRows = await global.db.query(fetchApprovedChecklistsQuery, [req.user.id]);
     const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
     const query = fetchApprovedChecklistsQuery + ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
     try {
-        const result = await db.query(query, [req.user.id]);
+        const result = await global.db.query(query, [req.user.id]);
         if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
 
         return res.status(200).json({ rows: result.rows, total: totalPages });
@@ -174,7 +174,7 @@ const fetchChecklistTemplateNames = async (req, res, next) => {
         : `SELECT * from keppel.checklist_templates WHERE plant_id = any(ARRAY[${req.user.allocated_plants}]::int[])
           ORDER BY keppel.checklist_templates.checklist_id DESC;`; // templates are plants specificed depending on user access(1 use can be assigned multiple plants)
 
-    db.query(sql, (err, result) => {
+    global.db.query(sql, (err, result) => {
         if (err) throw err;
         if (result) return res.status(200).json(result.rows);
     });
@@ -195,7 +195,7 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
             checklist_id = $1
     `;
 
-    db.query(sql, [req.params.checklist_id], (err, found) => {
+    global.db.query(sql, [req.params.checklist_id], (err, found) => {
         if (err) {
             console.log(err);
             return res.status(500).json("No checklist template found");
@@ -212,7 +212,7 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
             cl.checklist_id = $1
     `;
 
-    db.query(sql, [req.params.checklist_id], (err, found) => {
+    global.db.query(sql, [req.params.checklist_id], (err, found) => {
         if (err) {
             console.log(err);
             return res.status(500).json("No checklist template found");
@@ -274,7 +274,7 @@ const createNewChecklistRecord = async (req, res, next) => {
     ];
 
     try {
-        const data = await db.query(
+        const data = await global.db.query(
             sql,
             [
                 checklist.chl_name,
@@ -351,7 +351,7 @@ const createNewChecklistTemplate = async (req, res, next) => {
 
     const history = `Created Template_PENDING_${today}_${req.user.name}_NIL`;
 
-    db.query(
+    global.db.query(
         sql,
         [
             checklist.chl_name,
@@ -434,7 +434,7 @@ const fetchChecklistCounts = (req, res, next) => {
         default:
             return res.status(404).send(`Invalid checklist type of ${req.params.field}`);
     }
-    db.query(sql, (err, result) => {
+    global.db.query(sql, (err, result) => {
         if (err)
             return res
                 .status(500)
@@ -458,7 +458,7 @@ const createChecklistCSV = async (req, res, next) => {
         default:
             activeTabQuery = `fetch error`;
     }
-    db.query(activeTabQuery, [req.user.id], (err, result) => {
+    global.db.query(activeTabQuery, [req.user.id], (err, result) => {
         if (err) return res.status(400).json({ msg: err });
         if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
         generateCSV(result.rows)
@@ -498,7 +498,7 @@ const completeChecklist = async (req, res, next) => {
     `;
 
     try {
-        await db.query(sql, [JSON.stringify(req.body.datajson), req.params.checklist_id]);
+        await global.db.query(sql, [JSON.stringify(req.body.datajson), req.params.checklist_id]);
 
         const { 
             assigned_user_email, 
@@ -578,7 +578,7 @@ const editChecklistRecord = async (req, res, next) => {
     `;
 
     try {
-        await db.query(
+        await global.db.query(
             sql,
             [
                 JSON.stringify(data.datajson),
@@ -656,7 +656,7 @@ const approveChecklist = async (req, res, next) => {
     `;
 
     try {
-        await db.query(sql, [JSON.stringify(activity_log), req.params.checklist_id]);
+        await global.db.query(sql, [JSON.stringify(activity_log), req.params.checklist_id]);
 
         const { 
             assigned_user_email, 
@@ -718,7 +718,7 @@ const rejectChecklist = async (req, res, next) => {
     `;
 
     try {
-        await db.query(sql, [JSON.stringify(activity_log), req.params.checklist_id]);
+        await global.db.query(sql, [JSON.stringify(activity_log), req.params.checklist_id]);
 
         const { 
             assigned_user_email, 
@@ -780,7 +780,7 @@ const cancelChecklist = async (req, res, next) => {
             checklist_id = $2
     `;
 
-    db.query(sql, [JSON.stringify(activity_log), req.params.checklist_id], (err) => {
+    global.db.query(sql, [JSON.stringify(activity_log), req.params.checklist_id], (err) => {
         if (err) {
             console.log(err);
             return res.status(500).json("Failure to update checklist cancellation");
@@ -817,7 +817,7 @@ const deleteChecklistTemplate = async (req, res, next) => {
             checklist_id = ${req.params.checklist_id}
     `;
 
-    db.query(sql, (err) => {
+    global.db.query(sql, (err) => {
         if (err) return res.status(500).json("Failure to delete template");
         return res.status(200).json("Template successfully deleted");
     });
@@ -901,10 +901,10 @@ const fetchFilteredChecklists = async (req, res, next) => {
 
     const countSql = `SELECT COUNT(*) AS total FROM (${sql}) AS t1`;
 
-    const totalRows = await db.query(countSql);
+    const totalRows = await global.db.query(countSql);
     const totalPages = Math.ceil(+totalRows.rows[0].total / ITEMS_PER_PAGE);
 
-    db.query(sql + pageCond, (err, result) => {
+    global.db.query(sql + pageCond, (err, result) => {
         if (err) return res.status(400).json({ msg: err });
         if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
 
@@ -913,7 +913,7 @@ const fetchFilteredChecklists = async (req, res, next) => {
 };
 
 const fetchEmailDetailsForSpecificChecklist = async (checklist_id) => {
-    const data = await db.query(`
+    const data = await global.db.query(`
         SELECT 
             u1.user_email as assigned_user_email,
             u2.user_email as signoff_user_email,

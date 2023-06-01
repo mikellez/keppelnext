@@ -19,7 +19,7 @@ const fetchMasterInfo = async (req, res, next) => {
 	// 	`;
 	// }
 	
-	db.query(q, (err1, result) => {
+	global.db.query(q, (err1, result) => {
 		if (err1) {
 			// throw err;
 			return res.status(500).json({
@@ -77,7 +77,7 @@ const createMasterTypeEntry = async (req, res, next) => {
 	sql = `INSERT INTO keppel.${table} ${columns} VALUES ${num} `;
 	console.log(sql)
 	console.log(insert)
-	db.query(sql,insert)	
+	global.db.query(sql,insert)	
 		.then(result => {
 			return res.status(200).send({
 				msg: "success",
@@ -103,7 +103,7 @@ const fetchMasterTypeSingle = async (req, res, next) => {
 
 	const query = `SELECT * FROM keppel.${tableInfo[type].internalName} WHERE ${tableInfo[type].id}=$1`
 
-	db.query(query, [id], (err1, result) => {
+	global.db.query(query, [id], (err1, result) => {
 		if (err1) {
 			// throw err;
 			return res.status(500).json({
@@ -209,7 +209,7 @@ const updateMasterTypeSingle = async (req, res, next) => {
 	p.push(req.params.id);
 	console.log(p)
 
-	db.query(query, p, (err1, result) => {
+	global.db.query(query, p, (err1, result) => {
 		if (err1) {
 			// throw err;
 			console.log(err1)
@@ -237,7 +237,7 @@ const deleteMasterTypeSingle = async (req, res, next) => {
 
 	const query = `DELETE FROM keppel.${tableInfo[type].internalName} WHERE ${tableInfo[type].id}=$1;`
 
-	db.query(query, [id], (err1, result) => {
+	global.db.query(query, [id], (err1, result) => {
 		if (err1) {
 			// throw err;
 			return res.status(500).json({
