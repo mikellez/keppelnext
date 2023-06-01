@@ -7,8 +7,10 @@ async function generateCSV(data) {
     var memStream = new MemoryStream();
     let dataStr = Object.keys(data[0]).toString();
     for (row in data) {
+        console.log(row);
         const tmp = [];
         for (heading in data[row]) {
+            console.log(heading);
             tmp.push(data[row][heading])
         }
         dataStr +=  "\n" + tmp.toString();

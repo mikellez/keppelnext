@@ -449,12 +449,15 @@ const createChecklistCSV = async (req, res, next) => {
     let activeTabQuery;
     switch (req.query.activeTab) {
         case "0":
-            activeTabQuery = fetchAssignedChecklistsQuery;
+            activeTabQuery = fetchPendingChecklistsQuery;
             break;
         case "1":
-            activeTabQuery = fetchForReviewChecklistsQuery;
+            activeTabQuery = fetchAssignedChecklistsQuery;
             break;
         case "2":
+            activeTabQuery = fetchForReviewChecklistsQuery;
+            break;
+        case "3":
             activeTabQuery = fetchApprovedChecklistsQuery;
             break;
         default:
@@ -689,7 +692,7 @@ const approveChecklist = async (req, res, next) => {
 
         return res.status(200).json("Checklist successfully approved");
     } catch (err) {
-        return res.status(500).json("Failure to update checklist completion");
+        return res.status(500).json("Failure to update checklist approval");
     }
 };
 
@@ -703,7 +706,7 @@ const rejectChecklist = async (req, res, next) => {
         name: req.user.name,
         activity: "REJECTED",
         activity_type: "Updated Record",
-        remarks: rejectChecklist,
+        remarks: rejectionComments,
     };
 
     const sql = `
@@ -905,7 +908,7 @@ const fetchFilteredChecklists = async (req, res, next) => {
     const totalPages = Math.ceil(+totalRows.rows[0].total / ITEMS_PER_PAGE);
 
     db.query(sql + pageCond, (err, result) => {
-        if (err) return res.status(400).json({ msg: err });
+        if (err) return res.status(500).json({ msg: err });
         if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
 
         return res.status(200).json({ rows: result.rows, total: totalPages });
