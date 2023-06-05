@@ -93,12 +93,13 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
 
 /**
  * @api {get} /request/approved Get Approved Requests
- * @apiDescription Gets all approved requests. 
+ * @apiDescription Gets all requests with status of `APPROVED`. 
  * 
  * For operation specialists, only relevant approved requests will be returned. 
  * @apiName GetApprovedRequests
  * @apiGroup Request
  *
+ * @apiDefine RequestObject
  * @apiSuccess {Object[]} - Array of all requests, sorted by creation date
  * @apiSuccess {Number} request_id ID of request
  * @apiSuccess {Number} fault_id ID of fault type
@@ -133,7 +134,7 @@ router.get(
 
 /** 
  * @api {get} /request/assigned Get Assigned Requests
- * @apiDescription Gets assigned requests. 
+ * @apiDescription Gets all requests with status of `ASSIGNED`. 
  * 
  * For operation specialists, only relevant assigned requests will be returned. 
  * 
@@ -149,7 +150,7 @@ router.get(
 );
 /** 
  * @api {get} /request/review Get For Review Requests
- * @apiDescription Gets for review requests. 
+ * @apiDescription Gets all requests with status of `COMPLETED`, `REJECTED`, `CANCELLED`.
  * 
  * For operation specialists, only relevant for review requests will be returned. 
  * 
@@ -166,7 +167,7 @@ router.get(
 );
 /** 
  * @api {get} /request/pending Get Pending Requests
- * @apiDescription Gets pending requests. 
+ * @apiDescription Gets all requests with status of `PENDING`.
  * 
  * For operation specialists, only relevant pending requests will be returned. 
  * 
@@ -183,29 +184,8 @@ router.get(
 );
 
 /**
- * @api {post} /request Create Request
- * @apiDescription Creates a request
- * @apiName CreateRequest
- * @apiGroup Request
- *
- * @apiBody {Number} requestTypeID ID of the request type
- * @apiBody {Number} faultTypeID ID of the fault type
- * @apiBody {Number} plantLocationID ID of the plant location
- * @apiBody {Number} taggedAssetID ID of the asset that is being reported on
- * @apiBody {String} description Description of the created request
- * @apiBody {Object} [image] Image of the asset that is being reported on
- *
- * @apiSuccess {String} message `'Request created successfully'`
- */
-router.post(
-  "/request/",
-  upload.single("image"),
-  controllers.request.createRequest
-);
-
-/**
  * @api {get} /request/type Get Request Types
- * @apiDescription Gets request types
+ * @apiDescription Gets all request types.
  * @apiName GetRequestTypes
  * @apiGroup Request
  *
@@ -218,7 +198,7 @@ router.get("/request/types", controllers.request.fetchRequestTypes);
 
 /**
  * @api {get} /request/priority Get Request Priorities
- * @apiDescription Gets request priorities
+ * @apiDescription Gets all request priorities.
  * @apiName GetRequestPriorities
  * @apiGroup Request
  *
@@ -233,53 +213,181 @@ router.get(
   controllers.request.fetchRequestPriority
 );
 
+/**
+ * @api {get} /request/csv Get Request CSV
+ * @apiDescription Fetches the csv table of all the request in the form of a buffer.
+ * @apiName GetRequestCSV
+ * @apiGroup Request
+ *
+ * @apiSuccess {Buffer} - Buffer of csv
+ */
 router.get(
   "/request/csv",
   checkIfLoggedInAPI,
   controllers.request.createRequestCSV
 );
 
+/**
+ * @api {get} /request/pdf/:request_id Get Request PDF
+ * @apiDescription Fetches the pdf version of a request in the form of a buffer.
+ * @apiName GetRequestPDF
+ * @apiGroup Request
+ *
+ * @apiParam {Number} request_id Request ID
+ * 
+ * @apiSuccess {Buffer} - Buffer of pdf
+ */
 router.get("/request/pdf/:request_id", checkIfLoggedInAPI, sendRequestPDF);
 
+/**
+ * @api {patch} /request/complete/:request_id Complete Request
+ * @apiDescription Change the status of a request to `COMPLETED`.
+ * @apiName CompleteRequest
+ * @apiGroup Request
+ *
+ * @apiParam {Number} request_id Request ID
+ * 
+ * @apiBody {String} complete_comments Comments on the completed checklist
+ * @apiBody {File} completion_file Image of the completed task
+ *
+ */
 router.patch(
   "/request/complete/:request_id",
   checkIfLoggedInAPI,
   upload.single("completion_file"),
   controllers.request.completeRequest
 );
+
+/**
+ * @api {post} /request Create Request
+ * @apiDescription Creates a new request which will have a status of `PENDING`.
+ * @apiName CreateRequest
+ * @apiGroup Request
+ *
+ * @apiBody {Number} requestTypeID ID of the request type
+ * @apiBody {Number} faultTypeID ID of the fault type
+ * @apiBody {Number} plantLocationID ID of the plant location
+ * @apiBody {Number} taggedAssetID ID of the asset that is being reported on
+ * @apiBody {String} description Description of the created request
+ * @apiBody {Object} [image] Image of the asset that is being reported on
+ *
+ * @apiSuccess {String} message `'Request created successfully'`
+ */
+
+router.post(
+  "/request/",
+  upload.single("image"),
+  controllers.request.createRequest
+);
+
+/**
+ * @api {get} /request/:request_id Get Specific Request
+ * @apiDescription Creates a new request which will have a status of `PENDING`.
+ * @apiName GetSpecificRequest
+ * @apiGroup Request
+ * 
+ * @apiParam {Number} request_id Request ID
+ *
+ * @apiUse RequestObject
+ */
+
+/**
+ * @api {patch} /request/:request_id Update Specific Request
+ * @apiDescription Creates a new request which will have a status of `PENDING`.
+ * @apiName UpdateSpecificRequest
+ * @apiGroup Request
+ * 
+ * @apiParam {Number} request_id Request ID
+ * 
+ * @apiBody {Object[]} priority Priority object
+ * @apiBody {Number} -.p_id Priority ID
+ * @apiBody {String} -.priority Name of priority 
+ * @apiBody {Object[]} assignedUser Object for assigned user
+ * @apiBody {Number} -.value ID of assigned user
+ * @apiBody {String} -.label Name of assigned user
+ *
+ */
+
 router
   .route("/request/:request_id", checkIfLoggedInAPI)
   .get(controllers.request.fetchSpecificRequest)
   .patch(controllers.request.updateRequest);
 
+/**
+ * @api {get} /request/:request_id/uploadedfile Get Uploaded File
+ * @apiDescription Fetches the uploaded file in the form of a buffer.
+ * @apiName GetUploadedFile
+ * @apiGroup Request
+ *
+ * @apiParam {Number} request_id Request ID
+ * 
+ * @apiSuccess {Buffer} - Uploaded file of the request
+ */
 router
   .route("/request/:request_id/uploadedfile")
   .get(controllers.request.fetchRequestUploadedFile);
 
+/**
+ * @api {patch} /request/:request_id/:status_id Approve/Reject Request
+ * @apiDescription To change the status of a request to either `APPROVED` or `REJECTED`.
+ * @apiName ApproveOrRejectRequest
+ * @apiGroup Request
+ *
+ * @apiParam {Number} request_id Request ID
+ * @apiParam {Number} status_id Status ID of request. Use 4 to approve and 5 to reject. Any other string params will default to reject.
+ * 
+ * @apiBody {String} comments Comments from the manager
+ */
 router.patch(
   "/request/:request_id/:status_id",
   checkIfLoggedInAPI,
   controllers.request.approveRejectRequest
 );
+
 router.get(
   "/request/counts/:field/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.request.fetchRequestCounts
 );
+
 router.get(
   "/request/filter/:status/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.request.fetchFilteredRequests
 );
+
 router.get(
   "/request/filter/:status/:plant/:datetype/:date/:page",
   checkIfLoggedInAPI,
   controllers.request.fetchFilteredRequests
 );
+/**
+ * @api {get} /request/plant/:plant_id Get Plant Details
+ * @apiDescription Fetches the pd and name of a specific plant.
+ * @apiName GetPlantDetails
+ * @apiGroup Request
+ *
+ * @apiParam {Number} plant_id Plant ID
+ * 
+ * @apiBody {Number} plant_id Plant ID
+ * @apiBody {String} plant_name Plant name
+ */
 router.get(
   "/request/plant/:plant_id",
   controllers.request.fetchPlantRequest
 );
+
+/**
+ * @api {get} /request/asset/:psa_id Get Asset Details
+ * @apiDescription Fetches the id and name of a specific asset.
+ * @apiName GetAssetDetails
+ * @apiGroup Request
+ *
+ * @apiParam {Number} psa_id  Plant System Assets ID
+ * 
+ * @apiBody {Number} psa_id  Plant System Assets ID
+ * @apiBody {String} plant_asset_instrument Asset name
+ */
 router.get(
   "/request/asset/:psa_id",
   controllers.request.fetchAssetRequest

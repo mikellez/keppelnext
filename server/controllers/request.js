@@ -161,7 +161,7 @@ const fetchReviewRequests = async (req, res, next) => {
   const page = req.query.page || 1;
 
   const sql = fetchRequestQuery(
-    "AND (sc.status_id = 3 OR sc.status_id = 5 OR sc.status_id = 6)", //COMPLETED, REJECTED, CANCELLEd
+    "AND (sc.status_id = 3 OR sc.status_id = 5 OR sc.status_id = 6)", //COMPLETED, REJECTED, CANCELLED
     req.user.role_id,
     req.user.id,
     page
@@ -686,7 +686,6 @@ const approveRejectRequest = async (req, res, next) => {
   const status = req.params.status_id == 4 ? "APPROVED" : "REJECTED";
   const text = req.params.status_id == 4 ? "Approved" : "Rejected";
   const history = `!${status}_${text} request_${today}_${req.user.role_name}_${req.user.name}`;
-  // console.log(req.body);
   const sql = `
 	UPDATE keppel.request SET 
 	status_id = $1,
@@ -884,14 +883,6 @@ const fetchRequestUploadedFile = async (req, res, next) => {
   r.uploaded_file,
   r.uploadfilemimetype
   FROM keppel.request AS r
-  JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
-  JOIN keppel.fault_types  AS ft ON ft.fault_id = r.fault_id
-  JOIN keppel.plant_master AS pm ON pm.plant_id = r.plant_id
-  JOIN keppel.plant_system_assets AS psa ON psa.psa_id = r.psa_id
-  LEFT JOIN keppel.priority AS pr ON r.priority_id = pr.p_id
-  LEFT JOIN keppel.users AS u ON r.assigned_user_id = u.user_id
-	LEFT JOIN keppel.user_access ua ON u.user_id = ua.user_id
-  JOIN keppel.status_pm AS s ON r.status_id = s.status_id
   WHERE request_id = $1`;
   global.db.query(sql, [req.params.request_id], (err, result) => {
 
@@ -912,8 +903,6 @@ const fetchRequestUploadedFile = async (req, res, next) => {
     });
 
     res.end(img);
-
-    //return res.status(200).send(result.rows[0]);
   });
 };
 
