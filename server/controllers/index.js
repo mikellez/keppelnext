@@ -10,3 +10,4 @@ exports.changeOfParts   = require("./changeOfParts");
 exports.logbook         = require("./logbook");
 exports.user            = require("./user");
 exports.setting        = require("./setting");
+exports.workflow        = require("./workflow");

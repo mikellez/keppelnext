@@ -86,7 +86,6 @@ export default function Timeline() {
                     getSchedules(id).then((schedules) => {
                         if (schedules) {
                             setScheduleList(schedules);
-                            console.log(schedules);
                         }
                     });
                 }

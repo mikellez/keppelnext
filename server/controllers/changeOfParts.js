@@ -71,7 +71,7 @@ const fetchChangeOfParts = async (req, res, next) => {
         sql + `AND pm.plant_id = ${req.query.plant_id}` :
         sql;
 
-    db.query(sql, (err, found) => {
+    global.db.query(sql, (err, found) => {
         if (err) {
             console.log(err);
             return res.status(500).json("Failure to fetch change of parts");
@@ -96,7 +96,7 @@ const createNewChangeOfParts = async (req, res, next) => {
         )
         VALUES ($1, $2, $3, $4)`;
 
-    db.query(
+    global.db.query(
         sql,
         [
             req.body.formData.psaId,
@@ -128,7 +128,7 @@ const editChangeOfParts = async (req, res, next) => {
         cop_id = $6
     `;
 
-    db.query(
+    global.db.query(
         sql,
         [
             req.body.formData.psaId,

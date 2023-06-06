@@ -2,6 +2,7 @@ const passport = require("passport");
 const controllers = require("./controllers");
 const session = require("express-session");
 const multer = require("multer");
+const { fetchDBNames, dellocateGlobalDB } = require('./db/dbAPI');
 
 const express = require("express");
 
@@ -55,6 +56,8 @@ router.post("/login", passport.authenticate("local", {}), (req, res) => {
  * @apiSuccess {string} - "success"
  */
 router.post("/logout", (req, res) => {
+  dellocateGlobalDB();
+  
   if (req.user === undefined)
     return res.status(400).json({ errormsg: "you are not logged in" });
 
@@ -90,12 +93,19 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
 
 /**
  * @api {get} /request/approved Get Approved Requests
+<<<<<<< HEAD
  * @apiDescription Gets all approved requests.
  *
  * For operation specialists, only relevant approved requests will be returned.
+=======
+ * @apiDescription Gets all requests with status of `APPROVED`. 
+ * 
+ * For operation specialists, only relevant approved requests will be returned. 
+>>>>>>> b344da6c5b185a19e5320d63fc5a71def7b79aae
  * @apiName GetApprovedRequests
  * @apiGroup Request
  *
+ * @apiDefine RequestObject
  * @apiSuccess {Object[]} - Array of all requests, sorted by creation date
  * @apiSuccess {Number} request_id ID of request
  * @apiSuccess {Number} fault_id ID of fault type
@@ -130,10 +140,17 @@ router.get(
 
 /**
  * @api {get} /request/assigned Get Assigned Requests
+<<<<<<< HEAD
  * @apiDescription Gets assigned requests.
  *
  * For operation specialists, only relevant assigned requests will be returned.
  *
+=======
+ * @apiDescription Gets all requests with status of `ASSIGNED`. 
+ * 
+ * For operation specialists, only relevant assigned requests will be returned. 
+ * 
+>>>>>>> b344da6c5b185a19e5320d63fc5a71def7b79aae
  * Returns the same output schema as `/request/approved`
  * @apiName GetAssignedRequests
  * @apiGroup Request
@@ -146,11 +163,19 @@ router.get(
 );
 /**
  * @api {get} /request/review Get For Review Requests
+<<<<<<< HEAD
  * @apiDescription Gets for review requests.
  *
  * For operation specialists, only relevant for review requests will be returned.
  *
  *
+=======
+ * @apiDescription Gets all requests with status of `COMPLETED`, `REJECTED`, `CANCELLED`.
+ * 
+ * For operation specialists, only relevant for review requests will be returned. 
+ * 
+ * 
+>>>>>>> b344da6c5b185a19e5320d63fc5a71def7b79aae
  * Returns the same output schema as `/request/approved`
  * @apiName GetForReviewRequests
  * @apiGroup Request
@@ -163,10 +188,17 @@ router.get(
 );
 /**
  * @api {get} /request/pending Get Pending Requests
+<<<<<<< HEAD
  * @apiDescription Gets pending requests.
  *
  * For operation specialists, only relevant pending requests will be returned.
  *
+=======
+ * @apiDescription Gets all requests with status of `PENDING`.
+ * 
+ * For operation specialists, only relevant pending requests will be returned. 
+ * 
+>>>>>>> b344da6c5b185a19e5320d63fc5a71def7b79aae
  * Returns the same output schema as `/request/approved`
  * @apiName GetPendingRequests
  * @apiGroup Request
@@ -180,29 +212,8 @@ router.get(
 );
 
 /**
- * @api {post} /request Create Request
- * @apiDescription Creates a request
- * @apiName CreateRequest
- * @apiGroup Request
- *
- * @apiBody {Number} requestTypeID ID of the request type
- * @apiBody {Number} faultTypeID ID of the fault type
- * @apiBody {Number} plantLocationID ID of the plant location
- * @apiBody {Number} taggedAssetID ID of the asset that is being reported on
- * @apiBody {String} description Description of the created request
- * @apiBody {Object} [image] Image of the asset that is being reported on
- *
- * @apiSuccess {String} message `'Request created successfully'`
- */
-router.post(
-  "/request/",
-  upload.single("image"),
-  controllers.request.createRequest
-);
-
-/**
  * @api {get} /request/type Get Request Types
- * @apiDescription Gets request types
+ * @apiDescription Gets all request types.
  * @apiName GetRequestTypes
  * @apiGroup Request
  *
@@ -215,7 +226,7 @@ router.get("/request/types", controllers.request.fetchRequestTypes);
 
 /**
  * @api {get} /request/priority Get Request Priorities
- * @apiDescription Gets request priorities
+ * @apiDescription Gets all request priorities.
  * @apiName GetRequestPriorities
  * @apiGroup Request
  *
@@ -230,51 +241,186 @@ router.get(
   controllers.request.fetchRequestPriority
 );
 
+/**
+ * @api {get} /request/csv Get Request CSV
+ * @apiDescription Fetches the csv table of all the request in the form of a buffer.
+ * @apiName GetRequestCSV
+ * @apiGroup Request
+ *
+ * @apiSuccess {Buffer} - Buffer of csv
+ */
 router.get(
   "/request/csv",
   checkIfLoggedInAPI,
   controllers.request.createRequestCSV
 );
 
+/**
+ * @api {get} /request/pdf/:request_id Get Request PDF
+ * @apiDescription Fetches the pdf version of a request in the form of a buffer.
+ * @apiName GetRequestPDF
+ * @apiGroup Request
+ *
+ * @apiParam {Number} request_id Request ID
+ * 
+ * @apiSuccess {Buffer} - Buffer of pdf
+ */
 router.get("/request/pdf/:request_id", checkIfLoggedInAPI, sendRequestPDF);
 
+/**
+ * @api {patch} /request/complete/:request_id Complete Request
+ * @apiDescription Change the status of a request to `COMPLETED`.
+ * @apiName CompleteRequest
+ * @apiGroup Request
+ *
+ * @apiParam {Number} request_id Request ID
+ * 
+ * @apiBody {String} complete_comments Comments on the completed checklist
+ * @apiBody {File} completion_file Image of the completed task
+ *
+ */
 router.patch(
   "/request/complete/:request_id",
   checkIfLoggedInAPI,
   upload.single("completion_file"),
   controllers.request.completeRequest
 );
+
+/**
+ * @api {post} /request Create Request
+ * @apiDescription Creates a new request which will have a status of `PENDING`.
+ * @apiName CreateRequest
+ * @apiGroup Request
+ *
+ * @apiBody {Number} requestTypeID ID of the request type
+ * @apiBody {Number} faultTypeID ID of the fault type
+ * @apiBody {Number} plantLocationID ID of the plant location
+ * @apiBody {Number} taggedAssetID ID of the asset that is being reported on
+ * @apiBody {String} description Description of the created request
+ * @apiBody {Object} [image] Image of the asset that is being reported on
+ *
+ * @apiSuccess {String} message `'Request created successfully'`
+ */
+
+router.post(
+  "/request/",
+  upload.single("image"),
+  controllers.request.createRequest
+);
+
+/**
+ * @api {get} /request/:request_id Get Specific Request
+ * @apiDescription Creates a new request which will have a status of `PENDING`.
+ * @apiName GetSpecificRequest
+ * @apiGroup Request
+ * 
+ * @apiParam {Number} request_id Request ID
+ *
+ * @apiUse RequestObject
+ */
+
+/**
+ * @api {patch} /request/:request_id Update Specific Request
+ * @apiDescription Creates a new request which will have a status of `PENDING`.
+ * @apiName UpdateSpecificRequest
+ * @apiGroup Request
+ * 
+ * @apiParam {Number} request_id Request ID
+ * 
+ * @apiBody {Object[]} priority Priority object
+ * @apiBody {Number} -.p_id Priority ID
+ * @apiBody {String} -.priority Name of priority 
+ * @apiBody {Object[]} assignedUser Object for assigned user
+ * @apiBody {Number} -.value ID of assigned user
+ * @apiBody {String} -.label Name of assigned user
+ *
+ */
+
 router
   .route("/request/:request_id", checkIfLoggedInAPI)
   .get(controllers.request.fetchSpecificRequest)
   .patch(controllers.request.updateRequest);
 
+/**
+ * @api {get} /request/:request_id/uploadedfile Get Uploaded File
+ * @apiDescription Fetches the uploaded file in the form of a buffer.
+ * @apiName GetUploadedFile
+ * @apiGroup Request
+ *
+ * @apiParam {Number} request_id Request ID
+ * 
+ * @apiSuccess {Buffer} - Uploaded file of the request
+ */
 router
   .route("/request/:request_id/uploadedfile")
   .get(controllers.request.fetchRequestUploadedFile);
 
+/**
+ * @api {patch} /request/:request_id/:status_id Approve/Reject Request
+ * @apiDescription To change the status of a request to either `APPROVED` or `REJECTED`.
+ * @apiName ApproveOrRejectRequest
+ * @apiGroup Request
+ *
+ * @apiParam {Number} request_id Request ID
+ * @apiParam {Number} status_id Status ID of request. Use 4 to approve and 5 to reject. Any other string params will default to reject.
+ * 
+ * @apiBody {String} comments Comments from the manager
+ */
 router.patch(
   "/request/:request_id/:status_id",
   checkIfLoggedInAPI,
   controllers.request.approveRejectRequest
 );
+
 router.get(
   "/request/counts/:field/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.request.fetchRequestCounts
 );
+
 router.get(
   "/request/filter/:status/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.request.fetchFilteredRequests
 );
+
 router.get(
   "/request/filter/:status/:plant/:datetype/:date/:page",
   checkIfLoggedInAPI,
   controllers.request.fetchFilteredRequests
 );
-router.get("/request/plant/:plant_id", controllers.request.fetchPlantRequest);
-router.get("/request/asset/:psa_id", controllers.request.fetchAssetRequest);
+/**
+ * @api {get} /request/plant/:plant_id Get Plant Details
+ * @apiDescription Fetches the pd and name of a specific plant.
+ * @apiName GetPlantDetails
+ * @apiGroup Request
+ *
+ * @apiParam {Number} plant_id Plant ID
+ * 
+ * @apiBody {Number} plant_id Plant ID
+ * @apiBody {String} plant_name Plant name
+ */
+router.get(
+  "/request/plant/:plant_id",
+  controllers.request.fetchPlantRequest
+);
+
+/**
+ * @api {get} /request/asset/:psa_id Get Asset Details
+ * @apiDescription Fetches the id and name of a specific asset.
+ * @apiName GetAssetDetails
+ * @apiGroup Request
+ *
+ * @apiParam {Number} psa_id  Plant System Assets ID
+ * 
+ * @apiBody {Number} psa_id  Plant System Assets ID
+ * @apiBody {String} plant_asset_instrument Asset name
+ */
+router.get(
+  "/request/asset/:psa_id",
+  controllers.request.fetchAssetRequest
+);
+
 
 router.get(
   "/asset/systems",
@@ -408,85 +554,77 @@ router.get(
   controllers.asset.getSubComponentsFromPlant
 );
 
-router
-  .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
-  .get(controllers.checklist.fetchSpecificChecklistTemplate)
-  .post(controllers.checklist.createNewChecklistTemplate)
-  .delete(controllers.checklist.deleteChecklistTemplate);
 
-router
-  .route("/checklist/assigned", checkIfLoggedInAPI)
-  .get(controllers.checklist.fetchAssignedChecklists);
 
-router
-  .route("/checklist/record/:checklist_id?", checkIfLoggedInAPI)
-  .get(controllers.checklist.fetchChecklistRecords)
-  .post(controllers.checklist.createNewChecklistRecord)
-  .patch(controllers.checklist.editChecklistRecord);
+/**
+ * @apiDefine ChecklistDataJSON
+ * @apiSuccess {Object[]} -.datajson Checklist Data
+ * @apiSuccess {Object[]} -.datajson.rows Checklist Section (Each Section contain rows)
+ * @apiSuccess {String} -.datajson.description Checklist Section Description
+ * @apiSuccess {Object[]} -.datajson.rows.checks Checklist Row (Each Row contains checks)
+ * @apiSuccess {String} -.datajson.rows.description Checklist Row Description 
+ * @apiSuccess {String} -.datajson.rows.checks.type Check Type 
+ * @apiSuccess {String} -.datajson.rows.checks.question Check Question
+ * @apiSuccess {Array} -.datajson.rows.checks.choices Check Choices for given Question
+ * @apiSuccess {String} -.datajson.rows.checks.value Inputted Check Value
+ */
 
-router.get(
-  "/checklist/approved",
-  checkIfLoggedInAPI,
-  controllers.checklist.fetchApprovedChecklists
-);
+/**
+ * @apiDefine SubmitChecklistDataJSON
+ * 
+ * @apiBody {Object[]} -.datajson Checklist Data
+ * @apiBody {Object[]} -.datajson.rows Checklist Section (Each Section contain rows)
+ * @apiBody {Object[]} -.datajson.rows.checks Checklist Row (Each Row contains checks)
+ * @apiBody {String} -.datajson.rows.description Checklist Row Description 
+ * @apiBody {String} -.datajson.rows.checks.type Check Type 
+ * @apiBody {String} -.datajson.rows.checks.question Check Question
+ * @apiBody {Array} -.datajson.rows.checks.choices Check Choices for given Question
+ * @apiBody {String} -.datajson.rows.checks.value Inputted Check Value
+ * @apiBody {String} -.datajson.description Checklist Section Description
+ */
 
-router.get(
-  "/checklist/pending",
-  checkIfLoggedInAPI,
-  controllers.checklist.fetchPendingChecklists
-);
+/**
+ * @api {get} /notAnActualRoute ! Explaining Checklist
+ * @apiDescription the /checklist handles 2 tables, namely checklist_templates and checklists_records
+ * @apiDescription checklist_records are implemented versions of checklist_templates (multiple checklist_records can follow  the samechecklist_templates)
+ * @apiName ChecklistExplanation
+ * @apiGroup Checklist
+ */
 
-router.get(
-  "/checklist/templateNames/:id?",
-  checkIfLoggedInAPI,
-  controllers.checklist.fetchChecklistTemplateNames
-);
+/**
+ * @api {get} /notAnActualRoute Checklist DataJSON format
+ * @apiDescription Checklist DataJSON format
+ * @apiGroup Checklist
+ * 
+ * @apiSuccess {Object[]} datajson Checklist Data
+ * @apiSuccess {Object[]} datajson.rows Checklist Section (Each Section contain rows)
+ * @apiSuccess {Object[]} datajson.rows.checks Checklist Row (Each Row contains checks)
+ * @apiSuccess {String} datajson.rows.description Checklist Row Description 
+ * @apiSuccess {String} datajson.rows.checks.type Check Type 
+ * @apiSuccess {String} datajson.rows.checks.question Check Question
+ * @apiSuccess {Array} datajson.rows.checks.choices Check Choices for given Question
+ * @apiSuccess {String} datajson.rows.checks.value Inputted Check Value
+ * @apiSuccess {String} datajson.description Checklist Section Description
+ */
 
-router.get(
-  "/checklist/counts/:field/:plant/:datetype/:date",
-  checkIfLoggedInAPI,
-  controllers.checklist.fetchChecklistCounts
-);
-
-router.patch(
-  "/checklist/complete/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("complete")
-);
-router.get(
-  "/checklist/filter/:status/:plant/:datetype/:date",
-  checkIfLoggedInAPI,
-  controllers.checklist.fetchFilteredChecklists
-);
-router.get(
-  "/checklist/filter/:status/:plant/:datetype/:date/:page",
-  checkIfLoggedInAPI,
-  controllers.checklist.fetchFilteredChecklists
-);
-
-router.patch(
-  "/checklist/approve/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("approve")
-);
-
-router.patch(
-  "/checklist/reject/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("reject")
-);
-
-router.get(
-  "/checklist/pdf/:checklist_id",
-  checkIfLoggedInAPI,
-  sendChecklistPDF
-);
-
-router.get(
-  "/checklist/csv",
-  checkIfLoggedInAPI,
-  controllers.checklist.createChecklistCSV
-);
+/**
+ * @api {get} /checklist/template/:checklist_id Get Single Checklist Template
+ * @apiDescription Gets a single checklist template based on given checklist_id
+ * @apiName GetSingleChecklistTemplate
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} checklist_id Checklist Template unique ID
+ * 
+ * @apiSuccess {Object} - Object containing the specified checklist template's details
+ * @apiSuccess {String} -.chl_name Checklist Name 
+ * @apiSuccess {String} -.description Checklist Description
+ * @apiSuccess {Number} -.plant_id Plant ID
+ * @apiSuccess {Number} -.signoff_user_id Signoff User ID
+ * @apiSuccess {Number} -.status_id Template Status (currently deprecated)
+ * @apiUse ChecklistDataJSON
+ * 
+ * @apiError (Error 500) {String} InternalServerError "No checklist template found"
+ */
 
 /**
  * @api {post} /checklist/template Create Checklist Template
@@ -494,14 +632,506 @@ router.get(
  * @apiName CreateChecklistTemplate
  * @apiGroup Checklist
  *
- * @apiSuccess {string} - yeah
+ * @apiBody {Object} checklist Checklist Template
+ * @apiBody {String} checklist.chl_name Checklist Template Name
+ * @apiBody {String} checklist.description Checklist Description
+ * @apiBody {Number} checklist.signoff_user_id Signoff User ID
+ * @apiBody {Number} checklist.plant_id Plant ID of Checklist
+ * @apiUse SubmitChecklistDataJSON 
+ * 
+ * @apiSuccess {String} Created "New checklist successfully created"
+ * 
+ * @apiError (Error 500) {String} InternalServerError "Failure to create new checklist"
  */
 
-router.post(
-  "/checklist/template",
+/**
+ * @api {delete} /checklist/template/:checklist_id Delete Checklist Template
+ * @apiDescription Delete a Checklist Template based on given Checklist ID
+ * @apiName DeleteChecklistTemplate
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} checklist_id Checklist Template unique ID
+ * 
+ * @apiSuccess {String} Success "Template successfully deleted"
+ * 
+ * @apiError (Error 500) {String} InternalServerError "Failure to delete template"
+ */
+router
+  .route("/checklist/template/:checklist_id?", checkIfLoggedInAPI)
+  .get(controllers.checklist.fetchSpecificChecklistTemplate)
+  .post(controllers.checklist.createNewChecklistTemplate)
+  .delete(controllers.checklist.deleteChecklistTemplate);
+
+/**
+ * @api {get} /checklist/assigned Get Assigned Checklists
+ * @apiDescription Get all Assigned Checklists
+ * @apiName GetAssignedChecklists
+ * @apiGroup Checklist
+ * 
+ * @apiQuery {String} page Page Number
+ * 
+ * @apiSuccess {Object} - Object containing "Assigned" Checklists Array and side information
+ * @apiSuccess {Object[]} -.rows Checklists Array
+ * @apiSuccess {Number} -.rows.checklist_id Checklist ID
+ * @apiSuccess {String} -.rows.chl_name Checklist Name
+ * @apiSuccess {String} -.rows.description Checklist Description
+ * @apiSuccess {Number} -.rows.status_id Checklist Status (2 for Assigned)
+ * @apiSuccess {Object[]} -.rows.activity_log Checklist History
+ * @apiSuccess {String} -.rows.createdbyuser User who created Checklist
+ * @apiSuccess {String} -.rows.assigneduser Name of assigned user
+ * @apiSuccess {String} -.rows.signoffuser Name of signoff user
+ * @apiSuccess {String} -.rows.plant_name Plant Name of plant associated with Checklist
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist
+ * @apiSuccess {String} -.rows.completeremarks_req Completed Request Remarks
+ * @apiSuccess {String} -.rows.linkedassets Assets associated with Checklist
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Record
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist was created
+ * @apiSuccess {String} -.rows.history Deprecated. Use activity_log instead
+ * @apiSuccess {Object[]} -.rows.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {Number} -.rows.signoff_user_id Signoff user ID
+ * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
+ * @apiSuccess {String} -.rows.status Status (Should be "ASSIGNED")
+ * @apiSuccess {Number} -.total Total Pages of "Assigned" Checklists
+ * 
+ * @apiError (Error 204) {Object} NoContent {msg: "No checklist"}
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
+router
+  .route("/checklist/assigned", checkIfLoggedInAPI)
+  .get(controllers.checklist.fetchAssignedChecklists);
+
+
+/**
+ * @api {get} /checklist/record Get For Review Checklists
+ * @apiDescription Get all For Review Checklists
+ * @apiName GetForReviewChecklists
+ * @apiGroup Checklist
+ * 
+ * @apiQuery {String} page Page Number
+ * 
+ * @apiSuccess {Object} - Object containing "For Review" Checklists Array and side information
+ * @apiSuccess {Object[]} -.rows "For Review" Checklists Array
+ * @apiSuccess {Number} -.rows.checklist_id Checklist ID
+ * @apiSuccess {String} -.rows.chl_name Checklist Name
+ * @apiSuccess {String} -.rows.description Checklist Description
+ * @apiSuccess {Number} -.rows.status_id Checklist Status (4 for Work Done, 6 for Rejected) - Rejected is deprecated
+ * @apiSuccess {Object[]} -.rows.activity_log Checklist History
+ * @apiSuccess {String} -.rows.createdbyuser User who created Checklist
+ * @apiSuccess {String} -.rows.assigneduser Name of assigned user
+ * @apiSuccess {String} -.rows.signoffuser Name of signoff user
+ * @apiSuccess {String} -.rows.plant_name Plant Name of plant associated with Checklist
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist
+ * @apiSuccess {String} -.rows.completeremarks_req Completed Request Remarks
+ * @apiSuccess {String} -.rows.linkedassets Assets associated with Checklist
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Record
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist was created
+ * @apiSuccess {String} -.rows.history Deprecated. Use activity_log instead
+ * @apiSuccess {Object[]} -.rows.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {Number} -.rows.signoff_user_id Signoff user ID
+ * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
+ * @apiSuccess {String} -.rows.status Status (Should be "WORK DONE / REJECTED") - REJECTED is deprecated
+ * @apiSuccess {Number} -.total Total Pages of "For Review" Checklists
+ * 
+ * @apiError (Error 204) {Object} NoContent {msg: "No checklist"}
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
+
+/**
+ * @api {get} /checklist/record/:checklist_id Get Single Checklist Record
+ * @apiDescription Gets a single checklist record based on the given checklist_id
+ * @apiName GetSingleChecklistRecord
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} checklist_id Record unique ID
+ * 
+ * @apiSuccess {Object} - Object containing the specified checklist record's details
+ * @apiSuccess {Number} -.checklist_id Checklist(record) ID
+ * @apiSuccess {Number} -.chl_name Checklist(record) Name
+ * 
+ * @apiError (Error 500) {String} InternalServerError "No checklist template found"
+ */
+
+/**
+ * @api {post} /checklist/record Create Checklist Record
+ * @apiDescription Create a new Checklist Record
+ * @apiName CreateChecklistRecord
+ * @apiGroup Checklist
+ * 
+ * @apiBody {Object} checklist Checklist Record
+ * @apiBody {String} checklist.chl_name Checklist Template Name
+ * @apiBody {String} checklist.description Checklist Description
+ * @apiBody {String} [checklist.assigned_user_id] The user ID of assignee to the checklist
+ * @apiBody {Number} checklist.signoff_user_id Signoff User ID
+ * @apiBody {String} checklist.linkedassetids IDs of assets linked to the checklist
+ * @apiBody {Number} checklist.plant_id Plant ID of Checklist
+ * @apiUse SubmitChecklistDataJSON
+ * 
+ * @apiSuccess {String} Created "New checklist successfully created"
+ * 
+ * @apiError (Error 500) {String} InternalServerError "Failure to create new checklist"
+ */
+
+/**
+ * @api {patch} /checklist/record/:checklist_id Edit a Pending / Assigned Checklist Record
+ * @apiDescription Edit an existing Pending / Assigned Checklist Record  
+ * Responsible for updating Checklist Record from Pending to Assigned as well
+ * @apiName EditPendingChecklistRecord
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} checklist_id The ID of the Pending Checklist Record
+ * 
+ * @apiBody {Object} checklist Checklist Record
+ * @apiBody {String} checklist.chl_name Checklist Template Name
+ * @apiBody {String} checklist.description Checklist Description
+ * @apiBody {Number} [checklist.assigned_user_id] The user ID of assignee to the checklist. If filled, Checklist Record is updated to Status of "ASSIGNED"
+ * @apiBody {Number} checklist.signoff_user_id Signoff User ID
+ * @apiBody {String} checklist.linkedassetids IDs of assets linked to the checklist
+ * @apiBody {Number} checklist.plant_id Plant ID of Checklist
+ * 
+ * @apiSuccess {String} Success "Checklist successfully assigned/updated"
+ * 
+ * @apiError (Error 500) {String} InternalServerError "Failure to update checklist"
+ */
+router
+  .route("/checklist/record/:checklist_id?", checkIfLoggedInAPI)
+  .get(controllers.checklist.fetchChecklistRecords)
+  .post(controllers.checklist.createNewChecklistRecord)
+  .patch(controllers.checklist.editChecklistRecord);
+
+
+/**
+ * @api {get} /checklist/approved Get Approved Checklists
+ * @apiDescription Get all Approved Checklists
+ * @apiName GetApprovedChecklists
+ * @apiGroup Checklist
+ * 
+ * @apiQuery {String} page Page Number
+ * 
+ * @apiSuccess {Object} - Object containing "Approved" Checklists Array and side information
+ * @apiSuccess {Object[]} -.rows Checklists Array
+ * @apiSuccess {Number} -.rows.checklist_id Checklist ID
+ * @apiSuccess {String} -.rows.chl_name Checklist Name
+ * @apiSuccess {String} -.rows.description Checklist Description
+ * @apiSuccess {Number} -.rows.status_id Checklist Status (5 for Approved)
+ * @apiSuccess {Object[]} -.rows.activity_log Checklist History
+ * @apiSuccess {String} -.rows.createdbyuser User who created Checklist
+ * @apiSuccess {String} -.rows.assigneduser Name of assigned user
+ * @apiSuccess {String} -.rows.signoffuser Name of signoff user
+ * @apiSuccess {String} -.rows.plant_name Plant Name of plant associated with Checklist
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist
+ * @apiSuccess {String} -.rows.completeremarks_req Completed Request Remarks
+ * @apiSuccess {String} -.rows.linkedassets Assets associated with Checklist
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Record
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist was created
+ * @apiSuccess {String} -.rows.history Deprecated. Use activity_log instead
+ * @apiSuccess {Object[]} -.rows.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {Number} -.rows.signoff_user_id Signoff user ID
+ * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
+ * @apiSuccess {String} -.rows.status Status (Should be "APPROVED")
+ * @apiSuccess {Number} -.total Total Pages of "Approved" Checklists
+ * 
+ * @apiError (Error 204) {Object} NoContent {msg: "No checklist"}
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
+router.get(
+  "/checklist/approved",
   checkIfLoggedInAPI,
-  controllers.checklist.submitNewChecklistTemplate
+  controllers.checklist.fetchApprovedChecklists
 );
+
+
+/**
+ * @api {get} /checklist/pending Get Pending Checklists
+ * @apiDescription Get all Pending Checklists
+ * @apiName GetPendingChecklists
+ * @apiGroup Checklist
+ * 
+ * @apiQuery {String} page Page Number
+ * 
+ * @apiSuccess {Object} - Object containing "Pending" Checklists Array and side information
+ * @apiSuccess {Object[]} -.rows Checklists Array
+ * @apiSuccess {Number} -.rows.checklist_id Checklist ID
+ * @apiSuccess {String} -.rows.chl_name Checklist Name
+ * @apiSuccess {String} -.rows.description Checklist Description
+ * @apiSuccess {Number} -.rows.status_id Checklist Status (1 for Pending)
+ * @apiSuccess {Object[]} -.rows.activity_log Checklist History
+ * @apiSuccess {String} -.rows.createdbyuser User who created Checklist
+ * @apiSuccess {String} -.rows.assigneduser Name of assigned user
+ * @apiSuccess {String} -.rows.signoffuser Name of signoff user
+ * @apiSuccess {String} -.rows.plant_name Plant Name of plant associated with Checklist
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist
+ * @apiSuccess {String} -.rows.completeremarks_req Completed Request Remarks
+ * @apiSuccess {String} -.rows.linkedassets Assets associated with Checklist
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Record
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist was created
+ * @apiSuccess {String} -.rows.history Deprecated. Use activity_log instead
+ * @apiSuccess {Object[]} -.rows.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {Number} -.rows.signoff_user_id Signoff user ID
+ * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
+ * @apiSuccess {String} -.rows.status Status (Should be "PENDING")
+ * @apiSuccess {Number} -.total Total Pages of "Pending" Checklists
+ * 
+ * @apiError (Error 204) {Object} NoContent {msg: "No checklist"}
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
+router.get(
+  "/checklist/pending",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchPendingChecklists
+);
+
+/**
+ * @api {get} /checklist/templateNames/:id Get Template Names
+ * @apiDescription Get all Template Names
+ * @apiName GetTemplateNames
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} id Plant ID
+ * 
+ * @apiSuccess  {Object[]} - Array of Template Objects
+ * @apiSuccess {Number} -.checklist_id Checklist Template ID
+ * @apiSuccess {String} -.chl_name Checklist Name
+ * @apiSuccess {String} -.description Checklist Description
+ * @apiSuccess {Number} -.assigned_user_id Assigned User ID if available
+ * @apiSuccess {Number} -.signoff_user_id Signoff User ID
+ * @apiSuccess {String} -.completeremarks_req Completed Template Remarks (Should be null)
+ * @apiSuccess {String} -.linkedassetsids Linked Asset IDs
+ * @apiSuccess {Object[]} -.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Template
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist Template
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist Template was created
+ * @apiSuccess {Number} -.rows.created_user_id User ID of user who created the Checklist Template
+ * @apiSuccess {String} -.rows.history Deprecated.
+ * @apiSuccess {Number} -.rows.status_id Deprecated.
+ * @apiSuccess {String} -.rows.fromtemplateid Deprecated.
+ * 
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
+router.get(
+  "/checklist/templateNames/:id?",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchChecklistTemplateNames
+);
+
+/**
+ * @api {get} /checklist/counts/:field/:plant/:datetype/:date Get Checklist Records Counts
+ * @apiDescription Get Checklist Records Counts organised by status 
+ * @apiName GetChecklistRecordsCount
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} field "status", else there will be error status of 404 thrown
+ * @apiParam {String} plant Plant ID.  
+ * 0 for all Plants or respective plant IDs
+ * @apiParam {String} datetype "date", "week", "month", "quarter" or "year"
+ * @apiParam {String} date "all" or "YYYY-MM-DD"
+ * 
+ * @apiSuccess {Object[]} - Array of Checklist Records Counts organised by status
+ * @apiSuccess {String} -.name Checklist Record Status Name
+ * @apiSuccess {Number} -.name Checklist Record Status ID
+ * @apiSuccess {String} -.name Number of Checklist Records of given status
+ * 
+ * @apiError (Error 404) {String} NotFound Invalid "Checklist Type of ${field}"
+ * @apiError (Error 500) {String} InternalServerError "Error in fetching checklist status for dashboard"
+ */
+router.get(
+  "/checklist/counts/:field/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchChecklistCounts
+);
+
+
+/**
+ * @api {patch} /checklist/complete/:checklist_id Complete an existing checklist 
+ * @apiDescription Complete an existing checklist  
+ * Checklist will go into "For Review" if successful
+ * @apiName CompleteChecklist
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} checklist_id The ID of the "Assigned" checklist record
+ * 
+ * @apiUse SubmitChecklistDataJSON
+ * 
+ * @apiSuccess {String} Success "Checklist successfully completed"
+ * 
+ * @apiError (Error 500) {String} InternalServerError "Failure to update checklist completion"
+ */
+router.patch(
+  "/checklist/complete/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("complete")
+);
+
+/**
+ * @api {get} /checklist/filter/:status/:plant/:datetype/:date Get Filtered Checklist Records
+ * @apiDescription  Get Filtered Checklist Records 
+ * @apiName GetFilteredChecklistsRecords
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} status Single or multiple statuses  
+ * If multiple statuses, put in the following format eg. .../3, 4, 5, 6/...
+ * @apiParam {String} plant Plant ID.  
+ * 0 for all Plants or respective plant IDs
+ * @apiParam {String} datetype "date", "week", "month", "quarter" or "year"
+ * @apiParam {String} date "all" or "YYYY-MM-DD"
+ * 
+ * @apiSuccess {Object} - Object containing filtered Checklists Array and side information
+ * @apiSuccess {Object[]} -.rows Checklists Array
+ * @apiSuccess {Number} -.rows.checklist_id Checklist ID
+ * @apiSuccess {String} -.rows.chl_name Checklist Name
+ * @apiSuccess {String} -.rows.description Checklist Description
+ * @apiSuccess {Number} -.rows.status_id Checklist Status
+ * @apiSuccess {Object[]} -.rows.activity_log Checklist History
+ * @apiSuccess {String} -.rows.createdbyuser User who created Checklist
+ * @apiSuccess {String} -.rows.assigneduser Name of assigned user
+ * @apiSuccess {String} -.rows.signoffuser Name of signoff user
+ * @apiSuccess {String} -.rows.plant_name Plant Name of plant associated with Checklist
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist
+ * @apiSuccess {String} -.rows.completeremarks_req Completed Request Remarks
+ * @apiSuccess {String} -.rows.linkedassets Assets associated with Checklist
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Record
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist was created
+ * @apiSuccess {String} -.rows.history Deprecated. Use activity_log instead
+ * @apiSuccess {Object[]} -.rows.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {Number} -.rows.signoff_user_id Signoff user ID
+ * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
+ * @apiSuccess {String} -.rows.status Status Name
+ * @apiSuccess {Number} -.total Total Pages of filtered Checklists
+ * 
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ * @apiError (Error 204) {Object} NoContent {msg: "No checklist"}
+ */
+router.get(
+  "/checklist/filter/:status/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchFilteredChecklists
+);
+
+/**
+ * @api {get} /checklist/filter/:status/:plant/:datetype/:date/:page Get Filtered Checklist Records by page
+ * @apiDescription  Get Filtered Checklist Records by Page
+ * @apiName GetFilteredChecklistsRecordsByPage
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} status Single or multiple statuses  
+ * If multiple statuses, put in the following format eg. .../3, 4, 5, 6/...
+ * @apiParam {String} plant Plant ID.  
+ * 0 for all Plants or respective plant IDs
+ * @apiParam {String} datetype "date", "week", "month", "quarter" or "year"
+ * @apiParam {String} date "all" or "YYYY-MM-DD"
+ * @apiParam {String} page Page Number
+ * 
+ * @apiSuccess {Object} - Object containing filtered Checklists Array and side information
+ * @apiSuccess {Object[]} -.rows Checklists Array
+ * @apiSuccess {Number} -.rows.checklist_id Checklist ID
+ * @apiSuccess {String} -.rows.chl_name Checklist Name
+ * @apiSuccess {String} -.rows.description Checklist Description
+ * @apiSuccess {Number} -.rows.status_id Checklist Status
+ * @apiSuccess {Object[]} -.rows.activity_log Checklist History
+ * @apiSuccess {String} -.rows.createdbyuser User who created Checklist
+ * @apiSuccess {String} -.rows.assigneduser Name of assigned user
+ * @apiSuccess {String} -.rows.signoffuser Name of signoff user
+ * @apiSuccess {String} -.rows.plant_name Plant Name of plant associated with Checklist
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist
+ * @apiSuccess {String} -.rows.completeremarks_req Completed Request Remarks
+ * @apiSuccess {String} -.rows.linkedassets Assets associated with Checklist
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Record
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist was created
+ * @apiSuccess {String} -.rows.history Deprecated. Use activity_log instead
+ * @apiSuccess {Object[]} -.rows.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {Number} -.rows.signoff_user_id Signoff user ID
+ * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
+ * @apiSuccess {String} -.rows.status Status Name
+ * @apiSuccess {Number} -.total Total Pages of filtered Checklists
+ * 
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ * @apiError (Error 204) {Object} NoContent {msg: "No checklist"}
+ */
+router.get(
+  "/checklist/filter/:status/:plant/:datetype/:date/:page",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchFilteredChecklists
+);
+
+/**
+ * @api {patch} /checklist/approve/:checklist_id Approve an existing checklist 
+ * @apiDescription Approve an existing checklist  
+ * Checklist will go into "Approved" if successful
+ * @apiName ApproveChecklist
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} checklist_id The ID of the "Work Done" checklist record
+ * 
+ * @apiBody {String} remarks Approval Remarks
+ * 
+ * @apiSuccess {String} Success "Checklist successfully approved"
+ * 
+ * @apiError (Error 500) {String} InternalServerError "Failure to update checklist approval"
+ */
+router.patch(
+  "/checklist/approve/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("approve")
+);
+
+
+/**
+ * @api {patch} /checklist/approve/:checklist_id Reject an existing checklist 
+ * @apiDescription Reject an existing checklist  
+ * Checklist will go into "Reassigned" if successful
+ * @apiName RejectChecklist
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} checklist_id The ID of the "Work Done" checklist record
+ * 
+ * @apiBody {String} remarks Rejection Remarks
+ * 
+ * @apiSuccess {String} Success "Checklist successfully rejected"
+ * 
+ * @apiError (Error 500) {String} InternalServerError "Failure to update checklist rejection"
+ */
+router.patch(
+  "/checklist/reject/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("reject")
+);
+
+/**
+ * @api {get} /checklist/pdf/:checklist_id Get a specific Checklist Record PDF
+ * @apiDescription Get Checklist Record PDF
+ * @apiName getChecklistRecordPDF
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} checklist_id The ID of the Checklist Record 
+ * 
+ * @apiSuccess {ArrayBuffer} - Checklist PDF in ArrayBuffer format
+ * 
+ * @apiError (Error 400) {String} BadRequest "No checklist found"
+ * @apiError (Error 500) {String} InternalServerError "Error in generating PDF"
+ */
+router.get(
+  "/checklist/pdf/:checklist_id",
+  checkIfLoggedInAPI,
+  sendChecklistPDF
+);
+
+/**
+ * @api {get} /checklist/csv Get CSV file of Checklist Records
+ * @apiDescription Get CSV file of Checklist Records of a specific status/statuses
+ * @apiName GetCSVChecklistRecords
+ * @apiGroup Checklist
+ * 
+ * @apiQuery {String} activeTab
+ * 
+ * @apiSuccess {ArrayBuffer} - Checklist CSV in ArrayBuffer format
+ * @apiError (Error 400) {String} BadRequest "No checklist found"
+ * @apiError (Error 500) {String} InternalServerError "Error in generating csv file"
+ */
+router.get(
+  "/checklist/csv",
+  checkIfLoggedInAPI,
+  controllers.checklist.createChecklistCSV
+);
+
 
 /**
  * @api {get} /fault/type Get Fault Types
@@ -513,32 +1143,287 @@ router.post(
  * @apiSuccess {number} -.fault_id ID of the fault type
  * @apiSuccess {string} -.fault_type Name of the fault type
  */
+
 router.get("/fault/types", controllers.fault.fetchFaultTypes);
 
+/**
+ * @api {get} /asset Get Asset Table
+ * @apiDescription Gets table information/structure for all assets
+ * @apiName getAssetHierarchy
+ * @apiGroup Asset
+ *
+ * @apiSuccess {string} -.plant_name Plant name of the asset
+ * @apiSuccess {string} -.system_name System name of the asset
+ * @apiSuccess {string} -.system_asset System Asset of the asset
+ * @apiSuccess {string} -.parent_asset Parent Asset of the asset
+ * @apiSuccess {string} -.asset_type Asset Type of the asset
+ * @apiSuccess {number} -.system_asset_lvl5 System_asset_lvl5 of the asset
+ * @apiSuccess {number} -.system_asset_lvl6 System_asset_lvl6 of the asset
+ * @apiSuccess {number} -.system_asset_lvl7 System_asset_lvl7 of the asset
+ * @apiSuccess {string} -.plant_asset_instrument Asset Name of the asset
+ * @apiSuccess {string} -.asset_description Description of the asset
+ * @apiSuccess {string} -.asset_location location of the asset
+ * @apiSuccess {string} -.brand Brand of the asset
+ * @apiSuccess {string} -.model_number Model Number of the asset
+ * @apiSuccess {string} -.technical_specs Technical_specs of the asset
+ * @apiSuccess {string} -.manufacture_country Manufacture_country of the asset
+ * @apiSuccess {string} -.warranty Warranty of the asset
+ * @apiSuccess {string} -.remarks Remarks for the asset
+ * @apiSuccess {number} -.psa_id Psa ID of the asset
+ */
 router.get("/asset/:plant_id", controllers.asset.getAssetsFromPlant);
 router.get("/assets", controllers.asset.getAllAssets);
 router.get("/asset", controllers.asset.getAssetHierarchy);
+
+
+/**
+ * @api {get} /assetDetails/:psa_id Get Asset Details 
+ * @apiDescription Gets Asset details for a single asset for details page
+ * @apiName getAssetDetails
+ * @apiGroup Asset
+ *
+ * @apiSuccess {string} -.plant_name Plant name of the asset
+ * @apiSuccess {string} -.system_name System name of the asset
+ * @apiSuccess {string} -.system_asset System Asset of the asset
+ * @apiSuccess {string} -.parent_asset Parent Asset of the asset
+ * @apiSuccess {string} -.plant_asset_instrument Asset Name of the asset
+ * @apiSuccess {string} -.asset_type Asset Type of the asset
+ * @apiSuccess {string} -.asset_description Description of the asset
+ * @apiSuccess {string} -.asset_location location of the asset
+ * @apiSuccess {string} -.brand Brand of the asset
+ * @apiSuccess {string} -.model_number Model Number of the asset
+ * @apiSuccess {string} -.technical_specs Technical_specs of the asset
+ * @apiSuccess {string} -.manufacture_country Manufacture_country of the asset
+ * @apiSuccess {string} -.warranty Warranty of the asset
+ * @apiSuccess {string} -.remarks Remarks for the asset
+ * @apiSuccess {string} -.uploaded_image Image of the asset
+ * @apiSuccess {jsonb} -.uploaded_files Files pertaining to the asset
+ * @apiSuccess {string} -.plant_id Plant ID of the asset
+ * @apiSuccess {string} -.system_id System ID of the asset
+ * @apiSuccess {string} -.system_asset_id System Asset ID of the asset
+ * @apiSuccess {number} -.psa_id Psa ID of the asset
+ * @apiSuccess {number} -.system_asset_lvl5 System_asset_lvl5 of the asset
+ * @apiSuccess {number} -.system_asset_lvl6 System_asset_lvl6 of the asset
+ * @apiSuccess {number} -.system_asset_lvl7 System_asset_lvl7 of the asset
+
+ */
 router.get("/assetDetails/:psa_id", controllers.asset.getAssetDetails);
-router.get(
-  "/asset/history/:type/:id",
-  checkIfLoggedInAPI,
-  controllers.asset.getAssetHistory
-);
-router.get(
-  "/asset/Details/:psa_id",
-  checkIfLoggedInAPI,
-  controllers.asset.getAssetDetails
-);
+router.get("/asset/history/:type/:id",checkIfLoggedInAPI,controllers.asset.getAssetHistory);
+router.get("/asset/Details/:psa_id",checkIfLoggedInAPI,controllers.asset.getAssetDetails);
+router.get("/asset/systems",checkIfLoggedInAPI,controllers.asset.fetchSystems);
+router.get("/asset/fetch_asset_types",checkIfLoggedInAPI,controllers.asset.fetch_asset_types);
+
+
+/**
+ * @api {post} /addNewAsset Add New Asset
+ * @apiDescription Adds a new asset
+ * @apiName addNewAsset
+ * @apiGroup Asset
+ * @apiSuccess {number} -.system_id_lvl3 System id lvl3(System Asset) of the asset
+ * @apiSuccess {number} -.system_asset_id_lvl4 System id lvl4(System Asset Name) of the asset
+ * @apiSuccess {string} -.parent_asset Parent Asset of the asset
+ * @apiSuccess {string} -.asset_type Asset Type of the asset
+ * @apiSuccess {string} -.asset_description Description of the asset
+ * @apiSuccess {string} -.asset_location location of the asset
+ * @apiSuccess {string} -.brand Brand of the asset
+ * @apiSuccess {string} -.plant_asset_instrument Asset Name of the asset
+ * @apiSuccess {string} -.model_number Model Number of the asset
+ * @apiSuccess {string} -.technical_specs Technical specs of the asset
+ * @apiSuccess {string} -.manufacture_country Manufacture country of the asset
+ * @apiSuccess {string} -.warranty Warranty of the asset
+ * @apiSuccess {string} -.remarks Remarks for the asset
+ * @apiSuccess {number} -.system_asset_lvl5 System_asset_lvl5 of the asset
+ * @apiSuccess {number} -.system_asset_lvl6 System_asset_lvl6 of the asset
+ * @apiSuccess {number} -.system_asset_lvl7 System_asset_lvl7 of the asset
+ * @apiSuccess {string} -.uploaded_image Image of the asset
+ * @apiSuccess {jsonb} -.uploaded_files Files pertaining to the asset
+ * @apiSuccess {string} -.plant_id Plant ID of the asset       
+ * 
+ *
+ */
+router.post("/asset/addNewAsset",checkIfLoggedInAPI,controllers.asset.addNewAsset);
+
+/**
+ * @api {post} /editAsset Edit Asset
+ * @apiDescription Edit an asset. Not allowed to edit hierarchy of the asset.
+ * @apiGroup Asset
+
+ * @apiSuccess {string} -.asset_description Description of the asset
+ * @apiSuccess {string} -.asset_location location of the asset
+ * @apiSuccess {string} -.brand Brand of the asset
+ * @apiSuccess {string} -.plant_asset_instrument Asset Name of the asset
+ * @apiSuccess {string} -.model_number Model Number of the asset
+ * @apiSuccess {string} -.technical_specs Technical specs of the asset
+ * @apiSuccess {string} -.manufacture_country Manufacture country of the asset
+ * @apiSuccess {string} -.warranty Warranty of the asset
+ * @apiSuccess {string} -.remarks Remarks for the asset
+ * @apiSuccess {string} -.uploaded_image Image of the asset
+ * @apiSuccess {jsonb} -.uploaded_files Files pertaining to the asset
+ * 
+ *
+ */
+router.post("/asset/editAsset",checkIfLoggedInAPI,controllers.asset.editAsset);
+
+/**
+ * @api {post} /deleteAsset Delete Asset
+ * @apiDescription Delete an asset. 
+ * @apiGroup Asset
+ * @apiSuccess {number} -.psa_id Psa ID of the asset
+ *
+ */
+router.post("/asset/deleteAsset",checkIfLoggedInAPI,controllers.asset.deleteAsset);
+
+
+/**
+ * @api {get} /fetchSystemAsset Gets all system assets(lvl 5) for the asset table
+ * @apiDescription Gets all the system assets to display on the asset table
+ * @apiName fetchSystemAsset
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset System Assets
+ * @apiSuccess {nukber} -.system_asset_id System Asset IDs
+ *
+ */
+router.get("/asset/system/:system_id",checkIfLoggedInAPI,controllers.asset.fetchSystemAssets);
+/**
+ * @api {get} /fetchSystemAssetNames Gets all system asset names(lvl 6) for the asset table
+ * @apiDescription Gets all the system asset names to display on the asset table
+ * @apiName fetchSystemAssetName
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl6 System Asset Names
+ *
+ */
+router.get("/asset/system/:plant_id/:system_id/:system_asset_id",checkIfLoggedInAPI,controllers.asset.fetchSystemAssetNames);
+/**
+ * @api {get} /fetchSubComponent1Names Gets all Sub-Component-1 Names(lvl 7) for the asset table
+ * @apiDescription Gets all the Component names to display on the asset table
+ * @apiName fetchSubComponent1Names
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl7 Component Names
+ *
+ */
+router.get("/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",checkIfLoggedInAPI,controllers.asset.fetchSubComponent1Names);
+/**
+ * @api {get} /fetchAssetHistory Gets History of the asset 
+ * @apiDescription Retrieves Asset History when viewing the asset details page
+ * @apiName fetchAssetHistory
+ * @apiGroup Asset
+ * @apiSuccess {string} -.history_id History ID of the asset
+ * @apiSuccess {string} -.action What was changed of the asset
+ * @apiSuccess {string} -.name User who changed the Asset
+ * @apiSuccess {string} -.date Date of the change
+ * @apiSuccess {string} -.fields Which particular fields that were changed
+
+ *
+ */
+router.get("/asset/history/:psa_Id",checkIfLoggedInAPI,controllers.asset.fetchAssetHistory);
+
+/**
+ * @api {get} /getSystemsFromPlant Gets all systems from plant
+ * @apiDescription Gets list of all Systems for Mobile Asset Table
+ * @apiName getSystemsFromPlant
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_id System IDs for particular plant
+
+
+ *
+ */
+router.get("/asset/mobile/:plant_id",checkIfLoggedInAPI,controllers.asset.getSystemsFromPlant);
+
+/**
+ * @api {get} /getSystemAssetsFromPlant Gets all Systems Assets from plant
+ * @apiDescription Gets list of all Systems Assets for Mobile Asset Table
+ * @apiName getSystemAssetsFromPlant
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl5 System Assets for particular plant
+
+
+ *
+ */
+router.get("/asset/mobile/:plant_id/:system_id",checkIfLoggedInAPI,controllers.asset.getSystemAssetsFromPlant);
+/**
+ * @api {get} /getUploadedFile Gets File for Asset
+ * @apiDescription Retrieves Asset file when viewing the asset details page on Mobile
+ * @apiName getUploadedFile
+ * @apiGroup Asset
+ * @apiSuccess {jsonb} -.uploaded_files Uploaded Files for the Asset
+
+
+ *
+ */
+router.get("/asset/mobile/:psa_id/uploadedFile/:index",controllers.asset.getUploadedFile);
+/**
+ * @api {get} /getSystemAssetNamesFromPlant Gets all Systems Asset Names from plant
+ * @apiDescription Gets list of all Systems Asset Names for Mobile Asset Table
+ * @apiName getSystemAssetNamesFromPlant
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl6 System Asset Names for particular plant
+
+
+ *
+ */
+router.get("/asset/mobile/:plant_id/:system_id/:system_asset_id",checkIfLoggedInAPI,controllers.asset.getSystemAssetNamesFromPlant);
+/**
+ * @api {get} /getSubComponentsFromPlant Gets all Sub Components from plant
+ * @apiDescription Gets list of all Sub Components for Mobile Asset Table
+ * @apiName getSubComponentsFromPlant
+ * @apiGroup Asset
+ * @apiSuccess {string} -.system_asset_lvl7  Sub Components for particular plant
+
+
+ *
+ */
+router.get("/asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name",checkIfLoggedInAPI,controllers.asset.getSubComponentsFromPlant);
 
 /**
  * @api {get} /master/new Get Table Metadata
  * @apiDescription Gets table information/metadata. Mainly used for the creation of new entries in those tables
+ * @apiExample 1
+ * "plant": {
+		"internalName": "plant_master",
+		"name": "Plant",
+		"id": "plant_id",
+		"fields": [{
+			"column_label": "Name",
+			"column_name": "plant_name"
+		},{
+			"column_label": "Description",
+			"column_name": "plant_description"
+		}]
+	}
+ * @apiExample 2
+ *"system_assets": {
+		"internalName": "system_assets",
+		"name": "System Assets",
+		"id": "plant_id",
+		"fields": [{
+			"column_label": "System",
+			"column_name": "system_id",
+			"type" : "dropdown",
+			"url" : "/api/asset/systems",
+			"value" : "system_id",
+			"options" : "system_name"
+		},{
+			"column_label": "System Asset",
+			"column_name": "system_asset"
+		}]
+	}
  * @apiName GetMasterTypeEntry
  * @apiGroup Master
  *
- * @apiSuccess {Object[]}  Array containing the different request types and their corresponding ID
- * @apiSuccess {number} -.req_id ID of the request type
- * @apiSuccess {string} -.request Name of the request type
+ * @apiSuccess {Object}  -.data Object which contains multiple objects with the key being the table name and the value being the table metadata
+ * @apiSuccess {String} -.data.key Table name
+ * @apiSuccess {Object} -.data.value Object which has table metadata
+ * @apiSuccess {String} -.data.value.internalName Internal name of the table
+ * @apiSuccess {String} -.data.value.name Name of the table
+ * @apiSuccess {String} -.data.value.id unique ID of the rows in the table
+ * @apiSuccess {Object[]} -.data.value.fields Array of objects which contains the column name and column label of the table
+ * @apiSuccess {String} -.data.value.fields.column_label Column label of the table
+ * @apiSuccess {String} -.data.value.fields.column_name Column name of the table
+ * @apiSuccess {String} [-.data.value.fields.type] Type of the column (Eg. dropdown, boolean_dropdown) 
+ * @apiSuccess {String} [-.data.value.fields.url] URL to fetch dropdown options for dropdown type only (Example 2)
+ * @apiSuccess {String} [-.data.value.fields.value] Value of the dropdown option for dropdown type only (Example 2)
+ * @apiSuccess {String} [-.data.value.fields.options] Options of the dropdown option for dropdown type only (Example 2)
+ * 
  */
 router.get(
   "/master/new",
@@ -711,9 +1596,22 @@ router
     "/setting/updatePassword",
     checkIfLoggedInAPI,
     controllers.setting.updatePassword
-  );
+  )
+  .get("/setting/check/email/:id", checkIfLoggedInAPI, controllers.setting.checkEmail)
+  .get("/setting/check/username/:id", checkIfLoggedInAPI, controllers.setting.checkUsername);
+
+router
+    .get("/workflow/run/assign", controllers.workflow.runWorkflowAssign)
+    .get("/workflow/run/email", controllers.workflow.runWorkflowEmail)
+    .get("/workflows", checkIfLoggedInAPI, controllers.workflow.listWorkflow)
+    .post("/workflow", checkIfLoggedInAPI, controllers.workflow.createWorkflow)
+    .put("/workflow/:id", checkIfLoggedInAPI, controllers.workflow.updateWorkflow)
+    .delete("/workflow/:id", checkIfLoggedInAPI, controllers.workflow.deleteWorkflow);
+    //.get("/workflow/run/checklist", controllers.workflow.runWorkflowChecklist);
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
+
+router.get("/db/names", fetchDBNames);
 
 // NO API ROUTE
 router.all("/*", (req, res) => {
