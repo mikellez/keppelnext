@@ -10,6 +10,7 @@ import { ModuleModal, ModalProps } from "../";
 import { useRouter } from "next/router";
 import { ThreeDots } from "react-loading-icons";
 import instance from "../../types/common/axios.config";
+import { SingleValue } from "react-select";
 
 interface ScheduleMaintenanceModalProps extends ModalProps {
     timeline?: CMMSTimeline; // use to add schedule in draft
@@ -261,19 +262,15 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                                     <td>
                                         <AssignToSelect
                                             onChange={(value, action) => {
-                                                setNewSchedule((prev) => {
-                                                    const newData = { ...prev };
-                                                    const ids: number[] = [];
-                                                    if (Array.isArray(value)) {
-                                                        value?.forEach(
-                                                            (option: AssignedUserOption) => {
-                                                                ids.push(option.value);
-                                                            }
-                                                        );
-                                                    }
-                                                    newData.assignedIds = ids;
-                                                    return newData;
-                                                });
+                                                let newAssignedID = +(value as  SingleValue<AssignedUserOption>)!.value;;
+                                                if (typeof newAssignedID == 'number') {
+                                                    setNewSchedule(prev => {
+                                                        return {
+                                                            ...prev,
+                                                            assignedIds: [newAssignedID]
+                                                        }
+                                                    }) 
+                                                }
                                             }}
                                             plantId={
                                                 props.timeline
@@ -283,6 +280,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                                                     : 0 //error
                                             }
                                             defaultIds={props.scheduleEvent?.assignedIds}
+                                            isSingle
                                         />
                                     </td>
                                 </tr>
