@@ -90,9 +90,9 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
 
 /**
  * @api {get} /request/approved Get Approved Requests
- * @apiDescription Gets all approved requests. 
- * 
- * For operation specialists, only relevant approved requests will be returned. 
+ * @apiDescription Gets all approved requests.
+ *
+ * For operation specialists, only relevant approved requests will be returned.
  * @apiName GetApprovedRequests
  * @apiGroup Request
  *
@@ -128,49 +128,49 @@ router.get(
   controllers.request.fetchApprovedRequests
 );
 
-/** 
+/**
  * @api {get} /request/assigned Get Assigned Requests
- * @apiDescription Gets assigned requests. 
- * 
- * For operation specialists, only relevant assigned requests will be returned. 
- * 
+ * @apiDescription Gets assigned requests.
+ *
+ * For operation specialists, only relevant assigned requests will be returned.
+ *
  * Returns the same output schema as `/request/approved`
  * @apiName GetAssignedRequests
  * @apiGroup Request
- * 
+ *
  */
 router.get(
   "/request/assigned",
   checkIfLoggedInAPI,
   controllers.request.fetchAssignedRequests
 );
-/** 
+/**
  * @api {get} /request/review Get For Review Requests
- * @apiDescription Gets for review requests. 
- * 
- * For operation specialists, only relevant for review requests will be returned. 
- * 
- * 
+ * @apiDescription Gets for review requests.
+ *
+ * For operation specialists, only relevant for review requests will be returned.
+ *
+ *
  * Returns the same output schema as `/request/approved`
  * @apiName GetForReviewRequests
  * @apiGroup Request
- * 
+ *
  */
 router.get(
   "/request/review",
   checkIfLoggedInAPI,
   controllers.request.fetchReviewRequests
 );
-/** 
+/**
  * @api {get} /request/pending Get Pending Requests
- * @apiDescription Gets pending requests. 
- * 
- * For operation specialists, only relevant pending requests will be returned. 
- * 
+ * @apiDescription Gets pending requests.
+ *
+ * For operation specialists, only relevant pending requests will be returned.
+ *
  * Returns the same output schema as `/request/approved`
  * @apiName GetPendingRequests
  * @apiGroup Request
- * 
+ *
  */
 
 router.get(
@@ -209,7 +209,7 @@ router.post(
  * @apiSuccess {Object[]} - Array containing the different request types and their corresponding ID
  * @apiSuccess {Number} req_id ID of the request type
  * @apiSuccess {String} request Name of the request type
- * 
+ *
  */
 router.get("/request/types", controllers.request.fetchRequestTypes);
 
@@ -273,15 +273,8 @@ router.get(
   checkIfLoggedInAPI,
   controllers.request.fetchFilteredRequests
 );
-router.get(
-  "/request/plant/:plant_id",
-  controllers.request.fetchPlantRequest
-);
-router.get(
-  "/request/asset/:psa_id",
-  controllers.request.fetchAssetRequest
-);
-
+router.get("/request/plant/:plant_id", controllers.request.fetchPlantRequest);
+router.get("/request/asset/:psa_id", controllers.request.fetchAssetRequest);
 
 router.get(
   "/asset/systems",
@@ -331,11 +324,34 @@ router.get(
   controllers.asset.fetchAssetHistory
 );
 
+/**
+ * @api {GET} /asset/mobile/:plant_id Get Systems
+ * @apiDescription Gets all the systems in a specific plant
+ * @apiName GetSystemsFromPlant
+ * @apiGroup Assets Mobile
+ *
+ * @apiSuccess {Object[]} - Containing all the system objects
+ * @apiSuccess {string} -.system_name System Name
+ * @apiSuccess {integer} -.system_id System ID
+ *
+ */
+
 router.get(
   "/asset/mobile/:plant_id",
   checkIfLoggedInAPI,
   controllers.asset.getSystemsFromPlant
 );
+
+/**
+ * @api {GET} /asset/mobile/:plant_id/:system_id Get System Assets
+ * @apiDescription Gets all the systems assets of a specific plant and system
+ * @apiName GetSystemsAssetsFromPlant
+ * @apiGroup Assets Mobile
+ *
+ * @apiSuccess {Object[]} - Containing all the system asset objects
+ * @apiSuccess {string} -.system_asset_lvl5 System Asset
+ *
+ */
 
 router.get(
   "/asset/mobile/:plant_id/:system_id",
@@ -343,16 +359,48 @@ router.get(
   controllers.asset.getSystemAssetsFromPlant
 );
 
+/**
+ * @api {GET} /asset/mobile/:psa_id/uploadedFile/:index Get Uploaded File
+ * @apiDescription Gets a file from an array of files uploaded for an asset
+ * @apiName GetUploadedFile
+ * @apiGroup Assets Mobile
+ *
+ * @apiSuccess {Buffer[]} - Contains file in buffer array format
+ *
+ */
+
 router.get(
   "/asset/mobile/:psa_id/uploadedFile/:index",
   controllers.asset.getUploadedFile
 );
+
+/**
+ * @api {GET} /asset/mobile/:plant_id/:system_id/:system_asset_id Get System Asset Names
+ * @apiDescription Gets all the systems asset names of an asset with a specific plant, system and system asset
+ * @apiName GetSystemsAssetNamesFromPlant
+ * @apiGroup Assets Mobile
+ *
+ * @apiSuccess {Object[]} - Containing all the system asset name objects
+ * @apiSuccess {string} -.system_asset_lvl6 System Asset Name
+ *
+ */
 
 router.get(
   "/asset/mobile/:plant_id/:system_id/:system_asset_id",
   checkIfLoggedInAPI,
   controllers.asset.getSystemAssetNamesFromPlant
 );
+
+/**
+ * @api {GET} /asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name
+ * @apiDescription Gets all the subcomponents of an asset with the provided parameters
+ * @apiName GetSubComponentsFromPlant
+ * @apiGroup Assets Mobile
+ *
+ * @apiSuccess {Object[]} - Containing all the system asset name objects
+ * @apiSuccess {string} -.system_asset_lvl6 System Asset Name
+ *
+ */
 
 router.get(
   "/asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name",
@@ -594,6 +642,34 @@ router.get(
   controllers.activity.getEventtHistoryDate
 );
 
+/**
+ * @api {GET} /logbook Get Logbook Data
+ * @apiDescription Gets all the data that is in the logbook
+ * @apiName Get Logbook
+ * @apiGroup Logbook
+ *
+ * @apiSuccess {Object[]} - Containing all the logbook entry rows
+ * @apiSuccess {string} -.staff1 Duty Staff 1's full name
+ * @apiSuccess {string} -.staff2 Duty Staff 2's full name
+ * @apiSuccess {string} -.date Datetime of logged entry
+ * @apiSuccess {string} -.label Title of entry
+ * @apiSuccess {string} -.entry Entry description
+ *
+ */
+
+/**
+ * @api {POST} /logbook Create Entry
+ * @apiDescription Creates a logbook entry
+ * @apiName Post Entry
+ * @apiGroup Logbook
+ *
+ * @apiSuccess {string} staff1 Duty Staff 1's full name
+ * @apiSuccess {string} staff2 Duty Staff 2's full name
+ * @apiSuccess {string} date Datetime of logged entry
+ * @apiSuccess {string} label Title of entry
+ * @apiSuccess {string} entry Entry description
+ */
+
 router
   .route("/logbook", checkIfLoggedInAPI)
   .get(controllers.logbook.getLogbook)
@@ -609,8 +685,16 @@ router
   .get("/user/getUsers", checkIfLoggedInAPI, controllers.user.getUsers)
   .get("/user/getUsersCSV", checkIfLoggedInAPI, controllers.user.getUsersCSV)
   .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser)
-  .get("/user/getUsersData/:id", checkIfLoggedInAPI, controllers.user.getUsersData)
-  .get("/user/getUsersplantData/:id", checkIfLoggedInAPI, controllers.user.getUsersplantData)
+  .get(
+    "/user/getUsersData/:id",
+    checkIfLoggedInAPI,
+    controllers.user.getUsersData
+  )
+  .get(
+    "/user/getUsersplantData/:id",
+    checkIfLoggedInAPI,
+    controllers.user.getUsersplantData
+  )
   .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser)
   .post("/user/updateUser", checkIfLoggedInAPI, controllers.user.updateUser);
 
