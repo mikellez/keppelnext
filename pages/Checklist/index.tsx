@@ -178,7 +178,7 @@ export default function Checklist(props: ChecklistProps) {
             })
           );
           setTotalPages(response.data.total);
-          setReady(true);
+            setReady(true);
         })
         .catch((e) => {
           setChecklistItems([]);
