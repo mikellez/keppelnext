@@ -20,10 +20,24 @@
     table library. It supports table dropdown features.
 */
 
-import React, { useState, useEffect, CSSProperties, MouseEventHandler } from "react";
-import { ModuleContent, ModuleHeader, ModuleMain, ModuleModal } from "../../components";
+import React, {
+  useState,
+  useEffect,
+  CSSProperties,
+  MouseEventHandler,
+} from "react";
+import {
+  ModuleContent,
+  ModuleHeader,
+  ModuleMain,
+  ModuleModal,
+} from "../../components";
 
-import { Column, CompactTable, RowOptions } from "@table-library/react-table-library/compact";
+import {
+  Column,
+  CompactTable,
+  RowOptions,
+} from "@table-library/react-table-library/compact";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 
@@ -57,10 +71,10 @@ import moment from "moment";
 };*/
 
 const indexedColumn: ("pending" | "assigned" | "review" | "approved")[] = [
-    "pending",
-    "assigned",
-    "review",
-    "approved",
+  "pending",
+  "assigned",
+  "review",
+  "approved",
 ];
 
 export interface RequestItem {
@@ -88,62 +102,62 @@ export interface RequestItem {
   complete_comments?: string;
   completion_file?: any;
   activity_log?: { [key: string]: string }[];
-
 }
 
 export interface RequestProps {
-    filter?: boolean;
-    status: number | string;
-    plant: number;
-    date: string;
-    datetype: string;
-    isReady?: boolean;
+  filter?: boolean;
+  status: number | string;
+  plant: number;
+  date: string;
+  datetype: string;
+  isReady?: boolean;
 }
 
 export const getColor = (status: string) => {
-    switch (status) {
-        case "PENDING":
-            return "#b306ec";
-        case "ASSIGNED":
-            return "blue";
-        case "COMPLETED":
-        case "WORK DONE":
-        case "APPROVED":
-            return "#0ebd05";
-        case "HIGH":
-            return "#C74B50";
-        case "MEDIUM":
-            return "#FFAC41";
-        case "LOW":
-            return "#03C988";
-        case "REJECTED":
-        case "CANCELLED":
-            return "red";
-        case "REASSIGNED":
-            return "#B71375";
-        default:
-            return "#757575";
-    }
+  switch (status) {
+    case "PENDING":
+      return "#b306ec";
+    case "ASSIGNED":
+      return "blue";
+    case "COMPLETED":
+    case "WORK DONE":
+    case "APPROVED":
+      return "#0ebd05";
+    case "HIGH":
+      return "#C74B50";
+    case "MEDIUM":
+      return "#FFAC41";
+    case "LOW":
+      return "#03C988";
+    case "REJECTED":
+    case "CANCELLED":
+      return "red";
+    case "REASSIGNED":
+      return "#B71375";
+    default:
+      return "#757575";
+  }
 };
 
 export const downloadCSV = async (type: string, filename?: string) => {
-    try {
-        const response = await instance({
-            url: `/api/${type}/csv`,
-            method: "get",
-            responseType: "arraybuffer",
-        });
-        console.log(response);
-        const blob = new Blob([response.data]);
-        const url = window.URL.createObjectURL(blob);
-        const temp_link = document.createElement("a");
-        temp_link.download = filename || `${type}_${moment().format("YYYY-MM-DD")}.csv`;
-        temp_link.href = url;
-        temp_link.click();
-        temp_link.remove();
-    } catch (e) {
-        console.log(e);
-    }
+  try {
+    const response = await instance({
+      url: `/api/${type}/csv`,
+      method: "get",
+      responseType: "arraybuffer",
+    });
+    console.log(response);
+    const blob = new Blob([response.data]);
+    const url = window.URL.createObjectURL(blob);
+    const temp_link = document.createElement("a");
+    temp_link.download =
+      filename || `${type}_${moment().format("YYYY-MM-DD")}.csv`;
+    temp_link.href = url;
+    temp_link.click();
+    temp_link.remove();
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 export default function Request(props: RequestProps) {
@@ -151,7 +165,9 @@ export default function Request(props: RequestProps) {
   const [isReady, setReady] = useState(false);
   const [modalSrc, setModalSrc] = useState<string | undefined>();
   const [ids, setIds] = React.useState<string[]>([]);
-  const [currentHistory, setCurrentHistory] = useState< { [key: string]: string }[] | undefined>();
+  const [currentHistory, setCurrentHistory] = useState<
+    { [key: string]: string }[] | undefined
+  >();
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -286,34 +302,34 @@ export default function Request(props: RequestProps) {
     },
   ];
 
-    const handleExpand = (item: RequestItem) => {
-        if (ids.includes(item.id)) {
-            setIds(ids.filter((id) => id !== item.id));
-        } else {
-            setIds(ids.concat(item.id));
-        }
-    };
+  const handleExpand = (item: RequestItem) => {
+    if (ids.includes(item.id)) {
+      setIds(ids.filter((id) => id !== item.id));
+    } else {
+      setIds(ids.concat(item.id));
+    }
+  };
 
-    const filteredRequest = useRequestFilter(props, page);
-    const allRequest = useRequest(indexedColumn[activeTabIndex], page);
+  const filteredRequest = useRequestFilter(props, page);
+  const allRequest = useRequest(indexedColumn[activeTabIndex], page);
 
-    const {
-        data: requestData,
-        error: requestFetchError,
-        isValidating: requestIsFetchValidating,
-        mutate: requestMutate,
-    } = props?.filter ? filteredRequest : allRequest;
+  const {
+    data: requestData,
+    error: requestFetchError,
+    isValidating: requestIsFetchValidating,
+    mutate: requestMutate,
+  } = props?.filter ? filteredRequest : allRequest;
 
-    const theme = useTheme([
-        getTheme(),
-        {
-            Table: `--data-table-library_grid-template-columns:  5em 18% 8em 7em 8em 8em calc(72% - 42em) 10% 6em;
+  const theme = useTheme([
+    getTheme(),
+    {
+      Table: `--data-table-library_grid-template-columns:  5em 18% 8em 7em 8em 8em calc(72% - 42em) 10% 6em;
         overflow-x: hidden
         `,
-            HeaderRow: `
+      HeaderRow: `
 				background-color: #eaf5fd;
 			`,
-            Row: `
+      Row: `
 				&:nth-of-type(odd) {
 					background-color: #d2e9fb;
 				}
@@ -326,164 +342,156 @@ export default function Request(props: RequestProps) {
           cursor: pointer
         }
 			`,
-        },
-    ]);
+    },
+  ]);
 
-    const ROW_PROPS = {
-        onClick: handleExpand,
-    };
+  const ROW_PROPS = {
+    onClick: handleExpand,
+  };
 
-    const ROW_OPTIONS: RowOptions<RequestItem> = {
-        renderAfterRow: (item) => {
-            return (
-                <>
-                    {ids.includes(item.id) && (
-                        <tr style={{ display: "flex", gridColumn: "1 / -1" }}>
-                            <td style={{ flex: "1" }}>
-                                <ul className={styles.tableUL}>
-                                    <li className={styles.tableDropdownListItem}>
-                                        <p>
-                                            <strong>Fault Description</strong>
-                                        </p>
-                                        <p>{item.fault_description}</p>
-                                    </li>
-                                    <li className={styles.tableDropdownListItem}>
-                                        <p>
-                                            <strong>Assigned To</strong>
-                                        </p>
-                                        <p>
-                                            {item.assigned_user_name.trim() === ""
-                                                ? "UNASSIGNED"
-                                                : item.assigned_user_name}
-                                        </p>
-                                    </li>
-                                    <li className={styles.tableDropdownListItem}>
-                                        <p className={styles.tableDropdownListItemHeader}>
-                                            <strong>Fault File</strong>
-                                        </p>
-                                        {item.uploaded_file ? (
-                                            <Image
-                                                src={URL.createObjectURL(
-                                                    new Blob([
-                                                        new Uint8Array(item.uploaded_file.data),
-                                                    ])
-                                                )}
-                                                alt=""
-                                                className={styles.tableDropdownImg}
-                                                onClick={() =>
-                                                    setModalSrc(
-                                                        URL.createObjectURL(
-                                                            new Blob([
-                                                                new Uint8Array(
-                                                                    item.uploaded_file.data
-                                                                ),
-                                                            ])
-                                                        )
-                                                    )
-                                                }
-                                                width={200}
-                                                height={200}
-                                            />
-                                        ) : (
-                                            <p>No File</p>
-                                        )}
-                                    </li>
-                                    <li className={styles.tableDropdownListItem}>
-                                        <p className={styles.tableDropdownListItemHeader}>
-                                            <strong>Completion File</strong>
-                                        </p>
-                                        {item.completion_file ? (
-                                            <Image
-                                                src={URL.createObjectURL(
-                                                    new Blob([
-                                                        new Uint8Array(item.completion_file.data),
-                                                    ])
-                                                )}
-                                                alt=""
-                                                className={styles.tableDropdownImg}
-                                                onClick={() =>
-                                                    setModalSrc(
-                                                        URL.createObjectURL(
-                                                            new Blob([
-                                                                new Uint8Array(
-                                                                    item.completion_file.data
-                                                                ),
-                                                            ])
-                                                        )
-                                                    )
-                                                }
-                                                width={200}
-                                                height={200}
-                                            />
-                                        ) : (
-                                            <p>No File</p>
-                                        )}
-                                    </li>
-                                    <li className={styles.tableDropdownListItem}>
-                                        {
-                                            // (data?.role_id === Role.Admin ||
-                                            //     data?.role_id === Role.Manager) &&
-                                            // item.status_id === 3 ? (
-                                            //     <Link href={`/Request/Manage/${item.id}`}>
-                                            //         <strong>Manage</strong>
-                                            //     </Link>
-                                            // ) :
-                                            (data?.role_id === Role.Engineer ||
-                                                data?.role_id === Role.Specialist) &&
-                                            (item.status_id === 2 || item.status_id === 5) ? (
-                                                <Link href={`/Request/Complete/${item.id}`}>
-                                                    <strong>Complete</strong>
-                                                </Link>
-                                            ) : (
-                                                <Link href={`/Request/View/${item.id}`}>
-                                                    <strong>View</strong>
-                                                </Link>
-                                            )
-                                        }
-                                    </li>
-                                </ul>
-                            </td>
-                        </tr>
+  const ROW_OPTIONS: RowOptions<RequestItem> = {
+    renderAfterRow: (item) => {
+      return (
+        <>
+          {ids.includes(item.id) && (
+            <tr style={{ display: "flex", gridColumn: "1 / -1" }}>
+              <td style={{ flex: "1" }}>
+                <ul className={styles.tableUL}>
+                  <li className={styles.tableDropdownListItem}>
+                    <p>
+                      <strong>Fault Description</strong>
+                    </p>
+                    <p>{item.fault_description}</p>
+                  </li>
+                  <li className={styles.tableDropdownListItem}>
+                    <p>
+                      <strong>Assigned To</strong>
+                    </p>
+                    <p>
+                      {item.assigned_user_name.trim() === ""
+                        ? "UNASSIGNED"
+                        : item.assigned_user_name}
+                    </p>
+                  </li>
+                  <li className={styles.tableDropdownListItem}>
+                    <p className={styles.tableDropdownListItemHeader}>
+                      <strong>Fault File</strong>
+                    </p>
+                    {item.uploaded_file ? (
+                      <Image
+                        src={URL.createObjectURL(
+                          new Blob([new Uint8Array(item.uploaded_file.data)])
+                        )}
+                        alt=""
+                        className={styles.tableDropdownImg}
+                        onClick={() =>
+                          setModalSrc(
+                            URL.createObjectURL(
+                              new Blob([
+                                new Uint8Array(item.uploaded_file.data),
+                              ])
+                            )
+                          )
+                        }
+                        width={200}
+                        height={200}
+                      />
+                    ) : (
+                      <p>No File</p>
                     )}
-                </>
-            );
-        },
-    };
+                  </li>
+                  <li className={styles.tableDropdownListItem}>
+                    <p className={styles.tableDropdownListItemHeader}>
+                      <strong>Completion File</strong>
+                    </p>
+                    {item.completion_file ? (
+                      <Image
+                        src={URL.createObjectURL(
+                          new Blob([new Uint8Array(item.completion_file.data)])
+                        )}
+                        alt=""
+                        className={styles.tableDropdownImg}
+                        onClick={() =>
+                          setModalSrc(
+                            URL.createObjectURL(
+                              new Blob([
+                                new Uint8Array(item.completion_file.data),
+                              ])
+                            )
+                          )
+                        }
+                        width={200}
+                        height={200}
+                      />
+                    ) : (
+                      <p>No File</p>
+                    )}
+                  </li>
+                  <li className={styles.tableDropdownListItem}>
+                    {
+                      // (data?.role_id === Role.Admin ||
+                      //     data?.role_id === Role.Manager) &&
+                      // item.status_id === 3 ? (
+                      //     <Link href={`/Request/Manage/${item.id}`}>
+                      //         <strong>Manage</strong>
+                      //     </Link>
+                      // ) :
+                      (data?.role_id === Role.Engineer ||
+                        data?.role_id === Role.Specialist) &&
+                      (item.status_id === 2 || item.status_id === 5) ? (
+                        <Link href={`/Request/Complete/${item.id}`}>
+                          <strong>Complete</strong>
+                        </Link>
+                      ) : (
+                        <Link href={`/Request/View/${item.id}`}>
+                          <strong>View</strong>
+                        </Link>
+                      )
+                    }
+                  </li>
+                </ul>
+              </td>
+            </tr>
+          )}
+        </>
+      );
+    },
+  };
 
-    /*useEffect(() => {
+  /*useEffect(() => {
     if(props?.isReady) {
       alert(props?.isReady);
       setReady(props?.isReady);
     }
   }, [props?.isReady]);*/
 
-    useEffect(() => {
-        // if (requestIsFetchValidating) setReady(false);
+  console.log(isReady);
+  useEffect(() => {
+    // if (requestIsFetchValidating) setReady(false);
 
-        if (requestData && !requestIsFetchValidating) {
-            if (requestData?.rows?.length > 0) {
-                setRequestItems(
-                    requestData.rows.map((row: CMMSRequest, total: number) => {
-                        return {
-                            id: row.request_id,
-                            ...row,
-                            created_date: new Date(row.created_date),
-                        };
-                    })
-                );
-                setReady(true);
-                setTotalPages(requestData.total);
-            }
-        }
+    if (requestData && !requestIsFetchValidating) {
+      if (requestData?.rows?.length > 0) {
+        setRequestItems(
+          requestData.rows.map((row: CMMSRequest, total: number) => {
+            return {
+              id: row.request_id,
+              ...row,
+              created_date: new Date(row.created_date),
+            };
+          })
+        );
+        setReady(true);
+        setTotalPages(requestData.total);
+      }
+    }
+    if (requestData?.rows?.length === 0) {
+      setReady(true);
+      setRequestItems([]);
+      setTotalPages(1);
+    }
+  }, [requestData, requestIsFetchValidating, isReady, page, props?.isReady]);
 
-        if (!requestData) {
-            setReady(true);
-            setRequestItems([]);
-            setTotalPages(1);
-        }
-    }, [requestData, requestIsFetchValidating, isReady, page, props?.isReady]);
-
-    /*useEffect(() => {
+  /*useEffect(() => {
     setReady(false);
     axios
       .get(`/api/request/${indexedColumn[activeTabIndex]}?page=${page}`)
@@ -502,7 +510,7 @@ export default function Request(props: RequestProps) {
   }, [page]);
   */
 
-    /*useEffect(() => {
+  /*useEffect(() => {
     if(!props?.filter) {
       setReady(false);
       axios
@@ -538,7 +546,10 @@ export default function Request(props: RequestProps) {
           </TooltipBtn>
         </Link>
         <a>
-        <TooltipBtn text="Export CSV" onClick={() => downloadCSV("request", filename)}>
+          <TooltipBtn
+            text="Export CSV"
+            onClick={() => downloadCSV("request", filename)}
+          >
             <HiOutlineDownload size={20} />
           </TooltipBtn>
         </a>
@@ -584,7 +595,7 @@ export default function Request(props: RequestProps) {
           <div
             style={{
               position: "absolute",
-              top: "50%",
+              top: "100%",
               left: "50%",
               transform: "translate(-50%, -50%)",
               textAlign: "center",
@@ -623,13 +634,15 @@ export default function Request(props: RequestProps) {
         >
           <Image src={modalSrc as string} alt="" width={500} height={500} />
         </ModuleModal>
-        {currentHistory && <ModuleModal
-          isOpen={!!currentHistory}
-          closeModal={() => setCurrentHistory(undefined)}
-          closeOnOverlayClick={true}
-        >
-          <RequestHistory history={currentHistory!} />
-        </ModuleModal>}
+        {currentHistory && (
+          <ModuleModal
+            isOpen={!!currentHistory}
+            closeModal={() => setCurrentHistory(undefined)}
+            closeOnOverlayClick={true}
+          >
+            <RequestHistory history={currentHistory!} />
+          </ModuleModal>
+        )}
       </ModuleContent>
     </ModuleMain>
   );
