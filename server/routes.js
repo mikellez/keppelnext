@@ -1186,12 +1186,53 @@ router.get("/asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_na
 /**
  * @api {get} /master/new Get Table Metadata
  * @apiDescription Gets table information/metadata. Mainly used for the creation of new entries in those tables
+ * @apiExample 1
+ * "plant": {
+		"internalName": "plant_master",
+		"name": "Plant",
+		"id": "plant_id",
+		"fields": [{
+			"column_label": "Name",
+			"column_name": "plant_name"
+		},{
+			"column_label": "Description",
+			"column_name": "plant_description"
+		}]
+	}
+ * @apiExample 2
+ *"system_assets": {
+		"internalName": "system_assets",
+		"name": "System Assets",
+		"id": "plant_id",
+		"fields": [{
+			"column_label": "System",
+			"column_name": "system_id",
+			"type" : "dropdown",
+			"url" : "/api/asset/systems",
+			"value" : "system_id",
+			"options" : "system_name"
+		},{
+			"column_label": "System Asset",
+			"column_name": "system_asset"
+		}]
+	}
  * @apiName GetMasterTypeEntry
  * @apiGroup Master
  *
- * @apiSuccess {Object[]}  Array containing the different request types and their corresponding ID
- * @apiSuccess {number} -.req_id ID of the request type
- * @apiSuccess {string} -.request Name of the request type
+ * @apiSuccess {Object}  -.data Object which contains multiple objects with the key being the table name and the value being the table metadata
+ * @apiSuccess {String} -.data.key Table name
+ * @apiSuccess {Object} -.data.value Object which has table metadata
+ * @apiSuccess {String} -.data.value.internalName Internal name of the table
+ * @apiSuccess {String} -.data.value.name Name of the table
+ * @apiSuccess {String} -.data.value.id unique ID of the rows in the table
+ * @apiSuccess {Object[]} -.data.value.fields Array of objects which contains the column name and column label of the table
+ * @apiSuccess {String} -.data.value.fields.column_label Column label of the table
+ * @apiSuccess {String} -.data.value.fields.column_name Column name of the table
+ * @apiSuccess {String} [-.data.value.fields.type] Type of the column (Eg. dropdown, boolean_dropdown) 
+ * @apiSuccess {String} [-.data.value.fields.url] URL to fetch dropdown options for dropdown type only (Example 2)
+ * @apiSuccess {String} [-.data.value.fields.value] Value of the dropdown option for dropdown type only (Example 2)
+ * @apiSuccess {String} [-.data.value.fields.options] Options of the dropdown option for dropdown type only (Example 2)
+ * 
  */
 router.get(
   "/master/new",
