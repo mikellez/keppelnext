@@ -65,24 +65,28 @@ ORDER BY cl.checklist_id DESC
 `;
 
 const fetchAssignedChecklists = async (req, res, next) => {
-<<<<<<< HEAD
-    const page = req.query.page || 1;
-    const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  const page = req.query.page || 1;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-    const totalRows = await global.db.query(fetchAssignedChecklistsQuery, [req.user.id]);
-    const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+  const totalRows = await global.db.query(fetchAssignedChecklistsQuery, [
+    req.user.id,
+  ]);
+  const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
-    const query = fetchAssignedChecklistsQuery + ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+  const query =
+    fetchAssignedChecklistsQuery +
+    ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
-    try {
-        const result = await global.db.query(query, [req.user.id]);
-        if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
-        // console.log(result.rows);
-        // console.log(totalPages);
-        return res.status(200).json({ rows: result.rows, total: totalPages });
-    } catch (error) {
-        return res.status(500).json({ msg: error });
-    }
+  try {
+    const result = await global.db.query(query, [req.user.id]);
+    if (result.rows.length == 0)
+      return res.status(204).json({ msg: "No checklist" });
+    // console.log(result.rows);
+    // console.log(totalPages);
+    return res.status(200).json({ rows: result.rows, total: totalPages });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
 };
 
 const fetchPendingChecklistsQuery =
@@ -212,14 +216,14 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
             checklist_id = $1
     `;
 
-    global.db.query(sql, [req.params.checklist_id], (err, found) => {
-        if (err) {
-            console.log(err);
-            return res.status(500).json("No checklist template found");
-        }
-        // console.log(found);
-        res.status(200).send(found.rows[0]);
-    });
+  global.db.query(sql, [req.params.checklist_id], (err, found) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json("No checklist template found");
+    }
+    // console.log(found);
+    res.status(200).send(found.rows[0]);
+  });
 };
 
 const fetchSpecificChecklistRecord = async (req, res, next) => {
