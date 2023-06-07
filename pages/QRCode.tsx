@@ -6,7 +6,9 @@ import React, { useState, useRef } from 'react'
 import { ModuleMain, ModuleHeader, ModuleContent, ModuleFooter, ModuleDivider } from '../components/';
 import { useAsset } from '../components/SWR';
 import { useQRCode } from 'next-qrcode';
-import { CMMSAsset } from '../types/common/interfaces';
+import { CMMSAsset, CMMSPlant } from '../types/common/interfaces';
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import instance from '../axios.config';
 
 function saveSvg(svgEl: SVGSVGElement, name: string) {
 	svgEl.setAttribute("xmlns", "http://www.w3.org/2000/svg");
@@ -22,7 +24,7 @@ function saveSvg(svgEl: SVGSVGElement, name: string) {
 	document.body.removeChild(downloadLink);
 }
 
-function QRImg({asset, plant}: {asset: CMMSAsset; plant: number|null}) {
+function QRImg({asset, plant, bool}: {asset: CMMSAsset; plant: number|null; bool: boolean}) {
 	const { SVG } = useQRCode();
 
 	function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
@@ -36,6 +38,21 @@ function QRImg({asset, plant}: {asset: CMMSAsset; plant: number|null}) {
 
 	return (
 		<button className={"btn btn-secondary " + styles.btnQr} onClick={downloadQR}>
+			{ bool ?
+			<SVG 
+				text={window.location.origin + "/Guest/Asset/feedback/" + plant + "/" + asset.psa_id}
+				options={{
+					level: 'H',
+					margin: 0,
+					scale: 5,
+					width: 150,
+					color: {
+						dark: '#000000',
+						light: '#ffffff',
+					}
+				}}
+			/> 
+			:
 			<SVG 
 				text={window.location.origin + "/Guest/Asset/" + plant + "/" + asset.psa_id}
 				options={{
@@ -48,15 +65,19 @@ function QRImg({asset, plant}: {asset: CMMSAsset; plant: number|null}) {
 						light: '#ffffff',
 					}
 				}}
-			/>
+			/> 
+				}
 			<div className={styles.label}>{asset.asset_name}</div>
 		</button>
 	)
 }
-
-function QRCode() {
+interface NewAssetProps {
+	plants: CMMSPlant[];
+  }
+function QRCode(props: NewAssetProps) {
 	const [selectedPlant, setSelectedPlant] = useState<number|null>(null)
 	const [selectedAssets, setSelectedAssets] = useState<CMMSAsset[]>([]);
+	const [feedback, setFeedback] = useState<boolean>(false);
 	
 	const qrRef = useRef() as React.RefObject<HTMLDivElement>
 
@@ -77,16 +98,36 @@ function QRCode() {
 			<ModuleHeader title="QRCode" header="Generate QR Codes"></ModuleHeader>
 			<ModuleContent includeGreyContainer grid>
 				<div className={formStyles.halfContainer}>
+				<div className="form-group">
+						<label className='form-label'>Type:</label>
+						<select className="form-select" required onChange={(e) => {setFeedback(
+							e.target.value == "true"
+						)}}>
+							<option value="0" disabled hidden selected>
+                -- Select Type --
+              </option>
+			  <option value="false">
+				Fault
+			</option>
+			<option value="true">
+				Feedback
+			</option>
+				</select>
+					</div>
 					<div className="form-group">
 						<label className='form-label'>Plant Location:</label>
 						<select className="form-select" required onChange={(e) => {setSelectedPlant(parseInt(e.target.value))}}>
-							<option value="" hidden>-- Please Select a Plant --</option>
-							<option value="2">Woodlands DHCS</option>
-							<option value="3">Biopolis</option>
-							<option value="4">Mediapolis</option>
-							<option value="1">Changi DHCS</option>
-						</select>
+							<option value="0" disabled hidden selected>
+                -- Select Plant --
+              </option>
+              {props.plants.map((plant) => (
+                <option key={plant.plant_id} value={plant.plant_id}>
+                  {plant.plant_name}
+                </option>
+              ))}
+				</select>
 					</div>
+
 					<br/>
 				</div>
 				<div className={formStyles.halfContainer}>
@@ -106,7 +147,7 @@ function QRCode() {
 					{
 						selectedAssets.map((asset) => {
 							return (
-								<QRImg key={asset.psa_id} asset={asset} plant={selectedPlant}/>
+								<QRImg key={asset.psa_id} asset={asset} plant={selectedPlant} bool={feedback}/>
 							)
 						})
 					}
@@ -116,4 +157,34 @@ function QRCode() {
 	)
 }
 
+export const getServerSideProps: GetServerSideProps = async (
+	context: GetServerSidePropsContext
+  ) => {
+	const headers = {
+	  withCredentials: true,
+	  headers: {
+		Cookie: context.req.headers.cookie,
+	  },
+	};
+	// API to get plants, systems, asset types
+	const plants = await instance.get<CMMSPlant[]>(
+	  `/api/getPlants`,
+	  headers
+	);
+  
+	if (plants.status !== 200) throw Error("Error getting plants");
+
+  
+	let props: NewAssetProps = {
+	  plants: plants.data,
+	};
+	console.log(props.plants);
+  
+	return {
+	  props: props,
+	};
+  };
+  
+
 export default QRCode;
+
