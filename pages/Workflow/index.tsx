@@ -4,20 +4,28 @@ import { ModuleContent, ModuleHeader, ModuleMain } from "../../components";
 import TooltipBtn from "../../components/TooltipBtn";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 
-import { CompactTable, Column } from '@table-library/react-table-library/compact';
-import { useTheme } from '@table-library/react-table-library/theme';
-import { getTheme } from '@table-library/react-table-library/baseline';
+import {
+  CompactTable,
+  Column,
+} from "@table-library/react-table-library/compact";
+import { useTheme } from "@table-library/react-table-library/theme";
+import { getTheme } from "@table-library/react-table-library/baseline";
 
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { Switch, Tag } from "antd";
 import { useCurrentUser, useWorkflow } from "../../components/SWR";
 import { Role } from "../../types/common/enums";
-import { AiOutlineEdit, AiOutlineFolderView, AiFillDelete } from "react-icons/ai";
+import {
+  AiOutlineEdit,
+  AiOutlineFolderView,
+  AiFillDelete,
+} from "react-icons/ai";
 import instance from "../../axios.config";
 import ModuleSimplePopup from "../../components/ModuleLayout/ModuleSimplePopup";
 import LoadingIcon from "../../components/LoadingIcon";
 import { set } from "nprogress";
 import router from "next/router";
+import Pagination from "../../components/Pagination";
 
 interface WorkflowItem {
   sn: string;
@@ -28,8 +36,16 @@ interface WorkflowItem {
   action: number;
 }
 
+// export interface WorkflowProps {
+//   filter?: boolean;
+//   status: number | string;
+//   plant: number;
+//   date: string;
+//   datetype: string;
+//   isReady: boolean;
+// }
+
 const Workflow = () => {
-  const { data, error, isValidating, mutate } = useWorkflow();
   const [workflow, setWorkflow] = useState<WorkflowItem[]>([]);
   const [isReady, setIsReady] = useState<boolean>(false);
   const user = useCurrentUser();
@@ -37,35 +53,42 @@ const Workflow = () => {
   const [isDeleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
   const [isDeleteSuccess, setDeleteSuccess] = useState<boolean>(false);
   const [isDeleting, setDeleting] = useState<boolean>(false);
-  const [deleteModalID, setDeleteModalID] = useState<string>('');
+  const [deleteModalID, setDeleteModalID] = useState<string>("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const { data, error, isValidating, mutate } = useWorkflow(page);
 
   useEffect(() => {
-    if(data && !isValidating) {
-      setWorkflow(data.map((item, index) => {
-        let statement = '';
-        if(item.is_assign_to) {
-          statement = `When fault type at ${item.plant_name} is of type ${item.fault_type} then assign to ${item.user_name}`;
-        } else if (item.is_send_email) {
-          statement = `When fault type at ${item.plant_name} is of type ${item.fault_type} then send email to ${item.user_email}`;
-        }
+    if (data && !isValidating) {
+      console.log(data);
+      if (data?.rows?.length > 0) {
+        setWorkflow(
+          data.rows.map((item, index) => {
+            let statement = "";
+            if (item.is_assign_to) {
+              statement = `When fault type at ${item.plant_name} is of type ${item.fault_type} then assign to ${item.user_name}`;
+            } else if (item.is_send_email) {
+              statement = `When fault type at ${item.plant_name} is of type ${item.fault_type} then send email to ${item.user_email}`;
+            }
 
-        return {
-          sn: (index + 1).toString(),
-          id: item.id.toString(),
-          statement: statement,
-          created_at: new Date(item.created_at),
-          is_active: item.is_active,
-          action: 1
-        }
-      }));
+            return {
+              sn: (index + 1).toString(),
+              id: item.id.toString(),
+              statement: statement,
+              created_at: new Date(item.created_at),
+              is_active: item.is_active,
+              action: 1,
+            };
+          })
+        );
 
-      setIsReady(true);
+        setIsReady(true);
+        setTotalPages(data.total);
+      }
     }
-  }, [data]);
-  
+  }, [data, isValidating, isReady, page]);
 
-
-  const key = 'Compact Table';
+  const key = "Compact Table";
 
   /*const nodes = [
     {
@@ -84,67 +107,72 @@ const Workflow = () => {
       Table: `
         --data-table-library_grid-template-columns:  5em 5em calc(100% - 30em) 7em 5em 8em;
         overflow-x: hidden
-      `
-    }
+      `,
+    },
   ]);
 
   const onHandleToggle = async (id: string, checked: boolean) => {
     await instance
-    .put(`/api/workflow/${id}`, {is_active: checked})
-    .then((res) => {
-      setUpdateModalOpen(true);
-    })
-    .catch((err) => {
-      alert('Updated failed!');
-      console.log(err.response);
-      console.log('Unable to update workflow!');
-    })
-  }
+      .put(`/api/workflow/${id}`, { is_active: checked })
+      .then((res) => {
+        setUpdateModalOpen(true);
+      })
+      .catch((err) => {
+        alert("Updated failed!");
+        console.log(err.response);
+        console.log("Unable to update workflow!");
+      });
+  };
 
   const handleDelete = (id: string) => {
     setDeleteModalID(id);
     setDeleteModalOpen(true);
-  }
+  };
 
   const deleteWorkflow = async () => {
     await instance
-    .delete(`/api/workflow/${deleteModalID}`)
-    .then((res) => {
-      setDeleteModalOpen(false);
-      setDeleteSuccess(true);
-      mutate();
-    })
-    .catch((err) => {
-      alert('Delete failed!');
-      console.log(err.response);
-      console.log('Unable to delete workflow!');
-    });
-  }
-
+      .delete(`/api/workflow/${deleteModalID}`)
+      .then((res) => {
+        setDeleteModalOpen(false);
+        setDeleteSuccess(true);
+        mutate();
+      })
+      .catch((err) => {
+        alert("Delete failed!");
+        console.log(err.response);
+        console.log("Unable to delete workflow!");
+      });
+  };
 
   const COLUMNS: Column<WorkflowItem>[] = [
-    { label: 'S/N', renderCell: (item) => item.sn },
-    { label: 'ID', renderCell: (item) => item.id },
-    { label: 'Workflow Statement', renderCell: (item) => item.statement },
+    { label: "S/N", renderCell: (item) => item.sn },
+    { label: "ID", renderCell: (item) => item.id },
+    { label: "Workflow Statement", renderCell: (item) => item.statement },
     {
-      label: 'Created At',
+      label: "Created At",
       renderCell: (item) =>
-        item.created_at.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
+        item.created_at.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
         }),
     },
     {
-      label: 'Active',
-      renderCell: (item) => <Switch defaultChecked={!!item.is_active} onChange={(checked)=>onHandleToggle(item.id, checked)} size={'small'}/>
+      label: "Active",
+      renderCell: (item) => (
+        <Switch
+          defaultChecked={!!item.is_active}
+          onChange={(checked) => onHandleToggle(item.id, checked)}
+          size={"small"}
+        />
+      ),
     },
     /*{
       label: 'Active',
       renderCell: (item) => item.is_active ? <Tag color="success"> active </Tag> : <Tag color="error"> inactive </Tag>,
     },*/
     {
-      label: 'Action',
+      label: "Action",
       renderCell: (item) => {
         if (
           user.data!.role_id === Role.Admin ||
@@ -155,16 +183,14 @@ const Workflow = () => {
             <Link href="" onClick={(e) => handleDelete(item.id)}>
               <AiFillDelete size={22} />
             </Link>
-          )
+          );
         } else {
-          <></>
+          <></>;
         }
       },
     },
-
   ];
-
-
+  console.log(isReady);
   return (
     <ModuleMain>
       <ModuleHeader header="Workflow">
@@ -175,26 +201,42 @@ const Workflow = () => {
         </Link>
       </ModuleHeader>
       <ModuleContent>
-        {isReady && workflow && <CompactTable columns={COLUMNS} data={{nodes: workflow}} theme={theme} layout={{ custom: true }}/>}
+        {isReady && workflow && (
+          <>
+            <CompactTable
+              columns={COLUMNS}
+              data={{ nodes: workflow }}
+              theme={theme}
+              layout={{ custom: true }}
+            />
+          </>
+        )}
+        <Pagination
+          setPage={setPage}
+          setReady={setIsReady}
+          totalPages={totalPages}
+          page={page}
+        />
       </ModuleContent>
       <ModuleSimplePopup
-          modalOpenState={isUpdateModalOpen}
-          setModalOpenState={setUpdateModalOpen}
-          title="Success"
-          text={
-          // "ID " + deleteModalID + 
-          "Workflow updated successfully!"}
-          icon={1}
-          buttons={
+        modalOpenState={isUpdateModalOpen}
+        setModalOpenState={setUpdateModalOpen}
+        title="Success"
+        text={
+          // "ID " + deleteModalID +
+          "Workflow updated successfully!"
+        }
+        icon={1}
+        buttons={
           <button
-              onClick={() => {
-                  setUpdateModalOpen(false);
-              }}
-              className="btn btn-primary"
+            onClick={() => {
+              setUpdateModalOpen(false);
+            }}
+            className="btn btn-primary"
           >
-              Ok
+            Ok
           </button>
-          }
+        }
       />
       <ModuleSimplePopup
         modalOpenState={isDeleteModalOpen}
@@ -225,26 +267,27 @@ const Workflow = () => {
         ]}
       />
       <ModuleSimplePopup
-          modalOpenState={isDeleteSuccess}
-          setModalOpenState={setDeleteSuccess}
-          title="Success"
-          text={
-          // "ID " + deleteModalID + 
-          "Workflow delete successfully!"}
-          icon={1}
-          buttons={
+        modalOpenState={isDeleteSuccess}
+        setModalOpenState={setDeleteSuccess}
+        title="Success"
+        text={
+          // "ID " + deleteModalID +
+          "Workflow delete successfully!"
+        }
+        icon={1}
+        buttons={
           <button
-              onClick={() => {
-                  setDeleteSuccess(false);
-              }}
-              className="btn btn-primary"
+            onClick={() => {
+              setDeleteSuccess(false);
+            }}
+            className="btn btn-primary"
           >
-              Ok
+            Ok
           </button>
-          }
+        }
       />
     </ModuleMain>
-  )
+  );
 };
 
 export default Workflow;
