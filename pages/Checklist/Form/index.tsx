@@ -57,7 +57,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
     const router = useRouter();
 
     const submitChecklist = (checklistType: string) => {
-        if (!checkInputFields(checklistType)) {
+        if (!checkInputFields()) {
             setIncompleteModal(true);
         } else {
             setSuccessModal(true);
@@ -69,7 +69,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
     };
 
     const updateChecklist = async () => {
-        if (!checkInputFields("record")) {
+        if (!checkInputFields()) {
             setIncompleteModal(true);
         } else {
             setSuccessModal(true);
@@ -79,22 +79,14 @@ export default function ChecklistNew(props: ChecklistPageProps) {
             }, 1000);
         }
     };
-    const checkInputFields = (checklistType: string) => {
-        switch (checklistType) {
-            case "record":
-                return (
-                    // checklistData.assigned_user_id &&
-                    checklistData.signoff_user_id &&
-                    checklistData.plant_id &&
-                    checklistData.linkedassetids &&
-                    checklistData.linkedassetids != ""
-                );
-            case "template":
-                return (
-                    checklistData.signoff_user_id &&
-                    checklistData.plant_id
-                );
-        }
+    const checkInputFields = () => {
+        return (
+            checklistData.signoff_user_id &&
+            checklistData.plant_id &&
+            checklistData.linkedassetids &&
+            checklistData.linkedassetids != ""
+        );
+
     };
 
     useEffect(() => {
