@@ -16,7 +16,7 @@ class AutoSendWorkflowMail extends WorkflowMail {
   
     constructor(recipient, workflow, carbon_copy = null) {
         const emailContent = `
-          A fault request with type ${workflow.fault_type} has been created at location ${workflow.plant_name} on ${workflow.created_at}.<br></br><strong>Fault Description:</strong> ${workflow.fault_description ?? 'NIL'}
+          A fault request with type <strong>${workflow.fault_type}</strong> has been created at location <strong>${workflow.plant_name}</strong> on <strong>${workflow.created_at}</strong>.<br></br><strong>ID:</strong> ${workflow.request_id}<br/><strong>Fault Description:</strong> ${workflow.fault_description ?? 'NIL'}
         `;
         console.log(workflow)
         super(recipient, "Fault Request Created", emailContent, workflow, carbon_copy);

@@ -14,7 +14,7 @@ const listWorkflow = async (req, res, next) => {
       JOIN keppel.fault_types ft ON w.fault_id = ft.fault_id
       `;
 
-  db.query(
+  global.db.query(
     sql,
     (err, result) => {
       if (err) return res.status(500).json({ errormsg: err });
@@ -61,7 +61,7 @@ const runWorkflowAssign = async (req, res, next) => {
 
   `;
 
-  db.query(
+  global.db.query(
     sql,
     (err, result) => {
       if (err) return res.status(500).json({ errormsg: err });
@@ -75,6 +75,7 @@ const autoSendEmail = (workflow) => {
   for(let i = 0; i < workflow.length; i++) {
     const mail = new AutoSendWorkflowMail([workflow[i].user_email],
       {
+        request_id: workflow[i].request_id,
         user_name: workflow[i].user_name,
         fault_type: workflow[i].fault_type,
         fault_description: workflow[i].fault_description,
@@ -120,12 +121,11 @@ const runWorkflowEmail = async (req, res, next) => {
 
   `;
 
-  db.query(
+  global.db.query(
     sql,
     (err, result) => {
       if (err) return res.status(500).json({ errormsg: err });
 
-      console.log(result);
       autoSendEmail(result.rows);
 
       res.status(200).json(result.rows);
@@ -158,7 +158,7 @@ const createWorkflow = async (req, res, next) => {
     $1,$2,$3,$4,$5,$6,$7,$8,now()
   )`;
 
-  db.query(
+  global.db.query(
     sql,
     [
       type,
@@ -183,7 +183,7 @@ const updateWorkflow = async (req, res, next) => {
 
   const sql = `UPDATE keppel.workflow SET is_active = $1 WHERE id = $2`;
 
-  db.query(
+  global.db.query(
     sql,
     [ +is_active, id ],
     (err, result) => {
@@ -198,7 +198,7 @@ const deleteWorkflow = async (req, res, next) => {
   
   const sql = `DELETE FROM keppel.workflow WHERE id = $1`;
 
-  db.query(
+  global.db.query(
     sql,
     [ id ],
     (err, result) => {
