@@ -971,6 +971,17 @@ router.get(
 
 router.get("/fault/types", controllers.fault.fetchFaultTypes);
 
+router.get(
+  "/asset/systems",
+  checkIfLoggedInAPI,
+  controllers.asset.fetchSystems
+);
+router.get(
+  "/asset/fetch_asset_types",
+  checkIfLoggedInAPI,
+  controllers.asset.fetch_asset_types
+);
+
 /**
  * @api {get} /asset Get Asset Table
  * @apiDescription Gets table information/structure for all assets
@@ -1042,16 +1053,7 @@ router.get(
   checkIfLoggedInAPI,
   controllers.asset.getAssetDetails
 );
-router.get(
-  "/asset/systems",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchSystems
-);
-router.get(
-  "/asset/fetch_asset_types",
-  checkIfLoggedInAPI,
-  controllers.asset.fetch_asset_types
-);
+
 
 /**
  * @api {post} /addNewAsset Add New Asset
