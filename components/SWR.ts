@@ -8,6 +8,7 @@ import {
   CMMSSystemAssetName,
   CMMSSubComponent1Name,
   CMMSChangeOfParts,
+  CMMSWorkflow,
 } from "../types/common/interfaces";
 import { RequestProps } from "../pages/Request";
 import { ChecklistProps } from "../pages/Checklist";
@@ -273,6 +274,27 @@ function useChangeOfParts(
   );
 }
 
+function useWorkflow(page: number) {
+  const workflowFetcher = (url: string) =>
+    instance
+      .get< {rows : CMMSWorkflow[]; total : number }>(url)
+      .then((response) => {
+        response.data.rows.forEach((s: CMMSWorkflow) => {
+          s.created_date = new Date(s.created_date);
+        });
+        return response.data;
+      })
+      .catch((e) => {
+        throw new Error(e);
+      });
+
+  return useSWR<{rows : CMMSWorkflow[]; total:number}, Error>(
+    [`/api/workflows`],
+    workflowFetcher,
+    { revalidateOnFocus: false }
+  );
+}
+
 export {
   useRequest,
   useAsset,
@@ -285,4 +307,5 @@ export {
   useChangeOfParts,
   useChecklistFilter,
   useRequestFilter,
+  useWorkflow
 };

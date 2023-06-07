@@ -23,8 +23,10 @@ const Pagination = ({
           page - 1 > 0 ? styles.active : styles.disabled
         }`}
         onClick={() => {
-          setPage(1);
-          setReady(false);
+          if (page != 1) {
+            setPage(1);
+            setReady(false);
+          }
         }}
       />
       <span>
@@ -49,8 +51,10 @@ const Pagination = ({
           page < totalPages ? styles.active : styles.disabled
         }`}
         onClick={() => {
-          setPage(totalPages);
-          setReady(false);
+          if (page != totalPages) {
+            setPage(totalPages);
+            setReady(false);
+          }
         }}
       />
     </div>

@@ -27,6 +27,7 @@
 		"bootstrap": "^5.2.3",
 		"cors": "^2.8.5",
 		"custom-error": "^0.2.1",
+		"debug": "^4.3.4",
 		"dotenv": "^16.0.3",
 		"eslint": "8.27.0",
 		"eslint-config-next": "13.0.2",
@@ -41,6 +42,7 @@
 		"nanoid": "^4.0.1",
 		"next": "13.0.2",
 		"next-qrcode": "^2.4.0",
+		"node-cron": "^3.0.2",
 		"nodemailer": "^6.9.2",
 		"nprogress": "^0.2.0",
 		"passport": "^0.6.0",
@@ -58,6 +60,7 @@
 		"react-pro-sidebar": "^1.0.0-alpha.7",
 		"react-select": "^5.7.0",
 		"react-signature-canvas": "^1.0.6",
+		"react-star-ratings": "^2.3.0",
 		"react-to-print": "^2.14.11",
 		"recharts": "^2.4.3",
 		"sass": "^1.57.1",
@@ -70,6 +73,7 @@
 		"@types/nprogress": "^0.2.0",
 		"@types/react-modal": "^3.13.1",
 		"@types/react-signature-canvas": "^1.0.2",
+		"@types/react-star-ratings": "^2.3.0",
 		"kill-port": "^2.0.1"
 	},
 	"apidoc": {

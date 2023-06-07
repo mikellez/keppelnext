@@ -161,7 +161,7 @@ const fetchReviewRequests = async (req, res, next) => {
   const page = req.query.page || 1;
 
   const sql = fetchRequestQuery(
-    "AND (sc.status_id = 3 OR sc.status_id = 5 OR sc.status_id = 6)", //COMPLETED, REJECTED, CANCELLEd
+    "AND (sc.status_id = 3 OR sc.status_id = 5 OR sc.status_id = 6)", //COMPLETED, REJECTED, CANCELLED
     req.user.role_id,
     req.user.id,
     page
@@ -188,6 +188,39 @@ const fetchApprovedRequests = async (req, res, next) => {
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
+
+const createWorkflow = (requestID, faultTypeID, plantLocationID) => {
+
+  const insertRequestWorkflow = `
+    INSERT INTO keppel.request_workflow (request_id, set_assign, set_email, is_active, created_at)
+    SELECT
+      $1,
+      is_assign_to,
+      is_send_email,
+      is_active,
+      CURRENT_TIMESTAMP
+    FROM
+      keppel.workflow
+    WHERE
+      fault_id = $2
+      AND plant_id = $3;
+  `;
+
+  db.query(
+    insertRequestWorkflow,
+    [
+      requestID,
+      faultTypeID,
+      plantLocationID,
+    ],
+    (err, result) => {
+      if (err) {
+        // console.log(err);
+        return next(err);
+      }
+    }
+  );
+}
 
 const createRequest = async (req, res, next) => {
   // console.log(req.body)
@@ -254,15 +287,50 @@ const createRequest = async (req, res, next) => {
       },
     ];
   }
-if(!req.body.linkedRequestId) {
-  const q = `INSERT INTO keppel.request(
-    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
-  ) VALUES (
-    $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
-  )`;
-  global.db.query(q
-    ,
-    [
+  if(!req.body.linkedRequestId) {
+    const q = `INSERT INTO keppel.request(
+      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+    ) VALUES (
+      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
+    ) RETURNING request_id;`;
+    db.query(q
+      ,
+      [
+        faultTypeID,
+        description,
+        plantLocationID,
+        requestTypeID,
+        user_id,
+        role_id,
+        taggedAssetID,
+        guestfullname,
+        fileBuffer,
+        fileType,
+        history,
+        null,
+        JSON.stringify(activity_log),
+      ],
+      (err, result) => {
+        if (err) return res.status(500).json({ errormsg: err });
+        createWorkflow(result.rows[0].request_id, faultTypeID, plantLocationID);
+        res.status(200).send({ msg: "Request created successfully" });
+
+      }
+    );
+  }
+  else if (req.body.linkedRequestId){
+    const insertQuery = `
+      INSERT INTO keppel.request(
+        fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+      ) VALUES (
+        $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
+      ) RETURNING request_id;
+    `;
+    const updateQuery = `
+    UPDATE keppel.request SET status_id = 3 WHERE request_id = $1;
+    `;
+
+    global.db.query(insertQuery, [
       faultTypeID,
       description,
       plantLocationID,
@@ -270,60 +338,31 @@ if(!req.body.linkedRequestId) {
       user_id,
       role_id,
       taggedAssetID,
-      guestfullname,
       fileBuffer,
       fileType,
       history,
-      null,
+      req.body.linkedRequestId,
       JSON.stringify(activity_log),
-    ],
-    (err, result) => {
-      if (err) return res.status(500).json({ errormsg: err });
-      res.status(200).send({ msg: "Request created successfully" });
+    ], (err, result) => {
+      if (err) {
+        // console.log(err);
+        return next(err);
+      }
 
-    }
-  );
-}
-else if (req.body.linkedRequestId){
-  const insertQuery = `
-  INSERT INTO keppel.request(
-    fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
-  ) VALUES (
-    $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
-  );
-`;
-const updateQuery = `
-UPDATE keppel.request SET status_id = 3 WHERE request_id = $1;
-`;
+      global.db.query(updateQuery, [req.body.linkedRequestId], (err, result) => {
+        if (err) {
+          // console.log(err);
+          return next(err);
+        }
 
-global.db.query(insertQuery, [
-  faultTypeID,
-  description,
-  plantLocationID,
-  requestTypeID,
-  user_id,
-  role_id,
-  taggedAssetID,
-  fileBuffer,
-  fileType,
-  history,
-  req.body.linkedRequestId,
-  JSON.stringify(activity_log),
-], (err, result) => {
-  if (err) {
-    return next(err);
-  }
+        res.status(200).send({ message: "Request created successfully" });
+      });
 
-  global.db.query(updateQuery, [req.body.linkedRequestId], (err, result) => {
-    if (err) {
-      return next(err);
-    }
-
-    res.status(200).send({ message: "Request created successfully" });
-  });
-});
+      createWorkflow(result.rows[0].request_id, faultTypeID, plantLocationID);
+    });
 
   }
+
 };
 
 
@@ -647,7 +686,6 @@ const approveRejectRequest = async (req, res, next) => {
   const status = req.params.status_id == 4 ? "APPROVED" : "REJECTED";
   const text = req.params.status_id == 4 ? "Approved" : "Rejected";
   const history = `!${status}_${text} request_${today}_${req.user.role_name}_${req.user.name}`;
-  // console.log(req.body);
   const sql = `
 	UPDATE keppel.request SET 
 	status_id = $1,
@@ -845,14 +883,6 @@ const fetchRequestUploadedFile = async (req, res, next) => {
   r.uploaded_file,
   r.uploadfilemimetype
   FROM keppel.request AS r
-  JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
-  JOIN keppel.fault_types  AS ft ON ft.fault_id = r.fault_id
-  JOIN keppel.plant_master AS pm ON pm.plant_id = r.plant_id
-  JOIN keppel.plant_system_assets AS psa ON psa.psa_id = r.psa_id
-  LEFT JOIN keppel.priority AS pr ON r.priority_id = pr.p_id
-  LEFT JOIN keppel.users AS u ON r.assigned_user_id = u.user_id
-	LEFT JOIN keppel.user_access ua ON u.user_id = ua.user_id
-  JOIN keppel.status_pm AS s ON r.status_id = s.status_id
   WHERE request_id = $1`;
   global.db.query(sql, [req.params.request_id], (err, result) => {
 
@@ -873,8 +903,6 @@ const fetchRequestUploadedFile = async (req, res, next) => {
     });
 
     res.end(img);
-
-    //return res.status(200).send(result.rows[0]);
   });
 };
 

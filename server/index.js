@@ -4,8 +4,10 @@ const cors = require("cors");
 const next = require("next");
 const bodyParser = require("body-parser");
 const userAuth = require("./userAuth");
+const cron = require("node-cron");
+const axios = require("axios");
 const { dbConnection } = require("./db/dbAPI");
-
+const checklistGenerator = require("./services/checklistGenerator");
 const controllers = require("./controllers");
 const { apiLimiter, loginLimiter } = require("./rateLimiter");
 
@@ -156,4 +158,29 @@ app.prepare().then(() => {
   server.listen(process.env.PORT, () => {
     console.log(`Ready on Port ${process.env.PORT}`);
   });
+
+  var task = cron.schedule('* * * * *', async () =>  {
+    console.log('trigger task');
+
+    // run workflow task - auto assign user
+    await axios.get('http://localhost:3001/api/workflow/run/assign')
+      .catch((err)=> {
+        console.log(err.response)
+        console.log('Unable to run workflow task - assign user')
+      })
+    
+    // run workflow task - auto send email
+    await axios.get('http://localhost:3001/api/workflow/run/email')
+      .catch((err)=> {
+        console.log(err.response)
+        console.log('Unable to run workflow task - send email')
+      })
+    //console.log(result.data)
+  }, {
+    scheduled: true
+  });
+
+  task.start();
+
+  checklistGenerator.start();
 });
