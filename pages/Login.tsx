@@ -13,7 +13,7 @@ type FormValues = {
 	database: string;
 }
 
-function Login({ databases }: { databases: string[] }) {
+function Login({ databases, multi }: { databases: string[], multi: boolean }) {
 	const {
 		register,
 		handleSubmit,
@@ -53,7 +53,7 @@ function Login({ databases }: { databases: string[] }) {
 				<h1 className={styles.headerLogin}>Login</h1>
 				<form onSubmit={handleSubmit(formSubmit)}>
 
-					{/* <div className={`form-group ${styles.group}`}>
+					{multi && <div className={`form-group ${styles.group}`}>
 						<select className='form-select' placeholder='Select' defaultValue="" {...register("database", {required: true})}>
 							<option value="" disabled>Select a database</option>
 							{ databaseOptions }
@@ -61,7 +61,7 @@ function Login({ databases }: { databases: string[] }) {
 						{errors.database && (
 							<div className={styles.loginErrorInfoText}>Please select a database</div>
 						)}
-					</div> */}
+					</div>}
 
 					<div className={`form-group ${styles.group}`}>
 						<input className="form-control" type="text" placeholder="Username" {...register("username", {required: true})} />
@@ -102,9 +102,11 @@ const getServerSideProps: GetServerSideProps = async (context: GetServerSideProp
     };
 
 	const response = await instance.get<string[]>('/api/db/names');
+	const { multi } = context.query;
 	return {
 		props: {
 			databases: response.data,
+			multi: !!multi
 		}
 	};
 };
