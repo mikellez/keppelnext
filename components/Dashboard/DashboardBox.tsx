@@ -19,7 +19,7 @@ export default function DashboardBox({ id, title, style, onClick, filter, classN
       className={combinedClassName} 
       style={{ ...style, ...(onClick ? { cursor: 'pointer' } : {}) }}
       onClick={onClick}
-      //{...props}
+      // {...props}
       >
       <header className={styles.dashboardHeader}>
         <h5>{title}</h5>

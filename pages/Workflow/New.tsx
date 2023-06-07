@@ -72,7 +72,8 @@ const WorkflowNew = ({
             fieldContent: [
                 {   
                     type: 'select', label: 'Please select the type of request', required: true, options: [
-                        { label: 'Fault Request', value: 1 }
+                        { label: 'Fault Request', value: 1 },
+                        { label: 'test', value: 2}
                     ] 
                 }
             ]
@@ -234,6 +235,8 @@ const WorkflowNew = ({
 
         console.log(timeline)
         console.log(formData)
+
+        return 
     }
 
     return (
@@ -357,7 +360,7 @@ const WorkflowNew = ({
                     onClick={() => {
                         setSaveSuccess(false);
                         setModalOpen(false);
-                        router.reload();
+                        router.back();
                     }}
                     className="btn btn-primary"
                 >
