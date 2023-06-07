@@ -76,8 +76,8 @@ const fetchAssignedChecklists = async (req, res, next) => {
     try {
         const result = await global.db.query(query, [req.user.id]);
         if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
-        console.log(result.rows);
-        console.log(totalPages);
+        // console.log(result.rows);
+        // console.log(totalPages);
         return res.status(200).json({ rows: result.rows, total: totalPages });
     } catch (error) {
         return res.status(500).json({ msg: error });
@@ -201,7 +201,7 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
             console.log(err);
             return res.status(500).json("No checklist template found");
         }
-        console.log(found);
+        // console.log(found);
         res.status(200).send(found.rows[0]);
     });
 };
