@@ -30,9 +30,13 @@ import Pagination from "../../components/Pagination";
 interface WorkflowItem {
   sn: string;
   id: string;
-  statement: string;
+  fault_type: string;
+  plant_name: string;
+  assigneduser?: string;
+  user_email?: string;
   created_at: Date;
   is_active: number;
+  statement: string;
   action: number;
 }
 
@@ -65,19 +69,27 @@ const Workflow = () => {
         setWorkflow(
           data.rows.map((item, index) => {
             let statement = "";
+            let action = 0;
             if (item.is_assign_to) {
-              statement = `When fault type at ${item.plant_name} is of type ${item.fault_type} then assign to ${item.user_name}`;
+              // statement = `When fault type at ${item.plant_name} is of type ${item.fault_type} then assign to ${item.user_name}`;
+              statement = `assign to`;
+              action = 1;
             } else if (item.is_send_email) {
-              statement = `When fault type at ${item.plant_name} is of type ${item.fault_type} then send email to ${item.user_email}`;
+              // statement = `When fault type at ${item.plant_name} is of type ${item.fault_type} then send email to ${item.user_email}`;
+              statement = `email to`;
+              action = 2;
             }
-
             return {
               sn: (index + 1).toString(),
               id: item.id.toString(),
-              statement: statement,
+              plant_name: item.plant_name,
+              fault_type: item.fault_type,
               created_at: new Date(item.created_at),
+              assigneduser: item.user_name,
+              user_email: item.user_email,
               is_active: item.is_active,
-              action: 1,
+              statement: statement,
+              action: action,
             };
           })
         );
@@ -147,7 +159,23 @@ const Workflow = () => {
   const COLUMNS: Column<WorkflowItem>[] = [
     { label: "S/N", renderCell: (item) => item.sn },
     { label: "ID", renderCell: (item) => item.id },
-    { label: "Workflow Statement", renderCell: (item) => item.statement },
+    {
+      label: "Workflow Statement",
+      renderCell: (item) =>
+        item.action == 1 ? (
+          <>
+            When fault type at <b>{item.plant_name}</b> is of type{" "}
+            <b>{item.fault_type}</b> then {item.statement}{" "}
+            <b>{item.assigneduser}</b>
+          </>
+        ) : (
+          <>
+            When fault type at <b>{item.plant_name}</b> is of type{" "}
+            <b>{item.fault_type}</b> then {item.statement}{" "}
+            <b>{item.user_email}</b>
+          </>
+        ),
+    },
     {
       label: "Created At",
       renderCell: (item) =>
