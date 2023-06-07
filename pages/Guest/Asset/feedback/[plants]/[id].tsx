@@ -21,6 +21,7 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import Link from "next/link";
 import {RequestProps } from "../../../../../components/Request/RequestContainer";
 import RequestGuestContainer from "../../../../../components/Request/RequestGuestContainer";
+import FeedbackContainer from "../../../../../components/Guest/FeedbackContainer";
 
 let user: boolean = false;
 
@@ -54,7 +55,8 @@ export default function RequestNew(props: RequestProps) {
             <ModuleHeader title="Feedback" header="Feedback">
             </ModuleHeader>
             <ModuleContent>
-                <RequestGuestContainer requestData={props} user={userbool}/>
+                <FeedbackContainer requestData={props} user={userbool}/>
+                {/* <RequestGuestContainer requestData={props} user={userbool}/> */}
             </ModuleContent>
         </ModuleMain>
     );
