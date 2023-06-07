@@ -60,6 +60,7 @@
 		"react-pro-sidebar": "^1.0.0-alpha.7",
 		"react-select": "^5.7.0",
 		"react-signature-canvas": "^1.0.6",
+		"react-star-ratings": "^2.3.0",
 		"react-to-print": "^2.14.11",
 		"recharts": "^2.4.3",
 		"sass": "^1.57.1",
@@ -72,6 +73,7 @@
 		"@types/nprogress": "^0.2.0",
 		"@types/react-modal": "^3.13.1",
 		"@types/react-signature-canvas": "^1.0.2",
+		"@types/react-star-ratings": "^2.3.0",
 		"kill-port": "^2.0.1"
 	},
 	"apidoc": {
