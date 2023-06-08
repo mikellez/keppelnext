@@ -274,12 +274,12 @@ function useChangeOfParts(
   );
 }
 
-function useWorkflow() {
+function useWorkflow(page: number) {
   const workflowFetcher = (url: string) =>
     instance
-      .get< CMMSWorkflow[] >(url)
+      .get< {rows : CMMSWorkflow[]; total : number }>(url)
       .then((response) => {
-        response.data.forEach((s: CMMSWorkflow) => {
+        response.data.rows.forEach((s: CMMSWorkflow) => {
           s.created_date = new Date(s.created_date);
         });
         return response.data;
@@ -288,7 +288,7 @@ function useWorkflow() {
         throw new Error(e);
       });
 
-  return useSWR<CMMSWorkflow[], Error>(
+  return useSWR<{rows : CMMSWorkflow[]; total:number}, Error>(
     [`/api/workflows`],
     workflowFetcher,
     { revalidateOnFocus: false }

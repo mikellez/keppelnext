@@ -7,7 +7,7 @@ const userAuth = require("./userAuth");
 const cron = require("node-cron");
 const axios = require("axios");
 const { dbConnection } = require("./db/dbAPI");
-
+const checklistGenerator = require("./services/checklistGenerator");
 const controllers = require("./controllers");
 const { apiLimiter, loginLimiter } = require("./rateLimiter");
 
@@ -187,4 +187,6 @@ app.prepare().then(() => {
   });
 
   task.start();
+
+  checklistGenerator.start();
 });

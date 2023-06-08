@@ -2,7 +2,7 @@ const passport = require("passport");
 const controllers = require("./controllers");
 const session = require("express-session");
 const multer = require("multer");
-const { fetchDBNames, dellocateGlobalDB } = require('./db/dbAPI');
+const { fetchDBNames, dellocateGlobalDB } = require("./db/dbAPI");
 
 const express = require("express");
 
@@ -57,7 +57,7 @@ router.post("/login", passport.authenticate("local", {}), (req, res) => {
  */
 router.post("/logout", (req, res) => {
   dellocateGlobalDB();
-  
+
   if (req.user === undefined)
     return res.status(400).json({ errormsg: "you are not logged in" });
 
@@ -93,9 +93,9 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
 
 /**
  * @api {get} /request/approved Get Approved Requests
- * @apiDescription Gets all requests with status of `APPROVED`. 
- * 
- * For operation specialists, only relevant approved requests will be returned. 
+ * @apiDescription Gets all requests with status of `APPROVED`.
+ *
+ * For operation specialists, only relevant approved requests will be returned.
  * @apiName GetApprovedRequests
  * @apiGroup Request
  *
@@ -132,49 +132,49 @@ router.get(
   controllers.request.fetchApprovedRequests
 );
 
-/** 
+/**
  * @api {get} /request/assigned Get Assigned Requests
- * @apiDescription Gets all requests with status of `ASSIGNED`. 
- * 
- * For operation specialists, only relevant assigned requests will be returned. 
- * 
+ * @apiDescription Gets all requests with status of `ASSIGNED`.
+ *
+ * For operation specialists, only relevant assigned requests will be returned.
+ *
  * Returns the same output schema as `/request/approved`
  * @apiName GetAssignedRequests
  * @apiGroup Request
- * 
+ *
  */
 router.get(
   "/request/assigned",
   checkIfLoggedInAPI,
   controllers.request.fetchAssignedRequests
 );
-/** 
+/**
  * @api {get} /request/review Get For Review Requests
  * @apiDescription Gets all requests with status of `COMPLETED`, `REJECTED`, `CANCELLED`.
- * 
- * For operation specialists, only relevant for review requests will be returned. 
- * 
- * 
+ *
+ * For operation specialists, only relevant for review requests will be returned.
+ *
+ *
  * Returns the same output schema as `/request/approved`
  * @apiName GetForReviewRequests
  * @apiGroup Request
- * 
+ *
  */
 router.get(
   "/request/review",
   checkIfLoggedInAPI,
   controllers.request.fetchReviewRequests
 );
-/** 
+/**
  * @api {get} /request/pending Get Pending Requests
  * @apiDescription Gets all requests with status of `PENDING`.
- * 
- * For operation specialists, only relevant pending requests will be returned. 
- * 
+ *
+ * For operation specialists, only relevant pending requests will be returned.
+ *
  * Returns the same output schema as `/request/approved`
  * @apiName GetPendingRequests
  * @apiGroup Request
- * 
+ *
  */
 
 router.get(
@@ -192,7 +192,7 @@ router.get(
  * @apiSuccess {Object[]} - Array containing the different request types and their corresponding ID
  * @apiSuccess {Number} req_id ID of the request type
  * @apiSuccess {String} request Name of the request type
- * 
+ *
  */
 router.get("/request/types", controllers.request.fetchRequestTypes);
 
@@ -234,7 +234,7 @@ router.get(
  * @apiGroup Request
  *
  * @apiParam {Number} request_id Request ID
- * 
+ *
  * @apiSuccess {Buffer} - Buffer of pdf
  */
 router.get("/request/pdf/:request_id", checkIfLoggedInAPI, sendRequestPDF);
@@ -246,7 +246,7 @@ router.get("/request/pdf/:request_id", checkIfLoggedInAPI, sendRequestPDF);
  * @apiGroup Request
  *
  * @apiParam {Number} request_id Request ID
- * 
+ *
  * @apiBody {String} complete_comments Comments on the completed checklist
  * @apiBody {File} completion_file Image of the completed task
  *
@@ -285,7 +285,7 @@ router.post(
  * @apiDescription Creates a new request which will have a status of `PENDING`.
  * @apiName GetSpecificRequest
  * @apiGroup Request
- * 
+ *
  * @apiParam {Number} request_id Request ID
  *
  * @apiUse RequestObject
@@ -296,12 +296,12 @@ router.post(
  * @apiDescription Creates a new request which will have a status of `PENDING`.
  * @apiName UpdateSpecificRequest
  * @apiGroup Request
- * 
+ *
  * @apiParam {Number} request_id Request ID
- * 
+ *
  * @apiBody {Object[]} priority Priority object
  * @apiBody {Number} -.p_id Priority ID
- * @apiBody {String} -.priority Name of priority 
+ * @apiBody {String} -.priority Name of priority
  * @apiBody {Object[]} assignedUser Object for assigned user
  * @apiBody {Number} -.value ID of assigned user
  * @apiBody {String} -.label Name of assigned user
@@ -320,7 +320,7 @@ router
  * @apiGroup Request
  *
  * @apiParam {Number} request_id Request ID
- * 
+ *
  * @apiSuccess {Buffer} - Uploaded file of the request
  */
 router
@@ -335,7 +335,7 @@ router
  *
  * @apiParam {Number} request_id Request ID
  * @apiParam {Number} status_id Status ID of request. Use 4 to approve and 5 to reject. Any other string params will default to reject.
- * 
+ *
  * @apiBody {String} comments Comments from the manager
  */
 router.patch(
@@ -368,14 +368,11 @@ router.get(
  * @apiGroup Request
  *
  * @apiParam {Number} plant_id Plant ID
- * 
+ *
  * @apiBody {Number} plant_id Plant ID
  * @apiBody {String} plant_name Plant name
  */
-router.get(
-  "/request/plant/:plant_id",
-  controllers.request.fetchPlantRequest
-);
+router.get("/request/plant/:plant_id", controllers.request.fetchPlantRequest);
 
 /**
  * @api {get} /request/asset/:psa_id Get Asset Details
@@ -384,94 +381,11 @@ router.get(
  * @apiGroup Request
  *
  * @apiParam {Number} psa_id  Plant System Assets ID
- * 
+ *
  * @apiBody {Number} psa_id  Plant System Assets ID
  * @apiBody {String} plant_asset_instrument Asset name
  */
-router.get(
-  "/request/asset/:psa_id",
-  controllers.request.fetchAssetRequest
-);
-
-
-router.get(
-  "/asset/systems",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchSystems
-);
-router.get(
-  "/asset/fetch_asset_types",
-  checkIfLoggedInAPI,
-  controllers.asset.fetch_asset_types
-);
-router.post(
-  "/asset/addNewAsset",
-  checkIfLoggedInAPI,
-  controllers.asset.addNewAsset
-);
-router.post(
-  "/asset/editAsset",
-  checkIfLoggedInAPI,
-  controllers.asset.editAsset
-);
-router.post(
-  "/asset/deleteAsset",
-  checkIfLoggedInAPI,
-  controllers.asset.deleteAsset
-);
-
-router.get(
-  "/asset/system/:system_id",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchSystemAssets
-);
-router.get(
-  "/asset/system/:plant_id/:system_id/:system_asset_id",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchSystemAssetNames
-);
-router.get(
-  "/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchSubComponent1Names
-);
-
-router.get(
-  "/asset/history/:psa_Id",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchAssetHistory
-);
-
-router.get(
-  "/asset/mobile/:plant_id",
-  checkIfLoggedInAPI,
-  controllers.asset.getSystemsFromPlant
-);
-
-router.get(
-  "/asset/mobile/:plant_id/:system_id",
-  checkIfLoggedInAPI,
-  controllers.asset.getSystemAssetsFromPlant
-);
-
-router.get(
-  "/asset/mobile/:psa_id/uploadedFile/:index",
-  controllers.asset.getUploadedFile
-);
-
-router.get(
-  "/asset/mobile/:plant_id/:system_id/:system_asset_id",
-  checkIfLoggedInAPI,
-  controllers.asset.getSystemAssetNamesFromPlant
-);
-
-router.get(
-  "/asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name",
-  checkIfLoggedInAPI,
-  controllers.asset.getSubComponentsFromPlant
-);
-
-
+router.get("/request/asset/:psa_id", controllers.request.fetchAssetRequest);
 
 /**
  * @apiDefine ChecklistDataJSON
@@ -479,8 +393,8 @@ router.get(
  * @apiSuccess {Object[]} -.datajson.rows Checklist Section (Each Section contain rows)
  * @apiSuccess {String} -.datajson.description Checklist Section Description
  * @apiSuccess {Object[]} -.datajson.rows.checks Checklist Row (Each Row contains checks)
- * @apiSuccess {String} -.datajson.rows.description Checklist Row Description 
- * @apiSuccess {String} -.datajson.rows.checks.type Check Type 
+ * @apiSuccess {String} -.datajson.rows.description Checklist Row Description
+ * @apiSuccess {String} -.datajson.rows.checks.type Check Type
  * @apiSuccess {String} -.datajson.rows.checks.question Check Question
  * @apiSuccess {Array} -.datajson.rows.checks.choices Check Choices for given Question
  * @apiSuccess {String} -.datajson.rows.checks.value Inputted Check Value
@@ -488,12 +402,12 @@ router.get(
 
 /**
  * @apiDefine SubmitChecklistDataJSON
- * 
+ *
  * @apiBody {Object[]} -.datajson Checklist Data
  * @apiBody {Object[]} -.datajson.rows Checklist Section (Each Section contain rows)
  * @apiBody {Object[]} -.datajson.rows.checks Checklist Row (Each Row contains checks)
- * @apiBody {String} -.datajson.rows.description Checklist Row Description 
- * @apiBody {String} -.datajson.rows.checks.type Check Type 
+ * @apiBody {String} -.datajson.rows.description Checklist Row Description
+ * @apiBody {String} -.datajson.rows.checks.type Check Type
  * @apiBody {String} -.datajson.rows.checks.question Check Question
  * @apiBody {Array} -.datajson.rows.checks.choices Check Choices for given Question
  * @apiBody {String} -.datajson.rows.checks.value Inputted Check Value
@@ -512,12 +426,12 @@ router.get(
  * @api {get} /notAnActualRoute Checklist DataJSON format
  * @apiDescription Checklist DataJSON format
  * @apiGroup Checklist
- * 
+ *
  * @apiSuccess {Object[]} datajson Checklist Data
  * @apiSuccess {Object[]} datajson.rows Checklist Section (Each Section contain rows)
  * @apiSuccess {Object[]} datajson.rows.checks Checklist Row (Each Row contains checks)
- * @apiSuccess {String} datajson.rows.description Checklist Row Description 
- * @apiSuccess {String} datajson.rows.checks.type Check Type 
+ * @apiSuccess {String} datajson.rows.description Checklist Row Description
+ * @apiSuccess {String} datajson.rows.checks.type Check Type
  * @apiSuccess {String} datajson.rows.checks.question Check Question
  * @apiSuccess {Array} datajson.rows.checks.choices Check Choices for given Question
  * @apiSuccess {String} datajson.rows.checks.value Inputted Check Value
@@ -529,17 +443,17 @@ router.get(
  * @apiDescription Gets a single checklist template based on given checklist_id
  * @apiName GetSingleChecklistTemplate
  * @apiGroup Checklist
- * 
+ *
  * @apiParam {String} checklist_id Checklist Template unique ID
- * 
+ *
  * @apiSuccess {Object} - Object containing the specified checklist template's details
- * @apiSuccess {String} -.chl_name Checklist Name 
+ * @apiSuccess {String} -.chl_name Checklist Name
  * @apiSuccess {String} -.description Checklist Description
  * @apiSuccess {Number} -.plant_id Plant ID
  * @apiSuccess {Number} -.signoff_user_id Signoff User ID
  * @apiSuccess {Number} -.status_id Template Status (currently deprecated)
  * @apiUse ChecklistDataJSON
- * 
+ *
  * @apiError (Error 500) {String} InternalServerError "No checklist template found"
  */
 
@@ -554,10 +468,10 @@ router.get(
  * @apiBody {String} checklist.description Checklist Description
  * @apiBody {Number} checklist.signoff_user_id Signoff User ID
  * @apiBody {Number} checklist.plant_id Plant ID of Checklist
- * @apiUse SubmitChecklistDataJSON 
- * 
+ * @apiUse SubmitChecklistDataJSON
+ *
  * @apiSuccess {String} Created "New checklist successfully created"
- * 
+ *
  * @apiError (Error 500) {String} InternalServerError "Failure to create new checklist"
  */
 
@@ -566,11 +480,11 @@ router.get(
  * @apiDescription Delete a Checklist Template based on given Checklist ID
  * @apiName DeleteChecklistTemplate
  * @apiGroup Checklist
- * 
+ *
  * @apiParam {String} checklist_id Checklist Template unique ID
- * 
+ *
  * @apiSuccess {String} Success "Template successfully deleted"
- * 
+ *
  * @apiError (Error 500) {String} InternalServerError "Failure to delete template"
  */
 router
@@ -584,9 +498,9 @@ router
  * @apiDescription Get all Assigned Checklists
  * @apiName GetAssignedChecklists
  * @apiGroup Checklist
- * 
+ *
  * @apiQuery {String} page Page Number
- * 
+ *
  * @apiSuccess {Object} - Object containing "Assigned" Checklists Array and side information
  * @apiSuccess {Object[]} -.rows Checklists Array
  * @apiSuccess {Number} -.rows.checklist_id Checklist ID
@@ -609,7 +523,7 @@ router
  * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
  * @apiSuccess {String} -.rows.status Status (Should be "ASSIGNED")
  * @apiSuccess {Number} -.total Total Pages of "Assigned" Checklists
- * 
+ *
  * @apiError (Error 204) {Object} NoContent {msg: "No checklist"}
  * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
  */
@@ -617,15 +531,14 @@ router
   .route("/checklist/assigned", checkIfLoggedInAPI)
   .get(controllers.checklist.fetchAssignedChecklists);
 
-
 /**
  * @api {get} /checklist/record Get For Review Checklists
  * @apiDescription Get all For Review Checklists
  * @apiName GetForReviewChecklists
  * @apiGroup Checklist
- * 
+ *
  * @apiQuery {String} page Page Number
- * 
+ *
  * @apiSuccess {Object} - Object containing "For Review" Checklists Array and side information
  * @apiSuccess {Object[]} -.rows "For Review" Checklists Array
  * @apiSuccess {Number} -.rows.checklist_id Checklist ID
@@ -648,7 +561,7 @@ router
  * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
  * @apiSuccess {String} -.rows.status Status (Should be "WORK DONE / REJECTED") - REJECTED is deprecated
  * @apiSuccess {Number} -.total Total Pages of "For Review" Checklists
- * 
+ *
  * @apiError (Error 204) {Object} NoContent {msg: "No checklist"}
  * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
  */
@@ -658,13 +571,13 @@ router
  * @apiDescription Gets a single checklist record based on the given checklist_id
  * @apiName GetSingleChecklistRecord
  * @apiGroup Checklist
- * 
+ *
  * @apiParam {String} checklist_id Record unique ID
- * 
+ *
  * @apiSuccess {Object} - Object containing the specified checklist record's details
  * @apiSuccess {Number} -.checklist_id Checklist(record) ID
  * @apiSuccess {Number} -.chl_name Checklist(record) Name
- * 
+ *
  * @apiError (Error 500) {String} InternalServerError "No checklist template found"
  */
 
@@ -673,7 +586,7 @@ router
  * @apiDescription Create a new Checklist Record
  * @apiName CreateChecklistRecord
  * @apiGroup Checklist
- * 
+ *
  * @apiBody {Object} checklist Checklist Record
  * @apiBody {String} checklist.chl_name Checklist Template Name
  * @apiBody {String} checklist.description Checklist Description
@@ -682,21 +595,21 @@ router
  * @apiBody {String} checklist.linkedassetids IDs of assets linked to the checklist
  * @apiBody {Number} checklist.plant_id Plant ID of Checklist
  * @apiUse SubmitChecklistDataJSON
- * 
+ *
  * @apiSuccess {String} Created "New checklist successfully created"
- * 
+ *
  * @apiError (Error 500) {String} InternalServerError "Failure to create new checklist"
  */
 
 /**
  * @api {patch} /checklist/record/:checklist_id Edit a Pending / Assigned Checklist Record
- * @apiDescription Edit an existing Pending / Assigned Checklist Record  
+ * @apiDescription Edit an existing Pending / Assigned Checklist Record
  * Responsible for updating Checklist Record from Pending to Assigned as well
  * @apiName EditPendingChecklistRecord
  * @apiGroup Checklist
- * 
+ *
  * @apiParam {String} checklist_id The ID of the Pending Checklist Record
- * 
+ *
  * @apiBody {Object} checklist Checklist Record
  * @apiBody {String} checklist.chl_name Checklist Template Name
  * @apiBody {String} checklist.description Checklist Description
@@ -704,9 +617,9 @@ router
  * @apiBody {Number} checklist.signoff_user_id Signoff User ID
  * @apiBody {String} checklist.linkedassetids IDs of assets linked to the checklist
  * @apiBody {Number} checklist.plant_id Plant ID of Checklist
- * 
+ *
  * @apiSuccess {String} Success "Checklist successfully assigned/updated"
- * 
+ *
  * @apiError (Error 500) {String} InternalServerError "Failure to update checklist"
  */
 router
@@ -715,15 +628,14 @@ router
   .post(controllers.checklist.createNewChecklistRecord)
   .patch(controllers.checklist.editChecklistRecord);
 
-
 /**
  * @api {get} /checklist/approved Get Approved Checklists
  * @apiDescription Get all Approved Checklists
  * @apiName GetApprovedChecklists
  * @apiGroup Checklist
- * 
+ *
  * @apiQuery {String} page Page Number
- * 
+ *
  * @apiSuccess {Object} - Object containing "Approved" Checklists Array and side information
  * @apiSuccess {Object[]} -.rows Checklists Array
  * @apiSuccess {Number} -.rows.checklist_id Checklist ID
@@ -746,7 +658,7 @@ router
  * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
  * @apiSuccess {String} -.rows.status Status (Should be "APPROVED")
  * @apiSuccess {Number} -.total Total Pages of "Approved" Checklists
- * 
+ *
  * @apiError (Error 204) {Object} NoContent {msg: "No checklist"}
  * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
  */
@@ -756,15 +668,14 @@ router.get(
   controllers.checklist.fetchApprovedChecklists
 );
 
-
 /**
  * @api {get} /checklist/pending Get Pending Checklists
  * @apiDescription Get all Pending Checklists
  * @apiName GetPendingChecklists
  * @apiGroup Checklist
- * 
+ *
  * @apiQuery {String} page Page Number
- * 
+ *
  * @apiSuccess {Object} - Object containing "Pending" Checklists Array and side information
  * @apiSuccess {Object[]} -.rows Checklists Array
  * @apiSuccess {Number} -.rows.checklist_id Checklist ID
@@ -787,7 +698,7 @@ router.get(
  * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
  * @apiSuccess {String} -.rows.status Status (Should be "PENDING")
  * @apiSuccess {Number} -.total Total Pages of "Pending" Checklists
- * 
+ *
  * @apiError (Error 204) {Object} NoContent {msg: "No checklist"}
  * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
  */
@@ -802,9 +713,9 @@ router.get(
  * @apiDescription Get all Template Names
  * @apiName GetTemplateNames
  * @apiGroup Checklist
- * 
+ *
  * @apiParam {String} id Plant ID
- * 
+ *
  * @apiSuccess  {Object[]} - Array of Template Objects
  * @apiSuccess {Number} -.checklist_id Checklist Template ID
  * @apiSuccess {String} -.chl_name Checklist Name
@@ -821,7 +732,7 @@ router.get(
  * @apiSuccess {String} -.rows.history Deprecated.
  * @apiSuccess {Number} -.rows.status_id Deprecated.
  * @apiSuccess {String} -.rows.fromtemplateid Deprecated.
- * 
+ *
  * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
  */
 router.get(
@@ -832,21 +743,21 @@ router.get(
 
 /**
  * @api {get} /checklist/counts/:field/:plant/:datetype/:date Get Checklist Records Counts
- * @apiDescription Get Checklist Records Counts organised by status 
+ * @apiDescription Get Checklist Records Counts organised by status
  * @apiName GetChecklistRecordsCount
  * @apiGroup Checklist
- * 
+ *
  * @apiParam {String} field "status", else there will be error status of 404 thrown
- * @apiParam {String} plant Plant ID.  
+ * @apiParam {String} plant Plant ID.
  * 0 for all Plants or respective plant IDs
  * @apiParam {String} datetype "date", "week", "month", "quarter" or "year"
  * @apiParam {String} date "all" or "YYYY-MM-DD"
- * 
+ *
  * @apiSuccess {Object[]} - Array of Checklist Records Counts organised by status
  * @apiSuccess {String} -.name Checklist Record Status Name
  * @apiSuccess {Number} -.name Checklist Record Status ID
  * @apiSuccess {String} -.name Number of Checklist Records of given status
- * 
+ *
  * @apiError (Error 404) {String} NotFound Invalid "Checklist Type of ${field}"
  * @apiError (Error 500) {String} InternalServerError "Error in fetching checklist status for dashboard"
  */
@@ -856,20 +767,19 @@ router.get(
   controllers.checklist.fetchChecklistCounts
 );
 
-
 /**
- * @api {patch} /checklist/complete/:checklist_id Complete an existing checklist 
- * @apiDescription Complete an existing checklist  
+ * @api {patch} /checklist/complete/:checklist_id Complete an existing checklist
+ * @apiDescription Complete an existing checklist
  * Checklist will go into "For Review" if successful
  * @apiName CompleteChecklist
  * @apiGroup Checklist
- * 
+ *
  * @apiParam {String} checklist_id The ID of the "Assigned" checklist record
- * 
+ *
  * @apiUse SubmitChecklistDataJSON
- * 
+ *
  * @apiSuccess {String} Success "Checklist successfully completed"
- * 
+ *
  * @apiError (Error 500) {String} InternalServerError "Failure to update checklist completion"
  */
 router.patch(
@@ -880,17 +790,17 @@ router.patch(
 
 /**
  * @api {get} /checklist/filter/:status/:plant/:datetype/:date Get Filtered Checklist Records
- * @apiDescription  Get Filtered Checklist Records 
+ * @apiDescription  Get Filtered Checklist Records
  * @apiName GetFilteredChecklistsRecords
  * @apiGroup Checklist
- * 
- * @apiParam {String} status Single or multiple statuses  
+ *
+ * @apiParam {String} status Single or multiple statuses
  * If multiple statuses, put in the following format eg. .../3, 4, 5, 6/...
- * @apiParam {String} plant Plant ID.  
+ * @apiParam {String} plant Plant ID.
  * 0 for all Plants or respective plant IDs
  * @apiParam {String} datetype "date", "week", "month", "quarter" or "year"
  * @apiParam {String} date "all" or "YYYY-MM-DD"
- * 
+ *
  * @apiSuccess {Object} - Object containing filtered Checklists Array and side information
  * @apiSuccess {Object[]} -.rows Checklists Array
  * @apiSuccess {Number} -.rows.checklist_id Checklist ID
@@ -913,7 +823,7 @@ router.patch(
  * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
  * @apiSuccess {String} -.rows.status Status Name
  * @apiSuccess {Number} -.total Total Pages of filtered Checklists
- * 
+ *
  * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
  * @apiError (Error 204) {Object} NoContent {msg: "No checklist"}
  */
@@ -928,15 +838,15 @@ router.get(
  * @apiDescription  Get Filtered Checklist Records by Page
  * @apiName GetFilteredChecklistsRecordsByPage
  * @apiGroup Checklist
- * 
- * @apiParam {String} status Single or multiple statuses  
+ *
+ * @apiParam {String} status Single or multiple statuses
  * If multiple statuses, put in the following format eg. .../3, 4, 5, 6/...
- * @apiParam {String} plant Plant ID.  
+ * @apiParam {String} plant Plant ID.
  * 0 for all Plants or respective plant IDs
  * @apiParam {String} datetype "date", "week", "month", "quarter" or "year"
  * @apiParam {String} date "all" or "YYYY-MM-DD"
  * @apiParam {String} page Page Number
- * 
+ *
  * @apiSuccess {Object} - Object containing filtered Checklists Array and side information
  * @apiSuccess {Object[]} -.rows Checklists Array
  * @apiSuccess {Number} -.rows.checklist_id Checklist ID
@@ -959,7 +869,7 @@ router.get(
  * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
  * @apiSuccess {String} -.rows.status Status Name
  * @apiSuccess {Number} -.total Total Pages of filtered Checklists
- * 
+ *
  * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
  * @apiError (Error 204) {Object} NoContent {msg: "No checklist"}
  */
@@ -970,18 +880,18 @@ router.get(
 );
 
 /**
- * @api {patch} /checklist/approve/:checklist_id Approve an existing checklist 
- * @apiDescription Approve an existing checklist  
+ * @api {patch} /checklist/approve/:checklist_id Approve an existing checklist
+ * @apiDescription Approve an existing checklist
  * Checklist will go into "Approved" if successful
  * @apiName ApproveChecklist
  * @apiGroup Checklist
- * 
+ *
  * @apiParam {String} checklist_id The ID of the "Work Done" checklist record
- * 
+ *
  * @apiBody {String} remarks Approval Remarks
- * 
+ *
  * @apiSuccess {String} Success "Checklist successfully approved"
- * 
+ *
  * @apiError (Error 500) {String} InternalServerError "Failure to update checklist approval"
  */
 router.patch(
@@ -990,20 +900,19 @@ router.patch(
   controllers.checklist.updateChecklist("approve")
 );
 
-
 /**
- * @api {patch} /checklist/approve/:checklist_id Reject an existing checklist 
- * @apiDescription Reject an existing checklist  
+ * @api {patch} /checklist/approve/:checklist_id Reject an existing checklist
+ * @apiDescription Reject an existing checklist
  * Checklist will go into "Reassigned" if successful
  * @apiName RejectChecklist
  * @apiGroup Checklist
- * 
+ *
  * @apiParam {String} checklist_id The ID of the "Work Done" checklist record
- * 
+ *
  * @apiBody {String} remarks Rejection Remarks
- * 
+ *
  * @apiSuccess {String} Success "Checklist successfully rejected"
- * 
+ *
  * @apiError (Error 500) {String} InternalServerError "Failure to update checklist rejection"
  */
 router.patch(
@@ -1017,11 +926,11 @@ router.patch(
  * @apiDescription Get Checklist Record PDF
  * @apiName getChecklistRecordPDF
  * @apiGroup Checklist
- * 
- * @apiParam {String} checklist_id The ID of the Checklist Record 
- * 
+ *
+ * @apiParam {String} checklist_id The ID of the Checklist Record
+ *
  * @apiSuccess {ArrayBuffer} - Checklist PDF in ArrayBuffer format
- * 
+ *
  * @apiError (Error 400) {String} BadRequest "No checklist found"
  * @apiError (Error 500) {String} InternalServerError "Error in generating PDF"
  */
@@ -1036,9 +945,9 @@ router.get(
  * @apiDescription Get CSV file of Checklist Records of a specific status/statuses
  * @apiName GetCSVChecklistRecords
  * @apiGroup Checklist
- * 
+ *
  * @apiQuery {String} activeTab
- * 
+ *
  * @apiSuccess {ArrayBuffer} - Checklist CSV in ArrayBuffer format
  * @apiError (Error 400) {String} BadRequest "No checklist found"
  * @apiError (Error 500) {String} InternalServerError "Error in generating csv file"
@@ -1048,7 +957,6 @@ router.get(
   checkIfLoggedInAPI,
   controllers.checklist.createChecklistCSV
 );
-
 
 /**
  * @api {get} /fault/type Get Fault Types
@@ -1062,6 +970,17 @@ router.get(
  */
 
 router.get("/fault/types", controllers.fault.fetchFaultTypes);
+
+router.get(
+  "/asset/systems",
+  checkIfLoggedInAPI,
+  controllers.asset.fetchSystems
+);
+router.get(
+  "/asset/fetch_asset_types",
+  checkIfLoggedInAPI,
+  controllers.asset.fetch_asset_types
+);
 
 /**
  * @api {get} /asset Get Asset Table
@@ -1091,7 +1010,6 @@ router.get("/fault/types", controllers.fault.fetchFaultTypes);
 router.get("/asset/:plant_id", controllers.asset.getAssetsFromPlant);
 router.get("/assets", controllers.asset.getAllAssets);
 router.get("/asset", controllers.asset.getAssetHierarchy);
-
 
 /**
  * @api {get} /assetDetails/:psa_id Get Asset Details 
@@ -1125,10 +1043,16 @@ router.get("/asset", controllers.asset.getAssetHierarchy);
 
  */
 router.get("/assetDetails/:psa_id", controllers.asset.getAssetDetails);
-router.get("/asset/history/:type/:id",checkIfLoggedInAPI,controllers.asset.getAssetHistory);
-router.get("/asset/Details/:psa_id",checkIfLoggedInAPI,controllers.asset.getAssetDetails);
-router.get("/asset/systems",checkIfLoggedInAPI,controllers.asset.fetchSystems);
-router.get("/asset/fetch_asset_types",checkIfLoggedInAPI,controllers.asset.fetch_asset_types);
+router.get(
+  "/asset/history/:type/:id",
+  checkIfLoggedInAPI,
+  controllers.asset.getAssetHistory
+);
+router.get(
+  "/asset/Details/:psa_id",
+  checkIfLoggedInAPI,
+  controllers.asset.getAssetDetails
+);
 
 
 /**
@@ -1154,11 +1078,15 @@ router.get("/asset/fetch_asset_types",checkIfLoggedInAPI,controllers.asset.fetch
  * @apiSuccess {number} -.system_asset_lvl7 System_asset_lvl7 of the asset
  * @apiSuccess {string} -.uploaded_image Image of the asset
  * @apiSuccess {jsonb} -.uploaded_files Files pertaining to the asset
- * @apiSuccess {string} -.plant_id Plant ID of the asset       
- * 
+ * @apiSuccess {string} -.plant_id Plant ID of the asset
+ *
  *
  */
-router.post("/asset/addNewAsset",checkIfLoggedInAPI,controllers.asset.addNewAsset);
+router.post(
+  "/asset/addNewAsset",
+  checkIfLoggedInAPI,
+  controllers.asset.addNewAsset
+);
 
 /**
  * @api {post} /editAsset Edit Asset
@@ -1179,17 +1107,24 @@ router.post("/asset/addNewAsset",checkIfLoggedInAPI,controllers.asset.addNewAsse
  * 
  *
  */
-router.post("/asset/editAsset",checkIfLoggedInAPI,controllers.asset.editAsset);
+router.post(
+  "/asset/editAsset",
+  checkIfLoggedInAPI,
+  controllers.asset.editAsset
+);
 
 /**
  * @api {post} /deleteAsset Delete Asset
- * @apiDescription Delete an asset. 
+ * @apiDescription Delete an asset.
  * @apiGroup Asset
  * @apiSuccess {number} -.psa_id Psa ID of the asset
  *
  */
-router.post("/asset/deleteAsset",checkIfLoggedInAPI,controllers.asset.deleteAsset);
-
+router.post(
+  "/asset/deleteAsset",
+  checkIfLoggedInAPI,
+  controllers.asset.deleteAsset
+);
 
 /**
  * @api {get} /fetchSystemAsset Gets all system assets(lvl 5) for the asset table
@@ -1200,7 +1135,11 @@ router.post("/asset/deleteAsset",checkIfLoggedInAPI,controllers.asset.deleteAsse
  * @apiSuccess {nukber} -.system_asset_id System Asset IDs
  *
  */
-router.get("/asset/system/:system_id",checkIfLoggedInAPI,controllers.asset.fetchSystemAssets);
+router.get(
+  "/asset/system/:system_id",
+  checkIfLoggedInAPI,
+  controllers.asset.fetchSystemAssets
+);
 /**
  * @api {get} /fetchSystemAssetNames Gets all system asset names(lvl 6) for the asset table
  * @apiDescription Gets all the system asset names to display on the asset table
@@ -1209,7 +1148,11 @@ router.get("/asset/system/:system_id",checkIfLoggedInAPI,controllers.asset.fetch
  * @apiSuccess {string} -.system_asset_lvl6 System Asset Names
  *
  */
-router.get("/asset/system/:plant_id/:system_id/:system_asset_id",checkIfLoggedInAPI,controllers.asset.fetchSystemAssetNames);
+router.get(
+  "/asset/system/:plant_id/:system_id/:system_asset_id",
+  checkIfLoggedInAPI,
+  controllers.asset.fetchSystemAssetNames
+);
 /**
  * @api {get} /fetchSubComponent1Names Gets all Sub-Component-1 Names(lvl 7) for the asset table
  * @apiDescription Gets all the Component names to display on the asset table
@@ -1218,7 +1161,11 @@ router.get("/asset/system/:plant_id/:system_id/:system_asset_id",checkIfLoggedIn
  * @apiSuccess {string} -.system_asset_lvl7 Component Names
  *
  */
-router.get("/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",checkIfLoggedInAPI,controllers.asset.fetchSubComponent1Names);
+router.get(
+  "/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_name_id",
+  checkIfLoggedInAPI,
+  controllers.asset.fetchSubComponent1Names
+);
 /**
  * @api {get} /fetchAssetHistory Gets History of the asset 
  * @apiDescription Retrieves Asset History when viewing the asset details page
@@ -1232,64 +1179,128 @@ router.get("/asset/system/:plant_id/:system_id/:system_asset_id/:system_asset_na
 
  *
  */
-router.get("/asset/history/:psa_Id",checkIfLoggedInAPI,controllers.asset.fetchAssetHistory);
+router.get(
+  "/asset/history/:psa_Id",
+  checkIfLoggedInAPI,
+  controllers.asset.fetchAssetHistory
+);
 
 /**
- * @api {get} /getSystemsFromPlant Gets all systems from plant
- * @apiDescription Gets list of all Systems for Mobile Asset Table
- * @apiName getSystemsFromPlant
- * @apiGroup Asset
- * @apiSuccess {string} -.system_id System IDs for particular plant
-
-
+ * @api {GET} /asset/mobile/:plant_id Get Systems
+ * @apiDescription Gets all the systems in a specific plant
+ * @apiName GetSystemsFromPlant
+ * @apiGroup Assets Mobile
+ *
+ * @apiParam {Number} plant_id The ID of the Plant
+ *
+ * @apiSuccess {Object[]} - Containing all the system objects
+ * @apiSuccess {string} -.system_name System Name
+ * @apiSuccess {integer} -.system_id System ID
  *
  */
-router.get("/asset/mobile/:plant_id",checkIfLoggedInAPI,controllers.asset.getSystemsFromPlant);
+
+router.get(
+  "/asset/mobile/:plant_id",
+  checkIfLoggedInAPI,
+  controllers.asset.getSystemsFromPlant
+);
 
 /**
- * @api {get} /getSystemAssetsFromPlant Gets all Systems Assets from plant
- * @apiDescription Gets list of all Systems Assets for Mobile Asset Table
- * @apiName getSystemAssetsFromPlant
- * @apiGroup Asset
- * @apiSuccess {string} -.system_asset_lvl5 System Assets for particular plant
-
-
+ * @api {GET} /asset/mobile/:plant_id/:system_id Get System Assets
+ * @apiDescription Gets all the systems assets of a specific plant and system
+ * @apiName GetSystemsAssetsFromPlant
+ * @apiGroup Assets Mobile
+ *
+ * @apiParam {Number} plant_id The ID of the Plant
+ * @apiParam {Number} system_id The ID of the System
+ *
+ * @apiSuccess {Object[]} - Containing all the system asset objects
+ * @apiSuccess {string} -.system_asset_lvl5 System Asset
  *
  */
-router.get("/asset/mobile/:plant_id/:system_id",checkIfLoggedInAPI,controllers.asset.getSystemAssetsFromPlant);
+
+router.get(
+  "/asset/mobile/:plant_id/:system_id",
+  checkIfLoggedInAPI,
+  controllers.asset.getSystemAssetsFromPlant
+);
+
 /**
- * @api {get} /getUploadedFile Gets File for Asset
- * @apiDescription Retrieves Asset file when viewing the asset details page on Mobile
- * @apiName getUploadedFile
- * @apiGroup Asset
- * @apiSuccess {jsonb} -.uploaded_files Uploaded Files for the Asset
-
-
+ * @api {GET} /asset/mobile/:psa_id/uploadedFile/:index Get Uploaded File
+ * @apiDescription Gets a file from an array of files uploaded for an asset
+ * @apiName GetUploadedFile
+ * @apiGroup Assets Mobile
+ *
+ * @apiParam {Number} psa_id The ID of the Plant Sytem Asset
+ * @apiParam {Number} index The index of the file in the array of uploaded files
+ *
+ * @apiSuccess {Buffer[]} - Contains file in buffer array format
  *
  */
-router.get("/asset/mobile/:psa_id/uploadedFile/:index",controllers.asset.getUploadedFile);
+
+router.get(
+  "/asset/mobile/:psa_id/uploadedFile/:index",
+  controllers.asset.getUploadedFile
+);
+
 /**
- * @api {get} /getSystemAssetNamesFromPlant Gets all Systems Asset Names from plant
- * @apiDescription Gets list of all Systems Asset Names for Mobile Asset Table
- * @apiName getSystemAssetNamesFromPlant
- * @apiGroup Asset
- * @apiSuccess {string} -.system_asset_lvl6 System Asset Names for particular plant
-
-
+ * @api {GET} /asset/mobile/:plant_id/:system_id/:system_asset_id Get System Asset Names
+ * @apiDescription Gets all the systems asset names of an asset with a specific plant, system and system asset
+ * @apiName GetSystemsAssetNamesFromPlant
+ * @apiGroup Assets Mobile
+ *
+ * @apiParam {Number} plant_id The ID of the Plant
+ * @apiParam {Number} system_id The ID of the System
+ * @apiParam {String} system_asset_id The name of the System Asset
+ *
+ * @apiSuccess {Object} -
+ * @apiSuccess {Object} -.dict An object containing all the assets whose parent asset is NOT THE SAME as their asset types with the key being the asset's asset type
+ * @apiSuccess {Object[]} -.dict.assetType Contains all the assets with the same asset types
+ * @apiSuccess {String} -.dict.assetTypes.pai Plant Asset Instrument
+ * @apiSuccess {Number} -.dict.assetTypes.psa_id Plant Asset ID
+ * @apiSuccess {Object[]} -.pai All the assets whose parent asset is the SAME as their asset types
+ * @apiSuccess {String} -.pai.pai Plant Asset Instrument
+ * @apiSuccess {String} -.pai.prev_level Previous level of the asset
+ * @apiSuccess {String} -.pai.psa_id Plant Asset ID
  *
  */
-router.get("/asset/mobile/:plant_id/:system_id/:system_asset_id",checkIfLoggedInAPI,controllers.asset.getSystemAssetNamesFromPlant);
+
+router.get(
+  "/asset/mobile/:plant_id/:system_id/:system_asset_id",
+  checkIfLoggedInAPI,
+  controllers.asset.getSystemAssetNamesFromPlant
+);
+
 /**
- * @api {get} /getSubComponentsFromPlant Gets all Sub Components from plant
- * @apiDescription Gets list of all Sub Components for Mobile Asset Table
- * @apiName getSubComponentsFromPlant
- * @apiGroup Asset
- * @apiSuccess {string} -.system_asset_lvl7  Sub Components for particular plant
-
-
+ * @api {GET} /asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name Get Sub Components
+ * @apiDescription Gets all the subcomponents of an asset with the provided parameters
+ * @apiName GetSubComponentsFromPlant
+ * @apiGroup Assets Mobile
+ *
+ * @apiParam {Number} plant_id The ID of the Plant
+ * @apiParam {Number} system_id The ID of the System
+ * @apiParam {String} system_asset_id The name of the System Asset
+ * @apiParam {String} system_asset_name The name of the System Asset Name
+ *
+ * @apiSuccess {Object} -
+ * @apiSuccess {Object} -.dict An object containing all the assets whose parent asset is NOT THE SAME as their asset types with the key being the asset's asset type
+ * @apiSuccess {Object[]} -.dict.assetType Contains all the assets with the same asset types
+ * @apiSuccess {String} -.dict.assetTypes.pai Plant Asset Instrument
+ * @apiSuccess {Number} -.dict.assetTypes.psa_id Plant Asset ID
+ * @apiSuccess {Object[]} -.pai All the assets whose parent asset is the SAME as their asset types
+ * @apiSuccess {String} -.pai.pai Plant Asset Instrument
+ * @apiSuccess {String} -.pai.prev_level Previous level of the asset
+ * @apiSuccess {String} -.pai.psa_id Plant Asset ID
+ * @apiSuccess {Object[]} -.subComponents Contains all the assets that have a sub component 2 level
+ * @apiSuccess {String} -.subComponents.system_asset_lvl7 Sub Component 2
  *
  */
-router.get("/asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name",checkIfLoggedInAPI,controllers.asset.getSubComponentsFromPlant);
+
+router.get(
+  "/asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name",
+  checkIfLoggedInAPI,
+  controllers.asset.getSubComponentsFromPlant
+);
 
 /**
  * @api {get} /master/new Get Table Metadata
@@ -1459,8 +1470,16 @@ router
   .get("/user/getUsers", checkIfLoggedInAPI, controllers.user.getUsers)
   .get("/user/getUsersCSV", checkIfLoggedInAPI, controllers.user.getUsersCSV)
   .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser)
-  .get("/user/getUsersData/:id", checkIfLoggedInAPI, controllers.user.getUsersData)
-  .get("/user/getUsersplantData/:id", checkIfLoggedInAPI, controllers.user.getUsersplantData)
+  .get(
+    "/user/getUsersData/:id",
+    checkIfLoggedInAPI,
+    controllers.user.getUsersData
+  )
+  .get(
+    "/user/getUsersplantData/:id",
+    checkIfLoggedInAPI,
+    controllers.user.getUsersplantData
+  )
   .post("/user/addUser", checkIfLoggedInAPI, controllers.user.addUser)
   .post("/user/updateUser", checkIfLoggedInAPI, controllers.user.updateUser);
 
@@ -1478,17 +1497,29 @@ router
     checkIfLoggedInAPI,
     controllers.setting.updatePassword
   )
-  .get("/setting/check/email/:id", checkIfLoggedInAPI, controllers.setting.checkEmail)
-  .get("/setting/check/username/:id", checkIfLoggedInAPI, controllers.setting.checkUsername);
+  .get(
+    "/setting/check/email/:id",
+    checkIfLoggedInAPI,
+    controllers.setting.checkEmail
+  )
+  .get(
+    "/setting/check/username/:id",
+    checkIfLoggedInAPI,
+    controllers.setting.checkUsername
+  );
 
 router
-    .get("/workflow/run/assign", controllers.workflow.runWorkflowAssign)
-    .get("/workflow/run/email", controllers.workflow.runWorkflowEmail)
-    .get("/workflows", checkIfLoggedInAPI, controllers.workflow.listWorkflow)
-    .post("/workflow", checkIfLoggedInAPI, controllers.workflow.createWorkflow)
-    .put("/workflow/:id", checkIfLoggedInAPI, controllers.workflow.updateWorkflow)
-    .delete("/workflow/:id", checkIfLoggedInAPI, controllers.workflow.deleteWorkflow);
-    //.get("/workflow/run/checklist", controllers.workflow.runWorkflowChecklist);
+  .get("/workflow/run/assign", controllers.workflow.runWorkflowAssign)
+  .get("/workflow/run/email", controllers.workflow.runWorkflowEmail)
+  .get("/workflows", checkIfLoggedInAPI, controllers.workflow.listWorkflow)
+  .post("/workflow", checkIfLoggedInAPI, controllers.workflow.createWorkflow)
+  .put("/workflow/:id", checkIfLoggedInAPI, controllers.workflow.updateWorkflow)
+  .delete(
+    "/workflow/:id",
+    checkIfLoggedInAPI,
+    controllers.workflow.deleteWorkflow
+  );
+//.get("/workflow/run/checklist", controllers.workflow.runWorkflowChecklist);
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
 
