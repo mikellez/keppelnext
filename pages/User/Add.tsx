@@ -34,6 +34,7 @@ export default function AddUser(props: AddUserProps) {
 		setform((prevState) => {
 		  return { ...prevState, [e.target.name]: e.target.value };
 		});
+				console.log(form);
 	  };
 	const handleFormNumber =(
 		e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
@@ -41,6 +42,8 @@ export default function AddUser(props: AddUserProps) {
 		setform((prevState) => {
 			return { ...prevState, [e.target.name]: Number(e.target.value) };
 		})
+		console.log(form);
+
 	}
 
 	function validate(){
@@ -62,11 +65,13 @@ export default function AddUser(props: AddUserProps) {
 		console.log(err);
 	}
 
+
 			
 		
 		
 	}
 	return (
+		
 		<ModuleMain>
 			<ModuleHeader header="Add User" title="Add User">
 
@@ -153,10 +158,10 @@ export default function AddUser(props: AddUserProps) {
 						onChange={handleFormNumber}
 						name="roleType">
 							<option value={0} disabled hidden selected> -- Select Role -- </option>
-							<option value={1}>Admin</option>
-							<option value={2}>Manager</option>
-							<option value={3}>Engineer</option>
-							<option value={4}>Operation Specialist</option>
+							<option value={4}>Admin</option>
+							<option value={1}>Manager</option>
+							<option value={2}>Engineer</option>
+							<option value={3}>Operation Specialist</option>
 						</select>
 					</div>
 				</div>
