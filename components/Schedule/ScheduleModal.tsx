@@ -131,7 +131,6 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
         }
         // updating a schedule checklist
         else if (props.scheduleEvent) {
-            // console.log(newSchedule);
             editDraftSchedule(newSchedule).then((result) => {
                 console.log(result);
                 setSuccessEditModal(true);
