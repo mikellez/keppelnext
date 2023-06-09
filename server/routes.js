@@ -1054,7 +1054,6 @@ router.get(
   controllers.asset.getAssetDetails
 );
 
-
 /**
  * @api {post} /addNewAsset Add New Asset
  * @apiDescription Adds a new asset
