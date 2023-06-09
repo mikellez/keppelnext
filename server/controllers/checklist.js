@@ -65,8 +65,8 @@ ORDER BY cl.checklist_id DESC
 `;
 
 const fetchAssignedChecklists = async (req, res, next) => {
-  const page = req.query.page || 1;
-  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+    const page = req.query.page || 1;
+    const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
   const totalRows = await global.db.query(fetchAssignedChecklistsQuery, [
     req.user.id,
@@ -217,14 +217,13 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
             checklist_id = $1
     `;
 
-  global.db.query(sql, [req.params.checklist_id], (err, found) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json("No checklist template found");
-    }
-    // console.log(found);
-    res.status(200).send(found.rows[0]);
-  });
+    global.db.query(sql, [req.params.checklist_id], (err, found) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("No checklist template found");
+        }
+        res.status(200).send(found.rows[0]);
+    });
 };
 
 const fetchSpecificChecklistRecord = async (req, res, next) => {

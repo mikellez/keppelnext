@@ -16,6 +16,7 @@ interface EventSelectProps {
 const fetchPendingEvents = async () => {
     return await instance.get<PendingEventInfo[]>("/api/event/")
         .then(res => {
+            console.log(res.data);
             return res.data
         })
         .catch(err => console.log(err))
@@ -33,6 +34,7 @@ export default function EventSelect(props: EventSelectProps) {
     }, []);
 
     const eventOptions = events?.map(event => {
+        // console.log(events);
         return (
             <option 
             key={event.scheduleId} 

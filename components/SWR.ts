@@ -289,7 +289,7 @@ function useWorkflow(page: number) {
       });
 
   return useSWR<{rows : CMMSWorkflow[]; total:number}, Error>(
-    [`/api/workflows`],
+    [`/api/workflows?page=${page}`],
     workflowFetcher,
     { revalidateOnFocus: false }
   );
