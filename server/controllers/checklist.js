@@ -68,18 +68,25 @@ const fetchAssignedChecklists = async (req, res, next) => {
     const page = req.query.page || 1;
     const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-    const totalRows = await global.db.query(fetchAssignedChecklistsQuery, [req.user.id]);
-    const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+  const totalRows = await global.db.query(fetchAssignedChecklistsQuery, [
+    req.user.id,
+  ]);
+  const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
-    const query = fetchAssignedChecklistsQuery + ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+  const query =
+    fetchAssignedChecklistsQuery +
+    ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
-    try {
-        const result = await global.db.query(query, [req.user.id]);
-        if (result.rows.length == 0) return res.status(204).json({ msg: "No checklist" });
-        return res.status(200).json({ rows: result.rows, total: totalPages });
-    } catch (error) {
-        return res.status(500).json({ msg: error });
-    }
+  try {
+    const result = await global.db.query(query, [req.user.id]);
+    if (result.rows.length == 0)
+      return res.status(204).json({ msg: "No checklist" });
+    // console.log(result.rows);
+    // console.log(totalPages);
+    return res.status(200).json({ rows: result.rows, total: totalPages });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
 };
 
 const fetchPendingChecklistsQuery =
@@ -202,7 +209,8 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
             ct.datajson,
             ct.plant_id,
             ct.signoff_user_id,
-            ct.status_id
+            ct.status_id,
+            ct.linkedassetids
         FROM
             keppel.checklist_templates ct
         WHERE 
@@ -357,9 +365,10 @@ const createNewChecklistTemplate = async (req, res, next) => {
             created_date,
             created_user_id,
             history,
-            status_id
+            status_id,
+            linkedassetids
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`;
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
@@ -378,6 +387,7 @@ const createNewChecklistTemplate = async (req, res, next) => {
       req.user.id,
       history,
       1,
+      checklist.linkedassetids
     ],
     (err) => {
       if (err) {

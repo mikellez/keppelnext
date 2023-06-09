@@ -414,7 +414,7 @@ const fetchSystems = async (req, res, next) => {
   global.db.query(
     `SELECT system_id, system_name FROM keppel.system_master`,
     (err, result) => {
-      if (err) res.status(500);
+      if (err) res.status(500).send(err)
       else res.status(200).json(result.rows);
     }
   );

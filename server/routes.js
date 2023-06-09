@@ -971,6 +971,17 @@ router.get(
 
 router.get("/fault/types", controllers.fault.fetchFaultTypes);
 
+router.get(
+  "/asset/systems",
+  checkIfLoggedInAPI,
+  controllers.asset.fetchSystems
+);
+router.get(
+  "/asset/fetch_asset_types",
+  checkIfLoggedInAPI,
+  controllers.asset.fetch_asset_types
+);
+
 /**
  * @api {get} /asset Get Asset Table
  * @apiDescription Gets table information/structure for all assets
@@ -1043,16 +1054,7 @@ router.get(
   checkIfLoggedInAPI,
   controllers.asset.getAssetDetails
 );
-router.get(
-  "/asset/systems",
-  checkIfLoggedInAPI,
-  controllers.asset.fetchSystems
-);
-router.get(
-  "/asset/fetch_asset_types",
-  checkIfLoggedInAPI,
-  controllers.asset.fetch_asset_types
-);
+
 
 /**
  * @api {post} /addNewAsset Add New Asset
@@ -1190,6 +1192,8 @@ router.get(
  * @apiName GetSystemsFromPlant
  * @apiGroup Assets Mobile
  *
+ * @apiParam {Number} plant_id The ID of the Plant
+ *
  * @apiSuccess {Object[]} - Containing all the system objects
  * @apiSuccess {string} -.system_name System Name
  * @apiSuccess {integer} -.system_id System ID
@@ -1208,6 +1212,9 @@ router.get(
  * @apiName GetSystemsAssetsFromPlant
  * @apiGroup Assets Mobile
  *
+ * @apiParam {Number} plant_id The ID of the Plant
+ * @apiParam {Number} system_id The ID of the System
+ *
  * @apiSuccess {Object[]} - Containing all the system asset objects
  * @apiSuccess {string} -.system_asset_lvl5 System Asset
  *
@@ -1225,6 +1232,9 @@ router.get(
  * @apiName GetUploadedFile
  * @apiGroup Assets Mobile
  *
+ * @apiParam {Number} psa_id The ID of the Plant Sytem Asset
+ * @apiParam {Number} index The index of the file in the array of uploaded files
+ *
  * @apiSuccess {Buffer[]} - Contains file in buffer array format
  *
  */
@@ -1240,8 +1250,19 @@ router.get(
  * @apiName GetSystemsAssetNamesFromPlant
  * @apiGroup Assets Mobile
  *
- * @apiSuccess {Object[]} - Containing all the system asset name objects
- * @apiSuccess {string} -.system_asset_lvl6 System Asset Name
+ * @apiParam {Number} plant_id The ID of the Plant
+ * @apiParam {Number} system_id The ID of the System
+ * @apiParam {String} system_asset_id The name of the System Asset
+ *
+ * @apiSuccess {Object} -
+ * @apiSuccess {Object} -.dict An object containing all the assets whose parent asset is NOT THE SAME as their asset types with the key being the asset's asset type
+ * @apiSuccess {Object[]} -.dict.assetType Contains all the assets with the same asset types
+ * @apiSuccess {String} -.dict.assetTypes.pai Plant Asset Instrument
+ * @apiSuccess {Number} -.dict.assetTypes.psa_id Plant Asset ID
+ * @apiSuccess {Object[]} -.pai All the assets whose parent asset is the SAME as their asset types
+ * @apiSuccess {String} -.pai.pai Plant Asset Instrument
+ * @apiSuccess {String} -.pai.prev_level Previous level of the asset
+ * @apiSuccess {String} -.pai.psa_id Plant Asset ID
  *
  */
 
@@ -1252,13 +1273,27 @@ router.get(
 );
 
 /**
- * @api {GET} /asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name
+ * @api {GET} /asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name Get Sub Components
  * @apiDescription Gets all the subcomponents of an asset with the provided parameters
  * @apiName GetSubComponentsFromPlant
  * @apiGroup Assets Mobile
  *
- * @apiSuccess {Object[]} - Containing all the system asset name objects
- * @apiSuccess {string} -.system_asset_lvl6 System Asset Name
+ * @apiParam {Number} plant_id The ID of the Plant
+ * @apiParam {Number} system_id The ID of the System
+ * @apiParam {String} system_asset_id The name of the System Asset
+ * @apiParam {String} system_asset_name The name of the System Asset Name
+ *
+ * @apiSuccess {Object} -
+ * @apiSuccess {Object} -.dict An object containing all the assets whose parent asset is NOT THE SAME as their asset types with the key being the asset's asset type
+ * @apiSuccess {Object[]} -.dict.assetType Contains all the assets with the same asset types
+ * @apiSuccess {String} -.dict.assetTypes.pai Plant Asset Instrument
+ * @apiSuccess {Number} -.dict.assetTypes.psa_id Plant Asset ID
+ * @apiSuccess {Object[]} -.pai All the assets whose parent asset is the SAME as their asset types
+ * @apiSuccess {String} -.pai.pai Plant Asset Instrument
+ * @apiSuccess {String} -.pai.prev_level Previous level of the asset
+ * @apiSuccess {String} -.pai.psa_id Plant Asset ID
+ * @apiSuccess {Object[]} -.subComponents Contains all the assets that have a sub component 2 level
+ * @apiSuccess {String} -.subComponents.system_asset_lvl7 Sub Component 2
  *
  */
 
