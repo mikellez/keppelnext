@@ -410,7 +410,8 @@ interface CMMSWorkflow {
   user_id: number;
   user_email: string,
   user_name: string,
-  created_at: string
+  created_at: string,
+  create_date?: string,
 }
 
 export {

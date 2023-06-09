@@ -19,7 +19,7 @@ const listWorkflow = async (req, res, next) => {
   const totalRows = await global.db.query(sql);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
-  const query = sql + `LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+  const query = sql + ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   db.query(query, (err, result) => {
     if (err) return res.status(500).json({ errormsg: err });

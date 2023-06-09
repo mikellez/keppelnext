@@ -64,7 +64,7 @@ const Workflow = () => {
 
   useEffect(() => {
     if (data && !isValidating) {
-      console.log(data);
+      // console.log(data);
       if (data?.rows?.length > 0) {
         setWorkflow(
           data.rows.map((item, index) => {
@@ -218,7 +218,8 @@ const Workflow = () => {
       },
     },
   ];
-  console.log(isReady);
+  // console.log(isReady);
+
   return (
     <ModuleMain>
       <ModuleHeader header="Workflow">
@@ -237,14 +238,14 @@ const Workflow = () => {
               theme={theme}
               layout={{ custom: true }}
             />
+            <Pagination
+              setPage={setPage}
+              setReady={setIsReady}
+              totalPages={totalPages}
+              page={page}
+            />
           </>
         )}
-        <Pagination
-          setPage={setPage}
-          setReady={setIsReady}
-          totalPages={totalPages}
-          page={page}
-        />
       </ModuleContent>
       <ModuleSimplePopup
         modalOpenState={isUpdateModalOpen}
