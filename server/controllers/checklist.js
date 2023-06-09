@@ -65,8 +65,8 @@ ORDER BY cl.checklist_id DESC
 `;
 
 const fetchAssignedChecklists = async (req, res, next) => {
-  const page = req.query.page || 1;
-  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+    const page = req.query.page || 1;
+    const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
   const totalRows = await global.db.query(fetchAssignedChecklistsQuery, [
     req.user.id,
@@ -209,21 +209,21 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
             ct.datajson,
             ct.plant_id,
             ct.signoff_user_id,
-            ct.status_id
+            ct.status_id,
+            ct.linkedassetids
         FROM
             keppel.checklist_templates ct
         WHERE 
             checklist_id = $1
     `;
 
-  global.db.query(sql, [req.params.checklist_id], (err, found) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json("No checklist template found");
-    }
-    // console.log(found);
-    res.status(200).send(found.rows[0]);
-  });
+    global.db.query(sql, [req.params.checklist_id], (err, found) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json("No checklist template found");
+        }
+        res.status(200).send(found.rows[0]);
+    });
 };
 
 const fetchSpecificChecklistRecord = async (req, res, next) => {
@@ -365,9 +365,10 @@ const createNewChecklistTemplate = async (req, res, next) => {
             created_date,
             created_user_id,
             history,
-            status_id
+            status_id,
+            linkedassetids
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`;
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
@@ -386,6 +387,7 @@ const createNewChecklistTemplate = async (req, res, next) => {
       req.user.id,
       history,
       1,
+      checklist.linkedassetids
     ],
     (err) => {
       if (err) {

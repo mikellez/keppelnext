@@ -1017,29 +1017,30 @@ router.get("/asset", controllers.asset.getAssetHierarchy);
  * @apiName getAssetDetails
  * @apiGroup Asset
  *
- * @apiSuccess {string} -.plant_name Plant name of the asset
- * @apiSuccess {string} -.system_name System name of the asset
- * @apiSuccess {string} -.system_asset System Asset of the asset
- * @apiSuccess {string} -.parent_asset Parent Asset of the asset
- * @apiSuccess {string} -.plant_asset_instrument Asset Name of the asset
- * @apiSuccess {string} -.asset_type Asset Type of the asset
- * @apiSuccess {string} -.asset_description Description of the asset
- * @apiSuccess {string} -.asset_location location of the asset
- * @apiSuccess {string} -.brand Brand of the asset
- * @apiSuccess {string} -.model_number Model Number of the asset
- * @apiSuccess {string} -.technical_specs Technical_specs of the asset
- * @apiSuccess {string} -.manufacture_country Manufacture_country of the asset
- * @apiSuccess {string} -.warranty Warranty of the asset
- * @apiSuccess {string} -.remarks Remarks for the asset
- * @apiSuccess {string} -.uploaded_image Image of the asset
- * @apiSuccess {jsonb} -.uploaded_files Files pertaining to the asset
- * @apiSuccess {string} -.plant_id Plant ID of the asset
- * @apiSuccess {string} -.system_id System ID of the asset
- * @apiSuccess {string} -.system_asset_id System Asset ID of the asset
- * @apiSuccess {number} -.psa_id Psa ID of the asset
- * @apiSuccess {number} -.system_asset_lvl5 System_asset_lvl5 of the asset
- * @apiSuccess {number} -.system_asset_lvl6 System_asset_lvl6 of the asset
- * @apiSuccess {number} -.system_asset_lvl7 System_asset_lvl7 of the asset
+ * @apiParam {String} psa_id Plant System Asset ID
+ * @apiSuccess {String} -.plant_name Plant name of the asset
+ * @apiSuccess {String} -.system_name System name of the asset
+ * @apiSuccess {String} -.system_asset System Asset of the asset
+ * @apiSuccess {String} -.parent_asset Parent Asset of the asset
+ * @apiSuccess {String} -.plant_asset_instrument Asset Name of the asset
+ * @apiSuccess {String} -.asset_type Asset Type of the asset
+ * @apiSuccess {String} -.asset_description Description of the asset
+ * @apiSuccess {String} -.asset_location location of the asset
+ * @apiSuccess {String} -.brand Brand of the asset
+ * @apiSuccess {String} -.model_number Model Number of the asset
+ * @apiSuccess {String} -.technical_specs Technical_specs of the asset
+ * @apiSuccess {String} -.manufacture_country Manufacture_country of the asset
+ * @apiSuccess {String} -.warranty Warranty of the asset
+ * @apiSuccess {String} -.remarks Remarks for the asset
+ * @apiSuccess {String} -.uploaded_image Image of the asset
+ * @apiSuccess {Jsonb} -.uploaded_files Files pertaining to the asset
+ * @apiSuccess {String} -.plant_id Plant ID of the asset
+ * @apiSuccess {String} -.system_id System ID of the asset
+ * @apiSuccess {String} -.system_asset_id System Asset ID of the asset
+ * @apiSuccess {Number} -.psa_id Psa ID of the asset
+ * @apiSuccess {Number} -.system_asset_lvl5 System_asset_lvl5 of the asset
+ * @apiSuccess {Number} -.system_asset_lvl6 System_asset_lvl6 of the asset
+ * @apiSuccess {Number} -.system_asset_lvl7 System_asset_lvl7 of the asset
 
  */
 router.get("/assetDetails/:psa_id", controllers.asset.getAssetDetails);
@@ -1191,6 +1192,8 @@ router.get(
  * @apiName GetSystemsFromPlant
  * @apiGroup Assets Mobile
  *
+ * @apiParam {Number} plant_id The ID of the Plant
+ *
  * @apiSuccess {Object[]} - Containing all the system objects
  * @apiSuccess {string} -.system_name System Name
  * @apiSuccess {integer} -.system_id System ID
@@ -1209,6 +1212,9 @@ router.get(
  * @apiName GetSystemsAssetsFromPlant
  * @apiGroup Assets Mobile
  *
+ * @apiParam {Number} plant_id The ID of the Plant
+ * @apiParam {Number} system_id The ID of the System
+ *
  * @apiSuccess {Object[]} - Containing all the system asset objects
  * @apiSuccess {string} -.system_asset_lvl5 System Asset
  *
@@ -1226,6 +1232,9 @@ router.get(
  * @apiName GetUploadedFile
  * @apiGroup Assets Mobile
  *
+ * @apiParam {Number} psa_id The ID of the Plant Sytem Asset
+ * @apiParam {Number} index The index of the file in the array of uploaded files
+ *
  * @apiSuccess {Buffer[]} - Contains file in buffer array format
  *
  */
@@ -1241,8 +1250,19 @@ router.get(
  * @apiName GetSystemsAssetNamesFromPlant
  * @apiGroup Assets Mobile
  *
- * @apiSuccess {Object[]} - Containing all the system asset name objects
- * @apiSuccess {string} -.system_asset_lvl6 System Asset Name
+ * @apiParam {Number} plant_id The ID of the Plant
+ * @apiParam {Number} system_id The ID of the System
+ * @apiParam {String} system_asset_id The name of the System Asset
+ *
+ * @apiSuccess {Object} -
+ * @apiSuccess {Object} -.dict An object containing all the assets whose parent asset is NOT THE SAME as their asset types with the key being the asset's asset type
+ * @apiSuccess {Object[]} -.dict.assetType Contains all the assets with the same asset types
+ * @apiSuccess {String} -.dict.assetTypes.pai Plant Asset Instrument
+ * @apiSuccess {Number} -.dict.assetTypes.psa_id Plant Asset ID
+ * @apiSuccess {Object[]} -.pai All the assets whose parent asset is the SAME as their asset types
+ * @apiSuccess {String} -.pai.pai Plant Asset Instrument
+ * @apiSuccess {String} -.pai.prev_level Previous level of the asset
+ * @apiSuccess {String} -.pai.psa_id Plant Asset ID
  *
  */
 
@@ -1253,13 +1273,27 @@ router.get(
 );
 
 /**
- * @api {GET} /asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name
+ * @api {GET} /asset/mobile/:plant_id/:system_id/:system_asset_id/:system_asset_name Get Sub Components
  * @apiDescription Gets all the subcomponents of an asset with the provided parameters
  * @apiName GetSubComponentsFromPlant
  * @apiGroup Assets Mobile
  *
- * @apiSuccess {Object[]} - Containing all the system asset name objects
- * @apiSuccess {string} -.system_asset_lvl6 System Asset Name
+ * @apiParam {Number} plant_id The ID of the Plant
+ * @apiParam {Number} system_id The ID of the System
+ * @apiParam {String} system_asset_id The name of the System Asset
+ * @apiParam {String} system_asset_name The name of the System Asset Name
+ *
+ * @apiSuccess {Object} -
+ * @apiSuccess {Object} -.dict An object containing all the assets whose parent asset is NOT THE SAME as their asset types with the key being the asset's asset type
+ * @apiSuccess {Object[]} -.dict.assetType Contains all the assets with the same asset types
+ * @apiSuccess {String} -.dict.assetTypes.pai Plant Asset Instrument
+ * @apiSuccess {Number} -.dict.assetTypes.psa_id Plant Asset ID
+ * @apiSuccess {Object[]} -.pai All the assets whose parent asset is the SAME as their asset types
+ * @apiSuccess {String} -.pai.pai Plant Asset Instrument
+ * @apiSuccess {String} -.pai.prev_level Previous level of the asset
+ * @apiSuccess {String} -.pai.psa_id Plant Asset ID
+ * @apiSuccess {Object[]} -.subComponents Contains all the assets that have a sub component 2 level
+ * @apiSuccess {String} -.subComponents.system_asset_lvl7 Sub Component 2
  *
  */
 
@@ -1360,43 +1394,277 @@ router.get(
   checkIfLoggedInAPI,
   controllers.schedule.getUserPlants
 );
+
+/**
+ * @api {get} /timeline/:id Get Timeline Details
+ * @apiDescription Get Timeline Details based on given timeline ID
+ * @apiName getTimeline
+ * @apiGroup Schedule
+ * 
+ * @apiParam {String} id timeline ID
+ * 
+ * @apiSuccess {Object} - Object containing the specified schedule detail
+ * @apiSuccess {Number} -.id Timeline ID
+ * @apiSuccess {String} -.name Timeline Name
+ * @apiSuccess {String} -.description Timeline Description
+ * @apiSuccess {Number} -.status Schedule Status
+ * @apiSuccess {Number} -.plantId Plant ID of Plant assocaited with timeline
+ * @apiSuccess {String} -.plantName Plant Name of Plant associated with timeline
+ * 
+ * @apiError (Error 404) {Object} NotFound {message: "No timeline found"}
+ */
+
+/**
+ * @api {post} /timeline Create new Timeline
+ * @apiDescription Create new Timeline
+ * @apiName CreateNewTimeline
+ * @apiGroup Schedule
+ * 
+ * @apiBody {Object} data New Timeline Data
+ * @apiBody {String} data.name Timeline Name
+ * @apiBody {String} data.description Timeline Description
+ * @apiBody {Number} data.plantId Plant ID of Plant associated with timeline
+ * 
+ * @apiSuccess {Number} - Timeline ID of new timeline
+ * 
+ */
+
+/**
+ * @api {patch} /timeline/:id Edit specific schedule
+ * @apiDescription Edit specific timeline based on given timeline ID
+ * @apiName EditTimeline
+ * @apiGroup Schedule
+ * 
+ * @apiParam {String} id Timeline ID
+ * 
+ * @apiBody {Object} data New Timeline Data
+ * @apiBody {String} data.name Timeline Name
+ * @apiBody {String} data.description Timeline Description
+ * 
+ * @apiSuccess {Number} - Timeline ID of updated timeline
+ */
+
+/**
+ * @api {delete} /timeline/:id Delete specific timeline
+ * @apiDescription Delete specific timeline based on given timeline ID
+ * @apiName DeleteTimeline
+ * @apiGroup Schedule
+ * 
+ * @apiParam {String} id Timeline ID
+ * 
+ * @apiSuccess {String} - "success"
+ */
 router
   .route("/timeline/:id?", checkIfLoggedInAPI)
   .get(controllers.schedule.getTimeline)
   .post(controllers.schedule.createTimeline)
   .patch(controllers.schedule.editTimeline)
   .delete(controllers.schedule.deleteTimeline);
+
+/**
+ * @api {get} /timeline/schedules/:id Get Schedules of a Timeline
+ * @apiDescription Get all Schedules of a given Timeline
+ * @apiName GetSchedulesofTimeline
+ * @apiGroup Schedule
+ * 
+ * @apiParam {String} id Timeline ID
+ * 
+ * @apiSuccess {Object[]} - Schedule Array
+ * @apiSuccess {Number} -.schedule_id Schedule ID
+ * @apiSuccess {Number} -.timeline_id Timeline ID
+ * @apiSuccess {String} -.checklist_name Schedule Name (Schedule is a form of checklist)
+ * @apiSuccess {String} -.plant Plant Name of plant associated with Timeline
+ * @apiSuccess {Number} -.plantId Plant ID of plant associated with Timeline
+ * @apiSuccess {String} -.start_date Start Date of Schedule
+ * @apiSuccess {String} -.end_date End Date of Schedule
+ * @apiSuccess {Number} -.period Recurrence Period of Schedule
+ * @apiSuccess {String[]} -.calendar_dates Array of Calendar Dates
+ * @apiSuccess {Number} -.checklist_id Checklist Template ID
+ * @apiSuccess {Number[]} -.assigned_ids IDs of assigned users of Schedule Checklist
+ * @apiSuccess {String[]} -.assigned_usernames Usernames of assigned users of Schedule Checklist
+ * @apiSuccess {String[]} -.assigned_fnames First Names of assigned users of Schedule Checklist
+ * @apiSuccess {String[]} -.assigned_lnames Last Names of assigned users of Schedule Checklist
+ * @apiSuccess {String[]} -.assigned_roles Roles of assigned users of Schedule Checklist
+ * @apiSuccess {String[]} -.assigned_emails Emails of assigned users of Schedule Checklist
+ * @apiSuccess {String} -.remarks Remarks of Schedule Checklist
+ * @apiSuccess {Number[]} -.exclusionList a list of dates to be excluded due to a possible change of date
+ * @apiSuccess {Boolean} -.isSingle Represents whether this is the only schedule in the timeline
+ * @apiSuccess {Number} -.index Index of Schedule
+ * @apiSuccess {Number} -.prev_schedule_id Previous Schedule ID
+ * @apiSuccess {Number} -.status Schedule Checklist Status
+ */
 router
   .route("/timeline/schedules/:id")
   .get(controllers.schedule.getSchedulesTimeline);
+
+/** 
+ * @api {get} /timeline/status/:status/:id Get Timelines by Status
+ * @apiDescription Get Timelines by Status and User Created (optional)
+ * @apiName GetTimelinesByStatus
+ * @apiGroup Schedule
+ * 
+ * @apiParam {String} status Status to filter Timelines
+ * @apiParam {String} [id] User ID of the creator of timeline
+ * 
+ * @apiSuccess {Object[]} - Filtered Timeline Array
+ * @apiSuccess {Number} -.id Timeline ID
+ * @apiSuccess {String} -.name Timeline Name
+ * @apiSuccess {String} -.description Timeline Description
+ * @apiSuccess {Number} -.plant_id ID of the plant associated with timeline
+ * @apiSuccess {String} -.plant_name Name of the plant associated with timeline
+ * @apiSuccess {Number} -.status Status of Timeline
+ * 
+ * @apiError (Error 404) {Object} NotFound {message: "No timeline found"}
+*/
+
+/**
+ * @api {patch} /timeline/status/:status/:id Update Timeline Status
+ * @apiDescription Update Timeline Status
+ * @apiName UpdateTimeline
+ * @apiGroup Schedule
+ * 
+ * @apiParam {String} status Status to filter Timelines
+ * @apiParam {String} id Timeline ID
+ * 
+ * @apiBody {String} test "random"
+ * 
+ * @apiSuccess {Number} - Timeline ID
+ */
 router
   .route("/timeline/status/:status/:id?", checkIfLoggedInAPI)
   .get(controllers.schedule.getTimelineByStatus)
-  .post(controllers.schedule.changeTimelineStatus);
+  .patch(controllers.schedule.changeTimelineStatus);
+
 router.get(
   "/getAssignedUsers/:plant_id",
   checkIfLoggedInAPI,
   controllers.schedule.getOpsAndEngineers
 );
+
+/**
+ * @api {post} /insertSchedule Insert new Schedule Checklist
+ * @apiDescription Insert New Schedule Checklist
+ * @apiName InsertNewSchedule
+ * @apiGroup Schedule
+ * 
+ * @apiBody {Object} schedule Schedule
+ * @apiBody {Number} schedule.checklistId Checklist ID of Schedule
+ * @apiBody {String} schedule.remarks Schedule Remarks
+ * @apiBody {Number} schedule.recurringPeriod Schedule Recurrence Period
+ * @apiBody {Number} schedule.reminderRecurrence Schedule Reminder Recurrence
+ * @apiBody {String} schedule.assignedIds IDs of assigned users of Schedule Checklist
+ * @apiBody {Number} schedule.plantId Plant ID of plant associated with Timeline
+ * @apiBody {Number} schedule.timelindId Timeline ID of Schedule Checklist
+ * @apiBody {Number} [schedule.prevId] prev ID of Schedule
+ * @apiBody {Number} [schedule.status] Status of Schedule Checklist
+ * @apiBody {Number} [schedule.index] Schedule Checklist Index
+ * 
+ * @apiSuccess {String} - "success"
+ */
 router.post(
   "/insertSchedule",
   checkIfLoggedInAPI,
   controllers.schedule.insertSchedule
 );
+
+/**
+ * @api {patch} /updateSchedule Update existing Schedule Checklist
+ * @apiDescription Update existing Schedule Checklist
+ * @apiName UpdateExistingSchedule
+ * @apiGroup Schedule
+ * 
+ * @apiBody {Object} schedule Schedule
+ * @apiBody {Number} schedule.checklistId Checklist ID of Schedule
+ * @apiBody {String} schedule.remarks Schedule Remarks
+ * @apiBody {Number} schedule.recurringPeriod Schedule Recurrence Period
+ * @apiBody {Number} schedule.reminderRecurrence Schedule Reminder Recurrence
+ * @apiBody {String} schedule.assignedIds IDs of assigned users of Schedule Checklist
+ * @apiBody {Number} schedule.timelindId Timeline ID of Schedule Checklist
+ * @apiBody {Number} schedule.plantId Plant ID of plant associated with Timeline
+ * @apiBody {Number} [schedule.prevId] prev ID of Schedule
+ * @apiBody {number} schedule.scheduleId Schedule ID
+ * 
+ * @apiSuccess {String} Success "Schedule successfully updated"
+ * @apiError (Error 500) {String} InternalServerError "unable to update schedule"
+ */
 router.patch(
   "/updateSchedule",
   checkIfLoggedInAPI,
   controllers.schedule.updateSchedule
 );
+
+/**
+ * @api {delete} /schedule/:id Delete a Schedule
+ * @apiDescription Delete a Schedule given a Schedule ID
+ * @apiName DeleteSchedule
+ * @apiGroup Schedule
+ * 
+ * @apiParam {String} id Schedule ID
+ * 
+ * @apiSuccess {String} Success "Schedule successfully deleted"
+ */
+
+/**
+ * @api {get} /schedule/:id Get All Schedules or Plant Specific Schedules
+ * @apiDescription Get All Schedules or Plant Specific Schedules
+ * @apiName GetPlantSpecificSchedules
+ * @apiGroup Schedule
+ * 
+ * @apiParam {String} id Plant ID (0 for All Schedules)
+ * 
+ * @apiSuccess {Object[]} - Schedule Array
+ * @apiSuccess {Number} -.schedule_id Schedule ID
+ * @apiSuccess {Number} -.timeline_id Timeline ID
+ * @apiSuccess {String} -.checklist_name Schedule Name (Schedule is a form of checklist)
+ * @apiSuccess {String} -.plant Plant Name of plant associated with Timeline
+ * @apiSuccess {Number} -.plantId Plant ID of plant associated with Timeline
+ * @apiSuccess {String} -.start_date Start Date of Schedule
+ * @apiSuccess {String} -.end_date End Date of Schedule
+ * @apiSuccess {Number} -.period Recurrence Period of Schedule
+ * @apiSuccess {String[]} -.calendar_dates Array of Calendar Dates
+ * @apiSuccess {Number} -.checklist_id Checklist Template ID
+ * @apiSuccess {String} -.assigned_ids IDs of assigned users of Schedule Checklist
+ * @apiSuccess {String[]} -.assigned_usernames Usernames of assigned users of Schedule Checklist
+ * @apiSuccess {String[]} -.assigned_fnames First Names of assigned users of Schedule Checklist
+ * @apiSuccess {String[]} -.assigned_lnames Last Names of assigned users of Schedule Checklist
+ * @apiSuccess {String[]} -.assigned_roles Roles of assigned users of Schedule Checklist
+ * @apiSuccess {String[]} -.assigned_emails Emails of assigned users of Schedule Checklist
+ * @apiSuccess {String} -.remarks Remarks of Schedule Checklist
+ * @apiSuccess {String} -.exclusionList a list of dates to be excluded due to a possible change of date
+ * @apiSuccess {Boolean} -.isSingle Represents whether this is the only schedule in the timeline
+ * @apiSuccess {Number} -.index Index of Schedule
+ * @apiSuccess {Number} -.prev_schedule_id Previous Schedule ID
+ * @apiSuccess {Number} -.status Schedule Checklist Status
+ */
 router
   .route("/schedule/:id", checkIfLoggedInAPI)
   .delete(controllers.schedule.deleteSchedule)
   .get(controllers.schedule.getViewSchedules);
 
+/**
+ * @api {get} /event Get all Pending Schedule Checklists
+ * @apiDescription Get all Pending Schedule Checklists
+ * @apiName GetPendingChecklists
+ * @apiGroup Schedule
+ * 
+ * @apiSuccess {Object[]} - Array of Pending Schedule Checklists
+ * @apiSuccess {Number} -.id Schedule Checklist ID
+ * @apiSuccess {String} -.name Schedule Checklist Name
+ * @apiSuccess {Number} -.plantId ID of plant associated with Schedule Checklist
+ * @apiSuccess {String} -.description Schedule Checklist Description
+ * @apiSuccess {Number} -. Schedule Timeline ID
+ * @apiSuccess {String} -.checklistName Schedule Checklist TEMPLATE Name
+ * 
+ * @apiError (Error 404) {String} NotFound "No pending schedules"
+ */
+
+/**
+ * @api {patch} /event E
+ */
 router
   .route("/event/:schedule_id?/:index?/", checkIfLoggedInAPI)
   .get(controllers.schedule.getPendingSingleEvents)
-  .post(controllers.schedule.createSingleEvent)
+  // .post(controllers.schedule.createSingleEvent)
   .patch(controllers.schedule.manageSingleEvent)
   .delete();
 

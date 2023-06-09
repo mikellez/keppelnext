@@ -151,6 +151,9 @@ app.prepare().then(() => {
   server.get("/Guest*", (req, res) => {
     return handle(req, res);
   });
+  server.get("/Feedback*", (req, res) => {
+    return handle(req, res);
+  })
   server.get("*", (req, res) => {
     return handle(req, res);
   });

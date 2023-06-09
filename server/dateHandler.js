@@ -10,7 +10,7 @@ module.exports.getDateRange = (start,period,end) => {
 	// var add_days = 0;
 	if (period >= 28) {
 		while (next_date <= end) {
-
+			// adjust the first next_date
 			const startingWeek = findWeek(next_date) == 4 ? 0 : findWeek(next_date);
 			next_date = new Date(next_date.setDate(next_date.getDate() + period));
 			while (findWeek(next_date) !== startingWeek) {

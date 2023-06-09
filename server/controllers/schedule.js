@@ -501,7 +501,7 @@ const deleteSchedule = async (req, res, next) => {
         [req.params.id],
         (err) => {
             if (err) console.log(err.message);
-            else res.status(204).send("Successfully deleted");
+            else res.status(204).send("Schedule uccessfully deleted");
         }
     );
 };
@@ -695,8 +695,6 @@ const getPendingSingleEvents = (req, res, next) => {
         (err, found) => {
             if (err) throw err;
             if (found.rows.length === 0) return res.status(404).send("no pending schedules");
-            // const response_dict = makeScheduleDict(found.rows);
-            // return res.send(response_dict);
             return res.send(
                 found.rows.map((item) => {
                     return {

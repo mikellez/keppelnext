@@ -43,7 +43,7 @@ import ApprovedScheduleInput from "./ApprovedScheduleInput";
 import { scheduleMaintenance } from "./ScheduleModal";
 import { minDate } from "./ScheduleModal";
 import { AssignedUserOption } from "./AssignToSelect";
-import { MultiValue } from "react-select";
+import { SingleValue } from "react-select";
 
 interface CreateScheduleModalProps extends ModalProps {
     title?: string;
@@ -236,34 +236,24 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     }
 
     const scheduleInputElements = scheduleList?.map((schedule) => {
-        const startDate = new Date(schedule.startDate);
-        const endDate = new Date(schedule.endDate);
         return (
             <ApprovedScheduleInput
                 key={schedule.scheduleId}
-                scheduleId={schedule.scheduleId as number}
+                schedule={schedule}
                 onChange={changeScheduleList}
                 onAssignedChange={(value, action) => {
                     const scheduleId = parseInt(action.name as string);
-                    const value1 = value as MultiValue<AssignedUserOption>;
-                    const idList = value1
-                        ? value1.map((option: AssignedUserOption) => option.value)
-                        : [];
+                    const assignedId = (value as SingleValue<AssignedUserOption>)!.value;
                     setScheduleList((prevList) => {
                         return prevList.map((schedule) => {
                             if (schedule.scheduleId === scheduleId) {
-                                return { ...schedule, assignedIds: idList };
+                                return { ...schedule, assignedIds: [assignedId]};
                             }
                             return schedule;
                         });
                     });
                 }}
-                checklistName={schedule.checklistName as string}
-                startDate={startDate}
-                endDate={endDate}
-                remarks={schedule.remarks}
                 plantId={timelineData?.plantId as number}
-                isComplete={schedule.isComplete}
             />
         );
     });
