@@ -15,6 +15,7 @@ import Image from "next/image";
 import { set } from "nprogress";
 import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
 import StarRatings from 'react-star-ratings';
+import Login from "../../pages/Login";
 
 
 
@@ -45,20 +46,21 @@ export default function FeedbackContainer(props: any) {
     image: undefined
   }
   );
-  useEffect(() => {
-    console.log(props.user)
-    if (props.user){
-      setForm((prevState) => {
-        return {...prevState, name: "user"}
-      })
-    }
-  }, [])
+
   const [selectedFile, setSelectedFile] = useState<File>();
   const [previewedFile, setPreviewedFile] = useState<string>();
   const [isImage, setIsImage] = useState<boolean>(true);
   const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
   const [submissionModal, setSubmissionModal] = useState<boolean>(false);
-  
+  const [loginModal, setLoginModal] = useState<boolean>(true);
+  useEffect(() => {
+    console.log(props.user)
+    if (props.user){
+      setForm((prevState) => {
+        return {...prevState, name: "user"}
+      });
+    }
+  }, [])
 
 
   async function submitform() {
@@ -325,6 +327,36 @@ export default function FeedbackContainer(props: any) {
               router.reload();
             }}
           />
+          {!props.user && <ModuleSimplePopup
+            modalOpenState={loginModal}
+            setModalOpenState={setLoginModal}
+            title="Login?"
+            text="Please login if you have an account."
+            icon={SimpleIcon.Question}
+            buttons={[
+              <button
+                  key={1}
+                  onClick={() => {
+                    setSubmissionModal(false);
+                    localStorage.setItem("feedback",`/Guest/Asset/feedback/${props.requestData.plant[0].plant_id}/${props.requestData.asset[0].psa_id}`);
+                    router.push("/Login");
+                  }}
+                  className="btn btn-secondary"
+                >
+                  Login
+              </button>, 
+              <button
+              key={1}
+              onClick={() => {
+                setLoginModal(false);
+              }}
+              className="btn btn-secondary"
+            >
+              Continue as guest
+          </button>, 
+            ]}
+
+          />}
       </ModuleFooter>
     </div>
   );

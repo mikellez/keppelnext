@@ -53,24 +53,6 @@ export default function RequestNew(props: RequestProps) {
     <ModuleMain>
       <ModuleHeader title="Feedback" header="Feedback"></ModuleHeader>
       <ModuleContent>
-        {modal && (
-          <ModuleSimplePopup
-            modalOpenState={modal}
-            setModalOpenState={() => setModal(true)}
-            title="Please login if you have an account."
-            icon={4}
-            buttons={
-              <div>
-                <button className="btn btn-primary">Login</button>
-                <button className="btn btn-primary">Use Guest Account</button>
-              </div>
-            }
-          ></ModuleSimplePopup>
-          //   <ModuleModal isOpen={modal} closeModal={() => setModal(true)}>
-          //     <p>Please login if you have an account.</p>
-
-          //   </ModuleModal>
-        )}
         <FeedbackContainer requestData={props} user={userbool} />
         {/* <RequestGuestContainer requestData={props} user={userbool}/> */}
       </ModuleContent>

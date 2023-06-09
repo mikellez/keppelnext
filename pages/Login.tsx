@@ -23,12 +23,17 @@ function Login({ databases, multi }: { databases: string[], multi: boolean }) {
 	const { isSubmitting, errors } = formState;
 	const [errorSubmitting, setErrorSubmitting] = useState<string>("");
 	const router = useRouter();
-	
 	const formSubmit: SubmitHandler<FormValues> = async (data) => {
 		await instance.post("/api/login", data)
 		.then((response) => {
 			setErrorSubmitting("");
+			if (storedValue !== ""){
+				let temp = storedValue
+				localStorage.removeItem('feedback')
+				router.push(temp);
+			} else {
 			router.push("/Dashboard");
+			}
 		}).catch((e) => {
 			alert(e)
 			console.log("error", e);
@@ -45,6 +50,11 @@ function Login({ databases, multi }: { databases: string[], multi: boolean }) {
 	const databaseOptions = databases.map(db => {
 		return <option key={db} value={db}>{db}</option>
 	});
+	let storedValue = ""
+	if  (typeof localStorage !== "undefined" && localStorage.hasOwnProperty('feedback')){
+		storedValue = localStorage.getItem('feedback') as string
+		console.log(storedValue)
+	}
 
 	return <>
 		<div className={styles.loginContainer}>
