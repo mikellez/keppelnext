@@ -162,7 +162,7 @@ export default function NavBar() {
             <NavLink
               name="Feedback"
               path="/Feedback"
-              icon={<FcFeedback size={21}/>}
+              icon={<FcFeedback size={21} />}
             />
             <NavLink
               name="Workflow"
@@ -173,11 +173,6 @@ export default function NavBar() {
               name="Master"
               path="/Master"
               icon={<AiOutlineControl size={21} />}
-            />
-            <NavLink
-              name="Feedback"
-              path="/Feedback"
-              icon={<AiOutlineForm size={21} />}
             />
             <NavDropdown
               name="User Management"
