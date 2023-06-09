@@ -32,7 +32,7 @@ export async function changeTimelineStatus(newStatus: number, timelineId: number
 async function getScheduleById(id: number) {
     return await instance.get<ScheduleInfo[]>("/api/schedule/event/" + id)
         .then(res => {
-            return res.data
+            return res.data;
         })
         .catch(err => console.log(err))
 };

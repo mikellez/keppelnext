@@ -65,7 +65,6 @@ ORDER BY cl.checklist_id DESC
 `;
 
 const fetchAssignedChecklists = async (req, res, next) => {
-<<<<<<< HEAD
     const page = req.query.page || 1;
     const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
