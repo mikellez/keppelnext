@@ -11,6 +11,7 @@ import {
   AiOutlinePhone,
   AiOutlineHistory,
   AiOutlineDashboard,
+  AiOutlineForm,
 } from "react-icons/ai";
 import { FcFeedback } from "react-icons/fc";
 import { MdWorkOutline } from "react-icons/md";
@@ -172,6 +173,11 @@ export default function NavBar() {
               name="Master"
               path="/Master"
               icon={<AiOutlineControl size={21} />}
+            />
+            <NavLink
+              name="Feedback"
+              path="/Feedback"
+              icon={<AiOutlineForm size={21} />}
             />
             <NavDropdown
               name="User Management"
