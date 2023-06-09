@@ -88,7 +88,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
                     </button>
                 </ModuleHeader>
                 {isLoading ? <LoadingHourglass /> : <>
-                <ChecklistPreview checklist={props.checklist} />
+                {/* <ChecklistPreview checklist={props.checklist} /> */}
                 <ModuleContent>
                     <label>Remarks</label>
                     <textarea

@@ -40,7 +40,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
             setRemarks(props.checklist?.activity_log.at(-1).remarks as string)
         } 
     }, [props.checklist])
-
+    console.log(props.checklist)
     return (
         <ModuleMain>
             <ModuleHeader header="Manage Checklist">
@@ -54,7 +54,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
                     Back
                 </button>
             </ModuleHeader>
-            <ChecklistPreview checklist={props.checklist} />
+                <ChecklistPreview checklist={props.checklist} />
             <ModuleContent>
                 {remarks &&
                     <>

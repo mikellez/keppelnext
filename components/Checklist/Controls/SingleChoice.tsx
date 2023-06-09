@@ -53,7 +53,10 @@ export class SingleChoiceControl extends CheckControl {
 	renderEditableForm(rowId: string, sectionId: string) {
 		return <SingleChoiceEditable singleChoiceObj={this} rowId={rowId} sectionId={sectionId} />
 	}
-
+  renderReassignedEditableForm(rowId: string, sectionId: string) {
+		return <SingleChoiceReassignedEditable singleChoiceObj={this} rowId={rowId} sectionId={sectionId} />
+	}
+  
   renderViewOnlyForm() {
     return <SingleChoiceView singleChoiceObj={this} />
   }
@@ -263,4 +266,43 @@ function SingleChoiceView({singleChoiceObj}: {singleChoiceObj: SingleChoiceContr
 			}
     </div>
   );
+};
+
+
+function SingleChoiceReassignedEditable({ singleChoiceObj, rowId, sectionId }: { 
+	singleChoiceObj: SingleChoiceControl,
+	rowId: string,
+	sectionId: string
+}) {
+
+	const { setSections } = useContext(SectionsContext);
+	
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		updateSpecificCheck(sectionId, rowId, singleChoiceObj.id, e.target.value, setSections)
+	}
+
+	return (
+		<div className={styles.checkViewContainer}>
+			<h6>{singleChoiceObj.question}</h6>
+			{
+				singleChoiceObj.choices.map(choice => {
+					return (
+						<div key={choice} className="form-check">
+							<input 
+								type="radio"
+								value={choice}
+								name={singleChoiceObj.id}
+								className="form-check-input"
+								onChange={handleChange}
+                checked={choice === singleChoiceObj.value}
+							/>
+							<label className="form-check-label">
+								{choice}
+							</label>
+						</div>
+					)
+				})
+			}
+		</div>
+	);
 };

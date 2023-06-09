@@ -54,6 +54,15 @@ export class SignatureControl extends CheckControl {
       />
     );
   }
+  renderReassignedEditableForm(rowId: string, sectionId: string) {
+    return (
+      <SignatureEditable
+        signatureControlObj={this}
+        rowId={rowId}
+        sectionId={sectionId}
+      />
+    );
+  }
 
   renderViewOnlyForm() {
     return <SignatureView signatureControlObj={this} />;
@@ -171,3 +180,4 @@ function SignatureView({
     </div>
   );
 }
+
