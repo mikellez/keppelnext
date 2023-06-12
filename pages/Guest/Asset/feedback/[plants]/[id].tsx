@@ -16,6 +16,7 @@ import {
   CMMSRequestTypes,
   CMMSFaultTypes,
   CMMSUser,
+  CMMSPlantLoc,
 } from "../../../../../types/common/interfaces";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import Link from "next/link";
@@ -81,8 +82,12 @@ export const getServerSideProps: GetServerSideProps = async (
     `/api/request/plant/${context.query.plants}`,
     headers
   );
-  const getAsset = instance.get<any>(
-    `/api/request/asset/${context.query.id}`,
+  // const getAsset = instance.get<any>(
+  //   `/api/request/asset/${context.query.id}`,
+  //   headers
+  // );
+  const getPlantLoc = instance.get<CMMSPlantLoc>(
+    `/api/plantLocation/${context.query.id}`,
     headers
   );
 
@@ -90,26 +95,29 @@ export const getServerSideProps: GetServerSideProps = async (
     getRequestTypes,
     getFaultTypes,
     getPlant,
-    getAsset,
+    // getAsset,
+    getPlantLoc,
   ]);
 
   const r: CMMSRequestTypes[] = values[0].data;
   const f: CMMSFaultTypes[] = values[1].data;
   const p: CMMSBaseType = values[2].data;
-  const a: CMMSBaseType = values[3].data;
+  const l: CMMSPlantLoc = values[3].data;
 
   interface GuestRequestProps {
     requestTypes: CMMSRequestTypes[];
     faultTypes: CMMSFaultTypes[];
     plant: any;
-    asset: any;
+    // asset: any;
+    plantLoc: CMMSPlantLoc;
   }
 
   let props: GuestRequestProps = {
     requestTypes: r,
     faultTypes: f,
     plant: p,
-    asset: a,
+    // asset: a,
+    plantLoc: l,
   };
 
   return {
