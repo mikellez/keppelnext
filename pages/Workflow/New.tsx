@@ -355,6 +355,7 @@ const WorkflowNew = ({
                 // "ID " + deleteModalID + 
                 "Workflow created successfully!"}
                 icon={1}
+                shouldCloseOnOverlayClick={true}
                 buttons={
                 <button
                     onClick={() => {

@@ -111,6 +111,7 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
                 icon={SimpleIcon.Check}
                 title="Completed"
                 text="Checklist is successfully completed"
+                shouldCloseOnOverlayClick={true}
             />
 
             <ModuleSimplePopup
@@ -119,6 +120,7 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
                 icon={SimpleIcon.Exclaim}
                 title="Incomplete checklist"
                 text="Please ensure that all fields have been filled"
+                shouldCloseOnOverlayClick={true}
             />
         </>
     );

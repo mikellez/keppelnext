@@ -174,6 +174,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
         text="Please ensure that you have an uploaded image and comments"
         title="Incomplete Maintenance"
         icon={SimpleIcon.Exclaim}
+        shouldCloseOnOverlayClick={true}
       />
       <ModuleSimplePopup
         modalOpenState={successModal}
@@ -181,6 +182,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
         text="Request has been completed"
         title="Success"
         icon={SimpleIcon.Check}
+        shouldCloseOnOverlayClick={true}
       />
     </>
   );

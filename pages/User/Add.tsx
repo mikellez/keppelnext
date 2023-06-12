@@ -196,6 +196,7 @@ export default function AddUser(props: AddUserProps) {
             title="Missing Details"
             text="Please ensure that you have filled in all the required entries."
             icon={SimpleIcon.Cross}
+			shouldCloseOnOverlayClick={true}
           />
 		  		<ModuleSimplePopup
             modalOpenState={submissionModal}
@@ -203,6 +204,7 @@ export default function AddUser(props: AddUserProps) {
             title="Success!"
             text="Your inputs has been submitted!"
             icon={SimpleIcon.Check}
+			shouldCloseOnOverlayClick={true}
             buttons={[
               <button
                   key={1}

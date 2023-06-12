@@ -211,6 +211,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
                 title="Success"
                 text="New checklist successfully created"
                 icon={SimpleIcon.Check}
+                shouldCloseOnOverlayClick={true}
             />
 
             <ModuleSimplePopup
@@ -219,6 +220,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
                 title="Missing details"
                 text="Please ensure that all input fields have been filled"
                 icon={SimpleIcon.Exclaim}
+                shouldCloseOnOverlayClick={true}
             />
         </>
     );

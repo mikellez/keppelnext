@@ -119,6 +119,7 @@ export default function Edit(props: EditMasterProps) {
             title="Success!"
             text="Your entry has been updated!"
             icon={SimpleIcon.Check}
+			shouldCloseOnOverlayClick={true}
             buttons={
               <button
                 onClick={() => {

@@ -343,6 +343,7 @@ export default function EditUser() {
           title="Are You Sure?"
           text="Checklists/Requests/Schedules have been assigned by the user from the plants you are removing."
           icon={SimpleIcon.Check}
+          shouldCloseOnOverlayClick={true}
           buttons={[
             <button
               key={1}
@@ -397,6 +398,7 @@ export default function EditUser() {
           title="Success!"
           text="Your inputs have been submitted!"
           icon={SimpleIcon.Check}
+          shouldCloseOnOverlayClick={true}
           buttons={
             <button
               onClick={() => {
@@ -418,6 +420,7 @@ export default function EditUser() {
             title="Missing Details"
             text="Please ensure that you have filled in all the required entries."
             icon={SimpleIcon.Cross}
+            shouldCloseOnOverlayClick={true}
           />
 		  <ModuleSimplePopup
             modalOpenState={emailModal}
@@ -425,6 +428,7 @@ export default function EditUser() {
             title="Duplicate Email"
             text="Please ensure that the email you have entered is not already in use."
             icon={SimpleIcon.Cross}
+            shouldCloseOnOverlayClick={true}
           />
 		  <ModuleSimplePopup
             modalOpenState={usernameModal}
@@ -432,6 +436,7 @@ export default function EditUser() {
             title="Duplicate Username"
             text="Please ensure that the username you have entered is not already in use."
             icon={SimpleIcon.Cross}
+            shouldCloseOnOverlayClick={true}
           />
       </ModuleContent>
       <ModuleFooter>

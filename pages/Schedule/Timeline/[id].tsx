@@ -156,6 +156,7 @@ export default function Timeline() {
                     setModalOpenState={setSubmitModal}
                     title="Success"
                     text="Your schedule has been submitted for your supervisor's approval."
+                    shouldCloseOnOverlayClick={true}
                     icon={SimpleIcon.Check}
                 />
 
@@ -164,6 +165,7 @@ export default function Timeline() {
                     setModalOpenState={setEmptyModal}
                     title="Empty Schedule"
                     text="You cannot submit an empty schedule for approval. Please schedule a maintenance."
+                    shouldCloseOnOverlayClick={true}
                     icon={SimpleIcon.Cross}
                 />
 
@@ -172,6 +174,7 @@ export default function Timeline() {
                     setModalOpenState={setInvalidModal}
                     title="Queue Full"
                     text="There is already another schedule that is pending for approval."
+                    shouldCloseOnOverlayClick={true}
                     icon={SimpleIcon.Exclaim}
                 />
 
@@ -187,6 +190,7 @@ export default function Timeline() {
                     setModalOpenState={setDeleteModal}
                     title="Delete Schedule"
                     text="Are you sure you want to delete this schedule? This action cannot be undone"
+                    shouldCloseOnOverlayClick={true}
                     icon={SimpleIcon.Exclaim}
                     buttons={
                         <TooltipBtn

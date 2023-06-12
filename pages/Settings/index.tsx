@@ -194,6 +194,7 @@ export default function SettingsPage(props: settingsProps){
             title="Confirmation"
             text="Are you sure you want to change your details?"
             icon={SimpleIcon.Exclaim}
+			shouldCloseOnOverlayClick={true}
 			buttons={[
 				<button
 			  key={2}
@@ -224,6 +225,7 @@ export default function SettingsPage(props: settingsProps){
             title="Same Details"
             text="You did not change any details."
             icon={SimpleIcon.Cross}
+			shouldCloseOnOverlayClick={true}
           />
 		  <ModuleSimplePopup
             modalOpenState={isMissingDetailsModalOpen}
@@ -231,6 +233,7 @@ export default function SettingsPage(props: settingsProps){
             title="Missing Details"
             text="Please ensure that you have filled in all the required entries."
             icon={SimpleIcon.Cross}
+			shouldCloseOnOverlayClick={true}
           />
 		  <ModuleSimplePopup
             modalOpenState={emailModal}
@@ -238,6 +241,7 @@ export default function SettingsPage(props: settingsProps){
             title="Duplicate Email"
             text="Please ensure that the email you have entered is not already in use."
             icon={SimpleIcon.Cross}
+			shouldCloseOnOverlayClick={true}
           />
 		  <ModuleSimplePopup
             modalOpenState={usernameModal}
@@ -245,6 +249,7 @@ export default function SettingsPage(props: settingsProps){
             title="Duplicate Username"
             text="Please ensure that the username you have entered is not already in use."
             icon={SimpleIcon.Cross}
+			shouldCloseOnOverlayClick={true}
           />
 		  <ModuleSimplePopup
             modalOpenState={submissionModal}
@@ -252,6 +257,7 @@ export default function SettingsPage(props: settingsProps){
             title="Success!"
             text="Your inputs has been submitted!"
             icon={SimpleIcon.Check}
+			shouldCloseOnOverlayClick={true}
             buttons={[
               <button
                 key={2}

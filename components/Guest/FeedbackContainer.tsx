@@ -285,7 +285,7 @@ export default function FeedbackContainer(props: any) {
           )}
         </div>
       </ModuleContent>
-      <ModuleFooter>
+      <ModuleFooter>s
         <button type="submit" className="btn btn-primary"
         onClick={submitform}
         >
@@ -333,6 +333,7 @@ export default function FeedbackContainer(props: any) {
             title="Login?"
             text="Please login if you have an account."
             icon={SimpleIcon.Question}
+            shouldCloseOnOverlayClick={false}
             buttons={[
               <button
                   key={1}
@@ -341,7 +342,7 @@ export default function FeedbackContainer(props: any) {
                     localStorage.setItem("feedback",`/Guest/Asset/feedback/${props.requestData.plant[0].plant_id}/${props.requestData.asset[0].psa_id}`);
                     router.push("/Login");
                   }}
-                  className="btn btn-secondary"
+                  className="btn btn-primary"
                 >
                   Login
               </button>, 
@@ -351,6 +352,7 @@ export default function FeedbackContainer(props: any) {
                 setLoginModal(false);
               }}
               className="btn btn-secondary"
+              style={{backgroundColor: "#767676"}}
             >
               Continue as guest
           </button>, 

@@ -112,6 +112,7 @@ export default function PasswordPage(props: passwordProps){
             title="Confirmation"
             text="Are you sure you want to change your password?"
             icon={SimpleIcon.Exclaim}
+			shouldCloseOnOverlayClick={true}
 			buttons={[
 				<button
 			  key={2}
@@ -142,6 +143,7 @@ export default function PasswordPage(props: passwordProps){
             title="Wrong Password"
             text="Please ensure that you have filled in the old password correctly."
             icon={SimpleIcon.Cross}
+			shouldCloseOnOverlayClick={true}
           />
 		  <ModuleSimplePopup
             modalOpenState={isNotMatchModalOpen}
@@ -149,6 +151,7 @@ export default function PasswordPage(props: passwordProps){
             title="Passwords do not match!"
             text="Please ensure that your passwords match"
             icon={SimpleIcon.Cross}
+			shouldCloseOnOverlayClick={true}
           />
 		  <ModuleSimplePopup
             modalOpenState={submissionModal}
@@ -156,6 +159,7 @@ export default function PasswordPage(props: passwordProps){
             title="Success!"
             text="Your password has been changed! Logging you out..."
             icon={SimpleIcon.Check}
+			shouldCloseOnOverlayClick={true}
             buttons={[
               <button
                 key={2}

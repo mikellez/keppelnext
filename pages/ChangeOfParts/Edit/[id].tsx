@@ -84,6 +84,7 @@ const EditChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
             icon={SimpleIcon.Check}
             title="Success"
             text="Change of parts successfully updated"
+            shouldCloseOnOverlayClick={true}
         />
 
         <ModuleSimplePopup 
@@ -92,6 +93,7 @@ const EditChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
             icon={SimpleIcon.Exclaim}
             title="Incomplete Form"
             text="Please ensure that all fields have been filled"
+            shouldCloseOnOverlayClick={true}
         />
         </>
     );
