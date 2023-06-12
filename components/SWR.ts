@@ -80,14 +80,14 @@ function useFeedback(
         throw new Error(e);
       });
 
-  return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
+  return useSWR<{ rows: CMMSFeedback[]; total: number }, Error>(
     [`/api/Feedback/${request_type}?page=${page}`],
-    // requestFetcher,
+    feedbackFetcher,
     { revalidateOnFocus: false }
   );
 }
 function useFeedbackFilter(props: FeedbackProps, page: number) {
-  const requestFetcher = (url: string) =>
+  const feedbackFetcher = (url: string) =>
     instance
       .get<{ rows: CMMSFeedback[]; total: number }>(url)
       .then((response) => {
@@ -103,8 +103,8 @@ function useFeedbackFilter(props: FeedbackProps, page: number) {
       });
 
   return useSWR<{ rows: CMMSFeedback[]; total: number }, Error>(
-    `/api/request/filter/${props?.status || 0}/${props?.plant || 0}/${props.datetype || 'all'}/${props?.date || 'all'}/${page}`,
-    requestFetcher,
+    `/api/feedback/filter/${props?.status || 0}/${props?.plant || 0}/${props.datetype || 'all'}/${props?.date || 'all'}/${page}`,
+    feedbackFetcher,
     { revalidateOnFocus: false }
   );
 }
@@ -355,5 +355,7 @@ export {
   useChangeOfParts,
   useChecklistFilter,
   useRequestFilter,
-  useWorkflow
+  useWorkflow,
+  useFeedback,
+  useFeedbackFilter,
 };
