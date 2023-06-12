@@ -24,18 +24,18 @@ function saveSvg(svgEl: SVGSVGElement, name: string) {
 	document.body.removeChild(downloadLink);
 }
 
-function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
-	const svg = e.currentTarget.querySelector("svg");
-
-	if(!svg)
-		return;
-
-	saveSvg(svg, asset.asset_name + ".svg")
-}
 
 function QRAssetImg({asset, plant, isFeedback}: {asset: CMMSAsset; plant: number|null; isFeedback: boolean}) {
 	const { SVG } = useQRCode();
-
+	function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
+		const svg = e.currentTarget.querySelector("svg");
+	
+		if(!svg)
+			return;
+	
+		saveSvg(svg, asset.asset_name + ".svg")
+	}
+	
 	
 
 	return (
@@ -74,25 +74,7 @@ function QRAssetImg({asset, plant, isFeedback}: {asset: CMMSAsset; plant: number
 	)
 }
 
-const QRFeedbackImg = ({plant, loc_id}: {plant: number|null, loc_id: number|null}) => {
-	const { SVG } = useQRCode();
-	return <button className={"btn btn-secondary " + styles.btnQr} onClick={downloadQR}>
-		<SVG 
-				text={window.location.origin + "/Guest/Asset/feedback/" + plant + "/" + loc_id}
-				options={{
-					level: 'H',
-					margin: 0,
-					scale: 5,
-					width: 150,
-					color: {
-						dark: '#000000',
-						light: '#ffffff',
-					}
-				}}
-			/> 
-		<div className={styles.label}>hello</div>
-	</button>
-}
+
 
 interface NewAssetProps {
 	plants: CMMSPlant[];
@@ -102,14 +84,9 @@ function QRCode(props: NewAssetProps) {
 	const [selectedAssets, setSelectedAssets] = useState<CMMSAsset[]>([]);
 	const [feedback, setFeedback] = useState<boolean>(false);
 	const [plantLocs, setPlantLocs] = useState<CMMSPlantLoc[]>([]);
+	const [filteredPlantLocs, setFilteredPlantLocs] = useState<CMMSPlantLoc[]>([]);
 	const [selectedPlantLoc, setSelectedPlantLoc] = useState<number|null>(null);
 
-	useEffect(() => {
-		const plantLocations = instance.get<CMMSPlantLoc[]>(`/api/plantLocation`)
-			.then(res => {
-				setPlantLocs(res.data);
-			})
-	})
 	
 	const qrRef = useRef() as React.RefObject<HTMLDivElement>
 
@@ -123,6 +100,52 @@ function QRCode(props: NewAssetProps) {
 	function assetSelect(e: React.ChangeEvent<HTMLSelectElement>) {
 		if(data)
 			setSelectedAssets(Array.from(e.target.options).filter(o => o.selected).map(o => data[parseInt(o.value)]))
+	}
+
+// feedback
+	useEffect(() => {
+		const plantLocations = instance.get<CMMSPlantLoc[]>(`/api/plantLocation`)
+			.then(res => {
+				setPlantLocs(res.data);
+			})
+	}, [])
+
+	useEffect(() => {
+		if (feedback) {
+			// console.log(selectedPlant);
+			setFilteredPlantLocs(() => {
+				return plantLocs.filter(loc => loc.plant_id === selectedPlant)
+			})
+		}
+	}, [selectedPlant])
+
+	const QRFeedbackImg = ({plant, loc_id}: {plant: number|null, loc_id: number|null}) => {
+		const { SVG } = useQRCode();
+		const location = plantLocs.filter(loc => loc.id === loc_id)[0].location;
+		function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
+			const svg = e.currentTarget.querySelector("svg");
+		
+			if(!svg)
+				return;
+		
+			saveSvg(svg, location + ".svg")
+		}
+		return <button className={"btn btn-secondary " + styles.btnQr} onClick={downloadQR}>
+			<SVG 
+					text={window.location.origin + "/Guest/Asset/feedback/" + plant + "/" + loc_id}
+					options={{
+						level: 'H',
+						margin: 0,
+						scale: 5,
+						width: 150,
+						color: {
+							dark: '#000000',
+							light: '#ffffff',
+						}
+					}}
+				/> 
+			<div className={styles.label}>{location}</div>
+		</button>
 	}
 
 	return (
@@ -161,15 +184,15 @@ function QRCode(props: NewAssetProps) {
 						</select>
 					</div>
 
-					{feedback && <div className="form-group">
+					{feedback && selectedPlant && <div className="form-group">
 						<label className='form-label'>Plant Location:</label>
 						<select className="form-select" required onChange={(e) => {setSelectedPlantLoc(parseInt(e.target.value))}}>
 							<option value="0" disabled hidden selected>
 							-- Select Plant Location --
 						</option>
-						{plantLocs.map((loc) => (
+						{filteredPlantLocs.map((loc) => (
 							<option key={loc.id} value={loc.id}>
-							{loc.loc_floor} floor - {loc.loc_room}
+							{loc.location}
 							</option>
 						))}
 						</select>
