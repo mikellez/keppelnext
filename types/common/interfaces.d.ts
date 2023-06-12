@@ -162,6 +162,8 @@ interface CMMSRequest {
   total?: number;
 }
 
+
+
 interface CMMSRequestTypes {
   req_id: number;
   request: string;
@@ -262,6 +264,27 @@ interface CMMSSystemAssetName {
 }
 interface CMMSSubComponent1Name {
   system_asset_lvl7: string;
+}
+
+interface CMMSFeedback {
+  feedback_id: string;
+  created_date: Date;
+  createdbyuser?: string;
+  created_by_user_id: string | null;
+  created_by_user_email: string | null;
+  fullname: string;
+  plant_name: string;
+  plant_id?: number;
+  plant_loc: String;
+  status: string;
+  status_id?: number;
+  assigned_user_email: string;
+  assigned_user_id: number;
+  assigned_user_name: string;
+  feedback_description?: string;
+  requesthistory?: string;
+  complete_comments?: string;
+  total?: number;
 }
 
 interface CMMSChecklist {
@@ -450,5 +473,6 @@ export {
   CMMSUserSettings,
   CMMSUserInfo,
   CMMSChangePassword,
-  CMMSWorkflow
+  CMMSWorkflow,
+  CMMSFeedback,
 };

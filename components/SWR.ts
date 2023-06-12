@@ -9,10 +9,12 @@ import {
   CMMSSubComponent1Name,
   CMMSChangeOfParts,
   CMMSWorkflow,
+  CMMSFeedback,
 } from "../types/common/interfaces";
 import { RequestProps } from "../pages/Request";
 import { ChecklistProps } from "../pages/Checklist";
 import instance from "../types/common/axios.config";
+import { FeedbackProps } from "../pages/Feedback";
 
 function useRequest(
   request_type: "pending" | "assigned" | "review" | "approved",
@@ -55,6 +57,52 @@ function useRequestFilter(props: RequestProps, page: number) {
       });
 
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
+    `/api/request/filter/${props?.status || 0}/${props?.plant || 0}/${props.datetype || 'all'}/${props?.date || 'all'}/${page}`,
+    requestFetcher,
+    { revalidateOnFocus: false }
+  );
+}
+
+function useFeedback(
+  request_type: "pending" | "assigned" | "review",
+  page: number
+) {
+  const feedbackFetcher = (url: string) =>
+    instance
+      .get<{ rows: CMMSFeedback[]; total: number }>(url)
+      .then((response) => {
+        response.data.rows.forEach((s: CMMSFeedback) => {
+          s.created_date = new Date(s.created_date);
+        });
+        return response.data;
+      })
+      .catch((e) => {
+        throw new Error(e);
+      });
+
+  return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
+    [`/api/Feedback/${request_type}?page=${page}`],
+    // requestFetcher,
+    { revalidateOnFocus: false }
+  );
+}
+function useFeedbackFilter(props: FeedbackProps, page: number) {
+  const requestFetcher = (url: string) =>
+    instance
+      .get<{ rows: CMMSFeedback[]; total: number }>(url)
+      .then((response) => {
+        if (response?.data?.rows === undefined) return { rows: [], total: 0 };
+
+        response.data.rows.forEach((s) => {
+          s.created_date = new Date(s.created_date);
+        });
+        return response.data;
+      })
+      .catch((e) => {
+        throw new Error(e);
+      });
+
+  return useSWR<{ rows: CMMSFeedback[]; total: number }, Error>(
     `/api/request/filter/${props?.status || 0}/${props?.plant || 0}/${props.datetype || 'all'}/${props?.date || 'all'}/${page}`,
     requestFetcher,
     { revalidateOnFocus: false }
