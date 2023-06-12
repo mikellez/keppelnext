@@ -209,6 +209,7 @@ export default function ManageSchedule() {
             title="Missing Remarks" 
             text="Please write some remarks so that the engineers know why the schedule is rejected."
             icon={SimpleIcon.Exclaim}
+            shouldCloseOnOverlayClick={true}
         />
 
         <ModuleSimplePopup
@@ -217,6 +218,7 @@ export default function ManageSchedule() {
             title="Confirm Action" 
             text="Are you sure? This action cannot be undone."
             icon={SimpleIcon.Info}
+            shouldCloseOnOverlayClick={true}
             buttons={<TooltipBtn toolTip={false} onClick={() => handleManage(status)}  >Confirm</TooltipBtn>}
         />
 
@@ -224,6 +226,7 @@ export default function ManageSchedule() {
             modalOpenState={outcomeModal} 
             setModalOpenState={setOutcomeModal} 
             title={status === 1 ? "Approved" : status === 3 ? "Rejected" : ""}
+            shouldCloseOnOverlayClick={true}
             text={status === 1 ? "Schedule has been successfully approved." : status === 3 ? "Schedule has been rejected." : ""}
             icon={SimpleIcon.Check}
         />

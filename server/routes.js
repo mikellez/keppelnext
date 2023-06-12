@@ -1782,6 +1782,8 @@ router.get(
   checkIfLoggedInAPI,
   controllers.plantLocation.getAllPlantLoc
 );
+
+router.get("/plantLocation/:id", controllers.plantLocation.getSinglePlantLoc);
 //.get("/workflow/run/checklist", controllers.workflow.runWorkflowChecklist);
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);

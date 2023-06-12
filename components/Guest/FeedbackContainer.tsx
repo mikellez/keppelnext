@@ -27,8 +27,8 @@ export default function FeedbackContainer(props: any) {
   const [form, setForm]  = useState<{
     name : string,
     comments: string,
-    plantLocationID: string,
-    taggedAssetID: string,
+    plantID: string,
+    taggedLocID: string,
     rating: number,
     phoneNumber: string,
     email: string,
@@ -38,8 +38,8 @@ export default function FeedbackContainer(props: any) {
     {
     name: "",
     comments: "",
-    plantLocationID: props.requestData.plant[0].plant_id,
-    taggedAssetID: props.requestData.asset[0].psa_id,
+    plantID: props.requestData.plant[0].plant_id,
+    taggedLocID: props.requestData.plantLoc.id,
     rating: 5,
     phoneNumber: "",
     email: "",
@@ -196,7 +196,7 @@ export default function FeedbackContainer(props: any) {
           
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon /> Plant Location
+              <RequiredIcon /> Plant
             </label>
               <select className="form-select" disabled={true}
               >
@@ -208,14 +208,15 @@ export default function FeedbackContainer(props: any) {
 
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon /> Tag Asset
+              <RequiredIcon /> Plant Location
             </label>
             <select
               className="form-select"
               disabled = {true}
             >
-              <option value={props.requestData.asset[0].psa_id}> 
-              {props.requestData.asset[0].psa_id + " | " + props.requestData.asset[0].plant_asset_instrument}
+              <option value={props.requestData.plantLoc.id}> 
+              {/* {props.requestData.asset[0].psa_id + " | " + props.requestData.asset[0].plant_asset_instrument} */}
+              {props.requestData.plantLoc.location}
               </option>
             </select>
 
@@ -333,15 +334,16 @@ export default function FeedbackContainer(props: any) {
             title="Login?"
             text="Please login if you have an account."
             icon={SimpleIcon.Question}
+            shouldCloseOnOverlayClick={false}
             buttons={[
               <button
                   key={1}
                   onClick={() => {
                     setSubmissionModal(false);
-                    localStorage.setItem("feedback",`/Guest/Asset/feedback/${props.requestData.plant[0].plant_id}/${props.requestData.asset[0].psa_id}`);
+                    localStorage.setItem("feedback",`/Guest/Asset/feedback/${props.requestData.plant[0].plant_id}/${props.requestData.plantLoc}`);
                     router.push("/Login");
                   }}
-                  className="btn btn-secondary"
+                  className="btn btn-primary"
                 >
                   Login
               </button>, 
@@ -351,6 +353,7 @@ export default function FeedbackContainer(props: any) {
                 setLoginModal(false);
               }}
               className="btn btn-secondary"
+              style={{backgroundColor: "#767676"}}
             >
               Continue as guest
           </button>, 

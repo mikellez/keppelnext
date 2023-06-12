@@ -149,6 +149,7 @@ const Templates = () => {
                 text="The following action will permanently delete the template and all related checklist & schedules"
                 title="Confirm"
                 icon={SimpleIcon.Exclaim}
+                shouldCloseOnOverlayClick={true}
                 buttons={
                     <TooltipBtn toolTip={false} onClick={handleConfirmDelete}>
                         Confirm
@@ -162,6 +163,7 @@ const Templates = () => {
                 text="Template successfully deleted"
                 title="Success"
                 icon={SimpleIcon.Check}
+                shouldCloseOnOverlayClick={true}
             />
         </>
     );

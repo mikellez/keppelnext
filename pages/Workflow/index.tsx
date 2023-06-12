@@ -256,6 +256,7 @@ const Workflow = () => {
           "Workflow updated successfully!"
         }
         icon={1}
+        shouldCloseOnOverlayClick={true}
         buttons={
           <button
             onClick={() => {
@@ -277,6 +278,7 @@ const Workflow = () => {
           "?"
         }
         icon={2}
+        shouldCloseOnOverlayClick={true}
         buttons={[
           <button
             key="deleteConfirm"
@@ -304,6 +306,7 @@ const Workflow = () => {
           "Workflow delete successfully!"
         }
         icon={1}
+        shouldCloseOnOverlayClick={true}
         buttons={
           <button
             onClick={() => {

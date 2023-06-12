@@ -142,6 +142,7 @@ export default function New(props: NewMasterEntryProps) {
 				title="Missing Details"
 				text="Please ensure that you have filled in all the required entries."
 				icon={SimpleIcon.Cross}
+				shouldCloseOnOverlayClick={true}
 				onRequestClose={() => {
 					// clearErrors();
 					// setIsMissingDetailsModaOpen(false)
@@ -165,6 +166,7 @@ export default function New(props: NewMasterEntryProps) {
 				title="System asset ID not valid"
 				text="Please ensure that you have chosen a valid ID from the tables."
 				icon={SimpleIcon.Cross}
+				shouldCloseOnOverlayClick={true}
 				// onRequestClose={() => {
 				// 	router.reload();
 				//   }}
@@ -175,6 +177,7 @@ export default function New(props: NewMasterEntryProps) {
             title="Success!"
             text="Your entry has been submitted!"
             icon={SimpleIcon.Check}
+			shouldCloseOnOverlayClick={true}
             buttons={[
               	<button
 					key={1}

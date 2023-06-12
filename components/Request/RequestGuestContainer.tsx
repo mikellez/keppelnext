@@ -328,6 +328,7 @@ export default function RequestGuestContainer(props: any) {
             setModalOpenState={setIsMissingDetailsModaOpen}
             title="Missing Details"
             text="Please ensure that you have filled in all the required entries."
+            shouldCloseOnOverlayClick={true}
             icon={SimpleIcon.Cross}
           />
           <ModuleSimplePopup

@@ -218,6 +218,7 @@ export default function Master() {
           "?"
         }
         icon={2}
+        shouldCloseOnOverlayClick={true}
         buttons={[
           <button
             key="deleteConfirm"
@@ -243,6 +244,7 @@ export default function Master() {
         title="Success"
         text={"ID " + deleteModalID + " has been deleted"}
         icon={1}
+        shouldCloseOnOverlayClick={true}
         buttons={
           <button
             onClick={() => {
@@ -262,6 +264,7 @@ export default function Master() {
         title="Deletion Failed"
         text={"Something went wrong!"}
         icon={3}
+        shouldCloseOnOverlayClick={true}
         buttons={
           <button
             onClick={() => {

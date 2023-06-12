@@ -102,6 +102,7 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                 title="Confirm"
                 text="Please confirm that you have completed the change of part"
                 icon={SimpleIcon.Info}
+                shouldCloseOnOverlayClick={true}
             />
 
             <ModuleSimplePopup
@@ -109,6 +110,7 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                 setModalOpenState={setSuccessModal}
                 title="Success"
                 text="You have successfully completed change of part. Do you want to create another one?"
+                shouldCloseOnOverlayClick={true}
                 buttons={[
                     <TooltipBtn
                         key={1}

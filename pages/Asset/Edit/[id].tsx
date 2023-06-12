@@ -530,6 +530,7 @@ export default function EditAsset(props: EditAssetProps) {
           title="Success!"
           text="Your inputs have been submitted!"
           icon={SimpleIcon.Check}
+          shouldCloseOnOverlayClick={true}
           buttons={
             <button
               onClick={() => {
@@ -551,6 +552,7 @@ export default function EditAsset(props: EditAssetProps) {
           title="Irreversible Action!"
           text="The whole entity will be deleted!"
           icon={SimpleIcon.Exclaim}
+          shouldCloseOnOverlayClick={true}
           buttons={[
             <button
               key={1}
