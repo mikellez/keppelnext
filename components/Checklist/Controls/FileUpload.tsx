@@ -40,8 +40,8 @@ export class FileUploadControl extends CheckControl {
 		return <FileUpload fileControlObj={this} onChange={onChange} onDelete={onDelete} />
 	}
 
-	renderEditableForm(rowId: string, sectionId: string) {
-		return <FileUploadEditable fileControlObj={this} rowId={rowId} sectionId={sectionId} />
+	renderEditableForm(rowId: string, sectionId: string, index: number) {
+		return <FileUploadEditable fileControlObj={this} rowId={rowId} sectionId={sectionId} index={index} />
 	}
   renderReassignedEditableForm(rowId: string, sectionId: string) {
 		return <FileUploadReassignedEditable fileControlObj={this} rowId={rowId} sectionId={sectionId} />
@@ -104,12 +104,14 @@ export function FileUpload({
 	</div>);
 };
 
-function FileUploadEditable({ fileControlObj, rowId, sectionId }: {
+function FileUploadEditable({ fileControlObj, rowId, sectionId, index }: {
 	fileControlObj: FileUploadControl,
 	rowId: string,
-	sectionId: string
+	sectionId: string,
+  index: number
 }) {
 
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 	const { setSections } = useContext(SectionsContext);
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files && e.target.files.length > 0) {
@@ -147,7 +149,7 @@ function FileUploadEditable({ fileControlObj, rowId, sectionId }: {
 	
 	return (
 		<div className={styles.checkViewContainer}>
-			<h6>{fileControlObj.question}</h6>
+			<h6>{index}. {fileControlObj.question}</h6>
 			<input 
 				type="file" 
 				name={fileControlObj.id}
@@ -155,6 +157,24 @@ function FileUploadEditable({ fileControlObj, rowId, sectionId }: {
 				onChange={handleChange}
         accept='jpeg/png'
 			/>
+      <p 
+        onClick={() => setModalOpen(true)}
+        className={requestStyles.editIcon}
+      >View Previous File
+      </p>
+      <ModuleModal
+        closeModal={() => setModalOpen(false)}
+        isOpen={modalOpen}
+        closeOnOverlayClick
+        className={requestStyles.imageModal}
+      >
+      <Image 
+        src={fileControlObj.value}
+        alt="img"
+        width={500} 
+        height={500}
+      />
+    </ModuleModal>
 		</div>
 	)
 };

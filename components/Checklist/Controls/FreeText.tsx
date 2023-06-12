@@ -39,8 +39,8 @@ export class FreeTextControl extends CheckControl {
 		return <FreeText freeTextObj={this} onChange={onChange} onDelete={onDelete} />
 	}
 
-	renderEditableForm(rowId: string, sectionId: string) {
-		return <FreeTextEditable freeTextObj={this} rowId={rowId} sectionId={sectionId} />
+	renderEditableForm(rowId: string, sectionId: string, index: number) {
+		return <FreeTextEditable freeTextObj={this} rowId={rowId} sectionId={sectionId} index={index} />
 	}
   
   renderReassignedEditableForm(rowId: string, sectionId: string) {
@@ -103,10 +103,11 @@ export function FreeText({
   );
 };
 
-function FreeTextEditable({ freeTextObj, rowId, sectionId }: {
+function FreeTextEditable({ freeTextObj, rowId, sectionId, index }: {
 	freeTextObj: FreeTextControl,
 	rowId: string,
-	sectionId: string
+	sectionId: string,
+  index: number
 }) {
 
 	const { setSections } = useContext(SectionsContext);
@@ -114,14 +115,15 @@ function FreeTextEditable({ freeTextObj, rowId, sectionId }: {
 	const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		updateSpecificCheck(sectionId, rowId, freeTextObj.id, e.target.value, setSections)
 	};
-
+  
 	return (
 		<div className={styles.checkViewContainer}>
-			<h6>{freeTextObj.question}</h6>
+			<h6>{index}. {freeTextObj.question}</h6>
 			<textarea 
         className="form-control" 
         onChange={handleChange}
         style={{resize: "none"}}
+        value = {freeTextObj.value}
       ></textarea>
 		</div>
 	)

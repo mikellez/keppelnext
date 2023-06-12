@@ -94,8 +94,8 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
                 <ModuleDivider />
                 <ModuleContent>
                     <SectionsContext.Provider value={{ sections, setSections }}>
-                        {props.checklist.status_id !== 3 && <ChecklistEditableForm />}
-                        {props.checklist.status_id === 3 && <ChecklistEditableReassignedForm sections={sections}/>}
+                        <ChecklistEditableForm />
+                        {/* {props.checklist.status_id === 3 && <ChecklistEditableReassignedForm sections={sections}/>} */}
                     </SectionsContext.Provider>
                 </ModuleContent>
                 <ModuleFooter>

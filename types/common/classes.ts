@@ -62,7 +62,6 @@ class ControlFactory {
 
 			if(!(checkObj.choices as Array<any>).every(c => typeof c === "string" ))
 				throw Error("invalid json string in creating ChecklistControl")
-
 			const choices: Array<string> = checkObj.choices;
 
 			return new MultiChoiceControl(question, choices, value);
