@@ -267,24 +267,26 @@ interface CMMSSubComponent1Name {
 }
 
 interface CMMSFeedback {
-  feedback_id: string;
+  feedback_id: numbers;
   created_date: Date;
-  createdbyuser?: string;
+  createdbyuser: string;
   created_by_user_id: string | null;
   created_by_user_email: string | null;
   fullname: string;
   plant_name: string;
-  plant_id?: number;
-  plant_loc: String;
+  plant_id: number;
+  plant_loc: string;
   status: string;
-  status_id?: number;
+  status_id: number;
   assigned_user_email: string;
   assigned_user_id: number;
   assigned_user_name: string;
-  feedback_description?: string;
+  description?: string;
   requesthistory?: string;
   complete_comments?: string;
   total?: number;
+  datajson?: any;
+  activity_log: { [key: string]: string }[];
 }
 
 interface CMMSChecklist {

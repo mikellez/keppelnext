@@ -713,6 +713,24 @@ router.get(
   checkIfLoggedInAPI,
   controllers.feedback.fetchPendingFeedback
 );
+router.get(
+  "/feedback/assigned",
+  checkIfLoggedInAPI,
+  controllers.feedback.fetchAssignedFeedback
+);
+
+router.get(
+  "/feedback/review",
+  checkIfLoggedInAPI,
+  controllers.feedback.fetchForReviewFeedback
+);
+
+router.get(
+  "/feedback/filter/:status/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.feedback.fetchFilteredFeedback
+);
+
 /**
  * @api {get} /checklist/templateNames/:id Get Template Names
  * @apiDescription Get all Template Names
@@ -1759,8 +1777,11 @@ router
     controllers.workflow.deleteWorkflow
   );
 
-  router
-    .get("/plantLocation", checkIfLoggedInAPI, controllers.plantLocation.getAllPlantLoc)
+router.get(
+  "/plantLocation",
+  checkIfLoggedInAPI,
+  controllers.plantLocation.getAllPlantLoc
+);
 //.get("/workflow/run/checklist", controllers.workflow.runWorkflowChecklist);
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
