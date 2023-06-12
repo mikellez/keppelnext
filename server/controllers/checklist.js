@@ -55,12 +55,21 @@ FROM
     JOIN keppel.status_cm st ON st.status_id = cl.status_id	
 `;
 
+// check if user is an Opspec
 const fetchAssignedChecklistsQuery =
   fetchAllChecklistQuery +
   `
-WHERE 
-    ua.user_id = $1 AND 
-    (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3)
+  WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3) AND
+      (CASE
+          WHEN (SELECT ua.role_id
+              FROM
+                  keppel.user_access ua
+              WHERE
+                  ua.user_id = $1) = 4
+          THEN assignU.user_id = $1
+          ELSE True
+          END) AND
+          ua.user_id = $1
 ORDER BY cl.checklist_id DESC
 `;
 

@@ -1758,6 +1758,9 @@ router
     checkIfLoggedInAPI,
     controllers.workflow.deleteWorkflow
   );
+
+  router
+    .get("/plantLocation", checkIfLoggedInAPI, controllers.plantLocation.getAllPlantLoc)
 //.get("/workflow/run/checklist", controllers.workflow.runWorkflowChecklist);
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
