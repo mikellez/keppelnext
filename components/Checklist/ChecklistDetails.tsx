@@ -36,11 +36,12 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
                     {activity_log.reverse().find(activity => activity["activity"] == "APPROVED")!["date"]}
                 </div>
             );
-        } else if (status_id == 3) {
+        } else if (status_id == 3 || status_id == 2) {
+            const rejectedLog = activity_log.reverse().find(activity => activity["activity"] == "REJECTED");
             return (
                 <div>
                     <p className={styles.checklistDetailsHeading}>Date of Rejection</p>
-                    {activity_log.reverse().find(activity => activity["activity"] == "REJECTED")!["date"]}
+                    {rejectedLog ? rejectedLog.date : "NIL"}
                 </div>
             );
         }
