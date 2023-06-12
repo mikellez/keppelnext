@@ -708,6 +708,11 @@ router.get(
   controllers.checklist.fetchPendingChecklists
 );
 
+router.get(
+  "/feedback/pending",
+  checkIfLoggedInAPI,
+  controllers.feedback.fetchPendingFeedback
+);
 /**
  * @api {get} /checklist/templateNames/:id Get Template Names
  * @apiDescription Get all Template Names
@@ -1399,9 +1404,9 @@ router.get(
  * @apiDescription Get Timeline Details based on given timeline ID
  * @apiName getTimeline
  * @apiGroup Schedule
- * 
+ *
  * @apiParam {String} id timeline ID
- * 
+ *
  * @apiSuccess {Object} - Object containing the specified schedule detail
  * @apiSuccess {Number} -.id Timeline ID
  * @apiSuccess {String} -.name Timeline Name
@@ -1409,7 +1414,7 @@ router.get(
  * @apiSuccess {Number} -.status Schedule Status
  * @apiSuccess {Number} -.plantId Plant ID of Plant assocaited with timeline
  * @apiSuccess {String} -.plantName Plant Name of Plant associated with timeline
- * 
+ *
  * @apiError (Error 404) {Object} NotFound {message: "No timeline found"}
  */
 
@@ -1418,14 +1423,14 @@ router.get(
  * @apiDescription Create new Timeline
  * @apiName CreateNewTimeline
  * @apiGroup Schedule
- * 
+ *
  * @apiBody {Object} data New Timeline Data
  * @apiBody {String} data.name Timeline Name
  * @apiBody {String} data.description Timeline Description
  * @apiBody {Number} data.plantId Plant ID of Plant associated with timeline
- * 
+ *
  * @apiSuccess {Number} - Timeline ID of new timeline
- * 
+ *
  */
 
 /**
@@ -1433,13 +1438,13 @@ router.get(
  * @apiDescription Edit specific timeline based on given timeline ID
  * @apiName EditTimeline
  * @apiGroup Schedule
- * 
+ *
  * @apiParam {String} id Timeline ID
- * 
+ *
  * @apiBody {Object} data New Timeline Data
  * @apiBody {String} data.name Timeline Name
  * @apiBody {String} data.description Timeline Description
- * 
+ *
  * @apiSuccess {Number} - Timeline ID of updated timeline
  */
 
@@ -1448,9 +1453,9 @@ router.get(
  * @apiDescription Delete specific timeline based on given timeline ID
  * @apiName DeleteTimeline
  * @apiGroup Schedule
- * 
+ *
  * @apiParam {String} id Timeline ID
- * 
+ *
  * @apiSuccess {String} - "success"
  */
 router
@@ -1465,9 +1470,9 @@ router
  * @apiDescription Get all Schedules of a given Timeline
  * @apiName GetSchedulesofTimeline
  * @apiGroup Schedule
- * 
+ *
  * @apiParam {String} id Timeline ID
- * 
+ *
  * @apiSuccess {Object[]} - Schedule Array
  * @apiSuccess {Number} -.schedule_id Schedule ID
  * @apiSuccess {Number} -.timeline_id Timeline ID
@@ -1496,15 +1501,15 @@ router
   .route("/timeline/schedules/:id")
   .get(controllers.schedule.getSchedulesTimeline);
 
-/** 
+/**
  * @api {get} /timeline/status/:status/:id Get Timelines by Status
  * @apiDescription Get Timelines by Status and User Created (optional)
  * @apiName GetTimelinesByStatus
  * @apiGroup Schedule
- * 
+ *
  * @apiParam {String} status Status to filter Timelines
  * @apiParam {String} [id] User ID of the creator of timeline
- * 
+ *
  * @apiSuccess {Object[]} - Filtered Timeline Array
  * @apiSuccess {Number} -.id Timeline ID
  * @apiSuccess {String} -.name Timeline Name
@@ -1512,21 +1517,21 @@ router
  * @apiSuccess {Number} -.plant_id ID of the plant associated with timeline
  * @apiSuccess {String} -.plant_name Name of the plant associated with timeline
  * @apiSuccess {Number} -.status Status of Timeline
- * 
+ *
  * @apiError (Error 404) {Object} NotFound {message: "No timeline found"}
-*/
+ */
 
 /**
  * @api {patch} /timeline/status/:status/:id Update Timeline Status
  * @apiDescription Update Timeline Status
  * @apiName UpdateTimeline
  * @apiGroup Schedule
- * 
+ *
  * @apiParam {String} status Status to filter Timelines
  * @apiParam {String} id Timeline ID
- * 
+ *
  * @apiBody {String} test "random"
- * 
+ *
  * @apiSuccess {Number} - Timeline ID
  */
 router
@@ -1545,7 +1550,7 @@ router.get(
  * @apiDescription Insert New Schedule Checklist
  * @apiName InsertNewSchedule
  * @apiGroup Schedule
- * 
+ *
  * @apiBody {Object} schedule Schedule
  * @apiBody {Number} schedule.checklistId Checklist ID of Schedule
  * @apiBody {String} schedule.remarks Schedule Remarks
@@ -1557,7 +1562,7 @@ router.get(
  * @apiBody {Number} [schedule.prevId] prev ID of Schedule
  * @apiBody {Number} [schedule.status] Status of Schedule Checklist
  * @apiBody {Number} [schedule.index] Schedule Checklist Index
- * 
+ *
  * @apiSuccess {String} - "success"
  */
 router.post(
@@ -1571,7 +1576,7 @@ router.post(
  * @apiDescription Update existing Schedule Checklist
  * @apiName UpdateExistingSchedule
  * @apiGroup Schedule
- * 
+ *
  * @apiBody {Object} schedule Schedule
  * @apiBody {Number} schedule.checklistId Checklist ID of Schedule
  * @apiBody {String} schedule.remarks Schedule Remarks
@@ -1582,7 +1587,7 @@ router.post(
  * @apiBody {Number} schedule.plantId Plant ID of plant associated with Timeline
  * @apiBody {Number} [schedule.prevId] prev ID of Schedule
  * @apiBody {number} schedule.scheduleId Schedule ID
- * 
+ *
  * @apiSuccess {String} Success "Schedule successfully updated"
  * @apiError (Error 500) {String} InternalServerError "unable to update schedule"
  */
@@ -1597,9 +1602,9 @@ router.patch(
  * @apiDescription Delete a Schedule given a Schedule ID
  * @apiName DeleteSchedule
  * @apiGroup Schedule
- * 
+ *
  * @apiParam {String} id Schedule ID
- * 
+ *
  * @apiSuccess {String} Success "Schedule successfully deleted"
  */
 
@@ -1608,9 +1613,9 @@ router.patch(
  * @apiDescription Get All Schedules or Plant Specific Schedules
  * @apiName GetPlantSpecificSchedules
  * @apiGroup Schedule
- * 
+ *
  * @apiParam {String} id Plant ID (0 for All Schedules)
- * 
+ *
  * @apiSuccess {Object[]} - Schedule Array
  * @apiSuccess {Number} -.schedule_id Schedule ID
  * @apiSuccess {Number} -.timeline_id Timeline ID
@@ -1645,7 +1650,7 @@ router
  * @apiDescription Get all Pending Schedule Checklists
  * @apiName GetPendingChecklists
  * @apiGroup Schedule
- * 
+ *
  * @apiSuccess {Object[]} - Array of Pending Schedule Checklists
  * @apiSuccess {Number} -.id Schedule Checklist ID
  * @apiSuccess {String} -.name Schedule Checklist Name
@@ -1653,7 +1658,7 @@ router
  * @apiSuccess {String} -.description Schedule Checklist Description
  * @apiSuccess {Number} -. Schedule Timeline ID
  * @apiSuccess {String} -.checklistName Schedule Checklist TEMPLATE Name
- * 
+ *
  * @apiError (Error 404) {String} NotFound "No pending schedules"
  */
 
