@@ -437,6 +437,15 @@ interface CMMSWorkflow {
   create_date?: string,
 }
 
+interface CMMSPlantLoc {
+  id: number,
+  plant_id: number,
+  loc_floor: string,
+  loc_room: string,
+  activity_log?: {[key: string]: string}[]
+  created_date?: string
+}
+
 export {
   CMMSBaseType,
   CMMSUser,
@@ -475,4 +484,5 @@ export {
   CMMSChangePassword,
   CMMSWorkflow,
   CMMSFeedback,
+  CMMSPlantLoc,
 };

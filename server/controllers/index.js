@@ -11,3 +11,5 @@ exports.logbook         = require("./logbook");
 exports.user            = require("./user");
 exports.setting        = require("./setting");
 exports.workflow        = require("./workflow");
+exports.feedback        = require("./feedback");
+exports.plantLocation   = require("./plantLocation");
