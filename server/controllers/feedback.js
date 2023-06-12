@@ -12,14 +12,17 @@ const ITEMS_PER_PAGE = 10;
 const fetchAllFeedbackQuery = `
 SELECT 
     f.feedback_id, 
-    f.plant_loc, 
+    f.plant_loc_id,
     f.plant_id, 
     f.description,
     f.contact,
     f.status_id,
     f.activity_log,
     concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
-    concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
+    concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigned_user_name,
+	pl.loc_room,
+	pl.loc_id,
+	pl.loc_floor,
     pm.plant_name,
     pm.plant_id,
     f.created_date,
@@ -38,6 +41,7 @@ FROM
     LEFT JOIN keppel.users assignU ON assignU.user_id = f.assigned_user_id
     LEFT JOIN keppel.users createdU ON createdU.user_id = f.created_user_id
     LEFT JOIN keppel.plant_master pm ON pm.plant_id = f.plant_id
+    LEFT JOIN keppeL.plant_location pl ON pl.loc_id = f.plant_loc_id
     JOIN keppel.status_cm st ON st.status_id = f.status_id	
 `;
 
