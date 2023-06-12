@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode, useCallback } from "react";
 import { CMMSChecklist } from "../../types/common/interfaces";
 import { ChecklistPageProps } from "../../pages/Checklist/Form";
 import styles from "../../styles/Checklist.module.scss";
@@ -18,6 +18,45 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
             </p>
         );
     });
+
+    const actionDateElement = useCallback((): ReactNode | null => {
+        const { activity_log, status_id } = props.checklist as CMMSChecklist;
+        if (!Array.isArray(activity_log)) return;
+        if (status_id == 4) {
+            return (
+                <div>
+                    <p className={styles.checklistDetailsHeading}>Date of Completion</p>
+                    {activity_log.reverse().find(activity => activity["activity"] == "WORK DONE")!["date"]}
+                </div>
+            );
+        } else if (status_id == 5) {
+            return (
+                <div>
+                    <p className={styles.checklistDetailsHeading}>Date of Approval</p>
+                    {activity_log.reverse().find(activity => activity["activity"] == "APPROVED")!["date"]}
+                </div>
+            );
+        } else if (status_id == 3) {
+            return (
+                <div>
+                    <p className={styles.checklistDetailsHeading}>Date of Rejection</p>
+                    {activity_log.reverse().find(activity => activity["activity"] == "REJECTED")!["date"]}
+                </div>
+            );
+        }
+    }, [props.checklist]);
+
+    const rejectionComments = useCallback((): ReactNode | null => {
+        const { activity_log, status_id } = props.checklist as CMMSChecklist;
+        if (status_id == 3) {
+            return ( 
+                <div>
+                     <p className={styles.checklistDetailsHeading}>Rejection Comments</p>
+                    {activity_log.reverse().find(activity => activity["activity"] == "REJECTED")!["remarks"]}
+                </div>
+            );
+        }
+    }, [props.checklist]);
 
     return (
         <div>
@@ -55,19 +94,8 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
                     <p className={styles.checklistDetailsHeading}>Linked Assets</p>
                     {assetHTMLElements.length > 0 ? assetHTMLElements : "NIL"}
                 </div>
-                {props.checklist?.status_id == 4 && <div>
-                    <p className={styles.checklistDetailsHeading}>Time of Completion</p>
-                    {props.checklist?.activity_log.findLast(activity => activity["activity"] == "WORK DONE")!["date"]}
-                </div>}
-                {props.checklist?.status_id == 5 && <div>
-                    <p className={styles.checklistDetailsHeading}>Time of Approval</p>
-                    {props.checklist?.activity_log.findLast(activity => activity["activity"] == "APPROVED")!["date"]}
-                </div>}
-                {props.checklist?.status_id == 3 || props.checklist?.status_id == 6 && <div>
-                    <p className={styles.checklistDetailsHeading}>Time of Rejection</p>
-                    {props.checklist?.activity_log.findLast(activity => activity["activity"] == "REJECTED")!["date"]}
-                </div>}
-
+                {actionDateElement()}
+                {rejectionComments()}
             </div>
         </div>
     );

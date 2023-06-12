@@ -15,7 +15,6 @@ async function generateCSV(data) {
         }
         dataStr +=  "\n" + tmp.toString();
     }
-    // console.log(dataStr)
     memStream.write(dataStr);
     memStream.end(); // important -- you have to end the stream before storing it as a buffer
     const buffer = await getStream.buffer(memStream);

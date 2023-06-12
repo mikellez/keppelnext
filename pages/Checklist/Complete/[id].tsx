@@ -19,12 +19,12 @@ import { useRouter } from "next/router";
 import instance from '../../../types/common/axios.config';
 import Link from "next/link";
 import { downloadChecklistPDF } from "../View/[id]";
+import ChecklistEditableReassignedForm from "../../../components/Checklist/ChecklistEditableReassignedForm";
 
 export const SectionsContext = createContext({
     sections: [] as CheckSection[],
     setSections: (() => {}) as React.Dispatch<React.SetStateAction<CheckSection[]>>,
 });
-
 const submitCompletedChecklist = async (data: CheckSection[], id: number) => {
     return await instance({
         url: "/api/checklist/complete/" + id,
@@ -44,7 +44,6 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
     const [incompleteModal, setIncompleteModal] = useState<boolean>(false);
 
     const router = useRouter();
-
     useEffect(() => {
         if (props.checklist && props.checklist.datajson.length > 0) {
             const sectionsFromJSON = props.checklist.datajson.map((section: any) => {
@@ -71,8 +70,6 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
         });
     };
 
-    console.log(sections);
-
     const isCompleteChecklist = () => {
         return sections.every((section) => section.isComplete());
     };
@@ -97,7 +94,8 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
                 <ModuleDivider />
                 <ModuleContent>
                     <SectionsContext.Provider value={{ sections, setSections }}>
-                        <ChecklistEditableForm />
+                        {props.checklist.status_id !== 3 && <ChecklistEditableForm />}
+                        {props.checklist.status_id === 3 && <ChecklistEditableReassignedForm sections={sections}/>}
                     </SectionsContext.Provider>
                 </ModuleContent>
                 <ModuleFooter>
@@ -128,5 +126,4 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
 
 export default CompleteChecklistPage;
 const getServerSideProps: GetServerSideProps = createChecklistGetServerSideProps([2, 3]);
-
 export { getServerSideProps };

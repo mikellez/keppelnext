@@ -14,9 +14,10 @@ const ChecklistPreview = (props: ChecklistPageProps) => {
                 return CheckSection.fromJSON(JSON.stringify(section));
             });
             setSections(sectionsFromJSON);
+            console.log(sections);
         }
     }, [props.checklist]);
-
+    
     return (
         <>
             <ModuleContent>

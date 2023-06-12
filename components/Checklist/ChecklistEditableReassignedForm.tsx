@@ -5,24 +5,19 @@ import { ModuleDivider } from "../ModuleLayout/ModuleDivider";
 import styles from "../../styles/Checklist.module.scss";
 
 
-const ChecklistEditableForm = (
-   
-) => {
-    const { sections } = useContext(SectionsContext);
-    console.log(sections);
-    
+
+const ChecklistEditableReassignedForm = ({sections}: {sections: CheckSection[]}) => {
     return (
         <div>
             {sections.map((section, index) => {
-                return <ChecklistEditableFormSection key={section.id} section={section} sectionId={section.id} />
+                return <ChecklistEditableReassignedFormSection key={section.id} section={section} sectionId={section.id} />
             })}
         </div>
     );
 };
 
-const ChecklistEditableFormSection = (
-    { section, sectionId }: { section: CheckSection, sectionId: string }
-) => {
+const ChecklistEditableReassignedFormSection = ({ section, sectionId }: { section: CheckSection, sectionId: string}
+    ) => {
 
     return (
         <div>
@@ -30,7 +25,7 @@ const ChecklistEditableFormSection = (
             <div>
             {
                section.rows.map((row, index) => {
-                    return <ChecklistEditableFormRow key={row.id} row={row} rowId={row.id} sectionId={sectionId} />
+                    return <ChecklistEditableReassignedFormRow key={row.id} row={row} rowId={row.id} sectionId={sectionId} />
                })
             }
             </div>
@@ -39,22 +34,20 @@ const ChecklistEditableFormSection = (
     );
 };
 
-const ChecklistEditableFormRow = (
-    { row, rowId, sectionId }: { row: CheckRow, rowId: string, sectionId: string }
-) => {
-
+const ChecklistEditableReassignedFormRow = ({ row, rowId, sectionId }: { row: CheckRow, rowId: string, sectionId: string }
+    ) => {
     return (
         <div>
             <h6>{row.description}</h6>
-            <div className={styles.checklistViewRow}>
-            {
-                row.checks.map(check => 
-                    <React.Fragment key={check.id}>
-                        {check.renderEditableForm(rowId, sectionId)}
-                    </React.Fragment>
-                )
-            }
-            </div>
+                <div className={styles.checklistViewRow}>
+                {
+                    row.checks.map(check => 
+                        <React.Fragment key={check.id}>
+                            {check.renderReassignedEditableForm(rowId, sectionId)}
+                        </React.Fragment>
+                    )
+                }
+                </div>
         </div>
     );
 };
@@ -77,5 +70,5 @@ const updateSpecificCheck = (
     });
 };
 
-export default ChecklistEditableForm;
+export default ChecklistEditableReassignedForm;
 export { updateSpecificCheck }
