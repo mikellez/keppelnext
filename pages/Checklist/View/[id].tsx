@@ -32,18 +32,18 @@ const downloadChecklistPDF = async (checklistId: number) => {
 };
 
 const ManageChecklistPage = (props: ChecklistPageProps) => {
-    const [remarks, setRemarks] = useState<string>();
+    const [remarks, setRemarks] = useState<string>("");
     const router = useRouter();
 
     useEffect(() => {
         if (props.checklist?.status_id == 5) {
-            setRemarks(props.checklist?.activity_log.at(-1).remarks as string)
+            setRemarks(props.checklist?.activity_log.at(-1)!.remarks as string)
         } 
     }, [props.checklist])
-    console.log(props.checklist)
+
     return (
         <ModuleMain>
-            <ModuleHeader header="Manage Checklist">
+            <ModuleHeader header="View Checklist">
                 <TooltipBtn
                     text="Download PDF"
                     onClick={() => downloadChecklistPDF(parseInt(router.query.id as string))}

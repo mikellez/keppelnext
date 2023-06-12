@@ -42,7 +42,7 @@ export default function ViewRequest(props: RequestPreviewProps) {
   const { id } = router.query;
     return (
         <ModuleMain>
-          <ModuleHeader title="New Request" header="Complete Request">
+          <ModuleHeader title="New Request" header="View Request">
             <TooltipBtn text="Download PDF" onClick={() => downloadPDF(parseInt(id as string))}>
               <HiOutlineDownload size={20} />
             </TooltipBtn>
