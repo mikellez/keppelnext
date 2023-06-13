@@ -1,20 +1,20 @@
 import React from "react";
 import {
-    ModuleContent,
-    ModuleDivider,
-    ModuleFooter,
-    ModuleHeader,
-    ModuleMain,
+  ModuleContent,
+  ModuleDivider,
+  ModuleFooter,
+  ModuleHeader,
+  ModuleMain,
 } from "../../../components";
 import Link from "next/link";
 import RequestPreview, {
-    RequestPreviewProps,
-    RequestAction,
-  } from "../../../components/Request/RequestPreview";
+  RequestPreviewProps,
+  RequestAction,
+} from "../../../components/Request/RequestPreview";
 import TooltipBtn from "../../../components/TooltipBtn";
-import { HiOutlineDownload } from 'react-icons/hi';
+import { HiOutlineDownload } from "react-icons/hi";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import instance from '../../../types/common/axios.config';
+import instance from "../../../types/common/axios.config";
 import { CMMSRequest } from "../../../types/common/interfaces";
 import { useRouter } from "next/router";
 
@@ -56,25 +56,22 @@ export default function ViewRequest(props: RequestPreviewProps) {
 };
 
 export const getServerSideProps: GetServerSideProps = async (
-    context: GetServerSidePropsContext
-  ) => {
-    const getSpecificRequest = await instance.get<CMMSRequest>(
-      `/api/request/` + context.params?.id
-    );
-  
-    if (
-      !getSpecificRequest.data
-    ) {
-      return {
-        redirect: {
-          destination: "/404",
-        },
-        props: {},
-      };
-    }
-  
-    return {
-      props: { request: getSpecificRequest.data, action: RequestAction.manage },
-    };
-  };
+  context: GetServerSidePropsContext
+) => {
+  const getSpecificRequest = await instance.get<CMMSRequest>(
+    `/api/request/` + context.params?.id
+  );
 
+  if (!getSpecificRequest.data) {
+    return {
+      redirect: {
+        destination: "/404",
+      },
+      props: {},
+    };
+  }
+
+  return {
+    props: { request: getSpecificRequest.data, action: RequestAction.manage },
+  };
+};
