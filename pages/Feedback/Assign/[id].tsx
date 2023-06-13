@@ -25,9 +25,13 @@ interface FeedbackPageProps {
   feedback: CMMSFeedback | null;
 }
 
-const assignFeedback = async (feedback: CMMSFeedback, type: string) => {
+const assignFeedback = async (
+  feedback: CMMSFeedback,
+  type: string,
+  feedback_id: number
+) => {
   return await instance
-    .post(`/api/feedback/${type}`, { feedback })
+    .post(`/api/feedback/${type}/${feedback_id}`, { feedback })
     .then((res) => {
       return res.data;
     })
@@ -50,12 +54,13 @@ export default function FeedbackNew(props: FeedbackPageProps) {
   const user = useCurrentUser();
   const router = useRouter();
 
-  const submitFeedback = (feedbackType: string) => {
+  const submitFeedback = (feedbackType: string, feedback_id: number) => {
     if (!checkInputFields()) {
+      //   console.log("fail");
       setIncompleteModal(true);
     } else {
       setSuccessModal(true);
-      assignFeedback(feedbackData, feedbackType);
+      assignFeedback(feedbackData, feedbackType, feedback_id);
       setTimeout(() => {
         router.push("/Feedback");
       }, 1000);
@@ -74,7 +79,8 @@ export default function FeedbackNew(props: FeedbackPageProps) {
   //     }
   //   };
   const checkInputFields = () => {
-    return feedbackData.assigned_user_id;
+    console.log(feedbackData.assigned_user_name);
+    return feedbackData.assigned_user_name && feedbackData.description;
   };
 
   useEffect(() => {
@@ -141,7 +147,9 @@ export default function FeedbackNew(props: FeedbackPageProps) {
               <>
                 <TooltipBtn
                   toolTip={false}
-                  onClick={() => submitFeedback("assign")}
+                  onClick={() =>
+                    submitFeedback("assign", props.feedback?.feedback_id)
+                  }
                   disabled={successModal}
                 >
                   Submit

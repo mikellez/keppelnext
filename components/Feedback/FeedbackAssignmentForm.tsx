@@ -12,7 +12,7 @@ interface FeedbackCreationFormProps {
 }
 
 const FeedbackCreationForm = (props: FeedbackCreationFormProps) => {
-  console.log(props.feedbackData);
+  //   console.log(props.feedbackData);
   const updateFeedback = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
