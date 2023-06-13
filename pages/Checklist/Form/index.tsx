@@ -86,6 +86,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
       }, 1000);
     }
   };
+
   const checkInputFields = () => {
     return (
       checklistData.signoff_user_id &&
@@ -137,8 +138,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
       };
     });
   }, [sections]);
-  // console.log(checklistData.datajson)
-  // console.log(checklistData.status_id);
+
   return (
     <>
       <ModuleMain>

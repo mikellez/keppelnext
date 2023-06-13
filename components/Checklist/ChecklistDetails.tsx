@@ -26,14 +26,18 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
             return (
                 <div>
                     <p className={styles.checklistDetailsHeading}>Date of Completion</p>
-                    {activity_log.reverse().find(activity => activity["activity"] == "WORK DONE")!["date"]}
+                    <p className={styles.checklistDetailsContent}>
+                        {activity_log.reverse().find(activity => activity["activity"] == "WORK DONE")!["date"]}
+                    </p>
                 </div>
             );
         } else if (status_id == 5) {
             return (
                 <div>
                     <p className={styles.checklistDetailsHeading}>Date of Approval</p>
-                    {activity_log.reverse().find(activity => activity["activity"] == "APPROVED")!["date"]}
+                    <p className={styles.checklistDetailsContent}>
+                        {activity_log.reverse().find(activity => activity["activity"] == "APPROVED")!["date"]}
+                    </p>
                 </div>
             );
         } else if (status_id == 3 || status_id == 2) {
@@ -41,7 +45,9 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
             return (
                 <div>
                     <p className={styles.checklistDetailsHeading}>Date of Rejection</p>
-                    {rejectedLog ? rejectedLog.date : "NIL"}
+                    <p className={styles.checklistDetailsContent}>
+                        {rejectedLog ? rejectedLog.date : "NIL"}
+                    </p>
                 </div>
             );
         }
@@ -49,11 +55,14 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
 
     const rejectionComments = useCallback((): ReactNode | null => {
         const { activity_log, status_id } = props.checklist as CMMSChecklist;
-        if (status_id == 3) {
+        const rejectionActivity = activity_log.reverse().find(activity => activity["activity"] == "REJECTED");
+        if (status_id == 3 || status_id == 2) {
             return ( 
                 <div>
                      <p className={styles.checklistDetailsHeading}>Rejection Comments</p>
-                    {activity_log.reverse().find(activity => activity["activity"] == "REJECTED")!["remarks"]}
+                     <p className={styles.checklistDetailsContent}>
+                        {rejectionActivity && rejectionActivity["remarks"]}
+                    </p>
                 </div>
             );
         }
