@@ -148,11 +148,11 @@ function SignatureEditable({
       <h6>{signatureControlObj.question}</h6>
       <div
         className="form-group"
-        style={{ border: "black dashed 1px", height: "300", width: "200" }}
+        // style={{ border: "black dashed 1px" }}
       >
         <SignatureCanvas
-          canvasProps={{ width: "300", height: "200" }}
-          backgroundColor="#E4DCCF"
+          canvasProps={{ width: "300", height: "100" }}
+          backgroundColor="#F8E8EE"
           penColor="black"
           ref={sigRef}
           onEnd={handleSignatureEnd}
