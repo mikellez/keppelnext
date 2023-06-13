@@ -45,11 +45,12 @@ import { Role } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
 import { GetServerSidePropsContext } from "next";
 import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
+import FeedbackHistory from "../../components/Feedback/FeedbackHistory";
 
-const indexedColumn: ("pending" | "assigned" | "review")[] = [
+const indexedColumn: ("pending" | "assigned" | "completed")[] = [
   "pending",
   "assigned",
-  "review",
+  "completed",
 ];
 
 export interface FeedbackItem {
@@ -100,7 +101,7 @@ const downloadCSV = async (type: string, activeTabIndex: number) => {
   }
 };
 
-export default function Checklist(props: FeedbackProps) {
+export default function Feedback(props: FeedbackProps) {
   const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>([]);
   const [isReady, setReady] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
@@ -121,7 +122,7 @@ export default function Checklist(props: FeedbackProps) {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns:  5em calc(90% - 46em) 7em 8em 10em 10em 10% ;",
+        "--data-table-library_grid-template-columns:  5em calc(90% - 46em) 7em 8em 10em 10em 10% 5em;",
     },
   ]);
 
@@ -226,7 +227,7 @@ export default function Checklist(props: FeedbackProps) {
               }}
               className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
             >
-              <span style={{ all: "unset" }}>For Review</span>
+              <span style={{ all: "unset" }}>Completed</span>
             </li>
           </ul>
         )}
@@ -249,6 +250,7 @@ export default function Checklist(props: FeedbackProps) {
                       <HeaderCell resize>Assigned To</HeaderCell>
                       <HeaderCell resize>Location</HeaderCell>
                       <HeaderCell resize>Created By</HeaderCell>
+                      <HeaderCell resize>Actions</HeaderCell>
                     </HeaderRow>
                   </Header>
 
@@ -274,18 +276,12 @@ export default function Checklist(props: FeedbackProps) {
                             {item.loc_floor} floor, {item.loc_room}
                           </Cell>
                           <Cell>{item.createdbyuser}</Cell>
-                          {/* <Cell>
-                            {(user.data!.role_id === Role.Admin ||
+                          <Cell>
+                            {((user.data!.role_id === Role.Admin ||
                               user.data!.role_id === Role.Manager ||
                               user.data!.role_id === Role.Engineer) &&
-                            item.status_id === 4 ? (
-                              <Link href={`/Feedback/Manage/${item.id}`}>
-                                <AiOutlineFileProtect
-                                  size={22}
-                                  title={"Manage"}
-                                />
-                              </Link>
-                            ) : item.status_id === 2 || item.status_id === 3 ? (
+                              item.status_id === 2) ||
+                            item.status_id === 3 ? (
                               <>
                                 <Link href={`/Feedback/Complete/${item.id}`}>
                                   <AiOutlineFileDone
@@ -311,7 +307,7 @@ export default function Checklist(props: FeedbackProps) {
                               size={22}
                               title={"View History"}
                             />
-                          </Cell> */}
+                          </Cell>
                         </Row>
                       );
                     })}
@@ -346,7 +342,7 @@ export default function Checklist(props: FeedbackProps) {
             closeModal={() => setHistory(undefined)}
             closeOnOverlayClick={true}
           >
-            <ChecklistHistory history={history!} />
+            <FeedbackHistory history={history!} />
           </ModuleModal>
         )}
       </ModuleContent>

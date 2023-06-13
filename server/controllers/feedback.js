@@ -42,7 +42,7 @@ FROM
     LEFT JOIN keppel.users createdU ON createdU.user_id = f.created_user_id
     LEFT JOIN keppel.plant_master pm ON pm.plant_id = f.plant_id
     LEFT JOIN keppeL.plant_location pl ON pl.loc_id = f.plant_loc_id
-    JOIN keppel.status_cm st ON st.status_id = f.status_id	
+    JOIN keppel.status_fm st ON st.status_id = f.status_id	
 `;
 
 const fetchPendingFeedbackQuery =
@@ -58,7 +58,7 @@ const fetchPendingFeedback = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await global.db.query(fetchForReviewFeedbackQuery, [
+  const totalRows = await global.db.query(fetchPendingFeedbackQuery, [
     req.user.id,
   ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
@@ -112,26 +112,26 @@ const fetchAssignedFeedback = async (req, res, next) => {
   }
 };
 
-const fetchForReviewFeedbackQuery =
+const fetchCompletedFeedbackQuery =
   fetchAllFeedbackQuery +
   `				
 WHERE 
     ua.user_id = $1 AND 
-    (f.status_id = 4 OR f.status_id = 6)
+    (f.status_id = 4)
 ORDER BY f.feedback_id desc
 `;
 
-const fetchForReviewFeedback = async (req, res, next) => {
+const fetchCompletedFeedback = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await global.db.query(fetchForReviewFeedbackQuery, [
+  const totalRows = await global.db.query(fetchCompletedFeedbackQuery, [
     req.user.id,
   ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    fetchForReviewFeedbackQuery +
+    fetchCompletedFeedbackQuery +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
@@ -238,6 +238,6 @@ const fetchFilteredFeedback = async (req, res, next) => {
 module.exports = {
   fetchPendingFeedback,
   fetchAssignedFeedback,
-  fetchForReviewFeedback,
+  fetchCompletedFeedback,
   fetchFilteredFeedback,
 };

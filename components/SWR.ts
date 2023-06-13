@@ -64,7 +64,7 @@ function useRequestFilter(props: RequestProps, page: number) {
 }
 
 function useFeedback(
-  request_type: "pending" | "assigned" | "review",
+  request_type: "pending" | "assigned" | "completed",
   page: number
 ) {
   const feedbackFetcher = (url: string) =>

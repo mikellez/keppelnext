@@ -720,9 +720,9 @@ router.get(
 );
 
 router.get(
-  "/feedback/review",
+  "/feedback/completed",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchForReviewFeedback
+  controllers.feedback.fetchCompletedFeedback
 );
 
 router.get(
