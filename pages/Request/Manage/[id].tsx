@@ -59,7 +59,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
         }, 1000);
       });
     } else {
-      manageRequest(requestId, status).then((result) => {
+      manageRequest(requestId, status, comments).then((result) => {
         setModal(true);
         setTimeout(() => {
           router.push("/Request");
