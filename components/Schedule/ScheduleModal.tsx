@@ -327,6 +327,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                 title="Success"
                 text="New maintenance successfully scheduled!"
                 icon={SimpleIcon.Check}
+                shouldCloseOnOverlayClick={true}
             />
 
             <ModuleSimplePopup
@@ -335,6 +336,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                 title="Success"
                 text="Maintenance successfully updated!"
                 icon={SimpleIcon.Check}
+                shouldCloseOnOverlayClick={true}
             />
 
             <ModuleSimplePopup
@@ -343,6 +345,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                 title="Incomplete Maintenance"
                 text="Please fill in the missing details for the maintenance."
                 icon={SimpleIcon.Cross}
+                shouldCloseOnOverlayClick={true}
             />
         </div>
     );

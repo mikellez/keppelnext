@@ -79,6 +79,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
             }, 1000);
         }
     };
+    
     const checkInputFields = () => {
         return (
             checklistData.signoff_user_id &&
@@ -128,8 +129,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
             };
         });
     }, [sections]);
-    console.log(checklistData.datajson)
-    console.log(checklistData.status_id);
+   
     return (
         <>
             <ModuleMain>
@@ -211,6 +211,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
                 title="Success"
                 text="New checklist successfully created"
                 icon={SimpleIcon.Check}
+                shouldCloseOnOverlayClick={true}
             />
 
             <ModuleSimplePopup
@@ -219,6 +220,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
                 title="Missing details"
                 text="Please ensure that all input fields have been filled"
                 icon={SimpleIcon.Exclaim}
+                shouldCloseOnOverlayClick={true}
             />
         </>
     );

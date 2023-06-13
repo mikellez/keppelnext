@@ -10,6 +10,7 @@ const { dbConnection } = require("./db/dbAPI");
 const checklistGenerator = require("./services/checklistGenerator");
 const controllers = require("./controllers");
 const { apiLimiter, loginLimiter } = require("./rateLimiter");
+const { access } = require("fs");
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -19,13 +20,21 @@ const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
   const server = express();
-  server.use(cors({
-    origin: 'http://localhost:3001',
-    credentials: true
-  }))
-  server.use(bodyParser.json({limit: '50mb', extended: true}));
-  server.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
-  server.use(bodyParser.text({ limit: '200mb' }));
+  server.use(
+    cors({
+      origin: "http://localhost:3001",
+      credentials: true,
+    })
+  );
+  server.use(bodyParser.json({ limit: "50mb", extended: true }));
+  server.use(
+    bodyParser.urlencoded({
+      limit: "50mb",
+      extended: true,
+      parameterLimit: 50000,
+    })
+  );
+  server.use(bodyParser.text({ limit: "200mb" }));
   server.use(dbConnection);
   userAuth(server);
   server.use("/api/login", loginLimiter);
@@ -65,8 +74,7 @@ app.prepare().then(() => {
         res.redirect("/403");
       } else if (
         req.user.role_id == 4 &&
-        (
-          restrictOps.includes(req.path) ||
+        (restrictOps.includes(req.path) ||
           req.path.startsWith("/Schedule/Timeline") ||
           req.path.startsWith("/Asset/Edit") ||
           req.path.startsWith("/Request/Assign") ||
@@ -159,7 +167,7 @@ app.prepare().then(() => {
   });
   server.get("/Feedback*", checkIfLoggedIn, accessControl, (req, res) => {
     return handle(req, res);
-  })
+  });
   server.get("*", (req, res) => {
     return handle(req, res);
   });
@@ -168,26 +176,32 @@ app.prepare().then(() => {
     console.log(`Ready on Port ${process.env.PORT}`);
   });
 
-  var task = cron.schedule('* * * * *', async () =>  {
-    console.log('trigger task');
+  var task = cron.schedule(
+    "* * * * *",
+    async () => {
+      console.log("trigger task");
 
-    // run workflow task - auto assign user
-    await axios.get('http://localhost:3001/api/workflow/run/assign')
-      .catch((err)=> {
-        console.log(err.response)
-        console.log('Unable to run workflow task - assign user')
-      })
-    
-    // run workflow task - auto send email
-    await axios.get('http://localhost:3001/api/workflow/run/email')
-      .catch((err)=> {
-        console.log(err.response)
-        console.log('Unable to run workflow task - send email')
-      })
-    //console.log(result.data)
-  }, {
-    scheduled: true
-  });
+      // run workflow task - auto assign user
+      await axios
+        .get("http://localhost:3001/api/workflow/run/assign")
+        .catch((err) => {
+          console.log(err.response);
+          console.log("Unable to run workflow task - assign user");
+        });
+
+      // run workflow task - auto send email
+      await axios
+        .get("http://localhost:3001/api/workflow/run/email")
+        .catch((err) => {
+          console.log(err.response);
+          console.log("Unable to run workflow task - send email");
+        });
+      //console.log(result.data)
+    },
+    {
+      scheduled: true,
+    }
+  );
 
   task.start();
 

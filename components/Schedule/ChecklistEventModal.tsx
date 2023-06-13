@@ -470,6 +470,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                 title="Maintenance Deleted"
                 text="Schedule Maintenance has been successfully deleted."
                 icon={SimpleIcon.Check}
+                shouldCloseOnOverlayClick={true}
             />
             <ModuleSimplePopup
                 modalOpenState={submitModal}
@@ -477,6 +478,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                 title="Submitted"
                 text="Changes to event has to been sent for approval."
                 icon={SimpleIcon.Check}
+                shouldCloseOnOverlayClick={true}
             />
             <ModuleSimplePopup
                 modalOpenState={failureModal}
@@ -484,6 +486,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                 title="Incomplete Maintenance"
                 text="Please fill in the missing details for the maintenance."
                 icon={SimpleIcon.Cross}
+                shouldCloseOnOverlayClick={true}
             />
 
             <ScheduleModal

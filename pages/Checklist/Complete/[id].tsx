@@ -95,7 +95,8 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
                 <ModuleContent>
                     <SectionsContext.Provider value={{ sections, setSections }}>
                         <ChecklistEditableForm />
-                        {/* {props.checklist.status_id === 3 && <ChecklistEditableReassignedForm sections={sections}/>} */}
+                        {/* {props.checklist.status_id !== 3 && <ChecklistEditableForm />}
+                        {props.checklist.status_id === 3 && <ChecklistEditableReassignedForm sections={sections}/>} */}
                     </SectionsContext.Provider>
                 </ModuleContent>
                 <ModuleFooter>
@@ -111,6 +112,7 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
                 icon={SimpleIcon.Check}
                 title="Completed"
                 text="Checklist is successfully completed"
+                shouldCloseOnOverlayClick={true}
             />
 
             <ModuleSimplePopup
@@ -119,6 +121,7 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
                 icon={SimpleIcon.Exclaim}
                 title="Incomplete checklist"
                 text="Please ensure that all fields have been filled"
+                shouldCloseOnOverlayClick={true}
             />
         </>
     );

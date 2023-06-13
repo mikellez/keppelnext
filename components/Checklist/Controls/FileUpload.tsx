@@ -43,9 +43,9 @@ export class FileUploadControl extends CheckControl {
 	renderEditableForm(rowId: string, sectionId: string, index: number) {
 		return <FileUploadEditable fileControlObj={this} rowId={rowId} sectionId={sectionId} index={index} />
 	}
-  renderReassignedEditableForm(rowId: string, sectionId: string) {
-		return <FileUploadReassignedEditable fileControlObj={this} rowId={rowId} sectionId={sectionId} />
-	}
+  // renderReassignedEditableForm(rowId: string, sectionId: string) {
+	// 	return <FileUploadReassignedEditable fileControlObj={this} rowId={rowId} sectionId={sectionId} />
+	// }
 
   renderViewOnlyForm() {
     return <FileUploadView fileControlObj={this} />
@@ -126,25 +126,11 @@ function FileUploadEditable({ fileControlObj, rowId, sectionId, index }: {
 		reader.readAsDataURL(file);
 		reader.onload = () => {
 			updateSpecificCheck(sectionId, rowId, fileControlObj.id, reader.result as string, setSections);
-			// updateSection(reader.result as string)
 		};
 	};
 
 	const removeFileFromValue = () => {
 		updateSpecificCheck(sectionId, rowId, fileControlObj.id, "", setSections);
-		// updateSection("")
-	};
-
-	const updateSection = (value: string) => {
-		setSections((prevSections) => {
-			const newSections = [...prevSections];
-			newSections.forEach(section => {
-				if (section.id === sectionId) {
-					section.updateSection(rowId, fileControlObj.id, value)
-				}
-			})
-			return newSections;
-		});
 	};
 	
 	return (
@@ -157,10 +143,10 @@ function FileUploadEditable({ fileControlObj, rowId, sectionId, index }: {
 				onChange={handleChange}
         accept='jpeg/png'
 			/>
-      <p 
+      {fileControlObj.value && fileControlObj.value != "" && <><p 
         onClick={() => setModalOpen(true)}
         className={requestStyles.editIcon}
-      >View Previous File
+      >View File
       </p>
       <ModuleModal
         closeModal={() => setModalOpen(false)}
@@ -168,13 +154,13 @@ function FileUploadEditable({ fileControlObj, rowId, sectionId, index }: {
         closeOnOverlayClick
         className={requestStyles.imageModal}
       >
-      <Image 
-        src={fileControlObj.value}
-        alt="img"
-        width={500} 
-        height={500}
-      />
-    </ModuleModal>
+        <Image 
+          src={fileControlObj.value}
+          alt="img"
+          width={500} 
+          height={500}
+        />
+      </ModuleModal></>}
 		</div>
 	)
 };
@@ -183,96 +169,95 @@ function FileUploadView({ fileControlObj }: {fileControlObj: FileUploadControl})
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   return (
-    <>
       <div className={styles.checkViewContainer}>
         <h6>{fileControlObj.question}</h6>
         <p 
           onClick={() => setModalOpen(true)}
           className={requestStyles.editIcon}
         >View File</p>
+        <ModuleModal
+          closeModal={() => setModalOpen(false)}
+          isOpen={modalOpen}
+          closeOnOverlayClick
+          className={requestStyles.imageModal}
+        >
+        <Image 
+          src={fileControlObj.value}
+          alt="img"
+          width={500} 
+          height={500}
+        />
+        </ModuleModal>
       </div>
-      <ModuleModal
-        closeModal={() => setModalOpen(false)}
-        isOpen={modalOpen}
-        closeOnOverlayClick
-        className={requestStyles.imageModal}
-      >
-      <Image 
-        src={fileControlObj.value}
-        alt="img"
-        width={500} 
-        height={500}
-      />
-  </ModuleModal>
-  </>
+      
   );
 };
 
 
-function FileUploadReassignedEditable({ fileControlObj, rowId, sectionId }: {
-	fileControlObj: FileUploadControl,
-	rowId: string,
-	sectionId: string
+// function FileUploadReassignedEditable({ fileControlObj, rowId, sectionId }: {
+// 	fileControlObj: FileUploadControl,
+// 	rowId: string,
+// 	sectionId: string
 
-}) {
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
-	const { setSections } = useContext(SectionsContext);
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		if (e.target.files && e.target.files.length > 0) {
-			addFileToValue(e.target.files[0]);
-		} else {
-			removeFileFromValue();
-		}
-	};
+// }) {
+//   const [modalOpen, setModalOpen] = useState<boolean>(false);
+// 	const { setSections } = useContext(SectionsContext);
+// 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+// 		if (e.target.files && e.target.files.length > 0) {
+// 			addFileToValue(e.target.files[0]);
+// 		} else {
+// 			removeFileFromValue();
+// 		}
+// 	};
 
-	const addFileToValue = (file: File) => {
-		const reader = new FileReader();
-		reader.readAsDataURL(file);
-		reader.onload = () => {
-			updateSpecificCheck(sectionId, rowId, fileControlObj.id, reader.result as string, setSections);
-			// updateSection(reader.result as string)
-		};
-	};
+// 	const addFileToValue = (file: File) => {
+// 		const reader = new FileReader();
+// 		reader.readAsDataURL(file);
+// 		reader.onload = () => {
+// 			updateSpecificCheck(sectionId, rowId, fileControlObj.id, reader.result as string, setSections);
+// 			// updateSection(reader.result as string)
+// 		};
+// 	};
 
-	const removeFileFromValue = () => {
-		updateSpecificCheck(sectionId, rowId, fileControlObj.id, "", setSections);
-		// updateSection("")
-	};
+// 	const removeFileFromValue = () => {
+// 		updateSpecificCheck(sectionId, rowId, fileControlObj.id, "", setSections);
+// 		// updateSection("")
+// 	};
 
-	const updateSection = (value: string) => {
-		setSections((prevSections) => {
-			const newSections = [...prevSections];
-			newSections.forEach(section => {
-				if (section.id === sectionId) {
-					section.updateSection(rowId, fileControlObj.id, value)
-				}
-			})
-			return newSections;
-		});
-	};
+// 	const updateSection = (value: string) => {
+// 		setSections((prevSections) => {
+// 			const newSections = [...prevSections];
+// 			newSections.forEach(section => {
+// 				if (section.id === sectionId) {
+// 					section.updateSection(rowId, fileControlObj.id, value)
+// 				}
+// 			})
+// 			return newSections;
+// 		});
+// 	};
 	
-	return (
-		<>
-      <div className={styles.checkViewContainer}>
-        <h6>{fileControlObj.question}</h6>
-        <p 
-          onClick={() => setModalOpen(true)}
-          className={requestStyles.editIcon}
-        >View File</p>
-      </div>
-      <ModuleModal
-        closeModal={() => setModalOpen(false)}
-        isOpen={modalOpen}
-        closeOnOverlayClick
-        className={requestStyles.imageModal}
-      >
-      <Image 
-        src={fileControlObj.value}
-        alt="img"
-        width={500} 
-        height={500}
-      />
-  </ModuleModal>
-  </>
-	);
-};
+// 	return (
+// 		<>
+//       <div className={styles.checkViewContainer}>
+//         <h6>{fileControlObj.question}</h6>
+//         <p 
+//           onClick={() => setModalOpen(true)}
+//           className={requestStyles.editIcon}
+//         >View File</p>
+//       </div>
+//       <ModuleModal
+//         closeModal={() => setModalOpen(false)}
+//         isOpen={modalOpen}
+//         closeOnOverlayClick
+//         className={requestStyles.imageModal}
+//       >
+//       <Image 
+//         src={fileControlObj.value}
+//         alt="img"
+//         width={500} 
+//         height={500}
+//       />
+//   </ModuleModal>
+//   </>
+// 	);
+// };

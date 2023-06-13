@@ -40,12 +40,13 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
                     </p>
                 </div>
             );
-        } else if (status_id == 3) {
+        } else if (status_id == 3 || status_id == 2) {
+            const rejectedLog = activity_log.reverse().find(activity => activity["activity"] == "REJECTED");
             return (
                 <div>
                     <p className={styles.checklistDetailsHeading}>Date of Rejection</p>
                     <p className={styles.checklistDetailsContent}>
-                        {activity_log.reverse().find(activity => activity["activity"] == "REJECTED")!["date"]}
+                        {rejectedLog ? rejectedLog.date : "NIL"}
                     </p>
                 </div>
             );
@@ -54,14 +55,13 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
 
     const rejectionComments = useCallback((): ReactNode | null => {
         const { activity_log, status_id } = props.checklist as CMMSChecklist;
-        if (status_id == 3) {
+        const rejectionActivity = activity_log.reverse().find(activity => activity["activity"] == "REJECTED");
+        if (status_id == 3 || status_id == 2) {
             return ( 
                 <div>
-                     <p className={styles.checklistDetailsHeading}>
-                        Rejection Comments
-                    </p>
+                     <p className={styles.checklistDetailsHeading}>Rejection Comments</p>
                      <p className={styles.checklistDetailsContent}>
-                        {activity_log.reverse().find(activity => activity["activity"] == "REJECTED")!["remarks"]}
+                        {rejectionActivity && rejectionActivity["remarks"]}
                     </p>
                 </div>
             );

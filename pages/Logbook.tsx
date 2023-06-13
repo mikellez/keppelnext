@@ -281,6 +281,7 @@ const Logbook = ({
             order to lock!"
           title="Lock Error"
           icon={SimpleIcon.Exclaim}
+          shouldCloseOnOverlayClick={true}
         ></ModuleSimplePopup>
         {!loading && (
           <Table

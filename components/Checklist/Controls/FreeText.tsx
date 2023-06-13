@@ -43,9 +43,9 @@ export class FreeTextControl extends CheckControl {
 		return <FreeTextEditable freeTextObj={this} rowId={rowId} sectionId={sectionId} index={index} />
 	}
   
-  renderReassignedEditableForm(rowId: string, sectionId: string) {
-		return <FreeTextReassignedEditable freeTextObj={this} rowId={rowId} sectionId={sectionId} />
-	}
+  // renderReassignedEditableForm(rowId: string, sectionId: string) {
+	// 	return <FreeTextReassignedEditable freeTextObj={this} rowId={rowId} sectionId={sectionId} />
+	// }
   renderViewOnlyForm() {
     return <FreeTextView freeTextObj={this} />
   }
@@ -138,30 +138,30 @@ function FreeTextView({freeTextObj}: {freeTextObj: FreeTextControl}) {
   )
 }
 
-function FreeTextReassignedEditable({ freeTextObj, rowId, sectionId }: {
-	freeTextObj: FreeTextControl,
-	rowId: string,
-	sectionId: string
-}) {
+// function FreeTextReassignedEditable({ freeTextObj, rowId, sectionId }: {
+// 	freeTextObj: FreeTextControl,
+// 	rowId: string,
+// 	sectionId: string
+// }) {
 
-	const { setSections } = useContext(SectionsContext);
+// 	const { setSections } = useContext(SectionsContext);
 	
-	const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-		updateSpecificCheck(sectionId, rowId, freeTextObj.id, e.target.value, setSections)
-	};
+// 	const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+// 		updateSpecificCheck(sectionId, rowId, freeTextObj.id, e.target.value, setSections)
+// 	};
 
-	return (
-		<div className={styles.checkViewContainer}>
-			<h6>{freeTextObj.question}</h6>
-			<textarea 
-        className="form-control" 
-        onChange={handleChange}
-        style={{resize: "none"}}
-        value = {freeTextObj.value}
-      ></textarea>
-		</div>
-	)
-};
+// 	return (
+// 		<div className={styles.checkViewContainer}>
+// 			<h6>{freeTextObj.question}</h6>
+// 			<textarea 
+//         className="form-control" 
+//         onChange={handleChange}
+//         style={{resize: "none"}}
+//         value = {freeTextObj.value}
+//       ></textarea>
+// 		</div>
+// 	)
+// };
 
 
 

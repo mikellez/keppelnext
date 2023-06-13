@@ -28,6 +28,7 @@ interface ModuleSimplePopupProps {
   icon?: SimpleIcon | IconType | null;
   buttons?: React.ReactNode | React.ReactNode[];
   onRequestClose?: Function;
+  shouldCloseOnOverlayClick?: boolean;
 }
 
 export default function ModuleSimplePopup(props: ModuleSimplePopupProps) {
@@ -56,7 +57,7 @@ export default function ModuleSimplePopup(props: ModuleSimplePopupProps) {
     <Modal
       isOpen={props.modalOpenState}
       ariaHideApp={false}
-      shouldCloseOnOverlayClick={true}
+      shouldCloseOnOverlayClick={props.shouldCloseOnOverlayClick}
       onRequestClose={() => {
         if (props.onRequestClose !== undefined) props.onRequestClose();
         else toggleModal();

@@ -428,6 +428,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                 title="Missing Details"
                 text="Please ensure that you have filled in all the required entries."
                 icon={SimpleIcon.Cross}
+                shouldCloseOnOverlayClick={true}
             />
 
             {!props.isManage && (
@@ -437,6 +438,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                     title="Unsaved Changes"
                     text="Are you sure you want to discard this entry? Your progress will be lost."
                     icon={SimpleIcon.Exclaim}
+                    shouldCloseOnOverlayClick={true}
                     buttons={[
                         <TooltipBtn
                             key="yes"
