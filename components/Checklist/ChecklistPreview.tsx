@@ -17,7 +17,7 @@ const ChecklistPreview = (props: ChecklistPageProps) => {
             console.log(sections);
         }
     }, [props.checklist]);
-    console.log(sections);
+    
     return (
         <>
             <ModuleContent>

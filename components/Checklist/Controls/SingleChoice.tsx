@@ -50,8 +50,8 @@ export class SingleChoiceControl extends CheckControl {
 		return <SingleChoice singleChoiceObj={this} onChange={onChange} onDelete={onDelete} />
 	}
 
-	renderEditableForm(rowId: string, sectionId: string) {
-		return <SingleChoiceEditable singleChoiceObj={this} rowId={rowId} sectionId={sectionId} />
+	renderEditableForm(rowId: string, sectionId: string, index: number) {
+		return <SingleChoiceEditable singleChoiceObj={this} rowId={rowId} sectionId={sectionId} index={index} />
 	}
   renderReassignedEditableForm(rowId: string, sectionId: string) {
 		return <SingleChoiceReassignedEditable singleChoiceObj={this} rowId={rowId} sectionId={sectionId} />
@@ -206,10 +206,11 @@ export function SingleChoice({
   );
 };
 
-function SingleChoiceEditable({ singleChoiceObj, rowId, sectionId }: { 
+function SingleChoiceEditable({ singleChoiceObj, rowId, sectionId, index }: { 
 	singleChoiceObj: SingleChoiceControl,
 	rowId: string,
-	sectionId: string
+	sectionId: string,
+  index: number
 }) {
 
 	const { setSections } = useContext(SectionsContext);
@@ -220,7 +221,7 @@ function SingleChoiceEditable({ singleChoiceObj, rowId, sectionId }: {
 
 	return (
 		<div className={styles.checkViewContainer}>
-			<h6>{singleChoiceObj.question}</h6>
+			<h6>{index}. {singleChoiceObj.question}</h6>
 			{
 				singleChoiceObj.choices.map(choice => {
 					return (
@@ -231,6 +232,7 @@ function SingleChoiceEditable({ singleChoiceObj, rowId, sectionId }: {
 								name={singleChoiceObj.id}
 								className="form-check-input"
 								onChange={handleChange}
+                checked={choice === singleChoiceObj.value}
 							/>
 							<label className="form-check-label">
 								{choice}

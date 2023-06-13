@@ -429,13 +429,14 @@ export default function Request(props: RequestProps) {
                   </li>
                   <li className={styles.tableDropdownListItem}>
                     {
-                      // (data?.role_id === Role.Admin ||
-                      //     data?.role_id === Role.Manager) &&
-                      // item.status_id === 3 ? (
-                      //     <Link href={`/Request/Manage/${item.id}`}>
-                      //         <strong>Manage</strong>
-                      //     </Link>
-                      // ) :
+                      (data?.role_id === Role.Admin ||
+                          data?.role_id === Role.Manager ||
+                          data?.role_id === Role.Engineer) &&
+                      item.status_id === 3 ? (
+                          <Link href={`/Request/Manage/${item.id}`}>
+                              <strong>Manage</strong>
+                          </Link>
+                      ) :
                       (data?.role_id === Role.Engineer ||
                         data?.role_id === Role.Specialist) &&
                       (item.status_id === 2 || item.status_id === 5) ? (
@@ -458,17 +459,9 @@ export default function Request(props: RequestProps) {
     },
   };
 
-  /*useEffect(() => {
-    if(props?.isReady) {
-      alert(props?.isReady);
-      setReady(props?.isReady);
-    }
-  }, [props?.isReady]);*/
 
   console.log(isReady);
   useEffect(() => {
-    // if (requestIsFetchValidating) setReady(false);
-
     if (requestData && !requestIsFetchValidating) {
       if (requestData?.rows?.length > 0) {
         setRequestItems(
@@ -491,48 +484,6 @@ export default function Request(props: RequestProps) {
     }
   }, [requestData, requestIsFetchValidating, isReady, page, props?.isReady]);
 
-  /*useEffect(() => {
-    setReady(false);
-    axios
-      .get(`/api/request/${indexedColumn[activeTabIndex]}?page=${page}`)
-      .then((response) => {
-        setRequestItems(
-          response.data.rows.map((row: CMMSRequest) => {
-            return {
-              ...row,
-              id: row.request_id,
-              created_date: new Date(row.created_date),
-            };
-          })
-        );
-        setReady(true);
-      });
-  }, [page]);
-  */
-
-  /*useEffect(() => {
-    if(!props?.filter) {
-      setReady(false);
-      axios
-        .get(`/api/request/${indexedColumn[activeTabIndex]}?page=1`)
-        .then((response) => {
-          setRequestItems(
-            response.data.rows.map((row: CMMSRequest) => {
-              return {
-                ...row,
-                id: row.request_id,
-                created_date: new Date(row.created_date),
-              };
-            })
-          );
-          setTotalPages(response.data.total);
-          setPage(1);
-          setReady(true);
-        });
-
-    }
-  }, [activeTabIndex]);
-  */
 
   return (
     <ModuleMain>
@@ -604,8 +555,7 @@ export default function Request(props: RequestProps) {
             <LoadingHourglass />
           </div>
         )}
-        {/*requestFetchError && <div>{requestFetchError.toString()}</div>*/}
-        {/*requestFetchError && <div>error</div>*/}
+
         {isReady && (
           <>
             <CompactTable

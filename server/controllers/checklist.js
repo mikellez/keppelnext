@@ -292,7 +292,7 @@ const createNewChecklistRecord = async (req, res, next) => {
       date: today,
       name: req.user.name,
       activity: `${statusId === 2 ? "ASSIGNED" : "PENDING"}`,
-      activity_type: "Created Record",
+      activity_type: "Created Checklist Record",
     },
   ];
 

@@ -49,8 +49,8 @@ export class MultiChoiceControl extends CheckControl {
 		return <MultiChoice multiChoiceObj={this} onChange={onChange} onDelete={onDelete} />
 	}
 
-	renderEditableForm(rowId: string, sectionId: string) {
-		return <MultiChoiceEditable multiChoiceObj={this} rowId={rowId} sectionId={sectionId} />
+	renderEditableForm(rowId: string, sectionId: string, index: number) {
+		return <MultiChoiceEditable multiChoiceObj={this} rowId={rowId} sectionId={sectionId} index={index} />
 	}
   renderReassignedEditableForm(rowId: string, sectionId: string) {
 		return <MultiReassignedChoiceEditable multiChoiceObj={this} rowId={rowId} sectionId={sectionId} />
@@ -204,14 +204,15 @@ export function MultiChoice({
   );
 };
 
-function MultiChoiceEditable ({ multiChoiceObj, rowId, sectionId }: {
+function MultiChoiceEditable ({ multiChoiceObj, rowId, sectionId, index }: {
 	multiChoiceObj: MultiChoiceControl, 
 	rowId: string,
-	sectionId: string
+	sectionId: string,
+  index: number
 }) {
 
 	const { setSections } = useContext(SectionsContext);
-
+  console.log(multiChoiceObj)
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setSections((prevSections) => {
             const newSections = [...prevSections];
@@ -239,10 +240,10 @@ function MultiChoiceEditable ({ multiChoiceObj, rowId, sectionId }: {
 	const removeEventTargetValue = (current: string, value: string) => {
 		return current.split(",").filter(item => item != value).join(",");
 	};
-
+  
 	return (
 		<div className={styles.checkViewContainer}>
-			<h6>{multiChoiceObj.question}</h6>
+			<h6>{index}. {multiChoiceObj.question}</h6>
 			{
 				multiChoiceObj.choices.map(choice => {
 					return (
@@ -253,6 +254,7 @@ function MultiChoiceEditable ({ multiChoiceObj, rowId, sectionId }: {
 								className="form-check-input"
 								onChange={handleChange}
 								name={multiChoiceObj.id}
+                checked={multiChoiceObj.value.split(",").includes(choice)}
 							/>
 							<label className="form-check-label">
 								{choice}

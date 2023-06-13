@@ -40,30 +40,20 @@ export const downloadPDF = async (id: number) => {
 export default function ViewRequest(props: RequestPreviewProps) {
   const router = useRouter();
   const { id } = router.query;
-  console.log(props.request);
-  return (
-    <ModuleMain>
-      <ModuleHeader title="New Request" header="Complete Request">
-        <TooltipBtn
-          text="Download PDF"
-          onClick={() => downloadPDF(parseInt(id as string))}
-        >
-          <HiOutlineDownload size={20} />
-        </TooltipBtn>
-        <button
-          className={"btn btn-secondary"}
-          type="button"
-          onClick={() => router.back()}
-        >
-          Back
-        </button>
-      </ModuleHeader>
-      <ModuleContent>
-        <RequestPreview request={props.request} action={props.action} />
-      </ModuleContent>
-    </ModuleMain>
-  );
-}
+    return (
+        <ModuleMain>
+          <ModuleHeader title="New Request" header="View Request">
+            <TooltipBtn text="Download PDF" onClick={() => downloadPDF(parseInt(id as string))}>
+              <HiOutlineDownload size={20} />
+            </TooltipBtn>
+            <button className={"btn btn-secondary"} type="button" onClick={() => router.back()}>Back</button>
+          </ModuleHeader>
+          <ModuleContent>
+            <RequestPreview request={props.request} action={props.action} />
+          </ModuleContent>
+        </ModuleMain>
+    );
+};
 
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
