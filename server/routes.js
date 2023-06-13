@@ -708,6 +708,9 @@ router.get(
   controllers.checklist.fetchPendingChecklists
 );
 
+router.post("/feedback",
+controllers.feedback.createFeedback);
+
 router.get(
   "/feedback/pending",
   checkIfLoggedInAPI,

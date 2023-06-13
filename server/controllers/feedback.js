@@ -235,9 +235,54 @@ const fetchFilteredFeedback = async (req, res, next) => {
   });
 };
 
+const createFeedback = async (req, res, next) => {
+  const feedback = req.body;
+  const sql = `INSERT INTO keppel.feedback 
+              (name,
+                description,
+                plant_loc_id,
+                imageurl,
+                rating,
+                plant_id,
+                contact,
+                created_user_id,
+                status_id,
+                created_date)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  // const activity_log = [
+  //   {
+  //     date: today,
+  //     name: req.user.name,
+  //     activity: `${statusId === 2 ? "ASSIGNED" : "PENDING"}`,
+  //     activity_type: "Created Checklist Record",
+  //   },
+  // ];
+  const userID = req.user? req.user.id : null;
+  try {
+    await global.db.query(sql, [feedback.name, 
+                        feedback.comments,
+                        feedback.taggedLocID,
+                        feedback.image,
+                        feedback.rating,
+                        feedback.plantID,
+                        JSON.stringify(feedback.contact),
+                        userID,
+                        1,
+                        today
+                        ]);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("Failure to create feedback");
+  }
+  return res.status(200).send("New feedback created successfully");
+}
+
 module.exports = {
   fetchPendingFeedback,
   fetchAssignedFeedback,
   fetchForReviewFeedback,
   fetchFilteredFeedback,
+  createFeedback
 };
