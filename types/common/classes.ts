@@ -189,7 +189,10 @@ class CheckSection {
 		let result: boolean = true;
 		this.rows.forEach(row => {
 			row.checks.forEach(check => {
-				if (!check.value || check.value.trim() === "") result = false;
+				if (
+					!(check instanceof FreeTextControl || check instanceof FileUploadControl) &&
+					(!check.value || check.value.trim() === "")
+				) result = false;
 			})
 		})
 		return result;
