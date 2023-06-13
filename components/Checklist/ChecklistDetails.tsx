@@ -55,12 +55,13 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
 
     const rejectionComments = useCallback((): ReactNode | null => {
         const { activity_log, status_id } = props.checklist as CMMSChecklist;
+        const rejectionActivity = activity_log.reverse().find(activity => activity["activity"] == "REJECTED");
         if (status_id == 3 || status_id == 2) {
             return ( 
                 <div>
                      <p className={styles.checklistDetailsHeading}>Rejection Comments</p>
                      <p className={styles.checklistDetailsContent}>
-                        {activity_log.reverse().find(activity => activity["activity"] == "REJECTED")!["remarks"]}
+                        {rejectionActivity && rejectionActivity["remarks"]}
                     </p>
                 </div>
             );

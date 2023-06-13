@@ -111,7 +111,8 @@ export function Signature({
       </div>
 
       <div className="form-group" style={{ border: "black dashed 1px" }}>
-        <SignatureCanvas canvasProps={{ width: "450%", height: "140%" }} />
+        {/* <SignatureCanvas canvasProps={{ width: "450%", height: "140%" }} /> */}
+        <div style={{}}></div>
       </div>
     </div>
   );
