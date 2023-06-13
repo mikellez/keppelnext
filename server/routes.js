@@ -708,8 +708,7 @@ router.get(
   controllers.checklist.fetchPendingChecklists
 );
 
-router.post("/feedback",
-controllers.feedback.createFeedback);
+router.post("/feedback", controllers.feedback.createFeedback);
 
 router.get(
   "/feedback/pending",
@@ -732,6 +731,11 @@ router.get(
   "/feedback/filter/:status/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.feedback.fetchFilteredFeedback
+);
+router.patch(
+  "/feedback/assign/:feedback_id",
+  checkIfLoggedInAPI,
+  controllers.feedback.updateFeedback
 );
 
 /**

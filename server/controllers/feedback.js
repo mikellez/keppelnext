@@ -235,6 +235,43 @@ const fetchFilteredFeedback = async (req, res, next) => {
   });
 };
 
+const updateFeedback = async (req, res, next) => {
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const assignedComments = req.body.remarks;
+
+  const updatehistory = `,Updated Record_ASSIGNED_${today}_${req.user.name}`;
+  const activity_log = {
+    date: today,
+    name: req.user.name,
+    activity: "Assigned",
+    activity_type: "Updated Record",
+    remarks: assignedComments,
+  };
+
+  const sql = `
+        UPDATE
+            keppel.feedback
+        SET 
+            status_id = 2,
+            activity_log = activity_log || $1,
+            assigned_user_id = $2
+        WHERE 
+            feedback_id = $3
+    `;
+
+  try {
+    await global.db.query(sql, [
+      JSON.stringify(activity_log),
+      req.params.assigned_user_id,
+      req.params.feedback_id,
+    ]);
+    console.log("submit");
+    return res.status(200).json("Feedback successfully approved");
+  } catch (err) {
+    return res.status(500).json("Failure to assign feedback");
+  }
+};
+
 const createFeedback = async (req, res, next) => {
   const feedback = req.body;
   const sql = `INSERT INTO keppel.feedback 
@@ -248,7 +285,7 @@ const createFeedback = async (req, res, next) => {
                 created_user_id,
                 status_id,
                 created_date)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   // const activity_log = [
@@ -259,30 +296,32 @@ const createFeedback = async (req, res, next) => {
   //     activity_type: "Created Checklist Record",
   //   },
   // ];
-  const userID = req.user? req.user.id : null;
+  const userID = req.user ? req.user.id : null;
   try {
-    await global.db.query(sql, [feedback.name, 
-                        feedback.comments,
-                        feedback.taggedLocID,
-                        feedback.image,
-                        feedback.rating,
-                        feedback.plantID,
-                        JSON.stringify(feedback.contact),
-                        userID,
-                        1,
-                        today
-                        ]);
+    await global.db.query(sql, [
+      feedback.name,
+      feedback.comments,
+      feedback.taggedLocID,
+      feedback.image,
+      feedback.rating,
+      feedback.plantID,
+      JSON.stringify(feedback.contact),
+      userID,
+      1,
+      today,
+    ]);
   } catch (e) {
     console.log(e);
     return res.status(500).send("Failure to create feedback");
   }
   return res.status(200).send("New feedback created successfully");
-}
+};
 
 module.exports = {
   fetchPendingFeedback,
   fetchAssignedFeedback,
   fetchCompletedFeedback,
   fetchFilteredFeedback,
-  createFeedback
+  createFeedback,
+  updateFeedback,
 };

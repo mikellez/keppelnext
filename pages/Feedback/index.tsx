@@ -33,11 +33,11 @@ import LoadingHourglass from "../../components/LoadingHourglass";
 import instance from "../../types/common/axios.config";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import {
-  AiOutlineEdit,
   AiOutlineFolderView,
   AiOutlineFileDone,
   AiOutlineFileProtect,
   AiOutlineHistory,
+  AiOutlineUserAdd,
 } from "react-icons/ai";
 import PageButton from "../../components/PageButton";
 import styles from "../../styles/Request.module.scss";
@@ -291,10 +291,8 @@ export default function Feedback(props: FeedbackProps) {
                                 </Link>
                               </>
                             ) : item.status_id === 1 ? (
-                              <Link
-                                href={`/Feedback/Form/?action=Edit&id=${item.id}`}
-                              >
-                                <AiOutlineEdit size={22} title={"Assign"} />
+                              <Link href={`/Feedback/Form/${item.id}`}>
+                                <AiOutlineUserAdd size={22} title={"Assign"} />
                               </Link>
                             ) : (
                               <Link href={`/Feedback/View/${item.id}`}>
