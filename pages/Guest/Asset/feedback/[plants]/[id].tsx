@@ -72,14 +72,14 @@ export const getServerSideProps: GetServerSideProps = async (
       Cookie: context.req.headers.cookie,
     },
   };
-  const getRequestTypes = instance.get<CMMSRequestTypes[]>(
-    `/api/request/types`,
-    headers
-  );
-  const getFaultTypes = instance.get<CMMSFaultTypes[]>(
-    `/api/fault/types`,
-    headers
-  );
+  // const getRequestTypes = instance.get<CMMSRequestTypes[]>(
+  //   `/api/request/types`,
+  //   headers
+  // );
+  // const getFaultTypes = instance.get<CMMSFaultTypes[]>(
+  //   `/api/fault/types`,
+  //   headers
+  // );
   const getPlant = instance.get<any>(
     `/api/request/plant/${context.query.plants}`,
     headers
@@ -94,29 +94,29 @@ export const getServerSideProps: GetServerSideProps = async (
   );
 
   const values = await Promise.all([
-    getRequestTypes,
-    getFaultTypes,
+    // getRequestTypes,
+    // getFaultTypes,
     getPlant,
     // getAsset,
     getPlantLoc,
   ]);
 
-  const r: CMMSRequestTypes[] = values[0].data;
-  const f: CMMSFaultTypes[] = values[1].data;
-  const p: CMMSBaseType = values[2].data;
-  const l: CMMSPlantLoc = values[3].data;
+  // const r: CMMSRequestTypes[] = values[0].data;
+  // const f: CMMSFaultTypes[] = values[1].data;
+  const p: CMMSBaseType = values[0].data;
+  const l: CMMSPlantLoc = values[1].data;
 
   interface GuestRequestProps {
-    requestTypes: CMMSRequestTypes[];
-    faultTypes: CMMSFaultTypes[];
+    // requestTypes: CMMSRequestTypes[];
+    // faultTypes: CMMSFaultTypes[];
     plant: any;
     // asset: any;
     plantLoc: CMMSPlantLoc;
   }
 
   let props: GuestRequestProps = {
-    requestTypes: r,
-    faultTypes: f,
+    // requestTypes: r,
+    // faultTypes: f,
     plant: p,
     // asset: a,
     plantLoc: l,

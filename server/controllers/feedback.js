@@ -272,6 +272,21 @@ const updateFeedback = async (req, res, next) => {
   }
 };
 
+const completeFeedback = async (req, res, next) => {
+  const id = req.params.feedback_id;
+  const sql = `UPDATE keppel.feedback
+                SET status_id = 4 
+                WHERE feedback_id = $1`
+  try {
+    
+    await global.db.query(sql, [id]);
+    return res.status(200).json("Feedback successfully completed");
+  } catch (err) {
+    console.log(err); 
+    return res.status(500).json("Failure to complete Feedback");
+  }
+}
+
 const createFeedback = async (req, res, next) => {
   const feedback = req.body;
   const sql = `INSERT INTO keppel.feedback 
@@ -324,4 +339,5 @@ module.exports = {
   fetchFilteredFeedback,
   createFeedback,
   updateFeedback,
+  completeFeedback,
 };

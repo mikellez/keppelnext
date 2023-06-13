@@ -738,6 +738,10 @@ router.patch(
   controllers.feedback.updateFeedback
 );
 
+router.patch("/feedback/complete/:feedback_id",
+  checkIfLoggedInAPI,
+  controllers.feedback.completeFeedback)
+
 /**
  * @api {get} /checklist/templateNames/:id Get Template Names
  * @apiDescription Get all Template Names
