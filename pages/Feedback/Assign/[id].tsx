@@ -23,6 +23,7 @@ import { createChecklistGetServerSideProps } from "../../../types/common/props";
 
 interface FeedbackPageProps {
   feedback: CMMSFeedback | null;
+  id: number;
 }
 
 const assignFeedback = async (
@@ -31,7 +32,7 @@ const assignFeedback = async (
   feedback_id: number
 ) => {
   return await instance
-    .post(`/api/feedback/${type}/${feedback_id}`, { feedback })
+    .patch(`/api/feedback/${type}/${feedback_id}`, { feedback })
     .then((res) => {
       return res.data;
     })
@@ -52,15 +53,24 @@ export default function FeedbackNew(props: FeedbackPageProps) {
   };
 
   const user = useCurrentUser();
-  const router = useRouter();
 
-  const submitFeedback = (feedbackType: string, feedback_id: number) => {
+  const router = useRouter();
+  useEffect(() => {
+    if (props.feedback && props.feedback.datajson.length > 0) {
+      const sectionsFromJSON = props.feedback.datajson.map((section: any) => {
+        return CheckSection.fromJSON(JSON.stringify(section));
+      });
+      setSections(sectionsFromJSON);
+    }
+  }, [props.feedback]);
+
+  const submitFeedback = (feedbackType: string, feedback_id: string) => {
     if (!checkInputFields()) {
       //   console.log("fail");
       setIncompleteModal(true);
     } else {
       setSuccessModal(true);
-      assignFeedback(feedbackData, feedbackType, feedback_id);
+      assignFeedback(feedbackData, feedbackType, parseInt(feedback_id));
       setTimeout(() => {
         router.push("/Feedback");
       }, 1000);
@@ -123,6 +133,7 @@ export default function FeedbackNew(props: FeedbackPageProps) {
       };
     });
   }, [sections]);
+
   // console.log(checklistData.datajson)
   // console.log(checklistData.status_id);
   return (
@@ -148,7 +159,7 @@ export default function FeedbackNew(props: FeedbackPageProps) {
                 <TooltipBtn
                   toolTip={false}
                   onClick={() =>
-                    submitFeedback("assign", props.feedback?.feedback_id)
+                    submitFeedback("assign", router.query.id as string)
                   }
                   disabled={successModal}
                 >

@@ -291,7 +291,9 @@ export default function Feedback(props: FeedbackProps) {
                                 </Link>
                               </>
                             ) : item.status_id === 1 ? (
-                              <Link href={`/Feedback/Assign/${item.id}`}>
+                              <Link
+                                href={`/Feedback/Assign/${item.id}?id=${item.id}`}
+                              >
                                 <AiOutlineUserAdd size={22} title={"Assign"} />
                               </Link>
                             ) : (
