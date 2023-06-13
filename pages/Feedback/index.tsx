@@ -59,7 +59,8 @@ export interface FeedbackItem {
   status_id?: number;
   createdbyuser: string;
   feedback_id: number;
-  plant_loc: string;
+  loc_floor: string;
+  loc_room: string;
   plant_id: number;
   status: string;
   assigned_user_email: string;
@@ -120,7 +121,7 @@ export default function Checklist(props: FeedbackProps) {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns:  5em calc(90% - 46em) 7em 8em 10em 10em 10%;",
+        "--data-table-library_grid-template-columns:  5em calc(90% - 46em) 7em 8em 10em 10em 10% ;",
     },
   ]);
 
@@ -269,7 +270,9 @@ export default function Checklist(props: FeedbackProps) {
                           </Cell>
                           <Cell>{item.created_date.toString()}</Cell>
                           <Cell>{item.assigned_user_name}</Cell>
-                          <Cell>{item.plant_loc}</Cell>
+                          <Cell>
+                            {item.loc_floor} floor, {item.loc_room}
+                          </Cell>
                           <Cell>{item.createdbyuser}</Cell>
                           {/* <Cell>
                             {(user.data!.role_id === Role.Admin ||

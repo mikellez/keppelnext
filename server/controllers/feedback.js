@@ -12,14 +12,17 @@ const ITEMS_PER_PAGE = 10;
 const fetchAllFeedbackQuery = `
 SELECT 
     f.feedback_id, 
-    f.plant_loc, 
+    f.plant_loc_id,
     f.plant_id, 
     f.description,
     f.contact,
     f.status_id,
     f.activity_log,
     concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
-    concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
+    concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigned_user_name,
+	pl.loc_room,
+	pl.loc_id,
+	pl.loc_floor,
     pm.plant_name,
     pm.plant_id,
     f.created_date,
@@ -38,6 +41,7 @@ FROM
     LEFT JOIN keppel.users assignU ON assignU.user_id = f.assigned_user_id
     LEFT JOIN keppel.users createdU ON createdU.user_id = f.created_user_id
     LEFT JOIN keppel.plant_master pm ON pm.plant_id = f.plant_id
+    LEFT JOIN keppeL.plant_location pl ON pl.loc_id = f.plant_loc_id
     JOIN keppel.status_cm st ON st.status_id = f.status_id	
 `;
 
@@ -231,9 +235,54 @@ const fetchFilteredFeedback = async (req, res, next) => {
   });
 };
 
+const createFeedback = async (req, res, next) => {
+  const feedback = req.body;
+  const sql = `INSERT INTO keppel.feedback 
+              (name,
+                description,
+                plant_loc_id,
+                imageurl,
+                rating,
+                plant_id,
+                contact,
+                created_user_id,
+                status_id,
+                created_date)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  // const activity_log = [
+  //   {
+  //     date: today,
+  //     name: req.user.name,
+  //     activity: `${statusId === 2 ? "ASSIGNED" : "PENDING"}`,
+  //     activity_type: "Created Checklist Record",
+  //   },
+  // ];
+  const userID = req.user? req.user.id : null;
+  try {
+    await global.db.query(sql, [feedback.name, 
+                        feedback.comments,
+                        feedback.taggedLocID,
+                        feedback.image,
+                        feedback.rating,
+                        feedback.plantID,
+                        JSON.stringify(feedback.contact),
+                        userID,
+                        1,
+                        today
+                        ]);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("Failure to create feedback");
+  }
+  return res.status(200).send("New feedback created successfully");
+}
+
 module.exports = {
   fetchPendingFeedback,
   fetchAssignedFeedback,
   fetchForReviewFeedback,
   fetchFilteredFeedback,
+  createFeedback
 };

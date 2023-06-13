@@ -24,37 +24,39 @@ import { RequestProps } from "../../../../../components/Request/RequestContainer
 import RequestGuestContainer from "../../../../../components/Request/RequestGuestContainer";
 import FeedbackContainer from "../../../../../components/Guest/FeedbackContainer";
 import ModuleSimplePopup from "../../../../../components/ModuleLayout/ModuleSimplePopup";
+import { useCurrentUser } from "../../../../../components/SWR.ts"
 
-let user: boolean = false;
+// let user: boolean = false;
 
 export default function RequestNew(props: RequestProps) {
   const router = useRouter();
-  const [userbool, setUserbool] = useState(false);
+  // const [userbool, setUserbool] = useState(false);
   const [modal, setModal] = useState(true);
-  console.log(props);
-  useEffect(() => {
-    instance
-      .get<CMMSUser>(`/api/user`)
-      .then((response) => {
-        console.log(response.data);
-        console.log(1);
-        setUserbool(true);
-        console.log(userbool);
-        return true;
-      })
-      .catch((e) => {
-        console.log(e);
-        console.log(2);
-        console.log(userbool);
-        return false;
-      });
-  }, []);
+  const user = useCurrentUser();
+  // console.log(props);
+  // useEffect(() => {
+  //   instance
+  //     .get<CMMSUser>(`/api/user`)
+  //     .then((response) => {
+  //       console.log(response.data);
+  //       console.log(1);
+  //       setUserbool(true);
+  //       console.log(userbool);
+  //       return true;
+  //     })
+  //     .catch((e) => {
+  //       console.log(e);
+  //       console.log(2);
+  //       console.log(userbool);
+  //       return false;
+  //     });
+  // }, []);
 
   return (
     <ModuleMain>
       <ModuleHeader title="Feedback" header="Feedback"></ModuleHeader>
       <ModuleContent>
-        <FeedbackContainer requestData={props} user={userbool} />
+        <FeedbackContainer requestData={props} user={user} />
         {/* <RequestGuestContainer requestData={props} user={userbool}/> */}
       </ModuleContent>
     </ModuleMain>
