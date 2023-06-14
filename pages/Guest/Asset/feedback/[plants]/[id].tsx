@@ -33,24 +33,6 @@ export default function RequestNew(props: RequestProps) {
   // const [userbool, setUserbool] = useState(false);
   const [modal, setModal] = useState(true);
   const user = useCurrentUser();
-  // console.log(props);
-  // useEffect(() => {
-  //   instance
-  //     .get<CMMSUser>(`/api/user`)
-  //     .then((response) => {
-  //       console.log(response.data);
-  //       console.log(1);
-  //       setUserbool(true);
-  //       console.log(userbool);
-  //       return true;
-  //     })
-  //     .catch((e) => {
-  //       console.log(e);
-  //       console.log(2);
-  //       console.log(userbool);
-  //       return false;
-  //     });
-  // }, []);
 
   return (
     <ModuleMain>

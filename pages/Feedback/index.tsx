@@ -101,22 +101,14 @@ const downloadCSV = async (type: string, activeTabIndex: number) => {
   }
 };
 
-export default function Feedback(props: FeedbackProps) {
-  const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>([]);
+export default function Feedback() {
+  const [feedbackItems, setFeedbackItems] = useState<CMMSFeedback[]>([]);
   const [isReady, setReady] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const user = useCurrentUser();
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [history, setHistory] = useState<
-    { [key: string]: string }[] | undefined
-  >(undefined);
-  const filteredData = useFeedbackFilter(props, page);
-  const columnData = useFeedback(indexedColumn[activeTabIndex], page);
+  // const [page, setPage] = useState(1);
+  // const [totalPages, setTotalPages] = useState(1);
 
-  const { data, error, isValidating, mutate } = props.filter
-    ? filteredData
-    : columnData;
 
   const theme = useTheme([
     getTheme(),
@@ -130,7 +122,7 @@ export default function Feedback(props: FeedbackProps) {
     if (isReady) {
       setReady(false);
       setActiveTabIndex(index);
-      setPage(1);
+      // setPage(1);
     }
   };
 
@@ -138,36 +130,12 @@ export default function Feedback(props: FeedbackProps) {
     const feedbackRow = item;
   };
 
-  useEffect(() => {
-    if (data && !isValidating) {
-      if (props?.filter) {
-        if (data?.rows?.length > 0) {
-          setFeedbackItems(
-            data.rows.map((row: CMMSFeedback) => {
-              return {
-                id: row.feedback_id,
-                ...row,
-              };
-            })
-          );
-
-          setReady(true);
-          setTotalPages(data.total);
-        }
-      }
-    }
-    // if (!data) {
-    //     setReady(false);
-    //     setChecklistItems([]);
-    //     setTotalPages(1);
-    // }
-  }, [data, isValidating, isReady, page, props?.isReady]);
+  
 
   useEffect(() => {
-    if (!props?.filter) {
       setReady(false);
       instance
-        .get(`/api/feedback/${indexedColumn[activeTabIndex]}?page=${page}`)
+        .get(`/api/feedback/${indexedColumn[activeTabIndex]}`)
         .then((response) => {
           setFeedbackItems(
             response.data.rows.map((row: CMMSFeedback) => {
@@ -177,14 +145,13 @@ export default function Feedback(props: FeedbackProps) {
               };
             })
           );
-          setTotalPages(response.data.total);
+          // setTotalPages(response.data.total);
           setReady(true);
         })
         .catch((e) => {
           setFeedbackItems([]);
         });
-    }
-  }, [activeTabIndex, page]);
+  }, [activeTabIndex]);
 
   return (
     <ModuleMain>
@@ -203,7 +170,7 @@ export default function Feedback(props: FeedbackProps) {
       </ModuleHeader>
 
       <ModuleContent>
-        {!props?.filter && (
+        
           <ul className="nav nav-tabs">
             <li
               onClick={() => {
@@ -230,7 +197,7 @@ export default function Feedback(props: FeedbackProps) {
               <span style={{ all: "unset" }}>Completed</span>
             </li>
           </ul>
-        )}
+        
         {isReady && feedbackItems.length === 0 && <div>No Feedback</div>}
         {isReady ? (
           <>
@@ -301,12 +268,12 @@ export default function Feedback(props: FeedbackProps) {
                                 <AiOutlineFolderView size={22} title={"View"} />
                               </Link>
                             )}
-                            <AiOutlineHistory
+                            {/* <AiOutlineHistory
                               color={"#C70F2B"}
                               onClick={() => setHistory(item.activity_log)}
                               size={22}
                               title={"View History"}
-                            />
+                            /> */}
                           </Cell>
                         </Row>
                       );
@@ -316,12 +283,12 @@ export default function Feedback(props: FeedbackProps) {
               )}
             </Table>
 
-            <Pagination
+            {/* <Pagination
               setPage={setPage}
               setReady={setReady}
               totalPages={totalPages}
               page={page}
-            />
+            /> */}
           </>
         ) : (
           <div
@@ -336,7 +303,7 @@ export default function Feedback(props: FeedbackProps) {
             <LoadingHourglass />
           </div>
         )}
-        {history && (
+        {/* {history && (
           <ModuleModal
             isOpen={!!history}
             closeModal={() => setHistory(undefined)}
@@ -344,7 +311,7 @@ export default function Feedback(props: FeedbackProps) {
           >
             <FeedbackHistory history={history!} />
           </ModuleModal>
-        )}
+        )} */}
       </ModuleContent>
     </ModuleMain>
   );

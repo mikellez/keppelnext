@@ -41,7 +41,7 @@ export default function FeedbackContainer(props: any) {
     {
     name: "",
     comments: "",
-    plantID: props.requestData.plant[1].plant_id,
+    plantID: props.requestData.plant[0].plant_id,
     taggedLocID: props.requestData.plantLoc.id,
     rating: 5,
     contact: {telegram: 0, whatsapp: 0, number: null},
