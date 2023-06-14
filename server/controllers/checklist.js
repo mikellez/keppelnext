@@ -387,7 +387,7 @@ const createNewChecklistTemplate = async (req, res, next) => {
     sql,
     [
       checklist.chl_name,
-      checklist.description,
+      checklist.description ?? "",
       checklist.signoff_user_id,
       JSON.stringify(checklist.datajson),
       "Template",
