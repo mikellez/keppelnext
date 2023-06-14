@@ -734,19 +734,19 @@ router.get(
 );
 
 router.get(
-  "/feedback/:feedback_id",
+  "/feedback/:id",
   checkIfLoggedInAPI,
   controllers.feedback.getSingleFeedback
-)
+);
 
 router.patch(
-  "/feedback/assign/:feedback_id",
+  "/feedback/assign/:id",
   checkIfLoggedInAPI,
   controllers.feedback.updateFeedback
 );
 
 router.patch(
-  "/feedback/complete/:feedback_id",
+  "/feedback/complete/:id",
   checkIfLoggedInAPI,
   controllers.feedback.completeFeedback
 );

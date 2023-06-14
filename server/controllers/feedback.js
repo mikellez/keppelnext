@@ -205,7 +205,7 @@ const fetchFilteredFeedback = async (req, res, next) => {
 
 const updateFeedback = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  const assignedComments = req.body.remarks;
+  // const assignedComments = req.body.remarks;
 
   const updatehistory = `,Updated Record_ASSIGNED_${today}_${req.user.name}`;
   const activity_log = {
@@ -228,10 +228,11 @@ const updateFeedback = async (req, res, next) => {
     `;
 
   try {
+    console.log(req.params);
     await global.db.query(sql, [
       JSON.stringify(activity_log),
-      req.params.assigned_user_id,
-      req.params.feedback_id,
+      req.body.assigned_user_id,
+      req.params.id,
     ]);
     console.log("submit");
     return res.status(200).json("Feedback successfully approved");
@@ -241,7 +242,7 @@ const updateFeedback = async (req, res, next) => {
 };
 
 const completeFeedback = async (req, res, next) => {
-  const id = req.params.feedback_id;
+  const id = req.params.id;
   const sql = `UPDATE keppel.feedback
                 SET status_id = 4 
                 WHERE feedback_id = $1`;
@@ -255,20 +256,19 @@ const completeFeedback = async (req, res, next) => {
 };
 
 const getSingleFeedback = async (req, res, next) => {
-  console.log(req.params.feedback_id);
-  const sql = fetchAllFeedbackQuery + `WHERE f.feedback_id = ${req.params.feedback_id}`;
+  // console.log(req.params.feedback_id);
+  const sql = fetchAllFeedbackQuery + `WHERE f.feedback_id = ${req.params.id}`;
   global.db.query(sql, (err, result) => {
     if (err) {
-      return res.status(500).send("Error occured in the server")
+      return res.status(500).send("Error occured in the server");
     }
     if (result.rows.length > 0) {
       return res.status(200).send(result.rows[0]);
     } else {
       return res.status(404).send("No Feedback found");
     }
-  })
-
-}
+  });
+};
 
 const createFeedback = async (req, res, next) => {
   const feedback = req.body;

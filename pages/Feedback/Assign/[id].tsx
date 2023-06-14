@@ -19,7 +19,7 @@ import ModuleSimplePopup, {
 } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
 import FeedbackCreationForm from "../../../components/Feedback/FeedbackAssignmentForm";
-import {createFeedbackServerSideProps,} from "../../../types/common/props";
+import { createFeedbackServerSideProps } from "../../../types/common/props";
 import FeedbackAssignmentForm from "../../../components/Feedback/FeedbackAssignmentForm";
 import { AxiosResponse } from "axios";
 import { GetServerSideProps } from "next";
@@ -33,10 +33,10 @@ interface FeedbackPageProps {
 const assignFeedback = async (
   feedback: CMMSFeedback,
   type: string,
-  feedback_id: number
+  id: number
 ) => {
   return await instance
-    .patch(`/api/feedback/${type}/${feedback_id}`, { feedback })
+    .patch(`/api/feedback/${type}/${id}`, feedback)
     .then((res) => {
       return res.data;
     })
@@ -56,7 +56,7 @@ export default function AssignFeedback(props: FeedbackPageProps) {
 
   const submitFeedback = (feedbackType: string, feedback_id: number) => {
     if (!checkInputFields()) {
-      console.log("fail");
+      // console.log("fail");
       setIncompleteModal(true);
     } else {
       setSuccessModal(true);
@@ -68,7 +68,7 @@ export default function AssignFeedback(props: FeedbackPageProps) {
   };
 
   const checkInputFields = () => {
-    console.log(feedbackData.assigned_user_name);
+    // console.log(feedbackData.assigned_user_name);
     return feedbackData.assigned_user_name;
   };
 
@@ -102,6 +102,7 @@ export default function AssignFeedback(props: FeedbackPageProps) {
   //   }, 1000);
   // }, [user.data, props.feedback]);
 
+  // console.log(props.feedback.assigned_user_id);
 
   return (
     <>
@@ -116,25 +117,25 @@ export default function AssignFeedback(props: FeedbackPageProps) {
           </button>
         </ModuleHeader>
         {/* {isReady ? ( */}
-          <>
-            <FeedbackAssignmentForm
-              feedbackData={props.feedback}
-              setFeedbackData={setFeedbackData}
-            />
-            <ModuleFooter>
-              <>
-                <TooltipBtn
-                  toolTip={false}
-                  onClick={() =>
-                    submitFeedback("assign", props.feedback.assigned_user_id)
-                  }
-                  disabled={successModal}
-                >
-                  Submit
-                </TooltipBtn>
-              </>
-            </ModuleFooter>
-          </>
+        <>
+          <FeedbackAssignmentForm
+            feedbackData={feedbackData}
+            setFeedbackData={setFeedbackData}
+          />
+          <ModuleFooter>
+            <>
+              <TooltipBtn
+                toolTip={false}
+                onClick={() =>
+                  submitFeedback("assign", feedbackData.assigned_user_id)
+                }
+                disabled={successModal}
+              >
+                Submit
+              </TooltipBtn>
+            </>
+          </ModuleFooter>
+        </>
         {/* ) : (
           <div
             style={{
@@ -170,6 +171,7 @@ export default function AssignFeedback(props: FeedbackPageProps) {
   );
 }
 
-const getServerSideProps: GetServerSideProps =
-  createFeedbackServerSideProps([2, 3]);
+const getServerSideProps: GetServerSideProps = createFeedbackServerSideProps([
+  2, 3,
+]);
 export { getServerSideProps };

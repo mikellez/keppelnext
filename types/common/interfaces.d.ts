@@ -266,17 +266,24 @@ interface CMMSSubComponent1Name {
   system_asset_lvl7: string;
 }
 
+interface CMMSContact {
+  tele? : string;
+  whatsapp? : string;
+  email? : string;
+}
+
 interface CMMSFeedback {
-  id : number
+  id : number;
   created_date: Date;
   createdbyuser: string;
-  created_by_user_id: string | null;
-  created_by_user_email: string | null;
+  created_user_id: string | null;
+  created_user_email: string | null;
   fullname: string;
   plant_name: string;
   plant_id: number;
   rating: number;
   image: string;
+  contact: CMMSContact;
   loc_room: string;
   loc_floor:string;
   status: string;
