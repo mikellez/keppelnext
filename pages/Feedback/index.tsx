@@ -43,8 +43,6 @@ import PageButton from "../../components/PageButton";
 import styles from "../../styles/Request.module.scss";
 import { Role } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
-import { GetServerSidePropsContext } from "next";
-import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 import FeedbackHistory from "../../components/Feedback/FeedbackHistory";
 
 const indexedColumn: ("pending" | "assigned" | "completed")[] = [
@@ -53,62 +51,35 @@ const indexedColumn: ("pending" | "assigned" | "completed")[] = [
   "completed",
 ];
 
-export interface FeedbackItem {
-  id: number;
-  created_date: Date;
-  description?: string;
-  status_id?: number;
-  createdbyuser: string;
-  feedback_id: number;
-  loc_floor: string;
-  loc_room: string;
-  plant_id: number;
-  status: string;
-  assigned_user_email: string;
-  assigned_user_id: number;
-  assigned_user_name: string;
-  requesthistory?: string;
-  complete_comments?: string;
-  completion_file?: any;
-  activity_log?: { [key: string]: string }[];
-}
-
-export interface FeedbackProps {
-  filter?: boolean;
-  status: number | string;
-  plant: number;
-  date: string;
-  datetype: string;
-  isReady?: boolean;
-}
-
-const downloadCSV = async (type: string, activeTabIndex: number) => {
-  try {
-    const response = await instance({
-      url: `/api/${type}/csv?activeTab=${JSON.stringify(activeTabIndex)}`,
-      method: "get",
-      responseType: "arraybuffer",
-    });
-    const blob = new Blob([response.data]);
-    const url = window.URL.createObjectURL(blob);
-    const temp_link = document.createElement("a");
-    temp_link.download = `${type}.csv`;
-    temp_link.href = url;
-    temp_link.click();
-    temp_link.remove();
-  } catch (e) {
-    console.log(e);
-  }
-};
+// const downloadCSV = async (type: string, activeTabIndex: number) => {
+//   try {
+//     const response = await instance({
+//       url: `/api/${type}/csv?activeTab=${JSON.stringify(activeTabIndex)}`,
+//       method: "get",
+//       responseType: "arraybuffer",
+//     });
+//     const blob = new Blob([response.data]);
+//     const url = window.URL.createObjectURL(blob);
+//     const temp_link = document.createElement("a");
+//     temp_link.download = `${type}.csv`;
+//     temp_link.href = url;
+//     temp_link.click();
+//     temp_link.remove();
+//   } catch (e) {
+//     console.log(e);
+//   }
+// };
 
 export default function Feedback() {
   const [feedbackItems, setFeedbackItems] = useState<CMMSFeedback[]>([]);
   const [isReady, setReady] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const user = useCurrentUser();
-  // const [page, setPage] = useState(1);
-  // const [totalPages, setTotalPages] = useState(1);
-
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [history, setHistory] = useState<
+    { [key: string]: string }[] | undefined
+  >(undefined);
 
   const theme = useTheme([
     getTheme(),
@@ -126,33 +97,26 @@ export default function Feedback() {
     }
   };
 
-  const editRow: OnClick<FeedbackItem> = (item, event) => {
-    const feedbackRow = item;
-  };
-
-  
-
   useEffect(() => {
-      setReady(false);
-      instance
-        .get(`/api/feedback/${indexedColumn[activeTabIndex]}`)
-        .then((response) => {
-          setFeedbackItems(
-            response.data.rows.map((row: CMMSFeedback) => {
-              return {
-                id: row.feedback_id,
-                ...row,
-              };
-            })
-          );
-          // setTotalPages(response.data.total);
-          setReady(true);
-        })
-        .catch((e) => {
-          setFeedbackItems([]);
-        });
-  }, [activeTabIndex]);
-
+    setReady(false);
+    instance
+      .get(`/api/feedback/${indexedColumn[activeTabIndex]}?page=${page}`)
+      .then((response) => {
+        setFeedbackItems(
+          response.data.rows.map((row: CMMSFeedback) => {
+            return {
+              ...row,
+            };
+          })
+        );
+        setTotalPages(response.data.total);
+        setReady(true);
+      })
+      .catch((e) => {
+        setFeedbackItems([]);
+      });
+  }, [activeTabIndex, page]);
+  console.log(isReady);
   return (
     <ModuleMain>
       <ModuleHeader title="Feedback" header="Feedback">
@@ -170,7 +134,7 @@ export default function Feedback() {
       </ModuleHeader>
 
       <ModuleContent>
-        
+        {
           <ul className="nav nav-tabs">
             <li
               onClick={() => {
@@ -197,7 +161,7 @@ export default function Feedback() {
               <span style={{ all: "unset" }}>Completed</span>
             </li>
           </ul>
-        
+        }
         {isReady && feedbackItems.length === 0 && <div>No Feedback</div>}
         {isReady ? (
           <>
@@ -206,7 +170,7 @@ export default function Feedback() {
               theme={theme}
               layout={{ custom: true }}
             >
-              {(tableList: FeedbackItem[]) => (
+              {(tableList: CMMSFeedback[]) => (
                 <>
                   <Header>
                     <HeaderRow>
@@ -225,7 +189,7 @@ export default function Feedback() {
                     {tableList.map((item) => {
                       return (
                         <Row key={item.id} item={item}>
-                          <Cell>{item.id}</Cell>
+                          <Cell>{item.feedback_id}</Cell>
                           <Cell>{item.description}</Cell>
                           <Cell>
                             <span

@@ -19,10 +19,16 @@ import ModuleSimplePopup, {
 } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
 import FeedbackCreationForm from "../../../components/Feedback/FeedbackAssignmentForm";
-import { createChecklistGetServerSideProps } from "../../../types/common/props";
+import {
+  createChecklistGetServerSideProps,
+  createFeedbackServerSideProps,
+} from "../../../types/common/props";
+import FeedbackAssignmentForm from "../../../components/Feedback/FeedbackAssignmentForm";
+import { AxiosResponse } from "axios";
+import { GetServerSideProps } from "next";
 
 interface FeedbackPageProps {
-  feedback: CMMSFeedback | null;
+  feedback: CMMSFeedback;
   id: number;
 }
 
@@ -41,56 +47,31 @@ const assignFeedback = async (
 
 export default function FeedbackNew(props: FeedbackPageProps) {
   const [feedbackData, setFeedbackData] = useState<CMMSFeedback>(
-    {} as CMMSFeedback
+    props.feedback
   );
   const [isReady, setIsReady] = useState<boolean>(false);
   const [sections, setSections] = useState<CheckSection[]>([]);
   const [incompleteModal, setIncompleteModal] = useState<boolean>(false);
   const [successModal, setSuccessModal] = useState<boolean>(false);
-
-  const resetFeedback = () => {
-    setSections([]);
-  };
-
   const user = useCurrentUser();
-
   const router = useRouter();
-  useEffect(() => {
-    if (props.feedback && props.feedback.datajson.length > 0) {
-      const sectionsFromJSON = props.feedback.datajson.map((section: any) => {
-        return CheckSection.fromJSON(JSON.stringify(section));
-      });
-      setSections(sectionsFromJSON);
-    }
-  }, [props.feedback]);
 
-  const submitFeedback = (feedbackType: string, feedback_id: string) => {
+  const submitFeedback = (feedbackType: string, feedback_id: number) => {
     if (!checkInputFields()) {
-      //   console.log("fail");
+      console.log("fail");
       setIncompleteModal(true);
     } else {
       setSuccessModal(true);
-      assignFeedback(feedbackData, feedbackType, parseInt(feedback_id));
+      assignFeedback(feedbackData, feedbackType, feedback_id);
       setTimeout(() => {
         router.push("/Feedback");
       }, 1000);
     }
   };
 
-  //   const updateFeedback = async () => {
-  //     if (!checkInputFields()) {
-  //       setIncompleteModal(true);
-  //     } else {
-  //       setSuccessModal(true);
-  //       await editFeedbackAPI(feedbackData, +router.query.id!);
-  //       setTimeout(() => {
-  //         router.push("/Checklist");
-  //       }, 1000);
-  //     }
-  //   };
   const checkInputFields = () => {
     console.log(feedbackData.assigned_user_name);
-    return feedbackData.assigned_user_name && feedbackData.description;
+    return feedbackData.assigned_user_name;
   };
 
   useEffect(() => {
@@ -150,7 +131,7 @@ export default function FeedbackNew(props: FeedbackPageProps) {
         </ModuleHeader>
         {isReady ? (
           <>
-            <FeedbackCreationForm
+            <FeedbackAssignmentForm
               feedbackData={feedbackData}
               setFeedbackData={setFeedbackData}
             />
@@ -159,7 +140,7 @@ export default function FeedbackNew(props: FeedbackPageProps) {
                 <TooltipBtn
                   toolTip={false}
                   onClick={() =>
-                    submitFeedback("assign", router.query.id as string)
+                    submitFeedback("assign", props.feedback.assigned_user_id)
                   }
                   disabled={successModal}
                 >
@@ -202,5 +183,3 @@ export default function FeedbackNew(props: FeedbackPageProps) {
     </>
   );
 }
-
-export { type FeedbackPageProps };

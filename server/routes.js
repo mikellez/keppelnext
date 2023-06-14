@@ -728,7 +728,7 @@ router.get(
 );
 
 router.get(
-  "/feedback/filter/:status/:plant/:datetype/:date",
+  "/feedback/filter/:status/:plant",
   checkIfLoggedInAPI,
   controllers.feedback.fetchFilteredFeedback
 );
@@ -738,9 +738,11 @@ router.patch(
   controllers.feedback.updateFeedback
 );
 
-router.patch("/feedback/complete/:feedback_id",
+router.patch(
+  "/feedback/complete/:feedback_id",
   checkIfLoggedInAPI,
-  controllers.feedback.completeFeedback)
+  controllers.feedback.completeFeedback
+);
 
 /**
  * @api {get} /checklist/templateNames/:id Get Template Names
