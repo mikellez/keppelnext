@@ -51,6 +51,10 @@ const indexedColumn: ("pending" | "assigned" | "completed")[] = [
   "completed",
 ];
 
+export interface FeedbackPageProps {
+  feedback: CMMSFeedback;
+}
+
 // const downloadCSV = async (type: string, activeTabIndex: number) => {
 //   try {
 //     const response = await instance({
@@ -189,7 +193,7 @@ export default function Feedback() {
                     {tableList.map((item) => {
                       return (
                         <Row key={item.id} item={item}>
-                          <Cell>{item.feedback_id}</Cell>
+                          <Cell>{item.id}</Cell>
                           <Cell>{item.description}</Cell>
                           <Cell>
                             <span
