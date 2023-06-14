@@ -275,6 +275,8 @@ interface CMMSFeedback {
   fullname: string;
   plant_name: string;
   plant_id: number;
+  rating: number;
+  image: string;
   loc_room: string;
   loc_floor:string;
   status: string;
