@@ -87,7 +87,7 @@ const createChangeOfPartsServerSideProps = (specificCOP: boolean, conditionalFun
 
 	return getServerSideProps;
 };
-const createFeedbackServerSideProps = (action : string) => {
+const createFeedbackServerSideProps = (allowedStatuses?: number[]) => {
 	
 	const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
 
@@ -99,12 +99,12 @@ const createFeedbackServerSideProps = (action : string) => {
 		};
 			
 	
-		const url = `http://${process.env.SERVER}:${process.env.PORT}/api/feedback/`
+		const url = `http://${process.env.SERVER}:${process.env.PORT}/api/feedback/${context.query.id}`
 	
-		const response = await instance.get<CMMSFeedback[]>(url, headers);
+		const response = await instance.get<CMMSFeedback>(url, headers);
 
 	
-		if (response.status == 500) {
+		if (response.status == 500 && allowedStatuses?.includes(response.data.status_id)) {
 			return {
 				props: {
 					checklist: null
@@ -119,7 +119,7 @@ const createFeedbackServerSideProps = (action : string) => {
 		return {
 			props: {
 				feedback: feedback,	
-					}
+			}
 		};
 	};
 
