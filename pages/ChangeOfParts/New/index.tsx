@@ -147,6 +147,7 @@ const ChangeOfPartsNew = (props: ChangeOfPartsPageProps) => {
                 icon={SimpleIcon.Check}
                 title="Success"
                 text="Change of parts successfully updated"
+                shouldCloseOnOverlayClick={true}
             />
         </>
     );

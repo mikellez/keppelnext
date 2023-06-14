@@ -20,6 +20,7 @@ interface CMMSUserEdit {
     password_confirm?: string;
     user_name: string;
     user_email: string;
+    role_id: number;
 
 }
 interface checkdetails {
@@ -84,6 +85,7 @@ export default function EditUser() {
         password: "",
         user_name: "",
         user_email: "",
+        role_id: 0,
     });
     const handleForm = (
         e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
@@ -92,6 +94,16 @@ export default function EditUser() {
           return { ...prevState, [e.target.name]: e.target.value };
         });
       };
+
+      const handleFormNumber =(
+        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+      ) => {
+        setuserDetails((prevState) => {
+          return { ...prevState, [e.target.name]: Number(e.target.value) };
+        })
+        console.log(userDetails);
+    
+      }
 
       const handlePlantCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const plantId = parseInt(e.target.id);
@@ -125,6 +137,7 @@ export default function EditUser() {
       function submission() {
         //if no errors, submit form
         //post data
+        const adjustedRoleId = userDetails.role_id === 1 ? 4 : userDetails.role_id - 1
         const url = "/api/user/updateUser/";
         instance
           .post(url, {
@@ -137,6 +150,7 @@ export default function EditUser() {
             password: userDetails.password ? userDetails.password : null,
             user_name: userDetails.user_name,
             user_email: userDetails.user_email,
+            role_id: adjustedRoleId,
           })
           .then((res) => {
             console.log(res);
@@ -168,7 +182,7 @@ export default function EditUser() {
     useEffect(() => {
         getUsersData(parseInt(user_id as string)).then((result) => {
             console.log(result);
-            setuserDetails(result)
+            setuserDetails(result);
             setcheckdetails({
                 username: result.user_name,
                 email: result.user_email,
@@ -258,6 +272,20 @@ export default function EditUser() {
             />
           </div>
 
+          <div className="form-group">
+						<label className='form-label'> Role Type
+						</label>
+						<select className="form-select"
+              onChange={handleFormNumber}
+              name="role_id"
+              value={userDetails.role_id}>
+							<option value={1}>Admin</option>
+							<option value={2}>Manager</option>
+							<option value={3}>Engineer</option>
+							<option value={4}>Operation Specialist</option>
+						</select>
+					</div>
+
           <label className="form-label"> Assigned Plants</label>
           <div className="form-check"> 
           <input className="form-check-input" type="checkbox" id="2" checked={userDetails.allocatedplantids.includes(parseInt('2'))} onChange={(e) => handlePlantCheckboxChange(e)} />
@@ -315,6 +343,7 @@ export default function EditUser() {
           title="Are You Sure?"
           text="Checklists/Requests/Schedules have been assigned by the user from the plants you are removing."
           icon={SimpleIcon.Check}
+          shouldCloseOnOverlayClick={true}
           buttons={[
             <button
               key={1}
@@ -369,6 +398,7 @@ export default function EditUser() {
           title="Success!"
           text="Your inputs have been submitted!"
           icon={SimpleIcon.Check}
+          shouldCloseOnOverlayClick={true}
           buttons={
             <button
               onClick={() => {
@@ -390,6 +420,7 @@ export default function EditUser() {
             title="Missing Details"
             text="Please ensure that you have filled in all the required entries."
             icon={SimpleIcon.Cross}
+            shouldCloseOnOverlayClick={true}
           />
 		  <ModuleSimplePopup
             modalOpenState={emailModal}
@@ -397,6 +428,7 @@ export default function EditUser() {
             title="Duplicate Email"
             text="Please ensure that the email you have entered is not already in use."
             icon={SimpleIcon.Cross}
+            shouldCloseOnOverlayClick={true}
           />
 		  <ModuleSimplePopup
             modalOpenState={usernameModal}
@@ -404,6 +436,7 @@ export default function EditUser() {
             title="Duplicate Username"
             text="Please ensure that the username you have entered is not already in use."
             icon={SimpleIcon.Cross}
+            shouldCloseOnOverlayClick={true}
           />
       </ModuleContent>
       <ModuleFooter>

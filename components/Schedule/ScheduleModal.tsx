@@ -131,7 +131,6 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
         }
         // updating a schedule checklist
         else if (props.scheduleEvent) {
-            // console.log(newSchedule);
             editDraftSchedule(newSchedule).then((result) => {
                 console.log(result);
                 setSuccessEditModal(true);
@@ -328,6 +327,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                 title="Success"
                 text="New maintenance successfully scheduled!"
                 icon={SimpleIcon.Check}
+                shouldCloseOnOverlayClick={true}
             />
 
             <ModuleSimplePopup
@@ -336,6 +336,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                 title="Success"
                 text="Maintenance successfully updated!"
                 icon={SimpleIcon.Check}
+                shouldCloseOnOverlayClick={true}
             />
 
             <ModuleSimplePopup
@@ -344,6 +345,7 @@ export default function ScheduleMaintenanceModal(props: ScheduleMaintenanceModal
                 title="Incomplete Maintenance"
                 text="Please fill in the missing details for the maintenance."
                 icon={SimpleIcon.Cross}
+                shouldCloseOnOverlayClick={true}
             />
         </div>
     );

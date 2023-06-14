@@ -1,5 +1,4 @@
 import { CompactTable } from "@table-library/react-table-library/compact";
-
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import Link from "next/link";
@@ -7,7 +6,7 @@ import React, { MouseEvent, useEffect, useState } from "react";
 import { ModuleMain, ModuleHeader, ModuleContent } from "../../components";
 import { Nullish } from "@table-library/react-table-library/types/common";
 import useSWR from "swr";
-import instance from '../../axios.config.js';
+import instance from '../../types/common/axios.config';
 import {
   Table,
   Header,
@@ -25,25 +24,6 @@ import LoadingIcon from "../../components/LoadingIcon";
 import TooltipBtn from "../../components/TooltipBtn";
 import { FiRefreshCw } from "react-icons/fi";
 import info from "../../public/master.json";
-console.log(info);
-
-/*
-	CMMSMaster: {
-		idName: "plant_id"
-		data: CMMSMasterData[] [
-			{
-				"plant_id": "1"
-				"plant_name": "Changi DHCS"
-				"plant_description": "Description"
-			},
-			{
-				"plant_id": "2"
-				"plant_name": "Woodlands DHCS"
-				"plant_description": "Description"
-			}
-		]
-	}
-*/
 
 interface CMMSMaster {
   idName: string;
@@ -114,7 +94,6 @@ function MasterActions({
       >
         <BsTrashFill />
       </button>
-      {/* <button onClick={onClickEdit} name={"" + id} style={{all: "unset", cursor: "pointer"}}><BsPencilSquare /></button> */}
       <Link href={editHref} style={{ all: "unset", cursor: "pointer" }}>
         <BsPencilSquare />
       </Link>
@@ -184,15 +163,12 @@ export default function Master() {
   };
 
   const refreshData = () => {
-    console.log("asd");
     mutate();
     switchColumns(activeTabIndex);
   };
 
   const editRow: OnClick<CMMSMasterData> = (item, event) => {
     const checklistRow = item;
-
-    console.log(checklistRow, event);
     setEditModalOpen(true);
   };
 
@@ -207,7 +183,6 @@ export default function Master() {
       for (let i = 0; i < len; i++)
         sizes += "calc((100% - 12em) / " + len + ") ";
       setColumnSizes("6em " + sizes + "6em");
-
       setMasterItems(
         data.data.map((row): CMMSMasterData => {
           const { activity_log, created_date, ...newRow } = row;
@@ -216,9 +191,6 @@ export default function Master() {
           }, newRow);
         })
       );
-      
-      
-
       setReady(true);
     }
   }, [data, isValidating]);
@@ -246,6 +218,7 @@ export default function Master() {
           "?"
         }
         icon={2}
+        shouldCloseOnOverlayClick={true}
         buttons={[
           <button
             key="deleteConfirm"
@@ -271,6 +244,7 @@ export default function Master() {
         title="Success"
         text={"ID " + deleteModalID + " has been deleted"}
         icon={1}
+        shouldCloseOnOverlayClick={true}
         buttons={
           <button
             onClick={() => {
@@ -290,6 +264,7 @@ export default function Master() {
         title="Deletion Failed"
         text={"Something went wrong!"}
         icon={3}
+        shouldCloseOnOverlayClick={true}
         buttons={
           <button
             onClick={() => {
@@ -343,7 +318,7 @@ export default function Master() {
               <>
                 <Header>
                   <HeaderRow>
-                    {tableList.length > 1 &&
+                    {tableList.length > 0 &&
                       Object.keys(tableList[0]).slice(1).map((k) => {
                         return (
                           <HeaderCell resize key={k}>
@@ -357,7 +332,7 @@ export default function Master() {
                 <Body>
                   {tableList.map((item) => (
                     <Row key={item.id} item={item} onClick={editRow}>
-                      {tableList.length > 1 &&
+                      {tableList.length > 0 &&
                         Object.keys(tableList[0]).slice(1).map((k) => {
                           if (typeof item[k] === "boolean"){
                             return <Cell key={item[k]}>{item[k] ? "Yes" : "No"} </Cell>;

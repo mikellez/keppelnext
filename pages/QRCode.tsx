@@ -1,12 +1,12 @@
 import formStyles from '../styles/formStyles.module.css'
 import styles from '../styles/QRCode.module.css'
 
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 
 import { ModuleMain, ModuleHeader, ModuleContent, ModuleFooter, ModuleDivider } from '../components/';
 import { useAsset } from '../components/SWR';
 import { useQRCode } from 'next-qrcode';
-import { CMMSAsset, CMMSPlant } from '../types/common/interfaces';
+import { CMMSAsset, CMMSPlant, CMMSPlantLoc } from '../types/common/interfaces';
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import instance from '../axios.config';
 
@@ -24,21 +24,23 @@ function saveSvg(svgEl: SVGSVGElement, name: string) {
 	document.body.removeChild(downloadLink);
 }
 
-function QRImg({asset, plant, bool}: {asset: CMMSAsset; plant: number|null; bool: boolean}) {
-	const { SVG } = useQRCode();
 
+function QRAssetImg({asset, plant, isFeedback}: {asset: CMMSAsset; plant: number|null; isFeedback: boolean}) {
+	const { SVG } = useQRCode();
 	function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
 		const svg = e.currentTarget.querySelector("svg");
-
+	
 		if(!svg)
 			return;
-
+	
 		saveSvg(svg, asset.asset_name + ".svg")
 	}
+	
+	
 
 	return (
 		<button className={"btn btn-secondary " + styles.btnQr} onClick={downloadQR}>
-			{ bool ?
+			{ isFeedback ?
 			<SVG 
 				text={window.location.origin + "/Guest/Asset/feedback/" + plant + "/" + asset.psa_id}
 				options={{
@@ -71,6 +73,9 @@ function QRImg({asset, plant, bool}: {asset: CMMSAsset; plant: number|null; bool
 		</button>
 	)
 }
+
+
+
 interface NewAssetProps {
 	plants: CMMSPlant[];
   }
@@ -78,6 +83,10 @@ function QRCode(props: NewAssetProps) {
 	const [selectedPlant, setSelectedPlant] = useState<number|null>(null)
 	const [selectedAssets, setSelectedAssets] = useState<CMMSAsset[]>([]);
 	const [feedback, setFeedback] = useState<boolean>(false);
+	const [plantLocs, setPlantLocs] = useState<CMMSPlantLoc[]>([]);
+	const [filteredPlantLocs, setFilteredPlantLocs] = useState<CMMSPlantLoc[]>([]);
+	const [selectedPlantLoc, setSelectedPlantLoc] = useState<number|null>(null);
+
 	
 	const qrRef = useRef() as React.RefObject<HTMLDivElement>
 
@@ -93,65 +102,131 @@ function QRCode(props: NewAssetProps) {
 			setSelectedAssets(Array.from(e.target.options).filter(o => o.selected).map(o => data[parseInt(o.value)]))
 	}
 
+// feedback
+	useEffect(() => {
+		const plantLocations = instance.get<CMMSPlantLoc[]>(`/api/plantLocation`)
+			.then(res => {
+				setPlantLocs(res.data);
+			})
+	}, [])
+
+	useEffect(() => {
+		if (feedback) {
+			// console.log(selectedPlant);
+			setFilteredPlantLocs(() => {
+				return plantLocs.filter(loc => loc.plant_id === selectedPlant)
+			})
+		}
+	}, [selectedPlant])
+
+	const QRFeedbackImg = ({plant, loc_id}: {plant: number|null, loc_id: number|null}) => {
+		const { SVG } = useQRCode();
+		const location = plantLocs.filter(loc => loc.id === loc_id)[0].location;
+		function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
+			const svg = e.currentTarget.querySelector("svg");
+		
+			if(!svg)
+				return;
+		
+			saveSvg(svg, location + ".svg")
+		}
+		return <button className={"btn btn-secondary " + styles.btnQr} onClick={downloadQR}>
+			<SVG 
+					text={window.location.origin + "/Guest/Asset/feedback/" + plant + "/" + loc_id}
+					options={{
+						level: 'H',
+						margin: 0,
+						scale: 5,
+						width: 150,
+						color: {
+							dark: '#000000',
+							light: '#ffffff',
+						}
+					}}
+				/> 
+			<div className={styles.label}>{location}</div>
+		</button>
+	}
+
 	return (
 		<ModuleMain>
 			<ModuleHeader title="QRCode" header="Generate QR Codes"></ModuleHeader>
 			<ModuleContent includeGreyContainer grid>
 				<div className={formStyles.halfContainer}>
-				<div className="form-group">
+					<div className="form-group">
 						<label className='form-label'>Type:</label>
 						<select className="form-select" required onChange={(e) => {setFeedback(
 							e.target.value == "true"
 						)}}>
 							<option value="0" disabled hidden selected>
-                -- Select Type --
-              </option>
-			  <option value="false">
-				Fault
-			</option>
-			<option value="true">
-				Feedback
-			</option>
-				</select>
+								-- Select Type --
+							</option>
+							<option value="false">
+								Fault
+							</option>
+							<option value="true">
+								Feedback
+							</option>
+						</select>
 					</div>
+
 					<div className="form-group">
-						<label className='form-label'>Plant Location:</label>
+						<label className='form-label'>Plant:</label>
 						<select className="form-select" required onChange={(e) => {setSelectedPlant(parseInt(e.target.value))}}>
 							<option value="0" disabled hidden selected>
-                -- Select Plant --
-              </option>
-              {props.plants.map((plant) => (
-                <option key={plant.plant_id} value={plant.plant_id}>
-                  {plant.plant_name}
-                </option>
-              ))}
-				</select>
+							-- Select Plant --
+						</option>
+						{props.plants.map((plant) => (
+							<option key={plant.plant_id} value={plant.plant_id}>
+							{plant.plant_name}
+							</option>
+						))}
+						</select>
 					</div>
+
+					{feedback && selectedPlant && <div className="form-group">
+						<label className='form-label'>Plant Location:</label>
+						<select className="form-select" required onChange={(e) => {setSelectedPlantLoc(parseInt(e.target.value))}}>
+							<option value="0" disabled hidden selected>
+							-- Select Plant Location --
+						</option>
+						{filteredPlantLocs.map((loc) => (
+							<option key={loc.id} value={loc.id}>
+							{loc.location}
+							</option>
+						))}
+						</select>
+					</div>}
 
 					<br/>
 				</div>
 				<div className={formStyles.halfContainer}>
-					<div className="form-group">
+					{!feedback && <div className="form-group">
 						<label className="form-label">Assets:</label>
 						<select className="form-select" multiple style={{height: "14em"}} onChange={assetSelect}>
 							{
 								data && data.map((asset, i) => <option key={asset.psa_id} value={i}>{asset.asset_name}</option>)
 							}
 						</select>
-					</div>
+					</div>}
 				</div>
 			</ModuleContent>
 
 			<ModuleContent>
-				<div className={styles.qrList} ref={qrRef}>
+				{!feedback && <div className={styles.qrList} ref={qrRef}>
 					{
 						selectedAssets.map((asset) => {
 							return (
-								<QRImg key={asset.psa_id} asset={asset} plant={selectedPlant} bool={feedback}/>
+								<QRAssetImg key={asset.psa_id} asset={asset} plant={selectedPlant} isFeedback={feedback}/>
 							)
 						})
 					}
-				</div>
+				</div>}
+				{feedback && <div className={styles.qrList} ref ={qrRef}>
+					{
+						selectedPlantLoc && <QRFeedbackImg loc_id={selectedPlantLoc} plant={selectedPlant}/>
+					}
+				</div>}
 			</ModuleContent>
 		</ModuleMain>
 	)
@@ -171,6 +246,8 @@ export const getServerSideProps: GetServerSideProps = async (
 	  `/api/getPlants`,
 	  headers
 	);
+
+	
   
 	if (plants.status !== 200) throw Error("Error getting plants");
 
@@ -178,7 +255,6 @@ export const getServerSideProps: GetServerSideProps = async (
 	let props: NewAssetProps = {
 	  plants: plants.data,
 	};
-	console.log(props.plants);
   
 	return {
 	  props: props,

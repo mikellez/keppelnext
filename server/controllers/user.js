@@ -135,7 +135,8 @@ const getUsersData = async(req, res, next) => {
     allocated_plants,
     allocatedplantids,
     user_name,
-    user_email
+    user_email,
+    role_id
     FROM keppel.user_access
     WHERE user_id = ${id};`
     console.log(query);
@@ -186,7 +187,17 @@ const updateUser = async (req, res, next) => {
         `
         }
 
+    role = ``
+    role += `UPDATE keppel.user_role_privileges
+    SET role_parent_id = ${req.body.role_id}
+    WHERE user_id = ${user_id};`
+
+    role += `UPDATE keppel.user_role
+    SET role_parent_id = ${req.body.role_id}
+    WHERE user_id = ${user_id};`
+
     plants += query;
+    plants += role;
     console.log(plants)
 
     try {await global.db.query(plants); return res.status(200).json("success");} catch (err) {console.log(err);

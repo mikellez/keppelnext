@@ -5,20 +5,17 @@ import styles from "../../styles/Schedule.module.scss";
 import { AssignedUserOption } from "./AssignToSelect";
 import { ActionMeta, MultiValue, SingleValue } from "react-select";
 import { minDate } from "./ScheduleModal";
+import { CMMSSchedule } from "../../types/common/interfaces";
+import Schedule from "../../pages/Schedule";
 
 interface ApprovedScheduleInputProps {
-    checklistName: string;
-    startDate: Date;
-    endDate: Date;
-    remarks: string;
     plantId: number;
-    scheduleId: number;
+    schedule: CMMSSchedule;
     onChange: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement>;
     onAssignedChange: (
         value: MultiValue<AssignedUserOption> | SingleValue<AssignedUserOption>,
         action: ActionMeta<AssignedUserOption>
     ) => void;
-    isComplete?: boolean;
 }
 
 const inputRowStyles = {
@@ -29,23 +26,22 @@ const inputRowStyles = {
 
 export default function ApprovedScheduleInput(props: ApprovedScheduleInputProps) {
     return (
-        // <div className={styles.approvedScheduleInputContainer}>
         <tr
             className={styles.approvedScheduleInputRow}
             style={{
-                borderBottom: !props.isComplete ? "2px solid #FF0000" : "#ddd",
+                borderBottom: !props.schedule.isComplete ? "2px solid #FF0000" : "#ddd",
             }}
         >
             <td>
-                <p style={inputRowStyles}>{props.checklistName}</p>
+                <p style={inputRowStyles}>{props.schedule.checklistName}</p>
             </td>
 
             <td>
                 <input
                     className="form-control"
-                    name={props.scheduleId + "-startDate"}
+                    name={props.schedule.scheduleId + "-startDate"}
                     min={minDate}
-                    value={props.startDate.toISOString().slice(0, 10)}
+                    value={new Date(props.schedule.startDate).toISOString().slice(0, 10)}
                     type="date"
                     onChange={props.onChange}
                     style={inputRowStyles}
@@ -56,9 +52,9 @@ export default function ApprovedScheduleInput(props: ApprovedScheduleInputProps)
             <td>
                 <input
                     className="form-control"
-                    name={props.scheduleId + "-endDate"}
+                    name={props.schedule.scheduleId + "-endDate"}
                     min={minDate}
-                    value={props.endDate.toISOString().slice(0, 10)}
+                    value={new Date(props.schedule.endDate).toISOString().slice(0, 10)}
                     type="date"
                     onChange={props.onChange}
                     style={{ ...inputRowStyles }}
@@ -68,11 +64,12 @@ export default function ApprovedScheduleInput(props: ApprovedScheduleInputProps)
 
             <td>
                 <RecurrenceSelect
-                    startDate={props.startDate}
-                    endDate={props.endDate}
-                    name={props.scheduleId + "-recurringPeriod"}
+                    startDate={new Date(props.schedule.startDate)}
+                    endDate={new Date(props.schedule.endDate)}
+                    name={props.schedule.scheduleId + "-recurringPeriod"}
                     onChange={props.onChange}
                     style={inputRowStyles}
+                    value={props.schedule.recurringPeriod}
                 />
             </td>
 
@@ -81,21 +78,22 @@ export default function ApprovedScheduleInput(props: ApprovedScheduleInputProps)
                     plantId={props.plantId}
                     onChange={props.onAssignedChange}
                     style={inputRowStyles}
-                    name={props.scheduleId.toString()}
+                    name={props.schedule.scheduleId!.toString()}
+                    defaultIds={props.schedule.assignedIds}
+                    isSingle
                 />
             </td>
 
             <td>
                 <input
                     className="form-control"
-                    name={props.scheduleId + "-remarks"}
-                    value={props.remarks}
+                    name={props.schedule.scheduleId + "-remarks"}
+                    value={props.schedule.remarks}
                     type="text"
                     onChange={props.onChange}
                     style={inputRowStyles}
                 />
             </td>
         </tr>
-        // </div>
     );
 }

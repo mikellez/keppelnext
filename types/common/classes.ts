@@ -62,7 +62,6 @@ class ControlFactory {
 
 			if(!(checkObj.choices as Array<any>).every(c => typeof c === "string" ))
 				throw Error("invalid json string in creating ChecklistControl")
-
 			const choices: Array<string> = checkObj.choices;
 
 			return new MultiChoiceControl(question, choices, value);
@@ -189,7 +188,10 @@ class CheckSection {
 		let result: boolean = true;
 		this.rows.forEach(row => {
 			row.checks.forEach(check => {
-				if (!check.value || check.value.trim() === "") result = false;
+				if (
+					!(check instanceof FreeTextControl || check instanceof FileUploadControl) &&
+					(!check.value || check.value.trim() === "")
+				) result = false;
 			})
 		})
 		return result;

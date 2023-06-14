@@ -11,7 +11,9 @@ import {
   AiOutlinePhone,
   AiOutlineHistory,
   AiOutlineDashboard,
+  AiOutlineForm,
 } from "react-icons/ai";
+import { FcFeedback } from "react-icons/fc";
 import { MdWorkOutline } from "react-icons/md";
 import { VscBook } from "react-icons/vsc";
 import { TbExchange } from "react-icons/tb";
@@ -158,6 +160,11 @@ export default function NavBar() {
               icon={<AiOutlineQrcode size={21} />}
             />
             <NavLink
+              name="Feedback"
+              path="/Feedback"
+              icon={<AiOutlineForm size={21} />}
+            />
+            <NavLink
               name="Workflow"
               path="/Workflow"
               icon={<MdWorkOutline size={21} />}
@@ -167,19 +174,26 @@ export default function NavBar() {
               path="/Master"
               icon={<AiOutlineControl size={21} />}
             />
-            <NavDropdown
-              name="User Management"
-              path="/User"
-              navOpen={navDisplay}
-              icon={<AiOutlineUser size={21} />}
-            >
-              <NavDropdownLink href="/User/Management">
-                User Management
-              </NavDropdownLink>
-              {/* <NavDropdownLink href="/">Access Control</NavDropdownLink> */}
-              <NavDropdownLink href="/User/Add">Add New User</NavDropdownLink>
-              {/* <NavDropdownLink href="/">Password Policy</NavDropdownLink> */}
-            </NavDropdown>
+            
+            {data &&
+                (data.role_id === Role.Admin ||
+                  data.role_id === Role.Manager) && (
+                    <NavDropdown
+                    name="User Management"
+                    path="/User"
+                    navOpen={navDisplay}
+                    icon={<AiOutlineUser size={21} />}
+                  >
+                    
+                    <NavDropdownLink href="/User/Management">
+                      User Management
+                    </NavDropdownLink>
+                    {/* <NavDropdownLink href="/">Access Control</NavDropdownLink> */}
+                    <NavDropdownLink href="/User/Add">Add New User</NavDropdownLink>
+                    {/* <NavDropdownLink href="/">Password Policy</NavDropdownLink> */}
+                  </NavDropdown>
+                )}
+ 
             <NavDropdown
               name="Activity Log"
               path="/Activity"

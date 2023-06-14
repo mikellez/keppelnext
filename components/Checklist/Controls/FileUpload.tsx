@@ -40,9 +40,12 @@ export class FileUploadControl extends CheckControl {
 		return <FileUpload fileControlObj={this} onChange={onChange} onDelete={onDelete} />
 	}
 
-	renderEditableForm(rowId: string, sectionId: string) {
-		return <FileUploadEditable fileControlObj={this} rowId={rowId} sectionId={sectionId} />
+	renderEditableForm(rowId: string, sectionId: string, index: number) {
+		return <FileUploadEditable fileControlObj={this} rowId={rowId} sectionId={sectionId} index={index} />
 	}
+  // renderReassignedEditableForm(rowId: string, sectionId: string) {
+	// 	return <FileUploadReassignedEditable fileControlObj={this} rowId={rowId} sectionId={sectionId} />
+	// }
 
   renderViewOnlyForm() {
     return <FileUploadView fileControlObj={this} />
@@ -101,12 +104,14 @@ export function FileUpload({
 	</div>);
 };
 
-function FileUploadEditable({ fileControlObj, rowId, sectionId }: {
+function FileUploadEditable({ fileControlObj, rowId, sectionId, index }: {
 	fileControlObj: FileUploadControl,
 	rowId: string,
-	sectionId: string
+	sectionId: string,
+  index: number
 }) {
 
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 	const { setSections } = useContext(SectionsContext);
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files && e.target.files.length > 0) {
@@ -121,30 +126,16 @@ function FileUploadEditable({ fileControlObj, rowId, sectionId }: {
 		reader.readAsDataURL(file);
 		reader.onload = () => {
 			updateSpecificCheck(sectionId, rowId, fileControlObj.id, reader.result as string, setSections);
-			// updateSection(reader.result as string)
 		};
 	};
 
 	const removeFileFromValue = () => {
 		updateSpecificCheck(sectionId, rowId, fileControlObj.id, "", setSections);
-		// updateSection("")
-	};
-
-	const updateSection = (value: string) => {
-		setSections((prevSections) => {
-			const newSections = [...prevSections];
-			newSections.forEach(section => {
-				if (section.id === sectionId) {
-					section.updateSection(rowId, fileControlObj.id, value)
-				}
-			})
-			return newSections;
-		});
 	};
 	
 	return (
 		<div className={styles.checkViewContainer}>
-			<h6>{fileControlObj.question}</h6>
+			<h6>{index}. {fileControlObj.question}</h6>
 			<input 
 				type="file" 
 				name={fileControlObj.id}
@@ -152,6 +143,24 @@ function FileUploadEditable({ fileControlObj, rowId, sectionId }: {
 				onChange={handleChange}
         accept='jpeg/png'
 			/>
+      {fileControlObj.value && fileControlObj.value != "" && <><p 
+        onClick={() => setModalOpen(true)}
+        className={requestStyles.editIcon}
+      >View File
+      </p>
+      <ModuleModal
+        closeModal={() => setModalOpen(false)}
+        isOpen={modalOpen}
+        closeOnOverlayClick
+        className={requestStyles.imageModal}
+      >
+        <Image 
+          src={fileControlObj.value}
+          alt="img"
+          width={500} 
+          height={500}
+        />
+      </ModuleModal></>}
 		</div>
 	)
 };
@@ -160,27 +169,95 @@ function FileUploadView({ fileControlObj }: {fileControlObj: FileUploadControl})
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   return (
-    <>
       <div className={styles.checkViewContainer}>
         <h6>{fileControlObj.question}</h6>
         <p 
           onClick={() => setModalOpen(true)}
           className={requestStyles.editIcon}
         >View File</p>
+        <ModuleModal
+          closeModal={() => setModalOpen(false)}
+          isOpen={modalOpen}
+          closeOnOverlayClick
+          className={requestStyles.imageModal}
+        >
+        <Image 
+          src={fileControlObj.value}
+          alt="img"
+          width={500} 
+          height={500}
+        />
+        </ModuleModal>
       </div>
-      <ModuleModal
-        closeModal={() => setModalOpen(false)}
-        isOpen={modalOpen}
-        closeOnOverlayClick
-        className={requestStyles.imageModal}
-      >
-      <Image 
-        src={fileControlObj.value}
-        alt="img"
-        width={500} 
-        height={500}
-      />
-  </ModuleModal>
-  </>
+      
   );
 };
+
+
+// function FileUploadReassignedEditable({ fileControlObj, rowId, sectionId }: {
+// 	fileControlObj: FileUploadControl,
+// 	rowId: string,
+// 	sectionId: string
+
+// }) {
+//   const [modalOpen, setModalOpen] = useState<boolean>(false);
+// 	const { setSections } = useContext(SectionsContext);
+// 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+// 		if (e.target.files && e.target.files.length > 0) {
+// 			addFileToValue(e.target.files[0]);
+// 		} else {
+// 			removeFileFromValue();
+// 		}
+// 	};
+
+// 	const addFileToValue = (file: File) => {
+// 		const reader = new FileReader();
+// 		reader.readAsDataURL(file);
+// 		reader.onload = () => {
+// 			updateSpecificCheck(sectionId, rowId, fileControlObj.id, reader.result as string, setSections);
+// 			// updateSection(reader.result as string)
+// 		};
+// 	};
+
+// 	const removeFileFromValue = () => {
+// 		updateSpecificCheck(sectionId, rowId, fileControlObj.id, "", setSections);
+// 		// updateSection("")
+// 	};
+
+// 	const updateSection = (value: string) => {
+// 		setSections((prevSections) => {
+// 			const newSections = [...prevSections];
+// 			newSections.forEach(section => {
+// 				if (section.id === sectionId) {
+// 					section.updateSection(rowId, fileControlObj.id, value)
+// 				}
+// 			})
+// 			return newSections;
+// 		});
+// 	};
+	
+// 	return (
+// 		<>
+//       <div className={styles.checkViewContainer}>
+//         <h6>{fileControlObj.question}</h6>
+//         <p 
+//           onClick={() => setModalOpen(true)}
+//           className={requestStyles.editIcon}
+//         >View File</p>
+//       </div>
+//       <ModuleModal
+//         closeModal={() => setModalOpen(false)}
+//         isOpen={modalOpen}
+//         closeOnOverlayClick
+//         className={requestStyles.imageModal}
+//       >
+//       <Image 
+//         src={fileControlObj.value}
+//         alt="img"
+//         width={500} 
+//         height={500}
+//       />
+//   </ModuleModal>
+//   </>
+// 	);
+// };

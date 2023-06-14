@@ -59,7 +59,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
         }, 1000);
       });
     } else {
-      manageRequest(requestId, status).then((result) => {
+      manageRequest(requestId, status, comments).then((result) => {
         setModal(true);
         setTimeout(() => {
           router.push("/Request");
@@ -118,6 +118,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
         text="Your action has been successfully recorded"
         title="Success"
         icon={SimpleIcon.Check}
+        shouldCloseOnOverlayClick={true}
       />
       <ModuleSimplePopup
         modalOpenState={failureModal}
@@ -125,6 +126,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
         text="Please provide your reasons for rejecting the completed request"
         title="Missing comments"
         icon={SimpleIcon.Exclaim}
+        shouldCloseOnOverlayClick={true}
       />
     </>
   );

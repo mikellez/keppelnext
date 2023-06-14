@@ -19,11 +19,11 @@ import {
   OnClick,
 } from "@table-library/react-table-library";
 import {
-  useChecklist,
   useCurrentUser,
-  useChecklistFilter,
+  useFeedbackFilter,
+  useFeedback,
 } from "../../components/SWR";
-import { CMMSChecklist } from "../../types/common/interfaces";
+import { CMMSFeedback } from "../../types/common/interfaces";
 import { ThreeDots } from "react-loading-icons";
 import { getColor } from "../Request";
 import { HiOutlineDownload } from "react-icons/hi";
@@ -46,40 +46,39 @@ import Pagination from "../../components/Pagination";
 import { GetServerSidePropsContext } from "next";
 import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 
-const indexedColumn: ("pending" | "assigned" | "record" | "approved")[] = [
+const indexedColumn: ("pending" | "assigned" | "review")[] = [
   "pending",
   "assigned",
-  "record",
-  "approved",
+  "review",
 ];
 
-// pretty much the same as CMMSChecklist but the ID is changed
-export interface ChecklistItem {
+export interface FeedbackItem {
   id: number;
-  chl_name: string;
-  description: string;
-  status_id: number;
+  created_date: Date;
+  description?: string;
+  status_id?: number;
   createdbyuser: string;
-  assigneduser: string;
-  signoffuser: string;
-  plant_name: string;
+  feedback_id: number;
+  loc_floor: string;
+  loc_room: string;
   plant_id: number;
-  linkedassets: string | null;
-  linkedassetids: string | null;
-  chl_type?: string;
-  created_date: Date | string;
-  history: string;
   status: string;
+  assigned_user_email: string;
+  assigned_user_id: number;
+  assigned_user_name: string;
+  requesthistory?: string;
+  complete_comments?: string;
+  completion_file?: any;
   activity_log?: { [key: string]: string }[];
 }
 
-export interface ChecklistProps {
+export interface FeedbackProps {
   filter?: boolean;
   status: number | string;
   plant: number;
   date: string;
   datetype: string;
-  isReady: boolean;
+  isReady?: boolean;
 }
 
 const downloadCSV = async (type: string, activeTabIndex: number) => {
@@ -101,8 +100,8 @@ const downloadCSV = async (type: string, activeTabIndex: number) => {
   }
 };
 
-export default function Checklist(props: ChecklistProps) {
-  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
+export default function Checklist(props: FeedbackProps) {
+  const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>([]);
   const [isReady, setReady] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const user = useCurrentUser();
@@ -111,8 +110,8 @@ export default function Checklist(props: ChecklistProps) {
   const [history, setHistory] = useState<
     { [key: string]: string }[] | undefined
   >(undefined);
-  const filteredData = useChecklistFilter(props, page);
-  const columnData = useChecklist(indexedColumn[activeTabIndex], page);
+  const filteredData = useFeedbackFilter(props, page);
+  const columnData = useFeedback(indexedColumn[activeTabIndex], page);
 
   const { data, error, isValidating, mutate } = props.filter
     ? filteredData
@@ -122,7 +121,7 @@ export default function Checklist(props: ChecklistProps) {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns:  5em calc(90% - 46em) 7em 8em 10em 10em 10% 6em;",
+        "--data-table-library_grid-template-columns:  5em calc(90% - 46em) 7em 8em 10em 10em 10% ;",
     },
   ]);
 
@@ -134,18 +133,18 @@ export default function Checklist(props: ChecklistProps) {
     }
   };
 
-  const editRow: OnClick<ChecklistItem> = (item, event) => {
-    const checklistRow = item;
+  const editRow: OnClick<FeedbackItem> = (item, event) => {
+    const feedbackRow = item;
   };
 
   useEffect(() => {
     if (data && !isValidating) {
       if (props?.filter) {
         if (data?.rows?.length > 0) {
-          setChecklistItems(
-            data.rows.map((row: CMMSChecklist) => {
+          setFeedbackItems(
+            data.rows.map((row: CMMSFeedback) => {
               return {
-                id: row.checklist_id,
+                id: row.feedback_id,
                 ...row,
               };
             })
@@ -167,12 +166,12 @@ export default function Checklist(props: ChecklistProps) {
     if (!props?.filter) {
       setReady(false);
       instance
-        .get(`/api/checklist/${indexedColumn[activeTabIndex]}?page=${page}`)
+        .get(`/api/feedback/${indexedColumn[activeTabIndex]}?page=${page}`)
         .then((response) => {
-          setChecklistItems(
-            response.data.rows.map((row: CMMSChecklist) => {
+          setFeedbackItems(
+            response.data.rows.map((row: CMMSFeedback) => {
               return {
-                id: row.checklist_id,
+                id: row.feedback_id,
                 ...row,
               };
             })
@@ -181,25 +180,25 @@ export default function Checklist(props: ChecklistProps) {
           setReady(true);
         })
         .catch((e) => {
-          setChecklistItems([]);
+          setFeedbackItems([]);
         });
     }
   }, [activeTabIndex, page]);
 
   return (
     <ModuleMain>
-      <ModuleHeader title="Checklist" header="Checklist">
-        <Link href="/Checklist/Form?action=New">
-          <TooltipBtn text="New Checklist">
+      <ModuleHeader title="Feedback" header="Feedback">
+        {/* <Link href="/feedback/Form?action=New"> */}
+        {/* <TooltipBtn text="New feedback">
             <BsFileEarmarkPlus size={20} />
           </TooltipBtn>
         </Link>
         <TooltipBtn
-          onClick={() => downloadCSV("checklist", activeTabIndex)}
+          onClick={() => downloadCSV("feedback", activeTabIndex)}
           text="Export CSV"
         >
           <HiOutlineDownload size={20} />
-        </TooltipBtn>
+        </TooltipBtn> */}
       </ModuleHeader>
 
       <ModuleContent>
@@ -229,25 +228,17 @@ export default function Checklist(props: ChecklistProps) {
             >
               <span style={{ all: "unset" }}>For Review</span>
             </li>
-            <li
-              onClick={() => {
-                activeTabIndex !== 3 && switchColumns(3);
-              }}
-              className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
-            >
-              <span style={{ all: "unset" }}>Approved</span>
-            </li>
           </ul>
         )}
-        {isReady && checklistItems.length === 0 && <div>No Checklists</div>}
+        {isReady && feedbackItems.length === 0 && <div>No Feedback</div>}
         {isReady ? (
           <>
             <Table
-              data={{ nodes: checklistItems }}
+              data={{ nodes: feedbackItems }}
               theme={theme}
               layout={{ custom: true }}
             >
-              {(tableList: ChecklistItem[]) => (
+              {(tableList: FeedbackItem[]) => (
                 <>
                   <Header>
                     <HeaderRow>
@@ -256,9 +247,8 @@ export default function Checklist(props: ChecklistProps) {
                       <HeaderCell resize>Status</HeaderCell>
                       <HeaderCell resize>Created On</HeaderCell>
                       <HeaderCell resize>Assigned To</HeaderCell>
-                      <HeaderCell resize>Signed Off By</HeaderCell>
+                      <HeaderCell resize>Location</HeaderCell>
                       <HeaderCell resize>Created By</HeaderCell>
-                      <HeaderCell resize>Action</HeaderCell>
                     </HeaderRow>
                   </Header>
 
@@ -279,15 +269,17 @@ export default function Checklist(props: ChecklistProps) {
                             </span>
                           </Cell>
                           <Cell>{item.created_date.toString()}</Cell>
-                          <Cell>{item.assigneduser}</Cell>
-                          <Cell>{item.signoffuser}</Cell>
-                          <Cell>{item.createdbyuser}</Cell>
+                          <Cell>{item.assigned_user_name}</Cell>
                           <Cell>
+                            {item.loc_floor} floor, {item.loc_room}
+                          </Cell>
+                          <Cell>{item.createdbyuser}</Cell>
+                          {/* <Cell>
                             {(user.data!.role_id === Role.Admin ||
                               user.data!.role_id === Role.Manager ||
                               user.data!.role_id === Role.Engineer) &&
                             item.status_id === 4 ? (
-                              <Link href={`/Checklist/Manage/${item.id}`}>
+                              <Link href={`/Feedback/Manage/${item.id}`}>
                                 <AiOutlineFileProtect
                                   size={22}
                                   title={"Manage"}
@@ -295,26 +287,21 @@ export default function Checklist(props: ChecklistProps) {
                               </Link>
                             ) : item.status_id === 2 || item.status_id === 3 ? (
                               <>
-                                <Link href={`/Checklist/Complete/${item.id}`}>
+                                <Link href={`/Feedback/Complete/${item.id}`}>
                                   <AiOutlineFileDone
                                     size={22}
                                     title={"Complete"}
                                   />
                                 </Link>
-                                <Link
-                                  href={`/Checklist/Form/?action=Edit&id=${item.id}`}
-                                >
-                                  <AiOutlineEdit size={22} title={"Edit"} />
-                                </Link>
                               </>
                             ) : item.status_id === 1 ? (
                               <Link
-                                href={`/Checklist/Form/?action=Edit&id=${item.id}`}
+                                href={`/Feedback/Form/?action=Edit&id=${item.id}`}
                               >
                                 <AiOutlineEdit size={22} title={"Assign"} />
                               </Link>
                             ) : (
-                              <Link href={`/Checklist/View/${item.id}`}>
+                              <Link href={`/Feedback/View/${item.id}`}>
                                 <AiOutlineFolderView size={22} title={"View"} />
                               </Link>
                             )}
@@ -324,7 +311,7 @@ export default function Checklist(props: ChecklistProps) {
                               size={22}
                               title={"View History"}
                             />
-                          </Cell>
+                          </Cell> */}
                         </Row>
                       );
                     })}

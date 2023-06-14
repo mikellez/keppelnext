@@ -19,11 +19,12 @@ export default function RequestPreview(props: RequestPreviewProps) {
   const [completeUrl, setCompleteUrl] = useState("");
   const [completionModal, setCompletionModal] = useState(false);
   const [faultModal, setFaultModal] = useState(false);
+  const [comments, setComments] = useState<null | Object>(null);
   let date; // declare the date variable outside the if block
 
   const createdDate = props.request.requesthistory;
   if (createdDate != null) {
-    const parts = createdDate.split('_');
+    const parts = createdDate.split("_");
     date = parts[2]; // assign the value to the global date variable
   }
 
@@ -41,7 +42,22 @@ export default function RequestPreview(props: RequestPreviewProps) {
       setCompleteUrl(imageUrl);
     }
   }, [props.request.uploaded_file, props.request.completion_file]);
-  console.log(props)
+
+  useEffect(() => {
+    const activity_log = props.request.activity_log;
+    if (activity_log[activity_log.length - 1].activity_type === "APPROVED") {
+      setComments({
+        "Approval Comments":
+          activity_log[activity_log.length - 1].remarks || "NIL",
+      });
+    } else {
+      const rejected = activity_log
+        .reverse()
+        .find((log) => log.activity_type === "REJECTED");
+      setComments({ "Rejection Comments": rejected?.remarks || "NIL" });
+    }
+  }, [props.request.activity_log]);
+
   return (
     <div>
       <table className={styles.table}>
@@ -82,19 +98,23 @@ export default function RequestPreview(props: RequestPreviewProps) {
                   className={styles.viewImage}
                   onClick={() => setFaultModal(true)}
                 >
-                <Image
-                  src={faultUrl}
-                  width={150}
-                  height={150}
-                  style={{ objectFit: "contain" }}
-                  alt="Fault Image"
-                />
-              <div style={{ paddingTop: "10px", paddingBottom: "10px" }}>
-              <a href={faultUrl} download="FaultImage.jpg" >
-                <button className="btn btn-primary" style = {{fontSize: "0.8rem"}}>Download</button>
-              </a> 
-              </div>
-              
+                  <Image
+                    src={faultUrl}
+                    width={150}
+                    height={150}
+                    style={{ objectFit: "contain" }}
+                    alt="Fault Image"
+                  />
+                  <div style={{ paddingTop: "10px", paddingBottom: "10px" }}>
+                    <a href={faultUrl} download="FaultImage.jpg">
+                      <button
+                        className="btn btn-primary"
+                        style={{ fontSize: "0.8rem" }}
+                      >
+                        Download
+                      </button>
+                    </a>
+                  </div>
                 </span>
               ) : (
                 "No File"
@@ -109,24 +129,27 @@ export default function RequestPreview(props: RequestPreviewProps) {
                   closeOnOverlayClick={true}
                   hideHeader
                 >
-
-              <Image
-                  src={faultUrl}
-                  width={550}
-                  height={550}
-                  style={{ objectFit: "contain" }}
-                  alt="Fault Image"
-                />
+                  <Image
+                    src={faultUrl}
+                    width={550}
+                    height={550}
+                    style={{ objectFit: "contain" }}
+                    alt="Fault Image"
+                  />
                 </ModuleModal>
               )}
             </td>
           </tr>
-          {props.request.rejection_comments && (
-            <tr>
-              <th>Rejection Comments</th>
-              <td>{props.request.rejection_comments}</td>
-            </tr>
-          )}
+          {comments &&
+            (props.request.activity_log[props.request.activity_log.length - 1]
+              .activity_type === "APPROVED" ||
+              props.request.activity_log[props.request.activity_log.length - 1]
+                .activity_type === "REJECTED") && (
+              <tr>
+                <th>{Object.keys(comments)[0]}</th>
+                <td>{Object.values(comments)[0]}</td>
+              </tr>
+            )}
           {props.action == RequestAction.manage && (
             <>
               <tr>
@@ -143,7 +166,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
                       onClick={() => setCompletionModal(true)}
                       className={styles.viewImage}
                     >
-                    {completionModal}
+                      {completionModal}
                     </span>
                   ) : (
                     "No File"
@@ -171,11 +194,16 @@ export default function RequestPreview(props: RequestPreviewProps) {
                 </td>
               </tr>
               <tr>
-              <th>Completion Date</th>
-              <td style={{ color: date === "NIL" ? "#73777B" : "inherit", fontWeight: date === "NIL" ? "bold" : "normal" }}>
-                {date || "NIL"}
-              </td>
-            </tr> 
+                <th>Completion Date</th>
+                <td
+                  style={{
+                    color: date === "NIL" ? "#73777B" : "inherit",
+                    fontWeight: date === "NIL" ? "bold" : "normal",
+                  }}
+                >
+                  {date || "NIL"}
+                </td>
+              </tr>
             </>
           )}
         </tbody>

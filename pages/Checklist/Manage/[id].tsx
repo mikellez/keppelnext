@@ -126,6 +126,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
                 text="Please fill in the remarks"
                 title="Missing remarks"
                 icon={SimpleIcon.Exclaim}
+                shouldCloseOnOverlayClick={true}
             />
 
             <ModuleSimplePopup
@@ -134,6 +135,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
                 text={managerAction === Action.Approve ? "Checklist has been approved." : "Checklist has been rejected."}
                 title="Success"
                 icon={SimpleIcon.Check}
+                shouldCloseOnOverlayClick={true}
             />
         </>
     );

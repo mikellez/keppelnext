@@ -22,6 +22,7 @@ abstract class CheckControl {
 	};
 	abstract render(onChange: Function, onDelete: Function): React.ReactNode;
 	abstract renderEditableForm(rowId: string, sectionId: string): React.ReactNode;
+	// abstract renderReassignedEditableForm(rowId: string, sectionId: string): React.ReactNode;
 	abstract renderViewOnlyForm(): React.ReactNode;
 
 	updateCheck(value: string) {

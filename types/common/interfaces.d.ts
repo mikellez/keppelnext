@@ -159,8 +159,18 @@ interface CMMSRequest {
   complete_comments?: string;
   completion_file?: any;
   rejection_comments: string;
+  activity_log: {
+    activity: string;
+    activity_type: string;
+    date: string;
+    name: string;
+    role: string;
+    remarks?: string;
+  }[];
   total?: number;
 }
+
+
 
 interface CMMSRequestTypes {
   req_id: number;
@@ -181,7 +191,7 @@ interface CMMSPlant {
 interface CMMSEvent {
   title: string;
   start?: Date | string;
-  extendedProps: {[key: string]: any};
+  extendedProps: { [key: string]: any };
 }
 
 interface CMMSScheduleEvent extends CMMSEvent {
@@ -264,6 +274,30 @@ interface CMMSSubComponent1Name {
   system_asset_lvl7: string;
 }
 
+interface CMMSFeedback {
+  feedback_id: numbers;
+  created_date: Date;
+  createdbyuser: string;
+  created_by_user_id: string | null;
+  created_by_user_email: string | null;
+  fullname: string;
+  plant_name: string;
+  plant_id: number;
+  loc_room: string;
+  loc_floor:string;
+  status: string;
+  status_id: number;
+  assigned_user_email: string;
+  assigned_user_id: number;
+  assigned_user_name: string;
+  description?: string;
+  requesthistory?: string;
+  complete_comments?: string;
+  total?: number;
+  datajson?: any;
+  activity_log: { [key: string]: string }[];
+}
+
 interface CMMSChecklist {
   checklist_id: number;
   chl_name: string;
@@ -282,7 +316,7 @@ interface CMMSChecklist {
   plant_id: number;
   linkedassets: string | null;
   linkedassetids: string | null;
-  chl_type?: string
+  chl_type?: string;
   created_date: Date | string;
   history: string;
   status: string;
@@ -337,10 +371,10 @@ interface CMMSChangeOfParts {
   scheduledDate: Date;
   description: string;
   assignedUserId: number;
-  assignedUser: string; 
+  assignedUser: string;
 }
 
-interface CMMSAddUser{
+interface CMMSAddUser {
   firstName: string;
   lastName: string;
   username: string;
@@ -351,13 +385,11 @@ interface CMMSAddUser{
   allocatedPlants: number[];
 }
 
-interface CMMSUserSettings{
+interface CMMSUserSettings {
   username: string;
   email: string;
   userId: number;
 }
-
-
 
 interface CMMSChangeOfPartsEvent extends CMMSEvent {
   title: string;
@@ -371,46 +403,63 @@ interface CMMSChangeOfPartsEvent extends CMMSEvent {
     copId: number;
     plant: string;
     plantId: number;
-    status: string
+    status: string;
   };
   color?: string;
   display?: string;
 }
 interface CMMSUserInfo {
-  id: number,
-  name: string,
-  role_id: number,
-  role_name: string,
-  allocated_plants: [string]
-  employee_id: string,
-  email: string,
-  username: string,
-  first_name: string,
-  last_name: string,
+  id: number;
+  name: string;
+  role_id: number;
+  role_name: string;
+  allocated_plants: [string];
+  employee_id: string;
+  email: string;
+  username: string;
+  first_name: string;
+  last_name: string;
 }
 
 interface CMMSChangePassword {
-    current_password: string,
-		new_password: string,
-		confirm_password: string,
-    id: number
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
+  id: number;
 }
 
 interface CMMSWorkflow {
-  id: number,
-  type: string,
-  fault_id: string,
-  fault_type: string,
-  plant_id: string,
-  plant_name: string,
+  id: number;
+  type: string;
+  fault_id: string;
+  fault_type: string;
+  plant_id: string;
+  plant_name: string;
   is_assign_to: number;
   is_send_email: number;
   is_active: number;
-  assignTo: string,
+  assignTo: string;
   user_id: number;
-  user_email: string,
-  user_name: string,
-  created_at: string
+  user_email: string;
+  user_name: string;
+  created_at: string;
+  create_date?: string;
+}
+
+interface CMMSPlantLoc {
+  id: number,
+  plant_id: number,
+  location: string,
+  activity_log?: {[key: string]: string}[]
+  created_date?: string
+}
+
+interface CMMSPlantLoc {
+  id: number,
+  plant_id: number,
+  location: string,
+  activity_log?: {[key: string]: string}[]
+  created_date?: string
 }
 
 export {
@@ -449,5 +498,7 @@ export {
   CMMSUserSettings,
   CMMSUserInfo,
   CMMSChangePassword,
-  CMMSWorkflow
+  CMMSWorkflow,
+  CMMSFeedback,
+  CMMSPlantLoc,
 };

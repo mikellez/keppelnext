@@ -182,6 +182,7 @@ export default function User() {
           "Are you sure you want to delete this User?" + deleteModalID
         }
         icon={2}
+        shouldCloseOnOverlayClick={true}
         buttons={[
           <button
             key="deleteConfirm"
@@ -207,6 +208,7 @@ export default function User() {
           // "ID " + deleteModalID + 
           "User has been deleted"}
         icon={1}
+        shouldCloseOnOverlayClick={true}
         buttons={
           <button
             onClick={() => {
