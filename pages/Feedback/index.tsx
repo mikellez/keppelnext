@@ -189,7 +189,7 @@ export default function Feedback() {
                     {tableList.map((item) => {
                       return (
                         <Row key={item.id} item={item}>
-                          <Cell>{item.feedback_id}</Cell>
+                          <Cell>{item.id}</Cell>
                           <Cell>{item.description}</Cell>
                           <Cell>
                             <span

@@ -19,13 +19,11 @@ import ModuleSimplePopup, {
 } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
 import FeedbackCreationForm from "../../../components/Feedback/FeedbackAssignmentForm";
-import {
-  createChecklistGetServerSideProps,
-  createFeedbackServerSideProps,
-} from "../../../types/common/props";
+import {createFeedbackServerSideProps,} from "../../../types/common/props";
 import FeedbackAssignmentForm from "../../../components/Feedback/FeedbackAssignmentForm";
 import { AxiosResponse } from "axios";
 import { GetServerSideProps } from "next";
+import { C } from "@fullcalendar/core/internal-common";
 
 interface FeedbackPageProps {
   feedback: CMMSFeedback;
@@ -45,7 +43,7 @@ const assignFeedback = async (
     .catch((err) => console.log(err));
 };
 
-export default function FeedbackNew(props: FeedbackPageProps) {
+export default function AssignFeedback(props: FeedbackPageProps) {
   const [feedbackData, setFeedbackData] = useState<CMMSFeedback>(
     props.feedback
   );
@@ -74,49 +72,37 @@ export default function FeedbackNew(props: FeedbackPageProps) {
     return feedbackData.assigned_user_name;
   };
 
-  useEffect(() => {
-    setFeedbackData((prev) => {
-      return {
-        ...prev,
-        createdbyuser: user.data?.name as string,
-        plant_id: user.data?.allocated_plants[0] as number,
-      };
-    });
+  // useEffect(() => {
+  //   setFeedbackData((prev) => {
+  //     return {
+  //       ...prev,
+  //       createdbyuser: user.data?.name as string,
+  //       plant_id: user.data?.allocated_plants[0] as number,
+  //     };
+  //   });
 
-    if (props.feedback) {
-      setFeedbackData((prev) => {
-        return {
-          ...prev,
-          ...props.feedback,
-        };
-      });
+  //   if (props.feedback) {
+  //     setFeedbackData((prev) => {
+  //       return {
+  //         ...prev,
+  //         ...props.feedback,
+  //       };
+  //     });
 
-      if (props.feedback.datajson.length > 0) {
-        const sectionsFromJSON = props.feedback.datajson.map((section: any) => {
-          return CheckSection.fromJSON(JSON.stringify(section));
-        });
-        setSections(sectionsFromJSON);
-      }
-    }
+  //     if (props.feedback.datajson.length > 0) {
+  //       const sectionsFromJSON = props.feedback.datajson.map((section: any) => {
+  //         return CheckSection.fromJSON(JSON.stringify(section));
+  //       });
+  //       setSections(sectionsFromJSON);
+  //     }
+  //   }
 
-    setTimeout(() => {
-      setIsReady(true);
-    }, 1000);
-  }, [user.data, props.feedback]);
+  //   setTimeout(() => {
+  //     setIsReady(true);
+  //   }, 1000);
+  // }, [user.data, props.feedback]);
 
-  useEffect(() => {
-    const json =
-      sections.length > 0 ? sections.map((section) => section.toJSON()) : [];
-    setFeedbackData((prev) => {
-      return {
-        ...prev,
-        datajson: json,
-      };
-    });
-  }, [sections]);
 
-  // console.log(checklistData.datajson)
-  // console.log(checklistData.status_id);
   return (
     <>
       <ModuleMain>
@@ -129,10 +115,10 @@ export default function FeedbackNew(props: FeedbackPageProps) {
             Back
           </button>
         </ModuleHeader>
-        {isReady ? (
+        {/* {isReady ? ( */}
           <>
             <FeedbackAssignmentForm
-              feedbackData={feedbackData}
+              feedbackData={props.feedback}
               setFeedbackData={setFeedbackData}
             />
             <ModuleFooter>
@@ -149,7 +135,7 @@ export default function FeedbackNew(props: FeedbackPageProps) {
               </>
             </ModuleFooter>
           </>
-        ) : (
+        {/* ) : (
           <div
             style={{
               position: "absolute",
@@ -160,7 +146,7 @@ export default function FeedbackNew(props: FeedbackPageProps) {
           >
             <LoadingHourglass />
           </div>
-        )}
+        )} */}
       </ModuleMain>
 
       <ModuleSimplePopup
@@ -183,3 +169,7 @@ export default function FeedbackNew(props: FeedbackPageProps) {
     </>
   );
 }
+
+const getServerSideProps: GetServerSideProps =
+  createFeedbackServerSideProps([2, 3]);
+export { getServerSideProps };

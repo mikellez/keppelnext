@@ -296,12 +296,8 @@ export default function FeedbackContainer(props: any) {
                 id="formFile"
                 onChange={(e) => {
                   setIsImage(false);
-                  // console.log(e.target.files);
                   setSelectedFile(e.target.files![0]);
-                //   setForm((prevState) => {
-                //     return {...prevState, image: e.target.files![0]}
-                //   })
-                // }
+               
               }}
               />
             </div>

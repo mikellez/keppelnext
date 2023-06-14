@@ -11,23 +11,25 @@ const ITEMS_PER_PAGE = 10;
 
 const fetchAllFeedbackQuery = `
 SELECT 
-    f.feedback_id as id, 
-    f.plant_loc_id,
-    f.plant_id, 
-    f.description,
-    f.contact,
-    f.status_id,
-    f.activity_log,
-    concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
-    concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigned_user_name,
+  f.feedback_id as id, 
+  f.plant_loc_id,
+  f.plant_id, 
+  f.description,
+  f.contact,
+  f.rating,
+  f.imageurl as image,
+  f.status_id,
+  f.activity_log,
+  concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
+  concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigned_user_name,
 	pl.loc_room,
 	pl.loc_id,
 	pl.loc_floor,
-    pm.plant_name,
-    pm.plant_id,
-    f.created_date,
-    f.assigned_user_id,
-    st.status
+  pm.plant_name,
+  pm.plant_id,
+  f.created_date,
+  f.assigned_user_id,
+  st.status
 FROM 
     keppel.users u
     JOIN keppel.user_access ua ON u.user_id = ua.user_id
