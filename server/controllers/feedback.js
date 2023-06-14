@@ -146,8 +146,6 @@ const fetchCompletedFeedback = async (req, res, next) => {
 };
 
 const fetchFilteredFeedback = async (req, res, next) => {
-  let date = req.params.date;
-  let datetype = req.params.datetype;
   let status = req.params.status;
   let plant = req.params.plant;
   let page = req.params?.page;
@@ -175,38 +173,6 @@ const fetchFilteredFeedback = async (req, res, next) => {
       statusCond = `AND f.status_id IN (${status})`;
     } else {
       statusCond = `AND f.status_id = '${status}'`;
-    }
-  }
-
-  if (date !== "all") {
-    switch (datetype) {
-      case "week":
-        dateCond = `
-                    AND DATE_PART('week', f.CREATED_DATE::DATE) = DATE_PART('week', '${date}'::DATE) 
-                    AND DATE_PART('year', f.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
-
-        break;
-
-      case "month":
-        dateCond = `
-                    AND DATE_PART('month', f.CREATED_DATE::DATE) = DATE_PART('month', '${date}'::DATE) 
-                    AND DATE_PART('year', f.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
-
-        break;
-
-      case "year":
-        dateCond = `AND DATE_PART('year', f.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
-
-        break;
-
-      case "quarter":
-        dateCond = `
-                    AND DATE_PART('quarter', f.CREATED_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) 
-                    AND DATE_PART('year', f.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
-
-        break;
-      default:
-        dateCond = `AND CL.CREATED_DATE::DATE = '${date}'::DATE`;
     }
   }
 
@@ -276,16 +242,15 @@ const completeFeedback = async (req, res, next) => {
   const id = req.params.feedback_id;
   const sql = `UPDATE keppel.feedback
                 SET status_id = 4 
-                WHERE feedback_id = $1`
+                WHERE feedback_id = $1`;
   try {
-    
     await global.db.query(sql, [id]);
     return res.status(200).json("Feedback successfully completed");
   } catch (err) {
-    console.log(err); 
+    console.log(err);
     return res.status(500).json("Failure to complete Feedback");
   }
-}
+};
 
 const createFeedback = async (req, res, next) => {
   const feedback = req.body;

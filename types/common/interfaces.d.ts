@@ -268,6 +268,7 @@ interface CMMSSubComponent1Name {
 
 interface CMMSFeedback {
   feedback_id: numbers;
+  id : numbers
   created_date: Date;
   createdbyuser: string;
   created_by_user_id: string | null;
