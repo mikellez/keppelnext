@@ -11,7 +11,7 @@ const ITEMS_PER_PAGE = 10;
 
 const fetchAllFeedbackQuery = `
 SELECT 
-    f.feedback_id, 
+    f.feedback_id as id, 
     f.plant_loc_id,
     f.plant_id, 
     f.description,
@@ -252,6 +252,22 @@ const completeFeedback = async (req, res, next) => {
   }
 };
 
+const getSingleFeedback = async (req, res, next) => {
+  console.log(req.params.feedback_id);
+  const sql = fetchAllFeedbackQuery + `WHERE f.feedback_id = ${req.params.feedback_id}`;
+  global.db.query(sql, (err, result) => {
+    if (err) {
+      return res.status(500).send("Error occured in the server")
+    }
+    if (result.rows.length > 0) {
+      return res.status(200).send(result.rows[0]);
+    } else {
+      return res.status(404).send("No Feedback found");
+    }
+  })
+
+}
+
 const createFeedback = async (req, res, next) => {
   const feedback = req.body;
   const sql = `INSERT INTO keppel.feedback 
@@ -305,4 +321,5 @@ module.exports = {
   createFeedback,
   updateFeedback,
   completeFeedback,
+  getSingleFeedback,
 };

@@ -732,6 +732,13 @@ router.get(
   checkIfLoggedInAPI,
   controllers.feedback.fetchFilteredFeedback
 );
+
+router.get(
+  "/feedback/:feedback_id",
+  checkIfLoggedInAPI,
+  controllers.feedback.getSingleFeedback
+)
+
 router.patch(
   "/feedback/assign/:feedback_id",
   checkIfLoggedInAPI,
