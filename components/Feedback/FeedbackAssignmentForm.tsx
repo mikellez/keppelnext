@@ -92,24 +92,13 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
         </div>
       </div>
       <div className={formStyles.halfContainer}>
-        <div className="form-group">
+        {f.image && <div className="form-group">
           <div>
             <label className="form-label">Feedback Image</label>
           </div>
-          {/* {form.image} */}
-          {/* <img src={form.image} alt="" /> */}
-          {f.image && <ImagePreview previewObjURL={f.image} />}
-          {/* <Image
-            src={f.image}
-            onError={({ currentTarget }) => {
-              currentTarget.onerror = null; // prevents looping
-              currentTarget.src = "";
-            }}
-            width={480}
-            height={270}
-            alt="/"
-          /> */}
-        </div>
+          <ImagePreview previewObjURL={f.image} />
+          
+        </div>}
         <div className="form-group">
           <label className="form-label">
             <RequiredIcon /> Assign to

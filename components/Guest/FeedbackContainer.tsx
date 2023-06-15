@@ -32,7 +32,7 @@ export default function FeedbackContainer(props: any) {
     contact: {
       telegram: number;
       whatsapp: number;
-      number: number | null;
+      number: string;
     };
     email: string;
     image?: string;
@@ -42,7 +42,7 @@ export default function FeedbackContainer(props: any) {
     plantID: props.requestData.plant[0].plant_id,
     taggedLocID: props.requestData.plantLoc.id,
     rating: 5,
-    contact: { telegram: 0, whatsapp: 0, number: null },
+    contact: { telegram: 0, whatsapp: 0, number: ""},
     email: "",
     image: "",
   });
@@ -70,19 +70,14 @@ export default function FeedbackContainer(props: any) {
 
   async function submitform() {
     console.log(form)
-    if (form.name == "") {
+    const emptyContactCondition = form.email === "" 
+              && (form.contact.number === 0
+                      || (form.contact.whatsapp === 0 
+                              && form.contact.telegram === 0))
+    if (form.name == "" || form.comments == "" || (!props.user.data && emptyContactCondition)) {
       setIsMissingDetailsModaOpen(true);
     } else {
-      // const formData = new FormData();
-      // for (const key in form) {
-      //   if ( key == "image" ) {
-      //     if (form[key]) {
-      //       formData.append(key, form[key]);
-      //     }
-      //   } else{
-      //     formData.append(key, form[key]);
-      //   }
-      // }
+
       await instance
         .post("/api/feedback", form)
         .then((res) => {
@@ -92,18 +87,6 @@ export default function FeedbackContainer(props: any) {
         .catch((err) => {
           console.log(err);
         });
-      // return await instance
-      // .post("/api/request/", formData, {
-      //   headers: { "Content-Type": "multipart/form-data" },
-      // })
-      // .then((response) => {
-      //   setSubmissionModal(true);
-      //   return response.data;
-      // })
-      // .catch((e) => {
-      //   console.log(e);
-      //   return null;
-      // });
     }
   }
 
@@ -165,7 +148,9 @@ export default function FeedbackContainer(props: any) {
                 </label>
                 <input
                   className="form-control"
+                  type="number"
                   placeholder="Contact Number"
+                  value={form.contact.number}
                   onChange={(e) => {
                     // console.log(e.target.value);
                     setForm((prevState) => {
@@ -191,7 +176,7 @@ export default function FeedbackContainer(props: any) {
                           ...prevState,
                           contact: {
                             ...prevState.contact,
-                            whatsapp: parseInt(e.target.value),
+                            whatsapp: prevState.contact.whatsapp == 0 ? 1 : 0,
                           },
                         };
                       });
@@ -212,7 +197,7 @@ export default function FeedbackContainer(props: any) {
                           ...prevState,
                           contact: {
                             ...prevState.contact,
-                            telegram: parseInt(e.target.value),
+                            telegram: prevState.contact.telegram == 0 ? 1 : 0,
                           },
                         };
                       });
@@ -233,24 +218,9 @@ export default function FeedbackContainer(props: any) {
               </p>
             </div>
           )}
+          <ModuleDivider></ModuleDivider>
 
-          {/* <div className="form-group">
-            <label className="form-label">Rating</label>
-            <div>
-            <StarRatings
-        rating={form.rating} // The initial rating value
-        starRatedColor="orange" // Color of the selected stars
-        changeRating={(newRating) => {
-          setForm((prevState) => {
-            return {...prevState, rating: newRating}
-          })
-        }}
-        numberOfStars={5} // Total number of stars
-        starDimension="20px" // Size of the stars
-        starSpacing="2px" // Spacing between the stars
-      />
-      </div>
-          </div> */}
+          
           <div className="form-group">
             
             <label className="form-label"><RequiredIcon /> Feedback Comments</label>
