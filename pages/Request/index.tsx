@@ -146,7 +146,7 @@ export const downloadCSV = async (type: string, filename?: string) => {
       method: "get",
       responseType: "arraybuffer",
     });
-    console.log(response);
+    // console.log(response);
     const blob = new Blob([response.data]);
     const url = window.URL.createObjectURL(blob);
     const temp_link = document.createElement("a");
@@ -428,27 +428,24 @@ export default function Request(props: RequestProps) {
                     )}
                   </li>
                   <li className={styles.tableDropdownListItem}>
-                    {
-                      (data?.role_id === Role.Admin ||
-                          data?.role_id === Role.Manager ||
-                          data?.role_id === Role.Engineer) &&
-                      item.status_id === 3 ? (
-                          <Link href={`/Request/Manage/${item.id}`}>
-                              <strong>Manage</strong>
-                          </Link>
-                      ) :
-                      (data?.role_id === Role.Engineer ||
+                    {(data?.role_id === Role.Admin ||
+                      data?.role_id === Role.Manager ||
+                      data?.role_id === Role.Engineer) &&
+                    item.status_id === 3 ? (
+                      <Link href={`/Request/Manage/${item.id}`}>
+                        <strong>Manage</strong>
+                      </Link>
+                    ) : (data?.role_id === Role.Engineer ||
                         data?.role_id === Role.Specialist) &&
                       (item.status_id === 2 || item.status_id === 5) ? (
-                        <Link href={`/Request/Complete/${item.id}`}>
-                          <strong>Complete</strong>
-                        </Link>
-                      ) : (
-                        <Link href={`/Request/View/${item.id}`}>
-                          <strong>View</strong>
-                        </Link>
-                      )
-                    }
+                      <Link href={`/Request/Complete/${item.id}`}>
+                        <strong>Complete</strong>
+                      </Link>
+                    ) : (
+                      <Link href={`/Request/View/${item.id}`}>
+                        <strong>View</strong>
+                      </Link>
+                    )}
                   </li>
                 </ul>
               </td>
@@ -459,8 +456,7 @@ export default function Request(props: RequestProps) {
     },
   };
 
-
-  console.log(isReady);
+  // console.log(isReady);
   useEffect(() => {
     if (requestData && !requestIsFetchValidating) {
       if (requestData?.rows?.length > 0) {
@@ -483,7 +479,6 @@ export default function Request(props: RequestProps) {
       setTotalPages(1);
     }
   }, [requestData, requestIsFetchValidating, isReady, page, props?.isReady]);
-
 
   return (
     <ModuleMain>

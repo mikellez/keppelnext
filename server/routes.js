@@ -742,7 +742,7 @@ router.get(
 router.patch(
   "/feedback/assign/:id",
   checkIfLoggedInAPI,
-  controllers.feedback.updateFeedback
+  controllers.feedback.assignFeedback
 );
 
 router.patch(

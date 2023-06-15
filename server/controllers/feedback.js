@@ -203,11 +203,10 @@ const fetchFilteredFeedback = async (req, res, next) => {
   });
 };
 
-const updateFeedback = async (req, res, next) => {
+const assignFeedback = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  // const assignedComments = req.body.remarks;
+  const assignedComments = req.body.remarks;
 
-  const updatehistory = `,Updated Record_ASSIGNED_${today}_${req.user.name}`;
   const activity_log = {
     date: today,
     name: req.user.name,
@@ -228,15 +227,17 @@ const updateFeedback = async (req, res, next) => {
     `;
 
   try {
-    console.log(req.params);
+    // console.log(req.params);
+    // console.log(req.body);
     await global.db.query(sql, [
       JSON.stringify(activity_log),
-      req.body.assigned_user_id,
+      req.body.assigned_user_id.value,
       req.params.id,
     ]);
-    console.log("submit");
-    return res.status(200).json("Feedback successfully approved");
+    // console.log("submit");
+    return res.status(200).json("Feedback successfully assigned");
   } catch (err) {
+    // console.log(err);
     return res.status(500).json("Failure to assign feedback");
   }
 };
@@ -321,7 +322,7 @@ module.exports = {
   fetchCompletedFeedback,
   fetchFilteredFeedback,
   createFeedback,
-  updateFeedback,
+  assignFeedback,
   completeFeedback,
   getSingleFeedback,
 };

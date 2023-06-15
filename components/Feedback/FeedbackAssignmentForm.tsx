@@ -13,17 +13,11 @@ import FeedbackContact from "./FeedbackContact";
 import StarRatings from "react-star-ratings";
 import ImagePreview from "../Request/ImagePreview";
 import Image from "next/image";
-
-interface FeedbackFormProps {
-  feedbackData: CMMSFeedback;
-  setFeedbackData?: React.Dispatch<React.SetStateAction<CMMSFeedback>>;
-  disableForm?: boolean;
-}
+import { FeedbackFormProps } from "../../pages/Feedback";
 
 const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
   const user = useCurrentUser();
-  const [form, setForm] = useState<CMMSFeedback>(props.feedbackData);
-  // const assetRef = useRef<any>();
+  const f = props.feedbackData;
 
   // const updateDataField = (
   //   value: number | string | Date | null,
@@ -37,14 +31,10 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
   //       };
   //     });
   //   }
-
-  //   if (field === "plantId") {
-  //     assetRef.current.setValue("");
-  //   }
   // };
 
   useEffect(() => {
-    setForm(props.feedbackData);
+    props.setFeedbackData(f);
     // console.log(props.feedbackData.image);
   }, [props.feedbackData]);
 
@@ -60,7 +50,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
             type="text"
             className="form-control"
             disabled
-            value={form.plant_name}
+            value={f.plant_name}
           />
         </div>
         <div className="form-group">
@@ -69,7 +59,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
             type="text"
             className="form-control"
             disabled
-            value={`${form.loc_floor + " Floor - " + form.loc_room}`}
+            value={`${f.loc_floor + " Floor - " + f.loc_room}`}
           />
         </div>
         <div>
@@ -79,7 +69,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
             </div>
             <div>
               <StarRatings
-                rating={form.rating} // The initial rating value
+                rating={f.rating} // The initial rating value
                 starRatedColor="orange" // Color of the selected stars
                 numberOfStars={5} // Total number of stars
                 starDimension="20px" // Size of the stars
@@ -96,7 +86,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
             name="description"
             id="formControlDescription"
             rows={5}
-            value={form.description}
+            value={f.description}
             disabled
           ></textarea>
         </div>
@@ -108,30 +98,34 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
           </div>
           {/* {form.image} */}
           {/* <img src={form.image} alt="" /> */}
-          {/* {form.image && <ImagePreview previewObjURL={form.image}></ImagePreview>} */}
-          <Image
-            src={form.image ? form.image : "/"}
+          {f.image && <ImagePreview previewObjURL={f.image} />}
+          {/* <Image
+            src={f.image}
+            onError={({ currentTarget }) => {
+              currentTarget.onerror = null; // prevents looping
+              currentTarget.src = "";
+            }}
             width={480}
             height={270}
-            alt=""
-          />
+            alt="/"
+          /> */}
         </div>
         <div className="form-group">
           <label className="form-label">
             <RequiredIcon /> Assign to
           </label>
           <AssignToSelect
-            plantId={form.plant_id as number}
+            plantId={f.plant_id as number}
             isSingle={true}
             onChange={(value) => {
-              setForm((prev) => {
+              props.setFeedbackData((prev) => {
                 return {
                   ...prev,
                   ["assigned_user_id"]: value,
                 };
               });
             }}
-            defaultIds={form.assigned_user_id ? [form.assigned_user_id] : []}
+            defaultIds={f.assigned_user_id ? [f.assigned_user_id] : []}
           />
         </div>
       </div>
@@ -148,11 +142,11 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
             type="text"
             className="form-control"
             disabled
-            value={form.createdbyuser}
+            value={f.createdbyuser}
           />
         </div>
         <div className="form-group">
-          {form.created_user_id != "1" ? (
+          {f.created_user_id != "1" ? (
             <>
               <label className="form-label">
                 <RequiredIcon />
@@ -162,9 +156,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
                 type="text"
                 className="form-control"
                 disabled
-                value={
-                  form.created_user_email ? form.created_user_email : "No email"
-                }
+                value={f.created_user_email ? f.created_user_email : "No email"}
               />
             </>
           ) : (
@@ -178,12 +170,12 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
                 className="form-control"
                 disabled
                 value={
-                  form.contact.tele
-                    ? form.contact.tele
-                    : form.contact.whatsapp
-                    ? form.contact.whatsapp
-                    : form.contact.email
-                    ? form.contact.email
+                  f.contact.tele
+                    ? f.contact.tele
+                    : f.contact.whatsapp
+                    ? f.contact.whatsapp
+                    : f.contact.email
+                    ? f.contact.email
                     : "No Contact"
                 }
               />
@@ -199,7 +191,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
             type="text"
             className="form-control"
             disabled
-            value={new Date(form.created_date).toLocaleDateString()}
+            value={new Date(f.created_date).toLocaleDateString()}
           />
         </div>
       </div>

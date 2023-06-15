@@ -8,7 +8,7 @@ function rowElements(rows: { [key: string]: string }[]) {
   return (
     <>
       {rows.map((row) => {
-        console.log(row);
+        // console.log(row);
         return (
           <tr key={row["date"] + row["name"] + row["role"]}>
             <td>{row["activity_type"]}</td>

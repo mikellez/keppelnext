@@ -51,8 +51,10 @@ const indexedColumn: ("pending" | "assigned" | "completed")[] = [
   "completed",
 ];
 
-export interface FeedbackPageProps {
-  feedback: CMMSFeedback;
+export interface FeedbackFormProps {
+  feedbackData: CMMSFeedback;
+  setFeedbackData: React.Dispatch<React.SetStateAction<CMMSFeedback>>;
+  disableForm?: boolean;
 }
 
 // const downloadCSV = async (type: string, activeTabIndex: number) => {
@@ -120,7 +122,7 @@ export default function Feedback() {
         setFeedbackItems([]);
       });
   }, [activeTabIndex, page]);
-  console.log(isReady);
+  // console.log(isReady);
   return (
     <ModuleMain>
       <ModuleHeader title="Feedback" header="Feedback">
