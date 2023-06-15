@@ -20,7 +20,7 @@ import StarRatings from "react-star-ratings";
 import Login from "../../pages/Login";
 import { userAgent } from "next/server";
 
-export default function FeedbackContainer(props: any) {
+const FeedbackContainer = (props:any) => {
   const router = useRouter();
 
   const [form, setForm] = useState<{
@@ -39,7 +39,7 @@ export default function FeedbackContainer(props: any) {
   }>({
     name: "",
     comments: "",
-    plantID: props.requestData.plant[0].plant_id,
+    plantID: props.requestData.plantLoc.plant_id,
     taggedLocID: props.requestData.plantLoc.id,
     rating: 5,
     contact: { telegram: 0, whatsapp: 0, number: ""},
@@ -71,7 +71,7 @@ export default function FeedbackContainer(props: any) {
   async function submitform() {
     console.log(form)
     const emptyContactCondition = form.email === "" 
-              && (form.contact.number === 0
+              && (form.contact.number === ""
                       || (form.contact.whatsapp === 0 
                               && form.contact.telegram === 0))
     if (form.name == "" || form.comments == "" || (!props.user.data && emptyContactCondition)) {
@@ -241,8 +241,8 @@ export default function FeedbackContainer(props: any) {
               <RequiredIcon /> Plant
             </label>
             <select className="form-select" disabled={true}>
-              <option value={props.requestData.plant[0].plant_id}>
-                {props.requestData.plant[0].plant_name}
+              <option value={props.requestData.plantLoc.plant_id}>
+                {props.requestData.plantLoc.plant_name}
               </option>
             </select>
           </div>
@@ -285,34 +285,6 @@ export default function FeedbackContainer(props: any) {
           {isImage && previewedFile && (
             <ImagePreview previewObjURL={previewedFile} />
           )}
-
-          {/* {props.assignRequestData && (
-            <div className="form-group">
-              <label className="form-label">
-                <RequiredIcon />
-                Assign to:
-              </label>
-            </div>
-          )} */}
-
-          {/* {props.assignRequestData && (
-            <div className="form-group">
-              <label className="form-label">
-                <RequiredIcon />
-                Priority
-              </label>
-              {
-                <Select
-                  // options={}
-                  // onChange={}
-                  // defaultValue={
-                
-                  //  }
-                  
-                />
-              }
-            </div>
-          )} */}
         </div>
       </ModuleContent>
       <ModuleFooter>
@@ -370,7 +342,7 @@ export default function FeedbackContainer(props: any) {
                   setSubmissionModal(false);
                   localStorage.setItem(
                     "feedback",
-                    `/Guest/Asset/feedback/${props.requestData.plant[0].plant_id}/${props.requestData.plantLoc.id}`
+                    `/Guest/Feedback/${props.requestData.plantLoc.id}`
                   );
                   router.push("/Login");
                 }}
@@ -395,3 +367,6 @@ export default function FeedbackContainer(props: any) {
     </div>
   );
 }
+
+
+export default FeedbackContainer;
