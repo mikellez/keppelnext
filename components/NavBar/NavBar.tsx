@@ -131,7 +131,9 @@ export default function NavBar() {
               <NavDropdownLink href="/Schedule">View Schedules</NavDropdownLink>
               {data &&
                 (data.role_id === Role.Admin ||
-                  data.role_id === Role.Manager) && (
+                  data.role_id === Role.Manager ||
+                  data.role_id === Role.Engineer
+                ) && (
                   <NavDropdownLink href="/Schedule/Create">
                     Create Schedule
                   </NavDropdownLink>
