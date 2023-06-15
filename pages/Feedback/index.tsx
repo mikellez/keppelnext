@@ -251,12 +251,12 @@ export default function Feedback() {
               )}
             </Table>
 
-            {/* <Pagination
+            <Pagination
               setPage={setPage}
               setReady={setReady}
               totalPages={totalPages}
               page={page}
-            /> */}
+            />
           </>
         ) : (
           <div

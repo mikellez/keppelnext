@@ -69,7 +69,7 @@ export default function FeedbackContainer(props: any) {
   }, [props.user]);
 
   async function submitform() {
-    console.log(form)
+    console.log(form);
     if (form.name == "") {
       setIsMissingDetailsModaOpen(true);
     } else {
@@ -115,7 +115,7 @@ export default function FeedbackContainer(props: any) {
       reader.onload = () => {
         setPreviewedFile(reader.result as string);
         setIsImage(true);
-        setForm((prevState) => {
+        setForm((prevState: any) => {
           return { ...prevState, image: reader.result };
         });
       };
@@ -168,7 +168,7 @@ export default function FeedbackContainer(props: any) {
                   placeholder="Contact Number"
                   onChange={(e) => {
                     // console.log(e.target.value);
-                    setForm((prevState) => {
+                    setForm((prevState: any) => {
                       return {
                         ...prevState,
                         contact: {
@@ -252,8 +252,9 @@ export default function FeedbackContainer(props: any) {
       </div>
           </div> */}
           <div className="form-group">
-            
-            <label className="form-label"><RequiredIcon /> Feedback Comments</label>
+            <label className="form-label">
+              <RequiredIcon /> Feedback Comments
+            </label>
             <textarea
               className="form-control"
               rows={6}

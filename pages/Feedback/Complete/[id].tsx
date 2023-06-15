@@ -2,7 +2,7 @@ import { GetServerSideProps } from "next";
 import React, { Component, useEffect, useState } from "react";
 import { createFeedbackServerSideProps } from "../../../types/common/props";
 import { CMMSFeedback } from "../../../types/common/interfaces";
-import { FeedbackPageProps } from "..";
+import { FeedbackFormProps } from "..";
 import { useRouter } from "next/router";
 import { useCurrentUser } from "../../../components/SWR";
 import instance from "../../../axios.config";
@@ -28,11 +28,12 @@ export const editFeedback = async (formData: CMMSFeedback) => {
     .catch((err: any) => console.log(err));
 };
 
-export default function CompleteFeedbackPage(props: FeedbackPageProps) {
-  const [formData, setFormData] = useState<CMMSFeedback>(props.feedback);
+export default function CompleteFeedbackPage(props: FeedbackFormProps) {
+  const [formData, setFormData] = useState<CMMSFeedback>(props.feedbackData);
   const [successModal, setSuccessModal] = useState<boolean>(false);
   const [confirmModal, setConfirmModal] = useState<boolean>(false);
   const [isReady, setIsReady] = useState<boolean>(false);
+  const [incompleteModal, setIncompleteModal] = useState<boolean>(false);
   const router = useRouter();
   const user = useCurrentUser();
 
@@ -46,13 +47,25 @@ export default function CompleteFeedbackPage(props: FeedbackPageProps) {
   };
 
   const handleCompleteClick = () => {
-    setConfirmModal(true);
+    if (!checkInputFields()) {
+      // console.log("fail");
+      setIncompleteModal(true);
+    } else {
+      setConfirmModal(true);
+    }
   };
 
   const handleConfirmClick = () => {
     editFeedback(formData).then((result) => {
       setSuccessModal(true);
     });
+    setTimeout(() => {
+      router.push("/Feedback");
+    }, 1000);
+  };
+  const checkInputFields = () => {
+    // console.log(feedbackData.assigned_user_name);
+    return formData.assigned_user_name, formData.created_date;
   };
 
   useEffect(() => {
@@ -81,7 +94,7 @@ export default function CompleteFeedbackPage(props: FeedbackPageProps) {
           </ModuleHeader>
           <ModuleContent>
             <FeedbackCompletedForm
-              feedbackData={props.feedback}
+              feedbackData={formData}
               setFeedbackData={setFormData}
             />
           </ModuleContent>
@@ -98,11 +111,7 @@ export default function CompleteFeedbackPage(props: FeedbackPageProps) {
             </div>
           </ModuleContent>
           <ModuleFooter>
-            <TooltipBtn
-              toolTip={false}
-              disabled={!formData.created_date}
-              onClick={handleCompleteClick}
-            >
+            <TooltipBtn toolTip={false} onClick={handleCompleteClick}>
               Complete
             </TooltipBtn>
           </ModuleFooter>
@@ -141,6 +150,14 @@ export default function CompleteFeedbackPage(props: FeedbackPageProps) {
             Ok
           </TooltipBtn>,
         ]}
+      />
+      <ModuleSimplePopup
+        setModalOpenState={setIncompleteModal}
+        modalOpenState={incompleteModal}
+        title="Missing details"
+        text="Please ensure that all input fields have been filled"
+        icon={SimpleIcon.Exclaim}
+        shouldCloseOnOverlayClick={true}
       />
     </>
   );
