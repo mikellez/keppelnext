@@ -18,15 +18,14 @@ import LoadingHourglass from "../../../components/LoadingHourglass";
 import ModuleSimplePopup from "../../../components/ModuleLayout/ModuleSimplePopup";
 import TooltipBtn from "../../../components/TooltipBtn";
 import FeedbackCompletedForm from "../../../components/Feedback/FeedbackCompletedForm";
-import FeedbackContainer from "../../../components/Guest/FeedbackContainer";
 
 export const editFeedback = async (formData: CMMSFeedback) => {
   return await instance
     .patch(`/api/feedback/complete/${formData.id}`, { formData })
-    .then((res) => {
+    .then((res: any) => {
       return res.data;
     })
-    .catch((err) => console.log(err));
+    .catch((err: any) => console.log(err));
 };
 
 export default function CompleteFeedbackPage(props: FeedbackPageProps) {
@@ -81,7 +80,10 @@ export default function CompleteFeedbackPage(props: FeedbackPageProps) {
             </Link>
           </ModuleHeader>
           <ModuleContent>
-            <FeedbackContainer props={props} />
+            <FeedbackCompletedForm
+              feedbackData={props.feedback}
+              setFeedbackData={setFormData}
+            />
           </ModuleContent>
           <ModuleContent>
             <div className="form-group" style={{ width: "150px" }}>

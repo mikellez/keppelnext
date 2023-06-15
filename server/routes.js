@@ -702,6 +702,7 @@ router.get(
  * @apiError (Error 204) {Object} NoContent {msg: "No checklist"}
  * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
  */
+
 router.get(
   "/checklist/pending",
   checkIfLoggedInAPI,
