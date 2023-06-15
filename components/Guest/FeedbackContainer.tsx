@@ -69,7 +69,8 @@ export default function FeedbackContainer(props: any) {
 
   async function submitform() {
     console.log(form)
-    if (form.name == "") {
+    const emptyContactCondtion = form.email == "" && (!props.user.data && form.contact.number == null || (form.contact.whatsapp == 0 && form.contact.telegram == 0))
+    if (form.name == "" || form.comments == "" || emptyContactCondtion) {
       setIsMissingDetailsModaOpen(true);
     } else {
     // const formData = new FormData();
@@ -235,8 +236,10 @@ export default function FeedbackContainer(props: any) {
       </div>
           </div> */}
           <div className="form-group">
-            <RequiredIcon/>
-            <label className="form-label">Feedback Comments</label>
+            
+            <label className="form-label"> 
+            <RequiredIcon/> Feedback Comments
+            </label>
             <textarea
               className="form-control"
               rows={6}

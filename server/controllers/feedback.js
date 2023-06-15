@@ -302,7 +302,6 @@ const createFeedback = async (req, res, next) => {
       feedback.comments,
       feedback.taggedLocID,
       feedback.image,
-      feedback.rating,
       feedback.plantID,
       JSON.stringify(feedback.contact),
       userID,
