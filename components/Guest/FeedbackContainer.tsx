@@ -46,7 +46,7 @@ export default function FeedbackContainer(props: any) {
     rating: 5,
     contact: {telegram: 0, whatsapp: 0, number: null},
     email: "",
-    image: undefined
+    image: ""
   }
   );
 
@@ -217,7 +217,7 @@ export default function FeedbackContainer(props: any) {
         </div>
             }
 
-            <div className="form-group">
+            {/* <div className="form-group">
             <label className="form-label">Rating</label>
             <div>
             <StarRatings
@@ -233,9 +233,10 @@ export default function FeedbackContainer(props: any) {
         starSpacing="2px" // Spacing between the stars
       />
       </div>
-          </div>
+          </div> */}
           <div className="form-group">
-            <label className="form-label">Comments</label>
+            <RequiredIcon/>
+            <label className="form-label">Feedback Comments</label>
             <textarea
               className="form-control"
               rows={6}
@@ -286,7 +287,7 @@ export default function FeedbackContainer(props: any) {
             height: "100%",
           }}
         >
-          {!props.assignRequestData && (
+          
             <div className="form-group">
               <label className="form-label">Image</label>
               <input
@@ -301,22 +302,22 @@ export default function FeedbackContainer(props: any) {
               }}
               />
             </div>
-          )}
+
 
           { isImage && previewedFile && (
             <ImagePreview previewObjURL={previewedFile} />
           )}
 
-          {props.assignRequestData && (
+          {/* {props.assignRequestData && (
             <div className="form-group">
               <label className="form-label">
                 <RequiredIcon />
                 Assign to:
               </label>
             </div>
-          )}
+          )} */}
 
-          {props.assignRequestData && (
+          {/* {props.assignRequestData && (
             <div className="form-group">
               <label className="form-label">
                 <RequiredIcon />
@@ -333,7 +334,7 @@ export default function FeedbackContainer(props: any) {
                 />
               }
             </div>
-          )}
+          )} */}
         </div>
       </ModuleContent>
       <ModuleFooter>
