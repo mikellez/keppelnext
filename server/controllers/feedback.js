@@ -204,14 +204,12 @@ const fetchFilteredFeedback = async (req, res, next) => {
 
 const assignFeedback = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  const assignedComments = req.body.remarks;
 
   const activity_log = {
     date: today,
     name: req.user.name,
     activity: "Assigned",
-    activity_type: "Updated Record",
-    remarks: assignedComments,
+    activity_type: "Updated Feedback",
   };
 
   const sql = `
@@ -282,18 +280,18 @@ const createFeedback = async (req, res, next) => {
                 created_user_id,
                 status_id,
                 created_date)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  // const activity_log = [
-  //   {
-  //     date: today,
-  //     name: req.user.name,
-  //     activity: `${statusId === 2 ? "ASSIGNED" : "PENDING"}`,
-  //     activity_type: "Created Checklist Record",
-  //   },
-  // ];
-  const userID = req.user ? req.user.id : null;
+  const activity_log = [
+    {
+      date: today,
+      name: req.user ? req.user.name : "Guest",
+      activity: "PENDING",
+      activity_type: "Created Feedback",
+    },
+  ];
+  const userID = req.user ? req.user.id : 55;
   try {
     await global.db.query(sql, [
       feedback.name,

@@ -119,6 +119,7 @@ export default function Feedback() {
         setReady(true);
       })
       .catch((e) => {
+        setReady(true);
         setFeedbackItems([]);
       });
   }, [activeTabIndex, page]);
