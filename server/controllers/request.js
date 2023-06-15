@@ -117,112 +117,7 @@ async function fetchRequestQuery(status_query, role_id, user_id, page) {
   sql += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems};`;
 
   return { sql, totalPages };
-
-  // return role_id === 1 || role_id === 2 || role_id === 3
-  //   ? `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
-  //   ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
-  //   pri.priority,
-  //   CASE
-  // 	  WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
-  // 	  ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-  //   END AS fullname,
-  //   r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
-  //   r.complete_comments,
-  //   concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-  //   , r.activity_log, r.rejection_comments, r.status_id, r.psa_id, r.fault_id
-  //   FROM
-  // 	  keppel.users u
-  // 	  JOIN keppel.user_access ua ON u.user_id = ua.user_id
-  // 	  JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
-  // 	  left JOIN keppel.users req_u ON r.user_id = req_u.user_id
-  // 	  left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
-  // 	  left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id
-  // 	  left JOIN keppel.request_type rt ON rt.req_id = r.req_id
-  // 	  left JOIN keppel.priority pri ON pri.p_id = r.priority_id
-  // 	  left JOIN keppel.role ro ON ro.role_id = r.role_id
-  // 	  left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
-  // 	  left JOIN keppel.users au ON au.user_id = r.assigned_user_id
-  // 	  left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name
-  // 		  from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
-  // 		  WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
-  //   WHERE 1 = 1
-  //   ${status_query}
-  //   ${userCond}
-  //   GROUP BY (
-  // 	  r.request_id,
-  // 	  ft.fault_type,
-  // 	  pm.plant_name,
-  // 	  pm.plant_id,
-  // 	  rt.request,
-  // 	  ro.role_name,
-  // 	  sc.status,
-  // 	  pri.priority,
-  // 	  req_u.first_name,
-  // 	  tmp1.asset_name,
-  // 	  req_u.last_name,
-  // 	  au.first_name,
-  // 	  au.last_name
-  //   )
-  //   ORDER BY r.created_date DESC, r.status_id DESC
-  //   LIMIT ${ITEMS_PER_PAGE}
-  //   OFFSET ${offsetItems};`
-  //   : `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
-  //   ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
-  //   pri.priority,
-  //   CASE
-  // 	  WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
-  // 	  ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-  //   END AS fullname,
-  //   r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
-  //   r.complete_comments,
-  //   concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-  //   , r.activity_log, r.rejection_comments, r.status_id, r.psa_id, r.fault_id
-  //   FROM
-  // 	  keppel.users u
-  // 	  JOIN keppel.user_access ua ON u.user_id = ua.user_id
-  // 	  JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
-  // 	  left JOIN keppel.users req_u ON r.user_id = req_u.user_id
-  // 	  left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
-  // 	  left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id
-  // 	  left JOIN keppel.request_type rt ON rt.req_id = r.req_id
-  // 	  left JOIN keppel.priority pri ON pri.p_id = r.priority_id
-  // 	  left JOIN keppel.role ro ON ro.role_id = r.role_id
-  // 	  left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
-  // 	  left JOIN keppel.users au ON au.user_id = r.assigned_user_id
-  // 	  left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name
-  // 		  from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
-  // 		  WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
-  //   WHERE (r.assigned_user_id = ${user_id} OR r.user_id = ${user_id})
-  //   ${status_query}
-  //   GROUP BY (
-  // 	  r.request_id,
-  // 	  ft.fault_type,
-  // 	  pm.plant_name,
-  // 	  pm.plant_id,
-  // 	  rt.request,
-  // 	  ro.role_name,
-  // 	  sc.status,
-  // 	  pri.priority,
-  // 	  req_u.first_name,
-  // 	  tmp1.asset_name,
-  // 	  req_u.last_name,
-  // 	  au.first_name,
-  // 	  au.last_name
-  //   )
-  //   ORDER BY r.created_date DESC, r.status_id DESC
-  //   LIMIT ${ITEMS_PER_PAGE}
-  //   OFFSET ${offsetItems}`;
 }
-
-// const getTotalPagesForRequestStatus = async (status) => {
-//   const totalRows = await global.db
-//     .query(`SELECT COUNT(DISTINCT(r.request_id)) FROM keppel.request r
-// 	JOIN keppel.status_pm s ON r.status_id = s.status_id
-// 	WHERE s.status_id = ${status}`);
-
-//   const totalPages = Math.ceil(+totalRows.rows[0].count / ITEMS_PER_PAGE);
-//   return totalPages;
-// };
 
 const fetchPendingRequests = async (req, res, next) => {
   const page = req.query.page || 1;
@@ -233,14 +128,8 @@ const fetchPendingRequests = async (req, res, next) => {
     req.user.id,
     page
   );
-  // console.log(
-  //   sql,
-  //   totalPages,
-  //   "_______________________________________________________________--"
-  // );
 
   const result = await global.db.query(sql);
-  // const totalPages = await getTotalPagesForRequestStatus(1);
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -256,7 +145,6 @@ const fetchAssignedRequests = async (req, res, next) => {
   );
 
   const result = await global.db.query(sql);
-  // const totalPages = await getTotalPagesForRequestStatus(2);
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -272,7 +160,6 @@ const fetchReviewRequests = async (req, res, next) => {
   );
 
   const result = await global.db.query(sql);
-  // const totalPages = await getTotalPagesForRequestStatus(`ANY('{3, 5, 6}')`);
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -288,7 +175,6 @@ const fetchApprovedRequests = async (req, res, next) => {
   );
 
   const result = await global.db.query(sql);
-  // const totalPages = await getTotalPagesForRequestStatus(4);
 
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
@@ -709,6 +595,7 @@ const createRequestCSV = (req, res, next) => {
 		left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
 			from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
 			WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
+    WHERE u.user_id = ${req.user.id}
 	GROUP BY (
 		r.request_id,
 		ft.fault_type,
@@ -788,6 +675,7 @@ const approveRejectRequest = async (req, res, next) => {
   const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
   const status = req.params.status_id == 4 ? "APPROVED" : "REJECTED";
   const text = req.params.status_id == 4 ? "Approved" : "Rejected";
+  const id = req.params.status_id == 4 ? 4 : 2;
   const history = `!${status}_${text} request_${today}_${req.user.role_name}_${req.user.name}`;
   const sql = `
 	UPDATE keppel.request SET 
@@ -803,14 +691,10 @@ const approveRejectRequest = async (req, res, next) => {
           'remarks', '${req.body.comments}'
         )
 	WHERE request_id = $3`;
-  global.db.query(
-    sql,
-    [req.params.status_id, history, req.params.request_id],
-    (err, result) => {
-      if (err) return res.status(500).send("Error in updating status");
-      return res.status(200).json("Request successfully updated");
-    }
-  );
+  global.db.query(sql, [id, history, req.params.request_id], (err, result) => {
+    if (err) return res.status(500).send("Error in updating status");
+    return res.status(200).json("Request successfully updated");
+  });
 };
 
 const completeRequest = async (req, res, next) => {

@@ -74,8 +74,8 @@ ORDER BY cl.checklist_id DESC
 `;
 
 const fetchAssignedChecklists = async (req, res, next) => {
-    const page = req.query.page || 1;
-    const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  const page = req.query.page || 1;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
   const totalRows = await global.db.query(fetchAssignedChecklistsQuery, [
     req.user.id,
@@ -226,13 +226,13 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
             checklist_id = $1
     `;
 
-    global.db.query(sql, [req.params.checklist_id], (err, found) => {
-        if (err) {
-            console.log(err);
-            return res.status(500).json("No checklist template found");
-        }
-        res.status(200).send(found.rows[0]);
-    });
+  global.db.query(sql, [req.params.checklist_id], (err, found) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json("No checklist template found");
+    }
+    res.status(200).send(found.rows[0]);
+  });
 };
 
 const fetchSpecificChecklistRecord = async (req, res, next) => {
@@ -294,7 +294,7 @@ const createNewChecklistRecord = async (req, res, next) => {
         RETURNING checklist_id    
     `;
 
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
 
   const activity_log = [
     {
@@ -379,7 +379,7 @@ const createNewChecklistTemplate = async (req, res, next) => {
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`;
 
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
 
   const history = `Created Template_PENDING_${today}_${req.user.name}_NIL`;
 
@@ -396,7 +396,7 @@ const createNewChecklistTemplate = async (req, res, next) => {
       req.user.id,
       history,
       1,
-      checklist.linkedassetids
+      checklist.linkedassetids,
     ],
     (err) => {
       if (err) {
@@ -514,7 +514,7 @@ const createChecklistCSV = async (req, res, next) => {
 };
 
 const completeChecklist = async (req, res, next) => {
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
 
   const updatehistory = `,Updated Record_WORK DONE_${today}_${req.user.name}`;
 
@@ -583,7 +583,7 @@ const completeChecklist = async (req, res, next) => {
 
 const editChecklistRecord = async (req, res, next) => {
   const data = req.body.checklist;
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
 
   const updatehistory = data.assigned_user_id
     ? `,Assigned Record_ASSIGNED_${today}_${req.user.name}`
@@ -678,7 +678,7 @@ const editChecklistRecord = async (req, res, next) => {
 };
 
 const approveChecklist = async (req, res, next) => {
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
   const approvalComments = req.body.remarks;
 
   const updatehistory = `,Updated Record_APPROVE_${today}_${req.user.name}`;
@@ -746,7 +746,7 @@ const approveChecklist = async (req, res, next) => {
 };
 
 const rejectChecklist = async (req, res, next) => {
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
   const rejectionComments = req.body.remarks; // todo add rejected comment here
 
   const updatehistory = `,Updated Record_REJECTED_${today}_${req.user.name}_${rejectionComments}`;
@@ -815,7 +815,7 @@ const rejectChecklist = async (req, res, next) => {
 };
 
 const cancelChecklist = async (req, res, next) => {
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
   const cancelledComments = ""; // todo add cancelled comment here
 
   const updatehistory = `,Updated Record_CANCELLED_${today}_${req.user.name}_${cancelledComments}`;
