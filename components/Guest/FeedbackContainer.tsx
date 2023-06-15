@@ -42,7 +42,7 @@ const FeedbackContainer = (props:any) => {
     plantID: props.requestData.plantLoc.plant_id,
     taggedLocID: props.requestData.plantLoc.id,
     rating: 5,
-    contact: { telegram: 0, whatsapp: 0, number: ""},
+    contact: { telegram: 0, whatsapp: 0, number: "" },
     email: "",
     image: "",
   });
@@ -77,7 +77,6 @@ const FeedbackContainer = (props:any) => {
     if (form.name == "" || form.comments == "" || (!props.user.data && emptyContactCondition)) {
       setIsMissingDetailsModaOpen(true);
     } else {
-
       await instance
         .post("/api/feedback", form)
         .then((res) => {
@@ -98,7 +97,7 @@ const FeedbackContainer = (props:any) => {
       reader.onload = () => {
         setPreviewedFile(reader.result as string);
         setIsImage(true);
-        setForm((prevState) => {
+        setForm((prevState: any) => {
           return { ...prevState, image: reader.result };
         });
       };
@@ -153,7 +152,7 @@ const FeedbackContainer = (props:any) => {
                   value={form.contact.number}
                   onChange={(e) => {
                     // console.log(e.target.value);
-                    setForm((prevState) => {
+                    setForm((prevState: any) => {
                       return {
                         ...prevState,
                         contact: {
@@ -220,10 +219,11 @@ const FeedbackContainer = (props:any) => {
           )}
           <ModuleDivider></ModuleDivider>
 
-          
+
           <div className="form-group">
-            
-            <label className="form-label"><RequiredIcon /> Feedback Comments</label>
+            <label className="form-label">
+              <RequiredIcon /> Feedback Comments
+            </label>
             <textarea
               className="form-control"
               rows={6}

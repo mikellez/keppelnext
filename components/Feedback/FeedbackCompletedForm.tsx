@@ -47,7 +47,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
             type="text"
             className="form-control"
             disabled
-            value={f.plant_name}
+            value={props.feedbackData.plant_name}
           />
         </div>
         <div className="form-group">
@@ -184,6 +184,23 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
             value={new Date(f.created_date).toLocaleDateString()}
           />
         </div>
+      </div>
+      <div className="form-group">
+        <label className="form-label">Remarks</label>
+        <textarea
+          className="form-control"
+          name="description"
+          id="formControlDescription"
+          rows={5}
+          onChange={(value) => {
+            props.setFeedbackData((prev: any) => {
+              return {
+                ...prev,
+                ["remarks"]: value,
+              };
+            });
+          }}
+        ></textarea>
       </div>
     </ModuleContent>
   );
