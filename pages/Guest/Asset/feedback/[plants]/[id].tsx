@@ -22,9 +22,9 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import Link from "next/link";
 import { RequestProps } from "../../../../../components/Request/RequestContainer";
 import RequestGuestContainer from "../../../../../components/Request/RequestGuestContainer";
-import FeedbackContainer from "../../../../../components/Guest/FeedbackContainer";
+import FeedbackContainer from "../../../../../components/Guest/FeedbackContainer.jsx";
 import ModuleSimplePopup from "../../../../../components/ModuleLayout/ModuleSimplePopup";
-import { useCurrentUser } from "../../../../../components/SWR.ts"
+import { useCurrentUser } from "../../../../../components/SWR.ts";
 
 // let user: boolean = false;
 

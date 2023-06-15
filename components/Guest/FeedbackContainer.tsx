@@ -1,7 +1,7 @@
 import formStyles from "../../styles/formStyles.module.css";
 
 import React, { use, useEffect, useState } from "react";
-import instance from '../../types/common/axios.config';
+import instance from "../../types/common/axios.config";
 
 import { ModuleContent, ModuleDivider, ModuleFooter } from "..";
 import ImagePreview from "../Request/ImagePreview";
@@ -13,269 +13,280 @@ import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
 import Select, { ActionMeta, MultiValue, StylesConfig } from "react-select";
 import Image from "next/image";
 import { set } from "nprogress";
-import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
-import StarRatings from 'react-star-ratings';
+import ModuleSimplePopup, {
+  SimpleIcon,
+} from "../ModuleLayout/ModuleSimplePopup";
+import StarRatings from "react-star-ratings";
 import Login from "../../pages/Login";
 import { userAgent } from "next/server";
-
-
 
 export default function FeedbackContainer(props: any) {
   const router = useRouter();
 
-  const [form, setForm]  = useState<{
-    name : string,
-    comments: string,
-    plantID: string,
-    taggedLocID: string,
-    rating: number,
+  const [form, setForm] = useState<{
+    name: string;
+    comments: string;
+    plantID: string;
+    taggedLocID: string;
+    rating: number;
     contact: {
-      telegram: number,
-      whatsapp: number,
-      number: number | null,
-    },
-    email: string,
-    image?: string,
-
-  }>(
-    {
+      telegram: number;
+      whatsapp: number;
+      number: number | null;
+    };
+    email: string;
+    image?: string;
+  }>({
     name: "",
     comments: "",
     plantID: props.requestData.plant[0].plant_id,
     taggedLocID: props.requestData.plantLoc.id,
     rating: 5,
-    contact: {telegram: 0, whatsapp: 0, number: null},
+    contact: { telegram: 0, whatsapp: 0, number: null },
     email: "",
-    image: undefined
-  }
-  );
+    image: undefined,
+  });
 
   const [selectedFile, setSelectedFile] = useState<File>();
   const [previewedFile, setPreviewedFile] = useState<string>();
   const [isImage, setIsImage] = useState<boolean>(true);
-  const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
+  const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] =
+    useState<boolean>(false);
   const [submissionModal, setSubmissionModal] = useState<boolean>(false);
   const [loginModal, setLoginModal] = useState<boolean>(true);
 
   useEffect(() => {
-    console.log(props.user.data)
-    if (props.user.data){
+    console.log(props.user.data);
+    if (props.user.data) {
       setForm((prevState) => {
-        return {...prevState, ["name"]: props.user.data.name, ["email"]: props.user.data.email}
+        return {
+          ...prevState,
+          ["name"]: props.user.data.name,
+          ["email"]: props.user.data.email,
+        };
       });
     }
-  }, [props.user])
-
+  }, [props.user]);
 
   async function submitform() {
-    console.log(form)
+    console.log(form);
     if (form.name == "") {
       setIsMissingDetailsModaOpen(true);
     } else {
-    // const formData = new FormData();
-    // for (const key in form) {
-    //   if ( key == "image" ) {
-    //     if (form[key]) {
-    //       formData.append(key, form[key]);
-    //     }
-    //   } else{
-    //     formData.append(key, form[key]);
-    //   }
-    // }
-      await instance.post("/api/feedback", form)
-              .then(res => {
-                console.log(res);
-                setSubmissionModal(true);
-              })
-              .catch(err => {
-                console.log(err);
-              })
-    // return await instance
-    // .post("/api/request/", formData, {
-    //   headers: { "Content-Type": "multipart/form-data" },
-    // })
-    // .then((response) => {
-    //   setSubmissionModal(true);
-    //   return response.data;
-    // })
-    // .catch((e) => {
-    //   console.log(e);
-    //   return null;
-    // }); 
-  }}
+      // const formData = new FormData();
+      // for (const key in form) {
+      //   if ( key == "image" ) {
+      //     if (form[key]) {
+      //       formData.append(key, form[key]);
+      //     }
+      //   } else{
+      //     formData.append(key, form[key]);
+      //   }
+      // }
+      await instance
+        .post("/api/feedback", form)
+        .then((res) => {
+          console.log(res);
+          setSubmissionModal(true);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      // return await instance
+      // .post("/api/request/", formData, {
+      //   headers: { "Content-Type": "multipart/form-data" },
+      // })
+      // .then((response) => {
+      //   setSubmissionModal(true);
+      //   return response.data;
+      // })
+      // .catch((e) => {
+      //   console.log(e);
+      //   return null;
+      // });
+    }
+  }
 
   useEffect(() => {
     if (selectedFile) {
       const reader = new FileReader();
-      
+
       reader.readAsDataURL(selectedFile);
       reader.onload = () => {
         setPreviewedFile(reader.result as string);
         setIsImage(true);
         setForm((prevState) => {
-          return {...prevState, image: reader.result}
-        })
+          return { ...prevState, image: reader.result };
+        });
       };
     }
   }, [selectedFile]);
-  
-
 
   return (
     <div>
       <ModuleContent includeGreyContainer grid>
         <div className={formStyles.halfContainer}>
-        {!props.user.data ? <div>
-            <div className="form-group">
-              <label className="form-label">
-                <RequiredIcon />  Name
+          {!props.user.data ? (
+            <div>
+              <div className="form-group">
+                <label className="form-label">
+                  <RequiredIcon /> Name
                 </label>
-              <input type="text"
-                className="form-control"
-                placeholder='Name'
-                onChange = {(e) => {
-                  // console.log(e.target.value);
-                  setForm((prevState) => {
-                    return {...prevState, name: e.target.value}
-                  })
-                }}>
-              </input>
-            </div>
-          <div className="form-group">
-            <label className="form-label">
-              <RequiredIcon /> Email
-            </label>
-            <input
-              className="form-control"
-              placeholder="Email Address"
-              onChange = {(e) => {
-                // console.log(e.target.value);
-                setForm((prevState) => {
-                  return {...prevState, email: e.target.value}
-                })
-              }}>
-              </input>
-          </div>
-          <div className="form-group">
-            <label className="form-label">
-              <RequiredIcon />  Contact
-            </label>
-            <input
-              className="form-control"
-              placeholder="Contact Number"
-              onChange = {(e) => {
-                // console.log(e.target.value);
-                setForm(prevState => {
-                  return {...prevState, contact: {
-                    ...prevState.contact,
-                    number: e.target.value
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Name"
+                  onChange={(e) => {
+                    // console.log(e.target.value);
+                    setForm((prevState) => {
+                      return { ...prevState, name: e.target.value };
+                    });
                   }}
-                })
-              }}/>
-              <div className="form-check" >
-                <input 
-                  type="checkbox"
-                  value={1}
-                  name="Whatsapp"
-                  className="form-check-input"
-                  onChange={(e) => {setForm(prevState => {
-                    return {...prevState, contact: {
-                      ...prevState.contact,
-                      whatsapp: parseInt(e.target.value)
-                    }}
-                  })}}
-                  // onChange={handleChange}
-                />
-                <label className="form-check-label">
-                  Whatsapp
+                ></input>
+              </div>
+              <div className="form-group">
+                <label className="form-label">
+                  <RequiredIcon /> Email
                 </label>
-						  </div>
-              <div className="form-check">
-                <input 
-                  type="checkbox"
-                  value={1}
-                  name="Telegram"
-                  className="form-check-input"
-                  onChange={(e) => {setForm(prevState => {
-                    return {...prevState, contact: {
-                      ...prevState.contact,
-                      telegram: parseInt(e.target.value)
-                    }}
-                  })}}
-                  // onChange={handleChange}
-                />
-                <label className="form-check-label">
-                  Telegram
+                <input
+                  className="form-control"
+                  placeholder="Email Address"
+                  onChange={(e) => {
+                    // console.log(e.target.value);
+                    setForm((prevState) => {
+                      return { ...prevState, email: e.target.value };
+                    });
+                  }}
+                ></input>
+              </div>
+              <div className="form-group">
+                <label className="form-label">
+                  <RequiredIcon /> Contact
                 </label>
-						  </div>
+                <input
+                  className="form-control"
+                  placeholder="Contact Number"
+                  onChange={(e) => {
+                    // console.log(e.target.value);
+                    setForm((prevState) => {
+                      return {
+                        ...prevState,
+                        contact: {
+                          ...prevState.contact,
+                          number: e.target.value,
+                        },
+                      };
+                    });
+                  }}
+                />
+                <div className="form-check">
+                  <input
+                    type="checkbox"
+                    value={1}
+                    name="Whatsapp"
+                    className="form-check-input"
+                    onChange={(e) => {
+                      setForm((prevState) => {
+                        return {
+                          ...prevState,
+                          contact: {
+                            ...prevState.contact,
+                            whatsapp: parseInt(e.target.value),
+                          },
+                        };
+                      });
+                    }}
+                    // onChange={handleChange}
+                  />
+                  <label className="form-check-label">Whatsapp</label>
+                </div>
+                <div className="form-check">
+                  <input
+                    type="checkbox"
+                    value={1}
+                    name="Telegram"
+                    className="form-check-input"
+                    onChange={(e) => {
+                      setForm((prevState) => {
+                        return {
+                          ...prevState,
+                          contact: {
+                            ...prevState.contact,
+                            telegram: parseInt(e.target.value),
+                          },
+                        };
+                      });
+                    }}
+                    // onChange={handleChange}
+                  />
+                  <label className="form-check-label">Telegram</label>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <p>
+                Your Name: <span className="ms-4">{form.name}</span>
+              </p>
+              <p>
+                Email: <span className="ms-4">{form.email}</span>
+              </p>
+            </div>
+          )}
 
-          </div>
-        </div> :
-        <div>
-          <p>Your Name: <span className="ms-4">{form.name}</span></p>
-          <p>Email: <span className="ms-4">{form.email}</span></p>
-        </div>
-            }
-
-            <div className="form-group">
+          <div className="form-group">
             <label className="form-label">Rating</label>
             <div>
-            <StarRatings
-        rating={form.rating} // The initial rating value
-        starRatedColor="orange" // Color of the selected stars
-        changeRating={(newRating) => {
-          setForm((prevState) => {
-            return {...prevState, rating: newRating}
-          })
-        }}
-        numberOfStars={5} // Total number of stars
-        starDimension="20px" // Size of the stars
-        starSpacing="2px" // Spacing between the stars
-      />
-      </div>
+              <StarRatings
+                rating={form.rating} // The initial rating value
+                starRatedColor="orange" // Color of the selected stars
+                changeRating={(newRating) => {
+                  setForm((prevState) => {
+                    return { ...prevState, rating: newRating };
+                  });
+                }}
+                numberOfStars={5} // Total number of stars
+                starDimension="20px" // Size of the stars
+                starSpacing="2px" // Spacing between the stars
+              />
+            </div>
           </div>
           <div className="form-group">
             <label className="form-label">Comments</label>
             <textarea
               className="form-control"
               rows={6}
-              onChange = {(e) => {
+              onChange={(e) => {
                 // console.log(e.target.value);
                 setForm((prevState) => {
-                  return {...prevState, comments: e.target.value}
-                })
+                  return { ...prevState, comments: e.target.value };
+                });
               }}
             ></textarea>
           </div>
-          
+
           <div className="form-group">
             <label className="form-label">
               <RequiredIcon /> Plant
             </label>
-              <select className="form-select" disabled={true}
-              >
-                <option value={props.requestData.plant[0].plant_id}>
-                  {props.requestData.plant[0].plant_name}
-                </option>
-              </select>
+            <select className="form-select" disabled={true}>
+              <option value={props.requestData.plant[0].plant_id}>
+                {props.requestData.plant[0].plant_name}
+              </option>
+            </select>
           </div>
 
           <div className="form-group">
             <label className="form-label">
               <RequiredIcon /> Plant Location
             </label>
-            <select
-              className="form-select"
-              disabled = {true}
-            >
-              <option value={props.requestData.plantLoc.id}> 
-              {/* {props.requestData.asset[0].psa_id + " | " + props.requestData.asset[0].plant_asset_instrument} */}
-              {props.requestData.plantLoc.location}
+            <select className="form-select" disabled={true}>
+              <option value={props.requestData.plantLoc.id}>
+                {/* {props.requestData.asset[0].psa_id + " | " + props.requestData.asset[0].plant_asset_instrument} */}
+                {props.requestData.plantLoc.location}
               </option>
             </select>
-
           </div>
-      
         </div>
         <div
           className={formStyles.halfContainer}
@@ -297,13 +308,12 @@ export default function FeedbackContainer(props: any) {
                 onChange={(e) => {
                   setIsImage(false);
                   setSelectedFile(e.target.files![0]);
-               
-              }}
+                }}
               />
             </div>
           )}
 
-          { isImage && previewedFile && (
+          {isImage && previewedFile && (
             <ImagePreview previewObjURL={previewedFile} />
           )}
 
@@ -324,12 +334,11 @@ export default function FeedbackContainer(props: any) {
               </label>
               {
                 <Select
-                  // options={}
-                  // onChange={}
-                  // defaultValue={
-                
-                  //  }
-                  
+                // options={}
+                // onChange={}
+                // defaultValue={
+
+                //  }
                 />
               }
             </div>
@@ -337,9 +346,7 @@ export default function FeedbackContainer(props: any) {
         </div>
       </ModuleContent>
       <ModuleFooter>
-        <button type="submit" className="btn btn-primary"
-        onClick={submitform}
-        >
+        <button type="submit" className="btn btn-primary" onClick={submitform}>
           {
             <span
               role="status"
@@ -350,35 +357,36 @@ export default function FeedbackContainer(props: any) {
           Submit
         </button>
         <ModuleSimplePopup
-            modalOpenState={isMissingDetailsModalOpen}
-            setModalOpenState={setIsMissingDetailsModaOpen}
-            title="Missing Details"
-            text="Please ensure that you have filled in all the required entries."
-            icon={SimpleIcon.Cross}
-          />
+          modalOpenState={isMissingDetailsModalOpen}
+          setModalOpenState={setIsMissingDetailsModaOpen}
+          title="Missing Details"
+          text="Please ensure that you have filled in all the required entries."
+          icon={SimpleIcon.Cross}
+        />
+        <ModuleSimplePopup
+          modalOpenState={submissionModal}
+          setModalOpenState={setSubmissionModal}
+          title="Success!"
+          text="Your inputs has been submitted!"
+          icon={SimpleIcon.Check}
+          buttons={[
+            <button
+              key={1}
+              onClick={() => {
+                setSubmissionModal(false);
+                router.reload();
+              }}
+              className="btn btn-secondary"
+            >
+              Submit another request
+            </button>,
+          ]}
+          onRequestClose={() => {
+            router.reload();
+          }}
+        />
+        {!props.user.data && (
           <ModuleSimplePopup
-            modalOpenState={submissionModal}
-            setModalOpenState={setSubmissionModal}
-            title="Success!"
-            text="Your inputs has been submitted!"
-            icon={SimpleIcon.Check}
-            buttons={[
-              <button
-                  key={1}
-                  onClick={() => {
-                    setSubmissionModal(false);
-                    router.reload();
-                  }}
-                  className="btn btn-secondary"
-                >
-                  Submit another request
-              </button>, 
-            ]}
-            onRequestClose={() => {
-              router.reload();
-            }}
-          />
-          {!props.user.data && <ModuleSimplePopup
             modalOpenState={loginModal}
             setModalOpenState={setLoginModal}
             title="Login?"
@@ -387,29 +395,32 @@ export default function FeedbackContainer(props: any) {
             shouldCloseOnOverlayClick={false}
             buttons={[
               <button
-                  key={1}
-                  onClick={() => {
-                    setSubmissionModal(false);
-                    localStorage.setItem("feedback",`/Guest/Asset/feedback/${props.requestData.plant[0].plant_id}/${props.requestData.plantLoc.id}`);
-                    router.push("/Login");
-                  }}
-                  className="btn btn-primary"
-                >
-                  Login
-              </button>, 
+                key={1}
+                onClick={() => {
+                  setSubmissionModal(false);
+                  localStorage.setItem(
+                    "feedback",
+                    `/Guest/Asset/feedback/${props.requestData.plant[0].plant_id}/${props.requestData.plantLoc.id}`
+                  );
+                  router.push("/Login");
+                }}
+                className="btn btn-primary"
+              >
+                Login
+              </button>,
               <button
-              key={1}
-              onClick={() => {
-                setLoginModal(false);
-              }}
-              className="btn btn-secondary"
-              style={{backgroundColor: "#767676"}}
-            >
-              Continue as guest
-          </button>, 
+                key={1}
+                onClick={() => {
+                  setLoginModal(false);
+                }}
+                className="btn btn-secondary"
+                style={{ backgroundColor: "#767676" }}
+              >
+                Continue as guest
+              </button>,
             ]}
-
-          />}
+          />
+        )}
       </ModuleFooter>
     </div>
   );

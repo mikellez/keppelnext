@@ -1,6 +1,7 @@
 const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
+const { param } = require("../routes");
 
 /** Express router providing user related routes
  * @module controllers/feedback
@@ -248,7 +249,8 @@ const completeFeedback = async (req, res, next) => {
                 SET status_id = 4 
                 WHERE feedback_id = $1`;
   try {
-    await global.db.query(sql, [id]);
+    console.log.apply(req.param);
+    await global.db.query(sql, [req.param.id]);
     return res.status(200).json("Feedback successfully completed");
   } catch (err) {
     console.log(err);

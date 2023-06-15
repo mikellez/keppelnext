@@ -118,7 +118,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
             plantId={f.plant_id as number}
             isSingle={true}
             onChange={(value) => {
-              props.setFeedbackData((prev) => {
+              props.setFeedbackData((prev: any) => {
                 return {
                   ...prev,
                   ["assigned_user_id"]: value,
