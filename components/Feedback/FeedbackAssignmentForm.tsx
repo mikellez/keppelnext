@@ -63,7 +63,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
           />
         </div>
         <div>
-          <div className="form-group">
+          {/* <div className="form-group">
             <div>
               <label className="form-label">Rating</label>
             </div>
@@ -76,7 +76,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
                 starSpacing="2px" // Spacing between the stars
               />
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="form-group">

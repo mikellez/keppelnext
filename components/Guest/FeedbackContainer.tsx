@@ -44,7 +44,7 @@ export default function FeedbackContainer(props: any) {
     rating: 5,
     contact: { telegram: 0, whatsapp: 0, number: null },
     email: "",
-    image: undefined,
+    image: "",
   });
 
   const [selectedFile, setSelectedFile] = useState<File>();
@@ -234,25 +234,26 @@ export default function FeedbackContainer(props: any) {
             </div>
           )}
 
-          <div className="form-group">
+          {/* <div className="form-group">
             <label className="form-label">Rating</label>
             <div>
-              <StarRatings
-                rating={form.rating} // The initial rating value
-                starRatedColor="orange" // Color of the selected stars
-                changeRating={(newRating) => {
-                  setForm((prevState) => {
-                    return { ...prevState, rating: newRating };
-                  });
-                }}
-                numberOfStars={5} // Total number of stars
-                starDimension="20px" // Size of the stars
-                starSpacing="2px" // Spacing between the stars
-              />
-            </div>
-          </div>
+            <StarRatings
+        rating={form.rating} // The initial rating value
+        starRatedColor="orange" // Color of the selected stars
+        changeRating={(newRating) => {
+          setForm((prevState) => {
+            return {...prevState, rating: newRating}
+          })
+        }}
+        numberOfStars={5} // Total number of stars
+        starDimension="20px" // Size of the stars
+        starSpacing="2px" // Spacing between the stars
+      />
+      </div>
+          </div> */}
           <div className="form-group">
-            <label className="form-label">Comments</label>
+            <RequiredIcon />
+            <label className="form-label">Feedback Comments</label>
             <textarea
               className="form-control"
               rows={6}
@@ -297,36 +298,34 @@ export default function FeedbackContainer(props: any) {
             height: "100%",
           }}
         >
-          {!props.assignRequestData && (
-            <div className="form-group">
-              <label className="form-label">Image</label>
-              <input
-                className="form-control"
-                type="file"
-                accept="image/jpeg,image/png,image/gif"
-                id="formFile"
-                onChange={(e) => {
-                  setIsImage(false);
-                  setSelectedFile(e.target.files![0]);
-                }}
-              />
-            </div>
-          )}
+          <div className="form-group">
+            <label className="form-label">Image</label>
+            <input
+              className="form-control"
+              type="file"
+              accept="image/jpeg,image/png,image/gif"
+              id="formFile"
+              onChange={(e) => {
+                setIsImage(false);
+                setSelectedFile(e.target.files![0]);
+              }}
+            />
+          </div>
 
           {isImage && previewedFile && (
             <ImagePreview previewObjURL={previewedFile} />
           )}
 
-          {props.assignRequestData && (
+          {/* {props.assignRequestData && (
             <div className="form-group">
               <label className="form-label">
                 <RequiredIcon />
                 Assign to:
               </label>
             </div>
-          )}
+          )} */}
 
-          {props.assignRequestData && (
+          {/* {props.assignRequestData && (
             <div className="form-group">
               <label className="form-label">
                 <RequiredIcon />
@@ -342,7 +341,7 @@ export default function FeedbackContainer(props: any) {
                 />
               }
             </div>
-          )}
+          )} */}
         </div>
       </ModuleContent>
       <ModuleFooter>
