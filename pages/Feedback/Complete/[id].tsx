@@ -2,6 +2,7 @@ import { GetServerSideProps } from "next";
 import React, { Component, useEffect, useState } from "react";
 import { createFeedbackServerSideProps } from "../../../types/common/props";
 import { CMMSFeedback } from "../../../types/common/interfaces";
+import { FeedbackPageProps } from "..";
 import { useRouter } from "next/router";
 import { useCurrentUser } from "../../../components/SWR";
 import instance from "../../../axios.config";
@@ -16,21 +17,20 @@ import {
 import LoadingHourglass from "../../../components/LoadingHourglass";
 import ModuleSimplePopup from "../../../components/ModuleLayout/ModuleSimplePopup";
 import TooltipBtn from "../../../components/TooltipBtn";
-import FeedbackContainer from "../../../components/Guest/FeedbackContainer";
 import FeedbackCompletedForm from "../../../components/Feedback/FeedbackCompletedForm";
-import { FeedbackFormProps } from "..";
+import FeedbackContainer from "../../../components/Guest/FeedbackContainer";
 
 export const editFeedback = async (formData: CMMSFeedback) => {
   return await instance
     .patch(`/api/feedback/complete/${formData.id}`, { formData })
-    .then((res: any) => {
+    .then((res) => {
       return res.data;
     })
-    .catch((err: any) => console.log(err));
+    .catch((err) => console.log(err));
 };
 
-export default function CompleteFeedbackPage(props: FeedbackFormProps) {
-  const [formData, setFormData] = useState<CMMSFeedback>(props.feedbackData);
+export default function CompleteFeedbackPage(props: FeedbackPageProps) {
+  const [formData, setFormData] = useState<CMMSFeedback>(props.feedback);
   const [successModal, setSuccessModal] = useState<boolean>(false);
   const [confirmModal, setConfirmModal] = useState<boolean>(false);
   const [isReady, setIsReady] = useState<boolean>(false);
@@ -81,10 +81,7 @@ export default function CompleteFeedbackPage(props: FeedbackFormProps) {
             </Link>
           </ModuleHeader>
           <ModuleContent>
-            <FeedbackCompletedForm
-              feedbackData={props.feedbackData}
-              setFeedbackData={setFormData}
-            />
+            <FeedbackContainer props={props} />
           </ModuleContent>
           <ModuleContent>
             <div className="form-group" style={{ width: "150px" }}>
