@@ -6,7 +6,8 @@ const guestPaths = [
     "/api/fault/types",
     "/api/request/plant/",
     "/api/request/asset/",
-    "/api/feedback/"
+    "/api/feedback/",
+    "/api/workflow"
 ];
 
 const checkIfGuestPath = (path) => {
