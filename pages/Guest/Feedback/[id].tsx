@@ -21,13 +21,11 @@ import {
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 // import { RequestProps } from "../../../components/Request/RequestContainer.jsx";
 import FeedbackContainer from "../../../components/Guest/FeedbackContainer";
-import { useCurrentUser } from "../../../components/SWR.ts";
+import { useCurrentUser } from "../../../components/SWR";
 
 // let user: boolean = false;
 
-
 interface CreateFeedbackProps {
-
   // plant: any;
   plantLoc: CMMSPlantLoc;
 }
@@ -58,26 +56,24 @@ export const getServerSideProps: GetServerSideProps = async (
       Cookie: context.req.headers.cookie,
     },
   };
-  
-//   const getPlant = instance.get<any>(
-//     `/api/request/plant/${context.query.plants}`,
-//     headers
-//   );
-  
+
+  //   const getPlant = instance.get<any>(
+  //     `/api/request/plant/${context.query.plants}`,
+  //     headers
+  //   );
+
   const plantLoc = await instance.get<CMMSPlantLoc>(
     `/api/plantLocation/${context.query.id}`,
     headers
   );
 
-//   const values = await Promise.all([
-//     getPlant,
-//     getPlantLoc,
-//   ]);
+  //   const values = await Promise.all([
+  //     getPlant,
+  //     getPlantLoc,
+  //   ]);
 
-//   const p: CMMSBaseType = values[0].data;
-//   const l: CMMSPlantLoc = values[1].data;
-
-  
+  //   const p: CMMSBaseType = values[0].data;
+  //   const l: CMMSPlantLoc = values[1].data;
 
   let props: CreateFeedbackProps = {
     plantLoc: plantLoc.data,

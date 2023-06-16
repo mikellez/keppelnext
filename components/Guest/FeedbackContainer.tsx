@@ -20,7 +20,7 @@ import StarRatings from "react-star-ratings";
 import Login from "../../pages/Login";
 import { userAgent } from "next/server";
 
-export default function FeedbackContainer(props: any) {
+const FeedbackContainer = (props: any) => {
   const router = useRouter();
 
   const [form, setForm] = useState<{
@@ -79,26 +79,30 @@ export default function FeedbackContainer(props: any) {
       form.comments == "" ||
       (!props.user.data && emptyContactCondition)
     ) {
-    console.log(form)
-    const emptyContactCondition = form.email === "" 
-              && (form.contact.number === ""
-                      || (form.contact.whatsapp === 0 
-                              && form.contact.telegram === 0))
-    if (form.name == "" || form.comments == "" || (!props.user.data && emptyContactCondition)) {
-      setIsMissingDetailsModaOpen(true);
-    } else {
-      await instance
-        .post("/api/feedback", form)
-        .then((res) => {
-          console.log(res);
-          setSubmissionModal(true);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+      console.log(form);
+      const emptyContactCondition =
+        form.email === "" &&
+        (form.contact.number === "" ||
+          (form.contact.whatsapp === 0 && form.contact.telegram === 0));
+      if (
+        form.name == "" ||
+        form.comments == "" ||
+        (!props.user.data && emptyContactCondition)
+      ) {
+        setIsMissingDetailsModaOpen(true);
+      } else {
+        await instance
+          .post("/api/feedback", form)
+          .then((res) => {
+            console.log(res);
+            setSubmissionModal(true);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
     }
   }
-
   useEffect(() => {
     if (selectedFile) {
       const reader = new FileReader();
