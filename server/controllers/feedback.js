@@ -301,7 +301,12 @@ const createFeedback = async (req, res, next) => {
       activity_type: "Created Feedback",
     },
   ];
+  // Assign as Guest
   const userID = req.user ? req.user.id : 55;
+  // Update guest inputted email
+  if (!req.user) {
+    feedback.contact = {...feedback.contact, email: feedback.email}
+  }
   try {
     await global.db.query(sql, [
       feedback.name,

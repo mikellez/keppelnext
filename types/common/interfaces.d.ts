@@ -453,6 +453,7 @@ interface CMMSWorkflow {
 interface CMMSPlantLoc {
   id: number,
   plant_id: number,
+  plant_name: string,
   location: string,
   activity_log?: {[key: string]: string}[]
   created_date?: string
