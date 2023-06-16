@@ -294,7 +294,7 @@ const createNewChecklistRecord = async (req, res, next) => {
         RETURNING checklist_id    
     `;
 
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
   const activity_log = [
     {
