@@ -436,24 +436,8 @@ export default function Request(props: RequestProps) {
                         <strong>Manage</strong>
                       </Link>
                     ) : (data?.role_id === Role.Engineer ||
-                    {(data?.role_id === Role.Admin ||
-                      data?.role_id === Role.Manager ||
-                      data?.role_id === Role.Engineer) &&
-                    item.status_id === 3 ? (
-                      <Link href={`/Request/Manage/${item.id}`}>
-                        <strong>Manage</strong>
-                      </Link>
-                    ) : (data?.role_id === Role.Engineer ||
                         data?.role_id === Role.Specialist) &&
                       (item.status_id === 2 || item.status_id === 5) ? (
-                      <Link href={`/Request/Complete/${item.id}`}>
-                        <strong>Complete</strong>
-                      </Link>
-                    ) : (
-                      <Link href={`/Request/View/${item.id}`}>
-                        <strong>View</strong>
-                      </Link>
-                    )}
                       <Link href={`/Request/Complete/${item.id}`}>
                         <strong>Complete</strong>
                       </Link>
@@ -473,7 +457,6 @@ export default function Request(props: RequestProps) {
   };
 
   // console.log(isReady);
-  // console.log(requestData);
   useEffect(() => {
     if (requestData && !requestIsFetchValidating) {
       if (requestData?.rows?.length > 0) {
