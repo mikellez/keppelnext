@@ -221,7 +221,7 @@ const createRequest = async (req, res, next) => {
   // console.log("^&*")
   const fileBuffer = req.file === undefined ? null : req.file.buffer;
   const fileType = req.file === undefined ? null : req.file.mimetype;
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   let user_id = "";
   let name = "";
   let role_name = "";
@@ -354,7 +354,7 @@ const createRequest = async (req, res, next) => {
 
 const updateRequest = async (req, res, next) => {
   const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;
   global.db.query(
     `
@@ -672,7 +672,7 @@ const createRequestCSV = (req, res, next) => {
 };
 
 const approveRejectRequest = async (req, res, next) => {
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const status = req.params.status_id == 4 ? "APPROVED" : "REJECTED";
   const text = req.params.status_id == 4 ? "Approved" : "Rejected";
   const id = req.params.status_id == 4 ? 4 : 2;
@@ -700,7 +700,7 @@ const approveRejectRequest = async (req, res, next) => {
 const completeRequest = async (req, res, next) => {
   const fileBuffer = req.file === undefined ? null : req.file.buffer;
   const fileType = req.file === undefined ? null : req.file.mimetype;
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const history = `!COMPLETED_Completed request_${today}_${req.user.role_name}_${req.user.name}`;
 
   const sql = `UPDATE keppel.request SET
