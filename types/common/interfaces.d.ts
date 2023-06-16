@@ -447,7 +447,7 @@ interface CMMSWorkflow {
   user_email: string,
   user_name: string,
   created_at: string,
-  create_date?: string,
+  created_date: Date,
 }
 
 interface CMMSPlantLoc {

@@ -20,6 +20,7 @@ import TooltipBtn from "../../../components/TooltipBtn";
 import FeedbackCompletedForm from "../../../components/Feedback/FeedbackCompletedForm";
 
 export const handleCompleteFeedback = async (feedback: CMMSFeedback) => {
+  console.log("data before patching" + feedback);
   return await instance
     .patch(`/api/feedback/complete/${feedback.id}`, feedback)
     .then((res: any) => {
@@ -48,6 +49,7 @@ export default function CompleteFeedback(props: FeedbackFormProps) {
   };
 
   const handleConfirmClick = () => {
+    console.log(formData);
     handleCompleteFeedback(formData).then((res) => {
       setSuccessModal(true);
     });

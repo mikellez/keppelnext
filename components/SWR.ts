@@ -14,7 +14,7 @@ import {
 import { RequestProps } from "../pages/Request";
 import { ChecklistProps } from "../pages/Checklist";
 import instance from "../types/common/axios.config";
-import { FeedbackPageProps } from "../pages/Feedback";
+import { FeedbackFormProps } from "../pages/Feedback";
 
 function useRequest(
   request_type: "pending" | "assigned" | "review" | "approved",
@@ -86,7 +86,7 @@ function useFeedback(
     { revalidateOnFocus: false }
   );
 }
-function useFeedbackFilter(props: FeedbackPageProps, page: number) {
+function useFeedbackFilter(props: FeedbackFormProps, page: number) {
   const feedbackFetcher = (url: string) =>
     instance
       .get<{ rows: CMMSFeedback[]; total: number }>(url)
@@ -103,7 +103,7 @@ function useFeedbackFilter(props: FeedbackPageProps, page: number) {
       });
 
   return useSWR<{ rows: CMMSFeedback[]; total: number }, Error>(
-    `/api/feedback/filter/${props.feedback.status || 0}/${props.feedback.plant_id || 0}/${page}`,
+    `/api/feedback/filter/${props.feedbackData.status || 0}/${props.feedbackData.plant_id || 0}/${page}`,
     feedbackFetcher,
     { revalidateOnFocus: false }
   );

@@ -58,7 +58,7 @@ export const getServerSideProps: GetServerSideProps = async (
   };
 
   //   const getPlant = instance.get<any>(
-  //     `/api/request/plant/${context.query.plants}`,
+  //     /api/request/plant/${context.query.plants},
   //     headers
   //   );
 

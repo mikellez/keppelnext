@@ -56,7 +56,7 @@ const FeedbackContainer = (props: any) => {
   const [loginModal, setLoginModal] = useState<boolean>(true);
 
   useEffect(() => {
-    // console.log(props.user.data);
+    console.log(props.user.data);
     if (props.user.data) {
       setForm((prevState) => {
         return {
@@ -69,40 +69,30 @@ const FeedbackContainer = (props: any) => {
   }, [props.user]);
 
   async function submitform() {
-    // console.log(form);
+    console.log(form);
     const emptyContactCondition =
       form.email === "" &&
-      (form.contact.number === "0" ||
+      (form.contact.number === "" ||
         (form.contact.whatsapp === 0 && form.contact.telegram === 0));
     if (
       form.name == "" ||
       form.comments == "" ||
       (!props.user.data && emptyContactCondition)
     ) {
-      console.log(form);
-      const emptyContactCondition =
-        form.email === "" &&
-        (form.contact.number === "" ||
-          (form.contact.whatsapp === 0 && form.contact.telegram === 0));
-      if (
-        form.name == "" ||
-        form.comments == "" ||
-        (!props.user.data && emptyContactCondition)
-      ) {
-        setIsMissingDetailsModaOpen(true);
-      } else {
-        await instance
-          .post("/api/feedback", form)
-          .then((res) => {
-            console.log(res);
-            setSubmissionModal(true);
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      }
+      setIsMissingDetailsModaOpen(true);
+    } else {
+      await instance
+        .post("/api/feedback", form)
+        .then((res) => {
+          console.log(res);
+          setSubmissionModal(true);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
   }
+
   useEffect(() => {
     if (selectedFile) {
       const reader = new FileReader();
@@ -117,7 +107,6 @@ const FeedbackContainer = (props: any) => {
       };
     }
   }, [selectedFile]);
-
   return (
     <div>
       <ModuleContent includeGreyContainer grid>
@@ -294,7 +283,6 @@ const FeedbackContainer = (props: any) => {
               }}
             />
           </div>
-
           {isImage && previewedFile && (
             <ImagePreview previewObjURL={previewedFile} />
           )}
