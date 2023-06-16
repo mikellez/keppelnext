@@ -19,16 +19,17 @@ import ModuleSimplePopup from "../../../components/ModuleLayout/ModuleSimplePopu
 import TooltipBtn from "../../../components/TooltipBtn";
 import FeedbackCompletedForm from "../../../components/Feedback/FeedbackCompletedForm";
 
-export const editFeedback = async (formData: CMMSFeedback) => {
+export const handleCompleteFeedback = async (feedback: CMMSFeedback) => {
   return await instance
-    .patch(`/api/feedback/complete/${formData.id}`, { formData })
+    .patch(`/api/feedback/complete/${feedback.id}`, feedback)
     .then((res: any) => {
       return res.data;
     })
     .catch((err: any) => console.log(err));
 };
 
-export default function CompleteFeedbackPage(props: FeedbackFormProps) {
+export default function CompleteFeedback(props: FeedbackFormProps) {
+  // console.log("This is feedback data : " + props.feedbackData);
   const [formData, setFormData] = useState<CMMSFeedback>(props.feedbackData);
   const [successModal, setSuccessModal] = useState<boolean>(false);
   const [confirmModal, setConfirmModal] = useState<boolean>(false);
@@ -36,15 +37,6 @@ export default function CompleteFeedbackPage(props: FeedbackFormProps) {
   const [incompleteModal, setIncompleteModal] = useState<boolean>(false);
   const router = useRouter();
   const user = useCurrentUser();
-
-  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => {
-      return {
-        ...prev,
-        changedDate: new Date(e.target.value),
-      };
-    });
-  };
 
   const handleCompleteClick = () => {
     if (!checkInputFields()) {
@@ -56,13 +48,14 @@ export default function CompleteFeedbackPage(props: FeedbackFormProps) {
   };
 
   const handleConfirmClick = () => {
-    editFeedback(formData).then((result) => {
+    handleCompleteFeedback(formData).then((res) => {
       setSuccessModal(true);
     });
     setTimeout(() => {
       router.push("/Feedback");
     }, 1000);
   };
+
   const checkInputFields = () => {
     // console.log(feedbackData.assigned_user_name);
     return formData.assigned_user_name, formData.created_date;
@@ -97,18 +90,6 @@ export default function CompleteFeedbackPage(props: FeedbackFormProps) {
               feedbackData={formData}
               setFeedbackData={setFormData}
             />
-          </ModuleContent>
-          <ModuleContent>
-            <div className="form-group" style={{ width: "150px" }}>
-              <label className="form-label">Date of Completion</label>
-              <input
-                type="date"
-                className="form-control"
-                onChange={handleOnChange}
-                max={new Date().toISOString().slice(0, 10)}
-                onKeyDown={(e) => e.preventDefault()}
-              />
-            </div>
           </ModuleContent>
           <ModuleFooter>
             <TooltipBtn toolTip={false} onClick={handleCompleteClick}>

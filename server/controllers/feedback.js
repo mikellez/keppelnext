@@ -19,6 +19,8 @@ SELECT
   f.imageurl as image,
   f.status_id,
   f.activity_log,
+  f.completed_date,
+  f.remarks,
   concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
   concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigned_user_name,
 	pl.loc_room,
@@ -242,10 +244,18 @@ const assignFeedback = async (req, res, next) => {
 const completeFeedback = async (req, res, next) => {
   const id = req.params.id;
   const sql = `UPDATE keppel.feedback
-                SET status_id = 4 
-                WHERE feedback_id = $1`;
+                SET 
+                  status_id = 4,
+                  remarks = $1,
+                  completed_date = $2
+                
+                WHERE feedback_id = $3`;
+
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
+  console.log(req.body);
   try {
-    await global.db.query(sql, [id]);
+    await global.db.query(sql, [req.body.remarks, today, id]);
     return res.status(200).json("Feedback successfully completed");
   } catch (err) {
     console.log(err);

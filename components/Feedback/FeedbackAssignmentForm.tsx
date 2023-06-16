@@ -92,13 +92,14 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
         </div>
       </div>
       <div className={formStyles.halfContainer}>
-        {f.image && <div className="form-group">
-          <div>
-            <label className="form-label">Feedback Image</label>
+        {f.image && (
+          <div className="form-group">
+            <div>
+              <label className="form-label">Feedback Image</label>
+            </div>
+            <ImagePreview previewObjURL={f.image} />
           </div>
-          <ImagePreview previewObjURL={f.image} />
-          
-        </div>}
+        )}
         <div className="form-group">
           <label className="form-label">
             <RequiredIcon /> Assign to
@@ -107,7 +108,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
             plantId={f.plant_id as number}
             isSingle={true}
             onChange={(value) => {
-              props.setFeedbackData((prev) => {
+              props.setFeedbackData((prev: any) => {
                 return {
                   ...prev,
                   ["assigned_user_id"]: value,

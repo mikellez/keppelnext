@@ -24,11 +24,7 @@ import FeedbackAssignmentForm from "../../../components/Feedback/FeedbackAssignm
 import { AxiosResponse } from "axios";
 import { GetServerSideProps } from "next";
 import { C } from "@fullcalendar/core/internal-common";
-
-interface FeedbackPageProps {
-  feedback: CMMSFeedback;
-  id: number;
-}
+import { FeedbackFormProps } from "..";
 
 const assignFeedback = async (feedback: CMMSFeedback, id: number) => {
   return await instance
@@ -39,9 +35,9 @@ const assignFeedback = async (feedback: CMMSFeedback, id: number) => {
     .catch((err) => console.log(err));
 };
 
-export default function AssignFeedback(props: FeedbackPageProps) {
+export default function AssignFeedback(props: FeedbackFormProps) {
   const [feedbackData, setFeedbackData] = useState<CMMSFeedback>(
-    props.feedback
+    props.feedbackData
   );
   const [isReady, setIsReady] = useState<boolean>(false);
   const [sections, setSections] = useState<CheckSection[]>([]);

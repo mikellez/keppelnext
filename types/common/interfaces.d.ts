@@ -275,6 +275,7 @@ interface CMMSContact {
 interface CMMSFeedback {
   id : number;
   created_date: Date;
+  completed_date? : Date;
   createdbyuser: string;
   created_user_id: string | null;
   created_user_email: string | null;
@@ -293,7 +294,7 @@ interface CMMSFeedback {
   assigned_user_name: string;
   description?: string;
   requesthistory?: string;
-  complete_comments?: string;
+  remarks?: string;
   total?: number;
   datajson?: any;
   activity_log: { [key: string]: string }[];

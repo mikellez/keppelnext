@@ -56,7 +56,7 @@ export default function FeedbackContainer(props: any) {
   const [loginModal, setLoginModal] = useState<boolean>(true);
 
   useEffect(() => {
-    console.log(props.user.data);
+    // console.log(props.user.data);
     if (props.user.data) {
       setForm((prevState) => {
         return {
@@ -69,10 +69,10 @@ export default function FeedbackContainer(props: any) {
   }, [props.user]);
 
   async function submitform() {
-    console.log(form);
+    // console.log(form);
     const emptyContactCondition =
       form.email === "" &&
-      (form.contact.number === 0 ||
+      (form.contact.number === "0" ||
         (form.contact.whatsapp === 0 && form.contact.telegram === 0));
     if (
       form.name == "" ||

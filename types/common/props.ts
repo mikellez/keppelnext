@@ -118,7 +118,7 @@ const createFeedbackServerSideProps = (allowedStatuses?: number[]) => {
 
 		return {
 			props: {
-				feedback: feedback,	
+				feedbackData: feedback,	
 			}
 		};
 	};
