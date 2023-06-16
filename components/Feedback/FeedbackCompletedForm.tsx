@@ -10,8 +10,6 @@ import { CMMSFeedback } from "../../types/common/interfaces";
 
 const FeedbackCompletedForm = (props: FeedbackFormProps) => {
   const user = useCurrentUser();
-  const [formData, setFormData] = useState<CMMSFeedback>(props.feedbackData);
-
   // const updateDataField = (
   //   value: number | string | Date | null,
   //   field: string
@@ -27,7 +25,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
   // };
 
   useEffect(() => {
-    props.setFeedbackData(formData);
+    props.setFeedbackData(props.feedbackData);
     // console.log(props.feedbackData.image);
   }, [props.feedbackData]);
 
@@ -45,7 +43,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
               type="text"
               className="form-control"
               disabled
-              value={formData.plant_name}
+              value={props.feedbackData.plant_name}
             />
           </div>
           <div className="form-group">
@@ -54,7 +52,11 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
               type="text"
               className="form-control"
               disabled
-              value={`${formData.loc_floor + " Floor - " + formData.loc_room}`}
+              value={`${
+                props.feedbackData.loc_floor +
+                " Floor - " +
+                props.feedbackData.loc_room
+              }`}
             />
           </div>
           <div>
@@ -81,7 +83,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
               name="description"
               id="formControlDescription"
               rows={5}
-              value={formData.description}
+              value={props.feedbackData.description}
               disabled
             ></textarea>
           </div>
@@ -93,7 +95,9 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
             </div>
             {/* {form.image} */}
             {/* <img src={form.image} alt="" /> */}
-            {formData.image && <ImagePreview previewObjURL={formData.image} />}
+            {props.feedbackData.image && (
+              <ImagePreview previewObjURL={props.feedbackData.image} />
+            )}
             {/* <Image
             src={f.image}
             onError={({ currentTarget }) => {
@@ -113,7 +117,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
               type="text"
               className="form-control"
               disabled
-              value={formData.assigned_user_name}
+              value={props.feedbackData.assigned_user_name}
             />
           </div>
         </div>
@@ -131,11 +135,11 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
               type="text"
               className="form-control"
               disabled
-              value={formData.createdbyuser}
+              value={props.feedbackData.createdbyuser}
             />
           </div>
           <div className="form-group">
-            {formData.created_user_id != "1" ? (
+            {props.feedbackData.created_user_id != "1" ? (
               <>
                 <label className="form-label">
                   <RequiredIcon />
@@ -146,8 +150,8 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
                   className="form-control"
                   disabled
                   value={
-                    formData.created_user_email
-                      ? formData.created_user_email
+                    props.feedbackData.created_user_email
+                      ? props.feedbackData.created_user_email
                       : "No email"
                   }
                 />
@@ -163,12 +167,12 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
                   className="form-control"
                   disabled
                   value={
-                    formData.contact.tele
-                      ? formData.contact.tele
-                      : formData.contact.whatsapp
-                      ? formData.contact.whatsapp
-                      : formData.contact.email
-                      ? formData.contact.email
+                    props.feedbackData.contact.tele
+                      ? props.feedbackData.contact.tele
+                      : props.feedbackData.contact.whatsapp
+                      ? props.feedbackData.contact.whatsapp
+                      : props.feedbackData.contact.email
+                      ? props.feedbackData.contact.email
                       : "No Contact"
                   }
                 />
@@ -184,7 +188,9 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
               type="text"
               className="form-control"
               disabled
-              value={new Date(formData.created_date).toLocaleDateString()}
+              value={new Date(
+                props.feedbackData.created_date
+              ).toLocaleDateString()}
             />
           </div>
         </div>
@@ -196,8 +202,8 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
             id="formControlDescription"
             rows={5}
             onChange={(e) => {
-              setFormData((prev: any) => {
-                // console.log(e);
+              props.setFeedbackData((prev: CMMSFeedback) => {
+                // console.log(e.target.value);
                 return {
                   ...prev,
                   ["remarks"]: e.target.value,

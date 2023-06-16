@@ -169,7 +169,7 @@ export default function Feedback() {
             </li>
           </ul>
         }
-        {isReady && feedbackItems.length === 0 && <div>No Feedback</div>}
+        {isReady && feedbackItems.length === 0 && <div></div>}
         {isReady ? (
           <>
             <Table
