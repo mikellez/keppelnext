@@ -139,6 +139,7 @@ export default function Checklist(props: ChecklistProps) {
   };
 
   useEffect(() => {
+    console.log(props);
     if (data && !isValidating) {
       if (props?.filter) {
         if (data?.rows?.length > 0) {

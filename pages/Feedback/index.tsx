@@ -33,75 +33,51 @@ import LoadingHourglass from "../../components/LoadingHourglass";
 import instance from "../../types/common/axios.config";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import {
-  AiOutlineEdit,
   AiOutlineFolderView,
   AiOutlineFileDone,
   AiOutlineFileProtect,
   AiOutlineHistory,
+  AiOutlineUserAdd,
 } from "react-icons/ai";
 import PageButton from "../../components/PageButton";
 import styles from "../../styles/Request.module.scss";
 import { Role } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
-import { GetServerSidePropsContext } from "next";
-import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
+import FeedbackHistory from "../../components/Feedback/FeedbackHistory";
 
-const indexedColumn: ("pending" | "assigned" | "review")[] = [
+const indexedColumn: ("pending" | "assigned" | "completed")[] = [
   "pending",
   "assigned",
-  "review",
+  "completed",
 ];
 
-export interface FeedbackItem {
-  id: number;
-  created_date: Date;
-  description?: string;
-  status_id?: number;
-  createdbyuser: string;
-  feedback_id: number;
-  loc_floor: string;
-  loc_room: string;
-  plant_id: number;
-  status: string;
-  assigned_user_email: string;
-  assigned_user_id: number;
-  assigned_user_name: string;
-  requesthistory?: string;
-  complete_comments?: string;
-  completion_file?: any;
-  activity_log?: { [key: string]: string }[];
+export interface FeedbackFormProps {
+  feedbackData: CMMSFeedback;
+  setFeedbackData: React.Dispatch<React.SetStateAction<CMMSFeedback>>;
+  disableForm?: boolean;
 }
 
-export interface FeedbackProps {
-  filter?: boolean;
-  status: number | string;
-  plant: number;
-  date: string;
-  datetype: string;
-  isReady?: boolean;
-}
+// const downloadCSV = async (type: string, activeTabIndex: number) => {
+//   try {
+//     const response = await instance({
+//       url: `/api/${type}/csv?activeTab=${JSON.stringify(activeTabIndex)}`,
+//       method: "get",
+//       responseType: "arraybuffer",
+//     });
+//     const blob = new Blob([response.data]);
+//     const url = window.URL.createObjectURL(blob);
+//     const temp_link = document.createElement("a");
+//     temp_link.download = `${type}.csv`;
+//     temp_link.href = url;
+//     temp_link.click();
+//     temp_link.remove();
+//   } catch (e) {
+//     console.log(e);
+//   }
+// };
 
-const downloadCSV = async (type: string, activeTabIndex: number) => {
-  try {
-    const response = await instance({
-      url: `/api/${type}/csv?activeTab=${JSON.stringify(activeTabIndex)}`,
-      method: "get",
-      responseType: "arraybuffer",
-    });
-    const blob = new Blob([response.data]);
-    const url = window.URL.createObjectURL(blob);
-    const temp_link = document.createElement("a");
-    temp_link.download = `${type}.csv`;
-    temp_link.href = url;
-    temp_link.click();
-    temp_link.remove();
-  } catch (e) {
-    console.log(e);
-  }
-};
-
-export default function Checklist(props: FeedbackProps) {
-  const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>([]);
+export default function Feedback() {
+  const [feedbackItems, setFeedbackItems] = useState<CMMSFeedback[]>([]);
   const [isReady, setReady] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const user = useCurrentUser();
@@ -110,18 +86,12 @@ export default function Checklist(props: FeedbackProps) {
   const [history, setHistory] = useState<
     { [key: string]: string }[] | undefined
   >(undefined);
-  const filteredData = useFeedbackFilter(props, page);
-  const columnData = useFeedback(indexedColumn[activeTabIndex], page);
-
-  const { data, error, isValidating, mutate } = props.filter
-    ? filteredData
-    : columnData;
 
   const theme = useTheme([
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns:  5em calc(90% - 46em) 7em 8em 10em 10em 10% ;",
+        "--data-table-library_grid-template-columns:  5em calc(90% - 46em) 7em 8em 10em 10em 10% 5em;",
     },
   ]);
 
@@ -129,62 +99,31 @@ export default function Checklist(props: FeedbackProps) {
     if (isReady) {
       setReady(false);
       setActiveTabIndex(index);
-      setPage(1);
+      // setPage(1);
     }
   };
 
-  const editRow: OnClick<FeedbackItem> = (item, event) => {
-    const feedbackRow = item;
-  };
-
   useEffect(() => {
-    if (data && !isValidating) {
-      if (props?.filter) {
-        if (data?.rows?.length > 0) {
-          setFeedbackItems(
-            data.rows.map((row: CMMSFeedback) => {
-              return {
-                id: row.feedback_id,
-                ...row,
-              };
-            })
-          );
-
-          setReady(true);
-          setTotalPages(data.total);
-        }
-      }
-    }
-    // if (!data) {
-    //     setReady(false);
-    //     setChecklistItems([]);
-    //     setTotalPages(1);
-    // }
-  }, [data, isValidating, isReady, page, props?.isReady]);
-
-  useEffect(() => {
-    if (!props?.filter) {
-      setReady(false);
-      instance
-        .get(`/api/feedback/${indexedColumn[activeTabIndex]}?page=${page}`)
-        .then((response) => {
-          setFeedbackItems(
-            response.data.rows.map((row: CMMSFeedback) => {
-              return {
-                id: row.feedback_id,
-                ...row,
-              };
-            })
-          );
-          setTotalPages(response.data.total);
-          setReady(true);
-        })
-        .catch((e) => {
-          setFeedbackItems([]);
-        });
-    }
+    setReady(false);
+    instance
+      .get(`/api/feedback/${indexedColumn[activeTabIndex]}?page=${page}`)
+      .then((response) => {
+        setFeedbackItems(
+          response.data.rows.map((row: CMMSFeedback) => {
+            return {
+              ...row,
+            };
+          })
+        );
+        setTotalPages(response.data.total);
+        setReady(true);
+      })
+      .catch((e) => {
+        setReady(true);
+        setFeedbackItems([]);
+      });
   }, [activeTabIndex, page]);
-
+  // console.log(isReady);
   return (
     <ModuleMain>
       <ModuleHeader title="Feedback" header="Feedback">
@@ -202,7 +141,7 @@ export default function Checklist(props: FeedbackProps) {
       </ModuleHeader>
 
       <ModuleContent>
-        {!props?.filter && (
+        {
           <ul className="nav nav-tabs">
             <li
               onClick={() => {
@@ -226,11 +165,11 @@ export default function Checklist(props: FeedbackProps) {
               }}
               className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
             >
-              <span style={{ all: "unset" }}>For Review</span>
+              <span style={{ all: "unset" }}>Completed</span>
             </li>
           </ul>
-        )}
-        {isReady && feedbackItems.length === 0 && <div>No Feedback</div>}
+        }
+        {isReady && feedbackItems.length === 0 && <div></div>}
         {isReady ? (
           <>
             <Table
@@ -238,7 +177,7 @@ export default function Checklist(props: FeedbackProps) {
               theme={theme}
               layout={{ custom: true }}
             >
-              {(tableList: FeedbackItem[]) => (
+              {(tableList: CMMSFeedback[]) => (
                 <>
                   <Header>
                     <HeaderRow>
@@ -249,6 +188,7 @@ export default function Checklist(props: FeedbackProps) {
                       <HeaderCell resize>Assigned To</HeaderCell>
                       <HeaderCell resize>Location</HeaderCell>
                       <HeaderCell resize>Created By</HeaderCell>
+                      <HeaderCell resize>Actions</HeaderCell>
                     </HeaderRow>
                   </Header>
 
@@ -274,18 +214,12 @@ export default function Checklist(props: FeedbackProps) {
                             {item.loc_floor} floor, {item.loc_room}
                           </Cell>
                           <Cell>{item.createdbyuser}</Cell>
-                          {/* <Cell>
-                            {(user.data!.role_id === Role.Admin ||
+                          <Cell>
+                            {((user.data!.role_id === Role.Admin ||
                               user.data!.role_id === Role.Manager ||
                               user.data!.role_id === Role.Engineer) &&
-                            item.status_id === 4 ? (
-                              <Link href={`/Feedback/Manage/${item.id}`}>
-                                <AiOutlineFileProtect
-                                  size={22}
-                                  title={"Manage"}
-                                />
-                              </Link>
-                            ) : item.status_id === 2 || item.status_id === 3 ? (
+                              item.status_id === 2) ||
+                            item.status_id === 3 ? (
                               <>
                                 <Link href={`/Feedback/Complete/${item.id}`}>
                                   <AiOutlineFileDone
@@ -295,23 +229,21 @@ export default function Checklist(props: FeedbackProps) {
                                 </Link>
                               </>
                             ) : item.status_id === 1 ? (
-                              <Link
-                                href={`/Feedback/Form/?action=Edit&id=${item.id}`}
-                              >
-                                <AiOutlineEdit size={22} title={"Assign"} />
+                              <Link href={`/Feedback/Assign/${item.id}`}>
+                                <AiOutlineUserAdd size={22} title={"Assign"} />
                               </Link>
                             ) : (
                               <Link href={`/Feedback/View/${item.id}`}>
                                 <AiOutlineFolderView size={22} title={"View"} />
                               </Link>
                             )}
-                            <AiOutlineHistory
+                            {/* <AiOutlineHistory
                               color={"#C70F2B"}
                               onClick={() => setHistory(item.activity_log)}
                               size={22}
                               title={"View History"}
-                            />
-                          </Cell> */}
+                            /> */}
+                          </Cell>
                         </Row>
                       );
                     })}
@@ -340,15 +272,15 @@ export default function Checklist(props: FeedbackProps) {
             <LoadingHourglass />
           </div>
         )}
-        {history && (
+        {/* {history && (
           <ModuleModal
             isOpen={!!history}
             closeModal={() => setHistory(undefined)}
             closeOnOverlayClick={true}
           >
-            <ChecklistHistory history={history!} />
+            <FeedbackHistory history={history!} />
           </ModuleModal>
-        )}
+        )} */}
       </ModuleContent>
     </ModuleMain>
   );

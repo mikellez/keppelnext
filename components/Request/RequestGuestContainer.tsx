@@ -18,14 +18,10 @@
     be rendered for each use case
 */
 
-
-
-
-
 import formStyles from "../../styles/formStyles.module.css";
 
 import React, { use, useEffect, useState } from "react";
-import instance from '../../types/common/axios.config';
+import instance from "../../types/common/axios.config";
 
 import { ModuleContent, ModuleDivider, ModuleFooter } from "../../components";
 import ImagePreview from "../../components/Request/ImagePreview";
@@ -48,138 +44,141 @@ import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
 import Select, { ActionMeta, MultiValue, StylesConfig } from "react-select";
 import Image from "next/image";
 import { set } from "nprogress";
-import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
-
-
+import ModuleSimplePopup, {
+  SimpleIcon,
+} from "../ModuleLayout/ModuleSimplePopup";
 
 export default function RequestGuestContainer(props: any) {
   const router = useRouter();
 
-  const [form, setForm]  = useState<{
-    name : string,
-    requestTypeID: string,
-    faultTypeID: string,
-    description: string
-    plantLocationID: string,
-    taggedAssetID: string,
-    image?: FileList
-
-  }>(
-    {
+  const [form, setForm] = useState<{
+    name: string;
+    requestTypeID: string;
+    faultTypeID: string;
+    description: string;
+    plantLocationID: string;
+    taggedAssetID: string;
+    image?: FileList;
+  }>({
     name: "",
     requestTypeID: "",
     faultTypeID: "",
     description: "",
     plantLocationID: props.requestData.plant[0].plant_id,
-    taggedAssetID: props.requestData.asset[0].psa_id,
-    image: undefined
-  }
-  );
+    taggedAssetID: props.requestData.asset[0].psa_id
+      ? props.requestData.asset[0].psa_id
+      : "",
+    image: undefined,
+  });
   useEffect(() => {
-    console.log(props.user)
-    if (props.user){
+    console.log(props.user);
+    if (props.user) {
       setForm((prevState) => {
-        return {...prevState, name: "user"}
-      })
+        return { ...prevState, name: "user" };
+      });
     }
-  }, [])
+  }, []);
   const [selectedFile, setSelectedFile] = useState<File>();
   const [previewedFile, setPreviewedFile] = useState<string>();
   const [isImage, setIsImage] = useState<boolean>(true);
-  const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
+  const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] =
+    useState<boolean>(false);
   const [submissionModal, setSubmissionModal] = useState<boolean>(false);
 
-
   async function submitform() {
-    console.log(form)
+    console.log(form);
     if (form.requestTypeID == "" || form.faultTypeID == "" || form.name == "") {
       setIsMissingDetailsModaOpen(true);
     } else {
-    const formData = new FormData();
-    for (const key in form) {
-      if ( key == "image" ) {
-        if (form[key]) {
+      const formData = new FormData();
+      for (const key in form) {
+        if (key == "image") {
+          if (form[key]) {
+            formData.append(key, form[key]);
+          }
+        } else {
           formData.append(key, form[key]);
         }
-      } else{
-        formData.append(key, form[key]);
       }
+      return await instance
+        .post("/api/request/", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+        .then((response) => {
+          console.log("ni hao");
+          setSubmissionModal(true);
+          return response.data;
+        })
+        .catch((e) => {
+          console.log("error creating request");
+          console.log(e);
+          return null;
+        });
     }
-    return await instance
-    .post("/api/request/", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    })
-    .then((response) => {
-      console.log("ni hao")
-      setSubmissionModal(true);
-      return response.data;
-    })
-    .catch((e) => {
-      console.log("error creating request");
-      console.log(e);
-      return null;
-    }); 
-  }}
+  }
 
   useEffect(() => {
     if (selectedFile) {
       const reader = new FileReader();
-  
+
       reader.onload = () => {
         setPreviewedFile(reader.result as string);
         setIsImage(true);
         setForm((prevState) => {
-          return {...prevState, image: selectedFile}
-        })
+          return { ...prevState, image: selectedFile };
+        });
       };
       reader.readAsDataURL(selectedFile);
     }
   }, [selectedFile]);
-  
-
 
   return (
     <div>
       <ModuleContent includeGreyContainer grid>
         <div className={formStyles.halfContainer}>
-        {!props.user && (<div className="form-group">
-            <label className="form-label">
-              <RequiredIcon /> Name
-              <textarea
-              className="form-control"
-              rows={1}
-              onChange = {(e) => {
-                // console.log(e.target.value);
-                setForm((prevState) => {
-                  return {...prevState, name: e.target.value}
-                })
-              }}
-            ></textarea>
-            </label>
-            </div>)}
+          {!props.user && (
+            <div className="form-group">
+              <label className="form-label">
+                <RequiredIcon /> Name
+                <textarea
+                  className="form-control"
+                  rows={1}
+                  onChange={(e) => {
+                    // console.log(e.target.value);
+                    setForm((prevState) => {
+                      return { ...prevState, name: e.target.value };
+                    });
+                  }}
+                ></textarea>
+              </label>
+            </div>
+          )}
           <div className="form-group">
             <label className="form-label">
               <RequiredIcon /> Request Type
             </label>
             <select
               className="form-control"
-              onChange = {(e) => {
+              onChange={(e) => {
                 // console.log(e.target.value);
                 setForm((prevState) => {
-                  return {...prevState, requestTypeID: e.target.value}
-                })
+                  return { ...prevState, requestTypeID: e.target.value };
+                });
               }}
             >
               <option hidden key={0} value={0}>
                 Select request type
               </option>
-              {
-                props.requestData.requestTypes.map((requestType: CMMSRequestTypes) => {
-                  return <option key={requestType.req_id} value={requestType.req_id}>{requestType.request}
-                  </option>
-              })}
-            
-              </select>
+              {props.requestData.requestTypes.map(
+                (requestType: CMMSRequestTypes) => {
+                  return (
+                    <option key={requestType.req_id} value={requestType.req_id}>
+                      {requestType.request}
+                    </option>
+                  );
+                }
+              )}
+            </select>
           </div>
 
           <div className="form-group">
@@ -188,20 +187,22 @@ export default function RequestGuestContainer(props: any) {
             </label>
             <select
               className="form-control"
-              onChange = {(e) => {
+              onChange={(e) => {
                 // console.log(e.target.value);
                 setForm((prevState) => {
-                  return {...prevState, faultTypeID: e.target.value}
-                })
+                  return { ...prevState, faultTypeID: e.target.value };
+                });
               }}
             >
               <option hidden key={0} value={""}>
                 Select fault type
               </option>
-              {
-                props.requestData.faultTypes.map((faultType: CMMSFaultTypes) => {
-                  return <option key={faultType.fault_id} value={faultType.fault_id}>{faultType.fault_type}
+              {props.requestData.faultTypes.map((faultType: CMMSFaultTypes) => {
+                return (
+                  <option key={faultType.fault_id} value={faultType.fault_id}>
+                    {faultType.fault_type}
                   </option>
+                );
               })}
             </select>
           </div>
@@ -211,11 +212,11 @@ export default function RequestGuestContainer(props: any) {
             <textarea
               className="form-control"
               rows={6}
-              onChange = {(e) => {
+              onChange={(e) => {
                 // console.log(e.target.value);
                 setForm((prevState) => {
-                  return {...prevState, description: e.target.value}
-                })
+                  return { ...prevState, description: e.target.value };
+                });
               }}
             ></textarea>
           </div>
@@ -223,29 +224,25 @@ export default function RequestGuestContainer(props: any) {
             <label className="form-label">
               <RequiredIcon /> Plant Location
             </label>
-              <select className="form-select" disabled={true}
-              >
-                <option value={props.requestData.plant[0].plant_id}>
-                  {props.requestData.plant[0].plant_name}
-                </option>
-              </select>
+            <select className="form-select" disabled={true}>
+              <option value={props.requestData.plant[0].plant_id}>
+                {props.requestData.plant[0].plant_name}
+              </option>
+            </select>
           </div>
 
           <div className="form-group">
             <label className="form-label">
               <RequiredIcon /> Tag Asset
             </label>
-            <select
-              className="form-select"
-              disabled = {true}
-            >
-              <option value={props.requestData.asset[0].psa_id}> 
-              {props.requestData.asset[0].psa_id + " | " + props.requestData.asset[0].plant_asset_instrument}
+            <select className="form-select" disabled={true}>
+              <option value={props.requestData.asset[0].psa_id}>
+                {props.requestData.asset[0].psa_id +
+                  " | " +
+                  props.requestData.asset[0].plant_asset_instrument}
               </option>
             </select>
-
           </div>
-      
         </div>
         <div
           className={formStyles.halfContainer}
@@ -268,16 +265,16 @@ export default function RequestGuestContainer(props: any) {
                   setIsImage(false);
                   // console.log(e.target.files);
                   setSelectedFile(e.target.files![0]);
-                //   setForm((prevState) => {
-                //     return {...prevState, image: e.target.files![0]}
-                //   })
-                // }
-              }}
+                  //   setForm((prevState) => {
+                  //     return {...prevState, image: e.target.files![0]}
+                  //   })
+                  // }
+                }}
               />
             </div>
           )}
 
-          { isImage && previewedFile && (
+          {isImage && previewedFile && (
             <ImagePreview previewObjURL={previewedFile} />
           )}
 
@@ -298,12 +295,11 @@ export default function RequestGuestContainer(props: any) {
               </label>
               {
                 <Select
-                  // options={}
-                  // onChange={}
-                  // defaultValue={
-                
-                  //  }
-                  
+                // options={}
+                // onChange={}
+                // defaultValue={
+
+                //  }
                 />
               }
             </div>
@@ -311,9 +307,7 @@ export default function RequestGuestContainer(props: any) {
         </div>
       </ModuleContent>
       <ModuleFooter>
-        <button type="submit" className="btn btn-primary"
-        onClick={submitform}
-        >
+        <button type="submit" className="btn btn-primary" onClick={submitform}>
           {
             <span
               role="status"
@@ -324,35 +318,35 @@ export default function RequestGuestContainer(props: any) {
           Submit
         </button>
         <ModuleSimplePopup
-            modalOpenState={isMissingDetailsModalOpen}
-            setModalOpenState={setIsMissingDetailsModaOpen}
-            title="Missing Details"
-            text="Please ensure that you have filled in all the required entries."
-            shouldCloseOnOverlayClick={true}
-            icon={SimpleIcon.Cross}
-          />
-          <ModuleSimplePopup
-            modalOpenState={submissionModal}
-            setModalOpenState={setSubmissionModal}
-            title="Success!"
-            text="Your inputs has been submitted!"
-            icon={SimpleIcon.Check}
-            buttons={[
-              <button
-                  key={1}
-                  onClick={() => {
-                    setSubmissionModal(false);
-                    router.reload();
-                  }}
-                  className="btn btn-secondary"
-                >
-                  Submit another request
-              </button>, 
-            ]}
-            onRequestClose={() => {
-              router.reload();
-            }}
-          />
+          modalOpenState={isMissingDetailsModalOpen}
+          setModalOpenState={setIsMissingDetailsModaOpen}
+          title="Missing Details"
+          text="Please ensure that you have filled in all the required entries."
+          shouldCloseOnOverlayClick={true}
+          icon={SimpleIcon.Cross}
+        />
+        <ModuleSimplePopup
+          modalOpenState={submissionModal}
+          setModalOpenState={setSubmissionModal}
+          title="Success!"
+          text="Your inputs has been submitted!"
+          icon={SimpleIcon.Check}
+          buttons={[
+            <button
+              key={1}
+              onClick={() => {
+                setSubmissionModal(false);
+                router.reload();
+              }}
+              className="btn btn-secondary"
+            >
+              Submit another request
+            </button>,
+          ]}
+          onRequestClose={() => {
+            router.reload();
+          }}
+        />
       </ModuleFooter>
     </div>
   );

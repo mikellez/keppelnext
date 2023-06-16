@@ -1,5 +1,5 @@
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import { CMMSChecklist, CMMSChangeOfParts, CMMSAssetDetails } from "./interfaces";
+import { CMMSChecklist, CMMSChangeOfParts, CMMSAssetDetails, CMMSFeedback } from "./interfaces";
 import instance from '../../types/common/axios.config';
 
 const createChecklistGetServerSideProps = (allowedStatuses?: number[]) => {
@@ -87,8 +87,47 @@ const createChangeOfPartsServerSideProps = (specificCOP: boolean, conditionalFun
 
 	return getServerSideProps;
 };
+const createFeedbackServerSideProps = (allowedStatuses?: number[]) => {
+	
+	const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
+
+		const headers = {
+			withCredentials: true,
+			headers: {
+				Cookie: context.req.headers.cookie,
+			},
+		};
+			
+	
+		const url = `http://${process.env.SERVER}:${process.env.PORT}/api/feedback/${context.query.id}`
+	
+		const response = await instance.get<CMMSFeedback>(url, headers);
+
+	
+		if (response.status == 500 && allowedStatuses?.includes(response.data.status_id)) {
+			return {
+				props: {
+					checklist: null
+				},
+				redirect : {
+					destination: "/404"
+				}
+			}
+		}
+		const feedback = response.data
+
+		return {
+			props: {
+				feedbackData: feedback,	
+			}
+		};
+	};
+
+	return getServerSideProps;
+};
 
 export {
     createChecklistGetServerSideProps,
 	createChangeOfPartsServerSideProps,
+	createFeedbackServerSideProps,
 }
