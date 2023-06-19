@@ -36,7 +36,8 @@ SELECT
   pm.plant_id,
   f.created_date,
   f.assigned_user_id,
-  st.status
+  st.status,
+  f.name
 FROM 
     keppel.users u
     JOIN keppel.user_access ua ON u.user_id = ua.user_id
