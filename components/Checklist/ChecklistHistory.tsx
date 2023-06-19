@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 
 interface ChecklistHistoryProps {
   history: { [key: string]: string }[];
+  assignedUser: string;
 }
 
-function rowElements(rows: { [key: string]: string }[]) {
+function rowElements(rows: { [key: string]: string }[], assignedUser: string) {
   return (
     <>
       {rows.map((row) => {
@@ -12,7 +13,7 @@ function rowElements(rows: { [key: string]: string }[]) {
         return (
           <tr key={row["date"] + row["name"] + row["role"]}>
             <td>{row["activity_type"]}</td>
-            <td>{row["activity"]}</td>
+            <td>{row["activity"]  == "ASSIGNED" ? `ASSIGNED TO ${assignedUser}` : row["activity"]}</td>
             <td>
               {new Date(row["date"]).toLocaleDateString("en-US", {
                 year: "numeric",
@@ -39,10 +40,10 @@ const ChecklistHistory = (props: ChecklistHistoryProps) => {
             <th>Status</th>
             <th>Action</th>
             <th>Date</th>
-            <th>Name</th>
+            <th>Action by</th>
           </tr>
         </thead>
-        <tbody>{rowElements(props.history)}</tbody>
+        <tbody>{rowElements(props.history, props.assignedUser)}</tbody>
       </table>
     </div>
   );

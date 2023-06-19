@@ -709,43 +709,267 @@ router.get(
   controllers.checklist.fetchPendingChecklists
 );
 
+
+/**
+ * @api {post} /feedback/ Create Feedback
+ * @apiDescription Create new Feedback
+ * @apiName CreateFeedback
+ * @apiGroup Feedback
+ * 
+ * @apiBody {Object} - Feedback Object
+ * @apiBody {String} -.name Name of user who gave the feedback
+ * @apiBody {String} -.comments Feedback Comments by the user
+ * @apiBody {Number} -.taggedLocID Location ID
+ * @apiBody {String} -.image base64 encoded string of image
+ * @apiBody {Number} -.plantID Plant ID
+ * @apiBody {String} -.email Email of user who created the feedback
+ * @apiBody {Object} -.contact Contact Information
+ * @apiBody {String} -.contact.number Contact Number, will be empty if not provided or user is Internal User
+ * @apiBody {Number} -.contact.whatsapp Contact Method of Whatsapp, 0 if No, 1 if Yes
+ * @apiBody {Number} -.contact.telegram Contact Method of Telegram, 0 if No, 1 if Yes
+ * 
+ * @apiSuccess {String} Success "New feedback created successfully"
+ * 
+ * @apiError (Error 500) {String} InternalServerError "Failure to create feedback"
+ */
 router.post("/feedback", controllers.feedback.createFeedback);
 
+/**
+ * @api {get} /feedback/pending Get Pending Feedback
+ * @apiDescription Get Pending Feedback
+ * @apiName GetPendingFeedback
+ * @apiGroup Feedback
+ * 
+ * @apiSuccess {Object} - Data Object
+ * @apiSuccess {Object[]} -.rows Array of Pending Feedback
+ * @apiSuccess {Number} -.rows.id Feedback ID
+ * @apiSuccess {Number} -.rows.plant_loc_id Plant Location ID
+ * @apiSuccess {Number} -.rows.plant_id Plant ID
+ * @apiSuccess {String} -.rows.description Feedback Description
+ * @apiSuccess {Object} -.contact Contact Information
+ * @apiSuccess {String} -.rows.contact.number Contact Number, will be empty if not provided or user is Internal User
+ * @apiSuccess {Number} -.rows.contact.whatsapp Contact Method of Whatsapp, 0 if No, 1 if Yes
+ * @apiSuccess {Number} -.rows.contact.telegram Contact Method of Telegram, 0 if No, 1 if Yes
+ * @apiSuccess {String} -.rows.image base64 eoncded string of image
+ * @apiSuccess {String} -.rows.status_id Status ID (1 for Pending)
+ * @apiSuccess {String} -.rows.status Status of Feedback ("PENDING")
+ * @apiSuccess {String} -.rows.activity_log Activity Log of Feedback
+ * @apiSuccess {String} -.rows.createdByUser Name of user who created feedback ("Guest" if external)
+ * @apiSuccess {String} -.rows.assigned_user_name Name of assignee
+ * @apiSuccess {Number} -.rows.assigned_user_id ID of assignee
+ * @apiSuccess {String} -.rows.loc_room Location Room
+ * @apiSuccess {String} -.rows.loc_floor Location Floor
+ * @apiSuccess {String} -.rows.plant_name
+ * @apiSuccess {String} -.rows.created_date Date of Feedback Creation
+ * @apiSuccess {Number} -.total Total Pages
+ * 
+ * @apiError (Status Code 204) {Object} Empty {msg: "No Feedback"}
+ * @apiError (Error 500) {Object} InternalServerError {msg: error}
+ *  
+ */
 router.get(
   "/feedback/pending",
   checkIfLoggedInAPI,
   controllers.feedback.fetchPendingFeedback
 );
+
+/**
+ * @api {get} /feedback/pending Get Assigned Feedback
+ * @apiDescription Get Assigned Feedback
+ * @apiName GetAssignedFeedback
+ * @apiGroup Feedback
+ * 
+ * @apiSuccess {Object} - Data Object
+ * @apiSuccess {Object[]} -.rows Array of Assigned Feedback
+ * @apiSuccess {Number} -.rows.id Feedback ID
+ * @apiSuccess {Number} -.rows.plant_loc_id Plant Location ID
+ * @apiSuccess {Number} -.rows.plant_id Plant ID
+ * @apiSuccess {String} -.rows.description Feedback Description
+ * @apiSuccess {Object} -.contact Contact Information
+ * @apiSuccess {String} -.rows.contact.number Contact Number, will be empty if not provided or user is Internal User
+ * @apiSuccess {Number} -.rows.contact.whatsapp Contact Method of Whatsapp, 0 if No, 1 if Yes
+ * @apiSuccess {Number} -.rows.contact.telegram Contact Method of Telegram, 0 if No, 1 if Yes
+ * @apiSuccess {String} -.rows.image base64 eoncded string of image
+ * @apiSuccess {String} -.rows.status_id Status ID (2 for ASSIGNED, 3 for REASSIGNED)
+ * @apiSuccess {String} -.rows.status Status of Feedback ("ASSIGNED" or "REASSIGNED")
+ * @apiSuccess {String} -.rows.activity_log Activity Log of Feedback
+ * @apiSuccess {String} -.rows.createdByUser Name of user who created feedback ("Guest" if external)
+ * @apiSuccess {String} -.rows.assigned_user_name Name of assignee
+ * @apiSuccess {Number} -.rows.assigned_user_id ID of assignee
+ * @apiSuccess {String} -.rows.loc_room Location Room
+ * @apiSuccess {String} -.rows.loc_floor Location Floor
+ * @apiSuccess {String} -.rows.plant_name
+ * @apiSuccess {String} -.rows.created_date Date of Feedback Creation
+ * @apiSuccess {Number} -.total Total Pages
+ * 
+ * @apiError (Status Code 204) {Object} Empty {msg: "No Feedback"}
+ * @apiError (Error 500) {Object} InternalServerError {msg: error}
+ *  
+ */
 router.get(
   "/feedback/assigned",
   checkIfLoggedInAPI,
   controllers.feedback.fetchAssignedFeedback
 );
 
+
+/**
+ * @api {get} /feedback/pending Get Completed Feedback
+ * @apiDescription Get Completed Feedback
+ * @apiName GetCompletedFeedback
+ * @apiGroup Feedback
+ * 
+ * @apiSuccess {Object} - Data Object
+ * @apiSuccess {Object[]} -.rows Array of Completed Feedback
+ * @apiSuccess {Number} -.rows.id Feedback ID
+ * @apiSuccess {Number} -.rows.plant_loc_id Plant Location ID
+ * @apiSuccess {Number} -.rows.plant_id Plant ID
+ * @apiSuccess {String} -.rows.description Feedback Description
+ * @apiSuccess {Object} -.contact Contact Information
+ * @apiSuccess {String} -.rows.contact.number Contact Number, will be empty if not provided or user is Internal User
+ * @apiSuccess {Number} -.rows.contact.whatsapp Contact Method of Whatsapp, 0 if No, 1 if Yes
+ * @apiSuccess {Number} -.rows.contact.telegram Contact Method of Telegram, 0 if No, 1 if Yes
+ * @apiSuccess {String} -.rows.image base64 eoncded string of image
+ * @apiSuccess {String} -.rows.status_id Status ID (1 for Pending)
+ * @apiSuccess {String} -.rows.status Status of Feedback ("PENDING")
+ * @apiSuccess {String} -.rows.activity_log Activity Log of Feedback
+ * @apiSuccess {String} -.rows.createdByUser Name of user who created feedback ("Guest" if external)
+ * @apiSuccess {String} -.rows.assigned_user_name Name of assignee
+ * @apiSuccess {Number} -.rows.assigned_user_id ID of assignee
+ * @apiSuccess {String} -.rows.loc_room Location Room
+ * @apiSuccess {String} -.rows.loc_floor Location Floor
+ * @apiSuccess {String} -.rows.plant_name
+ * @apiSuccess {String} -.rows.created_date Date of Feedback Creation
+ * @apiSuccess {Number} -.total Total Pages
+ * 
+ * @apiError (Status Code 204) {Object} Empty {msg: "No Feedback"}
+ * @apiError (Error 500) {Object} InternalServerError {msg: error}
+ *  
+ */
 router.get(
   "/feedback/completed",
   checkIfLoggedInAPI,
   controllers.feedback.fetchCompletedFeedback
 );
 
+/**
+ * @api {get} /feedback/filter/:status/:plant Get Filtered Feedback
+ * @apiDescription Get Filtered Feedback
+ * @apiName GetFilteredFeedback
+ * @apiGroup Feedback
+ * 
+ * @apiParam {String} status Status of Feedback (Can be stringed together, eg. /filter/1,2/)
+ * @apiParam {String} plant Plant ID
+ * @apiQuery {String} page Page Number
+ * 
+ * @apiSuccess {Object} - Data Object
+ * @apiSuccess {Object[]} -.rows Array of Filtered Feedback
+ * @apiSuccess {Number} -.rows.id Feedback ID
+ * @apiSuccess {Number} -.rows.plant_loc_id Plant Location ID
+ * @apiSuccess {Number} -.rows.plant_id Plant ID
+ * @apiSuccess {String} -.rows.description Feedback Description
+ * @apiSuccess {Object} -.contact Contact Information
+ * @apiSuccess {String} -.rows.contact.number Contact Number, will be empty if not provided or user is Internal User
+ * @apiSuccess {Number} -.rows.contact.whatsapp Contact Method of Whatsapp, 0 if No, 1 if Yes
+ * @apiSuccess {Number} -.rows.contact.telegram Contact Method of Telegram, 0 if No, 1 if Yes
+ * @apiSuccess {String} -.rows.image base64 eoncded string of image
+ * @apiSuccess {String} -.rows.status_id Status ID
+ * @apiSuccess {String} -.rows.status Status of Feedback
+ * @apiSuccess {String} -.rows.activity_log Activity Log of Feedback
+ * @apiSuccess {String} -.rows.createdByUser Name of user who created feedback ("Guest" if external)
+ * @apiSuccess {String} -.rows.assigned_user_name Name of assignee
+ * @apiSuccess {Number} -.rows.assigned_user_id ID of assignee
+ * @apiSuccess {String} -.rows.loc_room Location Room
+ * @apiSuccess {String} -.rows.loc_floor Location Floor
+ * @apiSuccess {String} -.rows.plant_name
+ * @apiSuccess {String} -.rows.created_date Date of Feedback Creation
+ * @apiSuccess {Number} -.total Total Pages
+ * 
+ * @apiError (Status Code 204) {Object} Empty {msg: "No Feedback"}
+ * @apiError (Error 500) {Object} InternalServerError {msg: error}
+ * */
 router.get(
   "/feedback/filter/:status/:plant",
   checkIfLoggedInAPI,
   controllers.feedback.fetchFilteredFeedback
 );
 
+/**
+ * @api {get} /feedback/:id Get A Single Feedback
+ * @apiDescription Get a Single Feedback
+ * @apiName GetSingleFeedback
+ * @apiGroup Feedback
+ * 
+ * @apiParam {String} id Feedback ID
+ * 
+ * @apiSuccess {Object} - Data Object
+ * @apiSuccess {Object[]} -.rows Array of Completed Feedback
+ * @apiSuccess {Number} -.rows.id Feedback ID
+ * @apiSuccess {Number} -.rows.plant_loc_id Plant Location ID
+ * @apiSuccess {Number} -.rows.plant_id Plant ID
+ * @apiSuccess {String} -.rows.description Feedback Description
+ * @apiSuccess {Object} -.contact Contact Information
+ * @apiSuccess {String} -.rows.contact.number Contact Number, will be empty if not provided or user is Internal User
+ * @apiSuccess {Number} -.rows.contact.whatsapp Contact Method of Whatsapp, 0 if No, 1 if Yes
+ * @apiSuccess {Number} -.rows.contact.telegram Contact Method of Telegram, 0 if No, 1 if Yes
+ * @apiSuccess {String} -.rows.image base64 eoncded string of image
+ * @apiSuccess {String} -.rows.status_id Status ID (1 for Pending)
+ * @apiSuccess {String} -.rows.status Status of Feedback ("PENDING")
+ * @apiSuccess {String} -.rows.activity_log Activity Log of Feedback
+ * @apiSuccess {String} -.rows.createdByUser Name of user who created feedback ("Guest" if external)
+ * @apiSuccess {String} -.rows.assigned_user_name Name of assignee
+ * @apiSuccess {Number} -.rows.assigned_user_id ID of assignee
+ * @apiSuccess {String} -.rows.loc_room Location Room
+ * @apiSuccess {String} -.rows.loc_floor Location Floor
+ * @apiSuccess {String} -.rows.plant_name
+ * @apiSuccess {String} -.rows.created_date Date of Feedback Creation
+ * @apiSuccess {Number} -.total Total Pages
+ * 
+ * @apiError (Code 204) {Object} Empty {msg: "No Feedback"}
+ * @apiError (Error 500) {Object} InternalServerError {msg: error}
+ * 
+ */
 router.get(
   "/feedback/:id",
   checkIfLoggedInAPI,
   controllers.feedback.getSingleFeedback
 );
 
+/**
+ * @api {patch} /feedback/assign/:id Assign Feedback
+ * @apiDescription Assign Feedback
+ * @apiName AssignFeedback
+ * @apiGroup Feedback
+ * 
+ * @apiParam {String} id Feedback ID
+ * 
+ * @apiBody {Object} - Object
+ * @apiBody {String} -.assigned_user_id Assigned User ID
+ * 
+ * @apiSuccess {String} Success "Feedback successfully assigned"
+ * 
+ * @apiError (Error 500) {String} Internal Server Error "Failure to assign feedback"
+ */
 router.patch(
   "/feedback/assign/:id",
   checkIfLoggedInAPI,
   controllers.feedback.assignFeedback
 );
 
+/**
+ * @api {patch} /feedback/complete/:id Complete Feedback
+ * @apiDescription Complete Feedback
+ * @apiName CompleteFeedback
+ * @apiGroup Feedback
+ * 
+ * @apiParam {String} id Feedback ID
+ * 
+ * @apiBody {Object} - Object
+ * @apiBody {String} -.assigned_user_id Assigned User ID
+ * 
+ * @apiSuccess {String} Success "Feedback successfully assigned"
+ * @apiError (Error 500) {String} Internal Server Error "Failure to assign feedback"
+ */
 router.patch(
   "/feedback/complete/:id",
   checkIfLoggedInAPI,

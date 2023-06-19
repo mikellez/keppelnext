@@ -164,6 +164,9 @@ export default function ChecklistNew(props: ChecklistPageProps) {
             <ChecklistCreationForm
               checklistData={checklistData}
               setChecklistData={setChecklistData}
+              successModal={successModal}
+              updateChecklist={updateChecklist}
+
             />
 
             <ModuleContent>
@@ -180,7 +183,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
             </ModuleContent>
 
             <ModuleFooter>
-              {router.query.action === "New" ? (
+              {router.query.action === "New" && 
                 <>
                   <TooltipBtn
                     toolTip={false}
@@ -201,8 +204,8 @@ export default function ChecklistNew(props: ChecklistPageProps) {
                   >
                     Submit
                   </TooltipBtn>
-                </>
-              ) : (
+                </>}
+              {/* : (
                 <TooltipBtn
                   toolTip={false}
                   style={{ backgroundColor: "#F7C04A", borderColor: "#F7C04A" }}
@@ -211,7 +214,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
                 >
                   Update
                 </TooltipBtn>
-              )}
+              )} */}
             </ModuleFooter>
           </>
         ) : (

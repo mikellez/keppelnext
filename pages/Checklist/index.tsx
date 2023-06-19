@@ -111,6 +111,7 @@ export default function Checklist(props: ChecklistProps) {
   const [history, setHistory] = useState<
     { [key: string]: string }[] | undefined
   >(undefined);
+  const [assignedUserHistory, setAssignedUserHistory] = useState<string>("");
   const filteredData = useChecklistFilter(props, page);
   const columnData = useChecklist(indexedColumn[activeTabIndex], page);
 
@@ -330,7 +331,10 @@ export default function Checklist(props: ChecklistProps) {
                             )}
                             <AiOutlineHistory
                               color={"#C70F2B"}
-                              onClick={() => setHistory(item.activity_log)}
+                              onClick={() => {
+                                setHistory(item.activity_log)
+                                setAssignedUserHistory(item.assigneduser)
+                              }}
                               size={22}
                               title={"View History"}
                             />
@@ -369,7 +373,7 @@ export default function Checklist(props: ChecklistProps) {
             closeModal={() => setHistory(undefined)}
             closeOnOverlayClick={true}
           >
-            <ChecklistHistory history={history!} />
+            <ChecklistHistory history={history!} assignedUser={assignedUserHistory} />
           </ModuleModal>
         )}
       </ModuleContent>
