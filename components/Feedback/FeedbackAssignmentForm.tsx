@@ -92,7 +92,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
         </div>
       </div>
       <div className={formStyles.halfContainer}>
-        {f.image && (
+        {f.image != "" && (
           <div className="form-group">
             <div>
               <label className="form-label">Feedback Image</label>
