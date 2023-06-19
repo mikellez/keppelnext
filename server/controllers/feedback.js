@@ -271,7 +271,7 @@ const assignFeedback = async (req, res, next) => {
     } = await fetchEmailDetailsForSpecificFeedback(req.params.id);
 
     const mail = new AssignFeedbackMail(
-      [assigned_user_email],
+      [assigned_user_email, req.user.email],
       {
         plant_name: plant_name,
         name: name,
@@ -327,7 +327,7 @@ const completeFeedback = async (req, res, next) => {
         remarks: remarks,
         id: req.body.id,
         created_date: today,
-        completed_data: today,
+        completed_date: today,
       }
     );
 
