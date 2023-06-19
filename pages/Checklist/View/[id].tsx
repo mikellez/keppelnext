@@ -58,7 +58,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
             <ModuleContent>
                 {remarks &&
                     <>
-                        <label className={styles.checklistDetailsHeading}>Remarks</label>
+                        <label className={styles.checklistDetailsHeading}>Approval Remarks</label>
                         <p>{ remarks }</p>
                     </>
                 }
