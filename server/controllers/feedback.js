@@ -92,7 +92,16 @@ const fetchAssignedFeedbackQuery =
   `
 WHERE 
     ua.user_id = $1 AND 
-    (f.status_id is null or f.status_id = 2 or f.status_id = 3)
+    (f.status_id is null or f.status_id = 2 or f.status_id = 3) AND
+    (CASE
+      WHEN (SELECT ua.role_id
+          FROM
+              keppel.user_access ua
+          WHERE
+              ua.user_id = $1) = 4
+      THEN assignU.user_id = $1
+      ELSE True
+      END) 
 ORDER BY f.feedback_id DESC
 `;
 
@@ -126,7 +135,16 @@ const fetchCompletedFeedbackQuery =
   `				
 WHERE 
     ua.user_id = $1 AND 
-    (f.status_id = 4)
+    (f.status_id = 4) AND
+    (CASE
+      WHEN (SELECT ua.role_id
+          FROM
+              keppel.user_access ua
+          WHERE
+              ua.user_id = $1) = 4
+      THEN assignU.user_id = $1
+      ELSE True
+      END)
 ORDER BY f.feedback_id desc
 `;
 

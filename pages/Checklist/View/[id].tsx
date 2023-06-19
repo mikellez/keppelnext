@@ -41,36 +41,30 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
     }
   }, [props.checklist]);
 
-  return (
-    <ModuleMain>
-      <ModuleHeader header="View Checklist">
-        <TooltipBtn
-          text="Download PDF"
-          onClick={() =>
-            downloadChecklistPDF(parseInt(router.query.id as string))
-          }
-        >
-          <HiOutlineDownload size={24} />
-        </TooltipBtn>
-        <button
-          className={"btn btn-secondary"}
-          type="button"
-          onClick={() => router.back()}
-        >
-          Back
-        </button>
-      </ModuleHeader>
-      <ChecklistPreview checklist={props.checklist} />
-      <ModuleContent>
-        {remarks && (
-          <>
-            <label className={styles.checklistDetailsHeading}>Remarks</label>
-            <p>{remarks}</p>
-          </>
-        )}
-      </ModuleContent>
-    </ModuleMain>
-  );
+    return (
+        <ModuleMain>
+            <ModuleHeader header="View Checklist">
+                <TooltipBtn
+                    text="Download PDF"
+                    onClick={() => downloadChecklistPDF(parseInt(router.query.id as string))}
+                >
+                    <HiOutlineDownload size={24} />
+                </TooltipBtn>
+                <button className={"btn btn-secondary"} type="button" onClick={() => router.back()}>
+                    Back
+                </button>
+            </ModuleHeader>
+                <ChecklistPreview checklist={props.checklist} />
+            <ModuleContent>
+                {remarks &&
+                    <>
+                        <label className={styles.checklistDetailsHeading}>Approval Remarks</label>
+                        <p>{ remarks }</p>
+                    </>
+                }
+            </ModuleContent>
+        </ModuleMain>
+    );
 };
 
 export default ManageChecklistPage;

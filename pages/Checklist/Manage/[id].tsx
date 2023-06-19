@@ -5,12 +5,6 @@ import {
   ModuleHeader,
   ModuleFooter,
 } from "../../../components";
-import {
-  ModuleContent,
-  ModuleMain,
-  ModuleHeader,
-  ModuleFooter,
-} from "../../../components";
 import { ChecklistPageProps } from "../Form";
 import { createChecklistGetServerSideProps } from "../../../types/common/props";
 import { GetServerSideProps } from "next";
