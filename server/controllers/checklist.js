@@ -137,7 +137,7 @@ const fetchForReviewChecklistsQuery =
 WHERE 
     ua.user_id = $1 AND 
     (cl.status_id = 4 OR cl.status_id = 6)
-ORDER BY cl.checklist_id desc
+    ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' desc
 `;
 
 const fetchForReviewChecklists = async (req, res, next) => {
