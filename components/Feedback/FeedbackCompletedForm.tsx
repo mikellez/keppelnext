@@ -90,7 +90,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
           </div>
         </div>
         <div className={formStyles.halfContainer}>
-        {props.feedbackData.image && <div className="form-group">
+        {props.feedbackData.image !== "" && <div className="form-group">
             <div>
               <label className="form-label">Feedback Image</label>
             </div>
