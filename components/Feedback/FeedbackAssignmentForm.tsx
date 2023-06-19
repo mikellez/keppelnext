@@ -146,7 +146,13 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
                 type="text"
                 className="form-control"
                 disabled
-                value={f.created_user_email ? f.created_user_email : "No email"}
+                value={
+                  f.created_user_email
+                    ? f.created_user_email
+                    : f.contact.email
+                    ? f.contact.email
+                    : "No email"
+                }
               />
             </>
           ) : (
