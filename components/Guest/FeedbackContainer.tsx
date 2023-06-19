@@ -69,7 +69,7 @@ const FeedbackContainer = (props: any) => {
   }, [props.user]);
 
   async function submitform() {
-    console.log(form);
+    // console.log(form);
     const emptyContactCondition =
       form.email === "" &&
       (form.contact.number === "" ||
@@ -84,7 +84,7 @@ const FeedbackContainer = (props: any) => {
       await instance
         .post("/api/feedback", form)
         .then((res) => {
-          console.log(res);
+          // console.log(res.data);
           setSubmissionModal(true);
         })
         .catch((err) => {

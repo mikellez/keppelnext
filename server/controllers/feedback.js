@@ -1,6 +1,12 @@
 const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
+const {
+  CreateFeedbackMail,
+  AssignFeedbackMail,
+  CompletedFeedbackMail,
+} = require("../mailer/FeedbackMail");
+const { getMaxListeners } = require("process");
 
 /** Express router providing user related routes
  * @module controllers/feedback
@@ -228,11 +234,38 @@ const assignFeedback = async (req, res, next) => {
   try {
     // console.log(req.params);
     // console.log(req.body);
-    await global.db.query(sql, [
+    const data = await global.db.query(sql, [
       JSON.stringify(activity_log),
       req.body.assigned_user_id.value,
       req.params.id,
     ]);
+    // console.log(fetchEmailDetailsForSpecificFeedback(req.body.id));
+
+    const {
+      assigned_user_email,
+      creator_email,
+      plant_name,
+      status,
+      name,
+      description,
+      created_date,
+      completed_date,
+    } = await fetchEmailDetailsForSpecificFeedback(req.params.id);
+
+    const mail = new AssignFeedbackMail(
+      [assigned_user_email],
+      {
+        plant_name: plant_name,
+        name: name,
+        description: description,
+        id: req.body.id,
+        created_date: today,
+      }
+      // ["wenjunjie14@gmail.com"]
+    );
+
+    await mail.send();
+
     // console.log("submit");
     return res.status(200).json("Feedback successfully assigned");
   } catch (err) {
@@ -253,9 +286,35 @@ const completeFeedback = async (req, res, next) => {
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
-  console.log(req.body);
+  // console.log(req.body);
   try {
     await global.db.query(sql, [req.body.remarks, today, id]);
+    const {
+      assigned_user_email,
+      creator_email,
+      plant_name,
+      status,
+      name,
+      description,
+      created_date,
+      completed_date,
+      remarks,
+    } = await fetchEmailDetailsForSpecificFeedback(req.params.id);
+
+    const mail = new CompletedFeedbackMail(
+      [assigned_user_email, creator_email, req.body.contact.email],
+      {
+        plant_name: plant_name,
+        name: name,
+        remarks: remarks,
+        id: req.body.id,
+        created_date: today,
+        completed_data: today,
+      }
+    );
+
+    await mail.send();
+
     return res.status(200).json("Feedback successfully completed");
   } catch (err) {
     console.log(err);
@@ -280,6 +339,7 @@ const getSingleFeedback = async (req, res, next) => {
 
 const createFeedback = async (req, res, next) => {
   const feedback = req.body;
+  // console.log(req.body);
   const sql = `INSERT INTO keppel.feedback 
               (name,
                 description,
@@ -305,7 +365,7 @@ const createFeedback = async (req, res, next) => {
   const userID = req.user ? req.user.id : 55;
   // Update guest inputted email
   if (!req.user) {
-    feedback.contact = {...feedback.contact, email: feedback.email}
+    feedback.contact = { ...feedback.contact, email: feedback.email };
   }
   try {
     await global.db.query(sql, [
@@ -319,11 +379,46 @@ const createFeedback = async (req, res, next) => {
       1,
       today,
     ]);
+
+    const mail = new CreateFeedbackMail([feedback.contact.email], {
+      name: feedback.name,
+      description: feedback.comments,
+      created_date: today,
+    });
+
+    await mail.send();
   } catch (e) {
     console.log(e);
     return res.status(500).send("Failure to create feedback");
   }
   return res.status(200).send("New feedback created successfully");
+};
+
+const fetchEmailDetailsForSpecificFeedback = async (feedback_id) => {
+  const sql = `       
+  SELECT 
+       u1.user_email as assigned_user_email,
+       u3.user_email as creator_email,
+       pm.plant_name,
+       s.status,
+       f.name as name,
+       f.description,
+       f.created_date,
+       f.completed_date,
+       f.remarks
+       
+   FROM 
+       keppel.feedback f
+           JOIN keppel.users u1 ON f.assigned_user_id = u1.user_id
+           JOIN keppel.users u3 ON f.created_user_id = u3.user_id
+           JOIN keppel.plant_master pm ON f.plant_id = pm.plant_id
+           JOIN keppel.status_cm s ON f.status_id = s.status_id
+   WHERE
+       f.feedback_id = $1
+`;
+  const data = await global.db.query(sql, [feedback_id]);
+
+  return data.rows[0];
 };
 
 module.exports = {
