@@ -23,6 +23,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
   //     });
   //   }
   // };
+  const disForm = props.disableForm ? props.disableForm : false;
 
   useEffect(() => {
     props.setFeedbackData(props.feedbackData);
@@ -191,6 +192,8 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
             name="description"
             id="formControlDescription"
             rows={5}
+            disabled={disForm}
+            value={props.feedbackData.remarks ? props.feedbackData.remarks : ""}
             onChange={(e) => {
               props.setFeedbackData((prev: CMMSFeedback) => {
                 // console.log(e.target.value);
