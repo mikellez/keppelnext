@@ -274,15 +274,25 @@ interface CMMSSubComponent1Name {
   system_asset_lvl7: string;
 }
 
+interface CMMSContact {
+  tele? : string;
+  whatsapp? : string;
+  email? : string;
+}
+
 interface CMMSFeedback {
-  feedback_id: numbers;
+  id : number;
   created_date: Date;
+  completed_date? : Date;
   createdbyuser: string;
-  created_by_user_id: string | null;
-  created_by_user_email: string | null;
+  created_user_id: string | null;
+  created_user_email: string | null;
   fullname: string;
   plant_name: string;
   plant_id: number;
+  // rating: number;
+  image: string;
+  contact: CMMSContact;
   loc_room: string;
   loc_floor:string;
   status: string;
@@ -292,7 +302,7 @@ interface CMMSFeedback {
   assigned_user_name: string;
   description?: string;
   requesthistory?: string;
-  complete_comments?: string;
+  remarks?: string;
   total?: number;
   datajson?: any;
   activity_log: { [key: string]: string }[];
@@ -440,23 +450,16 @@ interface CMMSWorkflow {
   is_active: number;
   assignTo: string;
   user_id: number;
-  user_email: string;
-  user_name: string;
-  created_at: string;
-  create_date?: string;
+  user_email: string,
+  user_name: string,
+  created_at: string,
+  created_date: Date,
 }
 
 interface CMMSPlantLoc {
   id: number,
   plant_id: number,
-  location: string,
-  activity_log?: {[key: string]: string}[]
-  created_date?: string
-}
-
-interface CMMSPlantLoc {
-  id: number,
-  plant_id: number,
+  plant_name: string,
   location: string,
   activity_log?: {[key: string]: string}[]
   created_date?: string

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-interface ChecklistHistoryProps {
+interface FeedbackHistoryProps {
   history: { [key: string]: string }[];
 }
 
@@ -8,18 +8,12 @@ function rowElements(rows: { [key: string]: string }[]) {
   return (
     <>
       {rows.map((row) => {
-        console.log(row);
+        // console.log(row);
         return (
           <tr key={row["date"] + row["name"] + row["role"]}>
             <td>{row["activity_type"]}</td>
             <td>{row["activity"]}</td>
-            <td>
-              {new Date(row["date"]).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-              })}
-            </td>
+            <td>{row["date"]}</td>
             <td>{row["name"]}</td>
           </tr>
         );
@@ -28,7 +22,7 @@ function rowElements(rows: { [key: string]: string }[]) {
   );
 }
 
-const ChecklistHistory = (props: ChecklistHistoryProps) => {
+const FeedbackHistory = (props: FeedbackHistoryProps) => {
   const [rows, setRows] = useState<{ [key: string]: string }[]>([]);
 
   return (
@@ -48,4 +42,4 @@ const ChecklistHistory = (props: ChecklistHistoryProps) => {
   );
 };
 
-export default ChecklistHistory;
+export default FeedbackHistory;

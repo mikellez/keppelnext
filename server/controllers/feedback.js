@@ -11,23 +11,26 @@ const ITEMS_PER_PAGE = 10;
 
 const fetchAllFeedbackQuery = `
 SELECT 
-    f.feedback_id, 
-    f.plant_loc_id,
-    f.plant_id, 
-    f.description,
-    f.contact,
-    f.status_id,
-    f.activity_log,
-    concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
-    concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigned_user_name,
+  f.feedback_id as id, 
+  f.plant_loc_id,
+  f.plant_id, 
+  f.description,
+  f.contact,
+  f.imageurl as image,
+  f.status_id,
+  f.activity_log,
+  f.completed_date,
+  f.remarks,
+  concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
+  concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigned_user_name,
 	pl.loc_room,
 	pl.loc_id,
 	pl.loc_floor,
-    pm.plant_name,
-    pm.plant_id,
-    f.created_date,
-    f.assigned_user_id,
-    st.status
+  pm.plant_name,
+  pm.plant_id,
+  f.created_date,
+  f.assigned_user_id,
+  st.status
 FROM 
     keppel.users u
     JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -42,7 +45,7 @@ FROM
     LEFT JOIN keppel.users createdU ON createdU.user_id = f.created_user_id
     LEFT JOIN keppel.plant_master pm ON pm.plant_id = f.plant_id
     LEFT JOIN keppeL.plant_location pl ON pl.loc_id = f.plant_loc_id
-    JOIN keppel.status_cm st ON st.status_id = f.status_id	
+    JOIN keppel.status_fm st ON st.status_id = f.status_id	
 `;
 
 const fetchPendingFeedbackQuery =
@@ -58,7 +61,7 @@ const fetchPendingFeedback = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await global.db.query(fetchForReviewFeedbackQuery, [
+  const totalRows = await global.db.query(fetchPendingFeedbackQuery, [
     req.user.id,
   ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
@@ -83,7 +86,16 @@ const fetchAssignedFeedbackQuery =
   `
 WHERE 
     ua.user_id = $1 AND 
-    (f.status_id is null or f.status_id = 2 or f.status_id = 3)
+    (f.status_id is null or f.status_id = 2 or f.status_id = 3) AND
+    (CASE
+      WHEN (SELECT ua.role_id
+          FROM
+              keppel.user_access ua
+          WHERE
+              ua.user_id = $1) = 4
+      THEN assignU.user_id = $1
+      ELSE True
+      END) 
 ORDER BY f.feedback_id DESC
 `;
 
@@ -112,26 +124,35 @@ const fetchAssignedFeedback = async (req, res, next) => {
   }
 };
 
-const fetchForReviewFeedbackQuery =
+const fetchCompletedFeedbackQuery =
   fetchAllFeedbackQuery +
   `				
 WHERE 
     ua.user_id = $1 AND 
-    (f.status_id = 4 OR f.status_id = 6)
+    (f.status_id = 4) AND
+    (CASE
+      WHEN (SELECT ua.role_id
+          FROM
+              keppel.user_access ua
+          WHERE
+              ua.user_id = $1) = 4
+      THEN assignU.user_id = $1
+      ELSE True
+      END)
 ORDER BY f.feedback_id desc
 `;
 
-const fetchForReviewFeedback = async (req, res, next) => {
+const fetchCompletedFeedback = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await global.db.query(fetchForReviewFeedbackQuery, [
+  const totalRows = await global.db.query(fetchCompletedFeedbackQuery, [
     req.user.id,
   ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    fetchForReviewFeedbackQuery +
+    fetchCompletedFeedbackQuery +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
@@ -146,8 +167,6 @@ const fetchForReviewFeedback = async (req, res, next) => {
 };
 
 const fetchFilteredFeedback = async (req, res, next) => {
-  let date = req.params.date;
-  let datetype = req.params.datetype;
   let status = req.params.status;
   let plant = req.params.plant;
   let page = req.params?.page;
@@ -178,38 +197,6 @@ const fetchFilteredFeedback = async (req, res, next) => {
     }
   }
 
-  if (date !== "all") {
-    switch (datetype) {
-      case "week":
-        dateCond = `
-                    AND DATE_PART('week', f.CREATED_DATE::DATE) = DATE_PART('week', '${date}'::DATE) 
-                    AND DATE_PART('year', f.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
-
-        break;
-
-      case "month":
-        dateCond = `
-                    AND DATE_PART('month', f.CREATED_DATE::DATE) = DATE_PART('month', '${date}'::DATE) 
-                    AND DATE_PART('year', f.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
-
-        break;
-
-      case "year":
-        dateCond = `AND DATE_PART('year', f.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
-
-        break;
-
-      case "quarter":
-        dateCond = `
-                    AND DATE_PART('quarter', f.CREATED_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) 
-                    AND DATE_PART('year', f.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
-
-        break;
-      default:
-        dateCond = `AND CL.CREATED_DATE::DATE = '${date}'::DATE`;
-    }
-  }
-
   const sql =
     fetchAllFeedbackQuery +
     `
@@ -235,6 +222,80 @@ const fetchFilteredFeedback = async (req, res, next) => {
   });
 };
 
+const assignFeedback = async (req, res, next) => {
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
+  const activity_log = {
+    date: today,
+    name: req.user.name,
+    activity: "Assigned",
+    activity_type: "Updated Feedback",
+  };
+
+  const sql = `
+        UPDATE
+            keppel.feedback
+        SET 
+            status_id = 2,
+            activity_log = activity_log || $1,
+            assigned_user_id = $2
+        WHERE 
+            feedback_id = $3
+    `;
+
+  try {
+    // console.log(req.params);
+    // console.log(req.body);
+    await global.db.query(sql, [
+      JSON.stringify(activity_log),
+      req.body.assigned_user_id.value,
+      req.params.id,
+    ]);
+    // console.log("submit");
+    return res.status(200).json("Feedback successfully assigned");
+  } catch (err) {
+    // console.log(err);
+    return res.status(500).json("Failure to assign feedback");
+  }
+};
+
+const completeFeedback = async (req, res, next) => {
+  const id = req.params.id;
+  const sql = `UPDATE keppel.feedback
+                SET 
+                  status_id = 4,
+                  remarks = $1,
+                  completed_date = $2
+                
+                WHERE feedback_id = $3`;
+
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
+  console.log(req.body);
+  try {
+    await global.db.query(sql, [req.body.remarks, today, id]);
+    return res.status(200).json("Feedback successfully completed");
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json("Failure to complete Feedback");
+  }
+};
+
+const getSingleFeedback = async (req, res, next) => {
+  // console.log(req.params.feedback_id);
+  const sql = fetchAllFeedbackQuery + `WHERE f.feedback_id = ${req.params.id}`;
+  global.db.query(sql, (err, result) => {
+    if (err) {
+      return res.status(500).send("Error occured in the server");
+    }
+    if (result.rows.length > 0) {
+      return res.status(200).send(result.rows[0]);
+    } else {
+      return res.status(404).send("No Feedback found");
+    }
+  });
+};
+
 const createFeedback = async (req, res, next) => {
   const feedback = req.body;
   const sql = `INSERT INTO keppel.feedback 
@@ -242,47 +303,54 @@ const createFeedback = async (req, res, next) => {
                 description,
                 plant_loc_id,
                 imageurl,
-                rating,
                 plant_id,
                 contact,
                 created_user_id,
                 status_id,
                 created_date)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  // const activity_log = [
-  //   {
-  //     date: today,
-  //     name: req.user.name,
-  //     activity: `${statusId === 2 ? "ASSIGNED" : "PENDING"}`,
-  //     activity_type: "Created Checklist Record",
-  //   },
-  // ];
-  const userID = req.user? req.user.id : null;
+  const activity_log = [
+    {
+      date: today,
+      name: req.user ? req.user.name : "Guest",
+      activity: "PENDING",
+      activity_type: "Created Feedback",
+    },
+  ];
+  // Assign as Guest
+  const userID = req.user ? req.user.id : 55;
+  // Update guest inputted email
+  if (!req.user) {
+    feedback.contact = {...feedback.contact, email: feedback.email}
+  }
   try {
-    await global.db.query(sql, [feedback.name, 
-                        feedback.comments,
-                        feedback.taggedLocID,
-                        feedback.image,
-                        feedback.rating,
-                        feedback.plantID,
-                        JSON.stringify(feedback.contact),
-                        userID,
-                        1,
-                        today
-                        ]);
+    await global.db.query(sql, [
+      feedback.name,
+      feedback.comments,
+      feedback.taggedLocID,
+      feedback.image,
+      feedback.plantID,
+      JSON.stringify(feedback.contact),
+      userID,
+      1,
+      today,
+    ]);
   } catch (e) {
     console.log(e);
     return res.status(500).send("Failure to create feedback");
   }
   return res.status(200).send("New feedback created successfully");
-}
+};
 
 module.exports = {
   fetchPendingFeedback,
   fetchAssignedFeedback,
-  fetchForReviewFeedback,
+  fetchCompletedFeedback,
   fetchFilteredFeedback,
-  createFeedback
+  createFeedback,
+  assignFeedback,
+  completeFeedback,
+  getSingleFeedback,
 };

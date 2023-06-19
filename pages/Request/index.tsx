@@ -146,7 +146,7 @@ export const downloadCSV = async (type: string, filename?: string) => {
       method: "get",
       responseType: "arraybuffer",
     });
-    console.log(response);
+    // console.log(response);
     const blob = new Blob([response.data]);
     const url = window.URL.createObjectURL(blob);
     const temp_link = document.createElement("a");
@@ -456,8 +456,7 @@ export default function Request(props: RequestProps) {
     },
   };
 
-  console.log(isReady);
-  console.log(requestData);
+  // console.log(isReady);
   useEffect(() => {
     if (requestData && !requestIsFetchValidating) {
       if (requestData?.rows?.length > 0) {

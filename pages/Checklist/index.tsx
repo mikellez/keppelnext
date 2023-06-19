@@ -139,6 +139,7 @@ export default function Checklist(props: ChecklistProps) {
   };
 
   useEffect(() => {
+    console.log(props);
     if (data && !isValidating) {
       if (props?.filter) {
         if (data?.rows?.length > 0) {
@@ -278,7 +279,16 @@ export default function Checklist(props: ChecklistProps) {
                               {item.status}
                             </span>
                           </Cell>
-                          <Cell>{item.created_date.toString()}</Cell>
+                          <Cell>
+                            {new Date(item.created_date).toLocaleDateString!(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                              }
+                            )}
+                          </Cell>
                           <Cell>{item.assigneduser}</Cell>
                           <Cell>{item.signoffuser}</Cell>
                           <Cell>{item.createdbyuser}</Cell>

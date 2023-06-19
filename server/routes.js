@@ -702,14 +702,14 @@ router.get(
  * @apiError (Error 204) {Object} NoContent {msg: "No checklist"}
  * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
  */
+
 router.get(
   "/checklist/pending",
   checkIfLoggedInAPI,
   controllers.checklist.fetchPendingChecklists
 );
 
-router.post("/feedback",
-controllers.feedback.createFeedback);
+router.post("/feedback", controllers.feedback.createFeedback);
 
 router.get(
   "/feedback/pending",
@@ -723,15 +723,33 @@ router.get(
 );
 
 router.get(
-  "/feedback/review",
+  "/feedback/completed",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchForReviewFeedback
+  controllers.feedback.fetchCompletedFeedback
 );
 
 router.get(
-  "/feedback/filter/:status/:plant/:datetype/:date",
+  "/feedback/filter/:status/:plant",
   checkIfLoggedInAPI,
   controllers.feedback.fetchFilteredFeedback
+);
+
+router.get(
+  "/feedback/:id",
+  checkIfLoggedInAPI,
+  controllers.feedback.getSingleFeedback
+);
+
+router.patch(
+  "/feedback/assign/:id",
+  checkIfLoggedInAPI,
+  controllers.feedback.assignFeedback
+);
+
+router.patch(
+  "/feedback/complete/:id",
+  checkIfLoggedInAPI,
+  controllers.feedback.completeFeedback
 );
 
 /**
