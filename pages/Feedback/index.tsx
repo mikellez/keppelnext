@@ -215,10 +215,7 @@ export default function Feedback() {
                           </Cell>
                           <Cell>{item.createdbyuser}</Cell>
                           <Cell>
-                            {((user.data!.role_id === Role.Admin ||
-                              user.data!.role_id === Role.Manager ||
-                              user.data!.role_id === Role.Engineer) &&
-                              item.status_id === 2) ||
+                            {item.status_id === 2 ||
                             item.status_id === 3 ? (
                               <>
                                 <Link href={`/Feedback/Complete/${item.id}`}>
@@ -228,7 +225,9 @@ export default function Feedback() {
                                   />
                                 </Link>
                               </>
-                            ) : item.status_id === 1 ? (
+                            ) : (user.data!.role_id === Role.Admin ||
+                              user.data!.role_id === Role.Manager ||
+                              user.data!.role_id === Role.Engineer) && item.status_id === 1 ? (
                               <Link href={`/Feedback/Assign/${item.id}`}>
                                 <AiOutlineUserAdd size={22} title={"Assign"} />
                               </Link>
