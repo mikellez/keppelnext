@@ -6,9 +6,7 @@ import { dateFormat } from "../Schedule/ScheduleTemplate";
 import moment from "moment";
 
 const ChecklistDetails = (props: ChecklistPageProps) => {
-  const createdDate = dateFormat(
-    new Date(props.checklist?.created_date as string)
-  );
+  const createdDate = moment(new Date(props.checklist?.created_date as string)).format('MMMM Do YYYY, h:mm:ss a');
   const assets =
     props.checklist?.linkedassets != null && props.checklist?.linkedassets != ""
       ? props.checklist?.linkedassets.split(", ")
