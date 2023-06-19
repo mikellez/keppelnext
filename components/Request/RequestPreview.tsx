@@ -54,9 +54,10 @@ export default function RequestPreview(props: RequestPreviewProps) {
       const rejected = activity_log
         .reverse()
         .find((log) => log.activity_type === "REJECTED");
+        console.log('rejected', rejected)
       setComments({ "Rejection Comments": rejected?.remarks || "NIL" });
     }
-  }, [props.request.activity_log]);
+  }, []);
 
   return (
     <div>
@@ -141,15 +142,11 @@ export default function RequestPreview(props: RequestPreviewProps) {
             </td>
           </tr>
           {comments &&
-            (props.request.activity_log[props.request.activity_log.length - 1]
-              .activity_type === "APPROVED" ||
-              props.request.activity_log[props.request.activity_log.length - 1]
-                .activity_type === "REJECTED") && (
               <tr>
                 <th>{Object.keys(comments)[0]}</th>
                 <td>{Object.values(comments)[0]}</td>
               </tr>
-            )}
+            }
           {props.action == RequestAction.manage && (
             <>
               <tr>
