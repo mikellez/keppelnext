@@ -39,7 +39,7 @@ export default function ImagePreview(props: ImagePreviewProps) {
 
 	const previewContentFinal = props.previewObjURL ?
 	{...previewContent, 
-		backgroundImage: 'url("' + props.previewObjURL + '")',
+		backgroundImage: `url(data:image/png;base64, ${props.previewObjURL})`,
 	} : previewContent
 
 	return (

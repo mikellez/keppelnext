@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, CSSProperties } from "react";
 import RequiredIcon from "../RequiredIcon";
 import AssetSelect, { AssetOption } from "../Checklist/AssetSelect";
 import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
@@ -14,10 +14,33 @@ import StarRatings from "react-star-ratings";
 import ImagePreview from "../Request/ImagePreview";
 import Image from "next/image";
 import { FeedbackFormProps } from "../../pages/Feedback";
+import { BsCameraFill } from "react-icons/bs"
+import ModuleSimplePopup from "../ModuleLayout/ModuleSimplePopup";
+import { ModuleModal } from "../ModuleLayout/ModuleModal";
 
 const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
   const user = useCurrentUser();
+  const [image, setImage] = useState<boolean>(false);
   const f = props.feedbackData;
+  
+
+  const centerTransform: CSSProperties = {
+    position: "relative",
+    left: "50%",
+    top: "50%",
+    transform: "translate(-50%, -50%)",
+  }
+  const previewContent: CSSProperties = {
+    ...centerTransform,
+    textAlign: "center",
+  
+    height: "100%",
+    width: "100%",
+  
+    backgroundSize: "contain",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "center"
+  }
 
   // const updateDataField = (
   //   value: number | string | Date | null,
@@ -91,13 +114,26 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
           ></textarea>
         </div>
       </div>
-      <div className={formStyles.halfContainer}>
+      <div className={`${formStyles.halfContainer}`}>
         {f.image != "" && (
-          <div className="form-group">
+          <div className={`${formStyles.imageClick} form-group`} onClick={() => setImage(true)}>
             <div>
-              <label className="form-label">Feedback Image</label>
+              <label className="form-label">
+                <p style={{textDecoration: "underline"}}>
+                  View Feedback Image
+                </p>
+              </label>
             </div>
-            <ImagePreview previewObjURL={f.image} />
+            {/* <ImagePreview previewObjURL={f.image} /> */}
+            {/* <div style={{...previewContent, backgroundImage: 'url("' + f.image + '")'}}> */}
+            {/* <img src={f.image} width="100%" height="100%" alt="" /> */}
+
+            {/* </div> */}
+            {/* <div style={centerTransform}><BsCameraFill size={104}/>
+              <div style={{color: "rgba(0,0,0,0.1)"}}>
+                No Image
+              </div>
+            </div> */}
           </div>
         )}
         <div className="form-group">
@@ -185,6 +221,15 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
           />
         </div>
       </div>
+    <ModuleModal
+      isOpen={image}
+      closeModal={() => setImage(false)}
+      closeOnOverlayClick={true}
+      >
+
+        <Image src={f.image} fill={true} alt="" />
+    </ModuleModal>
+    
     </ModuleContent>
   );
 };
