@@ -1,0 +1,18 @@
+.searchBarContainer {
+    border: solid #C70F2B 2px;
+    border-radius: 5px;
+}
+
+.searchBarInput {
+    border: none;
+}
+
+.searchBarInput:focus {
+    outline: none;
+}
+
+.searchBarButton {
+    border: none;
+    background-color: #C70F2B;
+    padding: 0.15rem;
+}

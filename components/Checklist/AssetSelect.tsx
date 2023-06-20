@@ -80,7 +80,4 @@ const AssetSelect = forwardRef((props: AssetSelectProps, ref: any) => {
 });
 
 AssetSelect.displayName = "AssetSelect";
-  
-
-
 export default AssetSelect;
