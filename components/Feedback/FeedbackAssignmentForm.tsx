@@ -21,25 +21,24 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
   const user = useCurrentUser();
   const [image, setImage] = useState<boolean>(false);
   const f = props.feedbackData;
-  
 
   const centerTransform: CSSProperties = {
     position: "relative",
     left: "50%",
     top: "50%",
     transform: "translate(-50%, -50%)",
-  }
+  };
   const previewContent: CSSProperties = {
     ...centerTransform,
     textAlign: "center",
-  
+
     height: "100%",
     width: "100%",
-  
+
     backgroundSize: "contain",
     backgroundRepeat: "no-repeat",
-    backgroundPosition: "center"
-  }
+    backgroundPosition: "center",
+  };
 
   // const updateDataField = (
   //   value: number | string | Date | null,
@@ -103,63 +102,65 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
           </div> */}
           </div>
 
-        <div className="form-group">
-          <label className="form-label">Feedback Description</label>
-          <textarea
-            className="form-control"
-            name="description"
-            id="formControlDescription"
-            rows={5}
-            value={f.description}
-            disabled
-          ></textarea>
-        </div>
-      </div>
-      <div className={formStyles.halfContainer}>
-        {f.image != "" && (
-          <div className={`${formStyles.imageClick} form-group`} onClick={() => setImage(true)}>
-          <div>
-            <label className="form-label">
-              <p style={{textDecoration: "underline"}}>
-                View Feedback Image
-              </p>
-            </label>
+          <div className="form-group">
+            <label className="form-label">Feedback Description</label>
+            <textarea
+              className="form-control"
+              name="description"
+              id="formControlDescription"
+              rows={5}
+              value={f.description}
+              disabled
+            ></textarea>
           </div>
-          {/* <ImagePreview previewObjURL={f.image} /> */}
-          {/* <div style={{...previewContent, backgroundImage: 'url("' + f.image + '")'}}> */}
-          {/* <img src={f.image} width="100%" height="100%" alt="" /> */}
+        </div>
+        <div className={formStyles.halfContainer}>
+          {f.image != "" && (
+            <div
+              className={`${formStyles.imageClick} form-group`}
+              onClick={() => setImage(true)}
+            >
+              <div>
+                <label className="form-label">
+                  <p style={{ textDecoration: "underline" }}>
+                    View Feedback Image
+                  </p>
+                </label>
+              </div>
+              {/* <ImagePreview previewObjURL={f.image} /> */}
+              {/* <div style={{...previewContent, backgroundImage: 'url("' + f.image + '")'}}> */}
+              {/* <img src={f.image} width="100%" height="100%" alt="" /> */}
 
-          {/* </div> */}
-          {/* <div style={centerTransform}><BsCameraFill size={104}/>
+              {/* </div> */}
+              {/* <div style={centerTransform}><BsCameraFill size={104}/>
             <div style={{color: "rgba(0,0,0,0.1)"}}>
               No Image
             </div>
           </div> */}
+            </div>
+          )}
+          <div className="form-group">
+            <label className="form-label">
+              <RequiredIcon /> Assign to
+            </label>
+            <AssignToSelect
+              plantId={f.plant_id as number}
+              isSingle={true}
+              onChange={(value) => {
+                props.setFeedbackData((prev: any) => {
+                  return {
+                    ...prev,
+                    ["assigned_user_id"]: value,
+                  };
+                });
+              }}
+              defaultIds={f.assigned_user_id ? [f.assigned_user_id] : []}
+            />
           </div>
-        )}
-        <div className="form-group">
-          <label className="form-label">
-            <RequiredIcon /> Assign to
-          </label>
-          <AssignToSelect
-            plantId={f.plant_id as number}
-            isSingle={true}
-            onChange={(value) => {
-              props.setFeedbackData((prev: any) => {
-                return {
-                  ...prev,
-                  ["assigned_user_id"]: value,
-                };
-              });
-            }}
-            defaultIds={f.assigned_user_id ? [f.assigned_user_id] : []}
-          />
         </div>
-      </div>
-</ModuleContent>
+      </ModuleContent>
       <ModuleDivider />
-<ModuleContent grid>
-
+      <ModuleContent grid>
         <div className="form-group">
           <label className="form-label">
             <RequiredIcon />
@@ -192,9 +193,11 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
                 }
               />
             </>
-          ) : (FeedbackValidation(f.contact)
+          ) : (
+            <div>{FeedbackValidation(f.contact)}</div>
           )}
         </div>
+
         <div className="form-group">
           <label className="form-label">
             <RequiredIcon />
@@ -207,19 +210,16 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
             value={new Date(f.created_date).toLocaleDateString()}
           />
         </div>
-      </div>
-    
-      <ModuleModal
-      isOpen={image}
-      closeModal={() => setImage(false)}
-      closeOnOverlayClick={true}
-      >
 
-        <Image src={f.image} fill={true} alt="" />
-    </ModuleModal>
+        <ModuleModal
+          isOpen={image}
+          closeModal={() => setImage(false)}
+          closeOnOverlayClick={true}
+        >
+          <Image src={f.image} fill={true} alt="" />
+        </ModuleModal>
+      </ModuleContent>
     </ModuleContent>
-  </ModuleContent>
-
   );
 };
 

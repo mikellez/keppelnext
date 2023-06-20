@@ -7,7 +7,7 @@ export default function FeedbackValidation(contact: any) {
   var email;
   if (contact.number != "") {
     num = (
-      <>
+      <div>
         <label className="form-label">
           <RequiredIcon />
           Contact
@@ -18,7 +18,7 @@ export default function FeedbackValidation(contact: any) {
           disabled
           value={contact.number}
         />
-      </>
+      </div>
     );
   } else {
     num = <div></div>;
@@ -26,7 +26,7 @@ export default function FeedbackValidation(contact: any) {
 
   if (contact.email != "") {
     email = (
-      <>
+      <div>
         <label className="form-label">
           <RequiredIcon />
           Email
@@ -37,7 +37,7 @@ export default function FeedbackValidation(contact: any) {
           disabled
           value={contact.email}
         />
-      </>
+      </div>
     );
   } else {
     email = <div></div>;
