@@ -19,7 +19,7 @@ import ModuleSimplePopup, {
 import StarRatings from "react-star-ratings";
 import Login from "../../pages/Login";
 import { userAgent } from "next/server";
-import FeedbackModuleCSS from "../../styles/Feedback.module.css"
+import FeedbackModuleCSS from "../../styles/Feedback.module.css";
 
 const FeedbackContainer = (props: any) => {
   const router = useRouter();
@@ -110,11 +110,12 @@ const FeedbackContainer = (props: any) => {
     }
   }, [selectedFile]);
 
-  
-
   return (
     <div>
-      <ModuleContent includeGreyContainer={props.windowWidth > 768} grid={props.windowWidth > 768}>
+      <ModuleContent
+        includeGreyContainer={props.windowWidth > 768}
+        grid={props.windowWidth > 768}
+      >
         <div className={formStyles.halfContainer}>
           {!props.user.data ? (
             <div>
@@ -283,6 +284,7 @@ const FeedbackContainer = (props: any) => {
               accept="image/jpeg,image/png,image/gif"
               id="formFile"
               onChange={(e) => {
+                // console.log(e.target.files![0]);
                 setIsImage(false);
                 setSelectedFile(e.target.files![0]);
               }}
