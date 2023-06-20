@@ -63,6 +63,7 @@ import { Role } from "../../types/common/enums";
 import { GetServerSidePropsContext } from "next";
 import Pagination from "../../components/Pagination";
 import moment from "moment";
+import { request } from "http";
 
 /*export type TableNode<T> = {
   id: string;
@@ -102,6 +103,7 @@ export interface RequestItem {
   complete_comments?: string;
   completion_file?: any;
   activity_log?: { [key: string]: string }[];
+  associatedrequestid?: number;
 }
 
 export interface RequestProps {
@@ -182,7 +184,7 @@ export default function Request(props: RequestProps) {
     setRequestItems([]);
     setPage(1);
   };
-
+  console.log(requestItems);
   const COLUMNS: Column<RequestItem>[] = [
     {
       label: "ID",
@@ -280,15 +282,17 @@ export default function Request(props: RequestProps) {
               <BiCommentCheck size={18} title={"Manage"} />
             </div>
           )}
-          <div
-            className={styles.editIcon}
-            onClick={() => {
-              router.push(`/Request/CorrectiveRequest/${item.id}`);
-              setReady(false);
-            }}
-          >
-            <HiOutlineLink size={18} title={"Create Corrective Request"} />
-          </div>
+          {item.associatedrequestid === null && (
+            <div
+              className={styles.editIcon}
+              onClick={() => {
+                router.push(`/Request/CorrectiveRequest/${item.id}`);
+                setReady(false);
+              }}
+            >
+              <HiOutlineLink size={18} title={"Create Corrective Request"} />
+            </div>
+          )}
           <div
             className={styles.editIcon}
             onClick={() => {

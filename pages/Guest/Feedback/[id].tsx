@@ -32,15 +32,19 @@ interface CreateFeedbackProps {
 
 export default function RequestNew(props: CreateFeedbackProps) {
   const router = useRouter();
-  // const [userbool, setUserbool] = useState(false);
-  const [modal, setModal] = useState(true);
+  // const [modal, setModal] = useState(true);
+  const [windowWidth, setWindowWidth] = useState<number>(0);
   const user = useCurrentUser();
+  useEffect(() => {
+    console.log(window.innerWidth);
+    setWindowWidth(window.innerWidth);
+  }, []);
 
   return (
     <ModuleMain>
-      <ModuleHeader title="Feedback" header="Feedback"></ModuleHeader>
+      <ModuleHeader title="Feedback" header="Feedback" mobile={windowWidth <= 768}></ModuleHeader>
       <ModuleContent>
-        <FeedbackContainer requestData={props} user={user} />
+        <FeedbackContainer requestData={props} user={user} windowWidth={windowWidth}/>
         {/* <RequestGuestContainer requestData={props} user={userbool}/> */}
       </ModuleContent>
     </ModuleMain>
