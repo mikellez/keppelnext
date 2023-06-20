@@ -19,6 +19,7 @@ import ModuleSimplePopup, {
 import StarRatings from "react-star-ratings";
 import Login from "../../pages/Login";
 import { userAgent } from "next/server";
+import FeedbackModuleCSS from "../../styles/Feedback.module.css"
 
 const FeedbackContainer = (props: any) => {
   const router = useRouter();
@@ -54,6 +55,7 @@ const FeedbackContainer = (props: any) => {
     useState<boolean>(false);
   const [submissionModal, setSubmissionModal] = useState<boolean>(false);
   const [loginModal, setLoginModal] = useState<boolean>(true);
+  // const [windowWidth, setWindowWidth] = useState<number>(0);
 
   useEffect(() => {
     console.log(props.user.data);
@@ -107,9 +109,12 @@ const FeedbackContainer = (props: any) => {
       };
     }
   }, [selectedFile]);
+
+  
+
   return (
     <div>
-      <ModuleContent includeGreyContainer grid>
+      <ModuleContent includeGreyContainer={props.windowWidth > 768} grid={props.windowWidth > 768}>
         <div className={formStyles.halfContainer}>
           {!props.user.data ? (
             <div>

@@ -7,6 +7,7 @@ interface ModuleHeaderProps {
     headerSize?: string;
     leftChildren?: React.ReactNode;
     children?: React.ReactNode;
+    mobile?: boolean
 }
 
 const headerStyle: CSSProperties = {
@@ -51,7 +52,7 @@ export function ModuleHeader(props: ModuleHeaderProps) {
                 </Head>
             )}
             <div style={headerStyle}>
-                <span style={headerFinalName}>{props.header}</span>
+                <span className={props.mobile ? "ms-3" : ""} style={headerFinalName}>{props.header}</span>
                 <span style={besideHeaderName}>{props.leftChildren}</span>
                 <span style={headerSide}>
                     {React.Children.map(props.children, (child) => {
