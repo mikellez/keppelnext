@@ -500,11 +500,13 @@ const createChecklistCSV = async (req, res, next) => {
     if (err) return res.status(400).json({ msg: err });
     if (result.rows.length == 0)
       return res.status(204).json({ msg: "No checklist" });
+    // console.log(result);
     generateCSV(result.rows)
       .then((buffer) => {
         res.set({
           "Content-Type": "text/csv",
         });
+        console.log(buffer);
         return res.status(200).send(buffer);
       })
       .catch((error) => {

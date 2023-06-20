@@ -709,13 +709,12 @@ router.get(
   controllers.checklist.fetchPendingChecklists
 );
 
-
 /**
  * @api {post} /feedback/ Create Feedback
  * @apiDescription Create new Feedback
  * @apiName CreateFeedback
  * @apiGroup Feedback
- * 
+ *
  * @apiBody {Object} - Feedback Object
  * @apiBody {String} -.name Name of user who gave the feedback
  * @apiBody {String} -.comments Feedback Comments by the user
@@ -727,9 +726,9 @@ router.get(
  * @apiBody {String} -.contact.number Contact Number, will be empty if not provided or user is Internal User
  * @apiBody {Number} -.contact.whatsapp Contact Method of Whatsapp, 0 if No, 1 if Yes
  * @apiBody {Number} -.contact.telegram Contact Method of Telegram, 0 if No, 1 if Yes
- * 
+ *
  * @apiSuccess {String} Success "New feedback created successfully"
- * 
+ *
  * @apiError (Error 500) {String} InternalServerError "Failure to create feedback"
  */
 router.post("/feedback", controllers.feedback.createFeedback);
@@ -739,7 +738,7 @@ router.post("/feedback", controllers.feedback.createFeedback);
  * @apiDescription Get Pending Feedback
  * @apiName GetPendingFeedback
  * @apiGroup Feedback
- * 
+ *
  * @apiSuccess {Object} - Data Object
  * @apiSuccess {Object[]} -.rows Array of Pending Feedback
  * @apiSuccess {Number} -.rows.id Feedback ID
@@ -762,10 +761,10 @@ router.post("/feedback", controllers.feedback.createFeedback);
  * @apiSuccess {String} -.rows.plant_name
  * @apiSuccess {String} -.rows.created_date Date of Feedback Creation
  * @apiSuccess {Number} -.total Total Pages
- * 
+ *
  * @apiError (Status Code 204) {Object} Empty {msg: "No Feedback"}
  * @apiError (Error 500) {Object} InternalServerError {msg: error}
- *  
+ *
  */
 router.get(
   "/feedback/pending",
@@ -778,7 +777,7 @@ router.get(
  * @apiDescription Get Assigned Feedback
  * @apiName GetAssignedFeedback
  * @apiGroup Feedback
- * 
+ *
  * @apiSuccess {Object} - Data Object
  * @apiSuccess {Object[]} -.rows Array of Assigned Feedback
  * @apiSuccess {Number} -.rows.id Feedback ID
@@ -801,10 +800,10 @@ router.get(
  * @apiSuccess {String} -.rows.plant_name
  * @apiSuccess {String} -.rows.created_date Date of Feedback Creation
  * @apiSuccess {Number} -.total Total Pages
- * 
+ *
  * @apiError (Status Code 204) {Object} Empty {msg: "No Feedback"}
  * @apiError (Error 500) {Object} InternalServerError {msg: error}
- *  
+ *
  */
 router.get(
   "/feedback/assigned",
@@ -812,13 +811,12 @@ router.get(
   controllers.feedback.fetchAssignedFeedback
 );
 
-
 /**
  * @api {get} /feedback/pending Get Completed Feedback
  * @apiDescription Get Completed Feedback
  * @apiName GetCompletedFeedback
  * @apiGroup Feedback
- * 
+ *
  * @apiSuccess {Object} - Data Object
  * @apiSuccess {Object[]} -.rows Array of Completed Feedback
  * @apiSuccess {Number} -.rows.id Feedback ID
@@ -841,10 +839,10 @@ router.get(
  * @apiSuccess {String} -.rows.plant_name
  * @apiSuccess {String} -.rows.created_date Date of Feedback Creation
  * @apiSuccess {Number} -.total Total Pages
- * 
+ *
  * @apiError (Status Code 204) {Object} Empty {msg: "No Feedback"}
  * @apiError (Error 500) {Object} InternalServerError {msg: error}
- *  
+ *
  */
 router.get(
   "/feedback/completed",
@@ -857,11 +855,11 @@ router.get(
  * @apiDescription Get Filtered Feedback
  * @apiName GetFilteredFeedback
  * @apiGroup Feedback
- * 
+ *
  * @apiParam {String} status Status of Feedback (Can be stringed together, eg. /filter/1,2/)
  * @apiParam {String} plant Plant ID
  * @apiQuery {String} page Page Number
- * 
+ *
  * @apiSuccess {Object} - Data Object
  * @apiSuccess {Object[]} -.rows Array of Filtered Feedback
  * @apiSuccess {Number} -.rows.id Feedback ID
@@ -884,7 +882,7 @@ router.get(
  * @apiSuccess {String} -.rows.plant_name
  * @apiSuccess {String} -.rows.created_date Date of Feedback Creation
  * @apiSuccess {Number} -.total Total Pages
- * 
+ *
  * @apiError (Status Code 204) {Object} Empty {msg: "No Feedback"}
  * @apiError (Error 500) {Object} InternalServerError {msg: error}
  * */
@@ -899,9 +897,9 @@ router.get(
  * @apiDescription Get a Single Feedback
  * @apiName GetSingleFeedback
  * @apiGroup Feedback
- * 
+ *
  * @apiParam {String} id Feedback ID
- * 
+ *
  * @apiSuccess {Object} - Data Object
  * @apiSuccess {Object[]} -.rows Array of Completed Feedback
  * @apiSuccess {Number} -.rows.id Feedback ID
@@ -924,10 +922,10 @@ router.get(
  * @apiSuccess {String} -.rows.plant_name
  * @apiSuccess {String} -.rows.created_date Date of Feedback Creation
  * @apiSuccess {Number} -.total Total Pages
- * 
+ *
  * @apiError (Code 204) {Object} Empty {msg: "No Feedback"}
  * @apiError (Error 500) {Object} InternalServerError {msg: error}
- * 
+ *
  */
 router.get(
   "/feedback/:id",
@@ -940,14 +938,14 @@ router.get(
  * @apiDescription Assign Feedback
  * @apiName AssignFeedback
  * @apiGroup Feedback
- * 
+ *
  * @apiParam {String} id Feedback ID
- * 
+ *
  * @apiBody {Object} - Object
  * @apiBody {String} -.assigned_user_id Assigned User ID
- * 
+ *
  * @apiSuccess {String} Success "Feedback successfully assigned"
- * 
+ *
  * @apiError (Error 500) {String} Internal Server Error "Failure to assign feedback"
  */
 router.patch(
@@ -961,12 +959,12 @@ router.patch(
  * @apiDescription Complete Feedback
  * @apiName CompleteFeedback
  * @apiGroup Feedback
- * 
+ *
  * @apiParam {String} id Feedback ID
- * 
+ *
  * @apiBody {Object} - Object
  * @apiBody {String} -.assigned_user_id Assigned User ID
- * 
+ *
  * @apiSuccess {String} Success "Feedback successfully assigned"
  * @apiError (Error 500) {String} Internal Server Error "Failure to assign feedback"
  */
