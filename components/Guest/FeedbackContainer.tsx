@@ -3,7 +3,7 @@ import formStyles from "../../styles/formStyles.module.css";
 import React, { use, useEffect, useState } from "react";
 import instance from "../../types/common/axios.config";
 
-import { ModuleContent, ModuleDivider, ModuleFooter } from "..";
+import { ModuleContent, ModuleDivider, ModuleFooter, ModuleModal } from "..";
 import ImagePreview from "../Request/ImagePreview";
 import RequiredIcon from "../RequiredIcon";
 import PlantSelect from "../PlantSelect";
@@ -16,8 +16,6 @@ import { set } from "nprogress";
 import ModuleSimplePopup, {
   SimpleIcon,
 } from "../ModuleLayout/ModuleSimplePopup";
-import StarRatings from "react-star-ratings";
-import Login from "../../pages/Login";
 import { userAgent } from "next/server";
 import FeedbackModuleCSS from "../../styles/Feedback.module.css";
 
@@ -50,7 +48,7 @@ const FeedbackContainer = (props: any) => {
 
   const [selectedFile, setSelectedFile] = useState<File>();
   const [previewedFile, setPreviewedFile] = useState<string>();
-  const [isImage, setIsImage] = useState<boolean>(true);
+  const [isImage, setIsImage] = useState<boolean>(false);
   const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] =
     useState<boolean>(false);
   const [submissionModal, setSubmissionModal] = useState<boolean>(false);
@@ -102,11 +100,12 @@ const FeedbackContainer = (props: any) => {
       reader.readAsDataURL(selectedFile);
       reader.onload = () => {
         setPreviewedFile(reader.result as string);
-        setIsImage(true);
         setForm((prevState: any) => {
           return { ...prevState, image: reader.result };
         });
       };
+    } else {
+      setPreviewedFile("");
     }
   }, [selectedFile]);
 
@@ -277,6 +276,8 @@ const FeedbackContainer = (props: any) => {
           }}
         >
           <div className="form-group">
+            <div>
+
             <label className="form-label">Image</label>
             <input
               className="form-control"
@@ -288,11 +289,30 @@ const FeedbackContainer = (props: any) => {
                 setIsImage(false);
                 setSelectedFile(e.target.files![0]);
               }}
-            />
-          </div>
-          {isImage && previewedFile && (
-            <ImagePreview previewObjURL={previewedFile} />
+              />
+            </div>
+            {previewedFile && (
+            <div
+              className={`${formStyles.imageClick} form-group mt-3`}
+              onClick={() => setIsImage(true)}
+            >
+              <div>
+                <label className="form-label">
+                  <p style={{ textDecoration: "underline" }}>
+                    View Feedback Image
+                  </p>
+                </label>
+              </div>
+            </div>
           )}
+        </div>
+          <div>
+
+          {/* {previewedFile && (
+            <Image src={previewedFile} width></Image>
+            // <ImagePreview previewObjURL={previewedFile} />
+            )} */}
+          </div>
         </div>
       </ModuleContent>
       <ModuleFooter>
@@ -372,6 +392,15 @@ const FeedbackContainer = (props: any) => {
           />
         )}
       </ModuleFooter>
+      <ModuleModal
+          isOpen={isImage}
+          closeModal={() => setIsImage(false)}
+          closeOnOverlayClick={true}
+          large
+        >
+          {/* <Image src={f.image} width={100} height={100} alt="" /> */}
+          <img src={previewedFile} alt="" />
+      </ModuleModal>
     </div>
   );
 };
