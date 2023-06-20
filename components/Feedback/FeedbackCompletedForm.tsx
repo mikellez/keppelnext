@@ -9,6 +9,7 @@ import { FeedbackFormProps } from "../../pages/Feedback";
 import { CMMSFeedback } from "../../types/common/interfaces";
 import { ModuleModal } from "../ModuleLayout/ModuleModal";
 import Image from "next/image";
+import FeedbackValidation from "./FeedbackValidation";
 
 const FeedbackCompletedForm = (props: FeedbackFormProps) => {
   const user = useCurrentUser();
@@ -93,15 +94,18 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
           </div>
         </div>
         <div className={formStyles.halfContainer}>
-          {props.feedbackData.image !== "" && (
-            <div className="form-group">
+          {props.feedbackData.image != "" && (
+            <div
+              className={`${formStyles.imageClick} form-group`}
+              onClick={() => setImage(true)}
+            >
               <div>
-                <label className="form-label">Feedback Image</label>
+                <label className="form-label">
+                  <p style={{ textDecoration: "underline" }}>
+                    View Feedback Image
+                  </p>
+                </label>
               </div>
-              {/* {form.image} */}
-              {/* <img src={form.image} alt="" /> */}
-
-              <ImagePreview previewObjURL={props.feedbackData.image} />
             </div>
           )}
           <div className="form-group">
@@ -123,7 +127,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
         <div className={formStyles.halfContainer}>
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon/> Name
+              <RequiredIcon /> Name
             </label>
             <input
               type="text"
@@ -140,7 +144,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
             {props.feedbackData.created_user_id != "1" ? (
               <>
                 <label className="form-label">
-                  <RequiredIcon/> Email
+                  <RequiredIcon /> Email
                 </label>
                 <input
                   type="text"
@@ -156,30 +160,12 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
                 />
               </>
             ) : (
-              <>
-                <label className="form-label">
-                  <RequiredIcon/> Contact
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  disabled
-                  value={
-                    props.feedbackData.contact.tele
-                      ? props.feedbackData.contact.tele
-                      : props.feedbackData.contact.whatsapp
-                      ? props.feedbackData.contact.whatsapp
-                      : props.feedbackData.contact.email
-                      ? props.feedbackData.contact.email
-                      : "No Contact"
-                  }
-                />
-              </>
+              <>{FeedbackValidation(props.feedbackData.contact)}</>
             )}
           </div>
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon/> Created Date
+              <RequiredIcon /> Created Date
             </label>
             <input
               type="text"
@@ -234,14 +220,12 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
         </div> */}
       </ModuleContent>
       <ModuleModal
-      isOpen={image}
-      closeModal={() => setImage(false)}
-      closeOnOverlayClick={true}
-
+        isOpen={image}
+        closeModal={() => setImage(false)}
+        closeOnOverlayClick={true}
       >
-
-      <Image src={props.feedbackData.image} fill={true} alt="" />
-    </ModuleModal>
+        <Image src={props.feedbackData.image} fill={true} alt="" />
+      </ModuleModal>
     </ModuleContent>
   );
 };
