@@ -277,6 +277,7 @@ interface CMMSSubComponent1Name {
 interface CMMSContact {
   tele? : string;
   whatsapp? : string;
+  number? : string;
   email? : string;
 }
 
