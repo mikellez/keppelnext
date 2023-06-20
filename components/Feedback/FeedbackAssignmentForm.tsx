@@ -16,6 +16,7 @@ import Image from "next/image";
 import { FeedbackFormProps } from "../../pages/Feedback";
 import { ModuleModal } from "../ModuleLayout/ModuleModal";
 import FeedbackValidation from "./FeedbackValidation";
+import { FullWidth } from "ag-grid-community/dist/lib/components/framework/componentTypes";
 
 const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
   const user = useCurrentUser();
@@ -60,7 +61,8 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
   }, [props.feedbackData]);
 
   // console.log(form.created_by_user_id);
-  // console.log(f);
+  console.log(props);
+
   return (
     <ModuleContent includeGreyContainer>
       <ModuleContent grid>
@@ -163,8 +165,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
       <ModuleContent grid>
         <div className="form-group">
           <label className="form-label">
-            <RequiredIcon />
-            Name
+            <RequiredIcon /> Name
           </label>
           <input
             type="text"
@@ -173,12 +174,27 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
             value={f.name ? f.name : f.createdbyuser}
           />
         </div>
+        <div
+          className="form-group"
+          style={{
+            paddingLeft: 2 + "em",
+          }}
+        >
+          <label className="form-label">
+            <RequiredIcon /> Created Date
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            disabled
+            value={new Date(f.created_date).toLocaleDateString()}
+          />
+        </div>
         <div className="form-group">
-          {f.created_user_id != "1" ? (
-            <>
+          {f.created_user_id != "55" ? (
+            <div>
               <label className="form-label">
-                <RequiredIcon />
-                Email
+                <RequiredIcon /> Email
               </label>
               <input
                 type="text"
@@ -192,23 +208,13 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
                     : "No email"
                 }
               />
-            </>
+            </div>
           ) : (
-            <div>{FeedbackValidation(f.contact)}</div>
+            <div>
+              <div>{FeedbackValidation(f.contact.number, "Contact")}</div>
+              <div>{FeedbackValidation(f.contact.email, "Email")}</div>
+            </div>
           )}
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">
-            <RequiredIcon />
-            Created Date
-          </label>
-          <input
-            type="text"
-            className="form-control"
-            disabled
-            value={new Date(f.created_date).toLocaleDateString()}
-          />
         </div>
 
         <ModuleModal

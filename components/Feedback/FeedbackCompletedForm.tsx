@@ -35,6 +35,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
   }, [props.feedbackData]);
 
   // console.log(form.created_by_user_id);
+  console.log(props.feedbackData.created_user_id);
 
   return (
     <ModuleContent includeGreyContainer>
@@ -141,7 +142,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
             />
           </div>
           <div className="form-group">
-            {props.feedbackData.created_user_id != "1" ? (
+            {props.feedbackData.created_user_id != "55" ? (
               <>
                 <label className="form-label">
                   <RequiredIcon /> Email
@@ -160,7 +161,20 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
                 />
               </>
             ) : (
-              <>{FeedbackValidation(props.feedbackData.contact)}</>
+              <div>
+                <div>
+                  {FeedbackValidation(
+                    props.feedbackData.contact.number,
+                    "Contact"
+                  )}
+                </div>
+                <div>
+                  {FeedbackValidation(
+                    props.feedbackData.contact.email,
+                    "Email"
+                  )}
+                </div>
+              </div>
             )}
           </div>
           <div className="form-group">
