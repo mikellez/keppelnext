@@ -62,6 +62,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
   }, [props.feedbackData]);
 
   // console.log(form.created_by_user_id);
+  console.log(f);
   return (
     <ModuleContent includeGreyContainer grid>
       {/* <FeedbackContact></FeedbackContact> */}
@@ -168,7 +169,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
             type="text"
             className="form-control"
             disabled
-            value={f.createdbyuser}
+            value={f.name ? f.name : f.createdbyuser}
           />
         </div>
         <div className="form-group">
@@ -182,7 +183,13 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
                 type="text"
                 className="form-control"
                 disabled
-                value={f.created_user_email ? f.created_user_email : "No email"}
+                value={
+                  f.created_user_email
+                    ? f.created_user_email
+                    : f.contact.email
+                    ? f.contact.email
+                    : "No email"
+                }
               />
             </>
           ) : (

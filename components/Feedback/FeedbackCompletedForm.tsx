@@ -93,16 +93,17 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
           </div>
         </div>
         <div className={formStyles.halfContainer}>
-        {props.feedbackData.image !== "" && <div className="form-group">
-            <div>
-              <label className="form-label">Feedback Image</label>
-            </div>
-            {/* {form.image} */}
-            {/* <img src={form.image} alt="" /> */}
-            
+          {props.feedbackData.image !== "" && (
+            <div className="form-group">
+              <div>
+                <label className="form-label">Feedback Image</label>
+              </div>
+              {/* {form.image} */}
+              {/* <img src={form.image} alt="" /> */}
+
               <ImagePreview previewObjURL={props.feedbackData.image} />
-            
-          </div>}
+            </div>
+          )}
           <div className="form-group">
             <label className="form-label">
               <RequiredIcon /> Assigned to
@@ -128,7 +129,11 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
               type="text"
               className="form-control"
               disabled
-              value={props.feedbackData.createdbyuser}
+              value={
+                props.feedbackData.name
+                  ? props.feedbackData.name
+                  : props.feedbackData.createdbyuser
+              }
             />
           </div>
           <div className="form-group">
@@ -144,6 +149,8 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
                   value={
                     props.feedbackData.created_user_email
                       ? props.feedbackData.created_user_email
+                      : props.feedbackData.contact.email
+                      ? props.feedbackData.contact.email
                       : "No email"
                   }
                 />
