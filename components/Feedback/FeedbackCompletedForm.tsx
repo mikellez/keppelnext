@@ -7,9 +7,12 @@ import { useCurrentUser } from "../SWR";
 import ImagePreview from "../Request/ImagePreview";
 import { FeedbackFormProps } from "../../pages/Feedback";
 import { CMMSFeedback } from "../../types/common/interfaces";
+import { ModuleModal } from "../ModuleLayout/ModuleModal";
+import Image from "next/image";
 
 const FeedbackCompletedForm = (props: FeedbackFormProps) => {
   const user = useCurrentUser();
+  const [image, setImage] = useState<boolean>(false);
   // const updateDataField = (
   //   value: number | string | Date | null,
   //   field: string
@@ -120,8 +123,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
         <div className={formStyles.halfContainer}>
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon />
-              Name
+              <RequiredIcon/> Name
             </label>
             <input
               type="text"
@@ -138,8 +140,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
             {props.feedbackData.created_user_id != "1" ? (
               <>
                 <label className="form-label">
-                  <RequiredIcon />
-                  Email
+                  <RequiredIcon/> Email
                 </label>
                 <input
                   type="text"
@@ -157,8 +158,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
             ) : (
               <>
                 <label className="form-label">
-                  <RequiredIcon />
-                  Contact
+                  <RequiredIcon/> Contact
                 </label>
                 <input
                   type="text"
@@ -179,8 +179,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
           </div>
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon />
-              Created Date
+              <RequiredIcon/> Created Date
             </label>
             <input
               type="text"
@@ -234,6 +233,15 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
           />
         </div> */}
       </ModuleContent>
+      <ModuleModal
+      isOpen={image}
+      closeModal={() => setImage(false)}
+      closeOnOverlayClick={true}
+
+      >
+
+      <Image src={props.feedbackData.image} fill={true} alt="" />
+    </ModuleModal>
     </ModuleContent>
   );
 };

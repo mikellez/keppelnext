@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, CSSProperties } from "react";
 import RequiredIcon from "../RequiredIcon";
 import AssetSelect, { AssetOption } from "../Checklist/AssetSelect";
 import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
@@ -14,11 +14,32 @@ import StarRatings from "react-star-ratings";
 import ImagePreview from "../Request/ImagePreview";
 import Image from "next/image";
 import { FeedbackFormProps } from "../../pages/Feedback";
+import { ModuleModal } from "../ModuleLayout/ModuleModal";
 import FeedbackValidation from "./FeedbackValidation";
 
 const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
   const user = useCurrentUser();
+  const [image, setImage] = useState<boolean>(false);
   const f = props.feedbackData;
+  
+
+  const centerTransform: CSSProperties = {
+    position: "relative",
+    left: "50%",
+    top: "50%",
+    transform: "translate(-50%, -50%)",
+  }
+  const previewContent: CSSProperties = {
+    ...centerTransform,
+    textAlign: "center",
+  
+    height: "100%",
+    width: "100%",
+  
+    backgroundSize: "contain",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "center"
+  }
 
   // const updateDataField = (
   //   value: number | string | Date | null,
@@ -82,103 +103,123 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
           </div> */}
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Feedback Description</label>
-            <textarea
-              className="form-control"
-              name="description"
-              id="formControlDescription"
-              rows={5}
-              value={f.description}
-              disabled
-            ></textarea>
-          </div>
+        <div className="form-group">
+          <label className="form-label">Feedback Description</label>
+          <textarea
+            className="form-control"
+            name="description"
+            id="formControlDescription"
+            rows={5}
+            value={f.description}
+            disabled
+          ></textarea>
         </div>
-        <div className={formStyles.halfContainer}>
-          {f.image != "" && (
-            <div className="form-group">
-              <div>
-                <label className="form-label">Feedback Image</label>
-              </div>
-              <ImagePreview previewObjURL={f.image} />
+      </div>
+      <div className={formStyles.halfContainer}>
+        {f.image != "" && (
+          <div className={`${formStyles.imageClick} form-group`} onClick={() => setImage(true)}>
+          <div>
+            <label className="form-label">
+              <p style={{textDecoration: "underline"}}>
+                View Feedback Image
+              </p>
+            </label>
+          </div>
+          {/* <ImagePreview previewObjURL={f.image} /> */}
+          {/* <div style={{...previewContent, backgroundImage: 'url("' + f.image + '")'}}> */}
+          {/* <img src={f.image} width="100%" height="100%" alt="" /> */}
+
+          {/* </div> */}
+          {/* <div style={centerTransform}><BsCameraFill size={104}/>
+            <div style={{color: "rgba(0,0,0,0.1)"}}>
+              No Image
             </div>
-          )}
-          <div className="form-group">
-            <label className="form-label">
-              <RequiredIcon /> Assign to
-            </label>
-            <AssignToSelect
-              plantId={f.plant_id as number}
-              isSingle={true}
-              onChange={(value) => {
-                props.setFeedbackData((prev: any) => {
-                  return {
-                    ...prev,
-                    ["assigned_user_id"]: value,
-                  };
-                });
-              }}
-              defaultIds={f.assigned_user_id ? [f.assigned_user_id] : []}
-            />
+          </div> */}
           </div>
+        )}
+        <div className="form-group">
+          <label className="form-label">
+            <RequiredIcon /> Assign to
+          </label>
+          <AssignToSelect
+            plantId={f.plant_id as number}
+            isSingle={true}
+            onChange={(value) => {
+              props.setFeedbackData((prev: any) => {
+                return {
+                  ...prev,
+                  ["assigned_user_id"]: value,
+                };
+              });
+            }}
+            defaultIds={f.assigned_user_id ? [f.assigned_user_id] : []}
+          />
         </div>
-      </ModuleContent>
-
+      </div>
+</ModuleContent>
       <ModuleDivider />
+<ModuleContent grid>
 
-      <ModuleContent grid>
-        <div className={formStyles.halfContainer}>
-          <div className="form-group">
-            <label className="form-label">
-              <RequiredIcon />
-              Name
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              disabled
-              value={f.name ? f.name : f.createdbyuser}
-            />
-          </div>
-          <div className="form-group">
-            {f.created_user_id != "55" ? (
-              <>
-                <label className="form-label">
-                  <RequiredIcon />
-                  Email
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  disabled
-                  value={
-                    f.created_user_email
-                      ? f.created_user_email
-                      : f.contact.email
-                      ? f.contact.email
-                      : "No email"
-                  }
-                />
-              </>
-            ) : (
-              FeedbackValidation(f.contact)
-            )}
-          </div>
-          <div className="form-group">
-            <label className="form-label">
-              <RequiredIcon />
-              Created Date
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              disabled
-              value={new Date(f.created_date).toLocaleDateString()}
-            />
-          </div>
+        <div className="form-group">
+          <label className="form-label">
+            <RequiredIcon />
+            Name
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            disabled
+            value={f.name ? f.name : f.createdbyuser}
+          />
         </div>
-      </ModuleContent>
+        <div className="form-group">
+          {f.created_user_id != "1" ? (
+            <>
+              <label className="form-label">
+                <RequiredIcon />
+                Email
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                disabled
+                value={
+                  f.created_user_email
+                    ? f.created_user_email
+                    : f.contact.email
+                    ? f.contact.email
+                    : "No email"
+                }
+              />
+            </>
+          ) : (FeedbackValidation(f.contact)
+          )}
+        </div>
+        <div className="form-group">
+          <label className="form-label">
+            <RequiredIcon />
+            Created Date
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            disabled
+            value={new Date(f.created_date).toLocaleDateString()}
+          />
+        </div>
+      </div>
+    
+      <ModuleModal
+      isOpen={image}
+      closeModal={() => setImage(false)}
+      closeOnOverlayClick={true}
+      >
+
+        <Image src={f.image} fill={true} alt="" />
+    </ModuleModal>
     </ModuleContent>
+  </ModuleContent>
+
   );
 };
 
