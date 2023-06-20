@@ -215,8 +215,10 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
           isOpen={image}
           closeModal={() => setImage(false)}
           closeOnOverlayClick={true}
+          large
         >
-          <Image src={f.image} fill={true} alt="" />
+          {/* <Image src={f.image} width={100} height={100} alt="" /> */}
+          <img src={f.image} alt="" />
         </ModuleModal>
       </ModuleContent>
     </ModuleContent>
