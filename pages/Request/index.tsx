@@ -23,6 +23,7 @@
 import React, {
   useState,
   useEffect,
+  useRef,
   CSSProperties,
   MouseEventHandler,
 } from "react";
@@ -63,6 +64,7 @@ import { Role } from "../../types/common/enums";
 import { GetServerSidePropsContext } from "next";
 import Pagination from "../../components/Pagination";
 import moment from "moment";
+import SearchBar from "../../components/SearchBar/SearchBar";
 import { request } from "http";
 
 /*export type TableNode<T> = {
@@ -173,6 +175,7 @@ export default function Request(props: RequestProps) {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const searchRef = useRef({value: ""});
   const currentDate = moment().format("YYYY-MM-DD");
   const filename = `${currentDate} Request History.csv`;
   const router = useRouter();
@@ -184,7 +187,7 @@ export default function Request(props: RequestProps) {
     setRequestItems([]);
     setPage(1);
   };
-  console.log(requestItems);
+  
   const COLUMNS: Column<RequestItem>[] = [
     {
       label: "ID",
@@ -315,7 +318,7 @@ export default function Request(props: RequestProps) {
   };
 
   const filteredRequest = useRequestFilter(props, page);
-  const allRequest = useRequest(indexedColumn[activeTabIndex], page);
+  const allRequest = useRequest(indexedColumn[activeTabIndex], page, searchRef.current.value);
 
   const {
     data: requestData,
@@ -460,7 +463,6 @@ export default function Request(props: RequestProps) {
     },
   };
 
-  // console.log(isReady);
   useEffect(() => {
     if (requestData && !requestIsFetchValidating) {
       if (requestData?.rows?.length > 0) {
@@ -487,6 +489,13 @@ export default function Request(props: RequestProps) {
   return (
     <ModuleMain>
       <ModuleHeader title="Request" header="Request">
+        <SearchBar 
+          ref={searchRef}
+          onSubmit={() => {
+              setReady(false);
+              setRequestItems([]);
+          }}
+        />
         <TooltipBtn onClick={() => requestMutate()} text="Refresh">
           <FiRefreshCw size={20} />
         </TooltipBtn>
