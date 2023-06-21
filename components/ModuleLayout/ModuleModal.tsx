@@ -36,8 +36,8 @@ export function ModuleModal(props: ModalProps) {
         },
         content: {
           backgroundColor: "#F0F0F0",
-          height: props.large ? "75%" : "50%",
-          width: props.large ? "75%" : "50%",
+          height: props.large ? "70%" : "50%",
+          width: props.large ? "70%" : "50%",
           margin: "auto",
           border: "2px solid #393E46",
         },

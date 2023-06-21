@@ -14,6 +14,7 @@ interface ChecklistCreationFormProps {
     setChecklistData: React.Dispatch<React.SetStateAction<CMMSChecklist>>,
     successModal: boolean,
     updateChecklist: () => Promise<void>,
+    action: string | undefined,
 };
 
 const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
@@ -179,14 +180,14 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
                     <div className="ms-auto">
 
                     
-                <TooltipBtn
+                {props.action !== "New" && <TooltipBtn
                     toolTip={false}
                     style={{ backgroundColor: "#F7C04A", borderColor: "#F7C04A" }}
                     onClick={props.updateChecklist}
                     disabled={props.successModal}
                     >
                     Update
-                </TooltipBtn>
+                </TooltipBtn>}
                         </div>
                 </div>
             </div>

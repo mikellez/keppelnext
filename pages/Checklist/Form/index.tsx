@@ -166,6 +166,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
               setChecklistData={setChecklistData}
               successModal={successModal}
               updateChecklist={updateChecklist}
+              action={router.query.action as string}
 
             />
 
@@ -186,6 +187,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
               {router.query.action === "New" && 
                 <>
                   <TooltipBtn
+                    className="mb-1"
                     toolTip={false}
                     style={{
                       backgroundColor: "#F7C04A",

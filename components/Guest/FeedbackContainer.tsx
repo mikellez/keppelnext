@@ -397,9 +397,13 @@ const FeedbackContainer = (props: any) => {
           closeModal={() => setIsImage(false)}
           closeOnOverlayClick={true}
           large
+          hideHeader={props.windowWidth <= 768}
         >
           {/* <Image src={f.image} width={100} height={100} alt="" /> */}
-          <img src={previewedFile} alt="" />
+          <div style={{textAlign: "center"}}>
+          <img width={"75%"} height={"75%"} src={previewedFile} alt="" />
+
+          </div>
       </ModuleModal>
     </div>
   );
