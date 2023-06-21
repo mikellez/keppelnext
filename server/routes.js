@@ -1605,7 +1605,7 @@ router.get(
 			"column_name": "system_asset"
 		}]
 	}
- * @apiName GetMasterTypeEntry
+ * @apiName FetchMasterTypeEntry
  * @apiGroup Master
  *
  * @apiSuccess {Object}  -.data Object which contains multiple objects with the key being the table name and the value being the table metadata
@@ -1628,6 +1628,29 @@ router.get(
   checkIfLoggedInAPI,
   controllers.master.fetchMasterTypeEntry
 );
+
+/**
+ * @api {post} /master/new/add Add Table Metadata
+ * @apiDescription Adds table information/metadata. Mainly used for the creation of new entries in those tables
+ * @apiName CreateMasterTypeEntry
+ * @apiGroup Master
+ *
+ *
+ * @apiSuccess {Object} -.data Object which contains multiple objects with the key being the table name and the value being the table metadata
+ * @apiSuccess {String} -.data.key Table name
+ * @apiSuccess {Object} -.data.value Object which has table metadata
+ * @apiSuccess {String} -.data.value.internalName Internal name of the table
+ * @apiSuccess {String} -.data.value.name Name of the table
+ * @apiSuccess {String} -.data.value.id unique ID of the rows in the table
+ * @apiSuccess {Object[]} -.data.value.fields Array of objects which contains the column name and column label of the table
+ * @apiSuccess {String} -.data.value.fields.column_label Column label of the table
+ * @apiSuccess {String} -.data.value.fields.column_name Column name of the table
+ * @apiSuccess {String} [-.data.value.fields.type] Type of the column (Eg. dropdown, boolean_dropdown)
+ * @apiSuccess {String} [-.data.value.fields.url] URL to fetch dropdown options for dropdown type only (Example 2)
+ * @apiSuccess {String} [-.data.value.fields.value] Value of the dropdown option for dropdown type only (Example 2)
+ * @apiSuccess {String} [-.data.value.fields.options] Options of the dropdown option for dropdown type only (Example 2)
+ *
+ */
 router.post(
   "/master/new/add",
   checkIfLoggedInAPI,
@@ -1934,6 +1957,22 @@ router
   // .post(controllers.schedule.createSingleEvent)
   .patch(controllers.schedule.manageSingleEvent)
   .delete();
+
+/**
+ * @api {get} /schedule/event/:id Get Schedule by ID
+ * @apiDescription Get schedule by ID
+ * @apiName getScheduleByID
+ * @apiGroup Schedule
+ *
+ * @apiParam {number} id Schedule Id
+ *
+ * @apiSuccess {Object} schedule Schedule
+ * @apiSuccess {Number} schedule.schedule_id ID of Schedule
+ * @apiSuccess {String} schedule.start_date Date and time of start Date
+ * @apiSuccess {String} schedule.end_date Date and time of end date
+ * @apiSuccess {String} schedule.recurrence_period Date and Time of recurrance period
+ *
+ */
 
 router.get(
   "/schedule/event/:id",
