@@ -211,8 +211,12 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
             </div>
           ) : (
             <div>
-              <div>{FeedbackValidation(f.contact.number, "Contact")}</div>
-              <div>{FeedbackValidation(f.contact.email, "Email")}</div>
+              <div className="form-group">
+                {FeedbackValidation(f.contact.number, "Contact")}
+              </div>
+              <div className="form-group">
+                {FeedbackValidation(f.contact.email, "Email")}
+              </div>
             </div>
           )}
         </div>
