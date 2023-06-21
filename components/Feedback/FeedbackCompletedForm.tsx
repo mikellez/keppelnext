@@ -162,13 +162,13 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
               </>
             ) : (
               <div>
-                <div>
+                <div className="form-group">
                   {FeedbackValidation(
                     props.feedbackData.contact.number,
                     "Contact"
                   )}
                 </div>
-                <div>
+                <div className="form-group">
                   {FeedbackValidation(
                     props.feedbackData.contact.email,
                     "Email"
