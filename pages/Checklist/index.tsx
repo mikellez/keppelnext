@@ -45,6 +45,7 @@ import { Role } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
 import { GetServerSidePropsContext } from "next";
 import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
+import moment from "moment";
 
 const indexedColumn: ("pending" | "assigned" | "record" | "approved")[] = [
   "pending",
@@ -123,7 +124,7 @@ export default function Checklist(props: ChecklistProps) {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns:  5em calc(90% - 46em) 7em 8em 10em 10em 10% 6em;",
+        "--data-table-library_grid-template-columns:  5em 25em 7em 14em 8em 8em 8em 6em;",
     },
   ]);
 
@@ -247,7 +248,7 @@ export default function Checklist(props: ChecklistProps) {
             <Table
               data={{ nodes: checklistItems }}
               theme={theme}
-              layout={{ custom: true }}
+              layout={{ custom: true, horizontalScroll: true }}
             >
               {(tableList: ChecklistItem[]) => (
                 <>
@@ -281,14 +282,7 @@ export default function Checklist(props: ChecklistProps) {
                             </span>
                           </Cell>
                           <Cell>
-                            {new Date(item.created_date).toLocaleDateString!(
-                              "en-US",
-                              {
-                                year: "numeric",
-                                month: "2-digit",
-                                day: "2-digit",
-                              }
-                            )}
+                            {`${moment(new Date(item.created_date)).format('MMMM Do YYYY, h:mm:ss a')}`}
                           </Cell>
                           <Cell>{item.assigneduser}</Cell>
                           <Cell>{item.signoffuser}</Cell>
