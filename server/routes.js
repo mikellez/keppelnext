@@ -126,6 +126,7 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
  * @apiSuccess {String|NULL} rejection_comments Rejection comments of fault request
  * @apiSuccess {String|NULL} complete_comments Completion comments of fault request
  */
+
 router.get(
   "/request/approved",
   checkIfLoggedInAPI,
@@ -148,6 +149,7 @@ router.get(
   checkIfLoggedInAPI,
   controllers.request.fetchAssignedRequests
 );
+
 /**
  * @api {get} /request/review Get For Review Requests
  * @apiDescription Gets all requests with status of `COMPLETED`, `REJECTED`, `CANCELLED`.
@@ -1234,7 +1236,6 @@ router.get(
  * @apiSuccess {number} -.fault_id ID of the fault type
  * @apiSuccess {string} -.fault_type Name of the fault type
  */
-
 router.get("/fault/types", controllers.fault.fetchFaultTypes);
 
 router.get(
@@ -1274,7 +1275,9 @@ router.get(
  * @apiSuccess {number} -.psa_id Psa ID of the asset
  */
 router.get("/asset/:plant_id", controllers.asset.getAssetsFromPlant);
+
 router.get("/assets", controllers.asset.getAllAssets);
+
 router.get("/asset", controllers.asset.getAssetHierarchy);
 
 /**
@@ -1310,6 +1313,7 @@ router.get("/asset", controllers.asset.getAssetHierarchy);
 
  */
 router.get("/assetDetails/:psa_id", controllers.asset.getAssetDetails);
+
 router.get(
   "/asset/history/:type/:id",
   checkIfLoggedInAPI,
@@ -1901,6 +1905,7 @@ router.patch(
  * @apiSuccess {Number} -.prev_schedule_id Previous Schedule ID
  * @apiSuccess {Number} -.status Schedule Checklist Status
  */
+
 router
   .route("/schedule/:id", checkIfLoggedInAPI)
   .delete(controllers.schedule.deleteSchedule)
@@ -1923,9 +1928,6 @@ router
  * @apiError (Error 404) {String} NotFound "No pending schedules"
  */
 
-/**
- * @api {patch} /event E
- */
 router
   .route("/event/:schedule_id?/:index?/", checkIfLoggedInAPI)
   .get(controllers.schedule.getPendingSingleEvents)
