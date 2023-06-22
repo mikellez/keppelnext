@@ -137,7 +137,7 @@ const fetchForReviewChecklistsQuery =
 WHERE 
     ua.user_id = $1 AND 
     (cl.status_id = 4 OR cl.status_id = 6)
-ORDER BY cl.checklist_id desc
+    ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' desc
 `;
 
 const fetchForReviewChecklists = async (req, res, next) => {
@@ -500,11 +500,13 @@ const createChecklistCSV = async (req, res, next) => {
     if (err) return res.status(400).json({ msg: err });
     if (result.rows.length == 0)
       return res.status(204).json({ msg: "No checklist" });
+    // console.log(result);
     generateCSV(result.rows)
       .then((buffer) => {
         res.set({
           "Content-Type": "text/csv",
         });
+        console.log(buffer);
         return res.status(200).send(buffer);
       })
       .catch((error) => {

@@ -6,7 +6,9 @@ import { dateFormat } from "../Schedule/ScheduleTemplate";
 import moment from "moment";
 
 const ChecklistDetails = (props: ChecklistPageProps) => {
-  const createdDate = moment(new Date(props.checklist?.created_date as string)).format('MMMM Do YYYY, h:mm:ss a');
+  const createdDate = moment(
+    new Date(props.checklist?.created_date as string)
+  ).format("MMMM Do YYYY, h:mm:ss a");
   const assets =
     props.checklist?.linkedassets != null && props.checklist?.linkedassets != ""
       ? props.checklist?.linkedassets.split(", ")
@@ -20,41 +22,55 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
     );
   });
 
-    const actionDateElement = useCallback((): ReactNode | null => {
-        const { activity_log, status_id } = props.checklist as CMMSChecklist;
-        if (!Array.isArray(activity_log)) return;
-        if (status_id == 4) {
-            const completionLog = activity_log.reverse().find(activity => activity["activity"] == "WORK DONE");
-            return (
-                <div>
-                    <p className={styles.checklistDetailsHeading}>Completion Date</p>
-                    <p className={styles.checklistDetailsContent}>
-                        {moment(new Date(completionLog!.date)).format('MMMM Do YYYY, h:mm:ss a')}
-                    </p>
-                </div>
-            );
-        } else if (status_id == 5) {
-            const approvalLog = activity_log.reverse().find(activity => activity["activity"] == "APPROVED");
-            return (
-                <div>
-                    <p className={styles.checklistDetailsHeading}>Approval Date</p>
-                    <p className={styles.checklistDetailsContent}>
-                        {moment(new Date(approvalLog!.date)).format('MMMM Do YYYY, h:mm:ss a')}
-                    </p>
-                </div>
-            );
-        } else if (status_id == 3 || status_id == 2) {
-            const rejectedLog = activity_log.reverse().find(activity => activity["activity"] == "REJECTED");
-            return (
-                <div>
-                    <p className={styles.checklistDetailsHeading}>Rejection Date</p>
-                    <p className={styles.checklistDetailsContent}>
-                        {rejectedLog ? moment(new Date(rejectedLog!.date)).format('MMMM Do YYYY, h:mm:ss a') : "NIL"}
-                    </p>
-                </div>
-            );
-        }
-    }, [props.checklist]);
+  const actionDateElement = useCallback((): ReactNode | null => {
+    const { activity_log, status_id } = props.checklist as CMMSChecklist;
+    if (!Array.isArray(activity_log)) return;
+    if (status_id == 4) {
+      const completionLog = activity_log
+        .reverse()
+        .find((activity) => activity["activity"] == "WORK DONE");
+      return (
+        <div>
+          <p className={styles.checklistDetailsHeading}>Completed Date</p>
+          <p className={styles.checklistDetailsContent}>
+            {moment(new Date(completionLog!.date)).format(
+              "MMMM Do YYYY, h:mm:ss a"
+            )}
+          </p>
+        </div>
+      );
+    } else if (status_id == 5) {
+      const approvalLog = activity_log
+        .reverse()
+        .find((activity) => activity["activity"] == "APPROVED");
+      return (
+        <div>
+          <p className={styles.checklistDetailsHeading}>Approval Date</p>
+          <p className={styles.checklistDetailsContent}>
+            {moment(new Date(approvalLog!.date)).format(
+              "MMMM Do YYYY, h:mm:ss a"
+            )}
+          </p>
+        </div>
+      );
+    } else if (status_id == 3 || status_id == 2) {
+      const rejectedLog = activity_log
+        .reverse()
+        .find((activity) => activity["activity"] == "REJECTED");
+      return (
+        <div>
+          <p className={styles.checklistDetailsHeading}>Rejection Date</p>
+          <p className={styles.checklistDetailsContent}>
+            {rejectedLog
+              ? moment(new Date(rejectedLog!.date)).format(
+                  "MMMM Do YYYY, h:mm:ss a"
+                )
+              : "NIL"}
+          </p>
+        </div>
+      );
+    }
+  }, [props.checklist]);
 
   const rejectionComments = useCallback((): ReactNode | null => {
     const { activity_log, status_id } = props.checklist as CMMSChecklist;

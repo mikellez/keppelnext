@@ -48,6 +48,7 @@ import { useRouter } from "next/router";
 import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
 import Select, { ActionMeta, MultiValue, StylesConfig } from "react-select";
 import Image from "next/image";
+import moment from "moment";
 
 type FormValues = {
   requestTypeID: number;
@@ -407,7 +408,7 @@ export default function RequestContainer(props: RequestContainerProps) {
             <label className="form-label">
               <RequiredIcon /> Tag Asset
             </label>
-            <select
+            {/* <select
               className="form-select"
               id="formControlTagAsset"
               {...register("taggedAssetID", { required: true })}
@@ -432,7 +433,38 @@ export default function RequestContainer(props: RequestContainerProps) {
               {props.assignRequestData && (
                 <option value={-1}>{assignRequestData.asset_name}</option>
               )}
-            </select>
+            </select> */}
+            <Select
+              className="form-control"
+              id="formControlTagAsset"
+              {...register("taggedAssetID", { required: true })}
+              isDisabled={props.assignRequestData || !plantId ? true : false}
+              onChange={(value) => {
+                setValue("taggedAssetID", value?.value);
+              }}
+              defaultValue={
+                props.assignRequestData
+                  ? {
+                      value: props.assignRequestData.requestData.psa_id,
+                      label: props.assignRequestData.requestData.asset_name,
+                    }
+                  : 1
+              }
+              options = {
+                props.assignRequestData? [
+                  { value: -1, label: props.assignRequestData.requestData.asset_name }
+                ] : [
+                  { value: 0, label: 'Select asset'},
+                  ...(!props.assignRequestData &&
+                    sortedAssets.map((asset: CMMSAssetOption) => ({
+                      value: asset.psa_id,
+                      label: asset.asset_name,
+                      selected: asset.selected
+                    }))
+                  )
+                ]
+              }
+            />
 
           </div>
           {props.linkedRequestData && (
@@ -491,8 +523,7 @@ export default function RequestContainer(props: RequestContainerProps) {
           {props.assignRequestData && (
             <div className="form-group">
               <label className="form-label">
-                <RequiredIcon />
-                Assign to:
+                <RequiredIcon /> Assign to:
               </label>
 
               {/* {!plantId && <select className="form-control" disabled></select>} */}
@@ -513,8 +544,7 @@ export default function RequestContainer(props: RequestContainerProps) {
           {props.assignRequestData && (
             <div className="form-group">
               <label className="form-label">
-                <RequiredIcon />
-                Priority
+                <RequiredIcon /> Priority
               </label>
               {isReady && (
                 <Select
@@ -540,6 +570,13 @@ export default function RequestContainer(props: RequestContainerProps) {
               )}
             </div>
           )}
+          {assignRequestData && <div className="form-group">
+
+            <label className="form-label">
+              Created Date
+            </label>
+            <input type="text" className="form-control" disabled value={`${moment(assignRequestData.created_date).format('MMMM Do YYYY, h:mm:ss a')}`}/>
+          </div>}
         </div>
       </ModuleContent>
       <ModuleFooter>

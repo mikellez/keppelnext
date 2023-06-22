@@ -86,6 +86,7 @@ function QRCode(props: NewAssetProps) {
 	const [plantLocs, setPlantLocs] = useState<CMMSPlantLoc[]>([]);
 	const [filteredPlantLocs, setFilteredPlantLocs] = useState<CMMSPlantLoc[]>([]);
 	const [selectedPlantLoc, setSelectedPlantLoc] = useState<number|null>(null);
+	const [selectedLocString, setSelectedLocString] = useState<string>("");
 
 	
 	const qrRef = useRef() as React.RefObject<HTMLDivElement>
@@ -119,9 +120,16 @@ function QRCode(props: NewAssetProps) {
 		}
 	}, [selectedPlant])
 
-	const QRFeedbackImg = ({plant, loc_id}: {plant: number|null, loc_id: number|null}) => {
+	useEffect(() => {
+		if (selectedPlantLoc) {
+
+			setSelectedLocString(filteredPlantLocs.filter(loc => loc.id == selectedPlantLoc)[0].location)
+		}
+	}, [selectedPlantLoc])
+
+	const QRFeedbackImg = ({loc_id}: {loc_id: number|null}) => {
 		const { SVG } = useQRCode();
-		const location = plantLocs.filter(loc => loc.id === loc_id)[0].location;
+		// const location = plantLocs.filter(loc => loc.id === loc_id)[0].location;
 		function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
 			const svg = e.currentTarget.querySelector("svg");
 		
@@ -132,7 +140,7 @@ function QRCode(props: NewAssetProps) {
 		}
 		return <button className={"btn btn-secondary " + styles.btnQr} onClick={downloadQR}>
 			<SVG 
-					text={window.location.origin + "/Guest/Asset/feedback/" + plant + "/" + loc_id}
+					text={window.location.origin + "/Guest/Feedback/" + loc_id}
 					options={{
 						level: 'H',
 						margin: 0,
@@ -144,7 +152,7 @@ function QRCode(props: NewAssetProps) {
 						}
 					}}
 				/> 
-			<div className={styles.label}>{location}</div>
+			<div className={styles.label}>{selectedLocString}</div>
 		</button>
 	}
 
@@ -224,7 +232,7 @@ function QRCode(props: NewAssetProps) {
 				</div>}
 				{feedback && <div className={styles.qrList} ref ={qrRef}>
 					{
-						selectedPlantLoc && <QRFeedbackImg loc_id={selectedPlantLoc} plant={selectedPlant}/>
+						selectedPlantLoc && <QRFeedbackImg loc_id={selectedPlantLoc}/>
 					}
 				</div>}
 			</ModuleContent>

@@ -18,7 +18,8 @@ import { FeedbackFormProps } from "../pages/Feedback";
 
 function useRequest(
   request_type: "pending" | "assigned" | "review" | "approved",
-  page: number
+  page: number,
+  search: string = ""
 ) {
   const requestFetcher = (url: string) =>
     instance
@@ -34,7 +35,7 @@ function useRequest(
       });
 
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
-    [`/api/request/${request_type}?page=${page}`],
+    [`/api/request/${request_type}?page=${page}&search=${search}`],
     requestFetcher,
     { revalidateOnFocus: false }
   );

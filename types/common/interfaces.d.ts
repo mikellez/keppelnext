@@ -277,6 +277,7 @@ interface CMMSSubComponent1Name {
 interface CMMSContact {
   tele? : string;
   whatsapp? : string;
+  number? : string;
   email? : string;
 }
 
@@ -285,6 +286,7 @@ interface CMMSFeedback {
   created_date: Date;
   completed_date? : Date;
   createdbyuser: string;
+  name? : string;
   created_user_id: string | null;
   created_user_email: string | null;
   fullname: string;
