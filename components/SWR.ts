@@ -19,7 +19,8 @@ import { FeedbackFormProps } from "../pages/Feedback";
 function useRequest(
   request_type: "pending" | "assigned" | "review" | "approved",
   page: number,
-  search: string = ""
+  search: string = "",
+  fields: string[]
 ) {
   const requestFetcher = (url: string) =>
     instance
@@ -33,13 +34,33 @@ function useRequest(
       .catch((e) => {
         throw new Error(e);
       });
+  const fieldsString = fields.join(",");
 
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
-    [`/api/request/${request_type}?page=${page}&search=${search}`],
+    [`/api/request/${request_type}?page=${page}&search=${search}&expand=${fieldsString}`],
     requestFetcher,
     { revalidateOnFocus: false }
   );
 }
+
+function useSpecificRequest(request_id: number) {
+  const requestFetcher = (url: string) =>
+      instance
+      .get<CMMSRequest>(url)
+      .then((response) => {
+          response.data.created_date = new Date(response.data.created_date);
+          return response.data;
+        })
+      .catch((e) => {
+          throw new Error(e);
+        });
+  return useSWR<CMMSRequest, Error>(
+    [`/api/request/${request_id}`],
+    requestFetcher,
+    { revalidateOnFocus: false }
+  );
+}
+
 
 function useRequestFilter(props: RequestProps, page: number) {
   const requestFetcher = (url: string) =>
@@ -359,4 +380,5 @@ export {
   useWorkflow,
   useFeedback,
   useFeedbackFilter,
+  useSpecificRequest,
 };

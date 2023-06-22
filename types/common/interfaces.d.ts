@@ -168,6 +168,7 @@ interface CMMSRequest {
     remarks?: string;
   }[];
   total?: number;
+  associatedrequestid?: number;
 }
 
 

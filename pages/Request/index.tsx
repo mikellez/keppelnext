@@ -52,7 +52,7 @@ import {
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 
-import { useRequest, useRequestFilter } from "../../components/SWR";
+import { useRequest, useRequestFilter, useSpecificRequest } from "../../components/SWR";
 import { CMMSRequest } from "../../types/common/interfaces";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -200,7 +200,11 @@ export default function Request(props: RequestProps) {
   
   
 
-  const handleExpand = (item: RequestItem) => {
+  const handleExpand = async (item: RequestItem) => {
+    const request = await instance.get(`/api/request/${item.id}`).data;
+    // update with further details
+    setRequestItems(prev => prev.map(req => req.id === item.id ? request : req))
+    console.log(request);
     if (ids.includes(item.id)) {
       setIds(ids.filter((id) => id !== item.id));
     } else {
@@ -209,7 +213,20 @@ export default function Request(props: RequestProps) {
   };
 
   const filteredRequest = useRequestFilter(props, page);
-  const allRequest = useRequest(indexedColumn[activeTabIndex], page, searchRef.current.value);
+  const allRequest = useRequest(indexedColumn[activeTabIndex], page, searchRef.current.value, 
+    [
+      "request_id",
+      "fault_name",
+      "plant_name",
+      "priority",
+      "status",
+      "created_date",
+      "asset_name",
+      "fullname",
+      "status_id",
+      "associatedrequestid",
+      "activity_log"
+    ]);
 
   const {
     data: requestData,
