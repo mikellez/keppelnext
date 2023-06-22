@@ -187,18 +187,36 @@ async function generateRequestPDF(id) {
     const priority = request.priority ? request.priority : "No Priority";
     const completionComments = request.complete_comments;
     const rejectionComments = request.rejection_comments;
-    const history = request.requesthistory;
+    const history = request.activity_log;
     const faultImg = request.uploaded_file
     const completedImg = request.completion_file;
 
     // Generating a 2D array for request table history
     const historyArr = [];
+    // if (history) {
+    //     history.split("!").forEach(row => {
+    //         historyArr.push(row.split("_"))
+    //     })
+    // }
     if (history) {
-        history.split("!").forEach(row => {
-            historyArr.push(row.split("_"))
+        console.log(typeof(history), 1111);
+        // console.log(history, 1111);
+        history.forEach(row => {
+            arr = [];
+            arr.push(row.activity_type);
+            arr.push(row.activity);
+            arr.push(row.date);
+            arr.push(row.role);
+            arr.push(row.name);
+            historyArr.push(arr);
         })
+        console.log(historyArr,22);
     }
-
+    // {label: "Status", width: 50}, 
+    //             {label: "Remarks", width: 148}, 
+    //             {label: "Date", width: 148}, 
+    //             {label: "Role", width: 50},  
+    //             {label: "Action By", width: 100}, 
     // The default header on every page
     doc.on('pageAdded', () => {
         doc
@@ -293,7 +311,7 @@ async function generateRequestPDF(id) {
             title: {label: 'Request History', fontSize: 10, font: 'Times-Roman'},
             headers: [
                 {label: "Status", width: 50}, 
-                {label: "Remarks", width: 148}, 
+                {label: "Activity", width: 148},
                 {label: "Date", width: 148}, 
                 {label: "Role", width: 50},  
                 {label: "Action By", width: 100}, 
