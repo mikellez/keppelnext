@@ -39,6 +39,16 @@ import {
   CompactTable,
   RowOptions,
 } from "@table-library/react-table-library/compact";
+import {
+  Table,
+  Header,
+  HeaderRow,
+  HeaderCell,
+  Body,
+  Row,
+  Cell,
+  OnClick,
+} from "@table-library/react-table-library";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 
@@ -188,126 +198,7 @@ export default function Request(props: RequestProps) {
     setPage(1);
   };
   
-  const COLUMNS: Column<RequestItem>[] = [
-    {
-      label: "ID",
-      resize: true,
-      renderCell: (item) => item.id,
-    },
-    {
-      label: "Fault Type",
-      resize: true,
-      renderCell: (item) => item.fault_name,
-    },
-    {
-      label: "Location",
-      resize: true,
-      renderCell: (item) => item.plant_name,
-    },
-    {
-      label: "Priority",
-      resize: true,
-      renderCell: (item) => (
-        <span style={{ color: getColor(item.priority), fontWeight: "bold" }}>
-          {item.priority == null ? "-" : item.priority}
-        </span>
-      ),
-    },
-    {
-      label: "Status",
-      resize: true,
-      renderCell: (item) => (
-        <span style={{ color: getColor(item.status), fontWeight: "bold" }}>
-          {item.status}
-        </span>
-      ),
-    },
-    {
-      label: "Date",
-      resize: true,
-      renderCell: (item) =>
-        item.created_date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }),
-    },
-    {
-      label: "Asset Name",
-      resize: true,
-      renderCell: (item) => item.asset_name,
-    },
-    {
-      label: "Requested By",
-      resize: true,
-      renderCell: (item) => item.fullname,
-    },
-    {
-      label: "",
-      renderCell: (item) => (
-        <div className={styles.iconsDiv}>
-          {(item.status_id === 1 || item.status_id === 2) && (
-            <div
-              className={styles.editIcon}
-              style={{
-                display:
-                  data?.role_id == Role.Admin ||
-                  data?.role_id == Role.Manager ||
-                  data?.role_id == Role.Engineer
-                    ? "block"
-                    : "none",
-                // visibility:
-                //     item.status_id === 1 || item.status_id === 2 ? "visible" : "hidden",
-              }}
-              onClick={() => {
-                router.push(`/Request/Assign/${item.id}`);
-                setReady(false);
-              }}
-            >
-              <AiOutlineUserAdd size={18} title={"Assign"} />
-            </div>
-          )}
-          {item.status_id === 3 && (
-            <div
-              className={styles.editIcon}
-              style={{
-                display:
-                  data?.role_id == Role.Admin || data?.role_id == Role.Manager
-                    ? "block"
-                    : "none",
-                // visibility: item.status_id === 3 ? "visible" : "hidden",
-              }}
-              onClick={() => {
-                router.push(`/Request/Manage/${item.id}`);
-                setReady(false);
-              }}
-            >
-              <BiCommentCheck size={18} title={"Manage"} />
-            </div>
-          )}
-          {item.associatedrequestid === null && (
-            <div
-              className={styles.editIcon}
-              onClick={() => {
-                router.push(`/Request/CorrectiveRequest/${item.id}`);
-                setReady(false);
-              }}
-            >
-              <HiOutlineLink size={18} title={"Create Corrective Request"} />
-            </div>
-          )}
-          <div
-            className={styles.editIcon}
-            onClick={() => {
-              setCurrentHistory(item.activity_log);
-            }}
-          >
-            <AiOutlineHistory size={18} title={"View History"} />
-          </div>
-        </div>
-      ),
-    },
-  ];
+  
 
   const handleExpand = (item: RequestItem) => {
     if (ids.includes(item.id)) {
@@ -330,8 +221,8 @@ export default function Request(props: RequestProps) {
   const theme = useTheme([
     getTheme(),
     {
-      Table: `--data-table-library_grid-template-columns:  5em 18% 8em 7em 8em 8em calc(72% - 42em) 10% 6em;
-        overflow-x: hidden
+      Table: `--data-table-library_grid-template-columns:  5em 13em 8em 6em 6em 14em 15em 8em 6em;
+        
         `,
       HeaderRow: `
 				background-color: #eaf5fd;
@@ -352,116 +243,7 @@ export default function Request(props: RequestProps) {
     },
   ]);
 
-  const ROW_PROPS = {
-    onClick: handleExpand,
-  };
-
-  const ROW_OPTIONS: RowOptions<RequestItem> = {
-    renderAfterRow: (item) => {
-      return (
-        <>
-          {ids.includes(item.id) && (
-            <tr style={{ display: "flex", gridColumn: "1 / -1" }}>
-              <td style={{ flex: "1" }}>
-                <ul className={styles.tableUL}>
-                  <li className={styles.tableDropdownListItem}>
-                    <p>
-                      <strong>Fault Description</strong>
-                    </p>
-                    <p>{item.fault_description}</p>
-                  </li>
-                  <li className={styles.tableDropdownListItem}>
-                    <p>
-                      <strong>Assigned To</strong>
-                    </p>
-                    <p>
-                      {item.assigned_user_name.trim() === ""
-                        ? "UNASSIGNED"
-                        : item.assigned_user_name}
-                    </p>
-                  </li>
-                  <li className={styles.tableDropdownListItem}>
-                    <p className={styles.tableDropdownListItemHeader}>
-                      <strong>Fault File</strong>
-                    </p>
-                    {item.uploaded_file ? (
-                      <Image
-                        src={URL.createObjectURL(
-                          new Blob([new Uint8Array(item.uploaded_file.data)])
-                        )}
-                        alt=""
-                        className={styles.tableDropdownImg}
-                        onClick={() =>
-                          setModalSrc(
-                            URL.createObjectURL(
-                              new Blob([
-                                new Uint8Array(item.uploaded_file.data),
-                              ])
-                            )
-                          )
-                        }
-                        width={200}
-                        height={200}
-                      />
-                    ) : (
-                      <p>No File</p>
-                    )}
-                  </li>
-                  <li className={styles.tableDropdownListItem}>
-                    <p className={styles.tableDropdownListItemHeader}>
-                      <strong>Completion File</strong>
-                    </p>
-                    {item.completion_file ? (
-                      <Image
-                        src={URL.createObjectURL(
-                          new Blob([new Uint8Array(item.completion_file.data)])
-                        )}
-                        alt=""
-                        className={styles.tableDropdownImg}
-                        onClick={() =>
-                          setModalSrc(
-                            URL.createObjectURL(
-                              new Blob([
-                                new Uint8Array(item.completion_file.data),
-                              ])
-                            )
-                          )
-                        }
-                        width={200}
-                        height={200}
-                      />
-                    ) : (
-                      <p>No File</p>
-                    )}
-                  </li>
-                  <li className={styles.tableDropdownListItem}>
-                    {(data?.role_id === Role.Admin ||
-                      data?.role_id === Role.Manager ||
-                      data?.role_id === Role.Engineer) &&
-                    item.status_id === 3 ? (
-                      <Link href={`/Request/Manage/${item.id}`}>
-                        <strong>Manage</strong>
-                      </Link>
-                    ) : (data?.role_id === Role.Engineer ||
-                        data?.role_id === Role.Specialist) &&
-                      (item.status_id === 2 || item.status_id === 5) ? (
-                      <Link href={`/Request/Complete/${item.id}`}>
-                        <strong>Complete</strong>
-                      </Link>
-                    ) : (
-                      <Link href={`/Request/View/${item.id}`}>
-                        <strong>View</strong>
-                      </Link>
-                    )}
-                  </li>
-                </ul>
-              </td>
-            </tr>
-          )}
-        </>
-      );
-    },
-  };
+ 
 
   useEffect(() => {
     if (requestData && !requestIsFetchValidating) {
@@ -566,14 +348,217 @@ export default function Request(props: RequestProps) {
 
         {isReady && (
           <>
-            <CompactTable
-              columns={COLUMNS}
+            
+            <Table
               data={{ nodes: requestItems }}
               theme={theme}
-              layout={{ custom: true }}
-              rowProps={ROW_PROPS}
-              rowOptions={ROW_OPTIONS}
-            />
+              layout={{ custom: true, horizontalScroll: true}}
+            >
+              {(tableList: RequestItem[]) => (
+                <>
+                  <Header>
+                    <HeaderRow>
+                      <HeaderCell resize>ID</HeaderCell>
+                      <HeaderCell resize>Fault Type</HeaderCell>
+                      <HeaderCell resize>Location</HeaderCell>
+                      <HeaderCell resize>Priority</HeaderCell>
+                      <HeaderCell resize>Status</HeaderCell>
+                      <HeaderCell resize>Date</HeaderCell>
+                      <HeaderCell resize>Asset Name</HeaderCell>
+                      <HeaderCell resize>Requested By</HeaderCell>
+                      <HeaderCell resize>Action</HeaderCell>
+                    </HeaderRow>
+                  </Header>
+                  <Body>
+                    {tableList.map(item => {
+                      return (
+                        <React.Fragment key={item.id}>
+                        <Row item={item} onClick={handleExpand}>
+                          <Cell>{item.id}</Cell>
+                          <Cell>{item.fault_name}</Cell>
+                          <Cell>{item.plant_name}</Cell>
+                          <Cell style={{ color: getColor(item.priority), fontWeight: "bold" }}>
+                            {item.priority == null ? "-" : item.priority}
+                          </Cell>
+                          <Cell style={{ color: getColor(item.status), fontWeight: "bold" }}>
+                            {item.status}
+                          </Cell>
+                          <Cell>
+                          {`${moment(new Date(item.created_date)).format('MMMM Do YYYY, h:mm:ss a')}`}
+                          </Cell>
+                          <Cell>{item.asset_name}</Cell>
+                          <Cell>{item.fullname}</Cell>
+                          <Cell>
+                            <div className={styles.iconsDiv}>
+
+                            
+                              {(item.status_id === 1 || item.status_id === 2) && (
+                                <div
+                                  className={styles.editIcon}
+                                  style={{
+                                    display:
+                                      data?.role_id == Role.Admin ||
+                                      data?.role_id == Role.Manager ||
+                                      data?.role_id == Role.Engineer
+                                        ? "block"
+                                        : "none",
+                                    // visibility:
+                                    //     item.status_id === 1 || item.status_id === 2 ? "visible" : "hidden",
+                                  }}
+                                  onClick={() => {
+                                    router.push(`/Request/Assign/${item.id}`);
+                                    setReady(false);
+                                  }}
+                                >
+                                  <AiOutlineUserAdd size={18} title={"Assign"} />
+                                </div>
+                              )}
+                              {item.status_id === 3 && (
+                                <div
+                                  className={styles.editIcon}
+                                  style={{
+                                    display:
+                                      data?.role_id == Role.Admin || data?.role_id == Role.Manager
+                                        ? "block"
+                                        : "none",
+                                    // visibility: item.status_id === 3 ? "visible" : "hidden",
+                                  }}
+                                  onClick={() => {
+                                    router.push(`/Request/Manage/${item.id}`);
+                                    setReady(false);
+                                  }}
+                                >
+                                  <BiCommentCheck size={18} title={"Manage"} />
+                                </div>
+                              )}
+                              {item.associatedrequestid === null && (
+                                <div
+                                  className={styles.editIcon}
+                                  onClick={() => {
+                                    router.push(`/Request/CorrectiveRequest/${item.id}`);
+                                    setReady(false);
+                                  }}
+                                >
+                                  <HiOutlineLink size={18} title={"Create Corrective Request"} />
+                                </div>
+                              )}
+                              <div
+                                className={styles.editIcon}
+                                onClick={() => {
+                                  setCurrentHistory(item.activity_log);
+                                }}
+                              >
+                                <AiOutlineHistory size={18} title={"View History"} />
+                              </div>
+                            </div>
+                          </Cell>
+                        </Row>
+                        {ids.includes(item.id) && (
+                          <tr style={{ display: "flex", gridColumn: "1 / -1" }}>
+                            <td style={{ flex: "1" }}>
+                              <ul className={styles.tableUL}>
+                                <li className={styles.tableDropdownListItem}>
+                                  <p>
+                                    <strong>Fault Description</strong>
+                                  </p>
+                                  <p>{item.fault_description}</p>
+                                </li>
+                                <li className={styles.tableDropdownListItem}>
+                                  <p>
+                                    <strong>Assigned To</strong>
+                                  </p>
+                                  <p>
+                                    {item.assigned_user_name.trim() === ""
+                                      ? "UNASSIGNED"
+                                      : item.assigned_user_name}
+                                  </p>
+                                </li>
+                                <li className={styles.tableDropdownListItem}>
+                                  <p className={styles.tableDropdownListItemHeader}>
+                                    <strong>Fault File</strong>
+                                  </p>
+                                  {item.uploaded_file ? (
+                                    <Image
+                                      src={URL.createObjectURL(
+                                        new Blob([new Uint8Array(item.uploaded_file.data)])
+                                      )}
+                                      alt=""
+                                      className={styles.tableDropdownImg}
+                                      onClick={() =>
+                                        setModalSrc(
+                                          URL.createObjectURL(
+                                            new Blob([
+                                              new Uint8Array(item.uploaded_file.data),
+                                            ])
+                                          )
+                                        )
+                                      }
+                                      width={200}
+                                      height={200}
+                                    />
+                                  ) : (
+                                    <p>No File</p>
+                                  )}
+                                </li>
+                                <li className={styles.tableDropdownListItem}>
+                                  <p className={styles.tableDropdownListItemHeader}>
+                                    <strong>Completion File</strong>
+                                  </p>
+                                  {item.completion_file ? (
+                                    <Image
+                                      src={URL.createObjectURL(
+                                        new Blob([new Uint8Array(item.completion_file.data)])
+                                      )}
+                                      alt=""
+                                      className={styles.tableDropdownImg}
+                                      onClick={() =>
+                                        setModalSrc(
+                                          URL.createObjectURL(
+                                            new Blob([
+                                              new Uint8Array(item.completion_file.data),
+                                            ])
+                                          )
+                                        )
+                                      }
+                                      width={200}
+                                      height={200}
+                                    />
+                                  ) : (
+                                    <p>No File</p>
+                                  )}
+                                </li>
+                                <li className={styles.tableDropdownListItem}>
+                                  {(data?.role_id === Role.Admin ||
+                                    data?.role_id === Role.Manager ||
+                                    data?.role_id === Role.Engineer) &&
+                                  item.status_id === 3 ? (
+                                    <Link href={`/Request/Manage/${item.id}`}>
+                                      <strong>Manage</strong>
+                                    </Link>
+                                  ) : (data?.role_id === Role.Engineer ||
+                                      data?.role_id === Role.Specialist) &&
+                                    (item.status_id === 2 || item.status_id === 5) ? (
+                                    <Link href={`/Request/Complete/${item.id}`}>
+                                      <strong>Complete</strong>
+                                    </Link>
+                                  ) : (
+                                    <Link href={`/Request/View/${item.id}`}>
+                                      <strong>View</strong>
+                                    </Link>
+                                  )}
+                                </li>
+                              </ul>
+                            </td>
+                          </tr>
+                        )}
+                        </React.Fragment>
+                      )
+                    })}
+                  </Body>
+                </>
+              )}
+
+            </Table>
             {requestItems.length === 0 && <div>No Requests</div>}
             <Pagination
               setPage={setPage}

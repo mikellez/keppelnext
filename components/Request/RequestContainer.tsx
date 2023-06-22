@@ -48,6 +48,7 @@ import { useRouter } from "next/router";
 import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
 import Select, { ActionMeta, MultiValue, StylesConfig } from "react-select";
 import Image from "next/image";
+import moment from "moment";
 
 type FormValues = {
   requestTypeID: number;
@@ -491,8 +492,7 @@ export default function RequestContainer(props: RequestContainerProps) {
           {props.assignRequestData && (
             <div className="form-group">
               <label className="form-label">
-                <RequiredIcon />
-                Assign to:
+                <RequiredIcon /> Assign to:
               </label>
 
               {/* {!plantId && <select className="form-control" disabled></select>} */}
@@ -513,8 +513,7 @@ export default function RequestContainer(props: RequestContainerProps) {
           {props.assignRequestData && (
             <div className="form-group">
               <label className="form-label">
-                <RequiredIcon />
-                Priority
+                <RequiredIcon /> Priority
               </label>
               {isReady && (
                 <Select
@@ -540,6 +539,13 @@ export default function RequestContainer(props: RequestContainerProps) {
               )}
             </div>
           )}
+          {assignRequestData && <div className="form-group">
+
+            <label className="form-label">
+              Created Date
+            </label>
+            <input type="text" className="form-control" disabled value={`${moment(assignRequestData.created_date).format('MMMM Do YYYY, h:mm:ss a')}`}/>
+          </div>}
         </div>
       </ModuleContent>
       <ModuleFooter>
