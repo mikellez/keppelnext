@@ -52,6 +52,19 @@ async function generateChecklistPDF(checklistId) {
 
     const marginX = 50;
     const doc = new PDFDocument({ margin: marginX, autoFirstPage: false });
+    const historyArr = [];
+    cl.activity_log.forEach(row => {
+        arr = [];
+        arr.push(row.activity);
+        arr.push(row.activity_type);
+        arr.push(row.date);
+        arr.push(row.name);
+        historyArr.push(arr);
+    })
+    console.log(historyArr,22);
+
+
+    
 
     // The default header on every page
     doc.on('pageAdded', () => {
@@ -80,6 +93,28 @@ async function generateChecklistPDF(checklistId) {
     
     placeTopInfo(doc, headerObj, marginX);
     doc.text("\n", marginX);
+    (async function createTable() {
+        // Table
+        const table = { 
+            title: {label: 'Checklist History', fontSize: 10, font: 'Times-Roman'},
+            headers: [
+                {label: "Status", width: 50}, 
+                {label: "Activity", width: 148},
+                {label: "Date", width: 148}, 
+                {label: "Action By", width: 100}, 
+            ],
+            rows: historyArr,
+            };
+
+        await doc.table(table, {
+            prepareHeader: () => doc.font("Times-Bold").fontSize(10),
+            prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+                doc.font("Times-Roman").fontSize(8);
+            },
+        });
+
+    })();
+    
 
     // The checklist contents
     cl.datajson.forEach(sect => {
