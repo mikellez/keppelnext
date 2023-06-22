@@ -120,8 +120,6 @@ const getAllChecklistQuery = (expand) => {
   }
 
   expandCond = SELECT_ARR.join(", ");
-  console.log('selectArr', SELECT_ARR)
-  console.log('expand', expand)
 
   const query = `
     SELECT 
