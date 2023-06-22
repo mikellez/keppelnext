@@ -120,6 +120,8 @@ const getAllChecklistQuery = (expand) => {
   }
 
   expandCond = SELECT_ARR.join(", ");
+  console.log('selectArr', SELECT_ARR)
+  console.log('expand', expand)
 
   const query = `
     SELECT 
@@ -211,7 +213,7 @@ const fetchAssignedChecklists = async (req, res, next) => {
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    fetchAssignedChecklistsQuery +
+    getAssignedChecklistsQuery(expand) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
@@ -246,7 +248,7 @@ const fetchPendingChecklists = async (req, res, next) => {
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    fetchPendingChecklistsQuery +
+    getPendingChecklistsQuery(expand) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
@@ -280,7 +282,7 @@ const fetchForReviewChecklists = async (req, res, next) => {
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    fetchForReviewChecklistsQuery +
+    getForReviewChecklistsQuery(expand) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
@@ -313,7 +315,7 @@ const fetchApprovedChecklists = async (req, res, next) => {
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    fetchApprovedChecklistsQuery +
+    getApprovedChecklistsQuery(expand) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {

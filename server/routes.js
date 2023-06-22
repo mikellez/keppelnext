@@ -183,12 +183,6 @@ router.get(
   controllers.request.fetchPendingRequests
 );
 
-router.get(
-  "/request/pending?expand=*",
-  checkIfLoggedInAPI,
-  controllers.request.fetchPendingRequests
-);
-
 /**
  * @api {get} /request/type Get Request Types
  * @apiDescription Gets all request types.
