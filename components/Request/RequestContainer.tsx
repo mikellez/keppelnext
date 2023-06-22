@@ -408,7 +408,7 @@ export default function RequestContainer(props: RequestContainerProps) {
             <label className="form-label">
               <RequiredIcon /> Tag Asset
             </label>
-            <select
+            {/* <select
               className="form-select"
               id="formControlTagAsset"
               {...register("taggedAssetID", { required: true })}
@@ -433,7 +433,38 @@ export default function RequestContainer(props: RequestContainerProps) {
               {props.assignRequestData && (
                 <option value={-1}>{assignRequestData.asset_name}</option>
               )}
-            </select>
+            </select> */}
+            <Select
+              className="form-control"
+              id="formControlTagAsset"
+              {...register("taggedAssetID", { required: true })}
+              isDisabled={props.assignRequestData || !plantId ? true : false}
+              onChange={(value) => {
+                setValue("taggedAssetID", value?.value);
+              }}
+              defaultValue={
+                props.assignRequestData
+                  ? {
+                      value: props.assignRequestData.requestData.psa_id,
+                      label: props.assignRequestData.requestData.asset_name,
+                    }
+                  : 1
+              }
+              options = {
+                props.assignRequestData? [
+                  { value: -1, label: props.assignRequestData.requestData.asset_name }
+                ] : [
+                  { value: 0, label: 'Select asset'},
+                  ...(!props.assignRequestData &&
+                    sortedAssets.map((asset: CMMSAssetOption) => ({
+                      value: asset.psa_id,
+                      label: asset.asset_name,
+                      selected: asset.selected
+                    }))
+                  )
+                ]
+              }
+            />
 
           </div>
           {props.linkedRequestData && (
