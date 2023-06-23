@@ -9,28 +9,72 @@ const moment = require("moment");
 
 const ITEMS_PER_PAGE = 10;
 
-async function fetchRequestQuery(status_query, role_id, user_id, page) {
+async function fetchRequestQuery(status_query, role_id, user_id, page, expand, search="") {
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
   // console.log(role_id)
   let userCond = "";
+  let expandCond = "";
+  let SELECT_ARR = [];
+
   if (role_id == 3) {
     userCond = `AND u.user_id = ${user_id}`;
   }
 
+  const SELECT = {
+    request_id: "r.request_id",
+    fault_name: "ft.fault_type AS fault_name",
+    plant_name: "pm.plant_name",
+    plant_id: "pm.plant_id",
+    role_name: "ro.role_name",
+    status: "sc.status",
+    fault_description: "r.fault_description",
+    request_type: "rt.request AS request_type",
+    priority: "pri.priority",
+    fullname: `CASE
+      WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
+      ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
+    END AS fullname`,
+    created_date: "r.created_date",
+    asset_name: "tmp1.asset_name",
+    uploadfilemimetype: "r.uploadfilemimetype",
+    completedfilemimetype: "r.completedfilemimetype",
+    uploaded_file: "r.uploaded_file",
+    completion_file: "r.completion_file",
+    complete_comments: "r.complete_comments",
+    assigned_user_name: "concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name",
+    associatedrequestid: "r.associatedrequestid",
+    activity_log: "r.activity_log",
+    rejection_comments: "r.rejection_comments",
+    status_id: "r.status_id",
+    psa_id: "r.psa_id",
+    fault_id: "r.fault_id",
+  };
+
+  if(expand) {
+    const expandArr = expand.split(",");
+
+    SELECT_ARR = [];
+    for (let i = 0; i < expandArr.length; i++) {
+      SELECT_ARR.push(SELECT[expandArr[i]]);
+    }
+
+  } else {
+
+    for (let key in SELECT) {
+      if (SELECT.hasOwnProperty(key)) {
+        SELECT_ARR.push(SELECT[key]);
+      }
+    }
+
+  }
+
+  expandCond = SELECT_ARR.join(", ");
+
   let sql;
   if (role_id === 1 || role_id === 2 || role_id === 3) {
-    sql = `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
-    ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
-	  pri.priority, 
-	  CASE 
-		  WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
-		  ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-	  END AS fullname,
-	  r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
-	  r.complete_comments,
-	  concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-	  , r.activity_log, r.rejection_comments, r.status_id, r.psa_id, r.fault_id
-	  FROM    
+    sql = `SELECT 
+      ${expandCond}
+    FROM    
 		  keppel.users u
 		  JOIN keppel.user_access ua ON u.user_id = ua.user_id
 		  JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
@@ -46,6 +90,12 @@ async function fetchRequestQuery(status_query, role_id, user_id, page) {
 			  from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
 			  WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
     WHERE 1 = 1 
+    AND (
+      ft.fault_type LIKE '%${search}%' OR
+      pm.plant_name LIKE '%${search}%' OR
+      rt.request LIKE '%${search}%' OR
+      pri.priority LIKE '%${search}%'
+    )
 	  ${status_query}
     ${userCond}
 	  GROUP BY (
@@ -92,6 +142,12 @@ async function fetchRequestQuery(status_query, role_id, user_id, page) {
 			  from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
 			  WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
 	  WHERE (r.assigned_user_id = ${user_id} OR r.user_id = ${user_id})
+    AND (
+      ft.fault_type LIKE '%${search}%' OR
+      pm.plant_name LIKE '%${search}%' OR
+      rt.request LIKE '%${search}%' OR
+      pri.priority LIKE '%${search}%'
+    )
 	  ${status_query}
 	  GROUP BY (
 		  r.request_id,
@@ -121,12 +177,16 @@ async function fetchRequestQuery(status_query, role_id, user_id, page) {
 
 const fetchPendingRequests = async (req, res, next) => {
   const page = req.query.page || 1;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND sc.status_id = 1", //PENDING
     req.user.role_id,
     req.user.id,
-    page
+    page,
+    expand,
+    search
   );
 
   const result = await global.db.query(sql);
@@ -136,12 +196,16 @@ const fetchPendingRequests = async (req, res, next) => {
 
 const fetchAssignedRequests = async (req, res, next) => {
   const page = req.query.page || 1;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND sc.status_id = 2", //ASSIGNED
     req.user.role_id,
     req.user.id,
-    page
+    page,
+    expand,
+    search
   );
 
   const result = await global.db.query(sql);
@@ -151,12 +215,16 @@ const fetchAssignedRequests = async (req, res, next) => {
 
 const fetchReviewRequests = async (req, res, next) => {
   const page = req.query.page || 1;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND (sc.status_id = 3 OR sc.status_id = 5 OR sc.status_id = 6)", //COMPLETED, REJECTED, CANCELLED
     req.user.role_id,
     req.user.id,
-    page
+    page,
+    expand,
+    search
   );
 
   const result = await global.db.query(sql);
@@ -166,12 +234,16 @@ const fetchReviewRequests = async (req, res, next) => {
 
 const fetchApprovedRequests = async (req, res, next) => {
   const page = req.query.page || 1;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND sc.status_id = 4", //APPROVED
     req.user.role_id,
     req.user.id,
-    page
+    page,
+    expand,
+    search
   );
 
   const result = await global.db.query(sql);
@@ -208,7 +280,8 @@ const createWorkflow = (requestID, faultTypeID, plantLocationID) => {
 };
 
 const createRequest = async (req, res, next) => {
-  // console.log(req.body)
+
+  console.log(req.body)
   // console.log(req.file)
   const {
     requestTypeID,
@@ -221,7 +294,7 @@ const createRequest = async (req, res, next) => {
   // console.log("^&*")
   const fileBuffer = req.file === undefined ? null : req.file.buffer;
   const fileType = req.file === undefined ? null : req.file.mimetype;
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   let user_id = "";
   let name = "";
   let role_name = "";
@@ -301,6 +374,16 @@ const createRequest = async (req, res, next) => {
       }
     );
   } else if (req.body.linkedRequestId) {
+    history = `PENDING_Corrective Request Created_${today}_${role_name}_${name}`;
+    activity_log = [
+      {
+        date: today,
+        name: name,
+        role: role_name,
+        activity: `Corrective Request Created From Request ${req.body.linkedRequestId}`,
+        activity_type: "PENDING",
+      },
+    ];
     const insertQuery = `
       INSERT INTO keppel.request(
         fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
@@ -309,9 +392,18 @@ const createRequest = async (req, res, next) => {
       ) RETURNING request_id;
     `;
     const updateQuery = `
-    UPDATE keppel.request SET status_id = 3 WHERE request_id = $1;
+    UPDATE keppel.request SET status_id = 3,
+		requesthistory = concat(requesthistory, $2::text),
+    activity_log = activity_log || 
+        jsonb_build_object(
+          'date', '${today}',
+          'name', '${role_name}',
+          'role', '${name}',
+          'activity', 'Corrective Request Created For This Request',
+          'activity_type', 'COMPLETED'
+        ) WHERE request_id = $1;
     `;
-
+    const history_update = `COMPLETED_Corrective Request Created_${today}_${role_name}_${name}`;
     global.db.query(
       insertQuery,
       [
@@ -336,7 +428,8 @@ const createRequest = async (req, res, next) => {
 
         global.db.query(
           updateQuery,
-          [req.body.linkedRequestId],
+          [req.body.linkedRequestId,
+            history_update,],
           (err, result) => {
             if (err) {
               // console.log(err);
@@ -354,8 +447,9 @@ const createRequest = async (req, res, next) => {
 };
 
 const updateRequest = async (req, res, next) => {
+
   const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;
   console.log([
     req.body.assignedUser.value,
@@ -680,12 +774,33 @@ const createRequestCSV = (req, res, next) => {
 };
 
 const approveRejectRequest = async (req, res, next) => {
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  console.log(req.body);
+
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const status = req.params.status_id == 4 ? "APPROVED" : "REJECTED";
   const text = req.params.status_id == 4 ? "Approved" : "Rejected";
   const id = req.params.status_id == 4 ? 4 : 2;
   const history = `!${status}_${text} request_${today}_${req.user.role_name}_${req.user.name}`;
-  const sql = `
+  let sql = ``
+  if (req.params.status_id != 4) {
+    history != `!NIL_Rejected due to ${req.body.comments}_${today}_${req.user.role_name}_${req.user.name}`;
+    sql = `
+    UPDATE keppel.request SET 
+    status_id = $1,
+    requesthistory = concat(requesthistory, $2::text),
+    activity_log = activity_log || 
+          jsonb_build_object(
+            'date', '${today}',
+            'name', '${req.user.name}',
+            'role', '${req.user.role_name}',
+            'activity', '${text} request due to ${req.body.comments}',
+            'activity_type', '${status}',
+            'remarks', '${req.body.comments}'
+          )
+    WHERE request_id = $3`;
+  }
+  else{
+  sql = `
 	UPDATE keppel.request SET 
 	status_id = $1,
 	requesthistory = concat(requesthistory, $2::text),
@@ -699,6 +814,7 @@ const approveRejectRequest = async (req, res, next) => {
           'remarks', '${req.body.comments}'
         )
 	WHERE request_id = $3`;
+        }
   global.db.query(sql, [id, history, req.params.request_id], (err, result) => {
     if (err) return res.status(500).send("Error in updating status");
     return res.status(200).json("Request successfully updated");
@@ -708,7 +824,7 @@ const approveRejectRequest = async (req, res, next) => {
 const completeRequest = async (req, res, next) => {
   const fileBuffer = req.file === undefined ? null : req.file.buffer;
   const fileType = req.file === undefined ? null : req.file.mimetype;
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const history = `!COMPLETED_Completed request_${today}_${req.user.role_name}_${req.user.name}`;
 
   const sql = `UPDATE keppel.request SET

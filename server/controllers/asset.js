@@ -715,8 +715,8 @@ const editAsset = async (req, res, next) => {
   const updated = await global.db.query(assetQuery);
 
   const fields = compare(old.rows[0], updated.rows[0]).join(", ");
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
-  await global.db.query(
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    await global.db.query(
     `
     UPDATE keppel.plant_system_assets
     SET activity_log = activity_log || 
@@ -909,7 +909,7 @@ const addNewAsset = (req, res, next) => {
   let psa_id;
   global.db.query(sql)
     .then((result) => {
-      const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+      const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
       psa_id = result.rows[0].psa_id;
       const activity_log = [
         {
