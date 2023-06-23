@@ -126,6 +126,7 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
  * @apiSuccess {String|NULL} rejection_comments Rejection comments of fault request
  * @apiSuccess {String|NULL} complete_comments Completion comments of fault request
  */
+
 router.get(
   "/request/approved",
   checkIfLoggedInAPI,
@@ -148,6 +149,7 @@ router.get(
   checkIfLoggedInAPI,
   controllers.request.fetchAssignedRequests
 );
+
 /**
  * @api {get} /request/review Get For Review Requests
  * @apiDescription Gets all requests with status of `COMPLETED`, `REJECTED`, `CANCELLED`.
@@ -1234,7 +1236,6 @@ router.get(
  * @apiSuccess {number} -.fault_id ID of the fault type
  * @apiSuccess {string} -.fault_type Name of the fault type
  */
-
 router.get("/fault/types", controllers.fault.fetchFaultTypes);
 
 router.get(
@@ -1274,7 +1275,9 @@ router.get(
  * @apiSuccess {number} -.psa_id Psa ID of the asset
  */
 router.get("/asset/:plant_id", controllers.asset.getAssetsFromPlant);
+
 router.get("/assets", controllers.asset.getAllAssets);
+
 router.get("/asset", controllers.asset.getAssetHierarchy);
 
 /**
@@ -1310,6 +1313,7 @@ router.get("/asset", controllers.asset.getAssetHierarchy);
 
  */
 router.get("/assetDetails/:psa_id", controllers.asset.getAssetDetails);
+
 router.get(
   "/asset/history/:type/:id",
   checkIfLoggedInAPI,
@@ -1601,7 +1605,7 @@ router.get(
 			"column_name": "system_asset"
 		}]
 	}
- * @apiName GetMasterTypeEntry
+ * @apiName FetchMasterTypeEntry
  * @apiGroup Master
  *
  * @apiSuccess {Object}  -.data Object which contains multiple objects with the key being the table name and the value being the table metadata
@@ -1624,6 +1628,29 @@ router.get(
   checkIfLoggedInAPI,
   controllers.master.fetchMasterTypeEntry
 );
+
+/**
+ * @api {post} /master/new/add Add Table Metadata
+ * @apiDescription Adds table information/metadata. Mainly used for the creation of new entries in those tables
+ * @apiName CreateMasterTypeEntry
+ * @apiGroup Master
+ *
+ *
+ * @apiSuccess {Object} -.data Object which contains multiple objects with the key being the table name and the value being the table metadata
+ * @apiSuccess {String} -.data.key Table name
+ * @apiSuccess {Object} -.data.value Object which has table metadata
+ * @apiSuccess {String} -.data.value.internalName Internal name of the table
+ * @apiSuccess {String} -.data.value.name Name of the table
+ * @apiSuccess {String} -.data.value.id unique ID of the rows in the table
+ * @apiSuccess {Object[]} -.data.value.fields Array of objects which contains the column name and column label of the table
+ * @apiSuccess {String} -.data.value.fields.column_label Column label of the table
+ * @apiSuccess {String} -.data.value.fields.column_name Column name of the table
+ * @apiSuccess {String} [-.data.value.fields.type] Type of the column (Eg. dropdown, boolean_dropdown)
+ * @apiSuccess {String} [-.data.value.fields.url] URL to fetch dropdown options for dropdown type only (Example 2)
+ * @apiSuccess {String} [-.data.value.fields.value] Value of the dropdown option for dropdown type only (Example 2)
+ * @apiSuccess {String} [-.data.value.fields.options] Options of the dropdown option for dropdown type only (Example 2)
+ *
+ */
 router.post(
   "/master/new/add",
   checkIfLoggedInAPI,
@@ -1901,6 +1928,7 @@ router.patch(
  * @apiSuccess {Number} -.prev_schedule_id Previous Schedule ID
  * @apiSuccess {Number} -.status Schedule Checklist Status
  */
+
 router
   .route("/schedule/:id", checkIfLoggedInAPI)
   .delete(controllers.schedule.deleteSchedule)
@@ -1923,15 +1951,28 @@ router
  * @apiError (Error 404) {String} NotFound "No pending schedules"
  */
 
-/**
- * @api {patch} /event E
- */
 router
   .route("/event/:schedule_id?/:index?/", checkIfLoggedInAPI)
   .get(controllers.schedule.getPendingSingleEvents)
   // .post(controllers.schedule.createSingleEvent)
   .patch(controllers.schedule.manageSingleEvent)
   .delete();
+
+/**
+ * @api {get} /schedule/event/:id Get Schedule by ID
+ * @apiDescription Get schedule by ID
+ * @apiName getScheduleByID
+ * @apiGroup Schedule
+ *
+ * @apiParam {number} id Schedule Id
+ *
+ * @apiSuccess {Object} schedule Schedule
+ * @apiSuccess {Number} schedule.schedule_id ID of Schedule
+ * @apiSuccess {String} schedule.start_date Date and time of start Date
+ * @apiSuccess {String} schedule.end_date Date and time of end date
+ * @apiSuccess {String} schedule.recurrence_period Date and Time of recurrance period
+ *
+ */
 
 router.get(
   "/schedule/event/:id",
