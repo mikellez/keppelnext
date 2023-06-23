@@ -228,7 +228,8 @@ const createWorkflow = (requestID, faultTypeID, plantLocationID) => {
 };
 
 const createRequest = async (req, res, next) => {
-  // console.log(req.body)
+
+  console.log(req.body)
   // console.log(req.file)
   const {
     requestTypeID,
@@ -320,6 +321,16 @@ const createRequest = async (req, res, next) => {
       }
     );
   } else if (req.body.linkedRequestId) {
+    history = `PENDING_Corrective Request Created_${today}_${role_name}_${name}`;
+    activity_log = [
+      {
+        date: today,
+        name: name,
+        role: role_name,
+        activity: `Corrective Request Created From Request ${req.body.linkedRequestId}`,
+        activity_type: "PENDING",
+      },
+    ];
     const insertQuery = `
       INSERT INTO keppel.request(
         fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
@@ -328,9 +339,18 @@ const createRequest = async (req, res, next) => {
       ) RETURNING request_id;
     `;
     const updateQuery = `
-    UPDATE keppel.request SET status_id = 3 WHERE request_id = $1;
+    UPDATE keppel.request SET status_id = 3,
+		requesthistory = concat(requesthistory, $2::text),
+    activity_log = activity_log || 
+        jsonb_build_object(
+          'date', '${today}',
+          'name', '${role_name}',
+          'role', '${name}',
+          'activity', 'Corrective Request Created For This Request',
+          'activity_type', 'COMPLETED'
+        ) WHERE request_id = $1;
     `;
-
+    const history_update = `COMPLETED_Corrective Request Created_${today}_${role_name}_${name}`;
     global.db.query(
       insertQuery,
       [
@@ -355,7 +375,8 @@ const createRequest = async (req, res, next) => {
 
         global.db.query(
           updateQuery,
-          [req.body.linkedRequestId],
+          [req.body.linkedRequestId,
+            history_update,],
           (err, result) => {
             if (err) {
               // console.log(err);
@@ -373,6 +394,7 @@ const createRequest = async (req, res, next) => {
 };
 
 const updateRequest = async (req, res, next) => {
+
   const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;
@@ -692,12 +714,33 @@ const createRequestCSV = (req, res, next) => {
 };
 
 const approveRejectRequest = async (req, res, next) => {
+  console.log(req.body);
+
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const status = req.params.status_id == 4 ? "APPROVED" : "REJECTED";
   const text = req.params.status_id == 4 ? "Approved" : "Rejected";
   const id = req.params.status_id == 4 ? 4 : 2;
   const history = `!${status}_${text} request_${today}_${req.user.role_name}_${req.user.name}`;
-  const sql = `
+  let sql = ``
+  if (req.params.status_id != 4) {
+    history != `!NIL_Rejected due to ${req.body.comments}_${today}_${req.user.role_name}_${req.user.name}`;
+    sql = `
+    UPDATE keppel.request SET 
+    status_id = $1,
+    requesthistory = concat(requesthistory, $2::text),
+    activity_log = activity_log || 
+          jsonb_build_object(
+            'date', '${today}',
+            'name', '${req.user.name}',
+            'role', '${req.user.role_name}',
+            'activity', '${text} request due to ${req.body.comments}',
+            'activity_type', '${status}',
+            'remarks', '${req.body.comments}'
+          )
+    WHERE request_id = $3`;
+  }
+  else{
+  sql = `
 	UPDATE keppel.request SET 
 	status_id = $1,
 	requesthistory = concat(requesthistory, $2::text),
@@ -711,6 +754,7 @@ const approveRejectRequest = async (req, res, next) => {
           'remarks', '${req.body.comments}'
         )
 	WHERE request_id = $3`;
+        }
   global.db.query(sql, [id, history, req.params.request_id], (err, result) => {
     if (err) return res.status(500).send("Error in updating status");
     return res.status(200).json("Request successfully updated");
