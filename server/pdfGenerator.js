@@ -52,6 +52,19 @@ async function generateChecklistPDF(checklistId) {
 
     const marginX = 50;
     const doc = new PDFDocument({ margin: marginX, autoFirstPage: false });
+    const historyArr = [];
+    cl.activity_log.forEach(row => {
+        arr = [];
+        arr.push(row.activity);
+        arr.push(row.activity_type);
+        arr.push(row.date);
+        arr.push(row.name);
+        historyArr.push(arr);
+    })
+    console.log(historyArr,22);
+
+
+    
 
     // The default header on every page
     doc.on('pageAdded', () => {
@@ -80,6 +93,28 @@ async function generateChecklistPDF(checklistId) {
     
     placeTopInfo(doc, headerObj, marginX);
     doc.text("\n", marginX);
+    (async function createTable() {
+        // Table
+        const table = { 
+            title: {label: 'Checklist History', fontSize: 10, font: 'Times-Roman'},
+            headers: [
+                {label: "Status", width: 50}, 
+                {label: "Activity", width: 148},
+                {label: "Date", width: 148}, 
+                {label: "Action By", width: 100}, 
+            ],
+            rows: historyArr,
+            };
+
+        await doc.table(table, {
+            prepareHeader: () => doc.font("Times-Bold").fontSize(10),
+            prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+                doc.font("Times-Roman").fontSize(8);
+            },
+        });
+
+    })();
+    
 
     // The checklist contents
     cl.datajson.forEach(sect => {
@@ -187,18 +222,36 @@ async function generateRequestPDF(id) {
     const priority = request.priority ? request.priority : "No Priority";
     const completionComments = request.complete_comments;
     const rejectionComments = request.rejection_comments;
-    const history = request.requesthistory;
+    const history = request.activity_log;
     const faultImg = request.uploaded_file
     const completedImg = request.completion_file;
 
     // Generating a 2D array for request table history
     const historyArr = [];
+    // if (history) {
+    //     history.split("!").forEach(row => {
+    //         historyArr.push(row.split("_"))
+    //     })
+    // }
     if (history) {
-        history.split("!").forEach(row => {
-            historyArr.push(row.split("_"))
+        console.log(typeof(history), 1111);
+        // console.log(history, 1111);
+        history.forEach(row => {
+            arr = [];
+            arr.push(row.activity_type);
+            arr.push(row.activity);
+            arr.push(row.date);
+            arr.push(row.role);
+            arr.push(row.name);
+            historyArr.push(arr);
         })
+        console.log(historyArr,22);
     }
-
+    // {label: "Status", width: 50}, 
+    //             {label: "Remarks", width: 148}, 
+    //             {label: "Date", width: 148}, 
+    //             {label: "Role", width: 50},  
+    //             {label: "Action By", width: 100}, 
     // The default header on every page
     doc.on('pageAdded', () => {
         doc
@@ -293,7 +346,7 @@ async function generateRequestPDF(id) {
             title: {label: 'Request History', fontSize: 10, font: 'Times-Roman'},
             headers: [
                 {label: "Status", width: 50}, 
-                {label: "Remarks", width: 148}, 
+                {label: "Activity", width: 148},
                 {label: "Date", width: 148}, 
                 {label: "Role", width: 50},  
                 {label: "Action By", width: 100}, 

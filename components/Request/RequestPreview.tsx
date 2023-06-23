@@ -3,6 +3,7 @@ import { CMMSRequest } from "../../types/common/interfaces";
 import Image from "next/image";
 import styles from "../../styles/Request.module.scss";
 import { ModuleModal } from "../ModuleLayout/ModuleModal";
+import moment from "moment";
 
 export enum RequestAction {
   manage = 1,
@@ -22,10 +23,16 @@ export default function RequestPreview(props: RequestPreviewProps) {
   const [comments, setComments] = useState<null | Object>(null);
   let date; // declare the date variable outside the if block
 
-  const createdDate = props.request.requesthistory;
-  if (createdDate != null) {
-    const parts = createdDate.split("_");
-    date = parts[2]; // assign the value to the global date variable
+  
+// get completed date from activity_log
+  const completedLog = props.request.activity_log.filter(entry => {
+    return entry.activity_type === "COMPLETED"
+  }).at(-1);
+  console.log(completedLog);
+  let completedDate = "N.A"
+  if (completedLog) {
+    const [day, month, year, hour, minute] = completedLog.date.split(/[\/\s:]+/);
+    completedDate = moment(new Date(+year, +month - 1, +day, +hour, +minute)).format('MMMM Do YYYY, h:mm:ss a');
   }
 
   useEffect(() => {
@@ -48,14 +55,14 @@ export default function RequestPreview(props: RequestPreviewProps) {
     if (activity_log[activity_log.length - 1].activity_type === "APPROVED") {
       setComments({
         "Approval Comments":
-          activity_log[activity_log.length - 1].remarks || "NIL",
+          activity_log[activity_log.length - 1].remarks || "N.A",
       });
     } else {
       const rejected = activity_log
         .reverse()
         .find((log) => log.activity_type === "REJECTED");
         console.log('rejected', rejected)
-      setComments({ "Rejection Comments": rejected?.remarks || "NIL" });
+      setComments({ "Rejection Comments": rejected?.remarks || "N.A" });
     }
   }, []);
 
@@ -81,15 +88,19 @@ export default function RequestPreview(props: RequestPreviewProps) {
           </tr>
           <tr>
             <th>Fault Description</th>
-            <td>{props.request.fault_description || "NIL"}</td>
+            <td>{props.request.fault_description || "N.A"}</td>
           </tr>
           <tr>
             <th>Asset</th>
             <td>{props.request.asset_name}</td>
           </tr>
           <tr>
+            <th>Created Date</th>
+            <td>{`${moment(props.request.created_date).format('MMMM Do YYYY, h:mm:ss a')}`}</td>
+          </tr>
+          <tr>
             <th>Assigned To</th>
-            <td>{props.request.assigned_user_email}</td>
+            <td>{props.request.assigned_user_email || "N.A"}</td>
           </tr>
           <tr>
             <th>Fault Image</th>
@@ -152,7 +163,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
               <tr>
                 <th>Completion Comments</th>
                 <td style={{ color: "#73777B", fontWeight: "BOLD" }}>
-                  {props.request.complete_comments || "NIL"}
+                  {props.request.complete_comments || "N.A"}
                 </td>
               </tr>
               <tr>
@@ -163,13 +174,13 @@ export default function RequestPreview(props: RequestPreviewProps) {
                       onClick={() => setCompletionModal(true)}
                       className={styles.viewImage}
                     >
-                      {completionModal}
+                      View Image
                     </span>
                   ) : (
                     "No File"
                   )}
 
-                  {completeUrl && (
+                  {
                     <ModuleModal
                       isOpen={completionModal}
                       closeModal={() => {
@@ -187,18 +198,18 @@ export default function RequestPreview(props: RequestPreviewProps) {
                         alt="Completion Image"
                       />
                     </ModuleModal>
-                  )}
+                  }
                 </td>
               </tr>
               <tr>
-                <th>Completion Date</th>
+                <th>Completed Date</th>
                 <td
                   style={{
-                    color: date === "NIL" ? "#73777B" : "inherit",
-                    fontWeight: date === "NIL" ? "bold" : "normal",
+                    color: completedDate === "N.A" ? "#73777B" : "inherit",
+                    fontWeight: completedDate === "N.A" ? "bold" : "normal",
                   }}
                 >
-                  {date || "NIL"}
+                  {completedDate}
                 </td>
               </tr>
             </>

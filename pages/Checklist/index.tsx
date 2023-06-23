@@ -63,10 +63,10 @@ export interface ChecklistItem {
   createdbyuser: string;
   assigneduser: string;
   signoffuser: string;
-  plant_name: string;
-  plant_id: number;
-  linkedassets: string | null;
-  linkedassetids: string | null;
+  plant_name?: string;
+  plant_id?: number;
+  linkedassets?: string | null;
+  linkedassetids?: string | null;
   chl_type?: string;
   created_date: Date | string;
   history: string;
@@ -169,8 +169,22 @@ export default function Checklist(props: ChecklistProps) {
   useEffect(() => {
     if (!props?.filter) {
       setReady(false);
+      const fields = [
+        "checklist_id",
+        "chl_name",
+        "description",
+        "status_id",
+        "created_date",
+        "createdbyuser",
+        "assigneduser",
+        "signoffuser",
+        "plant_name",
+        "status",
+        "activity_log",
+      ]
+      const fieldsString = fields.join(",");
       instance
-        .get(`/api/checklist/${indexedColumn[activeTabIndex]}?page=${page}`)
+        .get(`/api/checklist/${indexedColumn[activeTabIndex]}?page=${page}&expand=${fieldsString}`)
         .then((response) => {
           setChecklistItems(
             response.data.rows.map((row: CMMSChecklist) => {

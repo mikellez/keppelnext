@@ -23,7 +23,8 @@ const SearchBar = forwardRef((props: SearchBarProps, ref: any) => {
                 className={styles.searchBarButton} 
                 onClick={props.onSubmit}
             >
-                <AiOutlineSearch size={20} color="white" />
+                <AiOutlineSearch size={25} color="white" />
+
             </button>
         </div>
     )
