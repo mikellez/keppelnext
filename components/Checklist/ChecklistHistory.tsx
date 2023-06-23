@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import moment from "moment";
 
 interface ChecklistHistoryProps {
   history: { [key: string]: string }[];
@@ -15,11 +16,7 @@ function rowElements(rows: { [key: string]: string }[], assignedUser: string) {
             <td>{row["activity_type"]}</td>
             <td>{row["activity"]  == "ASSIGNED" ? `ASSIGNED TO ${assignedUser}` : row["activity"]}</td>
             <td>
-              {new Date(row["date"]).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-              })}
+              {moment(new Date(row["date"])).format('MMMM Do YYYY, h:mm:ss a')}
             </td>
             <td>{row["name"]}</td>
           </tr>
