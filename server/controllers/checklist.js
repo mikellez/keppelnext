@@ -86,16 +86,18 @@ const fetchAssignedChecklists = async (req, res, next) => {
     fetchAssignedChecklistsQuery +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
-  try {
-    const result = await global.db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      //return res.status(204).json({ msg: "No checklist" });
-    // console.log(result.rows);
-    // console.log(totalPages);
-    return res.status(200).json({ rows: result.rows, total: totalPages });
-  } catch (error) {
-    return res.status(500).json({ msg: error });
-  }
+  const result = await global.db.query(query, [req.user.id]);
+
+  return res.status(200).send({ rows: result.rows, total: totalPages });
+  // try {
+  //   if (result.rows.length == 0) {
+  //     return res.status(204).json({ msg: "No checklist" });
+  //   } else {
+  //     return res.status(200).json({ rows: result.rows, total: totalPages });
+  //   }
+  // } catch (error) {
+  //   return res.status(500).json({ msg: error });
+  // }
 };
 
 const fetchPendingChecklistsQuery =
@@ -120,15 +122,17 @@ const fetchPendingChecklists = async (req, res, next) => {
     fetchPendingChecklistsQuery +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
-  try {
-    const result = await global.db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      //return res.status(204).json({ msg: "No checklist" });
-
-    return res.status(200).json({ rows: result.rows, total: totalPages });
-  } catch (error) {
-    return res.status(500).json({ msg: error });
-  }
+  const result = await global.db.query(query, [req.user.id]);
+  return res.status(200).send({ rows: result.rows, total: totalPages });
+  // try {
+  //   if (result.rows.length == 0) {
+  //     return res.status(204).json({ msg: "No checklist" });
+  //   } else {
+  //     return res.status(200).json({ rows: result.rows, total: totalPages });
+  //   }
+  // } catch (error) {
+  //   return res.status(500).json({ msg: error });
+  // }
 };
 
 const fetchForReviewChecklistsQuery =
@@ -153,15 +157,18 @@ const fetchForReviewChecklists = async (req, res, next) => {
     fetchForReviewChecklistsQuery +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
-  try {
-    const result = await global.db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      //return res.status(204).json({ msg: "No checklist" });
+  const result = await global.db.query(query, [req.user.id]);
 
-    return res.status(200).json({ rows: result.rows, total: totalPages });
-  } catch (error) {
-    return res.status(500).json({ msg: error });
-  }
+  return res.status(200).send({ rows: result.rows, total: totalPages });
+  // try {
+  //   if (result.rows.length != 0) {
+  //     return res.status(200).json({ rows: result.rows, total: totalPages });
+
+  //     // return res.status(204).json({ msg: "No checklist" });
+  //   }
+  // } catch (error) {
+  //   return res.status(500).json({ msg: error });
+  // }
 };
 
 const fetchApprovedChecklistsQuery =
@@ -185,15 +192,17 @@ const fetchApprovedChecklists = async (req, res, next) => {
     fetchApprovedChecklistsQuery +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
-  try {
-    const result = await global.db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      //return res.status(204).json({ msg: "No checklist" });
-
-    return res.status(200).json({ rows: result.rows, total: totalPages });
-  } catch (error) {
-    return res.status(500).json({ msg: error });
-  }
+  const result = await global.db.query(query, [req.user.id]);
+  return res.status(200).send({ rows: result.rows, total: totalPages });
+  // try {
+  //   if (result.rows.length == 0) {
+  //     // return res.status(204).json({ msg: "No checklist" });
+  //   } else {
+  //     return res.status(200).json({ rows: result.rows, total: totalPages });
+  //   }
+  // } catch (error) {
+  //   return res.status(500).json({ msg: error });
+  // }
 };
 
 // get checklist templates

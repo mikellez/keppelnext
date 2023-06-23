@@ -276,6 +276,7 @@ const createRequest = async (req, res, next) => {
     ) VALUES (
       $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
     ) RETURNING request_id;`;
+
     db.query(
       q,
       [
@@ -356,6 +357,12 @@ const updateRequest = async (req, res, next) => {
   const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
   const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
   const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;
+  console.log([
+    req.body.assignedUser.value,
+    req.body.priority.p_id,
+    history,
+    req.params.request_id,
+  ]);
   global.db.query(
     `
 		UPDATE keppel.request SET 
@@ -373,6 +380,7 @@ const updateRequest = async (req, res, next) => {
         )
     WHERE request_id = $4
 	`,
+
     [
       req.body.assignedUser.value,
       req.body.priority.p_id,

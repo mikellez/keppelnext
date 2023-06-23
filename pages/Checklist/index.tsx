@@ -46,6 +46,7 @@ import Pagination from "../../components/Pagination";
 import { GetServerSidePropsContext } from "next";
 import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 import moment from "moment";
+import { useRouter } from "next/router";
 
 const indexedColumn: ("pending" | "assigned" | "record" | "approved")[] = [
   "pending",
@@ -115,6 +116,7 @@ export default function Checklist(props: ChecklistProps) {
   const [assignedUserHistory, setAssignedUserHistory] = useState<string>("");
   const filteredData = useChecklistFilter(props, page);
   const columnData = useChecklist(indexedColumn[activeTabIndex], page);
+  const router = useRouter();
 
   const { data, error, isValidating, mutate } = props.filter
     ? filteredData
@@ -181,10 +183,12 @@ export default function Checklist(props: ChecklistProps) {
         "plant_name",
         "status",
         "activity_log",
-      ]
+      ];
       const fieldsString = fields.join(",");
       instance
-        .get(`/api/checklist/${indexedColumn[activeTabIndex]}?page=${page}&expand=${fieldsString}`)
+        .get(
+          `/api/checklist/${indexedColumn[activeTabIndex]}?page=${page}&expand=${fieldsString}`
+        )
         .then((response) => {
           setChecklistItems(
             response.data.rows.map((row: CMMSChecklist) => {
@@ -194,6 +198,7 @@ export default function Checklist(props: ChecklistProps) {
               };
             })
           );
+
           setTotalPages(response.data.total);
           setReady(true);
         })
@@ -296,7 +301,9 @@ export default function Checklist(props: ChecklistProps) {
                             </span>
                           </Cell>
                           <Cell>
-                            {`${moment(new Date(item.created_date)).format('MMMM Do YYYY, h:mm:ss a')}`}
+                            {`${moment(new Date(item.created_date)).format(
+                              "MMMM Do YYYY, h:mm:ss a"
+                            )}`}
                           </Cell>
                           <Cell>{item.assigneduser}</Cell>
                           <Cell>{item.signoffuser}</Cell>
@@ -340,8 +347,8 @@ export default function Checklist(props: ChecklistProps) {
                             <AiOutlineHistory
                               color={"#C70F2B"}
                               onClick={() => {
-                                setHistory(item.activity_log)
-                                setAssignedUserHistory(item.assigneduser)
+                                setHistory(item.activity_log);
+                                setAssignedUserHistory(item.assigneduser);
                               }}
                               size={22}
                               title={"View History"}
@@ -381,7 +388,10 @@ export default function Checklist(props: ChecklistProps) {
             closeModal={() => setHistory(undefined)}
             closeOnOverlayClick={true}
           >
-            <ChecklistHistory history={history!} assignedUser={assignedUserHistory} />
+            <ChecklistHistory
+              history={history!}
+              assignedUser={assignedUserHistory}
+            />
           </ModuleModal>
         )}
       </ModuleContent>
