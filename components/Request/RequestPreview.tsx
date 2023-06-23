@@ -31,8 +31,8 @@ export default function RequestPreview(props: RequestPreviewProps) {
   console.log(completedLog);
   let completedDate = "N.A"
   if (completedLog) {
-    const [day, month, year, hour, minute] = completedLog.date.split(/[\/\s:]+/);
-    completedDate = moment(new Date(+year, +month - 1, +day, +hour, +minute)).format('MMMM Do YYYY, h:mm:ss a');
+    const [day, month, year, hour, minute, second] = completedLog.date.split(/[\/\s:-]+/);
+    completedDate = moment(new Date(+year, +month - 1, +day, +hour, +minute, +second)).format('MMMM Do YYYY, h:mm:ss a');
   }
 
   useEffect(() => {

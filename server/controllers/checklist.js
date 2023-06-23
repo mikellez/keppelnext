@@ -73,23 +73,151 @@ const fetchAssignedChecklistsQuery =
 ORDER BY cl.checklist_id DESC
 `;
 
+
+const getAllChecklistQuery = (expand) => {
+  let expandCond = "";
+  let SELECT_ARR = [];
+
+  const SELECT = {
+    checklist_id: "cl.checklist_id",
+    chl_name: "cl.chl_name",
+    description: "cl.description",
+    status_id: "cl.status_id",
+    activity_log: "cl.activity_log",
+    createdbyuser: "concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser",
+    assigneduser: "concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser",
+    signoffuser: "concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser",
+    plant_name: "pm.plant_name",
+    plant_id: "pm.plant_id",
+    completeremarks_req: "completeremarks_req",
+    linkedassets: "tmp1.assetNames AS linkedassets",
+    linkedassetids: "linkedassetids",
+    chl_type: "cl.chl_type",
+    created_date: "cl.created_date",
+    history: "cl.history",
+    datajson: "cl.datajson",
+    signoff_user_id: "cl.signoff_user_id",
+    assigned_user_id: "cl.assigned_user_id",
+    status: "st.status",
+  };
+
+  if(expand) {
+    const expandArr = expand.split(",");
+
+    SELECT_ARR = [];
+    for (let i = 0; i < expandArr.length; i++) {
+      SELECT_ARR.push(SELECT[expandArr[i]]);
+    }
+
+  } else {
+
+    for (let key in SELECT) {
+      if (SELECT.hasOwnProperty(key)) {
+        SELECT_ARR.push(SELECT[key]);
+      }
+    }
+
+  }
+
+  expandCond = SELECT_ARR.join(", ");
+
+  const query = `
+    SELECT 
+      ${expandCond}
+    FROM 
+        keppel.users u
+        JOIN keppel.user_access ua ON u.user_id = ua.user_id
+        JOIN keppel.checklist_master cl on ua.allocatedplantids LIKE concat(concat('%',cl.plant_id::text), '%')
+        LEFT JOIN (
+            SELECT 
+                t3.checklist_id, 
+                string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id ASC) AS assetNames
+            FROM  
+                keppel.system_assets AS t1,
+                keppel.plant_system_assets AS t2, 
+                keppel.checklist_master AS t3
+            WHERE 
+                t1.system_asset_id = t2.system_asset_id_lvl4 AND 
+                t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
+            GROUP BY t3.checklist_id) tmp1 ON tmp1.checklist_id = cl.checklist_id
+        LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
+        LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
+        LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
+        LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id
+        JOIN keppel.status_cm st ON st.status_id = cl.status_id	
+  `;
+
+  return query; 
+
+
+}
+
+const getAssignedChecklistsQuery = (expand) => {
+  return getAllChecklistQuery(expand) + 
+  `
+    WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3) AND
+        (CASE
+            WHEN (SELECT ua.role_id
+                FROM
+                    keppel.user_access ua
+                WHERE
+                    ua.user_id = $1) = 4
+            THEN assignU.user_id = $1
+            ELSE True
+            END) AND
+            ua.user_id = $1
+    ORDER BY cl.checklist_id DESC
+  `;
+}
+
+const getPendingChecklistsQuery = (expand) => {
+  return getAllChecklistQuery(expand) +
+  `
+    WHERE
+        ua.user_id = $1 AND
+        (cl.status_id = 1)
+    ORDER BY cl.checklist_id DESC
+  `;
+}
+
+const getForReviewChecklistsQuery = (expand) => {
+  return getAllChecklistQuery(expand) +
+  `
+    WHERE
+        ua.user_id = $1 AND
+        (cl.status_id = 4 OR cl.status_id = 6)
+    ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' desc
+  `;
+}
+
+const getApprovedChecklistsQuery = (expand) => {
+  return getAllChecklistQuery(expand) +
+  `
+    WHERE
+        ua.user_id = $1 AND
+        (cl.status_id = 5 OR cl.status_id = 7)
+    ORDER BY cl.checklist_id DESC
+  `;
+}
+
 const fetchAssignedChecklists = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  const expand = req.query.expand || false;
 
-  const totalRows = await global.db.query(fetchAssignedChecklistsQuery, [
+  const totalRows = await global.db.query(getAssignedChecklistsQuery(expand), [
     req.user.id,
   ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    fetchAssignedChecklistsQuery +
+    getAssignedChecklistsQuery(expand) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
     const result = await global.db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      return res.status(204).json({ msg: "No checklist" });
+    //if (result.rows.length == 0)
+      //return res.status(204).json({ msg: "No checklist" });
     // console.log(result.rows);
     // console.log(totalPages);
     return res.status(200).json({ rows: result.rows, total: totalPages });
@@ -110,20 +238,21 @@ ORDER BY cl.checklist_id DESC
 const fetchPendingChecklists = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  const expand = req.query.expand || false;
 
-  const totalRows = await global.db.query(fetchForReviewChecklistsQuery, [
+  const totalRows = await global.db.query(getPendingChecklistsQuery(expand), [
     req.user.id,
   ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    fetchPendingChecklistsQuery +
+    getPendingChecklistsQuery(expand) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
     const result = await global.db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      return res.status(204).json({ msg: "No checklist" });
+    //if (result.rows.length == 0)
+      //return res.status(204).json({ msg: "No checklist" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {
@@ -143,20 +272,21 @@ WHERE
 const fetchForReviewChecklists = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  const expand = req.query.expand || false;
 
-  const totalRows = await global.db.query(fetchForReviewChecklistsQuery, [
+  const totalRows = await global.db.query(getForReviewChecklistsQuery(expand), [
     req.user.id,
   ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    fetchForReviewChecklistsQuery +
+    getForReviewChecklistsQuery(expand) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
     const result = await global.db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      return res.status(204).json({ msg: "No checklist" });
+    //if (result.rows.length == 0)
+      //return res.status(204).json({ msg: "No checklist" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {
@@ -175,20 +305,21 @@ ORDER BY cl.checklist_id DESC
 const fetchApprovedChecklists = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  const expand = req.query.expand || false;
 
-  const totalRows = await global.db.query(fetchApprovedChecklistsQuery, [
+  const totalRows = await global.db.query(getApprovedChecklistsQuery(expand), [
     req.user.id,
   ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    fetchApprovedChecklistsQuery +
+    getApprovedChecklistsQuery(expand) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
     const result = await global.db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      return res.status(204).json({ msg: "No checklist" });
+    //if (result.rows.length == 0)
+      //return res.status(204).json({ msg: "No checklist" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {

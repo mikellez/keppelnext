@@ -9,28 +9,72 @@ const moment = require("moment");
 
 const ITEMS_PER_PAGE = 10;
 
-async function fetchRequestQuery(status_query, role_id, user_id, page, search="") {
+async function fetchRequestQuery(status_query, role_id, user_id, page, expand, search="") {
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
   // console.log(role_id)
   let userCond = "";
+  let expandCond = "";
+  let SELECT_ARR = [];
+
   if (role_id == 3) {
     userCond = `AND u.user_id = ${user_id}`;
   }
 
+  const SELECT = {
+    request_id: "r.request_id",
+    fault_name: "ft.fault_type AS fault_name",
+    plant_name: "pm.plant_name",
+    plant_id: "pm.plant_id",
+    role_name: "ro.role_name",
+    status: "sc.status",
+    fault_description: "r.fault_description",
+    request_type: "rt.request AS request_type",
+    priority: "pri.priority",
+    fullname: `CASE
+      WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
+      ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
+    END AS fullname`,
+    created_date: "r.created_date",
+    asset_name: "tmp1.asset_name",
+    uploadfilemimetype: "r.uploadfilemimetype",
+    completedfilemimetype: "r.completedfilemimetype",
+    uploaded_file: "r.uploaded_file",
+    completion_file: "r.completion_file",
+    complete_comments: "r.complete_comments",
+    assigned_user_name: "concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name",
+    associatedrequestid: "r.associatedrequestid",
+    activity_log: "r.activity_log",
+    rejection_comments: "r.rejection_comments",
+    status_id: "r.status_id",
+    psa_id: "r.psa_id",
+    fault_id: "r.fault_id",
+  };
+
+  if(expand) {
+    const expandArr = expand.split(",");
+
+    SELECT_ARR = [];
+    for (let i = 0; i < expandArr.length; i++) {
+      SELECT_ARR.push(SELECT[expandArr[i]]);
+    }
+
+  } else {
+
+    for (let key in SELECT) {
+      if (SELECT.hasOwnProperty(key)) {
+        SELECT_ARR.push(SELECT[key]);
+      }
+    }
+
+  }
+
+  expandCond = SELECT_ARR.join(", ");
+
   let sql;
   if (role_id === 1 || role_id === 2 || role_id === 3) {
-    sql = `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name, pm.plant_id,
-    ro.role_name, sc.status, r.fault_description, rt.request AS request_type,
-	  pri.priority, 
-	  CASE 
-		  WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
-		  ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-	  END AS fullname,
-	  r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
-	  r.complete_comments,
-	  concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-	  , r.activity_log, r.rejection_comments, r.status_id, r.psa_id, r.fault_id
-	  FROM    
+    sql = `SELECT 
+      ${expandCond}
+    FROM    
 		  keppel.users u
 		  JOIN keppel.user_access ua ON u.user_id = ua.user_id
 		  JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
@@ -133,6 +177,7 @@ async function fetchRequestQuery(status_query, role_id, user_id, page, search=""
 
 const fetchPendingRequests = async (req, res, next) => {
   const page = req.query.page || 1;
+  const expand = req.query.expand || false;
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
@@ -140,6 +185,7 @@ const fetchPendingRequests = async (req, res, next) => {
     req.user.role_id,
     req.user.id,
     page,
+    expand,
     search
   );
 
@@ -150,6 +196,7 @@ const fetchPendingRequests = async (req, res, next) => {
 
 const fetchAssignedRequests = async (req, res, next) => {
   const page = req.query.page || 1;
+  const expand = req.query.expand || false;
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
@@ -157,6 +204,7 @@ const fetchAssignedRequests = async (req, res, next) => {
     req.user.role_id,
     req.user.id,
     page,
+    expand,
     search
   );
 
@@ -167,6 +215,7 @@ const fetchAssignedRequests = async (req, res, next) => {
 
 const fetchReviewRequests = async (req, res, next) => {
   const page = req.query.page || 1;
+  const expand = req.query.expand || false;
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
@@ -174,6 +223,7 @@ const fetchReviewRequests = async (req, res, next) => {
     req.user.role_id,
     req.user.id,
     page,
+    expand,
     search
   );
 
@@ -184,6 +234,7 @@ const fetchReviewRequests = async (req, res, next) => {
 
 const fetchApprovedRequests = async (req, res, next) => {
   const page = req.query.page || 1;
+  const expand = req.query.expand || false;
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
@@ -191,6 +242,7 @@ const fetchApprovedRequests = async (req, res, next) => {
     req.user.role_id,
     req.user.id,
     page,
+    expand,
     search
   );
 

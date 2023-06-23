@@ -52,7 +52,7 @@ import {
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 
-import { useRequest, useRequestFilter } from "../../components/SWR";
+import { useRequest, useRequestFilter, useSpecificRequest } from "../../components/SWR";
 import { CMMSRequest } from "../../types/common/interfaces";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -76,6 +76,8 @@ import Pagination from "../../components/Pagination";
 import moment from "moment";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import { request } from "http";
+import animationStyles from "../../styles/animations.module.css"
+
 
 /*export type TableNode<T> = {
   id: string;
@@ -200,16 +202,39 @@ export default function Request(props: RequestProps) {
   
   
 
-  const handleExpand = (item: RequestItem) => {
+  const handleExpand = async (item: RequestItem) => {
+    
+    
     if (ids.includes(item.id)) {
       setIds(ids.filter((id) => id !== item.id));
     } else {
       setIds(ids.concat(item.id));
+      instance.get(`/api/request/${item.id}`)
+        .then(res => {
+          const request = res.data;
+          // update with further details
+          setRequestItems(prev => prev.map(req => req.id === item.id 
+                      ? {... request, id: request.request_id, created_date: new Date(request.created_date)}
+                      : req))
+        })
     }
   };
 
   const filteredRequest = useRequestFilter(props, page);
-  const allRequest = useRequest(indexedColumn[activeTabIndex], page, searchRef.current.value);
+  const allRequest = useRequest(indexedColumn[activeTabIndex], page, searchRef.current.value, 
+    [
+      "request_id",
+      "fault_name",
+      "plant_name",
+      "priority",
+      "status",
+      "created_date",
+      "asset_name",
+      "fullname",
+      "status_id",
+      "associatedrequestid",
+      "activity_log"
+    ]);
 
   const {
     data: requestData,
@@ -453,7 +478,9 @@ export default function Request(props: RequestProps) {
                             </div>
                           </Cell>
                         </Row>
+                        
                         {ids.includes(item.id) && (
+                          item.fault_description != undefined ?
                           <tr style={{ display: "flex", gridColumn: "1 / -1" }}>
                             <td style={{ flex: "1" }}>
                               <ul className={styles.tableUL}>
@@ -550,7 +577,20 @@ export default function Request(props: RequestProps) {
                               </ul>
                             </td>
                           </tr>
+                          : <tr style={{ display: "flex", gridColumn: "1 / -1" }}>
+                            <td>
+                              <svg width={64} height={64} stroke={"#808080"} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <g className={animationStyles.spinner_V8m1}>
+                                    <circle cx="12" cy="12" r="9.5" fill="none" strokeWidth={3}/>
+                                </g>
+                              </svg>
+                            </td>
+                          </tr>
+
+                            
+                          
                         )}
+                        
                         </React.Fragment>
                       )
                     })}
