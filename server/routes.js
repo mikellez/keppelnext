@@ -108,7 +108,7 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
  * @apiSuccess {Number} plant_id ID of associated plant
  * @apiSuccess {String} plant_name Name of associated plant
  * @apiSuccess {String} role_name Role of request creator
- * @apiSuccess {String} fullname Full name of request creator
+ * @apiSuccess {String} created_by Full name of request creator
  * @apiSuccess {Number} status_id Current Status ID
  * @apiSuccess {String} status Current request status
  * @apiSuccess {String} request_type Type of request

@@ -9,7 +9,14 @@ const moment = require("moment");
 
 const ITEMS_PER_PAGE = 10;
 
-async function fetchRequestQuery(status_query, role_id, user_id, page, expand, search="") {
+async function fetchRequestQuery(
+  status_query,
+  role_id,
+  user_id,
+  page,
+  expand,
+  search = ""
+) {
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
   // console.log(role_id)
   let userCond = "";
@@ -30,10 +37,10 @@ async function fetchRequestQuery(status_query, role_id, user_id, page, expand, s
     fault_description: "r.fault_description",
     request_type: "rt.request AS request_type",
     priority: "pri.priority",
-    fullname: `CASE
+    created_by: `CASE
       WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
       ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-    END AS fullname`,
+    END AS created_by`,
     created_date: "r.created_date",
     asset_name: "tmp1.asset_name",
     uploadfilemimetype: "r.uploadfilemimetype",
@@ -41,7 +48,8 @@ async function fetchRequestQuery(status_query, role_id, user_id, page, expand, s
     uploaded_file: "r.uploaded_file",
     completion_file: "r.completion_file",
     complete_comments: "r.complete_comments",
-    assigned_user_name: "concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name",
+    assigned_user_name:
+      "concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name",
     associatedrequestid: "r.associatedrequestid",
     activity_log: "r.activity_log",
     rejection_comments: "r.rejection_comments",
@@ -50,22 +58,19 @@ async function fetchRequestQuery(status_query, role_id, user_id, page, expand, s
     fault_id: "r.fault_id",
   };
 
-  if(expand) {
+  if (expand) {
     const expandArr = expand.split(",");
 
     SELECT_ARR = [];
     for (let i = 0; i < expandArr.length; i++) {
       SELECT_ARR.push(SELECT[expandArr[i]]);
     }
-
   } else {
-
     for (let key in SELECT) {
       if (SELECT.hasOwnProperty(key)) {
         SELECT_ARR.push(SELECT[key]);
       }
     }
-
   }
 
   expandCond = SELECT_ARR.join(", ");
@@ -121,7 +126,7 @@ async function fetchRequestQuery(status_query, role_id, user_id, page, expand, s
 	  CASE 
 		  WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
 		  ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-	  END AS fullname,
+	  END AS created_by,
 	  r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
 	  r.complete_comments,
 	  concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
@@ -280,8 +285,7 @@ const createWorkflow = (requestID, faultTypeID, plantLocationID) => {
 };
 
 const createRequest = async (req, res, next) => {
-
-  console.log(req.body)
+  console.log(req.body);
   // console.log(req.file)
   const {
     requestTypeID,
@@ -428,8 +432,7 @@ const createRequest = async (req, res, next) => {
 
         global.db.query(
           updateQuery,
-          [req.body.linkedRequestId,
-            history_update,],
+          [req.body.linkedRequestId, history_update],
           (err, result) => {
             if (err) {
               // console.log(err);
@@ -447,7 +450,6 @@ const createRequest = async (req, res, next) => {
 };
 
 const updateRequest = async (req, res, next) => {
-
   const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;
@@ -645,7 +647,7 @@ const fetchSpecificRequest = async (req, res, next) => {
   r.complete_comments,
   r.activity_log,
   concat( concat(u.first_name,' '), u.last_name) AS assigned_user_name,
-  concat( concat(ua.first_name,' '), ua.last_name) AS created_by,
+  concat( concat(u1.first_name,' '), u1.last_name) AS created_by,
   r.created_date
   FROM keppel.request AS r
   JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
@@ -654,12 +656,13 @@ const fetchSpecificRequest = async (req, res, next) => {
   JOIN keppel.plant_system_assets AS psa ON psa.psa_id = r.psa_id
   LEFT JOIN keppel.priority AS pr ON r.priority_id = pr.p_id
   LEFT JOIN keppel.users AS u ON r.assigned_user_id = u.user_id
-	LEFT JOIN keppel.user_access ua ON u.user_id = ua.user_id
+LEFT JOIN keppel.users u1 ON r.user_id = u1.user_id
   JOIN keppel.status_pm AS s ON r.status_id = s.status_id
   LEFT JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
   from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
   WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
   WHERE request_id = $1`;
+
   global.db.query(sql, [req.params.request_id], (err, result) => {
     if (err) return res.status(500).send("Error in fetching request");
     if (result.rows.length === 0)
@@ -720,7 +723,7 @@ const createRequestCSV = (req, res, next) => {
 	CASE 
 		WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
 		ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-	END AS fullname,
+	END AS created_by,
 	r.created_date,tmp1.asset_name,
 	r.complete_comments,
 	concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
@@ -781,9 +784,10 @@ const approveRejectRequest = async (req, res, next) => {
   const text = req.params.status_id == 4 ? "Approved" : "Rejected";
   const id = req.params.status_id == 4 ? 4 : 2;
   const history = `!${status}_${text} request_${today}_${req.user.role_name}_${req.user.name}`;
-  let sql = ``
+  let sql = ``;
   if (req.params.status_id != 4) {
-    history != `!NIL_Rejected due to ${req.body.comments}_${today}_${req.user.role_name}_${req.user.name}`;
+    history !=
+      `!NIL_Rejected due to ${req.body.comments}_${today}_${req.user.role_name}_${req.user.name}`;
     sql = `
     UPDATE keppel.request SET 
     status_id = $1,
@@ -798,9 +802,8 @@ const approveRejectRequest = async (req, res, next) => {
             'remarks', '${req.body.comments}'
           )
     WHERE request_id = $3`;
-  }
-  else{
-  sql = `
+  } else {
+    sql = `
 	UPDATE keppel.request SET 
 	status_id = $1,
 	requesthistory = concat(requesthistory, $2::text),
@@ -814,7 +817,7 @@ const approveRejectRequest = async (req, res, next) => {
           'remarks', '${req.body.comments}'
         )
 	WHERE request_id = $3`;
-        }
+  }
   global.db.query(sql, [id, history, req.params.request_id], (err, result) => {
     if (err) return res.status(500).send("Error in updating status");
     return res.status(200).json("Request successfully updated");
@@ -932,7 +935,7 @@ const fetchFilteredRequests = async (req, res, next) => {
 		CASE 
 			WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
 			ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-		END AS fullname,
+		END AS created_by,
 		r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
 		r.complete_comments,
 		concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
