@@ -217,7 +217,7 @@ const fetchAssignedChecklists = async (req, res, next) => {
   try {
     const result = await global.db.query(query, [req.user.id]);
     if (result.rows.length == 0)
-      return res.status(204).json({ msg: "No checklist" });
+      //return res.status(204).json({ msg: "No checklist" });
     // console.log(result.rows);
     // console.log(totalPages);
     return res.status(200).json({ rows: result.rows, total: totalPages });
@@ -252,7 +252,7 @@ const fetchPendingChecklists = async (req, res, next) => {
   try {
     const result = await global.db.query(query, [req.user.id]);
     if (result.rows.length == 0)
-      return res.status(204).json({ msg: "No checklist" });
+      //return res.status(204).json({ msg: "No checklist" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {
@@ -286,7 +286,7 @@ const fetchForReviewChecklists = async (req, res, next) => {
   try {
     const result = await global.db.query(query, [req.user.id]);
     if (result.rows.length == 0)
-      return res.status(204).json({ msg: "No checklist" });
+      //return res.status(204).json({ msg: "No checklist" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {
@@ -319,7 +319,7 @@ const fetchApprovedChecklists = async (req, res, next) => {
   try {
     const result = await global.db.query(query, [req.user.id]);
     if (result.rows.length == 0)
-      return res.status(204).json({ msg: "No checklist" });
+      //return res.status(204).json({ msg: "No checklist" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {
