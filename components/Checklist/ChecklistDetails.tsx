@@ -40,10 +40,23 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
         </div>
       );
     } else if (status_id == 5) {
+      const completionLog = activity_log
+        .reverse()
+        .find((activity) => activity["activity"] == "WORK DONE");
       const approvalLog = activity_log
         .reverse()
         .find((activity) => activity["activity"] == "APPROVED");
       return (
+        <div>
+
+        <div className="mb-4">
+          <p className={styles.checklistDetailsHeading}>Completed Date</p>
+          <p className={styles.checklistDetailsContent}>
+            {moment(new Date(completionLog!.date)).format(
+              "MMMM Do YYYY, h:mm:ss a"
+            )}
+          </p>
+        </div>
         <div>
           <p className={styles.checklistDetailsHeading}>Approval Date</p>
           <p className={styles.checklistDetailsContent}>
@@ -51,6 +64,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
               "MMMM Do YYYY, h:mm:ss a"
             )}
           </p>
+        </div>
         </div>
       );
     } else if (status_id == 3 || status_id == 2) {

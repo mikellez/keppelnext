@@ -50,5 +50,6 @@ const dellocateGlobalDB = async () => {
 module.exports = {
   fetchDBNames,
   dbConnection,
+  connectDB,
   dellocateGlobalDB,
 };
