@@ -1,6 +1,10 @@
 const { connectDB, dellocateGlobalDB } = require("../db/dbAPI");
 
-const runScript = async () => {
+/**
+ * Only one argument to be passed to the script (Name of the database table, eg. keppel.request)
+ */
+
+const main = async () => {
     let args = process.argv.slice(2);
     console.log(args);
     if (args.length != 1) {
@@ -36,6 +40,7 @@ const runScript = async () => {
       )
       FROM jsonb_array_elements(activity_log) AS elem
     )`)
+    dellocateGlobalDB();
 }
 
-runScript();
+main();
