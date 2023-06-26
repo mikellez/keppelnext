@@ -91,7 +91,7 @@ export default function Feedback() {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns:  5em calc(90% - 46em) 7em 8em 10em 10em 10% 5em;",
+        "--data-table-library_grid-template-columns:  5em calc(90% - 53.5em) 7em 8em 10em 10% 10em 10% 5em;",
     },
   ]);
 
@@ -186,6 +186,7 @@ export default function Feedback() {
                       <HeaderCell resize>Status</HeaderCell>
                       <HeaderCell resize>Created On</HeaderCell>
                       <HeaderCell resize>Assigned To</HeaderCell>
+                      <HeaderCell resize>Plant</HeaderCell>
                       <HeaderCell resize>Location</HeaderCell>
                       <HeaderCell resize>Created By</HeaderCell>
                       <HeaderCell resize>Actions</HeaderCell>
@@ -210,13 +211,13 @@ export default function Feedback() {
                           </Cell>
                           <Cell>{item.created_date.toString()}</Cell>
                           <Cell>{item.assigned_user_name}</Cell>
+                          <Cell>{item.plant_name}</Cell>
                           <Cell>
                             {item.loc_floor} floor, {item.loc_room}
                           </Cell>
-                          <Cell>{item.createdbyuser}</Cell>
+                          <Cell>{item.name}</Cell>
                           <Cell>
-                            {item.status_id === 2 ||
-                            item.status_id === 3 ? (
+                            {item.status_id === 2 || item.status_id === 3 ? (
                               <>
                                 <Link href={`/Feedback/Complete/${item.id}`}>
                                   <AiOutlineFileDone
@@ -226,8 +227,9 @@ export default function Feedback() {
                                 </Link>
                               </>
                             ) : (user.data!.role_id === Role.Admin ||
-                              user.data!.role_id === Role.Manager ||
-                              user.data!.role_id === Role.Engineer) && item.status_id === 1 ? (
+                                user.data!.role_id === Role.Manager ||
+                                user.data!.role_id === Role.Engineer) &&
+                              item.status_id === 1 ? (
                               <Link href={`/Feedback/Assign/${item.id}`}>
                                 <AiOutlineUserAdd size={22} title={"Assign"} />
                               </Link>
