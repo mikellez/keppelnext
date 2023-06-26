@@ -23,16 +23,20 @@ export default function RequestPreview(props: RequestPreviewProps) {
   const [comments, setComments] = useState<null | Object>(null);
   let date; // declare the date variable outside the if block
 
-  
-// get completed date from activity_log
-  const completedLog = props.request.activity_log.filter(entry => {
-    return entry.activity_type === "COMPLETED"
-  }).at(-1);
+  // get completed date from activity_log
+  const completedLog = props.request.activity_log
+    .filter((entry) => {
+      return entry.activity_type === "COMPLETED";
+    })
+    .at(-1);
   console.log(completedLog);
-  let completedDate = "N.A"
+  let completedDate = "N.A";
   if (completedLog) {
-    const [day, month, year, hour, minute, second] = completedLog.date.split(/[\/\s:-]+/);
-    completedDate = moment(new Date(+year, +month - 1, +day, +hour, +minute, +second)).format('MMMM Do YYYY, h:mm:ss a');
+    const [day, month, year, hour, minute, second] =
+      completedLog.date.split(/[\/\s:-]+/);
+    completedDate = moment(
+      new Date(+year, +month - 1, +day, +hour, +minute, +second)
+    ).format("MMMM Do YYYY, h:mm:ss a");
   }
 
   useEffect(() => {
@@ -61,7 +65,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
       const rejected = activity_log
         .reverse()
         .find((log) => log.activity_type === "REJECTED");
-        console.log('rejected', rejected)
+      console.log("rejected", rejected);
       setComments({ "Rejection Comments": rejected?.remarks || "N.A" });
     }
   }, []);
@@ -96,11 +100,17 @@ export default function RequestPreview(props: RequestPreviewProps) {
           </tr>
           <tr>
             <th>Created Date</th>
-            <td>{`${moment(props.request.created_date).format('MMMM Do YYYY, h:mm:ss a')}`}</td>
+            <td>{`${moment(props.request.created_date).format(
+              "MMMM Do YYYY, h:mm:ss a"
+            )}`}</td>
           </tr>
           <tr>
             <th>Assigned To</th>
-            <td>{props.request.assigned_user_email || "N.A"}</td>
+            <td>{props.request.assigned_user_name || "N.A"}</td>
+          </tr>
+          <tr>
+            <th>Requested By</th>
+            <td>{props.request.created_by || "N.A"}</td>
           </tr>
           <tr>
             <th>Fault Image</th>
@@ -152,12 +162,12 @@ export default function RequestPreview(props: RequestPreviewProps) {
               )}
             </td>
           </tr>
-          {comments &&
-              <tr>
-                <th>{Object.keys(comments)[0]}</th>
-                <td>{Object.values(comments)[0]}</td>
-              </tr>
-            }
+          {comments && (
+            <tr>
+              <th>{Object.keys(comments)[0]}</th>
+              <td>{Object.values(comments)[0]}</td>
+            </tr>
+          )}
           {props.action == RequestAction.manage && (
             <>
               <tr>

@@ -73,7 +73,6 @@ const fetchAssignedChecklistsQuery =
 ORDER BY cl.checklist_id DESC
 `;
 
-
 const getAllChecklistQuery = (expand) => {
   let expandCond = "";
   let SELECT_ARR = [];
@@ -84,9 +83,12 @@ const getAllChecklistQuery = (expand) => {
     description: "cl.description",
     status_id: "cl.status_id",
     activity_log: "cl.activity_log",
-    createdbyuser: "concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser",
-    assigneduser: "concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser",
-    signoffuser: "concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser",
+    createdbyuser:
+      "concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser",
+    assigneduser:
+      "concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser",
+    signoffuser:
+      "concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser",
     plant_name: "pm.plant_name",
     plant_id: "pm.plant_id",
     completeremarks_req: "completeremarks_req",
@@ -101,22 +103,19 @@ const getAllChecklistQuery = (expand) => {
     status: "st.status",
   };
 
-  if(expand) {
+  if (expand) {
     const expandArr = expand.split(",");
 
     SELECT_ARR = [];
     for (let i = 0; i < expandArr.length; i++) {
       SELECT_ARR.push(SELECT[expandArr[i]]);
     }
-
   } else {
-
     for (let key in SELECT) {
       if (SELECT.hasOwnProperty(key)) {
         SELECT_ARR.push(SELECT[key]);
       }
     }
-
   }
 
   expandCond = SELECT_ARR.join(", ");
@@ -147,14 +146,13 @@ const getAllChecklistQuery = (expand) => {
         JOIN keppel.status_cm st ON st.status_id = cl.status_id	
   `;
 
-  return query; 
-
-
-}
+  return query;
+};
 
 const getAssignedChecklistsQuery = (expand) => {
-  return getAllChecklistQuery(expand) + 
-  `
+  return (
+    getAllChecklistQuery(expand) +
+    `
     WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3) AND
         (CASE
             WHEN (SELECT ua.role_id
@@ -167,38 +165,45 @@ const getAssignedChecklistsQuery = (expand) => {
             END) AND
             ua.user_id = $1
     ORDER BY cl.checklist_id DESC
-  `;
-}
+  `
+  );
+};
 
 const getPendingChecklistsQuery = (expand) => {
-  return getAllChecklistQuery(expand) +
-  `
+  return (
+    getAllChecklistQuery(expand) +
+    `
     WHERE
         ua.user_id = $1 AND
         (cl.status_id = 1)
     ORDER BY cl.checklist_id DESC
-  `;
-}
+  `
+  );
+};
 
 const getForReviewChecklistsQuery = (expand) => {
-  return getAllChecklistQuery(expand) +
-  `
+  return (
+    getAllChecklistQuery(expand) +
+    `
     WHERE
         ua.user_id = $1 AND
         (cl.status_id = 4 OR cl.status_id = 6)
     ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' desc
-  `;
-}
+  `
+  );
+};
 
 const getApprovedChecklistsQuery = (expand) => {
-  return getAllChecklistQuery(expand) +
-  `
+  return (
+    getAllChecklistQuery(expand) +
+    `
     WHERE
         ua.user_id = $1 AND
         (cl.status_id = 5 OR cl.status_id = 7)
     ORDER BY cl.checklist_id DESC
-  `;
-}
+  `
+  );
+};
 
 const fetchAssignedChecklists = async (req, res, next) => {
   const page = req.query.page || 1;
@@ -216,8 +221,8 @@ const fetchAssignedChecklists = async (req, res, next) => {
 
   try {
     const result = await global.db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      return res.status(204).json({ msg: "No checklist" });
+    //if (result.rows.length == 0)
+    //return res.status(204).json({ msg: "No checklist" });
     // console.log(result.rows);
     // console.log(totalPages);
     return res.status(200).json({ rows: result.rows, total: totalPages });
@@ -251,8 +256,8 @@ const fetchPendingChecklists = async (req, res, next) => {
 
   try {
     const result = await global.db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      return res.status(204).json({ msg: "No checklist" });
+    //if (result.rows.length == 0)
+    //return res.status(204).json({ msg: "No checklist" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {
@@ -285,8 +290,8 @@ const fetchForReviewChecklists = async (req, res, next) => {
 
   try {
     const result = await global.db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      return res.status(204).json({ msg: "No checklist" });
+    //if (result.rows.length == 0)
+    //return res.status(204).json({ msg: "No checklist" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {
@@ -318,8 +323,8 @@ const fetchApprovedChecklists = async (req, res, next) => {
 
   try {
     const result = await global.db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      return res.status(204).json({ msg: "No checklist" });
+    //if (result.rows.length == 0)
+    //return res.status(204).json({ msg: "No checklist" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {

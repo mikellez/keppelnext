@@ -41,7 +41,7 @@ const createMasterTypeEntry = async (req, res, next) => {
   // console.log(req.body);
   let table = tableInfo[req.body.type].internalName;
   // console.log(tableInfo)
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   let sql;
   let insert = [];
   // if asset_type
@@ -129,7 +129,7 @@ const updateMasterTypeSingle = async (req, res, next) => {
   // verifies if all the columns have been provided
   // returns false if failed
   // returns queryFields if success
-  const today = moment(new Date()).format("DD/MM/YYYY HH:mm A");
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
   const activity_log = {
     date: today,
     name: req.user.name,
