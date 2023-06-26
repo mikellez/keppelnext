@@ -162,11 +162,17 @@ export default function RequestPreview(props: RequestPreviewProps) {
               )}
             </td>
           </tr>
-          {comments && (
-            <tr>
-              <th>{Object.keys(comments)[0]}</th>
-              <td>{Object.values(comments)[0]}</td>
-            </tr>
+          {comments &&
+          props.request.activity_log[props.request.activity_log.length - 1]
+            .activity_type === "REJECTED" ? (
+            <>
+              <tr>
+                <th>{Object.keys(comments)[0]}</th>
+                <td>{Object.values(comments)[0]}</td>
+              </tr>
+            </>
+          ) : (
+            <div></div>
           )}
           {props.action == RequestAction.manage && (
             <>
