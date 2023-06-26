@@ -106,7 +106,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
           </tr>
           <tr>
             <th>Assigned To</th>
-            <td>{props.request.assigned_user_email || "N.A"}</td>
+            <td>{props.request.assigned_user_name || "N.A"}</td>
           </tr>
           <tr>
             <th>Requested By</th>
