@@ -18,16 +18,17 @@
     be rendered for each use case
 */
 
-
-
-
-
 import formStyles from "../../styles/formStyles.module.css";
 
 import React, { useEffect, useState } from "react";
-import instance from '../../types/common/axios.config';
+import instance from "../../types/common/axios.config";
 
-import { ModuleContent, ModuleDivider, ModuleFooter } from "../../components";
+import {
+  ModuleContent,
+  ModuleDivider,
+  ModuleFooter,
+  ModuleModal,
+} from "../../components";
 import ImagePreview from "../../components/Request/ImagePreview";
 
 import { useForm } from "react-hook-form";
@@ -87,7 +88,7 @@ async function createRequest(
   if (data.image.length > 0) formData.append("image", data.image[0]);
   if (linkedRequestId) formData.append("linkedRequestId", linkedRequestId);
 
-  console.log('formData', formData)
+  console.log("formData", formData);
 
   return await instance
     .post("/api/request/", formData, {
@@ -125,6 +126,7 @@ async function updateRequest(
 }
 
 export interface RequestContainerProps extends PropsWithChildren {
+  windowWidth: number;
   requestData?: RequestProps; // if not null, use data for creating new request (populate the dropdowns in create request page)
   // isAssignRequest?: boolean; // true: assign request page (prefill page), false : create new request page
   assignRequestData?: AssignRequestProps; // if not null, use data for assigning request
@@ -152,7 +154,7 @@ interface CMMSAssetOption extends CMMSAsset {
 }
 
 export default function RequestContainer(props: RequestContainerProps) {
-
+  const [isImage, setIsImage] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File>();
   const [previewedFile, setPreviewedFile] = useState<string>();
   const requestTypes = props.requestData?.requestTypes as CMMSRequestTypes[];
@@ -187,7 +189,7 @@ export default function RequestContainer(props: RequestContainerProps) {
 
   const router = useRouter();
 
-  console.log(props.assignRequestData);
+  // console.log(props.assignRequestData);
   const formSubmit: SubmitHandler<FormValues> = async (data) => {
     // console.log(data);
     if (props.linkedRequestData) {
@@ -301,13 +303,16 @@ export default function RequestContainer(props: RequestContainerProps) {
       setAvailableAssets(options);
     });
   };
-  const sortedAssets = availableAssets.sort((a, b) => a.asset_name.localeCompare(b.asset_name));
+  const sortedAssets = availableAssets.sort((a, b) =>
+    a.asset_name.localeCompare(b.asset_name)
+  );
   const plantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPlantId(parseInt(e.target.value));
     updateAssetLists(parseInt(e.target.value));
     resetField("taggedAssetID");
   };
-  console.log(props.linkedRequestData);
+  // console.log(props.linkedRequestData);
+  // console.log(props);
   return (
     <form onSubmit={handleSubmit(formSubmit)}>
       <ModuleContent includeGreyContainer grid>
@@ -450,22 +455,25 @@ export default function RequestContainer(props: RequestContainerProps) {
                     }
                   : 1
               }
-              options = {
-                props.assignRequestData? [
-                  { value: -1, label: props.assignRequestData.requestData.asset_name }
-                ] : [
-                  { value: 0, label: 'Select asset'},
-                  ...(!props.assignRequestData &&
-                    sortedAssets.map((asset: CMMSAssetOption) => ({
-                      value: asset.psa_id,
-                      label: asset.asset_name,
-                      selected: asset.selected
-                    }))
-                  )
-                ]
+              options={
+                props.assignRequestData
+                  ? [
+                      {
+                        value: -1,
+                        label: props.assignRequestData.requestData.asset_name,
+                      },
+                    ]
+                  : [
+                      { value: 0, label: "Select asset" },
+                      ...(!props.assignRequestData &&
+                        sortedAssets.map((asset: CMMSAssetOption) => ({
+                          value: asset.psa_id,
+                          label: asset.asset_name,
+                          selected: asset.selected,
+                        }))),
+                    ]
               }
             />
-
           </div>
           {props.linkedRequestData && (
             <div className="form-group">
@@ -476,10 +484,9 @@ export default function RequestContainer(props: RequestContainerProps) {
                 id="formControlLinkedRequest"
                 disabled
                 defaultValue={props.linkedRequestData.request_id}
-                />
-              </div>
+              />
+            </div>
           )}
-         
         </div>
         <div
           className={formStyles.halfContainer}
@@ -490,21 +497,39 @@ export default function RequestContainer(props: RequestContainerProps) {
             height: "100%",
           }}
         >
-          {!props.assignRequestData && (
-            <div className="form-group">
+          <div className="form-group">
+            <div>
               <label className="form-label">Image</label>
               <input
                 className="form-control"
                 type="file"
                 accept="image/jpeg,image/png,image/gif"
                 id="formFile"
-                {...register("image", { onChange: onFileSelected })}
+                onChange={(e) => {
+                  // console.log(e.target.files![0]);
+                  setIsImage(false);
+                  setSelectedFile(e.target.files![0]);
+                }}
               />
             </div>
-          )}
+            {previewedFile && (
+              <div
+                className={`${formStyles.imageClick} form-group mt-3`}
+                onClick={() => setIsImage(true)}
+              >
+                <div>
+                  <label className="form-label">
+                    <p style={{ textDecoration: "underline" }}>
+                      View Request Image
+                    </p>
+                  </label>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* <ImagePreview previewObjURL={previewedFile} /> */}
-          {props.assignRequestData &&
+          {/* {props.assignRequestData &&
           props.assignRequestData.requestData.uploaded_file?.data &&
           url ? (
             <div style={{ height: "100%", position: "relative" }}>
@@ -518,7 +543,7 @@ export default function RequestContainer(props: RequestContainerProps) {
             </div>
           ) : (
             <ImagePreview previewObjURL={previewedFile} />
-          )}
+          )} */}
 
           {props.assignRequestData && (
             <div className="form-group">
@@ -570,13 +595,19 @@ export default function RequestContainer(props: RequestContainerProps) {
               )}
             </div>
           )}
-          {assignRequestData && <div className="form-group">
-
-            <label className="form-label">
-              Created Date
-            </label>
-            <input type="text" className="form-control" disabled value={`${moment(assignRequestData.created_date).format('MMMM Do YYYY, h:mm:ss a')}`}/>
-          </div>}
+          {assignRequestData && (
+            <div className="form-group">
+              <label className="form-label">Created Date</label>
+              <input
+                type="text"
+                className="form-control"
+                disabled
+                value={`${moment(assignRequestData.created_date).format(
+                  "MMMM Do YYYY, h:mm:ss a"
+                )}`}
+              />
+            </div>
+          )}
         </div>
       </ModuleContent>
       <ModuleFooter>
@@ -606,6 +637,18 @@ export default function RequestContainer(props: RequestContainerProps) {
           Submit
         </button>
       </ModuleFooter>
+      <ModuleModal
+        isOpen={isImage}
+        closeModal={() => setIsImage(false)}
+        closeOnOverlayClick={true}
+        large
+        // hideHeader={props.windowWidth <= 768}
+      >
+        {/* <Image src={f.image} width={100} height={100} alt="" /> */}
+        <div style={{ textAlign: "center" }}>
+          <img width={"100%"} height={"100%"} src={previewedFile} alt="" />
+        </div>
+      </ModuleModal>
     </form>
   );
 }
