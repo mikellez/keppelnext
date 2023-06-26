@@ -35,6 +35,7 @@ const FeedbackContainer = (props: any) => {
     };
     email: string;
     image?: string;
+    completed_img?: string;
   }>({
     name: "",
     comments: "",
@@ -44,6 +45,7 @@ const FeedbackContainer = (props: any) => {
     contact: { telegram: 0, whatsapp: 0, number: "" },
     email: "",
     image: "",
+    completed_img: "",
   });
 
   const [selectedFile, setSelectedFile] = useState<File>();
@@ -277,38 +279,36 @@ const FeedbackContainer = (props: any) => {
         >
           <div className="form-group">
             <div>
-
-            <label className="form-label">Image</label>
-            <input
-              className="form-control"
-              type="file"
-              accept="image/jpeg,image/png,image/gif"
-              id="formFile"
-              onChange={(e) => {
-                // console.log(e.target.files![0]);
-                setIsImage(false);
-                setSelectedFile(e.target.files![0]);
-              }}
+              <label className="form-label">Image</label>
+              <input
+                className="form-control"
+                type="file"
+                accept="image/jpeg,image/png,image/gif"
+                id="formFile"
+                onChange={(e) => {
+                  // console.log(e.target.files![0]);
+                  setIsImage(false);
+                  setSelectedFile(e.target.files![0]);
+                }}
               />
             </div>
             {previewedFile && (
-            <div
-              className={`${formStyles.imageClick} form-group mt-3`}
-              onClick={() => setIsImage(true)}
-            >
-              <div>
-                <label className="form-label">
-                  <p style={{ textDecoration: "underline" }}>
-                    View Feedback Image
-                  </p>
-                </label>
+              <div
+                className={`${formStyles.imageClick} form-group mt-3`}
+                onClick={() => setIsImage(true)}
+              >
+                <div>
+                  <label className="form-label">
+                    <p style={{ textDecoration: "underline" }}>
+                      View Feedback Image
+                    </p>
+                  </label>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
           <div>
-
-          {/* {previewedFile && (
+            {/* {previewedFile && (
             <Image src={previewedFile} width></Image>
             // <ImagePreview previewObjURL={previewedFile} />
             )} */}
@@ -393,17 +393,16 @@ const FeedbackContainer = (props: any) => {
         )}
       </ModuleFooter>
       <ModuleModal
-          isOpen={isImage}
-          closeModal={() => setIsImage(false)}
-          closeOnOverlayClick={true}
-          large
-          hideHeader={props.windowWidth <= 768}
-        >
-          {/* <Image src={f.image} width={100} height={100} alt="" /> */}
-          <div style={{textAlign: "center"}}>
+        isOpen={isImage}
+        closeModal={() => setIsImage(false)}
+        closeOnOverlayClick={true}
+        large
+        hideHeader={props.windowWidth <= 768}
+      >
+        {/* <Image src={f.image} width={100} height={100} alt="" /> */}
+        <div style={{ textAlign: "center" }}>
           <img width={"75%"} height={"75%"} src={previewedFile} alt="" />
-
-          </div>
+        </div>
       </ModuleModal>
     </div>
   );

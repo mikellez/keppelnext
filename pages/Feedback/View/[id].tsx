@@ -5,18 +5,9 @@ import { useCurrentUser } from "../../../components/SWR";
 import { CMMSFeedback } from "../../../types/common/interfaces";
 import { GetServerSideProps } from "next";
 import Link from "next/link";
-import {
-  ModuleMain,
-  ModuleHeader,
-  ModuleContent,
-  ModuleFooter,
-  SimpleIcon,
-} from "../../../components";
-import FeedbackCompletedForm from "../../../components/Feedback/FeedbackCompletedForm";
-import LoadingHourglass from "../../../components/LoadingHourglass";
-import ModuleSimplePopup from "../../../components/ModuleLayout/ModuleSimplePopup";
-import TooltipBtn from "../../../components/TooltipBtn";
+import { ModuleMain, ModuleHeader, ModuleContent } from "../../../components";
 import { createFeedbackServerSideProps } from "../../../types/common/props";
+import FeedbackViewForm from "../../../components/Feedback/FeedbackViewForm";
 
 export default function ViewFeedback(props: FeedbackFormProps) {
   const [formData, setFormData] = useState<CMMSFeedback>(props.feedbackData);
@@ -32,7 +23,7 @@ export default function ViewFeedback(props: FeedbackFormProps) {
           </Link>
         </ModuleHeader>
         <ModuleContent>
-          <FeedbackCompletedForm
+          <FeedbackViewForm
             feedbackData={formData}
             setFeedbackData={setFormData}
             disableForm={true}

@@ -11,10 +11,8 @@ import { ModuleModal } from "../ModuleLayout/ModuleModal";
 import Image from "next/image";
 import FeedbackValidation from "./FeedbackValidation";
 
-const FeedbackCompletedForm = (props: FeedbackFormProps) => {
+const FeedbackViewForm = (props: FeedbackFormProps) => {
   const user = useCurrentUser();
-  const [selectedFile, setSelectedFile] = useState<File>();
-  const [previewedFile, setPreviewedFile] = useState<string>();
   const [feedbackImage, setFeedbackImage] = useState<boolean>(false);
   const [completeImage, setCompleteImage] = useState<boolean>(false);
 
@@ -34,29 +32,8 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
 
   const disForm = props.disableForm ? props.disableForm : false;
 
-  useEffect(() => {
-    props.setFeedbackData(props.feedbackData);
-    // console.log(props.feedbackData.image);
-  }, [props.feedbackData]);
-
   // console.log(form.created_by_user_id);
   // console.log(props.feedbackData.created_user_id);
-
-  useEffect(() => {
-    if (selectedFile) {
-      const reader = new FileReader();
-
-      reader.readAsDataURL(selectedFile);
-      reader.onload = () => {
-        setPreviewedFile(reader.result as string);
-        props.setFeedbackData((prevState: any) => {
-          return { ...prevState, completed_img: reader.result };
-        });
-      };
-    } else {
-      setPreviewedFile("");
-    }
-  }, [selectedFile]);
 
   return (
     <ModuleContent includeGreyContainer>
@@ -221,32 +198,9 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
             rows={5}
             disabled={disForm}
             value={props.feedbackData.remarks ? props.feedbackData.remarks : ""}
-            onChange={(e) => {
-              props.setFeedbackData((prev: CMMSFeedback) => {
-                // console.log(e.target.value);
-                return {
-                  ...prev,
-                  ["remarks"]: e.target.value,
-                };
-              });
-            }}
           ></textarea>
           <div className="form-group">
-            <div>
-              <label className="form-label">Complete Feedback Image</label>
-              <input
-                className="form-control"
-                type="file"
-                accept="image/jpeg,image/png,image/gif"
-                id="formFile"
-                onChange={(e) => {
-                  // console.log(e.target.files![0]);
-                  setCompleteImage(false);
-                  setSelectedFile(e.target.files![0]);
-                }}
-              />
-            </div>
-            {previewedFile && (
+            {props.feedbackData.completed_img != "" && (
               <div
                 className={`${formStyles.imageClick} form-group`}
                 onClick={() => setCompleteImage(true)}
@@ -297,11 +251,16 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
         closeOnOverlayClick={true}
       >
         <div style={{ textAlign: "center" }}>
-          <img width={"75%"} height={"75%"} src={previewedFile} alt="" />
+          <img
+            width={"75%"}
+            height={"75%"}
+            src={props.feedbackData.completed_img}
+            alt=""
+          />
         </div>{" "}
       </ModuleModal>
     </ModuleContent>
   );
 };
 
-export default FeedbackCompletedForm;
+export default FeedbackViewForm;

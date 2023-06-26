@@ -117,6 +117,24 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
           </div>
         </div>
         <div className={formStyles.halfContainer}>
+          <div className="form-group">
+            <label className="form-label">
+              <RequiredIcon /> Assign to
+            </label>
+            <AssignToSelect
+              plantId={f.plant_id as number}
+              isSingle={true}
+              onChange={(value) => {
+                props.setFeedbackData((prev: any) => {
+                  return {
+                    ...prev,
+                    ["assigned_user_id"]: value,
+                  };
+                });
+              }}
+              defaultIds={f.assigned_user_id ? [f.assigned_user_id] : []}
+            />
+          </div>
           {f.image != "" && (
             <div
               className={`${formStyles.imageClick} form-group`}
@@ -141,24 +159,6 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
           </div> */}
             </div>
           )}
-          <div className="form-group">
-            <label className="form-label">
-              <RequiredIcon /> Assign to
-            </label>
-            <AssignToSelect
-              plantId={f.plant_id as number}
-              isSingle={true}
-              onChange={(value) => {
-                props.setFeedbackData((prev: any) => {
-                  return {
-                    ...prev,
-                    ["assigned_user_id"]: value,
-                  };
-                });
-              }}
-              defaultIds={f.assigned_user_id ? [f.assigned_user_id] : []}
-            />
-          </div>
         </div>
       </ModuleContent>
       <ModuleDivider />
