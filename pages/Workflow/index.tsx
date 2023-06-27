@@ -26,6 +26,7 @@ import LoadingIcon from "../../components/LoadingIcon";
 import { set } from "nprogress";
 import router from "next/router";
 import Pagination from "../../components/Pagination";
+import moment from "moment";
 
 interface WorkflowItem {
   sn: string;
@@ -117,7 +118,7 @@ const Workflow = () => {
     getTheme(),
     {
       Table: `
-        --data-table-library_grid-template-columns:  5em 5em calc(100% - 30em) 7em 5em 8em;
+        --data-table-library_grid-template-columns:  5em 5em calc(100% - 30em) 15em 5em 8em;
         overflow-x: hidden
       `,
     },
@@ -179,11 +180,9 @@ const Workflow = () => {
     {
       label: "Created At",
       renderCell: (item) =>
-        item.created_at.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }),
+        moment(new Date(item.created_at)).format(
+          "MMMM Do YYYY, h:mm:ss a"
+          ),
     },
     {
       label: "Active",

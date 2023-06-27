@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import {
   ModuleContent,
@@ -47,6 +47,7 @@ import { GetServerSidePropsContext } from "next";
 import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 import moment from "moment";
 import { useRouter } from "next/router";
+import SearchBar from "../../components/SearchBar/SearchBar";
 
 const indexedColumn: ("pending" | "assigned" | "record" | "approved")[] = [
   "pending",
@@ -72,7 +73,7 @@ export interface ChecklistItem {
   created_date: Date | string;
   history: string;
   status: string;
-  activity_log?: { [key: string]: string }[];
+  activity_log: { [key: string]: string }[];
 }
 
 export interface ChecklistProps {
@@ -113,9 +114,10 @@ export default function Checklist(props: ChecklistProps) {
   const [history, setHistory] = useState<
     { [key: string]: string }[] | undefined
   >(undefined);
+  const searchRef = useRef({ value: "" });
   const [assignedUserHistory, setAssignedUserHistory] = useState<string>("");
   const filteredData = useChecklistFilter(props, page);
-  const columnData = useChecklist(indexedColumn[activeTabIndex], page);
+  const columnData = useChecklist(indexedColumn[activeTabIndex], page, searchRef.current.value);
   const router = useRouter();
 
   const { data, error, isValidating, mutate } = props.filter
@@ -161,16 +163,10 @@ export default function Checklist(props: ChecklistProps) {
         }
       }
     }
-    // if (!data) {
-    //     setReady(false);
-    //     setChecklistItems([]);
-    //     setTotalPages(1);
-    // }
   }, [data, isValidating, isReady, page, props?.isReady]);
 
   useEffect(() => {
     if (!props?.filter) {
-      setReady(false);
       const fields = [
         "checklist_id",
         "chl_name",
@@ -187,7 +183,7 @@ export default function Checklist(props: ChecklistProps) {
       const fieldsString = fields.join(",");
       instance
         .get(
-          `/api/checklist/${indexedColumn[activeTabIndex]}?page=${page}&expand=${fieldsString}`
+          `/api/checklist/${indexedColumn[activeTabIndex]}?page=${page}&expand=${fieldsString}&search=${searchRef.current.value}`
         )
         .then((response) => {
           setChecklistItems(
@@ -206,11 +202,18 @@ export default function Checklist(props: ChecklistProps) {
           setChecklistItems([]);
         });
     }
-  }, [activeTabIndex, page]);
+  }, [activeTabIndex, page, isReady]);
 
   return (
     <ModuleMain>
       <ModuleHeader title="Checklist" header="Checklist">
+      <SearchBar
+          ref={searchRef}
+          onSubmit={() => {
+            setReady(false);
+            setChecklistItems([]);
+          }}
+        />
         <Link href="/Checklist/Form?action=New">
           <TooltipBtn text="New Checklist">
             <BsFileEarmarkPlus size={20} />
@@ -276,7 +279,10 @@ export default function Checklist(props: ChecklistProps) {
                       <HeaderCell resize>ID</HeaderCell>
                       <HeaderCell resize>Details</HeaderCell>
                       <HeaderCell resize>Status</HeaderCell>
-                      <HeaderCell resize>Created On</HeaderCell>
+                      <HeaderCell resize>
+                        {activeTabIndex === 2 ? "Completed Date" :
+                          activeTabIndex === 3 ? "Approved Date" : "Created On"}
+                      </HeaderCell>
                       <HeaderCell resize>Assigned To</HeaderCell>
                       <HeaderCell resize>Signed Off By</HeaderCell>
                       <HeaderCell resize>Created By</HeaderCell>
@@ -301,9 +307,19 @@ export default function Checklist(props: ChecklistProps) {
                             </span>
                           </Cell>
                           <Cell>
-                            {`${moment(new Date(item.created_date)).format(
+                          {activeTabIndex === 2 
+                            ? `${moment(new Date(item.activity_log.reverse().find((activity) => activity["activity"] == "WORK DONE")!.date))
+                            .format(
                               "MMMM Do YYYY, h:mm:ss a"
-                            )}`}
+                            )}`
+                            : activeTabIndex === 3 
+                              ? `${moment(new Date(item.activity_log.reverse().find((activity) => activity["activity"] == "APPROVED")!.date))
+                              .format(
+                                "MMMM Do YYYY, h:mm:ss a"
+                              )}`
+                              : `${moment(new Date(item.created_date)).format(
+                                "MMMM Do YYYY, h:mm:ss a"
+                              )}`}
                           </Cell>
                           <Cell>{item.assigneduser}</Cell>
                           <Cell>{item.signoffuser}</Cell>

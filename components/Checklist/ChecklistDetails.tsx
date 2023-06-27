@@ -67,7 +67,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
         </div>
         </div>
       );
-    } else if (status_id == 3 || status_id == 2) {
+    } else if (status_id == 3) {
       const rejectedLog = activity_log
         .reverse()
         .find((activity) => activity["activity"] == "REJECTED");
@@ -91,7 +91,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
     const rejectionActivity = activity_log
       .reverse()
       .find((activity) => activity["activity"] == "REJECTED");
-    if (status_id == 3 || status_id == 2) {
+    if (rejectionActivity) {
       return (
         <div>
           <p className={styles.checklistDetailsHeading}>Rejection Comments</p>
