@@ -119,7 +119,7 @@ export interface RequestItem {
   requesthistory?: string;
   complete_comments?: string;
   completion_file?: any;
-  activity_log?: { [key: string]: string }[];
+  activity_log: { [key: string]: string }[];
   associatedrequestid?: number;
 }
 
@@ -400,7 +400,10 @@ export default function Request(props: RequestProps) {
                       <HeaderCell resize>Location</HeaderCell>
                       <HeaderCell resize>Priority</HeaderCell>
                       <HeaderCell resize>Status</HeaderCell>
-                      <HeaderCell resize>Date</HeaderCell>
+                      <HeaderCell resize>
+                      {activeTabIndex === 2 ? "Completed Date" :
+                          activeTabIndex === 3 ? "Approved Date" : "Created On"}
+                      </HeaderCell>
                       <HeaderCell resize>Asset Name</HeaderCell>
                       <HeaderCell resize>Requested By</HeaderCell>
                       <HeaderCell resize>Action</HeaderCell>
@@ -431,7 +434,7 @@ export default function Request(props: RequestProps) {
                               {item.status}
                             </Cell>
                             <Cell>
-                              {`${moment(new Date(item.created_date)).format(
+                            {`${moment(new Date(item.created_date)).format(
                                 "MMMM Do YYYY, h:mm:ss a"
                               )}`}
                             </Cell>
