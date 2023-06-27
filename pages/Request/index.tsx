@@ -499,22 +499,23 @@ export default function Request(props: RequestProps) {
                                     />
                                   </div>
                                 )}
-                                {item.associatedrequestid === null && (
-                                  <div
-                                    className={styles.editIcon}
-                                    onClick={() => {
-                                      router.push(
-                                        `/Request/CorrectiveRequest/${item.id}`
-                                      );
-                                      setReady(false);
-                                    }}
-                                  >
-                                    <HiOutlineLink
-                                      size={18}
-                                      title={"Create Corrective Request"}
-                                    />
-                                  </div>
-                                )}
+                                {item.associatedrequestid === null &&
+                                  item.status_id != 4 && (
+                                    <div
+                                      className={styles.editIcon}
+                                      onClick={() => {
+                                        router.push(
+                                          `/Request/CorrectiveRequest/${item.id}`
+                                        );
+                                        setReady(false);
+                                      }}
+                                    >
+                                      <HiOutlineLink
+                                        size={18}
+                                        title={"Create Corrective Request"}
+                                      />
+                                    </div>
+                                  )}
                                 <div
                                   className={styles.editIcon}
                                   onClick={() => {

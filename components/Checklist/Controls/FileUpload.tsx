@@ -1,15 +1,13 @@
-import React, { useContext, useState } from 'react';
-import { updateSpecificCheck } from '../ChecklistEditableForm';
-import CheckControl from '../../../types/common/CheckControl';
-import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
+import React, { useContext, useState } from "react";
+import { updateSpecificCheck } from "../ChecklistEditableForm";
+import CheckControl from "../../../types/common/CheckControl";
+import { SectionsContext } from "../../../pages/Checklist/Complete/[id]";
 import { ImCross } from "react-icons/im";
 import checklistStyles from "../ChecklistTemplateCreator.module.css";
 import { ModuleDivider, ModuleModal } from "../../";
-import Image from 'next/image';
+import Image from "next/image";
 import styles from "../../../styles/Checklist.module.scss";
 import requestStyles from "../../../styles/Request.module.scss";
-
-
 
 export class FileUploadControl extends CheckControl {
   constructor(question?: string, value?: string, id?: string) {
@@ -37,20 +35,33 @@ export class FileUploadControl extends CheckControl {
   }
 
   render(onChange: Function, onDelete: Function) {
-		return <FileUpload fileControlObj={this} onChange={onChange} onDelete={onDelete} />
-	}
+    return (
+      <FileUpload
+        fileControlObj={this}
+        onChange={onChange}
+        onDelete={onDelete}
+      />
+    );
+  }
 
-	renderEditableForm(rowId: string, sectionId: string, index: number) {
-		return <FileUploadEditable fileControlObj={this} rowId={rowId} sectionId={sectionId} index={index} />
-	}
+  renderEditableForm(rowId: string, sectionId: string, index: number) {
+    return (
+      <FileUploadEditable
+        fileControlObj={this}
+        rowId={rowId}
+        sectionId={sectionId}
+        index={index}
+      />
+    );
+  }
   // renderReassignedEditableForm(rowId: string, sectionId: string) {
-	// 	return <FileUploadReassignedEditable fileControlObj={this} rowId={rowId} sectionId={sectionId} />
-	// }
+  // 	return <FileUploadReassignedEditable fileControlObj={this} rowId={rowId} sectionId={sectionId} />
+  // }
 
   renderViewOnlyForm() {
-    return <FileUploadView fileControlObj={this} />
+    return <FileUploadView fileControlObj={this} />;
   }
-};
+}
 
 export function FileUpload({
   fileControlObj,
@@ -98,55 +109,106 @@ export function FileUpload({
         />
       </div>
 
-		<div className="form-group">
-			<input type="file" onChange={handleFile} className="form-control" disabled/>
-		</div>
-	</div>);
-};
+      <div className="form-group">
+        <input
+          type="file"
+          onChange={handleFile}
+          className="form-control"
+          disabled
+        />
+      </div>
+    </div>
+  );
+}
 
-function FileUploadEditable({ fileControlObj, rowId, sectionId, index }: {
-	fileControlObj: FileUploadControl,
-	rowId: string,
-	sectionId: string,
-  index: number
+function FileUploadEditable({
+  fileControlObj,
+  rowId,
+  sectionId,
+  index,
+}: {
+  fileControlObj: FileUploadControl;
+  rowId: string;
+  sectionId: string;
+  index: number;
 }) {
-
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-	const { setSections } = useContext(SectionsContext);
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		if (e.target.files && e.target.files.length > 0) {
-			addFileToValue(e.target.files[0]);
-		} else {
-			removeFileFromValue();
-		}
-	};
+  const { setSections } = useContext(SectionsContext);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      addFileToValue(e.target.files[0]);
+    } else {
+      removeFileFromValue();
+    }
+  };
 
-	const addFileToValue = (file: File) => {
-		const reader = new FileReader();
-		reader.readAsDataURL(file);
-		reader.onload = () => {
-			updateSpecificCheck(sectionId, rowId, fileControlObj.id, reader.result as string, setSections);
-		};
-	};
+  const addFileToValue = (file: File) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      updateSpecificCheck(
+        sectionId,
+        rowId,
+        fileControlObj.id,
+        reader.result as string,
+        setSections
+      );
+    };
+  };
 
-	const removeFileFromValue = () => {
-		updateSpecificCheck(sectionId, rowId, fileControlObj.id, "", setSections);
-	};
-	
-	return (
-		<div className={styles.checkViewContainer}>
-			<h6>{index}. {fileControlObj.question}</h6>
-			<input 
-				type="file" 
-				name={fileControlObj.id}
-				className="form-control"
-				onChange={handleChange}
-        accept='jpeg/png'
-			/>
-      {fileControlObj.value && fileControlObj.value != "" && <><p 
-        onClick={() => setModalOpen(true)}
-        className={requestStyles.editIcon}
-      >View File
+  const removeFileFromValue = () => {
+    updateSpecificCheck(sectionId, rowId, fileControlObj.id, "", setSections);
+  };
+
+  return (
+    <div className={styles.checkViewContainer}>
+      <h6>{fileControlObj.question}</h6>
+      <input
+        type="file"
+        name={fileControlObj.id}
+        className="form-control"
+        onChange={handleChange}
+        accept="jpeg/png"
+      />
+      {fileControlObj.value && fileControlObj.value != "" && (
+        <>
+          <p
+            onClick={() => setModalOpen(true)}
+            className={requestStyles.editIcon}
+          >
+            View File
+          </p>
+          <ModuleModal
+            closeModal={() => setModalOpen(false)}
+            isOpen={modalOpen}
+            closeOnOverlayClick
+            className={requestStyles.imageModal}
+          >
+            <Image
+              src={fileControlObj.value}
+              alt="img"
+              width={500}
+              height={500}
+            />
+          </ModuleModal>
+        </>
+      )}
+    </div>
+  );
+}
+
+function FileUploadView({
+  fileControlObj,
+}: {
+  fileControlObj: FileUploadControl;
+}) {
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+
+  return (
+    <div className={styles.checkViewContainer}>
+      <h6>{fileControlObj.question}</h6>
+      <p onClick={() => setModalOpen(true)} className={requestStyles.editIcon}>
+        View File
       </p>
       <ModuleModal
         closeModal={() => setModalOpen(false)}
@@ -154,45 +216,11 @@ function FileUploadEditable({ fileControlObj, rowId, sectionId, index }: {
         closeOnOverlayClick
         className={requestStyles.imageModal}
       >
-        <Image 
-          src={fileControlObj.value}
-          alt="img"
-          width={500} 
-          height={500}
-        />
-      </ModuleModal></>}
-		</div>
-	)
-};
-
-function FileUploadView({ fileControlObj }: {fileControlObj: FileUploadControl}) {
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
-
-  return (
-      <div className={styles.checkViewContainer}>
-        <h6>{fileControlObj.question}</h6>
-        <p 
-          onClick={() => setModalOpen(true)}
-          className={requestStyles.editIcon}
-        >View File</p>
-        <ModuleModal
-          closeModal={() => setModalOpen(false)}
-          isOpen={modalOpen}
-          closeOnOverlayClick
-          className={requestStyles.imageModal}
-        >
-        <Image 
-          src={fileControlObj.value}
-          alt="img"
-          width={500} 
-          height={500}
-        />
-        </ModuleModal>
-      </div>
-      
+        <Image src={fileControlObj.value} alt="img" width={500} height={500} />
+      </ModuleModal>
+    </div>
   );
-};
-
+}
 
 // function FileUploadReassignedEditable({ fileControlObj, rowId, sectionId }: {
 // 	fileControlObj: FileUploadControl,
@@ -235,12 +263,12 @@ function FileUploadView({ fileControlObj }: {fileControlObj: FileUploadControl})
 // 			return newSections;
 // 		});
 // 	};
-	
+
 // 	return (
 // 		<>
 //       <div className={styles.checkViewContainer}>
 //         <h6>{fileControlObj.question}</h6>
-//         <p 
+//         <p
 //           onClick={() => setModalOpen(true)}
 //           className={requestStyles.editIcon}
 //         >View File</p>
@@ -251,10 +279,10 @@ function FileUploadView({ fileControlObj }: {fileControlObj: FileUploadControl})
 //         closeOnOverlayClick
 //         className={requestStyles.imageModal}
 //       >
-//       <Image 
+//       <Image
 //         src={fileControlObj.value}
 //         alt="img"
-//         width={500} 
+//         width={500}
 //         height={500}
 //       />
 //   </ModuleModal>
