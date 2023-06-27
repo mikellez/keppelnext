@@ -99,7 +99,8 @@ async function fetchRequestQuery(
       ft.fault_type LIKE '%${search}%' OR
       pm.plant_name LIKE '%${search}%' OR
       rt.request LIKE '%${search}%' OR
-      pri.priority LIKE '%${search}%'
+      pri.priority LIKE '%${search}%' OR
+      tmp1.asset_name LIKE '%${search}%'
     )
 	  ${status_query}
     ${userCond}
