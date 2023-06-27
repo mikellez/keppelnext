@@ -38,7 +38,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     const timer = new IdleTimer({
-      timeout: 10, //expire after 10 seconds
+      timeout: 1800, //expire after 10 seconds
       onTimeout: () => {
         setIsTimeout(true);
       },
