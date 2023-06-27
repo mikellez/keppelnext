@@ -9,6 +9,13 @@ const {
 } = require("../mailer/ChecklistMail");
 
 const ITEMS_PER_PAGE = 10;
+const searchCondition = (search) => {
+  return `
+    AND (
+      cl.chl_name LIKE '%${search}%' OR
+      cl.description LIKE '%${search}%'
+    )`;
+};
 
 const fetchAllChecklistQuery = `
 SELECT 
@@ -70,10 +77,10 @@ const fetchAssignedChecklistsQuery =
           ELSE True
           END) AND
           ua.user_id = $1
-ORDER BY cl.checklist_id DESC
+  ORDER BY cl.checklist_id DESC
 `;
 
-const getAllChecklistQuery = (expand) => {
+const getAllChecklistQuery = (expand, search) => {
   let expandCond = "";
   let SELECT_ARR = [];
 
@@ -149,9 +156,9 @@ const getAllChecklistQuery = (expand) => {
   return query;
 };
 
-const getAssignedChecklistsQuery = (expand) => {
+const getAssignedChecklistsQuery = (expand, search) => {
   return (
-    getAllChecklistQuery(expand) +
+    getAllChecklistQuery(expand, search) +
     `
     WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3) AND
         (CASE
@@ -164,42 +171,46 @@ const getAssignedChecklistsQuery = (expand) => {
             ELSE True
             END) AND
             ua.user_id = $1
+    ${searchCondition(search)}
     ORDER BY cl.checklist_id DESC
   `
   );
 };
 
-const getPendingChecklistsQuery = (expand) => {
+const getPendingChecklistsQuery = (expand, search) => {
   return (
-    getAllChecklistQuery(expand) +
+    getAllChecklistQuery(expand, search) +
     `
     WHERE
         ua.user_id = $1 AND
         (cl.status_id = 1)
+    ${searchCondition(search)}
     ORDER BY cl.checklist_id DESC
   `
   );
 };
 
-const getForReviewChecklistsQuery = (expand) => {
+const getForReviewChecklistsQuery = (expand, search) => {
   return (
-    getAllChecklistQuery(expand) +
+    getAllChecklistQuery(expand, search) +
     `
     WHERE
         ua.user_id = $1 AND
         (cl.status_id = 4 OR cl.status_id = 6)
+    ${searchCondition(search)}
     ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' desc
   `
   );
 };
 
-const getApprovedChecklistsQuery = (expand) => {
+const getApprovedChecklistsQuery = (expand, search) => {
   return (
-    getAllChecklistQuery(expand) +
+    getAllChecklistQuery(expand, search) +
     `
     WHERE
         ua.user_id = $1 AND
         (cl.status_id = 5 OR cl.status_id = 7)
+    ${searchCondition(search)}
     ORDER BY cl.checklist_id DESC
   `
   );
@@ -209,6 +220,7 @@ const fetchAssignedChecklists = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
   const expand = req.query.expand || false;
+  const search = req.query.search || "";
 
   const totalRows = await global.db.query(getAssignedChecklistsQuery(expand), [
     req.user.id,
@@ -216,7 +228,7 @@ const fetchAssignedChecklists = async (req, res, next) => {
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    getAssignedChecklistsQuery(expand) +
+    getAssignedChecklistsQuery(expand, search) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
@@ -244,6 +256,7 @@ const fetchPendingChecklists = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
   const expand = req.query.expand || false;
+  const search = req.query.search || "";
 
   const totalRows = await global.db.query(getPendingChecklistsQuery(expand), [
     req.user.id,
@@ -251,7 +264,7 @@ const fetchPendingChecklists = async (req, res, next) => {
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    getPendingChecklistsQuery(expand) +
+    getPendingChecklistsQuery(expand, search) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
@@ -278,6 +291,7 @@ const fetchForReviewChecklists = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
   const expand = req.query.expand || false;
+  const search = req.query.search || "";
 
   const totalRows = await global.db.query(getForReviewChecklistsQuery(expand), [
     req.user.id,
@@ -285,7 +299,7 @@ const fetchForReviewChecklists = async (req, res, next) => {
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    getForReviewChecklistsQuery(expand) +
+    getForReviewChecklistsQuery(expand, search) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
@@ -311,6 +325,7 @@ const fetchApprovedChecklists = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
   const expand = req.query.expand || false;
+  const search = req.query.search || "";
 
   const totalRows = await global.db.query(getApprovedChecklistsQuery(expand), [
     req.user.id,
@@ -318,7 +333,7 @@ const fetchApprovedChecklists = async (req, res, next) => {
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    getApprovedChecklistsQuery(expand) +
+    getApprovedChecklistsQuery(expand, search) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {

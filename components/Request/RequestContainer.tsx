@@ -506,11 +506,13 @@ export default function RequestContainer(props: RequestContainerProps) {
                 type="file"
                 accept="image/jpeg,image/png,image/gif"
                 id="formFile"
-                onChange={(e) => {
-                  // console.log(e.target.files![0]);
-                  setIsImage(false);
-                  setSelectedFile(e.target.files![0]);
-                }}
+                // onChange={(e) => {
+                //   // console.log(e.target.files![0]);
+                //   setIsImage(false);
+                //   setSelectedFile(e.target.files!);
+                //   console.log(e.target.files![0]);
+                // }}
+                {...register("image", { onChange: onFileSelected })}
               />
             </div>
             {previewedFile && (

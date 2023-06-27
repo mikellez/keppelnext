@@ -2,16 +2,53 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/globals.scss";
 import "../styles/index.scss";
 import type { AppProps } from "next/app";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import TopBar from "../components/TopBar/TopBar";
 import Footer from "../components/Footer";
 import nProgress from "nprogress";
 import { StaffContextProvider } from "../components/Context/StaffContext";
+import { ModuleModal, SimpleIcon } from "../components";
+import ModuleSimplePopup from "../components/ModuleLayout/ModuleSimplePopup";
+import { Tooltip } from "antd";
+import TooltipBtn from "../components/TooltipBtn";
+import IdleTimer from "./IdleTimer";
+import instance from "../types/common/axios.config";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const { asPath, route, pathname } = router;
+  const [isTimeout, setIsTimeout] = useState(false);
+
+  const sendLogout = (): void => {
+    instance.get("/api/user/logouthistory").then((response: any) => {
+      instance
+        .post("/api/logout")
+        .then((response: any) => {
+          // console.log("success", response);
+          localStorage.removeItem("staff");
+          window.location.href = "/";
+        })
+        .catch((e: any) => {
+          // console.log("error", e);
+          alert("logout fail");
+        });
+    });
+  };
+
+  useEffect(() => {
+    const timer = new IdleTimer({
+      timeout: 1800, //expire after 10 seconds
+      onTimeout: () => {
+        setIsTimeout(true);
+      },
+      onExpired: sendLogout,
+    });
+
+    return () => {
+      timer.cleanUp();
+    };
+  }, []);
 
   useEffect(() => {
     require("bootstrap/dist/js/bootstrap.bundle.min.js");
@@ -31,8 +68,13 @@ export default function App({ Component, pageProps }: AppProps) {
     };
   }, [router.events]);
 
-
-  if (asPath.includes("/Login") || pathname === "/404" || pathname === "/500" || pathname === "/403" || asPath.includes("/Guest/"))
+  if (
+    asPath.includes("/Login") ||
+    pathname === "/404" ||
+    pathname === "/500" ||
+    pathname === "/403" ||
+    asPath.includes("/Guest/")
+  )
     return (
       <div>
         <Component {...pageProps} />
@@ -40,25 +82,38 @@ export default function App({ Component, pageProps }: AppProps) {
     );
 
   return (
-    <div>
-      <TopBar />
-      <div
-        style={
-          {
-            position: "relative",
-            minHeight: "calc(100vh - 4rem)",
+    <>
+      <div>
+        <TopBar />
+        <div
+          style={
+            {
+              position: "relative",
+              minHeight: "calc(100vh - 4rem)",
+            }
+            // minheight -4rem due to top bar height of 4 rem
           }
-          // minheight -4rem due to top bar height of 4 rem
-        }
-      >
-        <div style={{ paddingBottom: "12rem" }}>
-          <StaffContextProvider>
-            <Component {...pageProps} />
-          </StaffContextProvider>
+        >
+          <div style={{ paddingBottom: "12rem" }}>
+            <StaffContextProvider>
+              <Component {...pageProps} />
+            </StaffContextProvider>
+          </div>
+          <Footer />
         </div>
-        <Footer />
       </div>
-    </div>
+      <ModuleSimplePopup
+        modalOpenState={isTimeout}
+        setModalOpenState={setIsTimeout}
+        text="You will be redirected back to the login page"
+        title="Your session has expired"
+        icon={SimpleIcon.Exclaim}
+        buttons={[
+          <TooltipBtn key={1} toolTip={false} onClick={sendLogout}>
+            Ok
+          </TooltipBtn>,
+        ]}
+      />
+    </>
   );
-};
-
+}
