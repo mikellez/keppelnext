@@ -243,7 +243,7 @@ function MultiChoiceEditable ({ multiChoiceObj, rowId, sectionId, index }: {
   
 	return (
 		<div className={styles.checkViewContainer}>
-			<h6>{index}. {multiChoiceObj.question}</h6>
+			<h6>{multiChoiceObj.question}</h6>
 			{
 				multiChoiceObj.choices.map(choice => {
 					return (
