@@ -72,7 +72,7 @@ export interface ChecklistItem {
   created_date: Date | string;
   history: string;
   status: string;
-  activity_log?: { [key: string]: string }[];
+  activity_log: { [key: string]: string }[];
 }
 
 export interface ChecklistProps {
@@ -276,7 +276,10 @@ export default function Checklist(props: ChecklistProps) {
                       <HeaderCell resize>ID</HeaderCell>
                       <HeaderCell resize>Details</HeaderCell>
                       <HeaderCell resize>Status</HeaderCell>
-                      <HeaderCell resize>Created On</HeaderCell>
+                      <HeaderCell resize>
+                        {activeTabIndex === 2 ? "Completed Date" :
+                          activeTabIndex === 3 ? "Approved Date" : "Created On"}
+                      </HeaderCell>
                       <HeaderCell resize>Assigned To</HeaderCell>
                       <HeaderCell resize>Signed Off By</HeaderCell>
                       <HeaderCell resize>Created By</HeaderCell>
@@ -301,9 +304,19 @@ export default function Checklist(props: ChecklistProps) {
                             </span>
                           </Cell>
                           <Cell>
-                            {`${moment(new Date(item.created_date)).format(
+                          {activeTabIndex === 2 
+                            ? `${moment(new Date(item.activity_log.reverse().find((activity) => activity["activity"] == "WORK DONE")!.date))
+                            .format(
                               "MMMM Do YYYY, h:mm:ss a"
-                            )}`}
+                            )}`
+                            : activeTabIndex === 3 
+                              ? `${moment(new Date(item.activity_log.reverse().find((activity) => activity["activity"] == "APPROVED")!.date))
+                              .format(
+                                "MMMM Do YYYY, h:mm:ss a"
+                              )}`
+                              : `${moment(new Date(item.created_date)).format(
+                                "MMMM Do YYYY, h:mm:ss a"
+                              )}`}
                           </Cell>
                           <Cell>{item.assigneduser}</Cell>
                           <Cell>{item.signoffuser}</Cell>
