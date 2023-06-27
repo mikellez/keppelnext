@@ -293,6 +293,7 @@ interface CMMSFeedback {
   fullname: string;
   plant_name: string;
   plant_id: number;
+  completed_img: string;
   // rating: number;
   image: string;
   contact: CMMSContact;

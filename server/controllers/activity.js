@@ -38,7 +38,7 @@ for (const key in tableInfo) {
 
 const getEventtHistory = async (req, res, next) => {
     let q = `SELECT * FROM (${query}) AS activity_log WHERE event_time >= date_trunc('month', CURRENT_DATE) ORDER BY event_time DESC;`
-    console.log(q);
+    // console.log(q);
     global.db.query(q, (err, result) => {
         // console.log(result.rows);
         if (err) return res.status(400).json({ msg: err });

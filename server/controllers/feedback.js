@@ -38,7 +38,8 @@ SELECT
   f.assigned_user_id,
   st.status,
   f.name,
-  f.created_user_id
+  f.created_user_id,
+  f.completed_img
 FROM 
     keppel.users u
     JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -300,15 +301,21 @@ const completeFeedback = async (req, res, next) => {
                 SET 
                   status_id = 4,
                   remarks = $1,
-                  completed_date = $2
+                  completed_date = $2,
+                  completed_img = $3
                 
-                WHERE feedback_id = $3`;
+                WHERE feedback_id = $4`;
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
   // console.log(req.body);
   try {
-    await global.db.query(sql, [req.body.remarks, today, id]);
+    await global.db.query(sql, [
+      req.body.remarks,
+      today,
+      req.body.completed_img,
+      id,
+    ]);
     const {
       assigned_user_email,
       creator_email,
@@ -359,7 +366,7 @@ const getSingleFeedback = async (req, res, next) => {
 
 const createFeedback = async (req, res, next) => {
   const feedback = req.body;
-  // console.log(req.body);
+  console.log(req.body);
   const sql = `INSERT INTO keppel.feedback 
               (name,
                 description,
@@ -369,8 +376,9 @@ const createFeedback = async (req, res, next) => {
                 contact,
                 created_user_id,
                 status_id,
-                created_date)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
+                created_date,
+                completed_img)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const activity_log = [
@@ -398,6 +406,7 @@ const createFeedback = async (req, res, next) => {
       userID,
       1,
       today,
+      feedback.completed_img,
     ]);
 
     const mail = new CreateFeedbackMail([feedback.contact.email], {
@@ -425,7 +434,8 @@ const fetchEmailDetailsForSpecificFeedback = async (feedback_id) => {
        f.description,
        f.created_date,
        f.completed_date,
-       f.remarks
+       f.remarks,
+       f.completed_img
        
    FROM 
        keppel.feedback f

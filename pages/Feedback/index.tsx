@@ -44,6 +44,7 @@ import styles from "../../styles/Request.module.scss";
 import { Role } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
 import FeedbackHistory from "../../components/Feedback/FeedbackHistory";
+import moment from "moment";
 
 const indexedColumn: ("pending" | "assigned" | "completed")[] = [
   "pending",
@@ -91,7 +92,7 @@ export default function Feedback() {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns:  5em calc(90% - 46em) 7em 8em 10em 10em 10% 5em;",
+        "--data-table-library_grid-template-columns:  4em 15em 8em 15em 9em 8em 11em 7em 5em;",
     },
   ]);
 
@@ -175,7 +176,7 @@ export default function Feedback() {
             <Table
               data={{ nodes: feedbackItems }}
               theme={theme}
-              layout={{ custom: true }}
+              layout={{ custom: true, horizontalScroll: true, }}
             >
               {(tableList: CMMSFeedback[]) => (
                 <>
@@ -186,6 +187,7 @@ export default function Feedback() {
                       <HeaderCell resize>Status</HeaderCell>
                       <HeaderCell resize>Created On</HeaderCell>
                       <HeaderCell resize>Assigned To</HeaderCell>
+                      <HeaderCell resize>Plant</HeaderCell>
                       <HeaderCell resize>Location</HeaderCell>
                       <HeaderCell resize>Created By</HeaderCell>
                       <HeaderCell resize>Actions</HeaderCell>
@@ -208,15 +210,19 @@ export default function Feedback() {
                               {item.status}
                             </span>
                           </Cell>
-                          <Cell>{item.created_date.toString()}</Cell>
+                          <Cell>
+                            {moment(new Date(item.created_date)).format(
+                            "MMMM Do YYYY, h:mm:ss a"
+                            )}
+                          </Cell>
                           <Cell>{item.assigned_user_name}</Cell>
+                          <Cell>{item.plant_name}</Cell>
                           <Cell>
                             {item.loc_floor} floor, {item.loc_room}
                           </Cell>
-                          <Cell>{item.createdbyuser}</Cell>
+                          <Cell>{item.name}</Cell>
                           <Cell>
-                            {item.status_id === 2 ||
-                            item.status_id === 3 ? (
+                            {item.status_id === 2 || item.status_id === 3 ? (
                               <>
                                 <Link href={`/Feedback/Complete/${item.id}`}>
                                   <AiOutlineFileDone
@@ -226,8 +232,9 @@ export default function Feedback() {
                                 </Link>
                               </>
                             ) : (user.data!.role_id === Role.Admin ||
-                              user.data!.role_id === Role.Manager ||
-                              user.data!.role_id === Role.Engineer) && item.status_id === 1 ? (
+                                user.data!.role_id === Role.Manager ||
+                                user.data!.role_id === Role.Engineer) &&
+                              item.status_id === 1 ? (
                               <Link href={`/Feedback/Assign/${item.id}`}>
                                 <AiOutlineUserAdd size={22} title={"Assign"} />
                               </Link>

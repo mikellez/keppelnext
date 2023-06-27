@@ -30,40 +30,14 @@ import PageButton from "../components/PageButton";
 import styles2 from "../styles/Request.module.scss";
 import { FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
 import { useCurrentUser } from "../components/SWR";
+import moment from "moment";
 
 export interface logbookData {
   [key: string]: string | number;
   id: string | number;
 }
 
-const formatDate = (oldDate: string) => {
-  let strArray = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  const date = new Date(oldDate);
-  let y = date.getFullYear();
-  let d = date.getDate();
-  let m = strArray[date.getMonth()];
 
-  let hr = date.getHours();
-  let min: number | string = date.getMinutes();
-  if (min < 10) {
-    min = "0" + min.toString();
-  }
-
-  return `${d} ${m} ${y}, ${hr}:${min}`;
-};
 
 const Logbook = ({
   data,
@@ -91,7 +65,7 @@ const Logbook = ({
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns:  12em 10em calc(90% - 36em) 11em 11em;",
+        "--data-table-library_grid-template-columns:  15em 10em calc(90% - 36em) 11em 11em;",
     },
   ]);
 
@@ -305,7 +279,9 @@ const Logbook = ({
                   {logbookData.map((row) => {
                     return (
                       <Row key={row.logbook_id} item={{ id: row.logbook_id }}>
-                        <Cell>{formatDate(row.date as string)}</Cell>
+                        <Cell>{moment(new Date(row.date)).format(
+                            "MMMM Do YYYY, h:mm:ss a"
+                            )}</Cell>
                         <Cell>{row.label}</Cell>
                         <Cell>{row.entry}</Cell>
                         <Cell>{row.staff1}</Cell>

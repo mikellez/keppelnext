@@ -130,6 +130,7 @@ const { date, datetype } = pickerwithtype;
 
   let { data, error, isValidating, mutate } = useAccountlog("/api/activity/account_log");
   console.log(data);
+  console.log(error);
   const theme = useTheme([
     getTheme(),
     {
@@ -209,9 +210,11 @@ const { date, datetype } = pickerwithtype;
                       <Cell>{item.type}</Cell>
                       <Cell>{item.description}</Cell>
                       <Cell>
-                        {item.event_time?new Date(
+                        {item.event_time? moment(new Date(
                           item.event_time
-                        ).toLocaleString(): " "}
+                        )).format(
+                          "MMMM Do YYYY, h:mm:ss a"
+                          ): " "}
                       </Cell>
                     </Row>
                   );
