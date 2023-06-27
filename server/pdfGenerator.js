@@ -284,7 +284,7 @@ async function generateRequestPDF(id) {
         {title: "Fault Description", content: description},
     ];
 
-    for(entry of historyArr.slice().reverse()) {
+    for(entry of historyArr) {
         if(entry[0] === "COMPLETED") {
             console.log(entry[2], new Date(entry[2]));
             headerObj.push({title: "Completed On", content: moment(new Date(entry[2].slice(0, -3))).format("lll")})
@@ -292,7 +292,7 @@ async function generateRequestPDF(id) {
         }
     }
 
-    for(entry of historyArr.slice().reverse()) {
+    for(entry of historyArr) {
         if(entry[0] === "REJECTED") {
             headerObj.push({title: "Rejected On", content: moment(new Date(entry[2].slice(0, -3))).format("lll")})
             break;
@@ -301,7 +301,7 @@ async function generateRequestPDF(id) {
 
     if(historyArr.length != 0 && historyArr[historyArr.length-1][0] === "APPROVED") {
         headerObj.push({title: "Approved By", content: historyArr[historyArr.length-1][4]})
-        headerObj.push({title: "Approved On", content: moment(new Date(historyArr[historyArr.length-1][2].slice(0, -3))).format("lll")})
+        headerObj.push({title: "Approved On", content: moment(historyArr[historyArr.length-1][2]).format("lll")})
     }
 
     if(completionComments) {
