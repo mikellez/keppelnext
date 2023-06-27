@@ -9,6 +9,16 @@ const moment = require("moment");
 
 const ITEMS_PER_PAGE = 10;
 
+const searchCondition = (search) => {
+  return ` AND (
+    ft.fault_type LIKE '%${search}%' OR
+    pm.plant_name LIKE '%${search}%' OR
+    rt.request LIKE '%${search}%' OR
+    pri.priority LIKE '%${search}%' OR
+    tmp1.asset_name LIKE '%${search}%'
+  ) `;
+};
+
 async function fetchRequestQuery(
   status_query,
   role_id,
@@ -95,13 +105,7 @@ async function fetchRequestQuery(
 			  from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
 			  WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
     WHERE 1 = 1 
-    AND (
-      ft.fault_type LIKE '%${search}%' OR
-      pm.plant_name LIKE '%${search}%' OR
-      rt.request LIKE '%${search}%' OR
-      pri.priority LIKE '%${search}%' OR
-      tmp1.asset_name LIKE '%${search}%'
-    )
+    ${searchCondition(search)}
 	  ${status_query}
     ${userCond}
 	  GROUP BY (
@@ -148,12 +152,7 @@ async function fetchRequestQuery(
 			  from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
 			  WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
 	  WHERE (r.assigned_user_id = ${user_id} OR r.user_id = ${user_id})
-    AND (
-      ft.fault_type LIKE '%${search}%' OR
-      pm.plant_name LIKE '%${search}%' OR
-      rt.request LIKE '%${search}%' OR
-      pri.priority LIKE '%${search}%'
-    )
+    ${searchCondition(search)}
 	  ${status_query}
 	  GROUP BY (
 		  r.request_id,

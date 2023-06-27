@@ -149,7 +149,8 @@ function useAsset(plant_id: number | null) {
 
 function useChecklist(
   checklist_type: "pending" | "assigned" | "record" | "approved",
-  page: number
+  page: number,
+  search: string = ""
 ) {
   const checklistFetcher = (url: string) =>
     instance
@@ -160,7 +161,7 @@ function useChecklist(
       });
 
   return useSWR<{ rows: CMMSChecklist[]; total:number}, Error>(
-    [`/api/checklist/${checklist_type}?page=${page}`],
+    [`/api/checklist/${checklist_type}?page=${page}&search=${search}`],
     checklistFetcher,
     { revalidateOnFocus: false }
   );
