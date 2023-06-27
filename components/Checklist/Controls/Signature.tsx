@@ -148,7 +148,7 @@ function SignatureEditable({
 
   return (
     <div className={styles.checkViewContainer}>
-      <h6>{index}. {signatureControlObj.question}</h6>
+      <h6>{signatureControlObj.question}</h6>
       <div
         className="form-group"
         // style={{ border: "black dashed 1px" }}

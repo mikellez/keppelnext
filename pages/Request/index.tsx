@@ -119,7 +119,7 @@ export interface RequestItem {
   requesthistory?: string;
   complete_comments?: string;
   completion_file?: any;
-  activity_log?: { [key: string]: string }[];
+  activity_log: { [key: string]: string }[];
   associatedrequestid?: number;
 }
 
@@ -400,7 +400,10 @@ export default function Request(props: RequestProps) {
                       <HeaderCell resize>Location</HeaderCell>
                       <HeaderCell resize>Priority</HeaderCell>
                       <HeaderCell resize>Status</HeaderCell>
-                      <HeaderCell resize>Date</HeaderCell>
+                      <HeaderCell resize>
+                      {activeTabIndex === 2 ? "Completed Date" :
+                          activeTabIndex === 3 ? "Approved Date" : "Created On"}
+                      </HeaderCell>
                       <HeaderCell resize>Asset Name</HeaderCell>
                       <HeaderCell resize>Requested By</HeaderCell>
                       <HeaderCell resize>Action</HeaderCell>
@@ -431,7 +434,17 @@ export default function Request(props: RequestProps) {
                               {item.status}
                             </Cell>
                             <Cell>
-                              {`${moment(new Date(item.created_date)).format(
+                            {activeTabIndex === 2 
+                            ? `${moment(new Date(item.activity_log.reverse().find((activity) => activity["activity_type"] == "COMPLETED").date))
+                            .format(
+                              "MMMM Do YYYY, h:mm:ss a"
+                            )}`
+                            : activeTabIndex === 3 
+                              ? `${moment(new Date(item.activity_log.reverse().find((activity) => activity["activity_type"] == "APPROVED")!.date))
+                              .format(
+                                "MMMM Do YYYY, h:mm:ss a"
+                              )}`
+                              : `${moment(new Date(item.created_date)).format(
                                 "MMMM Do YYYY, h:mm:ss a"
                               )}`}
                             </Cell>
@@ -486,22 +499,23 @@ export default function Request(props: RequestProps) {
                                     />
                                   </div>
                                 )}
-                                {item.associatedrequestid === null && (
-                                  <div
-                                    className={styles.editIcon}
-                                    onClick={() => {
-                                      router.push(
-                                        `/Request/CorrectiveRequest/${item.id}`
-                                      );
-                                      setReady(false);
-                                    }}
-                                  >
-                                    <HiOutlineLink
-                                      size={18}
-                                      title={"Create Corrective Request"}
-                                    />
-                                  </div>
-                                )}
+                                {item.associatedrequestid === null &&
+                                  item.status_id != 4 && (
+                                    <div
+                                      className={styles.editIcon}
+                                      onClick={() => {
+                                        router.push(
+                                          `/Request/CorrectiveRequest/${item.id}`
+                                        );
+                                        setReady(false);
+                                      }}
+                                    >
+                                      <HiOutlineLink
+                                        size={18}
+                                        title={"Create Corrective Request"}
+                                      />
+                                    </div>
+                                  )}
                                 <div
                                   className={styles.editIcon}
                                   onClick={() => {

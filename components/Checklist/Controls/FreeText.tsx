@@ -118,7 +118,7 @@ function FreeTextEditable({ freeTextObj, rowId, sectionId, index }: {
   
 	return (
 		<div className={styles.checkViewContainer}>
-			<h6>{index}. {freeTextObj.question}</h6>
+			<h6>{freeTextObj.question}</h6>
 			<textarea 
         className="form-control" 
         onChange={handleChange}

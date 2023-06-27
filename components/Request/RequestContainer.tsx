@@ -85,6 +85,7 @@ async function createRequest(
   formData.append("plantLocationID", plantId.toString());
   formData.append("requestTypeID", data.requestTypeID.toString());
   formData.append("taggedAssetID", data.taggedAssetID.toString());
+  console.log(data);
   if (data.image.length > 0) formData.append("image", data.image[0]);
   if (linkedRequestId) formData.append("linkedRequestId", linkedRequestId);
 

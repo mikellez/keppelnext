@@ -117,7 +117,11 @@ export default function Checklist(props: ChecklistProps) {
   const searchRef = useRef({ value: "" });
   const [assignedUserHistory, setAssignedUserHistory] = useState<string>("");
   const filteredData = useChecklistFilter(props, page);
-  const columnData = useChecklist(indexedColumn[activeTabIndex], page, searchRef.current.value);
+  const columnData = useChecklist(
+    indexedColumn[activeTabIndex],
+    page,
+    searchRef.current.value
+  );
   const router = useRouter();
 
   const { data, error, isValidating, mutate } = props.filter
@@ -207,7 +211,7 @@ export default function Checklist(props: ChecklistProps) {
   return (
     <ModuleMain>
       <ModuleHeader title="Checklist" header="Checklist">
-      <SearchBar
+        <SearchBar
           ref={searchRef}
           onSubmit={() => {
             setReady(false);
@@ -280,8 +284,11 @@ export default function Checklist(props: ChecklistProps) {
                       <HeaderCell resize>Details</HeaderCell>
                       <HeaderCell resize>Status</HeaderCell>
                       <HeaderCell resize>
-                        {activeTabIndex === 2 ? "Completed Date" :
-                          activeTabIndex === 3 ? "Approved Date" : "Created On"}
+                        {activeTabIndex === 2
+                          ? "Completed Date"
+                          : activeTabIndex === 3
+                          ? "Approved Date"
+                          : "Created On"}
                       </HeaderCell>
                       <HeaderCell resize>Assigned To</HeaderCell>
                       <HeaderCell resize>Signed Off By</HeaderCell>
@@ -307,19 +314,31 @@ export default function Checklist(props: ChecklistProps) {
                             </span>
                           </Cell>
                           <Cell>
-                          {activeTabIndex === 2 
-                            ? `${moment(new Date(item.activity_log.reverse().find((activity) => activity["activity"] == "WORK DONE")!.date))
-                            .format(
-                              "MMMM Do YYYY, h:mm:ss a"
-                            )}`
-                            : activeTabIndex === 3 
-                              ? `${moment(new Date(item.activity_log.reverse().find((activity) => activity["activity"] == "APPROVED")!.date))
-                              .format(
-                                "MMMM Do YYYY, h:mm:ss a"
-                              )}`
+                            {activeTabIndex === 2
+                              ? `${moment(
+                                  new Date(
+                                    item.activity_log
+                                      .reverse()
+                                      .find(
+                                        (activity) =>
+                                          activity["activity"] == "WORK DONE"
+                                      )!.date
+                                  )
+                                ).format("MMMM Do YYYY, h:mm:ss a")}`
+                              : activeTabIndex === 3
+                              ? `${moment(
+                                  new Date(
+                                    item.activity_log
+                                      .reverse()
+                                      .find(
+                                        (activity) =>
+                                          activity["activity"] == "APPROVED"
+                                      )!.date
+                                  )
+                                ).format("MMMM Do YYYY, h:mm:ss a")}`
                               : `${moment(new Date(item.created_date)).format(
-                                "MMMM Do YYYY, h:mm:ss a"
-                              )}`}
+                                  "MMMM Do YYYY, h:mm:ss a"
+                                )}`}
                           </Cell>
                           <Cell>{item.assigneduser}</Cell>
                           <Cell>{item.signoffuser}</Cell>
