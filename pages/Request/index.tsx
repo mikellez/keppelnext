@@ -434,7 +434,17 @@ export default function Request(props: RequestProps) {
                               {item.status}
                             </Cell>
                             <Cell>
-                            {`${moment(new Date(item.created_date)).format(
+                            {activeTabIndex === 2 
+                            ? `${moment(new Date(item.activity_log.reverse().find((activity) => activity["activity_type"] == "COMPLETED").date))
+                            .format(
+                              "MMMM Do YYYY, h:mm:ss a"
+                            )}`
+                            : activeTabIndex === 3 
+                              ? `${moment(new Date(item.activity_log.reverse().find((activity) => activity["activity_type"] == "APPROVED")!.date))
+                              .format(
+                                "MMMM Do YYYY, h:mm:ss a"
+                              )}`
+                              : `${moment(new Date(item.created_date)).format(
                                 "MMMM Do YYYY, h:mm:ss a"
                               )}`}
                             </Cell>
