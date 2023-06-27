@@ -297,7 +297,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
         closeOnOverlayClick={true}
       >
         <div style={{ textAlign: "center" }}>
-          <img width={"75%"} height={"75%"} src={previewedFile} alt="" />
+          <img width={"100%"} height={"100%"} src={previewedFile} alt="" />
         </div>{" "}
       </ModuleModal>
     </ModuleContent>

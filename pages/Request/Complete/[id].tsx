@@ -15,7 +15,7 @@ import RequestPreview, {
   RequestAction,
 } from "../../../components/Request/RequestPreview";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import instance from '../../../axios.config.js';
+import instance from "../../../axios.config.js";
 import { CMMSRequest } from "../../../types/common/interfaces";
 import { HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../../components/TooltipBtn";
@@ -23,6 +23,7 @@ import { useRouter } from "next/router";
 import { useCurrentUser } from "../../../components/SWR";
 import { ThreeDots } from "react-loading-icons";
 import styles from "../../../styles/Request.module.scss";
+import formStyles from "../../../styles/formStyles.module.css";
 import { downloadPDF } from "../View/[id]";
 
 interface CompletionRequestInfo {
@@ -55,6 +56,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
   );
   const [failureModal, setFailureModal] = useState<boolean>(false);
   const [successModal, setSuccessModal] = useState<boolean>(false);
+  const [comepleteImage, setCompleteImage] = useState<boolean>(false);
   const [isReady, setIsReady] = useState<boolean>(false);
   const router = useRouter();
   const { id } = router.query;
@@ -71,6 +73,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
   const updateData = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
+    setCompleteImage(true);
     if (e.target.name === "completion_file") {
       const input = e.target as HTMLInputElement;
       if (!input.files || input.files.length == 0) {
@@ -118,11 +121,18 @@ export default function CompleteRequest(props: RequestPreviewProps) {
       {isReady ? (
         <ModuleMain>
           <ModuleHeader title="New Request" header="Complete Request">
-            <TooltipBtn text="Download PDF" onClick={() => downloadPDF(parseInt(id as string))}>
+            <TooltipBtn
+              text="Download PDF"
+              onClick={() => downloadPDF(parseInt(id as string))}
+            >
               <HiOutlineDownload size={20} />
             </TooltipBtn>
-            <button className={"btn btn-secondary"} type="button" onClick={() => router.back()}>
-                Back
+            <button
+              className={"btn btn-secondary"}
+              type="button"
+              onClick={() => router.back()}
+            >
+              Back
             </button>
           </ModuleHeader>
           <ModuleContent>
@@ -131,32 +141,46 @@ export default function CompleteRequest(props: RequestPreviewProps) {
               <tbody>
                 <tr>
                   <th>Completion File</th>
-                  <td>
-                  <input
-                    type="file"
-                    className="form-control"
-                    onChange={updateData}
-                    accept="image/jpeg,image/png"
-                    name="completion_file"
-                    style={{ width: "20rem" }}
-                  />
+                  <td valign="baseline">
+                    <input
+                      type="file"
+                      className="form-control"
+                      onChange={updateData}
+                      accept="image/jpeg,image/png"
+                      name="completion_file"
+                      style={{ width: "20rem" }}
+                    />
+                    {comepleteImage && (
+                      <div
+                        className={`${formStyles.imageClick} form-group mt-3`}
+                        onClick={() => setCompleteImage(true)}
+                      >
+                        <div>
+                          <label className="form-label">
+                            <p style={{ textDecoration: "underline" }}>
+                              View Complete Request Image
+                            </p>
+                          </label>
+                        </div>
+                      </div>
+                    )}
                   </td>
                 </tr>
                 <tr>
                   <th>Completion Comments</th>
                   <td>
-                  <textarea
-                    className="form-control"
-                    onChange={updateData}
-                    name="complete_comments"
-                    value={completionData.complete_comments}
-                    style={{ resize: "none", width: "30rem" }}
-                  ></textarea>
+                    <textarea
+                      className="form-control"
+                      onChange={updateData}
+                      name="complete_comments"
+                      value={completionData.complete_comments}
+                      style={{ resize: "none", width: "30rem" }}
+                    ></textarea>
                   </td>
                 </tr>
               </tbody>
             </table>
-            <div>  
+            <div>
               <TooltipBtn toolTip={false} onClick={submitRequest}>
                 Submit
               </TooltipBtn>

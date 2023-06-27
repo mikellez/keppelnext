@@ -205,7 +205,7 @@ const fetchAssignedRequests = async (req, res, next) => {
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
-    "AND (sc.status_id = 2 or sc.status_id = 5)", //ASSIGNED
+    "AND sc.status_id = 2", //ASSIGNED
     req.user.role_id,
     req.user.id,
     page,
