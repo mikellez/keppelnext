@@ -971,10 +971,10 @@ const fetchAssetHistory = (req, res, next) => {
     //   WHERE asset_id = ${req.params.psa_Id}`,
     `
     SELECT 
-        to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'dd-mm-yyyy HH24:MI'::text) AS history_id,
+        to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'YYYY-MM-DD HH24:mi:ss'::text) AS history_id,
 		btrim(concat(activity.value -> 'activity_type'::text), '"'::text) AS action,
 		btrim(((activity.value -> 'name'::text)::character varying)::text, '"'::text) AS name,
-        to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'dd-mm-yyyy HH24:MI'::text) AS date,
+        to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'YYYY-MM-DD HH24:mi:ss'::text) AS date,
 		btrim(concat(activity.value -> 'fields'::text), '"'::text) AS fields
          FROM keppel.plant_system_assets,
         LATERAL jsonb_array_elements(plant_system_assets.activity_log) activity(value)

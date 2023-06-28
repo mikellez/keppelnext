@@ -221,7 +221,7 @@ function SingleChoiceEditable({ singleChoiceObj, rowId, sectionId, index }: {
 
 	return (
 		<div className={styles.checkViewContainer}>
-			<h6>{index}. {singleChoiceObj.question}</h6>
+			<h6>{singleChoiceObj.question}</h6>
 			{
 				singleChoiceObj.choices.map(choice => {
 					return (

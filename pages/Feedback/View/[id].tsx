@@ -17,7 +17,7 @@ export default function ViewFeedback(props: FeedbackFormProps) {
   return (
     <>
       <ModuleMain>
-        <ModuleHeader header="Complete Feedback">
+        <ModuleHeader header="View Feedback">
           <Link href="/Feedback" className="btn btn-secondary">
             Back
           </Link>

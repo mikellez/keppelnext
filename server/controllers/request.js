@@ -783,7 +783,7 @@ const approveRejectRequest = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const status = req.params.status_id == 4 ? "APPROVED" : "REJECTED";
   const text = req.params.status_id == 4 ? "Approved" : "Rejected";
-  const id = req.params.status_id == 4 ? 4 : 2;
+  const id = req.params.status_id;
   const history = `!${status}_${text} request_${today}_${req.user.role_name}_${req.user.name}`;
   let sql = ``;
   if (req.params.status_id != 4) {

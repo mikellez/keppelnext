@@ -44,6 +44,7 @@ import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
 import Select, { ActionMeta, MultiValue, StylesConfig } from "react-select";
 import Image from "next/image";
 import { set } from "nprogress";
+import { ModuleModal } from "../../components";
 import ModuleSimplePopup, {
   SimpleIcon,
 } from "../ModuleLayout/ModuleSimplePopup";
@@ -80,7 +81,7 @@ export default function RequestGuestContainer(props: any) {
   }, []);
   const [selectedFile, setSelectedFile] = useState<File>();
   const [previewedFile, setPreviewedFile] = useState<string>();
-  const [isImage, setIsImage] = useState<boolean>(true);
+  const [isImage, setIsImage] = useState<boolean>(false);
   const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] =
     useState<boolean>(false);
   const [submissionModal, setSubmissionModal] = useState<boolean>(false);
@@ -123,7 +124,6 @@ export default function RequestGuestContainer(props: any) {
 
       reader.onload = () => {
         setPreviewedFile(reader.result as string);
-        setIsImage(true);
         setForm((prevState) => {
           return { ...prevState, image: selectedFile };
         });
@@ -271,12 +271,24 @@ export default function RequestGuestContainer(props: any) {
                   // }
                 }}
               />
+              {previewedFile && (
+              <div
+                className={`${formStyles.imageClick} form-group mt-3`}
+                onClick={() => setIsImage(true)}
+              >
+                <div>
+                  <label className="form-label">
+                    <p style={{ textDecoration: "underline" }}>
+                      View Feedback Image
+                    </p>
+                  </label>
+                </div>
+              </div>
+            )}
             </div>
           )}
 
-          {isImage && previewedFile && (
-            <ImagePreview previewObjURL={previewedFile} />
-          )}
+              
 
           {props.assignRequestData && (
             <div className="form-group">
@@ -348,6 +360,18 @@ export default function RequestGuestContainer(props: any) {
           }}
         />
       </ModuleFooter>
+      <ModuleModal
+        isOpen={isImage}
+        closeModal={() => setIsImage(false)}
+        closeOnOverlayClick={true}
+        large
+        hideHeader={props.windowWidth <= 768}
+      >
+        {/* <Image src={f.image} width={100} height={100} alt="" /> */}
+        <div style={{ textAlign: "center" }}>
+          <img width={"75%"} height={"75%"} src={previewedFile} alt="" />
+        </div>
+      </ModuleModal>
     </div>
   );
 }

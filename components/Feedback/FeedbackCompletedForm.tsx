@@ -8,6 +8,7 @@ import ImagePreview from "../Request/ImagePreview";
 import { FeedbackFormProps } from "../../pages/Feedback";
 import { CMMSFeedback } from "../../types/common/interfaces";
 import { ModuleModal } from "../ModuleLayout/ModuleModal";
+import { ModuleImageModal } from "../ModuleLayout/ModuleImageModal";
 import Image from "next/image";
 import FeedbackValidation from "./FeedbackValidation";
 
@@ -17,6 +18,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
   const [previewedFile, setPreviewedFile] = useState<string>();
   const [feedbackImage, setFeedbackImage] = useState<boolean>(false);
   const [completeImage, setCompleteImage] = useState<boolean>(false);
+  const [portrait, setPortrait] = useState<boolean>(false);
 
   // const updateDataField = (
   //   value: number | string | Date | null,
@@ -35,7 +37,10 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
   const disForm = props.disableForm ? props.disableForm : false;
 
   useEffect(() => {
-    props.setFeedbackData(props.feedbackData);
+    // props.setFeedbackData(props.feedbackData);
+    // const image = new Image(props.feedbackData.image);
+    // image.src = props.feedbackData.image;
+
     // console.log(props.feedbackData.image);
   }, [props.feedbackData]);
 
@@ -57,6 +62,12 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
       setPreviewedFile("");
     }
   }, [selectedFile]);
+
+  // const handleImageLoad = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  //   const image = event.target;
+  //   console.log(image);
+
+  // }
 
   return (
     <ModuleContent includeGreyContainer>
@@ -212,7 +223,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
             />
           </div>
         </div>
-        <div className="form-group">
+        <div className="form-group ms-3">
           <label className="form-label">Remarks</label>
           <textarea
             className="form-control"
@@ -231,7 +242,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
               });
             }}
           ></textarea>
-          <div className="form-group">
+          <div className="form-group mt-3">
             <div>
               <label className="form-label">Complete Feedback Image</label>
               <input
@@ -289,15 +300,16 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
         closeModal={() => setFeedbackImage(false)}
         closeOnOverlayClick={true}
       >
-        <Image src={props.feedbackData.image} fill={true} alt="" />
+        <img width={"85%"} height={"85%"} src={props.feedbackData.image} alt="" />
       </ModuleModal>
       <ModuleModal
         isOpen={completeImage}
         closeModal={() => setCompleteImage(false)}
         closeOnOverlayClick={true}
+        // large
       >
         <div style={{ textAlign: "center" }}>
-          <img width={"75%"} height={"75%"} src={previewedFile} alt="" />
+          <img width={"85%"} height={"85%"} src={previewedFile} alt="" />
         </div>{" "}
       </ModuleModal>
     </ModuleContent>

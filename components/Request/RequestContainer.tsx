@@ -85,6 +85,7 @@ async function createRequest(
   formData.append("plantLocationID", plantId.toString());
   formData.append("requestTypeID", data.requestTypeID.toString());
   formData.append("taggedAssetID", data.taggedAssetID.toString());
+  console.log(data);
   if (data.image.length > 0) formData.append("image", data.image[0]);
   if (linkedRequestId) formData.append("linkedRequestId", linkedRequestId);
 
@@ -505,11 +506,13 @@ export default function RequestContainer(props: RequestContainerProps) {
                 type="file"
                 accept="image/jpeg,image/png,image/gif"
                 id="formFile"
-                onChange={(e) => {
-                  // console.log(e.target.files![0]);
-                  setIsImage(false);
-                  setSelectedFile(e.target.files![0]);
-                }}
+                // onChange={(e) => {
+                //   // console.log(e.target.files![0]);
+                //   setIsImage(false);
+                //   setSelectedFile(e.target.files!);
+                //   console.log(e.target.files![0]);
+                // }}
+                {...register("image", { onChange: onFileSelected })}
               />
             </div>
             {previewedFile && (

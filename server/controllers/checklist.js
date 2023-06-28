@@ -222,9 +222,10 @@ const fetchAssignedChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(getAssignedChecklistsQuery(expand), [
-    req.user.id,
-  ]);
+  const totalRows = await global.db.query(
+    getAssignedChecklistsQuery(expand, search),
+    [req.user.id]
+  );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -258,9 +259,10 @@ const fetchPendingChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(getPendingChecklistsQuery(expand), [
-    req.user.id,
-  ]);
+  const totalRows = await global.db.query(
+    getPendingChecklistsQuery(expand, search),
+    [req.user.id]
+  );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -293,9 +295,10 @@ const fetchForReviewChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(getForReviewChecklistsQuery(expand), [
-    req.user.id,
-  ]);
+  const totalRows = await global.db.query(
+    getForReviewChecklistsQuery(expand, search),
+    [req.user.id]
+  );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -327,9 +330,10 @@ const fetchApprovedChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(getApprovedChecklistsQuery(expand), [
-    req.user.id,
-  ]);
+  const totalRows = await global.db.query(
+    getApprovedChecklistsQuery(expand, search),
+    [req.user.id]
+  );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
