@@ -1,0 +1,25 @@
+.assetSearchBarContainer {
+    border: solid #C70F2B 2px;
+    border-radius: 5px;
+    
+    
+}
+
+.assetSearchBarInput {
+    border: none;
+    position: relative;
+    width: 87.6%;
+    padding: 0.32em;
+}
+
+.assetSearchBarInput:focus {
+    outline: none;
+
+}
+
+.assetSearchBarButton {
+    border: none;
+    background-color: #C70F2B;
+    padding: 0.3em;
+    
+}

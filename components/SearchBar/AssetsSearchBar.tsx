@@ -1,5 +1,5 @@
 import { AiOutlineSearch } from "react-icons/ai";
-import styles from "./SearchBar.module.css";
+import styles from "./AssetSearchBar.module.css";
 import { MouseEventHandler, ChangeEventHandler, forwardRef } from "react";
 import Search from "antd/es/transfer/search";
 
@@ -9,22 +9,22 @@ interface SearchBarProps {
   onSubmit: MouseEventHandler;
 }
 
-const SearchBar = forwardRef((props: SearchBarProps, ref: any) => {
+const AssetSearchBar = forwardRef((props: SearchBarProps, ref: any) => {
   return (
-    <div className={styles.searchBarContainer}>
+    <div className={styles.assetSearchBarContainer}>
       <input
         // value={props.search}
         type="text"
-        className={styles.searchBarInput}
+        className={styles.assetSearchBarInput}
         // onChange={props.onChange}
         ref={ref}
       />
-      <button className={styles.searchBarButton} onClick={props.onSubmit}>
+      <button className={styles.assetSearchBarButton} onClick={props.onSubmit}>
         <AiOutlineSearch size={25} color="white" />
       </button>
     </div>
   );
 });
 
-SearchBar.displayName = "SearchBar";
-export default SearchBar;
+AssetSearchBar.displayName = "SearchBar";
+export default AssetSearchBar;
