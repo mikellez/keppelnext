@@ -228,7 +228,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
           large
         >
           {/* <Image src={f.image} width={100} height={100} alt="" /> */}
-          <img src={f.image} alt="" />
+          <img width={'85%'} height={'85%'} src={f.image} alt="" />
         </ModuleModal>
       </ModuleContent>
     </ModuleContent>
