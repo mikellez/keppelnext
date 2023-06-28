@@ -87,6 +87,7 @@ const FeedbackContainer = (props: any) => {
         .post("/api/feedback", form)
         .then((res) => {
           // console.log(res.data);
+          router.push("/Guest/Feedback/Submitted");
           setSubmissionModal(true);
         })
         .catch((err) => {
@@ -333,7 +334,7 @@ const FeedbackContainer = (props: any) => {
           text="Please ensure that you have filled in all the required entries."
           icon={SimpleIcon.Cross}
         />
-        <ModuleSimplePopup
+        {/* <ModuleSimplePopup
           modalOpenState={submissionModal}
           setModalOpenState={setSubmissionModal}
           title="Success!"
@@ -354,7 +355,7 @@ const FeedbackContainer = (props: any) => {
           onRequestClose={() => {
             router.reload();
           }}
-        />
+        /> */}
         {!props.user.data && (
           <ModuleSimplePopup
             modalOpenState={loginModal}
