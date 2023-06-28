@@ -647,7 +647,8 @@ const fetchSpecificRequest = async (req, res, next) => {
   r.complete_comments,
   r.activity_log,
   concat( concat(u.first_name,' '), u.last_name) AS assigned_user_name,
-  concat( concat(u1.first_name,' '), u1.last_name) AS created_by,
+  CASE WHEN u1.first_name IS NULL THEN r.guestfullname ELSE CONCAT(CONCAT(u1.first_name, ' '), u1.last_name) END AS created_by,
+  r.guestfullname,
   r.created_date
   FROM keppel.request AS r
   JOIN keppel.request_type AS rt ON rt.req_id = r.req_id

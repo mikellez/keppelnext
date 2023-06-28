@@ -189,7 +189,7 @@ const FeedbackViewForm = (props: FeedbackFormProps) => {
             />
           </div>
         </div>
-        <div className="form-group">
+        <div className="form-group ms-3">
           <label className="form-label">Remarks</label>
           <textarea
             className="form-control"
@@ -202,7 +202,7 @@ const FeedbackViewForm = (props: FeedbackFormProps) => {
           <div className="form-group">
             {props.feedbackData.completed_img != "" && (
               <div
-                className={`${formStyles.imageClick} form-group`}
+                className={`${formStyles.imageClick} form-group mt-3`}
                 onClick={() => setCompleteImage(true)}
               >
                 <div>
@@ -243,7 +243,12 @@ const FeedbackViewForm = (props: FeedbackFormProps) => {
         closeModal={() => setFeedbackImage(false)}
         closeOnOverlayClick={true}
       >
-        <Image src={props.feedbackData.image} fill={true} alt="" />
+        <img
+            width={"85%"}
+            height={"85%"}
+            src={props.feedbackData.image}
+            alt=""
+          />
       </ModuleModal>
       <ModuleModal
         isOpen={completeImage}
@@ -252,8 +257,8 @@ const FeedbackViewForm = (props: FeedbackFormProps) => {
       >
         <div style={{ textAlign: "center" }}>
           <img
-            width={"75%"}
-            height={"75%"}
+            width={"85%"}
+            height={"85%"}
             src={props.feedbackData.completed_img}
             alt=""
           />
