@@ -24,7 +24,7 @@ SELECT
     cl.description, 
     cl.status_id,
     cl.activity_log,
-    concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser,
+    CASE WHEN createdU.first_name IS NULL THEN 'System' ELSE concat( concat(createdU.first_name ,' '), createdU.last_name ) END AS createdByUser,
     concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser,
     concat( concat(signoff.first_name ,' '), signoff.last_name ) AS signoffUser,  
     pm.plant_name,
@@ -91,7 +91,7 @@ const getAllChecklistQuery = (expand, search) => {
     status_id: "cl.status_id",
     activity_log: "cl.activity_log",
     createdbyuser:
-      "concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser",
+      "CASE WHEN createdU.first_name IS NULL THEN 'System' ELSE concat( concat(createdU.first_name ,' '), createdU.last_name ) END AS createdByUser",
     assigneduser:
       "concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigneduser",
     signoffuser:
