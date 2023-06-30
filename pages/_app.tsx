@@ -12,7 +12,7 @@ import { ModuleModal, SimpleIcon } from "../components";
 import ModuleSimplePopup from "../components/ModuleLayout/ModuleSimplePopup";
 import { Tooltip } from "antd";
 import TooltipBtn from "../components/TooltipBtn";
-import IdleTimer from "./IdleTimer";
+import IdleTimer from "../components/IdleTimer";
 import instance from "../types/common/axios.config";
 
 export default function App({ Component, pageProps }: AppProps) {
