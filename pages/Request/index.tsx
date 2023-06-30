@@ -211,7 +211,7 @@ export default function Request(props: RequestProps) {
       setIds(ids.concat(item.id));
       instance.get(`/api/request/${item.id}`).then((res) => {
         const request = res.data;
-        // console.log(request);
+        console.log(request.associatedrequestid);
         // update with further details
         setRequestItems((prev) =>
           prev.map((req) =>
@@ -499,7 +499,7 @@ export default function Request(props: RequestProps) {
                                     />
                                   </div>
                                 )}
-                                {item.associatedrequestid === null &&
+                                {!item.associatedrequestid &&
                                   item.status_id != 4 && (
                                     <div
                                       className={styles.editIcon}
@@ -519,6 +519,7 @@ export default function Request(props: RequestProps) {
                                 <div
                                   className={styles.editIcon}
                                   onClick={() => {
+                                    console.log(item.status_id, item.associatedrequestid)
                                     setCurrentHistory(item.activity_log);
                                   }}
                                 >

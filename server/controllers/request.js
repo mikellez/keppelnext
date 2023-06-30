@@ -645,6 +645,7 @@ const fetchSpecificRequest = async (req, res, next) => {
   r.uploaded_file,
   r.completion_file,
   r.complete_comments,
+  r.associatedrequestid,
   r.activity_log,
   concat( concat(u.first_name,' '), u.last_name) AS assigned_user_name,
   CASE WHEN u1.first_name IS NULL THEN r.guestfullname ELSE CONCAT(CONCAT(u1.first_name, ' '), u1.last_name) END AS created_by,
@@ -781,8 +782,8 @@ const approveRejectRequest = async (req, res, next) => {
   console.log(req.body);
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  const status = req.params.status_id == 4 ? "APPROVED" : "REJECTED";
   const text = req.params.status_id == 4 ? "Approved" : "Rejected";
+  const status = req.params.status_id == 4? "APPROVED" : "REJECTED";
   const id = req.params.status_id;
   const history = `!${status}_${text} request_${today}_${req.user.role_name}_${req.user.name}`;
   let sql = ``;
@@ -792,15 +793,16 @@ const approveRejectRequest = async (req, res, next) => {
     sql = `
     UPDATE keppel.request SET 
     status_id = $1,
-    requesthistory = concat(requesthistory, $2::text),
+    requesthistory = concat(requesthistory, $2::text),\
+    rejection_comments = ${req.body.comments}
     activity_log = activity_log || 
           jsonb_build_object(
             'date', '${today}',
             'name', '${req.user.name}',
             'role', '${req.user.role_name}',
-            'activity', '${text} request due to ${req.body.comments}',
+            'activity', '${text} Request Case ID-${req.params.request_id},
             'activity_type', '${status}',
-            'remarks', '${req.body.comments}'
+           'remarks', '${req.body.comments}'
           )
     WHERE request_id = $3`;
   } else {
@@ -813,7 +815,7 @@ const approveRejectRequest = async (req, res, next) => {
           'date', '${today}',
           'name', '${req.user.name}',
           'role', '${req.user.role_name}',
-          'activity', '${text} request',
+          'activity', '${text} Request Case ID-${req.params.request_id}',
           'activity_type', '${status}',
           'remarks', '${req.body.comments}'
         )
@@ -842,7 +844,7 @@ const completeRequest = async (req, res, next) => {
           'date', '${today}',
           'name', '${req.user.name}',
           'role', '${req.user.role_name}',
-          'activity', 'Completed request',
+          'activity', 'Completed Request Case ID-${req.params.request_id}',
           'activity_type', 'COMPLETED'
         )
 		WHERE request_id = $5`;
