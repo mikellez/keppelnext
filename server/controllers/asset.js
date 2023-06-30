@@ -713,7 +713,7 @@ const editAsset = async (req, res, next) => {
 
   await global.db.query(sql);
   const updated = await global.db.query(assetQuery);
-
+  // console.log(compare(old.rows[0], updated.rows[0]));
   const fields = compare(old.rows[0], updated.rows[0]).join(", ");
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
     await global.db.query(
@@ -742,10 +742,10 @@ const compare = (old, updated) => {
   for (const key in old) {
     if (Array.isArray(old[key])) {
       if (JSON.stringify(old[key]) !== JSON.stringify(updated[key])) {
-        fields.push(key);
+        fields.push(key + " : " + old[key] + " => " + updated[key]);
       }
     } else if (old[key] !== updated[key]) {
-      fields.push(key);
+      fields.push(key + " : " + old[key] + " => " + updated[key]);
     }
   }
 
