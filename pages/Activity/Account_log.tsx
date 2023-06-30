@@ -35,6 +35,7 @@ export default function AccountLog() {
     date: string | null,
     datetype: PickerType
 }>({ date: null, datetype: 'day' });
+  const [justInitialised, setJustInitialised] = useState<boolean>(true);
 
 const handleDateChange: DatePickerProps['onChange'] = (date, dateString) => {
     setPickerWithType((prevState)=>
@@ -47,6 +48,7 @@ const handleDateTypeChange = (value: PickerType) => {
     setPickerWithType({ date: date || moment().format('YYYY-MM-DD'), datetype: value || 'month' });
 }
 const { date, datetype } = pickerwithtype;
+console.log('date', date);
 
 
   async function sortDate() {
@@ -141,13 +143,24 @@ const { date, datetype } = pickerwithtype;
 
   useEffect(() => {
     if (!isReady && data && !isValidating) {
-      setActivityItems(data)
+      setActivityItems(data);
       setReady(true);
     }
   }, [data, isValidating]);
+
+  // useEffect(() => {
+  //   console.log("test", justInitialised);
+  //   if (justInitialised && activityItems) {
+  //     console.log("Initial")
+  //     // sortDate();
+  //     // setJustInitialised(false);
+  //   }
+  // }, [])
+  
   useEffect(() => {
     if (date){
     setReady(false);
+    console.log(data);
     console.log(`/api/activity/account_log/` + datetype + `/${date}`);
     instance(`/api/activity/account_log/` + datetype + `/${date}`).then((res: any) => {
       console.log(res.data);
@@ -203,9 +216,10 @@ const { date, datetype } = pickerwithtype;
               </Header>
 
               <Body>
-                {tableList.map((item) => {
+                {tableList.map((item, index) => {
+                  console.log(item.id);
                   return (
-                    <Row key={item.id} item={item}>
+                    <Row key={index} item={item}>
                       <Cell>{item.user_name}</Cell>
                       <Cell>{item.type}</Cell>
                       <Cell>{item.description}</Cell>

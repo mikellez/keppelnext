@@ -124,7 +124,7 @@ const createChecklistFromTemplate = async (schedule) => {
         cl.signoff_user_id,
         cl.linkedassetids,
         JSON.stringify(cl.datajson),
-        'record',
+        'Record',
         schedule.plant_id,
         today,
         status,

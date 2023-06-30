@@ -455,8 +455,8 @@ const createNewChecklistRecord = async (req, res, next) => {
     {
       date: today,
       name: req.user.name,
-      activity: `${statusId === 2 ? "ASSIGNED" : "PENDING"}`,
-      activity_type: "Created Checklist Record",
+      activity: "Created Checklist Record",
+      activity_type: `${statusId === 2 ? "ASSIGNED" : "PENDING"}`,
     },
   ];
 
@@ -686,8 +686,8 @@ const completeChecklist = async (req, res, next) => {
         jsonb_build_object(
           'date', '${today}',
           'name', '${req.user.name}',
-          'activity', 'WORK DONE',
-          'activity_type', 'Updated Record'
+          'activity', 'Checklist ID-${req.params.checklist_id} Completed',
+          'activity_type', 'WORK DONE'
         )
         WHERE 
             checklist_id = $2
@@ -740,24 +740,25 @@ const completeChecklist = async (req, res, next) => {
 
 const editChecklistRecord = async (req, res, next) => {
   const data = req.body.checklist;
+  const assigned = req.body.assigned;
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
-  const updatehistory = data.assigned_user_id
+  const updatehistory = assigned 
     ? `,Assigned Record_ASSIGNED_${today}_${req.user.name}`
     : `,Edited Record_PENDING_${today}_${req.user.name}`;
   const statusId = data.assigned_user_id ? 2 : 1;
-  const activity_log = data.assigned_user_id
+  const activity_log = assigned
     ? {
         date: today,
         name: req.user.name,
-        activity: "ASSIGNED",
-        activity_type: "Assigned Record",
+        activity: `Assigned Checklist ID-${req.params.checklist_id} to ${data.assigneduser.split('|')[0].trim()}`,
+        activity_type: "ASSIGNED"
       }
     : {
         date: today,
         name: req.user.name,
-        activity: "PENDING",
-        activity_type: "Edited Record",
+        activity: `Edited (${statusId == 2 ? "ASSIGNED" : "PENDING"}) Checklist ID-${req.params.checklist_id}`,
+        activity_type: `EDITED`
       };
 
   const sql = `
@@ -842,8 +843,8 @@ const approveChecklist = async (req, res, next) => {
   const activity_log = {
     date: today,
     name: req.user.name,
-    activity: "APPROVED",
-    activity_type: "Updated Record",
+    activity: `Checklist ID-${req.params.checklist_id} Approved`,
+    activity_type: "APPROVED",
     remarks: approvalComments,
   };
 
@@ -910,8 +911,8 @@ const rejectChecklist = async (req, res, next) => {
   const activity_log = {
     date: today,
     name: req.user.name,
-    activity: "REJECTED",
-    activity_type: "Updated Record",
+    activity: `Checklist ID-${req.params.checklist_id} Rejected`,
+    activity_type: "REJECTED",
     remarks: rejectionComments,
   };
 

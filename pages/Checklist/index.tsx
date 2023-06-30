@@ -321,7 +321,7 @@ export default function Checklist(props: ChecklistProps) {
                                       .reverse()
                                       .find(
                                         (activity) =>
-                                          activity["activity"] == "WORK DONE"
+                                          activity["activity_type"] == "WORK DONE"
                                       )!.date
                                   )
                                 ).format("MMMM Do YYYY, h:mm:ss a")}`
@@ -332,7 +332,7 @@ export default function Checklist(props: ChecklistProps) {
                                       .reverse()
                                       .find(
                                         (activity) =>
-                                          activity["activity"] == "APPROVED"
+                                          activity["activity_type"] == "APPROVED"
                                       )!.date
                                   )
                                 ).format("MMMM Do YYYY, h:mm:ss a")}`
@@ -342,7 +342,7 @@ export default function Checklist(props: ChecklistProps) {
                           </Cell>
                           <Cell>{item.assigneduser}</Cell>
                           <Cell>{item.signoffuser}</Cell>
-                          <Cell>{item.createdbyuser}</Cell>
+                          <Cell>{item.createdbyuser != " " ? item.createdbyuser : "System Generated"}</Cell>
                           <Cell>
                             {(user.data!.role_id === Role.Admin ||
                               user.data!.role_id === Role.Manager ||

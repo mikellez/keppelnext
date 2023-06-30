@@ -19,7 +19,7 @@ for (const key in activityLog){
     UNION ALL
     SELECT btrim(((activity.value -> 'name'::text)::character varying)::text, '"'::text) AS user_name,
     '${key}'::text AS type,
-    to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), '${activityLog[key].format}') AS event_time,
+    to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 1), '${activityLog[key].format}') AS event_time,
     btrim(concat(activity.value -> 'activity'::text), '"'::text) AS description
     FROM ${activityLog[key].table},
     LATERAL jsonb_array_elements(${activityLog[key].table}.activity_log) activity(value)

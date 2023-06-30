@@ -37,10 +37,11 @@ const createChecklist = async (checklist: CMMSChecklist, type: string) => {
 
 const editChecklistAPI = async (
   checklist: CMMSChecklist,
-  checklistId: number
+  checklistId: number,
+  assigned: boolean
 ) => {
   return await instance
-    .patch(`/api/checklist/record/${checklistId}`, { checklist })
+    .patch(`/api/checklist/record/${checklistId}`, { checklist, assigned })
     .then((res) => {
       return res.data;
     })
@@ -55,6 +56,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
   const [sections, setSections] = useState<CheckSection[]>([]);
   const [incompleteModal, setIncompleteModal] = useState<boolean>(false);
   const [successModal, setSuccessModal] = useState<boolean>(false);
+  const [changeAssigned, setChangeAssigned] = useState<boolean>(false);
 
   const resetChecklist = () => {
     setSections([]);
@@ -80,7 +82,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
       setIncompleteModal(true);
     } else {
       setSuccessModal(true);
-      await editChecklistAPI(checklistData, +router.query.id!);
+      await editChecklistAPI(checklistData, +router.query.id!, changeAssigned);
       setTimeout(() => {
         router.push("/Checklist");
       }, 1000);
@@ -167,7 +169,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
               successModal={successModal}
               updateChecklist={updateChecklist}
               action={router.query.action as string}
-
+              setChangeAssigned={setChangeAssigned}
             />
 
             <ModuleContent>

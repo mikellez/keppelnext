@@ -28,7 +28,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
     if (status_id == 4) {
       const completionLog = activity_log
         .reverse()
-        .find((activity) => activity["activity"] == "WORK DONE");
+        .find((activity) => activity["activity_type"] == "WORK DONE");
       return (
         <div>
           <p className={styles.checklistDetailsHeading}>Completed Date</p>
@@ -42,10 +42,10 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
     } else if (status_id == 5) {
       const completionLog = activity_log
         .reverse()
-        .find((activity) => activity["activity"] == "WORK DONE");
+        .find((activity) => activity["activity_type"] == "WORK DONE");
       const approvalLog = activity_log
         .reverse()
-        .find((activity) => activity["activity"] == "APPROVED");
+        .find((activity) => activity["activity_type"] == "APPROVED");
       return (
         <div>
 
@@ -132,7 +132,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
         <div>
           <p className={styles.checklistDetailsHeading}>Created By</p>
           <p className={styles.checklistDetailsContent}>
-            {props.checklist?.createdbyuser}
+            {props.checklist?.createdbyuser !== " " ? props.checklist?.createdbyuser : "System Generated"}
           </p>
         </div>
         <div>

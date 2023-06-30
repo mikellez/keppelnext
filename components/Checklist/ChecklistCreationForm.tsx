@@ -15,6 +15,7 @@ interface ChecklistCreationFormProps {
     successModal: boolean,
     updateChecklist: () => Promise<void>,
     action: string | undefined,
+    setChangeAssigned: React.Dispatch<React.SetStateAction<boolean>>
 };
 
 const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
@@ -124,12 +125,18 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
                         <RequiredIcon /> Assigned To
                     </label>
                     <AssignToSelect
-                        onChange={(value) => {
+                        onChange={(option) => {
                             updateChecklistField(
-                                (value as SingleValue<AssignedUserOption>)
+                                (option as SingleValue<AssignedUserOption>)
                                     ?.value as number,
                                 "assigned_user_id"
                             );
+                            updateChecklistField(
+                                (option as SingleValue<AssignedUserOption>)
+                                   ?.label as string,
+                                "assigneduser"
+                            );
+                            props.setChangeAssigned(true);
                         }}
                         plantId={props.checklistData.plant_id}
                         isSingle
@@ -147,7 +154,7 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
                     </label>
                     <input
                         className="form-control"
-                        defaultValue={props.checklistData.createdbyuser}
+                        defaultValue={props.checklistData.createdbyuser !== " " ? props.checklistData.createdbyuser : "System Generated"}
                         disabled
                     />
                 </div>
