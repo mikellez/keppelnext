@@ -1,4 +1,4 @@
-import React, { CSSProperties } from "react";
+import React, { CSSProperties, useState, useEffect } from "react";
 import { BsCameraFill } from "react-icons/bs";
 
 const greyFill = "rgba(0,0,0,0.05)";
@@ -9,9 +9,10 @@ const previewContainer: CSSProperties = {
   padding: "1em",
   border: "6px solid " + greyFill,
   borderRadius: "8px",
-  display: "block",
+  display: "flex",
   height: "100%",
   flex: "1 1 auto",
+  justifyContent: "center",
 };
 
 const centerTransform: CSSProperties = {
@@ -34,7 +35,7 @@ const previewContent: CSSProperties = {
 };
 
 interface ImagePreviewProps {
-  previewObjURL?: string;
+  previewObjURL: string;
 }
 
 export default function ImagePreview(props: ImagePreviewProps) {
@@ -45,16 +46,28 @@ export default function ImagePreview(props: ImagePreviewProps) {
       }
     : previewContent;
 
+    const [isPortrait, setIsPortrait] = useState(false);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = props.previewObjURL;
+    img.onload = () => {
+      const { width, height } = img;
+      setIsPortrait(height > width);
+    };
+  }, [props.previewObjURL]);
+
   return (
     <div style={previewContainer}>
-      <div style={previewContentFinal}>
-        {!props.previewObjURL && (
+      {/* <div style={previewContentFinal}> */}
+        {props.previewObjURL ? <img width={isPortrait ? "50%" : "100%"} height={isPortrait ? "50%" : "100%"} src={props.previewObjURL} alt="" /> :(
           <div style={centerTransform}>
             <BsCameraFill size={104} fill={greyFill} />
             <div style={{ color: "rgba(0,0,0,0.1)" }}>No Image</div>
           </div>
         )}
-      </div>
+        
+      {/* </div> */}
     </div>
   );
 }

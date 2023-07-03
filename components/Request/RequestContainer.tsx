@@ -520,13 +520,8 @@ export default function RequestContainer(props: RequestContainerProps) {
                 className={`${formStyles.imageClick} form-group mt-3`}
                 onClick={() => setIsImage(true)}
               >
-                <div>
-                  <label className="form-label">
-                    <p style={{ textDecoration: "underline" }}>
-                      View Request Image
-                    </p>
-                  </label>
-                </div>
+                <ImagePreview
+                  previewObjURL={previewedFile}/>
               </div>
             )}
           </div>
@@ -640,18 +635,6 @@ export default function RequestContainer(props: RequestContainerProps) {
           Submit
         </button>
       </ModuleFooter>
-      <ModuleModal
-        isOpen={isImage}
-        closeModal={() => setIsImage(false)}
-        closeOnOverlayClick={true}
-        large
-        // hideHeader={props.windowWidth <= 768}
-      >
-        {/* <Image src={f.image} width={100} height={100} alt="" /> */}
-        <div style={{ textAlign: "center" }}>
-          <img width={"100%"} height={"100%"} src={previewedFile} alt="" />
-        </div>
-      </ModuleModal>
     </form>
   );
 }
