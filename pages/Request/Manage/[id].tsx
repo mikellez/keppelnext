@@ -24,15 +24,23 @@ import styles from "../../../styles/Manage.module.css";
 import { downloadPDF } from "../View/[id]";
 
 const manageRequest = async (id: number, status: number, comments?: string) => {
-  return await instance({
-    url: `/api/request/${id}/${status}`,
-    method: "patch",
-    data: { comments: comments },
-  })
+  if (status == 4) {
+
+    return await instance({
+      url: `/api/request/approve/${id}`,
+      method: "patch",
+      data: { comments: comments },
+    })
     .then((res) => {
       return res.data;
     })
     .catch((err) => console.log(err));
+  } else {
+    return await instance.patch(`/api/request/reject/${id}`, {comments: comments})
+      .then(res => {
+        console.log(res.data);
+      }).catch((err) => console.log(err));
+  }
 };
 
 export default function CompleteRequest(props: RequestPreviewProps) {

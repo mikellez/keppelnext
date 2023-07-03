@@ -85,7 +85,7 @@ async function createRequest(
   formData.append("plantLocationID", plantId.toString());
   formData.append("requestTypeID", data.requestTypeID.toString());
   formData.append("taggedAssetID", data.taggedAssetID.toString());
-  console.log(data);
+  // console.log(data);
   if (data.image.length > 0) formData.append("image", data.image[0]);
   if (linkedRequestId) formData.append("linkedRequestId", linkedRequestId);
 
@@ -238,6 +238,9 @@ export default function RequestContainer(props: RequestContainerProps) {
         value: props.assignRequestData?.requestData.assigned_user_id,
         label: props.assignRequestData?.requestData.assigned_user_email,
       });
+      console.log(props.assignRequestData.requestData.uploaded_file.data)
+      setPreviewedFile(URL.createObjectURL(new Blob(props.assignRequestData?.requestData.uploaded_file.data)));
+      // setPreviewedFile(props.assignRequestData?.assigned_file)
     }
     if (props.linkedRequestData) {
       setPlantId(props.linkedRequestData.plant_id);
@@ -312,8 +315,6 @@ export default function RequestContainer(props: RequestContainerProps) {
     updateAssetLists(parseInt(e.target.value));
     resetField("taggedAssetID");
   };
-  // console.log(props.linkedRequestData);
-  // console.log(props);
   return (
     <form onSubmit={handleSubmit(formSubmit)}>
       <ModuleContent includeGreyContainer grid>
@@ -499,7 +500,7 @@ export default function RequestContainer(props: RequestContainerProps) {
           }}
         >
           <div className="form-group">
-            <div>
+            {!props.assignRequestData && <div>
               <label className="form-label">Image</label>
               <input
                 className="form-control"
@@ -514,7 +515,8 @@ export default function RequestContainer(props: RequestContainerProps) {
                 // }}
                 {...register("image", { onChange: onFileSelected })}
               />
-            </div>
+            </div>}
+          </div>
             {previewedFile && (
               <div
                 className={`${formStyles.imageClick} form-group mt-3`}
@@ -524,7 +526,6 @@ export default function RequestContainer(props: RequestContainerProps) {
                   previewObjURL={previewedFile}/>
               </div>
             )}
-          </div>
 
           {/* <ImagePreview previewObjURL={previewedFile} /> */}
           {/* {props.assignRequestData &&
