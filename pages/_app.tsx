@@ -10,9 +10,9 @@ import nProgress from "nprogress";
 import { StaffContextProvider } from "../components/Context/StaffContext";
 import { ModuleModal, SimpleIcon } from "../components";
 import ModuleSimplePopup from "../components/ModuleLayout/ModuleSimplePopup";
-import { Tooltip } from "antd";
 import TooltipBtn from "../components/TooltipBtn";
-import IdleTimer from "../components/IdleTimer";
+// import IdleTimer from "../components/IdleTimer";
+import { useIdleTimer } from "react-idle-timer";
 import instance from "../types/common/axios.config";
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -21,33 +21,56 @@ export default function App({ Component, pageProps }: AppProps) {
   const [isTimeout, setIsTimeout] = useState(false);
 
   const sendLogout = (): void => {
-    instance.get("/api/user/logouthistory").then((response: any) => {
-      instance
-        .post("/api/logout")
-        .then((response: any) => {
-          // console.log("success", response);
-          localStorage.removeItem("staff");
-          window.location.href = "/";
-        })
-        .catch((e: any) => {
-          // console.log("error", e);
-          alert("logout fail");
-        });
-    });
+    instance
+      .post("/api/logout")
+      .then((response: any) => {
+        // console.log("success", response);
+        localStorage.removeItem("staff");
+        window.location.href = "/";
+      })
+      .catch((e: any) => {
+        // console.log("error", e);
+        alert("logout fail");
+      });
   };
 
-  useEffect(() => {
-    const timer = new IdleTimer({
-      timeout: 1800, //expire after 10 seconds
-      onTimeout: () => {
-        setIsTimeout(true);
-      },
-      onExpired: sendLogout,
-    });
+  function onPrompt() {
+    setIsTimeout(true);
+  }
+  function onActive() {
+    setIsTimeout(false);
+  }
+  function onIdle() {
+    if (isTimeout) {
+      sendLogout();
+      setIsTimeout(true);
+    }
+  }
 
-    return () => {
-      timer.cleanUp();
-    };
+  const idleTimer = useIdleTimer({
+    onPrompt: onPrompt,
+    onIdle: onIdle,
+    onActive: onActive,
+    promptTimeout: 30 * 1000 * 60,
+    timeout: 30 * 1000 * 60,
+    crossTab: true,
+  });
+
+  useEffect(() => {
+    // if (!timer) {
+    //   setTimer(
+    //     new IdleTimer({
+    //       timeout: 15, //expire after 10 seconds
+    //       onTimeout: () => {
+    //         setIsTimeout(true);
+    //       },
+    //       onExpired: sendLogout,
+    //     })
+    //   );
+    // }
+    if (!isTimeout) {
+      idleTimer.start();
+    }
   }, []);
 
   useEffect(() => {

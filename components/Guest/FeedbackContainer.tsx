@@ -26,8 +26,9 @@ const FeedbackContainer = (props: any) => {
     name: string;
     comments: string;
     plantID: string;
+    plantName: string;
     taggedLocID: string;
-    rating: number;
+    location: string;
     contact: {
       telegram: number;
       whatsapp: number;
@@ -40,8 +41,9 @@ const FeedbackContainer = (props: any) => {
     name: "",
     comments: "",
     plantID: props.requestData.plantLoc.plant_id,
+    plantName: props.requestData.plantLoc.plant_name,
     taggedLocID: props.requestData.plantLoc.id,
-    rating: 5,
+    location: props.requestData.plantLoc.location,
     contact: { telegram: 0, whatsapp: 0, number: "" },
     email: "",
     image: "",

@@ -354,7 +354,7 @@ export default function Checklist(props: ChecklistProps) {
                                   title={"Manage"}
                                 />
                               </Link>
-                            ) : item.status_id === 2 || item.status_id === 3 ? (
+                            ) : item.status_id === 2 || item.status_id === 3 || item.status_id === 6 ? (
                               <>
                                 <Link href={`/Checklist/Complete/${item.id}`}>
                                   <AiOutlineFileDone

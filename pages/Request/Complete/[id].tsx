@@ -5,6 +5,7 @@ import {
   ModuleFooter,
   ModuleHeader,
   ModuleMain,
+  ModuleModal,
 } from "../../../components";
 import ModuleSimplePopup, {
   SimpleIcon,
@@ -56,7 +57,8 @@ export default function CompleteRequest(props: RequestPreviewProps) {
   );
   const [failureModal, setFailureModal] = useState<boolean>(false);
   const [successModal, setSuccessModal] = useState<boolean>(false);
-  const [comepleteImage, setCompleteImage] = useState<boolean>(false);
+  const [completeImage, setCompleteImage] = useState<boolean>(false);
+  const [imageSrc, setImageSrc] = useState<string>("");
   const [isReady, setIsReady] = useState<boolean>(false);
   const router = useRouter();
   const { id } = router.query;
@@ -70,10 +72,21 @@ export default function CompleteRequest(props: RequestPreviewProps) {
     }
   }, []);
 
+  useEffect(() => {
+    if (completionData.completion_file) {
+
+      const reader = new FileReader();
+      reader.readAsDataURL(completionData.completion_file!);
+      reader.onload = () => {
+        setImageSrc(reader.result as string);
+      };
+    }
+
+  }, [completionData.completion_file])
+
   const updateData = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setCompleteImage(true);
     if (e.target.name === "completion_file") {
       const input = e.target as HTMLInputElement;
       if (!input.files || input.files.length == 0) {
@@ -140,7 +153,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
             <table className={styles.table}>
               <tbody>
                 <tr>
-                  <th>Completion File</th>
+                  <th className='d-flex align-items-start'>Completion File</th>
                   <td valign="baseline">
                     <input
                       type="file"
@@ -150,14 +163,14 @@ export default function CompleteRequest(props: RequestPreviewProps) {
                       name="completion_file"
                       style={{ width: "20rem" }}
                     />
-                    {comepleteImage && (
+                    {completionData.completion_file && (
                       <div
                         className={`${formStyles.imageClick} form-group mt-3`}
                         onClick={() => setCompleteImage(true)}
                       >
                         <div>
                           <label className="form-label">
-                            <p style={{ textDecoration: "underline" }}>
+                            <p style={{ textDecoration: "underline" }} onClick={() => setCompleteImage(true)}>
                               View Complete Request Image
                             </p>
                           </label>
@@ -192,6 +205,17 @@ export default function CompleteRequest(props: RequestPreviewProps) {
           <ThreeDots fill="black" />
         </div>
       )}
+      <ModuleModal
+        isOpen={completeImage}
+        closeModal={() => setCompleteImage(false)}
+        closeOnOverlayClick={true}
+        large
+      >
+        {/* <Image src={f.image} width={100} height={100} alt="" /> */}
+        <div style={{ textAlign: "center" }}>
+          <img width={"75%"} height={"75%"} src={imageSrc} alt="" />
+        </div>
+      </ModuleModal>
       <ModuleSimplePopup
         modalOpenState={failureModal}
         setModalOpenState={setFailureModal}

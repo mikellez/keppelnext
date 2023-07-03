@@ -30,7 +30,7 @@ interface CreateFeedbackProps {
   plantLoc: CMMSPlantLoc;
 }
 
-export default function RequestNew(props: CreateFeedbackProps) {
+export default function FeedbackNew(props: CreateFeedbackProps) {
   const router = useRouter();
   // const [modal, setModal] = useState(true);
   const [windowWidth, setWindowWidth] = useState<number>(0);
@@ -53,7 +53,6 @@ export default function RequestNew(props: CreateFeedbackProps) {
           user={user}
           windowWidth={windowWidth}
         />
-        {/* <RequestGuestContainer requestData={props} user={userbool}/> */}
       </ModuleContent>
     </ModuleMain>
   );

@@ -124,11 +124,12 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
             <AssignToSelect
               plantId={f.plant_id as number}
               isSingle={true}
-              onChange={(value) => {
+              onChange={(option) => {
                 props.setFeedbackData((prev: any) => {
                   return {
                     ...prev,
-                    ["assigned_user_id"]: value,
+                    ["assigned_user_id"]: (option as SingleValue<AssignedUserOption>)?.value,
+                    ["assigned_user_name"]: (option as SingleValue<AssignedUserOption>)?.label.split('|')[0],
                   };
                 });
               }}

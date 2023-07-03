@@ -198,7 +198,7 @@ const getForReviewChecklistsQuery = (expand, search) => {
         ua.user_id = $1 AND
         (cl.status_id = 4 OR cl.status_id = 6)
     ${searchCondition(search)}
-    ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' desc
+    ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' DESC
   `
   );
 };
@@ -680,7 +680,7 @@ const completeChecklist = async (req, res, next) => {
             keppel.checklist_master
         SET 
             datajson = $1,
-            status_id = 4,
+            status_id = 6,
             history = concat(history,'${updatehistory}'),
             activity_log = activity_log || 
         jsonb_build_object(

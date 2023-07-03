@@ -366,29 +366,30 @@ const fetchFilteredFeedback = async (req, res, next) => {
 const assignFeedback = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
-  const activity_log = {
-    date: today,
-    name: req.user.name,
-    activity: "Assigned",
-    activity_type: "Updated Feedback",
-  };
 
   const sql = `
         UPDATE
             keppel.feedback
         SET 
             status_id = 2,
-            activity_log = activity_log || $1,
-            assigned_user_id = $2
+            activity_log = activity_log || 
+            jsonb_build_object(
+              'date', '${today}',
+              'name', '${req.user.name}',
+              'activity', 'Assigned Feedback Case ID-${req.params.id} to ${req.body.assigned_user_name}',
+              'activity_type', 'ASSIGNED'
+            ),
+            assigned_user_id = $1
         WHERE 
-            feedback_id = $3
+            feedback_id = $2
     `;
+
+    console.log(sql);
 
   try {
     // console.log(req.params);
     // console.log(req.body);
     const data = await global.db.query(sql, [
-      JSON.stringify(activity_log),
       req.body.assigned_user_id.value,
       req.params.id,
     ]);
@@ -429,17 +430,24 @@ const assignFeedback = async (req, res, next) => {
 
 const completeFeedback = async (req, res, next) => {
   const id = req.params.id;
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const sql = `UPDATE keppel.feedback
                 SET 
                   status_id = 4,
                   remarks = $1,
                   completed_date = $2,
-                  completed_img = $3
+                  completed_img = $3,
+                  activity_log = activity_log ||
+                    jsonb_build_object(
+                      'date', '${today}',
+                      'name', '${req.user.name}',
+                      'activity', 'Completed Feedback Case ID-${req.params.id}',
+                      'activity_type', 'WORK DONE'
+                    )
                 
                 WHERE feedback_id = $4`;
 
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-
+  
   // console.log(req.body);
   try {
     await global.db.query(sql, [
@@ -509,16 +517,17 @@ const createFeedback = async (req, res, next) => {
                 created_user_id,
                 status_id,
                 created_date,
-                completed_img)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
+                completed_img,
+                activity_log)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`;
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const activity_log = [
     {
       date: today,
       name: req.user ? req.user.name : "Guest",
-      activity: "PENDING",
-      activity_type: "Created Feedback",
+      activity: `Created Feedback on ${feedback.plantName} ${feedback.location}` ,
+      activity_type: "PENDING",
     },
   ];
   // Assign as Guest
@@ -539,6 +548,7 @@ const createFeedback = async (req, res, next) => {
       1,
       today,
       feedback.completed_img,
+      JSON.stringify(activity_log),
     ]);
 
     const mail = new CreateFeedbackMail([feedback.contact.email], {
