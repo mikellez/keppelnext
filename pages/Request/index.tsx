@@ -728,6 +728,7 @@ export default function Request(props: RequestProps) {
             isOpen={!!currentHistory}
             closeModal={() => setCurrentHistory(undefined)}
             closeOnOverlayClick={true}
+            medium
           >
             <RequestHistory history={currentHistory!} />
           </ModuleModal>

@@ -243,12 +243,12 @@ export default function Feedback() {
                                 <AiOutlineFolderView size={22} title={"View"} />
                               </Link>
                             )}
-                            {/* <AiOutlineHistory
+                            <AiOutlineHistory
                               color={"#C70F2B"}
                               onClick={() => setHistory(item.activity_log)}
                               size={22}
                               title={"View History"}
-                            /> */}
+                            />
                           </Cell>
                         </Row>
                       );
@@ -278,7 +278,7 @@ export default function Feedback() {
             <LoadingHourglass />
           </div>
         )}
-        {/* {history && (
+        {history && (
           <ModuleModal
             isOpen={!!history}
             closeModal={() => setHistory(undefined)}
@@ -286,7 +286,7 @@ export default function Feedback() {
           >
             <FeedbackHistory history={history!} />
           </ModuleModal>
-        )} */}
+        )}
       </ModuleContent>
     </ModuleMain>
   );

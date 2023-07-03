@@ -7,10 +7,10 @@ interface FeedbackHistoryProps {
 function rowElements(rows: { [key: string]: string }[]) {
   return (
     <>
-      {rows.map((row) => {
+      {rows.map((row, index) => {
         // console.log(row);
         return (
-          <tr key={row["date"] + row["name"] + row["role"]}>
+          <tr key={index}>
             <td>{row["activity_type"]}</td>
             <td>{row["activity"]}</td>
             <td>{row["date"]}</td>

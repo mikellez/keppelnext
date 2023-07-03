@@ -57,7 +57,7 @@ export default function RequestHistory(props: RequestHistoryProps) {
             <td>
                 {moment(new Date(row["date"])).format('MMMM Do YYYY, h:mm:ss a')}
             </td>
-            <td>{row["role"]}</td>
+            {/* <td>{row["role"]}</td> */}
             <td>{row["name"]}</td>
         </tr>
         })} 
@@ -79,7 +79,7 @@ export default function RequestHistory(props: RequestHistoryProps) {
                         <th>Status</th>
                         <th>Action</th>
                         <th>Date</th>
-                        <th>Role</th>
+                        {/* <th>Role</th> */}
                         <th>Name</th>
                     </tr>
                 </thead>
