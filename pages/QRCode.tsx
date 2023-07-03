@@ -183,11 +183,13 @@ function QRCode(props: NewAssetProps) {
 
   const QRFeedbackImg = ({ loc_id }: { loc_id: number | null }) => {
     const { SVG } = useQRCode();
-    // const location = plantLocs.filter(loc => loc.id === loc_id)[0].location;
+    const location = plantLocs.filter(loc => loc.id === loc_id)[0].location;
+    console.log(location);
     function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
       const svg = e.currentTarget.querySelector("svg");
 
       if (!svg) return;
+      console.log('downloading', location)
 
       saveSvg(svg, location + ".svg");
     }

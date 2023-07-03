@@ -26,6 +26,7 @@ import { ThreeDots } from "react-loading-icons";
 import styles from "../../../styles/Request.module.scss";
 import formStyles from "../../../styles/formStyles.module.css";
 import { downloadPDF } from "../View/[id]";
+import Image from "next/image";
 
 interface CompletionRequestInfo {
   completion_file?: File;
@@ -157,26 +158,24 @@ export default function CompleteRequest(props: RequestPreviewProps) {
                   <td valign="baseline">
                     <input
                       type="file"
-                      className="form-control"
+                      className="form-control mb-1"
                       onChange={updateData}
                       accept="image/jpeg,image/png"
                       name="completion_file"
                       style={{ width: "20rem" }}
                     />
-                    {completionData.completion_file && (
-                      <div
-                        className={`${formStyles.imageClick} form-group mt-3`}
-                        onClick={() => setCompleteImage(true)}
-                      >
-                        <div>
-                          <label className="form-label">
-                            <p style={{ textDecoration: "underline" }} onClick={() => setCompleteImage(true)}>
-                              View Complete Request Image
-                            </p>
-                          </label>
-                        </div>
-                      </div>
-                    )}
+                    {completionData.completion_file && 
+                      <div>
+                        <Image
+                          src={imageSrc}
+                          width={150}
+                          height={150}
+                          style={{ objectFit: "contain", cursor: "pointer" }}
+                          alt="Fault Image"
+                          onClick={() => setCompleteImage(true)}
+                        />
+                      </div>}
+                    
                   </td>
                 </tr>
                 <tr>
@@ -209,12 +208,20 @@ export default function CompleteRequest(props: RequestPreviewProps) {
         isOpen={completeImage}
         closeModal={() => setCompleteImage(false)}
         closeOnOverlayClick={true}
-        large
+        className={styles.modal}
+        hideHeader
       >
         {/* <Image src={f.image} width={100} height={100} alt="" /> */}
-        <div style={{ textAlign: "center" }}>
-          <img width={"75%"} height={"75%"} src={imageSrc} alt="" />
-        </div>
+        {/* <div style={{ textAlign: "center" }}> */}
+                    <Image
+                        src={imageSrc}
+                        width={550}
+                        height={550}
+                        style={{ objectFit: "contain" }}
+                        alt="Completion Image"
+                      />
+          {/* <img width={"75%"} height={"75%"} src={imageSrc} alt="" /> */}
+        {/* </div> */}
       </ModuleModal>
       <ModuleSimplePopup
         modalOpenState={failureModal}

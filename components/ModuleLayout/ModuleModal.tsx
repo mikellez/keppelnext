@@ -36,7 +36,7 @@ export function ModuleModal(props: ModalProps) {
           backgroundColor: "rgba(0,0,0,0.4)",
         },
         content: {
-          backgroundColor: "#F0F0F0",
+          backgroundColor: "white",
           height: props.large ? "70%" : props.medium? "60%" : "50%",
           width: props.large ? "70%" : props.medium? "60%" : "50%",
           margin: "auto",
