@@ -66,23 +66,151 @@ WHERE
 ORDER BY f.feedback_id DESC
 `;
 
+const getAllFeedBackQuery = (expand, search) => {
+  let expandCond = "";
+  let SELECT_ARR = [];
+
+  const SELECT = {
+    id: "f.feedback_id AS id",
+    plant_loc_id: "f.plant_loc_id",
+    plant_id: "f.plant_id",
+    description: "f.description",
+    contact: "f.contact",
+    image: "f.imageurl",
+    status_id: "f.status_id",
+    activity_log: "f.activity_log",
+    completed_date: "f.completed_date",
+    remarks: "f.remarks",
+    createdByUser: "concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser",
+    assigned_user_name: "concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigned_user_name",
+    loc_room: "pl.loc_room",
+    loc_id: "pl.loc_id",
+    loc_floor: "pl.loc_floor",
+    plant_name: "pm.plant_name",
+    plant_id: "pm.plant_id",
+    created_date: "f.created_date",
+    assigned_user_id: "f.assigned_user_id",
+    status: "st.status",
+    name: "f.name",
+    created_user_id: "f.created_user_id",
+    completed_img: "f.completed_img"
+  }
+
+  if (expand) {
+    const expandArr = expand.split(",");
+
+    SELECT_ARR = [];
+    for (let i = 0; i < expandArr.length; i++) {
+      SELECT_ARR.push(SELECT[expandArr[i]]);
+    }
+  } else {
+    for (let key in SELECT) {
+      if (SELECT.hasOwnProperty(key)) {
+        SELECT_ARR.push(SELECT[key]);
+      }
+    }
+  }
+
+  expandCond = SELECT_ARR.join(", ");
+
+  const query = `
+    SELECT 
+      ${expandCond}
+    FROM 
+        keppel.users u
+        JOIN keppel.user_access ua ON u.user_id = ua.user_id
+        JOIN keppel.feedback f  on ua.allocatedplantids LIKE concat(concat('%',f.plant_id::text), '%')
+        LEFT JOIN (
+            SELECT 
+                t3.feedback_id
+            FROM  
+                keppel.feedback AS t3
+            GROUP BY t3.feedback_id) tmp1 ON tmp1.feedback_id = f.feedback_id
+        LEFT JOIN keppel.users assignU ON assignU.user_id = f.assigned_user_id
+        LEFT JOIN keppel.users createdU ON createdU.user_id = f.created_user_id
+        LEFT JOIN keppel.plant_master pm ON pm.plant_id = f.plant_id
+        LEFT JOIN keppeL.plant_location pl ON pl.loc_id = f.plant_loc_id
+        JOIN keppel.status_fm st ON st.status_id = f.status_id	
+    `;
+
+  return query;
+}
+
+const getPendingFeedbackQuery = (expand, search) => {
+  return (
+    getAllFeedBackQuery(expand, search) +
+    `
+      WHERE 
+          ua.user_id = $1 AND 
+          (f.status_id = 1)
+      ORDER BY f.feedback_id DESC
+      `
+  );
+}
+
+const getAssignedFeedbackQuery = (expand, search) => {
+  return (
+    getAllFeedBackQuery(expand, search) +
+    `
+      WHERE
+          ua.user_id = $1 AND
+          (f.status_id is null or f.status_id = 2 or f.status_id = 3) AND
+          (CASE
+            WHEN (SELECT ua.role_id
+                FROM
+                    keppel.user_access ua
+                WHERE
+                    ua.user_id = $1) = 4
+            THEN assignU.user_id = $1
+            ELSE True
+            END)
+      ORDER BY f.feedback_id DESC
+      `
+  );
+}
+
+const getCompletedFeedbackQuery = (expand, search) => {
+  return (
+    getAllFeedBackQuery(expand, search) +
+    `
+      WHERE
+          ua.user_id = $1 AND
+          (f.status_id = 4) AND
+          (CASE
+            WHEN (SELECT ua.role_id
+                FROM
+                    keppel.user_access ua
+                WHERE
+                    ua.user_id = $1) = 4
+            THEN assignU.user_id = $1
+            ELSE True
+            END)
+      ORDER BY f.feedback_id desc
+      `
+  );
+}
+
 const fetchPendingFeedback = async (req, res, next) => {
   const page = req.query.page || 1;
+  const expand = req.query.expand || null;
+  const search = req.query.search || null;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await global.db.query(fetchPendingFeedbackQuery, [
+  const totalRows = await global.db.query(getPendingFeedbackQuery(expand, search), [
     req.user.id,
   ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    fetchPendingFeedbackQuery +
+    getPendingFeedbackQuery(expand, search) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+
+    console.log(query)
 
   try {
     const result = await global.db.query(query, [req.user.id]);
-    if (result.rows.length == 0)
-      return res.status(204).json({ msg: "No Feedback" });
+    //if (result.rows.length == 0)
+      //return res.status(204).json({ msg: "No Feedback" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {
@@ -110,15 +238,17 @@ ORDER BY f.feedback_id DESC
 
 const fetchAssignedFeedback = async (req, res, next) => {
   const page = req.query.page || 1;
+  const expand = req.query.expand || null;
+  const search = req.query.search || null;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await global.db.query(fetchAssignedFeedbackQuery, [
+  const totalRows = await global.db.query(getAssignedFeedbackQuery(expand, search), [
     req.user.id,
   ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    fetchAssignedFeedbackQuery +
+    getAssignedFeedbackQuery(expand, search) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
@@ -153,15 +283,17 @@ ORDER BY f.feedback_id desc
 
 const fetchCompletedFeedback = async (req, res, next) => {
   const page = req.query.page || 1;
+  const expand = req.query.expand || null;
+  const search = req.query.search || null;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await global.db.query(fetchCompletedFeedbackQuery, [
+  const totalRows = await global.db.query(getCompletedFeedbackQuery(expand, search), [
     req.user.id,
   ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    fetchCompletedFeedbackQuery +
+    getCompletedFeedbackQuery(expand, search) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {

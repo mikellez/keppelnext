@@ -106,8 +106,21 @@ export default function Feedback() {
 
   useEffect(() => {
     setReady(false);
+
+    const PARAMS = [
+      "id",
+      "description",
+      "status",
+      "created_date",
+      "assigned_user_name",
+      "plant_name",
+      "loc_floor",
+      "loc_room",
+      "name"
+    ]
+
     instance
-      .get(`/api/feedback/${indexedColumn[activeTabIndex]}?page=${page}`)
+      .get(`/api/feedback/${indexedColumn[activeTabIndex]}?page=${page}&expand=${PARAMS}`)
       .then((response) => {
         setFeedbackItems(
           response.data.rows.map((row: CMMSFeedback) => {
