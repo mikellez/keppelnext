@@ -21,6 +21,7 @@ const searchCondition = (search) => {
 
 async function fetchRequestQuery(
   status_query,
+  order_query,
   role_id,
   user_id,
   page,
@@ -122,8 +123,7 @@ async function fetchRequestQuery(
 		  req_u.last_name,
 		  au.first_name,
 		  au.last_name
-	  )
-	  ORDER BY r.created_date DESC, r.status_id DESC`;
+	  ) ${order_query}`;
   } else {
     sql = `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
 	  ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
@@ -168,8 +168,7 @@ async function fetchRequestQuery(
 		  req_u.last_name,
 		  au.first_name,
 		  au.last_name
-	  )
-	  ORDER BY r.created_date DESC, r.status_id DESC`;
+	  ) ${order_query}`;
   }
 
   const result = await global.db.query(sql);
@@ -187,12 +186,16 @@ const fetchPendingRequests = async (req, res, next) => {
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND sc.status_id = 1", //PENDING
+    ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
     page,
     expand,
     search
   );
+
+  console.log(sql);
+  
 
   const result = await global.db.query(sql);
 
@@ -206,6 +209,7 @@ const fetchAssignedRequests = async (req, res, next) => {
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND sc.status_id = 2", //ASSIGNED
+    ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
     page,
@@ -225,6 +229,7 @@ const fetchReviewRequests = async (req, res, next) => {
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND (sc.status_id = 3 OR sc.status_id = 5 OR sc.status_id = 6)", //COMPLETED, REJECTED, CANCELLED
+    ` ORDER BY r.activity_log -> (jsonb_array_length(r.activity_log) -1) ->> 'date' DESC`,
     req.user.role_id,
     req.user.id,
     page,
@@ -244,6 +249,7 @@ const fetchApprovedRequests = async (req, res, next) => {
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND sc.status_id = 4", //APPROVED
+    ` ORDER BY r.activity_log -> (jsonb_array_length(r.activity_log) -1) ->> 'date' DESC`,
     req.user.role_id,
     req.user.id,
     page,
