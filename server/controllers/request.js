@@ -205,7 +205,7 @@ const fetchAssignedRequests = async (req, res, next) => {
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
-    "AND sc.status_id = 2", //ASSIGNED
+    "AND (sc.status_id = 2 OR sc.status_id = 5)", //ASSIGNED, REJECTED
     req.user.role_id,
     req.user.id,
     page,
@@ -224,7 +224,7 @@ const fetchReviewRequests = async (req, res, next) => {
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
-    "AND (sc.status_id = 3 OR sc.status_id = 5 OR sc.status_id = 6)", //COMPLETED, REJECTED, CANCELLED
+    "AND (sc.status_id = 3 OR sc.status_id = 6)", //COMPLETED, CANCELLED
     req.user.role_id,
     req.user.id,
     page,
@@ -779,11 +779,12 @@ const createRequestCSV = (req, res, next) => {
 };
 
 const approveRejectRequest = async (req, res, next) => {
-  console.log(req.body);
+  // console.log(req.body);
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const text = req.params.status_id == 4 ? "Approved" : "Rejected";
-  const status = req.params.status_id == 4? "APPROVED" : "REJECTED";
+  const status = req.params.status_id == 4 ? "APPROVED" : "REJECTED";
+  console.log(req.params, req.body);
   const id = req.params.status_id;
   const history = `!${status}_${text} request_${today}_${req.user.role_name}_${req.user.name}`;
   let sql = ``;
@@ -833,6 +834,7 @@ const completeRequest = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const history = `!COMPLETED_Completed request_${today}_${req.user.role_name}_${req.user.name}`;
 
+  // console.log(req.file)
   const sql = `UPDATE keppel.request SET
 		complete_comments = $1,
 		completion_file = $2,

@@ -25,6 +25,7 @@ function saveSvg(svgEl: SVGSVGElement, name: string) {
   var svgBlob = new Blob([preface, svgData], {
     type: "image/svg+xml;charset=utf-8",
   });
+
   var svgUrl = URL.createObjectURL(svgBlob);
   var downloadLink = document.createElement("a");
   downloadLink.href = svgUrl;
@@ -46,10 +47,11 @@ function QRAssetImg({
   const { SVG } = useQRCode();
   function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
     const svg = e.currentTarget.querySelector("svg");
+    // console.log(svg);
 
     if (!svg) return;
 
-    saveSvg(svg, asset.asset_name + ".svg");
+    saveSvg(svg, asset.asset_name);
   }
 
   return (
@@ -65,6 +67,7 @@ function QRAssetImg({
             plant +
             "/" +
             asset.psa_id
+            // + asset.asset_name
           }
           options={{
             level: "H",
@@ -126,11 +129,26 @@ function QRCode(props: NewAssetProps) {
   function assetSelect(e: React.ChangeEvent<HTMLSelectElement>) {
     if (data) {
       //   console.log(e.target.options[20].value);
-      setSelectedAssets(
-        Array.from(e.target.options)
-          .filter((o) => o.selected)
-          .map((o) => data[parseInt(o.value)])
-      );
+      // console.log(selectedAssets);
+      const newAsset = Array.from(e.target.options)
+        .filter((o) => o.selected)
+        .map((o) => data[parseInt(o.value)]);
+      if (!selectedAssets.includes(newAsset[0])) {
+        setSelectedAssets(selectedAssets.concat(newAsset));
+      }
+    }
+  }
+
+  function assetDelete(e: React.ChangeEvent<HTMLSelectElement>) {
+    if (selectedAssets && data) {
+      const newAss = selectedAssets.filter((asset) => {
+        // console.log(asset);
+        // console.log(selectedAssets[parseInt(e.target.value) + 1]);
+        // console.log(asset);
+        return asset.psa_id != selectedAssets[parseInt(e.target.value)].psa_id;
+      });
+      // console.log(newAss);
+      setSelectedAssets(newAss);
     }
   }
 
@@ -174,12 +192,6 @@ function QRCode(props: NewAssetProps) {
       );
     }
   }
-  //   useEffect(() => {
-  //     const currRef = searchRef.current.value;
-
-  //     }
-  //     console.log(searchRef.current.value);
-  //   }, [searchRef]);
 
   const QRFeedbackImg = ({ loc_id }: { loc_id: number | null }) => {
     const { SVG } = useQRCode();
@@ -285,12 +297,30 @@ function QRCode(props: NewAssetProps) {
         <div className={formStyles.halfContainer}>
           {!feedback && (
             <>
+              <label className="form-label">Selected Assets:</label>
+              <div className="form-group">
+                <select
+                  className="form-select"
+                  multiple
+                  style={{ height: "14em" }}
+                  onChange={assetDelete}
+                  defaultValue={["0"]}
+                >
+                  {selectedAssets &&
+                    selectedAssets.map((asset, i) => (
+                      <option key={asset.psa_id} value={i}>
+                        {asset.asset_name}
+                      </option>
+                    ))}
+                </select>
+              </div>
               <div className="form-group">
                 <label className="form-label">Assets:</label>
                 <div>
                   <AssetSearchBar
                     ref={searchRef}
                     onSubmit={searchAssets}
+                    onChange={searchAssets}
                   ></AssetSearchBar>
                 </div>
                 <select
@@ -299,7 +329,6 @@ function QRCode(props: NewAssetProps) {
                   style={{ height: "14em" }}
                   onChange={assetSelect}
                   defaultValue={["0"]}
-                  value={[]}
                 >
                   <option value="0" disabled hidden selected>
                     -- Select Asset --

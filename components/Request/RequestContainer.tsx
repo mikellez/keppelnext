@@ -132,6 +132,7 @@ export interface RequestContainerProps extends PropsWithChildren {
   // isAssignRequest?: boolean; // true: assign request page (prefill page), false : create new request page
   assignRequestData?: AssignRequestProps; // if not null, use data for assigning request
   linkedRequestData?: CMMSRequest;
+  isNotAssign?: boolean;
 }
 
 export interface RequestProps {
@@ -165,7 +166,7 @@ export default function RequestContainer(props: RequestContainerProps) {
   const assignRequestData = props.assignRequestData?.requestData as CMMSRequest;
   const priorityList = props.assignRequestData
     ?.priority as CMMSRequestPriority[];
-
+  setSelectedFile(undefined);
   const defaultValues = props.linkedRequestData
     ? {
         requestTypeID: props.linkedRequestData.req_id,
@@ -202,8 +203,8 @@ export default function RequestContainer(props: RequestContainerProps) {
       await createRequest(data, plantId as number);
     } else if (props.assignRequestData) {
       // console.log("Assigning request");
-      console.log(prioritySelected);
-      console.log(assignedUsers);
+      // console.log(prioritySelected);
+      // console.log(assignedUsers);
       const { id } = router.query;
       // if priority and assign user dropdown are filled
       if (prioritySelected && assignedUsers) {
@@ -499,34 +500,39 @@ export default function RequestContainer(props: RequestContainerProps) {
           }}
         >
           <div className="form-group">
-            <div>
-              <label className="form-label">Image</label>
-              <input
-                className="form-control"
-                type="file"
-                accept="image/jpeg,image/png,image/gif"
-                id="formFile"
-                // onChange={(e) => {
-                //   // console.log(e.target.files![0]);
-                //   setIsImage(false);
-                //   setSelectedFile(e.target.files!);
-                //   console.log(e.target.files![0]);
-                // }}
-                {...register("image", { onChange: onFileSelected })}
-              />
-            </div>
-            {previewedFile && (
-              <div
-                className={`${formStyles.imageClick} form-group mt-3`}
-                onClick={() => setIsImage(true)}
-              >
+            {props.isNotAssign && (
+              <div>
                 <div>
-                  <label className="form-label">
-                    <p style={{ textDecoration: "underline" }}>
-                      View Request Image
-                    </p>
-                  </label>
+                  <label className="form-label">Image</label>
+                  <input
+                    className="form-control"
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif"
+                    id="formFile"
+                    // onChange={(e) => {
+                    //   // console.log(e.target.files![0]);
+                    //   setIsImage(false);
+                    //   setSelectedFile(e.target.files!);
+                    //   console.log(e.target.files![0]);
+                    // }}
+                    {...register("image", { onChange: onFileSelected })}
+                  />
                 </div>
+
+                {previewedFile && (
+                  <div
+                    className={`${formStyles.imageClick} form-group mt-3`}
+                    onClick={() => setIsImage(true)}
+                  >
+                    <div>
+                      <label className="form-label">
+                        <p style={{ textDecoration: "underline" }}>
+                          View Request Image
+                        </p>
+                      </label>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
