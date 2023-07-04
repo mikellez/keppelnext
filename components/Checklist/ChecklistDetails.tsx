@@ -48,29 +48,30 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
         .find((activity) => activity["activity_type"] == "APPROVED");
       return (
         <div>
-
-        <div className="mb-4">
-          <p className={styles.checklistDetailsHeading}>Completed Date</p>
-          <p className={styles.checklistDetailsContent}>
-            {moment(new Date(completionLog!.date)).format(
-              "MMMM Do YYYY, h:mm:ss a"
-            )}
-          </p>
-        </div>
-        <div>
-          <p className={styles.checklistDetailsHeading}>Approval Date</p>
-          <p className={styles.checklistDetailsContent}>
-            {moment(new Date(approvalLog!.date)).format(
-              "MMMM Do YYYY, h:mm:ss a"
-            )}
-          </p>
-        </div>
+          <div className="mb-4">
+            <p className={styles.checklistDetailsHeading}>Completed Date</p>
+            <p className={styles.checklistDetailsContent}>
+              {moment(new Date(completionLog!.date)).format(
+                "MMMM Do YYYY, h:mm:ss a"
+              )}
+            </p>
+          </div>
+          <div>
+            <p className={styles.checklistDetailsHeading}>Approval Date</p>
+            <p className={styles.checklistDetailsContent}>
+              {moment(new Date(approvalLog!.date)).format(
+                "MMMM Do YYYY, h:mm:ss a"
+              )}
+            </p>
+          </div>
         </div>
       );
-    } else if (status_id == 3) {
+    } else if (status_id == 3 || status_id == 6) {
       const rejectedLog = activity_log
         .reverse()
-        .find((activity) => activity["activity"] == "REJECTED");
+        .find((activity) => activity["activity_type"] == "REJECTED");
+      // console.log(activity_log);
+      // console.log(rejectedLog);
       return (
         <div>
           <p className={styles.checklistDetailsHeading}>Rejection Date</p>
@@ -90,7 +91,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
     const { activity_log, status_id } = props.checklist as CMMSChecklist;
     const rejectionActivity = activity_log
       .reverse()
-      .find((activity) => activity["activity"] == "REJECTED");
+      .find((activity) => activity["activity_type"] == "REJECTED");
     if (rejectionActivity) {
       return (
         <div>
@@ -132,7 +133,9 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
         <div>
           <p className={styles.checklistDetailsHeading}>Created By</p>
           <p className={styles.checklistDetailsContent}>
-            {props.checklist?.createdbyuser !== " " ? props.checklist?.createdbyuser : "System Generated"}
+            {props.checklist?.createdbyuser !== " "
+              ? props.checklist?.createdbyuser
+              : "System Generated"}
           </p>
         </div>
         <div>
