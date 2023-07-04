@@ -179,7 +179,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
           ) : (
             <div></div>
           )}
-          {props.action == RequestAction.manage && (
+          {props.action == RequestAction.manage && props.request.complete_comments && (
             <>
               <tr>
                 <th>Completion Comments</th>

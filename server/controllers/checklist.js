@@ -924,7 +924,7 @@ const rejectChecklist = async (req, res, next) => {
         UPDATE
             keppel.checklist_master
         SET 
-            status_id = 3,
+            status_id = 6,
             history = concat(history,'${updatehistory}'),
             activity_log = activity_log || $1
         WHERE 
