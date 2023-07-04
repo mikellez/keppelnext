@@ -132,7 +132,6 @@ export interface RequestContainerProps extends PropsWithChildren {
   // isAssignRequest?: boolean; // true: assign request page (prefill page), false : create new request page
   assignRequestData?: AssignRequestProps; // if not null, use data for assigning request
   linkedRequestData?: CMMSRequest;
-  isNotAssign?: boolean;
 }
 
 export interface RequestProps {
@@ -145,7 +144,6 @@ export interface AssignRequestProps {
   requestData: CMMSRequest;
   priority: CMMSRequestPriority[];
 }
-
 export interface CMMSRequestPriority {
   p_id?: number;
   priority?: string;
@@ -166,7 +164,7 @@ export default function RequestContainer(props: RequestContainerProps) {
   const assignRequestData = props.assignRequestData?.requestData as CMMSRequest;
   const priorityList = props.assignRequestData
     ?.priority as CMMSRequestPriority[];
-  setSelectedFile(undefined);
+
   const defaultValues = props.linkedRequestData
     ? {
         requestTypeID: props.linkedRequestData.req_id,
@@ -203,8 +201,8 @@ export default function RequestContainer(props: RequestContainerProps) {
       await createRequest(data, plantId as number);
     } else if (props.assignRequestData) {
       // console.log("Assigning request");
-      // console.log(prioritySelected);
-      // console.log(assignedUsers);
+      console.log(prioritySelected);
+      console.log(assignedUsers);
       const { id } = router.query;
       // if priority and assign user dropdown are filled
       if (prioritySelected && assignedUsers) {
@@ -242,7 +240,6 @@ export default function RequestContainer(props: RequestContainerProps) {
       // console.log(props.assignRequestData.requestData.uploaded_file.data)
       if (props.assignRequestData.requestData.uploaded_file) {
         console.log("processing image");
-
         setPreviewedFile(
           URL.createObjectURL(
             new Blob([
