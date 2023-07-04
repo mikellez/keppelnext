@@ -548,7 +548,7 @@ export default function RequestContainer(props: RequestContainerProps) {
               )}
               <div
                 className={`${formStyles.imageClick} form-group mt-0`}
-                onClick={() => setIsImage(true)}
+                // onClick={() => setIsImage(true)}
               >
                 <ImagePreview previewObjURL={previewedFile} />
               </div>
