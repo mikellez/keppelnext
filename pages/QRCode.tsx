@@ -17,47 +17,63 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import instance from "../axios.config";
 import { set } from "nprogress";
 import AssetSearchBar from "../components/SearchBar/AssetsSearchBar";
+import downloadjs from "downloadjs";
+import html2canvas from "html2canvas";
+import { Button } from "antd";
 
-function saveSvg(svgEl: SVGSVGElement, name: string) {
-  svgEl.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-  var svgData = svgEl.outerHTML;
-  var preface = '<?xml version="1.0" standalone="no"?>\r\n';
-  var svgBlob = new Blob([preface, svgData], {
-    type: "image/svg+xml;charset=utf-8",
-  });
-
-  var svgUrl = URL.createObjectURL(svgBlob);
-  var downloadLink = document.createElement("a");
-  downloadLink.href = svgUrl;
-  downloadLink.download = name;
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
+async function handleCaptureClick(name: string, id: string) {
+  // console.log(document.getElementById("qr"));
+  if (document.getElementById(id)) {
+    const canvas = await html2canvas(document.getElementById(id)!);
+    const dataURL = canvas.toDataURL("image/png");
+    downloadjs(dataURL, name, "image/png");
+  }
+  // console.log(canvas);
 }
+
+// function saveSvg(svgEl: SVGSVGElement, name: string) {
+//   svgEl.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+//   var svgData = svgEl.outerHTML;
+//   var preface = '<?xml version="1.0" standalone="no"?>\r\n';
+//   var svgBlob = new Blob([preface, svgData], {
+//     type: "image/svg+xml;charset=utf-8",
+//   });
+
+//   var svgUrl = URL.createObjectURL(svgBlob);
+//   var downloadLink = document.createElement("a");
+//   downloadLink.href = svgUrl;
+//   downloadLink.download = name;
+//   document.body.appendChild(downloadLink);
+//   downloadLink.click();
+//   document.body.removeChild(downloadLink);
+// }
 
 function QRAssetImg({
   asset,
   plant,
   isFeedback,
+  my_id,
 }: {
   asset: CMMSAsset;
   plant: number | null;
   isFeedback: boolean;
+  my_id: string;
 }) {
   const { SVG } = useQRCode();
-  function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
-    const svg = e.currentTarget.querySelector("svg");
-    // console.log(svg);
+  // function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
+  //   const svg = e.currentTarget.querySelector("svg");
+  //   // console.log(svg);
 
-    if (!svg) return;
+  //   if (!svg) return;
 
-    saveSvg(svg, asset.asset_name);
-  }
+  //   saveSvg(svg, asset.asset_name);
+  // }
 
   return (
     <button
       className={"btn btn-secondary " + styles.btnQr}
-      onClick={downloadQR}
+      onClick={() => handleCaptureClick(my_id, asset.asset_name)}
+      id={my_id}
     >
       {isFeedback ? (
         <SVG
@@ -109,6 +125,7 @@ function QRAssetImg({
 interface NewAssetProps {
   plants: CMMSPlant[];
 }
+
 function QRCode(props: NewAssetProps) {
   const [selectedPlant, setSelectedPlant] = useState<number | null>(null);
   const [selectedAssets, setSelectedAssets] = useState<CMMSAsset[]>([]);
@@ -196,19 +213,21 @@ function QRCode(props: NewAssetProps) {
   const QRFeedbackImg = ({ loc_id }: { loc_id: number | null }) => {
     const { SVG } = useQRCode();
     const location = plantLocs.filter((loc) => loc.id === loc_id)[0].location;
-    console.log(location);
-    function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
-      const svg = e.currentTarget.querySelector("svg");
+    // console.log(location);
+    // function downloadQR(e: React.MouseEvent<HTMLButtonElement>) {
+    //   const svg = e.currentTarget.querySelector("svg");
 
-      if (!svg) return;
-      console.log("downloading", location);
+    //   if (!svg) return;
+    //   console.log("downloading", location);
 
-      saveSvg(svg, location + ".svg");
-    }
+    //   saveSvg(svg, location + ".svg");
+    // }
+    const id = "feedback" + loc_id;
     return (
       <button
         className={"btn btn-secondary " + styles.btnQr}
-        onClick={downloadQR}
+        onClick={() => handleCaptureClick(location, id)}
+        id={id}
       >
         <SVG
           text={window.location.origin + "/Guest/Feedback/" + loc_id}
@@ -258,7 +277,7 @@ function QRCode(props: NewAssetProps) {
               onChange={(e) => {
                 // console.log(e.target.value);
                 setSelectedPlant(parseInt(e.target.value));
-                console.log(selectedPlant);
+                // console.log(selectedPlant);
               }}
             >
               <option value="0" disabled hidden selected>
@@ -358,6 +377,7 @@ function QRCode(props: NewAssetProps) {
                   asset={asset}
                   plant={selectedPlant}
                   isFeedback={feedback}
+                  my_id={asset.asset_name}
                 />
               );
             })}
