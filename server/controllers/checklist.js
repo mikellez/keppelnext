@@ -680,7 +680,7 @@ const completeChecklist = async (req, res, next) => {
             keppel.checklist_master
         SET 
             datajson = $1,
-            status_id = 6,
+            status_id = 4,
             history = concat(history,'${updatehistory}'),
             activity_log = activity_log || 
         jsonb_build_object(
