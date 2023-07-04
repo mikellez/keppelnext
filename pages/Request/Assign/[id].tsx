@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import instance from '../../../types/common/axios.config';
+import instance from "../../../types/common/axios.config";
 import { useRouter } from "next/router";
 import {
   ModuleContent,
@@ -29,12 +29,16 @@ export default function AssignRequestPage(props: AssignRequestProps) {
   return (
     <ModuleMain>
       <ModuleHeader title="Assign Request" header="Assign Request">
-        <button className={"btn btn-secondary"} type="button" onClick={() => router.back()}>
+        <button
+          className={"btn btn-secondary"}
+          type="button"
+          onClick={() => router.back()}
+        >
           Back
         </button>
       </ModuleHeader>
       <ModuleContent>
-        <RequestContainer assignRequestData={props} />
+        <RequestContainer assignRequestData={props} isNotAssign={false} />
       </ModuleContent>
     </ModuleMain>
   );
@@ -55,10 +59,7 @@ export const getServerSideProps: GetServerSideProps = async (
     headers
   );
 
-  const getPriority = instance.get(
-    `/api/request/priority`,
-    headers
-  );
+  const getPriority = instance.get(`/api/request/priority`, headers);
 
   const values = await Promise.all([getSpecificRequest, getPriority]);
 

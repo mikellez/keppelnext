@@ -18,6 +18,7 @@ import instance from "../types/common/axios.config";
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const { asPath, route, pathname } = router;
+  const [isTimeoutPromt, setIsTimeoutPrompt] = useState(false);
   const [isTimeout, setIsTimeout] = useState(false);
 
   const sendLogout = (): void => {
@@ -35,7 +36,7 @@ export default function App({ Component, pageProps }: AppProps) {
   };
 
   function onPrompt() {
-    setIsTimeout(true);
+    setIsTimeoutPrompt(true);
   }
   function onActive() {
     setIsTimeout(false);
@@ -51,7 +52,7 @@ export default function App({ Component, pageProps }: AppProps) {
     onPrompt: onPrompt,
     onIdle: onIdle,
     onActive: onActive,
-    promptTimeout: 30 * 1000 * 60,
+    promptBeforeIdle: 15 * 1000 * 60,
     timeout: 30 * 1000 * 60,
     crossTab: true,
   });
@@ -132,7 +133,27 @@ export default function App({ Component, pageProps }: AppProps) {
         title="Your session has expired"
         icon={SimpleIcon.Exclaim}
         buttons={[
-          <TooltipBtn key={1} toolTip={false} onClick={sendLogout}>
+          <TooltipBtn
+            key={1}
+            toolTip={false}
+            onClick={() => setIsTimeout(false)}
+          >
+            Ok
+          </TooltipBtn>,
+        ]}
+      />
+      <ModuleSimplePopup
+        modalOpenState={isTimeoutPromt}
+        setModalOpenState={setIsTimeoutPrompt}
+        text="Do you want to exit?"
+        title="Your session will expire soon"
+        icon={SimpleIcon.Exclaim}
+        buttons={[
+          <TooltipBtn
+            key={1}
+            toolTip={false}
+            onClick={() => setIsTimeoutPrompt(false)}
+          >
             Ok
           </TooltipBtn>,
         ]}

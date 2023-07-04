@@ -66,7 +66,7 @@ FROM
 const fetchAssignedChecklistsQuery =
   fetchAllChecklistQuery +
   `
-  WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3) AND
+  WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6) AND
       (CASE
           WHEN (SELECT ua.role_id
               FROM
@@ -160,7 +160,7 @@ const getAssignedChecklistsQuery = (expand, search) => {
   return (
     getAllChecklistQuery(expand, search) +
     `
-    WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3) AND
+    WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6) AND
         (CASE
             WHEN (SELECT ua.role_id
                 FROM
@@ -196,7 +196,7 @@ const getForReviewChecklistsQuery = (expand, search) => {
     `
     WHERE
         ua.user_id = $1 AND
-        (cl.status_id = 4 OR cl.status_id = 6)
+        (cl.status_id = 4)
     ${searchCondition(search)}
     ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' DESC
   `
@@ -743,7 +743,7 @@ const editChecklistRecord = async (req, res, next) => {
   const assigned = req.body.assigned;
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
-  const updatehistory = assigned 
+  const updatehistory = assigned
     ? `,Assigned Record_ASSIGNED_${today}_${req.user.name}`
     : `,Edited Record_PENDING_${today}_${req.user.name}`;
   const statusId = data.assigned_user_id ? 2 : 1;
@@ -751,14 +751,18 @@ const editChecklistRecord = async (req, res, next) => {
     ? {
         date: today,
         name: req.user.name,
-        activity: `Assigned Checklist ID-${req.params.checklist_id} to ${data.assigneduser.split('|')[0].trim()}`,
-        activity_type: "ASSIGNED"
+        activity: `Assigned Checklist ID-${
+          req.params.checklist_id
+        } to ${data.assigneduser.split("|")[0].trim()}`,
+        activity_type: "ASSIGNED",
       }
     : {
         date: today,
         name: req.user.name,
-        activity: `Edited (${statusId == 2 ? "ASSIGNED" : "PENDING"}) Checklist ID-${req.params.checklist_id}`,
-        activity_type: `EDITED`
+        activity: `Edited (${
+          statusId == 2 ? "ASSIGNED" : "PENDING"
+        }) Checklist ID-${req.params.checklist_id}`,
+        activity_type: `EDITED`,
       };
 
   const sql = `
