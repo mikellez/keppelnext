@@ -193,7 +193,6 @@ const fetchPendingRequests = async (req, res, next) => {
     expand,
     search
   );
-  
 
   const result = await global.db.query(sql);
 
@@ -206,7 +205,7 @@ const fetchAssignedRequests = async (req, res, next) => {
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
-    "AND sc.status_id = 2", //ASSIGNED
+    "AND (sc.status_id = 2 OR sc.status_id = 5)", //ASSIGNED, REJECTED
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
@@ -226,7 +225,7 @@ const fetchReviewRequests = async (req, res, next) => {
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
-    "AND (sc.status_id = 3 OR sc.status_id = 5 OR sc.status_id = 6)", //COMPLETED, REJECTED, CANCELLED
+    "AND (sc.status_id = 3 OR sc.status_id = 6)", //COMPLETED, CANCELLED
     ` ORDER BY r.activity_log -> (jsonb_array_length(r.activity_log) -1) ->> 'date' DESC`,
     req.user.role_id,
     req.user.id,
@@ -783,7 +782,7 @@ const createRequestCSV = (req, res, next) => {
 };
 
 const rejectRequest = async (req, res) => {
-  console.log("correct")
+  console.log("correct");
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const activity = `Rejected Request Case ID-${req.params.request_id}`;
   sql = `
@@ -801,14 +800,25 @@ const rejectRequest = async (req, res) => {
 	WHERE request_id = $6`;
 
   console.log("reject", sql);
-  global.db.query(sql, [today, req.user.name, req.user.role_name, activity, req.body.comments, req.params.request_id], (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).send("Error in rejecting request");
+  global.db.query(
+    sql,
+    [
+      today,
+      req.user.name,
+      req.user.role_name,
+      activity,
+      req.body.comments,
+      req.params.request_id,
+    ],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).send("Error in rejecting request");
+      }
+      return res.status(200).json("Request successfully rejected");
     }
-    return res.status(200).json("Request successfully rejected");
-  });
-}
+  );
+};
 
 const approveRequest = async (req, res, next) => {
   // console.log(req.body);
@@ -816,7 +826,7 @@ const approveRequest = async (req, res, next) => {
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const activity = `Approved Request Case ID-${req.params.request_id}`;
-  
+
   const sql = `
 	UPDATE keppel.request SET 
 	status_id = 4,
@@ -831,10 +841,21 @@ const approveRequest = async (req, res, next) => {
         )
 	WHERE request_id = $6`;
   console.log(sql);
-  global.db.query(sql, [today, req.user.name, req.user.role_name, activity, req.body.comments, req.params.request_id], (err, result) => {
-    if (err) return res.status(500).send("Error in updating status");
-    return res.status(200).json("Request successfully updated");
-  });
+  global.db.query(
+    sql,
+    [
+      today,
+      req.user.name,
+      req.user.role_name,
+      activity,
+      req.body.comments,
+      req.params.request_id,
+    ],
+    (err, result) => {
+      if (err) return res.status(500).send("Error in updating status");
+      return res.status(200).json("Request successfully updated");
+    }
+  );
 };
 
 const completeRequest = async (req, res, next) => {
@@ -843,6 +864,7 @@ const completeRequest = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const history = `!COMPLETED_Completed request_${today}_${req.user.role_name}_${req.user.name}`;
 
+  // console.log(req.file)
   const sql = `UPDATE keppel.request SET
 		complete_comments = $1,
 		completion_file = $2,

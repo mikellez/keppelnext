@@ -189,7 +189,7 @@ export default function Feedback() {
             <Table
               data={{ nodes: feedbackItems }}
               theme={theme}
-              layout={{ custom: true, horizontalScroll: true, }}
+              layout={{ custom: true, horizontalScroll: true }}
             >
               {(tableList: CMMSFeedback[]) => (
                 <>
@@ -209,6 +209,7 @@ export default function Feedback() {
 
                   <Body>
                     {tableList.map((item) => {
+                      // console.log(item);
                       return (
                         <Row key={item.id} item={item}>
                           <Cell>{item.id}</Cell>
@@ -225,7 +226,7 @@ export default function Feedback() {
                           </Cell>
                           <Cell>
                             {moment(new Date(item.created_date)).format(
-                            "MMMM Do YYYY, h:mm:ss a"
+                              "MMMM Do YYYY, h:mm:ss a"
                             )}
                           </Cell>
                           <Cell>{item.assigned_user_name}</Cell>

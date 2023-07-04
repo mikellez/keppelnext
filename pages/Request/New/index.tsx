@@ -1,72 +1,77 @@
 import React, { useEffect, useState } from "react";
-import instance from '../../../types/common/axios.config';
+import instance from "../../../types/common/axios.config";
 import { useRouter } from "next/router";
 
 import {
-    ModuleContent,
-    ModuleDivider,
-    ModuleFooter,
-    ModuleHeader,
-    ModuleMain,
+  ModuleContent,
+  ModuleDivider,
+  ModuleFooter,
+  ModuleHeader,
+  ModuleMain,
 } from "../../../components";
 
 import {
-    CMMSBaseType,
-    CMMSRequestTypes,
-    CMMSFaultTypes,
-    CMMSUser,
+  CMMSBaseType,
+  CMMSRequestTypes,
+  CMMSFaultTypes,
+  CMMSUser,
 } from "../../../types/common/interfaces";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import Link from "next/link";
-import RequestContainer, { RequestProps } from "../../../components/Request/RequestContainer";
+import RequestContainer, {
+  RequestProps,
+} from "../../../components/Request/RequestContainer";
 
 export default function RequestNew(props: RequestProps) {
-    const router = useRouter();
+  const router = useRouter();
 
-    return (
-        <ModuleMain>
-            <ModuleHeader title="New Request" header="Create New Request">
-                <button className={"btn btn-secondary"} type="button" onClick={() => router.back()}>
-                    Back
-                </button>
-            </ModuleHeader>
-            <ModuleContent>
-                <RequestContainer requestData={props} />
-            </ModuleContent>
-        </ModuleMain>
-    );
+  return (
+    <ModuleMain>
+      <ModuleHeader title="New Request" header="Create New Request">
+        <button
+          className={"btn btn-secondary"}
+          type="button"
+          onClick={() => router.back()}
+        >
+          Back
+        </button>
+      </ModuleHeader>
+      <ModuleContent>
+        <RequestContainer requestData={props} isNotAssign={true} />
+      </ModuleContent>
+    </ModuleMain>
+  );
 }
 
 export const getServerSideProps: GetServerSideProps = async (
-    context: GetServerSidePropsContext
+  context: GetServerSidePropsContext
 ) => {
-    const headers = {
-        withCredentials: true,
-        headers: {
-            Cookie: context.req.headers.cookie,
-        },
-    };
+  const headers = {
+    withCredentials: true,
+    headers: {
+      Cookie: context.req.headers.cookie,
+    },
+  };
 
-    const getUser = instance
-        .get<CMMSUser>(`/api/user`, headers);
-    const getRequestTypes = instance.get<CMMSRequestTypes[]>(
-        `/api/request/types`,
-        headers
-    );
-    const getFaultTypes = instance.get<CMMSFaultTypes[]>(
-        `/api/fault/types`,
-        headers
-    );
+  const getUser = instance.get<CMMSUser>(`/api/user`, headers);
+  const getRequestTypes = instance.get<CMMSRequestTypes[]>(
+    `/api/request/types`,
+    headers
+  );
+  const getFaultTypes = instance.get<CMMSFaultTypes[]>(
+    `/api/fault/types`,
+    headers
+  );
 
-    const values = await Promise.all([getUser, getRequestTypes, getFaultTypes]);
+  const values = await Promise.all([getUser, getRequestTypes, getFaultTypes]);
 
-    const u: CMMSUser = values[0].data;
-    const r: CMMSRequestTypes[] = values[1].data;
-    const f: CMMSFaultTypes[] = values[2].data;
+  const u: CMMSUser = values[0].data;
+  const r: CMMSRequestTypes[] = values[1].data;
+  const f: CMMSFaultTypes[] = values[2].data;
 
-    let props: RequestProps = { user: u, requestTypes: r, faultTypes: f };
+  let props: RequestProps = { user: u, requestTypes: r, faultTypes: f };
 
-    return {
-        props: props,
-    };
+  return {
+    props: props,
+  };
 };

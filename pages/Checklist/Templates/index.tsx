@@ -112,7 +112,7 @@ const Templates = () => {
         <ModuleContent includeGreyContainer>
           <div className={styles.gridContainer}>
             <div style={{ maxHeight: "800px", overflow: "auto" }}>
-              <table className="table">
+              <table className="table" style={{backgroundColor: "grey"}}>
                 <thead id="templates_list">{checklistTemplateHTML}</thead>
               </table>
             </div>

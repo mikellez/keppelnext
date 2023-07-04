@@ -435,7 +435,7 @@ export default function Request(props: RequestProps) {
                             </Cell>
                             <Cell>
                             {activeTabIndex === 2 
-                            ? `${moment(new Date(item.activity_log.reverse().find((activity) => activity["activity_type"] == "COMPLETED").date))
+                            ? `${moment(new Date(item.activity_log.reverse().find((activity) => activity["activity_type"] == "COMPLETED")!.date))
                             .format(
                               "MMMM Do YYYY, h:mm:ss a"
                             )}`

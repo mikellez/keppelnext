@@ -716,8 +716,6 @@ router.get(
   controllers.checklist.fetchPendingChecklists
 );
 
-
-
 /**
  * @api {get} /checklist/templateNames/:id Get Template Names
  * @apiDescription Get all Template Names
