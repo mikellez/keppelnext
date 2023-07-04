@@ -341,9 +341,14 @@ router
  * @apiBody {String} comments Comments from the manager
  */
 router.patch(
-  "/request/:request_id/:status_id",
+  "/request/approve/:request_id",
   checkIfLoggedInAPI,
-  controllers.request.approveRejectRequest
+  controllers.request.approveRequest
+);
+
+router.patch("/request/reject/:request_id", 
+  checkIfLoggedInAPI,
+  controllers.request.rejectRequest
 );
 
 router.get(

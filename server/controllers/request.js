@@ -21,6 +21,7 @@ const searchCondition = (search) => {
 
 async function fetchRequestQuery(
   status_query,
+  order_query,
   role_id,
   user_id,
   page,
@@ -122,8 +123,7 @@ async function fetchRequestQuery(
 		  req_u.last_name,
 		  au.first_name,
 		  au.last_name
-	  )
-	  ORDER BY r.created_date DESC, r.status_id DESC`;
+	  ) ${order_query}`;
   } else {
     sql = `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
 	  ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
@@ -168,8 +168,7 @@ async function fetchRequestQuery(
 		  req_u.last_name,
 		  au.first_name,
 		  au.last_name
-	  )
-	  ORDER BY r.created_date DESC, r.status_id DESC`;
+	  ) ${order_query}`;
   }
 
   const result = await global.db.query(sql);
@@ -187,6 +186,7 @@ const fetchPendingRequests = async (req, res, next) => {
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND sc.status_id = 1", //PENDING
+    ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
     page,
@@ -206,6 +206,7 @@ const fetchAssignedRequests = async (req, res, next) => {
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND (sc.status_id = 2 OR sc.status_id = 5)", //ASSIGNED, REJECTED
+    ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
     page,
@@ -225,6 +226,7 @@ const fetchReviewRequests = async (req, res, next) => {
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND (sc.status_id = 3 OR sc.status_id = 6)", //COMPLETED, CANCELLED
+    ` ORDER BY r.activity_log -> (jsonb_array_length(r.activity_log) -1) ->> 'date' DESC`,
     req.user.role_id,
     req.user.id,
     page,
@@ -244,6 +246,7 @@ const fetchApprovedRequests = async (req, res, next) => {
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND sc.status_id = 4", //APPROVED
+    ` ORDER BY r.activity_log -> (jsonb_array_length(r.activity_log) -1) ->> 'date' DESC`,
     req.user.role_id,
     req.user.id,
     page,
@@ -778,54 +781,81 @@ const createRequestCSV = (req, res, next) => {
   });
 };
 
-const approveRejectRequest = async (req, res, next) => {
-  // console.log(req.body);
-
+const rejectRequest = async (req, res) => {
+  console.log("correct");
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  const text = req.params.status_id == 4 ? "Approved" : "Rejected";
-  const status = req.params.status_id == 4 ? "APPROVED" : "REJECTED";
-  console.log(req.params, req.body);
-  const id = req.params.status_id;
-  const history = `!${status}_${text} request_${today}_${req.user.role_name}_${req.user.name}`;
-  let sql = ``;
-  if (req.params.status_id != 4) {
-    history !=
-      `!NIL_Rejected due to ${req.body.comments}_${today}_${req.user.role_name}_${req.user.name}`;
-    sql = `
-    UPDATE keppel.request SET 
-    status_id = $1,
-    requesthistory = concat(requesthistory, $2::text),\
-    rejection_comments = ${req.body.comments}
-    activity_log = activity_log || 
-          jsonb_build_object(
-            'date', '${today}',
-            'name', '${req.user.name}',
-            'role', '${req.user.role_name}',
-            'activity', '${text} Request Case ID-${req.params.request_id},
-            'activity_type', '${status}',
-           'remarks', '${req.body.comments}'
-          )
-    WHERE request_id = $3`;
-  } else {
-    sql = `
+  const activity = `Rejected Request Case ID-${req.params.request_id}`;
+  sql = `
 	UPDATE keppel.request SET 
-	status_id = $1,
-	requesthistory = concat(requesthistory, $2::text),
+	status_id = 5,
   activity_log = activity_log || 
         jsonb_build_object(
-          'date', '${today}',
-          'name', '${req.user.name}',
-          'role', '${req.user.role_name}',
-          'activity', '${text} Request Case ID-${req.params.request_id}',
-          'activity_type', '${status}',
-          'remarks', '${req.body.comments}'
+          'date', $1::text,
+          'name', $2::text,
+          'role', $3::text,
+          'activity', $4::text,
+          'activity_type', 'REJECTED',
+          'remarks', $5::text
         )
-	WHERE request_id = $3`;
-  }
-  global.db.query(sql, [id, history, req.params.request_id], (err, result) => {
-    if (err) return res.status(500).send("Error in updating status");
-    return res.status(200).json("Request successfully updated");
-  });
+	WHERE request_id = $6`;
+
+  console.log("reject", sql);
+  global.db.query(
+    sql,
+    [
+      today,
+      req.user.name,
+      req.user.role_name,
+      activity,
+      req.body.comments,
+      req.params.request_id,
+    ],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).send("Error in rejecting request");
+      }
+      return res.status(200).json("Request successfully rejected");
+    }
+  );
+};
+
+const approveRequest = async (req, res, next) => {
+  // console.log(req.body);
+  console.log("wrong");
+
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const activity = `Approved Request Case ID-${req.params.request_id}`;
+
+  const sql = `
+	UPDATE keppel.request SET 
+	status_id = 4,
+  activity_log = activity_log || 
+        jsonb_build_object(
+          'date', $1::text,
+          'name', $2::text,
+          'role', $3::text,
+          'activity', $4::text,
+          'activity_type', 'APPROVED',
+          'remarks', $5::text
+        )
+	WHERE request_id = $6`;
+  console.log(sql);
+  global.db.query(
+    sql,
+    [
+      today,
+      req.user.name,
+      req.user.role_name,
+      activity,
+      req.body.comments,
+      req.params.request_id,
+    ],
+    (err, result) => {
+      if (err) return res.status(500).send("Error in updating status");
+      return res.status(200).json("Request successfully updated");
+    }
+  );
 };
 
 const completeRequest = async (req, res, next) => {
@@ -1056,7 +1086,8 @@ module.exports = {
   fetchSpecificRequest,
   fetchRequestPriority,
   updateRequest,
-  approveRejectRequest,
+  approveRequest,
+  rejectRequest,
   completeRequest,
   fetchPendingRequests,
   fetchFilteredRequests,

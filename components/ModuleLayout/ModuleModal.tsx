@@ -15,6 +15,7 @@ export interface ModalProps extends PropsWithChildren {
   className?: string;
   hideHeader?: boolean;
   large?: boolean;
+  medium? : boolean;
 }
 
 export function ModuleModal(props: ModalProps) {
@@ -35,9 +36,9 @@ export function ModuleModal(props: ModalProps) {
           backgroundColor: "rgba(0,0,0,0.4)",
         },
         content: {
-          backgroundColor: "#F0F0F0",
-          height: props.large ? "70%" : "50%",
-          width: props.large ? "70%" : "50%",
+          backgroundColor: "white",
+          height: props.large ? "70%" : props.medium? "60%" : "50%",
+          width: props.large ? "70%" : props.medium? "60%" : "50%",
           margin: "auto",
           border: "2px solid #393E46",
         },

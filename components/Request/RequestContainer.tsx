@@ -85,7 +85,7 @@ async function createRequest(
   formData.append("plantLocationID", plantId.toString());
   formData.append("requestTypeID", data.requestTypeID.toString());
   formData.append("taggedAssetID", data.taggedAssetID.toString());
-  console.log(data);
+  // console.log(data);
   if (data.image.length > 0) formData.append("image", data.image[0]);
   if (linkedRequestId) formData.append("linkedRequestId", linkedRequestId);
 
@@ -239,7 +239,23 @@ export default function RequestContainer(props: RequestContainerProps) {
         value: props.assignRequestData?.requestData.assigned_user_id,
         label: props.assignRequestData?.requestData.assigned_user_email,
       });
+      // console.log(props.assignRequestData.requestData.uploaded_file.data)
+      if (props.assignRequestData.requestData.uploaded_file) {
+        console.log("processing image");
+
+        setPreviewedFile(
+          URL.createObjectURL(
+            new Blob([
+              new Uint8Array(
+                props.assignRequestData?.requestData.uploaded_file.data
+              ),
+            ])
+          )
+        );
+      }
     }
+    // setPreviewedFile(props.assignRequestData?.assigned_file)
+
     if (props.linkedRequestData) {
       setPlantId(props.linkedRequestData.plant_id);
       updateAssetLists(
@@ -248,18 +264,7 @@ export default function RequestContainer(props: RequestContainerProps) {
       ); // asset dropdown according to default plant
     }
     setIsReady(true);
-
-    if (!selectedFile) {
-      setPreviewedFile(undefined);
-      return;
-    }
-
-    const objectURL = URL.createObjectURL(selectedFile);
-    setPreviewedFile(objectURL);
-
-    return () => URL.revokeObjectURL(objectURL);
   }, [
-    selectedFile,
     props.linkedRequestData,
     assignRequestData?.plant_id,
     props.assignRequestData,
@@ -268,15 +273,33 @@ export default function RequestContainer(props: RequestContainerProps) {
   ]);
 
   useEffect(() => {
-    const imageUrl = URL.createObjectURL(
-      new Blob([
-        new Uint8Array(
-          props.assignRequestData?.requestData.uploaded_file?.data
-        ),
-      ])
-    );
-    setUrl(imageUrl);
-  }, []);
+    console.log(previewedFile);
+  }, [previewedFile]);
+
+  useEffect(() => {
+    if (!props.assignRequestData) {
+      if (!selectedFile) {
+        setPreviewedFile(undefined);
+        return;
+      }
+
+      const objectURL = URL.createObjectURL(selectedFile);
+      setPreviewedFile(objectURL);
+
+      return () => URL.revokeObjectURL(objectURL);
+    }
+  }, [selectedFile]);
+
+  // useEffect(() => {
+  //   const imageUrl = URL.createObjectURL(
+  //     new Blob([
+  //       new Uint8Array(
+  //         props.assignRequestData?.requestData.uploaded_file?.data
+  //       ),
+  //     ])
+  //   );
+  //   setUrl(imageUrl);
+  // }, []);
 
   const onFileSelected = (e: React.ChangeEvent) => {
     const input = e.target as HTMLInputElement;
@@ -313,8 +336,6 @@ export default function RequestContainer(props: RequestContainerProps) {
     updateAssetLists(parseInt(e.target.value));
     resetField("taggedAssetID");
   };
-  // console.log(props.linkedRequestData);
-  // console.log(props);
   return (
     <form onSubmit={handleSubmit(formSubmit)}>
       <ModuleContent includeGreyContainer grid>
@@ -499,43 +520,40 @@ export default function RequestContainer(props: RequestContainerProps) {
             height: "100%",
           }}
         >
-          <div className="form-group">
-            {props.isNotAssign && (
+          {!props.assignRequestData && (
+            <div className="form-group">
               <div>
-                <div>
-                  <label className="form-label">Image</label>
-                  <input
-                    className="form-control"
-                    type="file"
-                    accept="image/jpeg,image/png,image/gif"
-                    id="formFile"
-                    // onChange={(e) => {
-                    //   // console.log(e.target.files![0]);
-                    //   setIsImage(false);
-                    //   setSelectedFile(e.target.files!);
-                    //   console.log(e.target.files![0]);
-                    // }}
-                    {...register("image", { onChange: onFileSelected })}
-                  />
-                </div>
-
-                {previewedFile && (
-                  <div
-                    className={`${formStyles.imageClick} form-group mt-3`}
-                    onClick={() => setIsImage(true)}
-                  >
-                    <div>
-                      <label className="form-label">
-                        <p style={{ textDecoration: "underline" }}>
-                          View Request Image
-                        </p>
-                      </label>
-                    </div>
-                  </div>
-                )}
+                <label className="form-label">Image</label>
+                <input
+                  className="form-control"
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif"
+                  id="formFile"
+                  // onChange={(e) => {
+                  //   // console.log(e.target.files![0]);
+                  //   setIsImage(false);
+                  //   setSelectedFile(e.target.files!);
+                  //   console.log(e.target.files![0]);
+                  // }}
+                  {...register("image", { onChange: onFileSelected })}
+                />
               </div>
-            )}
-          </div>
+            </div>
+          )}
+          {/* {previewedFile?.toString()} */}
+          {previewedFile && (
+            <div>
+              {props.assignRequestData && (
+                <label className="form-label mb-0">Fault Image</label>
+              )}
+              <div
+                className={`${formStyles.imageClick} form-group mt-0`}
+                onClick={() => setIsImage(true)}
+              >
+                <ImagePreview previewObjURL={previewedFile} />
+              </div>
+            </div>
+          )}
 
           {/* <ImagePreview previewObjURL={previewedFile} /> */}
           {/* {props.assignRequestData &&
@@ -646,18 +664,6 @@ export default function RequestContainer(props: RequestContainerProps) {
           Submit
         </button>
       </ModuleFooter>
-      <ModuleModal
-        isOpen={isImage}
-        closeModal={() => setIsImage(false)}
-        closeOnOverlayClick={true}
-        large
-        // hideHeader={props.windowWidth <= 768}
-      >
-        {/* <Image src={f.image} width={100} height={100} alt="" /> */}
-        <div style={{ textAlign: "center" }}>
-          <img width={"100%"} height={"100%"} src={previewedFile} alt="" />
-        </div>
-      </ModuleModal>
     </form>
   );
 }

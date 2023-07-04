@@ -4,6 +4,9 @@ import Image from "next/image";
 import styles from "../../styles/Request.module.scss";
 import { ModuleModal } from "../ModuleLayout/ModuleModal";
 import moment from "moment";
+import { AiOutlineDownload } from "react-icons/ai";
+import { BiDownload } from "react-icons/bi"
+import { FaDownload } from "react-icons/fa";
 
 export enum RequestAction {
   manage = 1,
@@ -74,7 +77,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
     <div>
       <table className={styles.table}>
         <tbody>
-          <tr>
+          <tr style={{ marginBottom: "50px"}}>
             <th>Request Type</th>
             <td>{props.request.request_name}</td>
           </tr>
@@ -108,7 +111,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
             <th>Assigned To</th>
             <td>{props.request.assigned_user_name || "N.A"}</td>
           </tr>
-          <tr>
+          <tr >
             <th>Requested By</th>
             <td>{props.request.created_by || "N.A"}</td>
           </tr>
@@ -116,28 +119,30 @@ export default function RequestPreview(props: RequestPreviewProps) {
             <th>Fault Image</th>
             <td>
               {faultUrl ? (
-                <span
-                  className={styles.viewImage}
-                  onClick={() => setFaultModal(true)}
-                >
-                  <Image
-                    src={faultUrl}
-                    width={150}
-                    height={150}
-                    style={{ objectFit: "contain" }}
-                    alt="Fault Image"
-                  />
-                  <div style={{ paddingTop: "10px", paddingBottom: "10px" }}>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div className="mb-2">
+                    <Image
+                      src={faultUrl}
+                      onClick={() => setFaultModal(true)}
+                      width={150}
+                      height={150}
+                      style={{ objectFit: "contain", cursor: "pointer" }}
+                      alt="Fault Image"
+                      />
+                  </div>
+
+                  <div>
                     <a href={faultUrl} download="FaultImage.jpg">
-                      <button
+                      <FaDownload size={16}/>
+                      {/* <button
                         className="btn btn-primary"
                         style={{ fontSize: "0.8rem" }}
-                      >
+                        >
                         Download
-                      </button>
+                      </button> */}
                     </a>
                   </div>
-                </span>
+                </div>
               ) : (
                 "No File"
               )}
@@ -185,13 +190,27 @@ export default function RequestPreview(props: RequestPreviewProps) {
               <tr>
                 <th>Completion Image</th>
                 <td>
+                  
                   {completeUrl ? (
-                    <span
-                      onClick={() => setCompletionModal(true)}
-                      className={styles.viewImage}
-                    >
-                      View Image
-                    </span>
+                    <div className="d-flex align-items-center justify-content-between">
+
+                      <div className="mb-2">
+                        <Image
+                        src={completeUrl}
+                        onClick={() => setCompletionModal(true)}
+                        width={150}
+                        height={150}
+                        style={{ objectFit: "contain", cursor: "pointer" }}
+                        alt="Fault Image"
+                        />
+                      </div>
+                      <div>
+                        <a href={completeUrl} download="CompletionImage.jpg">
+                          <FaDownload size={16}/>
+                        </a>
+                      </div>
+                    </div>
+                    
                   ) : (
                     "No File"
                   )}

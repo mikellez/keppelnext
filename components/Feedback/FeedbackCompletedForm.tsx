@@ -18,7 +18,6 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
   const [previewedFile, setPreviewedFile] = useState<string>();
   const [feedbackImage, setFeedbackImage] = useState<boolean>(false);
   const [completeImage, setCompleteImage] = useState<boolean>(false);
-  const [portrait, setPortrait] = useState<boolean>(false);
 
   // const updateDataField = (
   //   value: number | string | Date | null,
