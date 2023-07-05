@@ -70,6 +70,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
       setIncompleteModal(true);
     } else {
       setSuccessModal(true);
+      console.log(checklistData)
       createChecklist(checklistData, checklistType);
       setTimeout(() => {
         router.push("/Checklist");

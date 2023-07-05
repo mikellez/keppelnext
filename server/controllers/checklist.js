@@ -53,7 +53,7 @@ FROM
             keppel.checklist_master AS t3
         WHERE 
             t1.system_asset_id = t2.system_asset_id_lvl4 AND 
-            t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
+            ',' || t3.linkedassetids || ',' LIKE concat(concat('%,',t2.psa_id::text) , ',%')
         GROUP BY t3.checklist_id) tmp1 ON tmp1.checklist_id = cl.checklist_id
     LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
     LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
@@ -395,15 +395,15 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
     fetchAllChecklistQuery +
     ` 
         WHERE 
-            cl.checklist_id = $1
+            cl.checklist_id = $1 and ua.user_id = $2
     `;
 
-  global.db.query(sql, [req.params.checklist_id], (err, found) => {
+  global.db.query(sql, [req.params.checklist_id, req.user.id], (err, found) => {
     if (err) {
       console.log(err);
       return res.status(500).json("No checklist template found");
     }
-    // console.log(found.rows[0]);
+    console.log(found.rows);
     res.status(200).send(found.rows[0]);
   });
 };

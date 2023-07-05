@@ -8,6 +8,7 @@ import { ModuleDivider, ModuleModal } from "../../";
 import Image from "next/image";
 import styles from "../../../styles/Checklist.module.scss";
 import requestStyles from "../../../styles/Request.module.scss";
+import ImagePreview from "../../Request/ImagePreview";
 
 export class FileUploadControl extends CheckControl {
   constructor(question?: string, value?: string, id?: string) {
@@ -166,7 +167,7 @@ function FileUploadEditable({
       <input
         type="file"
         name={fileControlObj.id}
-        className="form-control"
+        className="form-control mb-3"
         onChange={handleChange}
         accept="jpeg/png"
       />
@@ -178,6 +179,7 @@ function FileUploadEditable({
           >
             View File
           </p>
+          
           <ModuleModal
             closeModal={() => setModalOpen(false)}
             isOpen={modalOpen}
@@ -207,7 +209,10 @@ function FileUploadView({
   return (
     <div className={styles.checkViewContainer}>
       <h6>{fileControlObj.question}</h6>
-      <p onClick={() => setModalOpen(true)} className={requestStyles.editIcon}>
+      <div>
+            <ImagePreview previewObjURL={fileControlObj.value}/>
+          </div>
+      {/* <p onClick={() => setModalOpen(true)} className={requestStyles.editIcon}>
         View File
       </p>
       <ModuleModal
@@ -217,7 +222,7 @@ function FileUploadView({
         className={requestStyles.imageModal}
       >
         <Image src={fileControlObj.value} alt="img" width={500} height={500} />
-      </ModuleModal>
+      </ModuleModal> */}
     </div>
   );
 }

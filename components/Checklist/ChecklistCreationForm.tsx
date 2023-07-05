@@ -19,7 +19,7 @@ interface ChecklistCreationFormProps {
 };
 
 const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
-    console.log(props.checklistData)
+    // console.log(props.checklistData)
     const updateChecklist = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const newInput = e.target.name === "plant_id" ? parseInt(e.target.value) : e.target.value;
         props.setChecklistData((prev) => {
@@ -94,6 +94,7 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
 
                     <AssetSelect
                         onChange={(values) => {
+                            console.log(values);
                             if (Array.isArray(values)) {
                                 const assetIdsString =
                                     values.length > 0

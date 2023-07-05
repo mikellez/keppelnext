@@ -46,10 +46,12 @@
 
 .editIcon {
   cursor: pointer;
+  text-decoration: underline;
+  color: #c70f2b;
 }
 
 .editIcon:hover {
-  color: #c70f2b;
+  color: #ff0026;
 }
 
 .imageModal {
