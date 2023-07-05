@@ -27,6 +27,7 @@ interface ChecklistPageProps {
 }
 
 const createChecklist = async (checklist: CMMSChecklist, type: string) => {
+  console.log(checklist);
   return await instance
     .post(`/api/checklist/${type}`, { checklist })
     .then((res) => {
@@ -36,12 +37,13 @@ const createChecklist = async (checklist: CMMSChecklist, type: string) => {
 };
 
 const editChecklistAPI = async (
-  checklist: CMMSChecklist,
+  checklistData: CMMSChecklist,
   checklistId: number,
   assigned: boolean
 ) => {
+  console.log(checklistData);
   return await instance
-    .patch(`/api/checklist/record/${checklistId}`, { checklist, assigned })
+    .patch(`/api/checklist/record/${checklistId}`, { checklistData, assigned })
     .then((res) => {
       return res.data;
     })
@@ -142,6 +144,10 @@ export default function ChecklistNew(props: ChecklistPageProps) {
     });
   }, [sections]);
 
+  // useEffect(() => {
+  //   console.log(checklistData.linkedassets, checklistData.linkedassetids);
+  // }, [checklistData.linkedassetids]);
+
   return (
     <>
       <ModuleMain>
@@ -187,7 +193,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
             </ModuleContent>
 
             <ModuleFooter>
-              {router.query.action === "New" && 
+              {router.query.action === "New" && (
                 <>
                   <TooltipBtn
                     className="mb-1"
@@ -209,7 +215,8 @@ export default function ChecklistNew(props: ChecklistPageProps) {
                   >
                     Submit
                   </TooltipBtn>
-                </>}
+                </>
+              )}
               {/* : (
                 <TooltipBtn
                   toolTip={false}
