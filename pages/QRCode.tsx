@@ -19,7 +19,6 @@ import { set } from "nprogress";
 import AssetSearchBar from "../components/SearchBar/AssetsSearchBar";
 import downloadjs from "downloadjs";
 import html2canvas from "html2canvas";
-import { Button } from "antd";
 
 async function handleCaptureClick(name: string, id: string) {
   // console.log(document.getElementById("qr"));
