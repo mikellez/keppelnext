@@ -7,6 +7,8 @@ import moment from "moment";
 import { AiOutlineDownload } from "react-icons/ai";
 import { BiDownload } from "react-icons/bi"
 import { FaDownload } from "react-icons/fa";
+import { TbSquareRoundedArrowRightFilled } from "react-icons/tb";
+import { useRouter } from "next/router";
 
 export enum RequestAction {
   manage = 1,
@@ -24,6 +26,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
   const [completionModal, setCompletionModal] = useState(false);
   const [faultModal, setFaultModal] = useState(false);
   const [comments, setComments] = useState<null | Object>(null);
+  const router = useRouter();
   let date; // declare the date variable outside the if block
 
   // get completed date from activity_log
@@ -131,16 +134,15 @@ export default function RequestPreview(props: RequestPreviewProps) {
                       />
                   </div>
 
-                  <div>
-                    <a href={faultUrl} download="FaultImage.jpg">
-                      <FaDownload size={16}/>
-                      {/* <button
-                        className="btn btn-primary"
-                        style={{ fontSize: "0.8rem" }}
-                        >
-                        Download
-                      </button> */}
-                    </a>
+                  <div> 
+                    {/* <a href={faultUrl} download="FaultImage.jpg"> */}
+                      <FaDownload color="#c70f2b" size={16} onClick={() => {
+                        const link = document.createElement("a");
+                        link.href = faultUrl;
+                        link.download="FaultImage.jpg";
+                        link.click();
+                      }}/>
+                    {/* </a> */}
                   </div>
                 </div>
               ) : (
@@ -205,9 +207,14 @@ export default function RequestPreview(props: RequestPreviewProps) {
                         />
                       </div>
                       <div>
-                        <a href={completeUrl} download="CompletionImage.jpg">
-                          <FaDownload size={16}/>
-                        </a>
+                        {/* <a href={completeUrl} download="CompletionImage.jpg"> */}
+                          <FaDownload color="#c70f2b" size={16} onClick={() => {
+                            const link = document.createElement("a");
+                            link.href = completeUrl;
+                            link.download = "CompletionImage.jpg"
+                            link.click();
+                          }}/>
+                        {/* </a> */}
                       </div>
                     </div>
                     
@@ -249,6 +256,21 @@ export default function RequestPreview(props: RequestPreviewProps) {
               </tr>
             </>
           )}
+          {props.request.associatedrequestid &&
+          <tr>
+            <th>Linked Request ID</th>
+            <td>
+              <div className="d-flex align-items-center">
+
+              <span className="me-3">
+                {props.request.associatedrequestid}
+              </span>
+              <TbSquareRoundedArrowRightFilled size={22} color="#c70f2b" cursor="pointer"
+                title={"See this request"} 
+                onClick={() => router.push(`/Request/View/${props.request.associatedrequestid}`)}/>
+              </div>
+            </td>
+          </tr>}
         </tbody>
       </table>
     </div>

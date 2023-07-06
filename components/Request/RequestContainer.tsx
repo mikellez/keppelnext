@@ -50,6 +50,8 @@ import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
 import Select, { ActionMeta, MultiValue, StylesConfig } from "react-select";
 import Image from "next/image";
 import moment from "moment";
+import { TbSquareRoundedArrowRightFilled } from "react-icons/tb";
+import Link from "next/link";
 
 type FormValues = {
   requestTypeID: number;
@@ -221,6 +223,8 @@ export default function RequestContainer(props: RequestContainerProps) {
     router.push("/Request/");
   };
   useEffect(() => {
+    console.log("linked", props.linkedRequestData);
+    console.log("assigned", props.assignRequestData);
     setIsReady(false);
 
     if (props.assignRequestData) {
@@ -495,16 +499,28 @@ export default function RequestContainer(props: RequestContainerProps) {
               }
             />
           </div>
-          {props.linkedRequestData && (
-            <div className="form-group">
-              <label className="form-label">Linked Request</label>
-              <input
-                className="form-control"
-                type="text"
-                id="formControlLinkedRequest"
-                disabled
-                defaultValue={props.linkedRequestData.request_id}
-              />
+          {(props.linkedRequestData || props.assignRequestData?.requestData.associatedrequestid) && (
+            // <div className="form-group">
+            //   <label className="form-label">Linked Request</label>
+            //   <input
+            //     className="form-control"
+            //     type="text"
+            //     id="formControlLinkedRequest"
+            //     disabled
+            //     defaultValue={props.linkedRequestData.request_id}
+            //   />
+            // </div>
+            <div className="mt-3 d-flex align-items-center">
+              <span className="me-3">
+                {`Linked Request ID: ${props.linkedRequestData 
+                  ? props.linkedRequestData.request_id 
+                  : props.assignRequestData?.requestData.associatedrequestid}`}
+              </span>
+              {/* <Link href={`/Request/View/${props.linkedRequestData!.request_id}`}>
+              </Link> */}
+              <TbSquareRoundedArrowRightFilled size={22} color="#c70f2b" cursor="pointer"
+                title={"See this request"} onClick={() => router.push(`/Request/View/${props.linkedRequestData
+                  ? props.linkedRequestData.request_id : props.assignRequestData?.requestData.associatedrequestid}`)}/>
             </div>
           )}
         </div>
