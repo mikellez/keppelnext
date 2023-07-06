@@ -146,5 +146,5 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
 
 export default CompleteChecklistPage;
 const getServerSideProps: GetServerSideProps =
-  createChecklistGetServerSideProps([2, 3]);
+  createChecklistGetServerSideProps([2, 3, 6]);
 export { getServerSideProps };

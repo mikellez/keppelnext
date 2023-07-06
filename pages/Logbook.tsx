@@ -30,6 +30,7 @@ import PageButton from "../components/PageButton";
 import styles2 from "../styles/Request.module.scss";
 import { FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
 import { useCurrentUser } from "../components/SWR";
+import { CMMSPlant } from "../types/common/interfaces";
 import moment from "moment";
 
 export interface logbookData {
@@ -42,9 +43,11 @@ export interface logbookData {
 const Logbook = ({
   data,
   totalPages,
+  plants,
 }: {
   data: logbookData[];
   totalPages: number;
+  plants: CMMSPlant[];
 }) => {
   const [logbookData, setLogbookData] = useState(data);
   const [lock, setLock] = useState(false);
@@ -53,6 +56,8 @@ const Logbook = ({
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
   const [page, setPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<number>(plants[0].plant_id);
+  const [isReady, setIsReady] = useState<boolean>(true);
 
   const [staff, setStaff] = useState<{
     first: null | number;
@@ -113,6 +118,7 @@ const Logbook = ({
     } else {
       setLoading(false);
     }
+    console.log(plants);
   }, []);
 
   useEffect(() => {
@@ -130,6 +136,14 @@ const Logbook = ({
 
     getLogbook(page);
   }, [page]);
+
+  const switchTab = (tab: number) => {
+    // if (isReady) {
+      // setIsReady(false);
+      setActiveTab(tab);
+      setPage(1);
+    // }
+  }
 
   const onLockHandler = () => {
     localStorage.setItem("staff", JSON.stringify(staff));
@@ -160,6 +174,33 @@ const Logbook = ({
     <ModuleMain>
       <ModuleHeader title="E-Logbook" header="E-Logbook"></ModuleHeader>
       <ModuleContent>
+        <ul className="nav nav-tabs">
+          {plants.map((plant) => {
+            return <li key={plant.plant_id} className={`nav-link ${activeTab == plant.plant_id ? "active" : ""}`}
+            onClick={() => activeTab != plant.plant_id && switchTab(plant.plant_id)}>
+            {plant.plant_name}
+          </li>
+          })}
+          {/* <li className={`nav-link ${activeTab == 1 ? "active" : ""}`}
+            onClick={() => activeTab != 1 && switchTab(1)}>
+            Changi DHCS
+          </li>
+          <li className={`nav-link ${activeTab == 2 ? "active" : ""}`}
+            onClick={() => activeTab != 2 && switchTab(2)}>
+            Woodlands DHCS
+          </li>
+          <li className={`nav-link ${activeTab == 3 ? "active" : ""}`}
+            onClick={() => activeTab != 3 && switchTab(3)}>
+            Biopolis
+          </li>
+          <li className={`nav-link ${activeTab == 4 ? "active" : ""}`}
+            onClick={() => activeTab != 4 && switchTab(4)}>
+            Mediapolis
+          </li> */}
+        </ul>
+        <div className="p-5" style={{border: "solid #e9ecef 1px"}}>
+
+        
         <form className={styles.logbookForm} onSubmit={submitHandler}>
           <div className={styles.addEntryInputs}>
             {/* <input type="text" value={formatDate(new Date().toString())} disabled name="date" /> */}
@@ -233,7 +274,7 @@ const Logbook = ({
           </div>
           <div className={styles.entryDiv}>
             <textarea
-              cols={30}
+              cols={20}
               rows={5}
               placeholder="Entry Details"
               name="entry"
@@ -242,12 +283,17 @@ const Logbook = ({
                 setEntry(event.target.value)
               }
               className="form-control"
+              style={{resize: "none", overflow: "auto", width: "100%"}}
             />
           </div>
-          <button type="submit" className="btn btn-primary">
+          <div className="d-flex justify-content-end">
+
+          <button type="submit" className="ms-auto btn btn-primary">
             Log Entry
           </button>
+          </div>
         </form>
+        
         <ModuleSimplePopup
           modalOpenState={modal}
           setModalOpenState={setModal}
@@ -276,9 +322,9 @@ const Logbook = ({
                 </Header>
 
                 <Body>
-                  {logbookData.map((row) => {
+                  {logbookData.map((row, index) => {
                     return (
-                      <Row key={row.logbook_id} item={{ id: row.logbook_id }}>
+                      <Row key={index} item={{ id: row.logbook_id }}>
                         <Cell>{moment(new Date(row.date)).format(
                             "MMMM Do YYYY, h:mm:ss a"
                             )}</Cell>
@@ -321,6 +367,7 @@ const Logbook = ({
             onClick={() => setPage(totalPages)}
           />
         </div>
+        </div>
       </ModuleContent>
     </ModuleMain>
   );
@@ -343,7 +390,10 @@ export const getServerSideProps = async (
     headers
   );
 
+  const plants = await instance.get(`api/getPlants`, headers);
+
+
   return {
-    props: { data: response.data.rows, totalPages: response.data.total },
+    props: { data: response.data.rows, totalPages: response.data.total, plants: plants.data },
   };
 };
