@@ -13,10 +13,14 @@ import styles from "../../../styles/Checklist.module.scss";
 
 const downloadChecklistPDF = async (checklistId: number) => {
   try {
+    const headers = {
+      'X-Download-PDF': 'true',
+    }
     const response = await instance({
       url: "/api/checklist/pdf/" + checklistId,
       method: "get",
       responseType: "arraybuffer",
+      headers: headers,
     });
 
     const blob = new Blob([response.data]);
