@@ -21,6 +21,8 @@ import { CMMSActivitylog } from "../../types/common/interfaces";
 import { HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../components/TooltipBtn";
 import instance from "../../axios.config";
+import Pagination from "../../components/Pagination";
+import LoadingHourglass from "../../components/LoadingHourglass";
 type PickerType = "date";
 const { Option } = Select;
 
@@ -36,6 +38,8 @@ export default function AccountLog() {
     datetype: PickerType;
   }>({ date: null, datetype: "day" });
   const [justInitialised, setJustInitialised] = useState<boolean>(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const handleDateChange: DatePickerProps["onChange"] = (date, dateString) => {
     setPickerWithType((prevState) => {
@@ -153,7 +157,8 @@ export default function AccountLog() {
 
   useEffect(() => {
     if (!isReady && data && !isValidating) {
-      setActivityItems(data);
+      setTotalPages(data.totalPages);
+      setActivityItems(data.logs);
       setReady(true);
     }
   }, [data, isValidating]);
@@ -170,25 +175,30 @@ export default function AccountLog() {
   useEffect(() => {
     if (date) {
       setReady(false);
-      console.log(data);
-      console.log(`/api/activity/account_log/` + datetype + `/${date}`);
-      instance(`/api/activity/account_log/` + datetype + `/${date}`).then(
-        (res: any) => {
-          console.log(res.data);
-          setActivityItems(res.data);
-          setReady(true);
-        }
-      );
-    } else {
-      console.log("test");
-      setReady(false);
-      console.log(`/api/activity/account_log`);
-      instance(`/api/activity/account_log`).then((res: any) => {
+      // console.log(data);
+      // console.log(`/api/activity/account_log/` + datetype + `/${date}`);
+      instance(
+        `/api/activity/account_log/` + datetype + `/${date}?page=${page}`
+      ).then((res: any) => {
         console.log(res.data);
-        setActivityItems(res.data);
+        setActivityItems(res.data.logs);
+        setTotalPages(res.data.totalPages);
+        setReady(true);
+      });
+    } else {
+      setReady(false);
+      // console.log(`/api/activity/account_log`);
+      instance(`/api/activity/account_log?page=${page}`).then((res: any) => {
+        // console.log(res.data);
+        setActivityItems(res.data.logs);
+        setTotalPages(res.data.totalPages);
         setReady(true);
       });
     }
+  }, [date, page]);
+
+  useEffect(() => {
+    setPage(1);
   }, [date]);
 
   return (
@@ -209,59 +219,68 @@ export default function AccountLog() {
       </ModuleHeader>
       <ModuleContent>
         {isReady && (
-          <Table data={{ nodes: activityItems }} theme={theme}>
-            {(tableList: CMMSActivitylog[]) => (
-              <>
-                <Header>
-                  <HeaderRow>
-                    <HeaderCell
-                      resize
-                      onClick={() => updateTable(sortUserName)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      {userName}
-                    </HeaderCell>
-                    <HeaderCell
-                      resize
-                      onClick={() => updateTable(sortType)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      {type}
-                    </HeaderCell>
-                    <HeaderCell resize>Activity</HeaderCell>
-                    <HeaderCell
-                      resize
-                      onClick={() => updateTable(sortDate)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      {datee}
-                    </HeaderCell>
-                  </HeaderRow>
-                </Header>
+          <>
+            <Table data={{ nodes: activityItems }} theme={theme}>
+              {(tableList: CMMSActivitylog[]) => (
+                <>
+                  <Header>
+                    <HeaderRow>
+                      <HeaderCell
+                        resize
+                        onClick={() => updateTable(sortUserName)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {userName}
+                      </HeaderCell>
+                      <HeaderCell
+                        resize
+                        onClick={() => updateTable(sortType)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {type}
+                      </HeaderCell>
+                      <HeaderCell resize>Activity</HeaderCell>
+                      <HeaderCell
+                        resize
+                        onClick={() => updateTable(sortDate)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {datee}
+                      </HeaderCell>
+                    </HeaderRow>
+                  </Header>
 
-                <Body>
-                  {tableList.map((item, index) => {
-                    console.log(item.id);
-                    return (
-                      <Row key={index} item={item}>
-                        <Cell>{item.user_name}</Cell>
-                        <Cell>{item.type}</Cell>
-                        <Cell>{item.description}</Cell>
-                        <Cell>
-                          {item.event_time
-                            ? moment(new Date(item.event_time)).format(
-                                "MMMM Do YYYY, h:mm:ss a"
-                              )
-                            : " "}
-                        </Cell>
-                      </Row>
-                    );
-                  })}
-                </Body>
-              </>
-            )}
-          </Table>
+                  <Body>
+                    {tableList.map((item, index) => {
+                      // console.log(item.id);
+                      return (
+                        <Row key={index} item={item}>
+                          <Cell>{item.user_name}</Cell>
+                          <Cell>{item.type}</Cell>
+                          <Cell>{item.description}</Cell>
+                          <Cell>
+                            {item.event_time
+                              ? moment(new Date(item.event_time)).format(
+                                  "MMMM Do YYYY, h:mm:ss a"
+                                )
+                              : " "}
+                          </Cell>
+                        </Row>
+                      );
+                    })}
+                  </Body>
+                </>
+              )}
+            </Table>
+            <Pagination
+              page={page}
+              setPage={setPage}
+              totalPages={totalPages}
+              setReady={setReady}
+            />
+          </>
         )}
+        {!isReady && <LoadingHourglass />}
       </ModuleContent>
     </ModuleMain>
   );

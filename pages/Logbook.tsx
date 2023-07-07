@@ -96,6 +96,7 @@ const Logbook = ({
         label: labelValue,
         entry: entryValue,
         staff,
+        plant_id: activeTab,
       });
 
       if (!lock) {
@@ -128,21 +129,24 @@ const Logbook = ({
   }, [staff]);
 
   useEffect(() => {
-    const getLogbook = async (pageNumber: number) => {
-      const response = await instance.get(`/api/logbook?page=${pageNumber}`);
+    if (!isReady) {
 
-      setLogbookData(response.data.rows);
-    };
-
-    getLogbook(page);
-  }, [page]);
+      const getLogbook = async (pageNumber: number) => {
+        const response = await instance.get(`/api/logbook/${activeTab}?page=${pageNumber}`);
+        
+        setLogbookData(response.data.rows);
+      };
+      
+      getLogbook(page).then(res => setIsReady(true));
+    }
+  }, [page, activeTab]);
 
   const switchTab = (tab: number) => {
-    // if (isReady) {
-      // setIsReady(false);
+    if (isReady) {
+      setIsReady(false);
       setActiveTab(tab);
       setPage(1);
-    // }
+    }
   }
 
   const onLockHandler = () => {
@@ -181,22 +185,6 @@ const Logbook = ({
             {plant.plant_name}
           </li>
           })}
-          {/* <li className={`nav-link ${activeTab == 1 ? "active" : ""}`}
-            onClick={() => activeTab != 1 && switchTab(1)}>
-            Changi DHCS
-          </li>
-          <li className={`nav-link ${activeTab == 2 ? "active" : ""}`}
-            onClick={() => activeTab != 2 && switchTab(2)}>
-            Woodlands DHCS
-          </li>
-          <li className={`nav-link ${activeTab == 3 ? "active" : ""}`}
-            onClick={() => activeTab != 3 && switchTab(3)}>
-            Biopolis
-          </li>
-          <li className={`nav-link ${activeTab == 4 ? "active" : ""}`}
-            onClick={() => activeTab != 4 && switchTab(4)}>
-            Mediapolis
-          </li> */}
         </ul>
         <div className="p-5" style={{border: "solid #e9ecef 1px"}}>
 
@@ -385,12 +373,12 @@ export const getServerSideProps = async (
     },
   };
 
+  
+  const plants = await instance.get(`api/getPlants`, headers);
   const response = await instance.get(
-    `/api/logbook?page=1`,
+    `/api/logbook/${plants.data[0].plant_id}?page=1`,
     headers
   );
-
-  const plants = await instance.get(`api/getPlants`, headers);
 
 
   return {

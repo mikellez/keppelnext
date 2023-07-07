@@ -11,7 +11,8 @@ import { StaffContextProvider } from "../components/Context/StaffContext";
 import { ModuleModal, SimpleIcon } from "../components";
 import ModuleSimplePopup from "../components/ModuleLayout/ModuleSimplePopup";
 import TooltipBtn from "../components/TooltipBtn";
-import { useIdleTimer } from "react-idle-timer";
+// import IdleTimer from "../components/IdleTimer";
+//import { useIdleTimer } from "react-idle-timer";
 import instance from "../types/common/axios.config";
 import User from "./User/Management";
 
@@ -36,7 +37,7 @@ export default function App({ Component, pageProps }: AppProps) {
       });
   };
 
-  function onPrompt() {
+  /*function onPrompt() {
     setIsTimeoutPrompt(true);
     setIsTimeout(true);
   }
@@ -53,9 +54,9 @@ export default function App({ Component, pageProps }: AppProps) {
       setTimerStarted(false);
       idleTimer.pause();
     }
-  }
+  }*/
 
-  const idleTimer = useIdleTimer({
+  /*const idleTimer = useIdleTimer({
     onPrompt: onPrompt,
     onIdle: onIdle,
     onActive: onActive,
@@ -65,7 +66,7 @@ export default function App({ Component, pageProps }: AppProps) {
     // timeout: 10 * 1000,
     crossTab: true,
     stopOnIdle: true,
-  });
+  });*/
 
   useEffect(() => {
     // if (!timer) {
@@ -79,10 +80,10 @@ export default function App({ Component, pageProps }: AppProps) {
     //     })
     //   );
     // }
-    if (!timerStarted && !asPath.includes("/Login")) {
+    /*if (!timerStarted && !asPath.includes("/Login")) {
       idleTimer.start();
       setTimerStarted(true);
-    }
+    }*/
   }, [asPath]);
 
   useEffect(() => {
