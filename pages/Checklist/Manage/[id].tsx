@@ -90,7 +90,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
           <TooltipBtn
             text="Download PDF"
             onClick={() => {
-              console.log("Download PDF");
+              // console.log("Download PDF");
               downloadChecklistPDF(parseInt(router.query.id as string));
             }}
           >

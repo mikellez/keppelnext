@@ -11,7 +11,6 @@ import { StaffContextProvider } from "../components/Context/StaffContext";
 import { ModuleModal, SimpleIcon } from "../components";
 import ModuleSimplePopup from "../components/ModuleLayout/ModuleSimplePopup";
 import TooltipBtn from "../components/TooltipBtn";
-// import IdleTimer from "../components/IdleTimer";
 import { useIdleTimer } from "react-idle-timer";
 import instance from "../types/common/axios.config";
 import User from "./User/Management";

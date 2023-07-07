@@ -14,8 +14,8 @@ import styles from "../../../styles/Checklist.module.scss";
 const downloadChecklistPDF = async (checklistId: number) => {
   try {
     const headers = {
-      'X-Download-PDF': 'true',
-    }
+      "X-Download-PDF": "true",
+    };
     const response = await instance({
       url: "/api/checklist/pdf/" + checklistId,
       method: "get",
@@ -23,7 +23,10 @@ const downloadChecklistPDF = async (checklistId: number) => {
       headers: headers,
     });
 
+    // console.log();
+
     const blob = new Blob([response.data]);
+    // console.log(blob);
     const url = URL.createObjectURL(blob);
     const temp = document.createElement("a");
     temp.download = `checklist ${checklistId}.pdf`;
@@ -45,30 +48,38 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
     }
   }, [props.checklist]);
 
-    return (
-        <ModuleMain>
-            <ModuleHeader header="View Checklist">
-                <TooltipBtn
-                    text="Download PDF"
-                    onClick={() => downloadChecklistPDF(parseInt(router.query.id as string))}
-                >
-                    <HiOutlineDownload size={24} />
-                </TooltipBtn>
-                <button className={"btn btn-secondary"} type="button" onClick={() => router.back()}>
-                    Back
-                </button>
-            </ModuleHeader>
-                <ChecklistPreview checklist={props.checklist} />
-            <ModuleContent>
-                {remarks &&
-                    <>
-                        <label className={styles.checklistDetailsHeading}>Approval Remarks</label>
-                        <p>{ remarks }</p>
-                    </>
-                }
-            </ModuleContent>
-        </ModuleMain>
-    );
+  return (
+    <ModuleMain>
+      <ModuleHeader header="View Checklist">
+        <TooltipBtn
+          text="Download PDF"
+          onClick={() =>
+            downloadChecklistPDF(parseInt(router.query.id as string))
+          }
+        >
+          <HiOutlineDownload size={24} />
+        </TooltipBtn>
+        <button
+          className={"btn btn-secondary"}
+          type="button"
+          onClick={() => router.back()}
+        >
+          Back
+        </button>
+      </ModuleHeader>
+      <ChecklistPreview checklist={props.checklist} />
+      <ModuleContent>
+        {remarks && (
+          <>
+            <label className={styles.checklistDetailsHeading}>
+              Approval Remarks
+            </label>
+            <p>{remarks}</p>
+          </>
+        )}
+      </ModuleContent>
+    </ModuleMain>
+  );
 };
 
 export default ManageChecklistPage;
