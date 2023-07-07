@@ -90,9 +90,9 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
           <TooltipBtn
             text="Download PDF"
             onClick={() => {
-              console.log("Download PDF")
-              downloadChecklistPDF(parseInt(router.query.id as string))
-             } }
+              console.log("Download PDF");
+              downloadChecklistPDF(parseInt(router.query.id as string));
+            }}
           >
             <HiOutlineDownload size={24} />
           </TooltipBtn>

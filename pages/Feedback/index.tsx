@@ -116,11 +116,13 @@ export default function Feedback() {
       "plant_name",
       "loc_floor",
       "loc_room",
-      "name"
-    ]
+      "name",
+    ];
 
     instance
-      .get(`/api/feedback/${indexedColumn[activeTabIndex]}?page=${page}&expand=${PARAMS}`)
+      .get(
+        `/api/feedback/${indexedColumn[activeTabIndex]}?page=${page}&expand=${PARAMS}`
+      )
       .then((response) => {
         setFeedbackItems(
           response.data.rows.map((row: CMMSFeedback) => {

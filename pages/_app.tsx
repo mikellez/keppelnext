@@ -21,6 +21,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const { asPath, route, pathname } = router;
   const [isTimeoutPromt, setIsTimeoutPrompt] = useState(false);
   const [isTimeout, setIsTimeout] = useState(false);
+  const [timerStarted, setTimerStarted] = useState(false);
 
   const sendLogout = (): void => {
     instance
@@ -50,6 +51,8 @@ export default function App({ Component, pageProps }: AppProps) {
       setIsTimeoutPrompt(false);
       // idleTimer.e
       sendLogout();
+      setTimerStarted(false);
+      idleTimer.pause();
     }
   }
 
@@ -77,10 +80,9 @@ export default function App({ Component, pageProps }: AppProps) {
     //     })
     //   );
     // }
-    if (!isTimeout && !asPath.includes("/Login")) {
+    if (!timerStarted && !asPath.includes("/Login")) {
       idleTimer.start();
-    } else {
-      idleTimer.pause();
+      setTimerStarted(true);
     }
   }, [asPath]);
 
