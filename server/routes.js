@@ -2002,7 +2002,7 @@ router.get(
 );
 
 router
-  .route("/logbook", checkIfLoggedInAPI)
+  .route("/logbook/:plant_id?", checkIfLoggedInAPI)
   .get(controllers.logbook.getLogbook)
   .post(controllers.logbook.addEntryToLogbook);
 

@@ -32,7 +32,7 @@ export default function NavBar() {
   const router = useRouter();
 
   useEffect(() => {
-    console.log(router.events);
+    // console.log(router.events);
 
     const closeOnRouteChange = () => {
       setNavDisplay(false);
