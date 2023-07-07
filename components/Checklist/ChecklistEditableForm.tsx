@@ -6,7 +6,7 @@ import styles from "../../styles/Checklist.module.scss";
 
 const ChecklistEditableForm = () => {
   const { sections } = useContext(SectionsContext);
-  console.log(sections);
+  // console.log(sections);
 
   return (
     <div>

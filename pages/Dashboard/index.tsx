@@ -25,7 +25,7 @@ export async function fetchData(
     "#FB2576",
   ];
 
-  console.log(url)
+  // console.log(url)
 
   return await instance
     .get(url)
@@ -49,13 +49,13 @@ export default function Dashboad({ role_id }: { role_id: number }) {
   if (role_id === 3) return <EngineerDashboad />;
 
   return <SpecialistDashboad />;*/
-  return <DashboardContent role_id={role_id}/>
+  return <DashboardContent role_id={role_id} />;
 }
 
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  console.log('cookie', context.req.headers.cookie);
+  // console.log('cookie', context.req.headers.cookie);
   const headers = {
     withCredentials: true,
     headers: {
@@ -63,11 +63,8 @@ export const getServerSideProps: GetServerSideProps = async (
     },
   };
 
-  const userInfo = await instance.get<any>(
-    "/api/user",
-    headers
-  );
-  console.log(userInfo.data);
+  const userInfo = await instance.get<any>("/api/user", headers);
+  // console.log(userInfo.data);
   if (userInfo.status === 400) return { notFound: true };
 
   let props = {

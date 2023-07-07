@@ -27,6 +27,7 @@ import styles from "../../../styles/Request.module.scss";
 import formStyles from "../../../styles/formStyles.module.css";
 import { downloadPDF } from "../View/[id]";
 import Image from "next/image";
+import RequiredIcon from "../../../components/RequiredIcon";
 
 interface CompletionRequestInfo {
   completion_file?: File;
@@ -46,10 +47,10 @@ const completeRequest = async (data: CompletionRequestInfo, id: string) => {
       "Content-Type": "multipart/form-data",
     },
   })
-    .then((res) => {
+    .then((res: any) => {
       return res.data;
     })
-    .catch((err) => console.log(err));
+    .catch((err: any) => console.log(err));
 };
 
 export default function CompleteRequest(props: RequestPreviewProps) {
@@ -75,15 +76,13 @@ export default function CompleteRequest(props: RequestPreviewProps) {
 
   useEffect(() => {
     if (completionData.completion_file) {
-
       const reader = new FileReader();
       reader.readAsDataURL(completionData.completion_file!);
       reader.onload = () => {
         setImageSrc(reader.result as string);
       };
     }
-
-  }, [completionData.completion_file])
+  }, [completionData.completion_file]);
 
   const updateData = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -154,7 +153,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
             <table className={styles.table}>
               <tbody>
                 <tr>
-                  <th className='d-flex align-items-start'>Completion File</th>
+                  <th className="d-flex align-items-start">Completion File</th>
                   <td valign="baseline">
                     <input
                       type="file"
@@ -164,7 +163,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
                       name="completion_file"
                       style={{ width: "20rem" }}
                     />
-                    {completionData.completion_file && 
+                    {completionData.completion_file && (
                       <div>
                         <Image
                           src={imageSrc}
@@ -174,12 +173,14 @@ export default function CompleteRequest(props: RequestPreviewProps) {
                           alt="Fault Image"
                           onClick={() => setCompleteImage(true)}
                         />
-                      </div>}
-                    
+                      </div>
+                    )}
                   </td>
                 </tr>
                 <tr>
-                  <th>Completion Comments</th>
+                  <th>
+                    <RequiredIcon /> Completion Comments
+                  </th>
                   <td>
                     <textarea
                       className="form-control"
@@ -213,14 +214,14 @@ export default function CompleteRequest(props: RequestPreviewProps) {
       >
         {/* <Image src={f.image} width={100} height={100} alt="" /> */}
         {/* <div style={{ textAlign: "center" }}> */}
-                    <Image
-                        src={imageSrc}
-                        width={550}
-                        height={550}
-                        style={{ objectFit: "contain" }}
-                        alt="Completion Image"
-                      />
-          {/* <img width={"75%"} height={"75%"} src={imageSrc} alt="" /> */}
+        <Image
+          src={imageSrc}
+          width={550}
+          height={550}
+          style={{ objectFit: "contain" }}
+          alt="Completion Image"
+        />
+        {/* <img width={"75%"} height={"75%"} src={imageSrc} alt="" /> */}
         {/* </div> */}
       </ModuleModal>
       <ModuleSimplePopup

@@ -58,7 +58,7 @@ async function generateChecklistPDF(checklistId) {
   const doc = new PDFDocument({ margin: marginX, autoFirstPage: false });
   const historyArr = [];
   cl.activity_log.forEach((row) => {
-    console.log(row);
+    // console.log(row);
     arr = [];
     arr.push(row.activity);
     arr.push(row.activity_type);
@@ -237,8 +237,8 @@ async function fetchRequest(id) {
 // Generate a PDF file for request
 async function generateRequestPDF(id) {
   const request = await fetchRequest(id);
-  console.log("^&*^*(*(");
-  console.log(Object.keys(request));
+  //   console.log("^&*^*(*(");
+  //   console.log(Object.keys(request));
 
   if (!request) return null;
 
@@ -275,7 +275,7 @@ async function generateRequestPDF(id) {
   //     })
   // }
   if (history) {
-    console.log(typeof history, 1111);
+    // console.log(typeof history, 1111);
     // console.log(history, 1111);
     history.forEach((row) => {
       arr = [];
@@ -286,7 +286,7 @@ async function generateRequestPDF(id) {
       arr.push(row.name);
       historyArr.push(arr);
     });
-    console.log(historyArr, 22);
+    // console.log(historyArr, 22);
   }
   // {label: "Status", width: 50},
   //             {label: "Remarks", width: 148},
@@ -328,7 +328,7 @@ async function generateRequestPDF(id) {
 
   for (entry of historyArr) {
     if (entry[0] === "COMPLETED") {
-      console.log(entry[2], new Date(entry[2]));
+      //   console.log(entry[2], new Date(entry[2]));
       headerObj.push({
         title: "Completed On",
         content: moment(new Date(entry[2].slice(0, -3))).format("lll"),
@@ -447,7 +447,7 @@ function sendRequestPDF(req, res, next) {
       return res.status(200).send(result);
     })
     .catch((err) => {
-      console.log(err);
+      //   console.log(err);
       return res.status(500).json("Error in generating PDF");
     });
 }

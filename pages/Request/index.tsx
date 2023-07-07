@@ -401,8 +401,11 @@ export default function Request(props: RequestProps) {
                       <HeaderCell resize>Priority</HeaderCell>
                       <HeaderCell resize>Status</HeaderCell>
                       <HeaderCell resize>
-                      {activeTabIndex === 2 ? "Completed Date" :
-                          activeTabIndex === 3 ? "Approved Date" : "Created On"}
+                        {activeTabIndex === 2
+                          ? "Completed Date"
+                          : activeTabIndex === 3
+                          ? "Approved Date"
+                          : "Created On"}
                       </HeaderCell>
                       <HeaderCell resize>Asset Name</HeaderCell>
                       <HeaderCell resize>Requested By</HeaderCell>
@@ -434,19 +437,33 @@ export default function Request(props: RequestProps) {
                               {item.status}
                             </Cell>
                             <Cell>
-                            {activeTabIndex === 2 
-                            ? `${moment(new Date(item.activity_log.reverse().find((activity) => activity["activity_type"] == "COMPLETED")!.date))
-                            .format(
-                              "MMMM Do YYYY, h:mm:ss a"
-                            )}`
-                            : activeTabIndex === 3 
-                              ? `${moment(new Date(item.activity_log.reverse().find((activity) => activity["activity_type"] == "APPROVED")!.date))
-                              .format(
-                                "MMMM Do YYYY, h:mm:ss a"
-                              )}`
-                              : `${moment(new Date(item.created_date)).format(
-                                "MMMM Do YYYY, h:mm:ss a"
-                              )}`}
+                              {activeTabIndex === 2
+                                ? `${moment(
+                                    new Date(
+                                      item.activity_log
+                                        .reverse()
+                                        .find(
+                                          (activity) =>
+                                            activity["activity_type"] ==
+                                            "COMPLETED"
+                                        )!.date
+                                    )
+                                  ).format("MMMM Do YYYY, h:mm:ss a")}`
+                                : activeTabIndex === 3
+                                ? `${moment(
+                                    new Date(
+                                      item.activity_log
+                                        .reverse()
+                                        .find(
+                                          (activity) =>
+                                            activity["activity_type"] ==
+                                            "APPROVED"
+                                        )!.date
+                                    )
+                                  ).format("MMMM Do YYYY, h:mm:ss a")}`
+                                : `${moment(new Date(item.created_date)).format(
+                                    "MMMM Do YYYY, h:mm:ss a"
+                                  )}`}
                             </Cell>
                             <Cell>{item.asset_name}</Cell>
                             <Cell>{item.created_by}</Cell>
@@ -519,7 +536,7 @@ export default function Request(props: RequestProps) {
                                 <div
                                   className={styles.editIcon}
                                   onClick={() => {
-                                    console.log(item.status_id, item.associatedrequestid)
+                                    // console.log(item.status_id, item.associatedrequestid)
                                     setCurrentHistory(item.activity_log);
                                   }}
                                 >

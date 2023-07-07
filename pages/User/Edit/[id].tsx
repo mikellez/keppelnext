@@ -2,222 +2,241 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { useCurrentUser } from "../../../components/SWR";
-import { ModuleContent, ModuleFooter, ModuleHeader, ModuleMain } from "../../../components";
+import {
+  ModuleContent,
+  ModuleFooter,
+  ModuleHeader,
+  ModuleMain,
+} from "../../../components";
 import Link from "next/link";
-import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
+import ModuleSimplePopup, {
+  SimpleIcon,
+} from "../../../components/ModuleLayout/ModuleSimplePopup";
 import formStyles from "../../../styles/formStyles.module.css";
 import instance from "../../../types/common/axios.config";
 
 interface CMMSUserEdit {
-    first_name?: string;
-    last_name?: string;
-    employee_id: string;
-    allocated_plants: string[];
-    allocatedplantids: number[];
-    addplantids: number[];
-    removeplantids: number[];
-    password?: string;
-    password_confirm?: string;
-    user_name: string;
-    user_email: string;
-    role_id: number;
-
+  first_name?: string;
+  last_name?: string;
+  employee_id: string;
+  allocated_plants: string[];
+  allocatedplantids: number[];
+  addplantids: number[];
+  removeplantids: number[];
+  password?: string;
+  password_confirm?: string;
+  user_name: string;
+  user_email: string;
+  role_id: number;
 }
 interface checkdetails {
-    username: string;
-    email: string;
+  username: string;
+  email: string;
 }
 
-const getUsersData = async (id:number) => {
-    const url = "/api/user/getUsersData/";
-    return await instance
-        .get(url + id)
-        .then((res) => {
-        return res.data;
-        })
-        .catch((err) => {
-        console.log(err.response);
-        return err.response.status;
-        });
+const getUsersData = async (id: number) => {
+  const url = "/api/user/getUsersData/";
+  return await instance
+    .get(url + id)
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      // console.log(err.response);
+      return err.response.status;
+    });
 };
 
-const getUsersplantData = async (id:number) => {
-    const url = "/api/user/getUsersplantData/";
-    console.log(url + id);
-    return await instance
-        .get(url + id)
-        .then((res) => {
-        return res.data;
-        })
-        .catch((err) => {
-        console.log(err.response);
-        return err.response.status;
-        });
+const getUsersplantData = async (id: number) => {
+  const url = "/api/user/getUsersplantData/";
+  // console.log(url + id);
+  return await instance
+    .get(url + id)
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      // console.log(err.response);
+      return err.response.status;
+    });
 };
-
-
-
 
 export default function EditUser() {
-    const router = useRouter();
-    const user_id: string = router.query.id as string;
-    const [plantsAmmended, setPlantsAmmended]: [number[], any] = useState([]);
-    const [modalOpen, setModalOpen] = useState<boolean>(false);
-    const [currentplant, setCurrentplant] = useState<number>(0);
-    const [submissionModal, setSubmissionModal] = useState<boolean>(false);
-    const [passwordError, setPasswordError] = useState<boolean>(false);
-    const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] = useState<boolean>(false);
-    const [emailModal, setEmailModal] = useState<boolean>(false);
-    const [usernameModal, setUsernameModal] = useState<boolean>(false);
-    const [checkdetails, setcheckdetails] = useState<checkdetails>({
-        username: "",
-        email: "",
-    });
+  const router = useRouter();
+  const user_id: string = router.query.id as string;
+  const [plantsAmmended, setPlantsAmmended]: [number[], any] = useState([]);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [currentplant, setCurrentplant] = useState<number>(0);
+  const [submissionModal, setSubmissionModal] = useState<boolean>(false);
+  const [passwordError, setPasswordError] = useState<boolean>(false);
+  const [isMissingDetailsModalOpen, setIsMissingDetailsModaOpen] =
+    useState<boolean>(false);
+  const [emailModal, setEmailModal] = useState<boolean>(false);
+  const [usernameModal, setUsernameModal] = useState<boolean>(false);
+  const [checkdetails, setcheckdetails] = useState<checkdetails>({
+    username: "",
+    email: "",
+  });
 
-    const [userDetails, setuserDetails] = useState<CMMSUserEdit>({
-        first_name: "",
-        last_name: "",
-        employee_id: "",
-        allocated_plants: [], 
-        allocatedplantids: [],
+  const [userDetails, setuserDetails] = useState<CMMSUserEdit>({
+    first_name: "",
+    last_name: "",
+    employee_id: "",
+    allocated_plants: [],
+    allocatedplantids: [],
+    addplantids: [],
+    removeplantids: [],
+    password: "",
+    user_name: "",
+    user_email: "",
+    role_id: 0,
+  });
+  const handleForm = (
+    e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+  ) => {
+    setuserDetails((prevState) => {
+      return { ...prevState, [e.target.name]: e.target.value };
+    });
+  };
+
+  const handleFormNumber = (
+    e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+  ) => {
+    setuserDetails((prevState) => {
+      return { ...prevState, [e.target.name]: Number(e.target.value) };
+    });
+    // console.log(userDetails);
+  };
+
+  const handlePlantCheckboxChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const plantId = parseInt(e.target.id);
+    const isChecked = e.target.checked;
+    if (isChecked) {
+      // add plant to to allocatedplantids and add to addplantids only if it wasnt in removeplantids and remove from removeplantids if it was inside
+      setuserDetails((prevState) => ({
+        ...prevState,
+        allocatedplantids: [...prevState.allocatedplantids, plantId],
+        addplantids: prevState.removeplantids.includes(plantId)
+          ? prevState.addplantids
+          : [...prevState.addplantids, plantId],
+        removeplantids: prevState.removeplantids.filter((id) => id !== plantId),
+      }));
+    } else {
+      if (plantsAmmended.includes(plantId)) {
+        setModalOpen(true);
+        setCurrentplant(plantId);
+      } else {
+        // remove plant from allocatedplantids and addplantids and add plant to removeplantids if it was not in addplantids
+        setuserDetails((prevState) => ({
+          ...prevState,
+          allocatedplantids: prevState.allocatedplantids.filter(
+            (id) => id !== plantId
+          ),
+          addplantids: prevState.addplantids.filter((id) => id !== plantId),
+          removeplantids: prevState.addplantids.includes(plantId)
+            ? prevState.removeplantids
+            : [...prevState.removeplantids, plantId],
+        }));
+      }
+    }
+  };
+
+  function submission() {
+    //if no errors, submit form
+    //post data
+    const adjustedRoleId =
+      userDetails.role_id === 1 ? 4 : userDetails.role_id - 1;
+    const url = "/api/user/updateUser/";
+    instance
+      .post(url, {
+        user_id: user_id,
+        first_name: userDetails.first_name,
+        last_name: userDetails.last_name,
+        employee_id: userDetails.employee_id,
+        addplantids: userDetails.addplantids,
+        removeplantids: userDetails.removeplantids,
+        password: userDetails.password ? userDetails.password : null,
+        user_name: userDetails.user_name,
+        user_email: userDetails.user_email,
+        role_id: adjustedRoleId,
+      })
+      .then((res) => {
+        // console.log(res);
+        setSubmissionModal(true);
+      });
+  }
+
+  async function validate() {
+    // console.log(userDetails);
+
+    if (userDetails.user_name == "" || userDetails.user_email == "") {
+      setIsMissingDetailsModaOpen(true);
+    } else if (
+      (await validation(userDetails.user_email, "/api/setting/check/email/")) ==
+        true &&
+      userDetails.user_email != checkdetails.email
+    ) {
+      setEmailModal(true);
+    } else if (
+      (await validation(
+        userDetails.user_name,
+        "/api/setting/check/username/"
+      )) == true &&
+      userDetails.user_name != checkdetails.username
+    ) {
+      setUsernameModal(true);
+    } else {
+      submission();
+    }
+  }
+
+  async function validation(value: string, url: string) {
+    // let res = await axios.get(url + value);
+    let res = await instance.get(url + value);
+    return res.data;
+  }
+
+  useEffect(() => {
+    getUsersData(parseInt(user_id as string)).then((result) => {
+      // console.log(result);
+      setuserDetails(result);
+      setcheckdetails({
+        username: result.user_name,
+        email: result.user_email,
+      });
+    });
+    // set user details to the result of the api call
+  }, []);
+  useEffect(() => {
+    getUsersplantData(parseInt(user_id as string)).then((result) => {
+      // console.log(result);
+      const plantIds = result.map((obj: any) => obj.plant_id);
+      // console.log(plantIds)
+      setPlantsAmmended(plantIds);
+    });
+  }, []);
+
+  useEffect(() => {
+    getUsersData(parseInt(user_id as string)).then((result) => {
+      const allocatedplantidsArray = result.allocatedplantids
+        .split(",")
+        .map(Number);
+      setuserDetails({
+        ...result,
+        allocatedplantids: allocatedplantidsArray,
         addplantids: [],
         removeplantids: [],
-        password: "",
-        user_name: "",
-        user_email: "",
-        role_id: 0,
+      });
     });
-    const handleForm = (
-        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-      ) => {
-        setuserDetails((prevState) => {
-          return { ...prevState, [e.target.name]: e.target.value };
-        });
-      };
+  }, []);
+  // console.log(userDetails)
 
-      const handleFormNumber =(
-        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-      ) => {
-        setuserDetails((prevState) => {
-          return { ...prevState, [e.target.name]: Number(e.target.value) };
-        })
-        console.log(userDetails);
-    
-      }
-
-      const handlePlantCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const plantId = parseInt(e.target.id);
-        const isChecked = e.target.checked;
-        if (isChecked) {
-          // add plant to to allocatedplantids and add to addplantids only if it wasnt in removeplantids and remove from removeplantids if it was inside
-          setuserDetails(prevState => ({
-            ...prevState,
-            allocatedplantids: [...prevState.allocatedplantids, plantId],
-            addplantids: prevState.removeplantids.includes(plantId) ? prevState.addplantids : [...prevState.addplantids, plantId],
-            removeplantids: prevState.removeplantids.filter(id => id !== plantId)
-          }));
-        } else {
-              if (plantsAmmended.includes(plantId)) {
-                setModalOpen(true);
-                setCurrentplant(plantId);
-              }
-              else{
-                // remove plant from allocatedplantids and addplantids and add plant to removeplantids if it was not in addplantids
-              setuserDetails(prevState => ({
-                ...prevState,
-                allocatedplantids: prevState.allocatedplantids.filter(id => id !== plantId),
-                addplantids: prevState.addplantids.filter(id => id !== plantId),
-                removeplantids: prevState.addplantids.includes(plantId) ? prevState.removeplantids : [...prevState.removeplantids, plantId]
-                
-              }));
-            }
-          }
-      };
-      
-      function submission() {
-        //if no errors, submit form
-        //post data
-        const adjustedRoleId = userDetails.role_id === 1 ? 4 : userDetails.role_id - 1
-        const url = "/api/user/updateUser/";
-        instance
-          .post(url, {
-            user_id: user_id,
-            first_name: userDetails.first_name,
-            last_name: userDetails.last_name,
-            employee_id: userDetails.employee_id,
-            addplantids: userDetails.addplantids,
-            removeplantids: userDetails.removeplantids,
-            password: userDetails.password ? userDetails.password : null,
-            user_name: userDetails.user_name,
-            user_email: userDetails.user_email,
-            role_id: adjustedRoleId,
-          })
-          .then((res) => {
-            console.log(res);
-            setSubmissionModal(true);
-          })
-        }
-
-      	async function validate(){
-          console.log(userDetails);
-
-          if (userDetails.user_name == "" || userDetails.user_email == ""){
-            setIsMissingDetailsModaOpen(true);
-          } else if((await validation(userDetails.user_email, "/api/setting/check/email/") == true) && (userDetails.user_email != checkdetails.email)){
-            setEmailModal(true);
-          } else if ((await validation(userDetails.user_name, "/api/setting/check/username/") == true) && (userDetails.user_name != checkdetails.username)){
-            setUsernameModal(true);
-          }
-            else {
-            submission();
-          }
-        }
-
-        async function validation(value: string, url: string){
-          // let res = await axios.get(url + value);
-          let res = await instance.get(url + value);
-          return res.data;
-        }
-
-    useEffect(() => {
-        getUsersData(parseInt(user_id as string)).then((result) => {
-            console.log(result);
-            setuserDetails(result);
-            setcheckdetails({
-                username: result.user_name,
-                email: result.user_email,
-            });
-        });
-        // set user details to the result of the api call
-
-    }, []);
-    useEffect(() => {
-      getUsersplantData(parseInt(user_id as string)).then((result) => {
-        console.log(result);
-        const plantIds = result.map((obj: any) => obj.plant_id);
-        console.log(plantIds)
-        setPlantsAmmended(plantIds);     
-      });
-    }, []);
-    
-    useEffect(() => {
-      getUsersData(parseInt(user_id as string)).then((result) => {
-        const allocatedplantidsArray = result.allocatedplantids.split(",").map(Number);
-        setuserDetails({
-          ...result,
-          allocatedplantids: allocatedplantidsArray,
-          addplantids: [],
-          removeplantids: []
-        });
-      });
-    }, []);
-    console.log(userDetails)
-
-    return(
+  return (
     <ModuleMain>
       <ModuleHeader title="User Edit" header="User Edit"></ModuleHeader>
-      <ModuleContent includeGreyContainer grid>    
-
+      <ModuleContent includeGreyContainer grid>
         <div className={formStyles.halfContainer}>
           <div className="form-group">
             <label className="form-label">Username</label>
@@ -273,49 +292,65 @@ export default function EditUser() {
           </div>
 
           <div className="form-group">
-						<label className='form-label'> Role Type
-						</label>
-						<select className="form-select"
+            <label className="form-label"> Role Type</label>
+            <select
+              className="form-select"
               onChange={handleFormNumber}
               name="role_id"
-              value={userDetails.role_id}>
-							<option value={1}>Admin</option>
-							<option value={2}>Manager</option>
-							<option value={3}>Engineer</option>
-							<option value={4}>Operation Specialist</option>
-						</select>
-					</div>
+              value={userDetails.role_id}
+            >
+              <option value={1}>Admin</option>
+              <option value={2}>Manager</option>
+              <option value={3}>Engineer</option>
+              <option value={4}>Operation Specialist</option>
+            </select>
+          </div>
 
           <label className="form-label"> Assigned Plants</label>
-          <div className="form-check"> 
-          <input className="form-check-input" type="checkbox" id="2" checked={userDetails.allocatedplantids.includes(parseInt('2'))} onChange={(e) => handlePlantCheckboxChange(e)} />
-            <label className="form-check-label">
-                Woodlands DHCS
-            </label>
-            </div>
-
-            <div className="form-check"> 
-            <input className="form-check-input" type="checkbox" id="1" checked={userDetails.allocatedplantids.includes(parseInt('1'))} onChange={(e) => handlePlantCheckboxChange(e)} />
-            <label className="form-check-label">
-                Changi DHCS
-            </label>
-            </div>
-
-            <div className="form-check"> 
-            <input className="form-check-input" type="checkbox" id="3" checked={userDetails.allocatedplantids.includes(parseInt('3'))} onChange={(e) => handlePlantCheckboxChange(e)} />
-            <label className="form-check-label">
-                Biopolis
-            </label>
-            </div>
-
-            <div className="form-check"> 
-            <input className="form-check-input" type="checkbox" id="4" checked={userDetails.allocatedplantids.includes(parseInt('4'))} onChange={(e) => handlePlantCheckboxChange(e)} />
-            <label className="form-check-label">
-                Mediapolis
-            </label>
-            </div>
-            
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              id="2"
+              checked={userDetails.allocatedplantids.includes(parseInt("2"))}
+              onChange={(e) => handlePlantCheckboxChange(e)}
+            />
+            <label className="form-check-label">Woodlands DHCS</label>
           </div>
+
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              id="1"
+              checked={userDetails.allocatedplantids.includes(parseInt("1"))}
+              onChange={(e) => handlePlantCheckboxChange(e)}
+            />
+            <label className="form-check-label">Changi DHCS</label>
+          </div>
+
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              id="3"
+              checked={userDetails.allocatedplantids.includes(parseInt("3"))}
+              onChange={(e) => handlePlantCheckboxChange(e)}
+            />
+            <label className="form-check-label">Biopolis</label>
+          </div>
+
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              id="4"
+              checked={userDetails.allocatedplantids.includes(parseInt("4"))}
+              onChange={(e) => handlePlantCheckboxChange(e)}
+            />
+            <label className="form-check-label">Mediapolis</label>
+          </div>
+        </div>
 
         <div className={formStyles.halfContainer}>
           <div className="form-group">
@@ -356,43 +391,45 @@ export default function EditUser() {
               Cancel
             </button>,
             <button
-            key={2}
-            onClick={() => {
-              setuserDetails(prevState => ({
-                ...prevState,
-                allocatedplantids: prevState.allocatedplantids.filter(id => id !== currentplant)
-              }));
-              setModalOpen(false);
-              // route back to assets
-            }}
-            className="btn btn-primary"
+              key={2}
+              onClick={() => {
+                setuserDetails((prevState) => ({
+                  ...prevState,
+                  allocatedplantids: prevState.allocatedplantids.filter(
+                    (id) => id !== currentplant
+                  ),
+                }));
+                setModalOpen(false);
+                // route back to assets
+              }}
+              className="btn btn-primary"
             >
               Confirm
-            </button>
+            </button>,
           ]}
           onRequestClose={() => {
             setModalOpen(false);
           }}
-          
         />
         <ModuleSimplePopup
-        modalOpenState={passwordError}       
-        setModalOpenState={setPasswordError}
-        title="Error"
-        text="Passwords do not match"
-        icon={SimpleIcon.Exclaim}
-        buttons={[
-        <button key={1}
+          modalOpenState={passwordError}
+          setModalOpenState={setPasswordError}
+          title="Error"
+          text="Passwords do not match"
+          icon={SimpleIcon.Exclaim}
+          buttons={[
+            <button
+              key={1}
               onClick={() => {
                 setPasswordError(false);
               }}
               className="btn btn-primary"
             >
               Ok
-            </button>
-        ]}
+            </button>,
+          ]}
         />
-          <ModuleSimplePopup
+        <ModuleSimplePopup
           modalOpenState={submissionModal}
           setModalOpenState={setSubmissionModal}
           title="Success!"
@@ -415,29 +452,29 @@ export default function EditUser() {
           }}
         />
         <ModuleSimplePopup
-            modalOpenState={isMissingDetailsModalOpen}
-            setModalOpenState={setIsMissingDetailsModaOpen}
-            title="Missing Details"
-            text="Please ensure that you have filled in all the required entries."
-            icon={SimpleIcon.Cross}
-            shouldCloseOnOverlayClick={true}
-          />
-		  <ModuleSimplePopup
-            modalOpenState={emailModal}
-            setModalOpenState={setEmailModal}
-            title="Duplicate Email"
-            text="Please ensure that the email you have entered is not already in use."
-            icon={SimpleIcon.Cross}
-            shouldCloseOnOverlayClick={true}
-          />
-		  <ModuleSimplePopup
-            modalOpenState={usernameModal}
-            setModalOpenState={setUsernameModal}
-            title="Duplicate Username"
-            text="Please ensure that the username you have entered is not already in use."
-            icon={SimpleIcon.Cross}
-            shouldCloseOnOverlayClick={true}
-          />
+          modalOpenState={isMissingDetailsModalOpen}
+          setModalOpenState={setIsMissingDetailsModaOpen}
+          title="Missing Details"
+          text="Please ensure that you have filled in all the required entries."
+          icon={SimpleIcon.Cross}
+          shouldCloseOnOverlayClick={true}
+        />
+        <ModuleSimplePopup
+          modalOpenState={emailModal}
+          setModalOpenState={setEmailModal}
+          title="Duplicate Email"
+          text="Please ensure that the email you have entered is not already in use."
+          icon={SimpleIcon.Cross}
+          shouldCloseOnOverlayClick={true}
+        />
+        <ModuleSimplePopup
+          modalOpenState={usernameModal}
+          setModalOpenState={setUsernameModal}
+          title="Duplicate Username"
+          text="Please ensure that the username you have entered is not already in use."
+          icon={SimpleIcon.Cross}
+          shouldCloseOnOverlayClick={true}
+        />
       </ModuleContent>
       <ModuleFooter>
         <Link href={{ pathname: "/User/Management" }}>
@@ -452,11 +489,10 @@ export default function EditUser() {
           className="btn"
           style={{ backgroundColor: "green", color: "white" }}
           //check if submission function is running
-          onClick = {() => {
+          onClick={() => {
             if (userDetails.password == userDetails.password_confirm) {
               validate();
-            }
-            else {
+            } else {
               setPasswordError(true);
             }
           }}
@@ -465,9 +501,5 @@ export default function EditUser() {
         </button>
       </ModuleFooter>
     </ModuleMain>
-
-    );
+  );
 }
-
-
-

@@ -74,7 +74,7 @@ export const getServerSideProps: GetServerSideProps = async (
     requestData: requestData,
     priority: priority,
   };
-  console.log(props);
+  // console.log(props);
   return {
     props: props,
   };

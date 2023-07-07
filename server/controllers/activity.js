@@ -105,7 +105,7 @@ const getEventtHistoryDate = async (req, res, next) => {
 };
 
 const createActivityCSV = async (req, res, next) => {
-  console.log(req.body);
+  // console.log(req.body);
   generateCSV(req.body).then((buffer) => {
     res.set({
       "Content-Type": "text/csv",
