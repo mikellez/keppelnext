@@ -60,7 +60,7 @@ export default function AccountLog() {
     });
   };
   const { date, datetype } = pickerwithtype;
-  // console.log("date", date);
+  console.log("date", date);
 
   async function sortDate() {
     if (datee == "Date & Time" || datee == "Date & Time ▲") {
@@ -143,10 +143,10 @@ export default function AccountLog() {
   };
 
   let { data, error, isValidating, mutate } = useAccountlog(
-    `/api/activity/account_log?page=${page}`
+    "/api/activity/account_log"
   );
-  // console.log(data);
-  // console.log(error);
+  console.log(data);
+  console.log(error);
   const theme = useTheme([
     getTheme(),
     {

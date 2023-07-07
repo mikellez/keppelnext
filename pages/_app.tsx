@@ -14,12 +14,14 @@ import TooltipBtn from "../components/TooltipBtn";
 // import IdleTimer from "../components/IdleTimer";
 import { useIdleTimer } from "react-idle-timer";
 import instance from "../types/common/axios.config";
+import User from "./User/Management";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const { asPath, route, pathname } = router;
   const [isTimeoutPromt, setIsTimeoutPrompt] = useState(false);
   const [isTimeout, setIsTimeout] = useState(false);
+  const [timerStarted, setTimerStarted] = useState(false);
 
   const sendLogout = (): void => {
     instance
@@ -37,14 +39,20 @@ export default function App({ Component, pageProps }: AppProps) {
 
   function onPrompt() {
     setIsTimeoutPrompt(true);
+    setIsTimeout(true);
   }
   function onActive() {
     setIsTimeout(false);
+    setIsTimeoutPrompt(false);
   }
   function onIdle() {
     if (isTimeout) {
+      setIsTimeout(false);
+      setIsTimeoutPrompt(false);
+      // idleTimer.e
       sendLogout();
-      setIsTimeout(true);
+      setTimerStarted(false);
+      idleTimer.pause();
     }
   }
 
@@ -54,7 +62,10 @@ export default function App({ Component, pageProps }: AppProps) {
     onActive: onActive,
     promptBeforeIdle: 15 * 1000 * 60,
     timeout: 30 * 1000 * 60,
+    // promptBeforeIdle: 5 * 1000,
+    // timeout: 10 * 1000,
     crossTab: true,
+    stopOnIdle: true,
   });
 
   useEffect(() => {
@@ -69,10 +80,11 @@ export default function App({ Component, pageProps }: AppProps) {
     //     })
     //   );
     // }
-    if (!isTimeout) {
+    if (!timerStarted && !asPath.includes("/Login")) {
       idleTimer.start();
+      setTimerStarted(true);
     }
-  }, []);
+  }, [asPath]);
 
   useEffect(() => {
     require("bootstrap/dist/js/bootstrap.bundle.min.js");
@@ -127,25 +139,9 @@ export default function App({ Component, pageProps }: AppProps) {
         </div>
       </div>
       <ModuleSimplePopup
-        modalOpenState={isTimeout}
-        setModalOpenState={setIsTimeout}
-        text="You will be redirected back to the login page"
-        title="Your session has expired"
-        icon={SimpleIcon.Exclaim}
-        buttons={[
-          <TooltipBtn
-            key={1}
-            toolTip={false}
-            onClick={() => setIsTimeout(false)}
-          >
-            Ok
-          </TooltipBtn>,
-        ]}
-      />
-      <ModuleSimplePopup
         modalOpenState={isTimeoutPromt}
         setModalOpenState={setIsTimeoutPrompt}
-        text="Do you want to exit?"
+        text="You will be redirected back to the Login page if you remain Idle"
         title="Your session will expire soon"
         icon={SimpleIcon.Exclaim}
         buttons={[

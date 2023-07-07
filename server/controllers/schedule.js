@@ -227,7 +227,8 @@ const getViewSchedules = async (req, res, next) => {
 const getPlants = async (req, res, next) => {
     if (req?.user && (req.user.role_id === 0 || req.user.role_id === 4)) {
         global.db.query(
-            "SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) FROM keppel.user_access WHERE user_id = $1::integer)",
+            `SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[])
+             FROM keppel.user_access WHERE user_id = $1::integer) ORDER BY plant_id ASC`,
             [req.user.id],
             (err, result) => {
                 if (err) throw err;
@@ -237,7 +238,7 @@ const getPlants = async (req, res, next) => {
             }
         );
     } else {
-        global.db.query(`SELECT * FROM keppel.plant_master`, (err, result) => {
+        global.db.query(`SELECT * FROM keppel.plant_master ORDER BY plant_id ASC`, (err, result) => {
             if (err) throw err;
             if (result) {
                 return res.status(200).send(result.rows);

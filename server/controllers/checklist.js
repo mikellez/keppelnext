@@ -394,11 +394,11 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
   const sql =
     fetchAllChecklistQuery +
     ` 
-        WHERE 
+        WHERE
             cl.checklist_id = $1 and ua.user_id = $2
     `;
 
-  global.db.query(sql, [req.params.checklist_id, req.user.id], (err, found) => {
+  global.db.query(sql, [req.params.checklist_id, 17], (err, found) => {
     if (err) {
       console.log(err);
       return res.status(500).json("No checklist template found");

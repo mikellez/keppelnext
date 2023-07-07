@@ -535,7 +535,7 @@ export default function EditAsset(props: EditAssetProps) {
             <button
               onClick={() => {
                 setSubmissionModal(false);
-                router.push("/Asset");
+                router.push("/Asset/Details/" + psa_id);
               }}
               className="btn btn-primary"
             >
