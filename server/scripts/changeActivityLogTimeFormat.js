@@ -6,7 +6,7 @@ const { connectDB, dellocateGlobalDB } = require("../db/dbAPI");
 
 const main = async () => {
   let args = process.argv.slice(2);
-  console.log(args);
+  // console.log(args);
   if (args.length != 1) {
     throw new Error("1 argument required only");
   }

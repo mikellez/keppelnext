@@ -11,7 +11,7 @@ const runScript = async () => {
                         SPLIT_PART(datetime, ' ', 2)), 'MM/DD/YYYY HH24:MI AM');`
     )
     .then((res) => {
-      console.log("Altered datetime successfully");
+      //   console.log("Altered datetime successfully");
       dellocateGlobalDB();
     });
 };

@@ -733,7 +733,7 @@ const completeChecklist = async (req, res, next) => {
 
     return res.status(200).json("Checklist successfully completed");
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     return res.status(500).json("Failure to update checklist completion");
   }
 };
@@ -1005,7 +1005,7 @@ const cancelChecklist = async (req, res, next) => {
     [JSON.stringify(activity_log), req.params.checklist_id],
     (err) => {
       if (err) {
-        console.log(err);
+        // console.log(err);
         return res.status(500).json("Failure to update checklist cancellation");
       }
       return res.status(200).json("Checklist successfully cancelled");
