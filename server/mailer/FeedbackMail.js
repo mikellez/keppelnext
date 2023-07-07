@@ -2,7 +2,7 @@ const Mail = require("./Mail");
 
 class FeedbackMail extends Mail {
   constructor(recipient, subject, content, feedback, carbon_copy = null) {
-    console.log(feedback);
+    // console.log(feedback);
     const emailContent = `
             Dear ${feedback.name},</br></br>
             ${content}</br>
@@ -20,7 +20,7 @@ class CreateFeedbackMail extends FeedbackMail {
       feedback.description ?? "NIL"
     }
         `;
-    console.log(feedback);
+    // console.log(feedback);
     super(recipient, "Feedback received", emailContent, feedback, carbon_copy);
   }
 }
@@ -38,7 +38,7 @@ class AssignFeedbackMail extends FeedbackMail {
       feedback.description ?? "NIL"
     }
         `;
-    console.log(feedback);
+    // console.log(feedback);
     super(recipient, "Feedback Assigned", emailContent, feedback, carbon_copy);
   }
 }
@@ -54,7 +54,7 @@ class CompletedFeedbackMail extends FeedbackMail {
       feedback.id
     }<br/><strong>Feedback Remarks:</strong> ${feedback.remarks ?? "NIL"}
         `;
-    console.log(feedback);
+    // console.log(feedback);
     super(recipient, "Feedback Completed", emailContent, feedback, carbon_copy);
   }
 }

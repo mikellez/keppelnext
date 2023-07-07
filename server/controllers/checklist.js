@@ -403,7 +403,7 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
       console.log(err);
       return res.status(500).json("No checklist template found");
     }
-    console.log(found.rows);
+    // console.log(found.rows);
     res.status(200).send(found.rows[0]);
   });
 };
@@ -661,7 +661,7 @@ const createChecklistCSV = async (req, res, next) => {
         res.set({
           "Content-Type": "text/csv",
         });
-        console.log(buffer);
+        // console.log(buffer);
         return res.status(200).send(buffer);
       })
       .catch((error) => {

@@ -5,13 +5,13 @@ const { connectDB, dellocateGlobalDB } = require("../db/dbAPI");
  */
 
 const main = async () => {
-    let args = process.argv.slice(2);
-    console.log(args);
-    if (args.length != 1) {
-        throw new Error("1 argument required only")
-    }
-    connectDB("cmms_dev");
-    await global.db.query(`UPDATE ${args[0]}
+  let args = process.argv.slice(2);
+  console.log(args);
+  if (args.length != 1) {
+    throw new Error("1 argument required only");
+  }
+  connectDB("cmms_dev");
+  await global.db.query(`UPDATE ${args[0]}
     SET activity_log = (
       SELECT jsonb_agg(
         CASE 
@@ -22,7 +22,7 @@ const main = async () => {
       )
       FROM jsonb_array_elements(activity_log) AS elem
     )`);
-    await global.db.query(`UPDATE ${args[0]}
+  await global.db.query(`UPDATE ${args[0]}
     SET activity_log = (
       SELECT jsonb_agg(
         CASE 
@@ -33,14 +33,14 @@ const main = async () => {
       )
       FROM jsonb_array_elements(activity_log) AS elem
     )`);
-    await global.db.query(`UPDATE ${args[0]}
+  await global.db.query(`UPDATE ${args[0]}
     SET activity_log = (
       SELECT jsonb_agg(
         jsonb_set(elem, '{date}', to_jsonb(replace(elem->>'date', 'T', ' ')))
       )
       FROM jsonb_array_elements(activity_log) AS elem
-    )`)
-    dellocateGlobalDB();
-}
+    )`);
+  dellocateGlobalDB();
+};
 
 main();

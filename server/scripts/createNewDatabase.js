@@ -1,42 +1,42 @@
-const exec = require('child_process').exec;
+const exec = require("child_process").exec;
 const bcrypt = require("bcryptjs");
-const { Client } = require('pg');
-const fs = require('fs');
+const { Client } = require("pg");
+const fs = require("fs");
 
 const checkIfDatabaseExists = (dbName) => {
-    fs.readFile('../db/db.config.json', (err, data) => {
-        if (err) console.log(err);
-        if (data && JSON.parse(data)[dbName]) {
-            throw new Error('Error: database alr exists.');
-        }
-    });
+  fs.readFile("../db/db.config.json", (err, data) => {
+    if (err) console.log(err);
+    if (data && JSON.parse(data)[dbName]) {
+      throw new Error("Error: database alr exists.");
+    }
+  });
 };
 
 const createNewDatabase = (newDB, cb) => {
-    return new Promise((resolve, reject) => {
-        const script = exec(`sh db_clone.sh ${newDB}`);
-        script.stdout.on('data', data => console.log(data));
-        script.stderr.on('data', data => console.log(data));
-        script.on('exit', (code) => {
-            if (code == 0) {
-                resolve("Database successfully created.");
-            } else {
-                reject("Database creation failed.");
-            }
-        })
-    })
+  return new Promise((resolve, reject) => {
+    const script = exec(`sh db_clone.sh ${newDB}`);
+    script.stdout.on("data", (data) => console.log(data));
+    script.stderr.on("data", (data) => console.log(data));
+    script.on("exit", (code) => {
+      if (code == 0) {
+        resolve("Database successfully created.");
+      } else {
+        reject("Database creation failed.");
+      }
+    });
+  });
 };
 
 const connectDB = (dbName) => {
-    const client = new Client({
-        host: '192.168.20.96',
-        port: 5432,
-        database: dbName,
-        user: 'postgres',
-        password: '123Az!!!',
-    });
-    client.connect();
-    return client;
+  const client = new Client({
+    host: "192.168.20.96",
+    port: 5432,
+    database: dbName,
+    user: "postgres",
+    password: "123Az!!!",
+  });
+  client.connect();
+  return client;
 };
 
 // const changeSchemaName = async (client) => {
@@ -46,8 +46,9 @@ const connectDB = (dbName) => {
 // };
 
 const createAdminRole = async (dbName) => {
-    const client = connectDB(dbName);
-    await client.query(`
+  const client = connectDB(dbName);
+  await client.query(
+    `
         INSERT INTO 
             keppel.role (
                 role_name
@@ -55,15 +56,16 @@ const createAdminRole = async (dbName) => {
         VALUES (
             $1
         )
-    `, [
-        'Admin'
-    ]);
-    client.end()
+    `,
+    ["Admin"]
+  );
+  client.end();
 };
 
 const createAdminRolePrivileges = async (dbName) => {
-    const client = connectDB(dbName);
-    await client.query(`
+  const client = connectDB(dbName);
+  await client.query(
+    `
         INSERT INTO 
             keppel.role_privileges (
                 role_id,
@@ -75,15 +77,16 @@ const createAdminRolePrivileges = async (dbName) => {
         VALUES (
             $1, $2, $3, $4, $5
         )
-    `, [
-        1, true, true, true, true
-    ]);
-    client.end();
+    `,
+    [1, true, true, true, true]
+  );
+  client.end();
 };
 
 const createAdminRoleParent = async (dbName) => {
-    const client = connectDB(dbName);
-    await client.query(`
+  const client = connectDB(dbName);
+  await client.query(
+    `
         INSERT INTO 
             keppel.role_parent (
                 role_id,
@@ -92,17 +95,18 @@ const createAdminRoleParent = async (dbName) => {
         VALUES (
             $1, $2
         )
-    `, [
-        1, '1'
-    ]);
-    client.end();
+    `,
+    [1, "1"]
+  );
+  client.end();
 };
 
 const createAdminUser = async (dbName) => {
-    const salt = bcrypt.genSaltSync(10);
-    const hash = await bcrypt.hash('123Az!!!', salt);  
-    const client = connectDB(dbName);
-    await client.query(`
+  const salt = bcrypt.genSaltSync(10);
+  const hash = await bcrypt.hash("123Az!!!", salt);
+  const client = connectDB(dbName);
+  await client.query(
+    `
         INSERT INTO 
             keppel.users (
                 user_name,
@@ -115,20 +119,16 @@ const createAdminUser = async (dbName) => {
         VALUES (
             $1, $2, $3, $4, $5, $6
         )
-    `, [
-        'admin',
-        'admin',
-        hash,
-        '',
-        'Adminstrator',
-        '-'
-    ]);
-    client.end();
+    `,
+    ["admin", "admin", hash, "", "Adminstrator", "-"]
+  );
+  client.end();
 };
 
 const createAdminUserRole = async (dbName) => {
-    const client = connectDB(dbName);
-    await client.query(`
+  const client = connectDB(dbName);
+  await client.query(
+    `
         INSERT INTO 
             keppel.user_role (
                 role_parent_id
@@ -136,15 +136,16 @@ const createAdminUserRole = async (dbName) => {
         VALUES (
             $1
         )
-    `, [
-        1
-    ]);
-    client.end();
+    `,
+    [1]
+  );
+  client.end();
 };
 
 const createAdminUserRolePrivileges = async (dbName) => {
-    const client = connectDB(dbName);
-    await client.query(`
+  const client = connectDB(dbName);
+  await client.query(
+    `
         INSERT INTO 
             keppel.user_role_privileges (
                 role_parent_id,
@@ -153,48 +154,47 @@ const createAdminUserRolePrivileges = async (dbName) => {
         VALUES (
             $1, $2
         )
-    `, [
-        1, 1
-    ]);
-    client.end();
+    `,
+    [1, 1]
+  );
+  client.end();
 };
 
 const addToJSONFile = async (dbName) => {
-    fs.readFile('../db/db.config.json', (err, data) => {
-        if (err) console.log(err)
-        if (data) {
-            let json = JSON.parse(data)
-            json[dbName] = {
-                host: "192.168.20.96",
-                port: 5432,
-                database: dbName,
-                user: "postgres",
-                password: "123Az!!!"
-            }
-            fs.writeFile('../db/db.config.json', JSON.stringify(json), (err) => {
-                if (err) console.log(err);
-                else console.log("db.config.json successfully updated.");
-            });
-        }
-    });    
+  fs.readFile("../db/db.config.json", (err, data) => {
+    if (err) console.log(err);
+    if (data) {
+      let json = JSON.parse(data);
+      json[dbName] = {
+        host: "192.168.20.96",
+        port: 5432,
+        database: dbName,
+        user: "postgres",
+        password: "123Az!!!",
+      };
+      fs.writeFile("../db/db.config.json", JSON.stringify(json), (err) => {
+        if (err) console.log(err);
+        else console.log("db.config.json successfully updated.");
+      });
+    }
+  });
 };
 
 const main = async (newDB) => {
-    try {
-        checkIfDatabaseExists(newDB);
-        await createNewDatabase(newDB)
-        // await changeSchemaName(client);
-        await createAdminRole(newDB);
-        await createAdminRolePrivileges(newDB);
-        await createAdminRoleParent(newDB);
-        await createAdminUser(newDB);
-        await createAdminUserRole(newDB);
-        await createAdminUserRolePrivileges(newDB);
-        addToJSONFile(newDB);
-    } catch (err) {
-        console.log(err);
-    }
+  try {
+    checkIfDatabaseExists(newDB);
+    await createNewDatabase(newDB);
+    // await changeSchemaName(client);
+    await createAdminRole(newDB);
+    await createAdminRolePrivileges(newDB);
+    await createAdminRoleParent(newDB);
+    await createAdminUser(newDB);
+    await createAdminUserRole(newDB);
+    await createAdminUserRolePrivileges(newDB);
+    addToJSONFile(newDB);
+  } catch (err) {
+    console.log(err);
+  }
 };
-
 
 main("internal_test_db");
