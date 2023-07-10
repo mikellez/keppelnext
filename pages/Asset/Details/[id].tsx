@@ -18,8 +18,8 @@ import {
 import styles from "../../../styles/Asset.module.scss";
 import { ThreeDots } from "react-loading-icons";
 import Image from "next/image";
-import AssetRequestHistory from "../../../components/Asset/AssetRequestHistory";
-import AssetChecklistHistory from "../../../components/Asset/AssetChecklistHistory";
+import AssetRequestHistory from "../../../components/Asset/AssetHistory/AssetRequestHistory";
+import AssetChecklistHistory from "../../../components/Asset/AssetHistory/AssetChecklistHistory";
 import AssetHierachy from "../../../components/Asset/AssetHierachy";
 import Link from "next/link";
 import TooltipBtn from "../../../components/TooltipBtn";
@@ -28,6 +28,7 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { HiOutlinePencilAlt } from "react-icons/hi";
 import { TbExchange } from "react-icons/tb";
 import COPTable from "../../../components/ChangeOfParts/COPTable";
+import AssetHistoryModalContainer from "../../../components/Asset/AssetHistory/AssetHistoryModalContainer";
 
 // Get asset detail by psa id
 const getAsset = async (id: number) => {
@@ -128,6 +129,12 @@ export default function AssetDetails(props: {
       </tr>
     );
   });
+
+  useEffect(() => {
+    props.assetHistory.map((history) => {
+      console.log("model data" + history);
+    });
+  }, [props.assetHistory]);
 
   const formatDate = (oldDate: string) => {
     let strArray = [
@@ -288,7 +295,7 @@ export default function AssetDetails(props: {
                 )}
               </div>
             </div>
-            {assetRequestHistory && (
+            {/* {assetRequestHistory && (
               <AssetRequestHistory
                 history={assetRequestHistory as CMMSAssetRequestHistory[]}
               />
@@ -297,7 +304,7 @@ export default function AssetDetails(props: {
               <AssetChecklistHistory
                 history={assetChecklistHistory as CMMSAssetChecklistHistory[]}
               />
-            )}
+            )} */}
           </>
         )}
       </ModuleContent>
@@ -306,7 +313,13 @@ export default function AssetDetails(props: {
         closeModal={() => setAssetHistoryModal(false)}
         closeOnOverlayClick={true}
       >
-        <table className="assetHistoryTable table">
+        <AssetHistoryModalContainer
+          checklistHistory={assetChecklistHistory!}
+          requestHistory={assetRequestHistory!}
+          assetHistory={props.assetHistory}
+          // page={page}
+        />
+        {/* <table className="assetHistoryTable table">
           <thead>
             <tr>
               <th>Action</th>
@@ -327,7 +340,7 @@ export default function AssetDetails(props: {
               );
             })}
           </tbody>
-        </table>
+        </table> */}
       </ModuleModal>
       <ModuleModal
         isOpen={COPHistoryModal}
