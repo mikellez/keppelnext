@@ -221,7 +221,7 @@ export default function ScheduleMaintenanceModal(
                       name="startDate"
                       value={
                         newSchedule.startDate
-                          ? newSchedule.startDate.toISOString().slice(0, 10)
+                          ? newSchedule.startDate//newSchedule.startDate?.toISOString().slice(0, 10)
                           : minDate
                       }
                       onChange={updateSchedule}
@@ -239,7 +239,7 @@ export default function ScheduleMaintenanceModal(
                       name="endDate"
                       value={
                         newSchedule.endDate
-                          ? newSchedule.endDate.toISOString().slice(0, 10)
+                          ? newSchedule.endDate//newSchedule.endDate?.toISOString().slice(0, 10)
                           : minDate
                       }
                       onChange={updateSchedule}

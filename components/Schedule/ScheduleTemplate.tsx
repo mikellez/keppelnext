@@ -54,6 +54,7 @@ export interface ScheduleInfo {
 
 // Function to format Date to string
 export function dateFormat(date: Date): string {
+    if(!date) return '';
     return date.toLocaleDateString("en-GB", {
         weekday: "short",
         year: "numeric",
