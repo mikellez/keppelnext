@@ -1,8 +1,12 @@
 // import axios from "axios";
 const axios = require('axios')
+import getConfig from 'next/config';
+
+const { publicRuntimeConfig } = getConfig();
+const { apiBaseUrl } = publicRuntimeConfig;
 
 const instance = axios.create({
-  baseURL: `http://localhost:${process.env.PORT}`,
+  baseURL: `${apiBaseUrl}`,
 });
 
 /*instance.interceptors.request.use(
