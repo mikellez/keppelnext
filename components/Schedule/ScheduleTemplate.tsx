@@ -16,6 +16,7 @@ import {
 } from "../../types/common/interfaces";
 import EventColorLegend, { EventColours } from "./EventColorLegend";
 import COPEventModal from "./COPEventModal";
+import moment from "moment";
 
 interface ScheduleTemplateInfo extends PropsWithChildren {
     title: string;
@@ -54,12 +55,7 @@ export interface ScheduleInfo {
 
 // Function to format Date to string
 export function dateFormat(date: Date): string {
-    return date.toLocaleDateString("en-GB", {
-        weekday: "short",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-    });
+    return moment(date).format("MMMM Do YYYY, h:mm:ss a");
 }
 
 // Function to convert a recurring period to string format
@@ -157,6 +153,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
             const newCOPEvents: CMMSChangeOfPartsEvent[] = newCOPs.map((cop) =>
                 toCMMSChangeOfPartsEvent(cop)
             );
+            console.log(newCOPEvents);
             setCOPEvents(newCOPEvents);
         },
         [toCMMSChangeOfPartsEvent]
@@ -224,7 +221,6 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
 
     const handleEventClick = useCallback((info: EventClickArg) => {
         if (info.event._def.extendedProps.checklistId) {
-            // console.log("Checklist Modal is opened");
             setCurrentEvent({
                 title: info.event._def.title,
                 start: info.event._instance?.range.start,
@@ -253,6 +249,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
             });
             setIsChecklistModalOpen(true);
         } else {
+            console.log("hello", info.event._instance?.range.start);
             setCurrentEvent({
                 title: info.event._def.title,
                 start: info.event._instance?.range.start,
@@ -271,6 +268,11 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
             setIsCOPModalOpen(true);
         }
     }, []);
+
+    useEffect(() => {
+        console.log(currentEvent);
+        console.log(router.pathname);
+    }, [currentEvent])
 
     // Add events to be displayed on the calendar
     useEffect(() => {

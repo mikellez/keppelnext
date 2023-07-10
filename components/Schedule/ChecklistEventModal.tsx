@@ -58,7 +58,7 @@ export default function ChecklistEventModal(props: ModalProps) {
     // const [scheduleObject, setScheduleObject] = useState<CMMSSchedule>();
 
     // Get the current user
-    const { data, error } = useCurrentUser();
+    const { data: user, error } = useCurrentUser();
 
     const router = useRouter();
 
@@ -107,6 +107,7 @@ export default function ChecklistEventModal(props: ModalProps) {
         };
 
         if (scheduleValidator(schedule)) {
+            console.log("working edit")
             scheduleMaintenance(schedule).then((result) => {
                 setSubmitModal(true);
                 // router.push("/Schedule");
@@ -259,6 +260,9 @@ export default function ChecklistEventModal(props: ModalProps) {
 
     return (
         <div>
+            {props.event?.extendedProps.checklistId && <div>
+
+            
             <Modal
                 isOpen={props.isOpen}
                 ariaHideApp={false}
@@ -308,7 +312,8 @@ export default function ChecklistEventModal(props: ModalProps) {
                                     </tr>
                                     <tr className={styles.eventModalTableRow}>
                                         <th>Date:</th>
-                                        {editMode ? (
+                                        {editMode && (props.event.extendedProps.recurringPeriod > 1 ||
+                                    props.event.extendedProps.isSingle) ? (
                                             <td>
                                                 <input
                                                     type="date"
@@ -428,10 +433,9 @@ export default function ChecklistEventModal(props: ModalProps) {
                                 </div>
                             )}
                             {props.editSingle &&
-                                (data?.role_id as number) != Role.Specialist &&
+                                (user?.role_id as number) != Role.Specialist &&
                                 (props.event.extendedProps.date as Date) > new Date() &&
-                                (props.event.extendedProps.recurringPeriod > 1 ||
-                                    props.event.extendedProps.isSingle) && (
+                                 (
                                     <div className={styles.eventModalButtonContainer}>
                                         <TooltipBtn
                                             toolTip={false}
@@ -497,6 +501,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                 title="Schedule Maintenance"
                 scheduleEvent={newSchedule}
             />
+            </div>}
         </div>
     );
 }

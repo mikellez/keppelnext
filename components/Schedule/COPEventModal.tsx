@@ -15,7 +15,11 @@ interface COPModalProps extends PropsWithChildren {
     event?: CMMSChangeOfPartsEvent;
 }
 
+
 const COPEventModal = (props: COPModalProps) => {
+    useEffect(() => {
+        console.log("From modal", props.event);
+    }, [props])
     return (
         <div>
             <Modal
