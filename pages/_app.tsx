@@ -59,7 +59,7 @@ export default function App({ Component, pageProps }: AppProps) {
   }
 
   // if (!asPath.includes("/Login")) {
-  const timer = useIdleTimer({
+  /*const timer = useIdleTimer({
     ref: idleTimer,
     syncTimers: 1,
     // ref: idleTimer,
@@ -73,7 +73,7 @@ export default function App({ Component, pageProps }: AppProps) {
     // timeout: 10 * 1000,
     crossTab: true,
     stopOnIdle: true,
-  });
+  });*/
   // }
 
   // useEffect(() => {

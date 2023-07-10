@@ -22,7 +22,7 @@ app.prepare().then(() => {
   const server = express();
   server.use(
     cors({
-      origin: "http://localhost:3001",
+      origin: `http://localhost:${process.env.PORT}`,
       credentials: true,
     })
   );
@@ -187,7 +187,7 @@ app.prepare().then(() => {
 
       // run workflow task - auto assign user
       await axios
-        .get("http://localhost:3001/api/workflow/run/assign")
+        .get(`http://localhost:${process.env.PORT}/api/workflow/run/assign`)
         .catch((err) => {
           console.log(err.response);
           console.log("Unable to run workflow task - assign user");
@@ -195,7 +195,7 @@ app.prepare().then(() => {
 
       // run workflow task - auto send email
       await axios
-        .get("http://localhost:3001/api/workflow/run/email")
+        .get(`http://localhost:${process.env.PORT}/api/workflow/run/email`)
         .catch((err) => {
           console.log(err.response);
           console.log("Unable to run workflow task - send email");
