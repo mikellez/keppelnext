@@ -91,7 +91,7 @@ async function createRequest(
   if (data.image.length > 0) formData.append("image", data.image[0]);
   if (linkedRequestId) formData.append("linkedRequestId", linkedRequestId);
 
-  console.log("formData", formData);
+  // console.log("formData", formData);
 
   return await instance
     .post("/api/request/", formData, {
@@ -203,8 +203,8 @@ export default function RequestContainer(props: RequestContainerProps) {
       await createRequest(data, plantId as number);
     } else if (props.assignRequestData) {
       // console.log("Assigning request");
-      console.log(prioritySelected);
-      console.log(assignedUsers);
+      // console.log(prioritySelected);
+      // console.log(assignedUsers);
       const { id } = router.query;
       // if priority and assign user dropdown are filled
       if (prioritySelected && assignedUsers) {
@@ -223,8 +223,8 @@ export default function RequestContainer(props: RequestContainerProps) {
     router.push("/Request/");
   };
   useEffect(() => {
-    console.log("linked", props.linkedRequestData);
-    console.log("assigned", props.assignRequestData);
+    // console.log("linked", props.linkedRequestData);
+    // console.log("assigned", props.assignRequestData);
     setIsReady(false);
 
     if (props.assignRequestData) {
@@ -243,7 +243,7 @@ export default function RequestContainer(props: RequestContainerProps) {
       });
       // console.log(props.assignRequestData.requestData.uploaded_file.data)
       if (props.assignRequestData.requestData.uploaded_file) {
-        console.log("processing image");
+        // console.log("processing image");
         setPreviewedFile(
           URL.createObjectURL(
             new Blob([
@@ -273,9 +273,9 @@ export default function RequestContainer(props: RequestContainerProps) {
     props.requestData,
   ]);
 
-  useEffect(() => {
-    console.log(previewedFile);
-  }, [previewedFile]);
+  // useEffect(() => {
+  //   console.log(previewedFile);
+  // }, [previewedFile]);
 
   useEffect(() => {
     if (!props.assignRequestData) {
@@ -499,7 +499,8 @@ export default function RequestContainer(props: RequestContainerProps) {
               }
             />
           </div>
-          {(props.linkedRequestData || props.assignRequestData?.requestData.associatedrequestid) && (
+          {(props.linkedRequestData ||
+            props.assignRequestData?.requestData.associatedrequestid) && (
             // <div className="form-group">
             //   <label className="form-label">Linked Request</label>
             //   <input
@@ -512,15 +513,30 @@ export default function RequestContainer(props: RequestContainerProps) {
             // </div>
             <div className="mt-3 d-flex align-items-center">
               <span className="me-3">
-                {`Linked Request ID: ${props.linkedRequestData 
-                  ? props.linkedRequestData.request_id 
-                  : props.assignRequestData?.requestData.associatedrequestid}`}
+                {`Linked Request ID: ${
+                  props.linkedRequestData
+                    ? props.linkedRequestData.request_id
+                    : props.assignRequestData?.requestData.associatedrequestid
+                }`}
               </span>
               {/* <Link href={`/Request/View/${props.linkedRequestData!.request_id}`}>
               </Link> */}
-              <TbSquareRoundedArrowRightFilled size={22} color="#c70f2b" cursor="pointer"
-                title={"See this request"} onClick={() => router.push(`/Request/View/${props.linkedRequestData
-                  ? props.linkedRequestData.request_id : props.assignRequestData?.requestData.associatedrequestid}`)}/>
+              <TbSquareRoundedArrowRightFilled
+                size={22}
+                color="#c70f2b"
+                cursor="pointer"
+                title={"See this request"}
+                onClick={() =>
+                  router.push(
+                    `/Request/View/${
+                      props.linkedRequestData
+                        ? props.linkedRequestData.request_id
+                        : props.assignRequestData?.requestData
+                            .associatedrequestid
+                    }`
+                  )
+                }
+              />
             </div>
           )}
         </div>

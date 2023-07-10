@@ -23,17 +23,17 @@ interface EditAssetProps {
 // get asset details query
 const getAsset = async (id: number) => {
   const url = "/api/assetDetails/";
-  console.log(url + id);
+  // console.log(url + id);
   return await instance
     .get(url + id)
     .then((res) => {
-      console.log("test");
-      console.log(res.data);
+      // console.log("test");
+      // console.log(res.data);
       return res.data;
     })
     .catch((err) => {
-      console.log("test1");
-      console.log(err.response);
+      // console.log("test1");
+      // console.log(err.response);
       return err.response.status;
     });
 };
@@ -73,7 +73,7 @@ export default function EditAsset(props: EditAssetProps) {
       return { ...prevState, [e.target.name]: e.target.value };
     });
   };
-  console.log(assetDetail);
+  // console.log(assetDetail);
 
   //Function to get state of image
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -106,7 +106,7 @@ export default function EditAsset(props: EditAssetProps) {
           // If all files have been processed, update the state
           if (uploadedFiles.length === files.length) {
             setfileraw((prevState) => {
-              console.log(prevState);
+              // console.log(prevState);
               if (
                 prevState === undefined ||
                 prevState === null ||
@@ -135,7 +135,7 @@ export default function EditAsset(props: EditAssetProps) {
     let postData: {} = {
       psa_id: psa_id,
     };
-    console.log(postData);
+    // console.log(postData);
 
     // if confirmmodal true, allow delete
     fetch("/api/asset/deleteAsset", {
@@ -168,7 +168,7 @@ export default function EditAsset(props: EditAssetProps) {
       files: JSON.stringify(fileraw),
       user_id: user.data!.id,
     };
-    console.log(postData);
+    // console.log(postData);
     //post data to API
     instance.post("/api/asset/editAsset", postData);
     //open modal to show success
@@ -179,9 +179,9 @@ export default function EditAsset(props: EditAssetProps) {
   useEffect(() => {
     getAsset(parseInt(psa_id as string)).then((result) => {
       // console.log(result);
-      console.log(result[0]);
+      // console.log(result[0]);
       if (!result[0].system_asset_lvl5) {
-        console.log(11);
+        // console.log(11);
         setAssetDetail({
           ...result[0],
           system_asset_lvl5: result[0].asset_name,
@@ -190,7 +190,7 @@ export default function EditAsset(props: EditAssetProps) {
         setImagePreview(result[0].uploaded_image);
         setfileraw(result[0].uploaded_files);
       } else if (!result[0].system_asset_lvl6) {
-        console.log(22);
+        // console.log(22);
         setAssetDetail({
           ...result[0],
           system_asset_lvl6: result[0].asset_name,
@@ -200,7 +200,7 @@ export default function EditAsset(props: EditAssetProps) {
         setImagePreview(result[0].uploaded_image);
         setfileraw(result[0].uploaded_files);
       } else if (!result[0].system_asset_lvl7) {
-        console.log(33);
+        // console.log(33);
         setAssetDetail({
           ...result[0],
           system_asset_lvl7: result[0].asset_name,
@@ -215,8 +215,8 @@ export default function EditAsset(props: EditAssetProps) {
       }
     });
   }, []);
-  console.log(assetDetail, 1);
-  console.log(assetDetail.plant_name, 2);
+  // console.log(assetDetail, 1);
+  // console.log(assetDetail.plant_name, 2);
   //function TO MAP file name and value to variables
   var filename = [""];
   var filevalue = [""];

@@ -5,7 +5,7 @@ const moment = require("moment");
 const fetchMasterInfo = async (req, res, next) => {
   if (tableInfo[req.params.type] === undefined)
     return res.status(404).json("no type");
-  console.log(tableInfo[req.params.type].internalName);
+  // console.log(tableInfo[req.params.type].internalName);
   let table = tableInfo[req.params.type].internalName;
   let idColumn = tableInfo[req.params.type].id;
   let q = `SELECT * FROM keppel.${table} ORDER BY ${idColumn}`;
@@ -25,7 +25,7 @@ const fetchMasterInfo = async (req, res, next) => {
         msg: err1,
       });
     }
-    console.log(result.rows);
+    // console.log(result.rows);
     return res.status(200).json({
       rows: result.rows,
       fields: result.fields,
@@ -54,7 +54,7 @@ const createMasterTypeEntry = async (req, res, next) => {
     insert.push(req.body.entries[key]);
     temp++;
   }
-  console.log(temp);
+  // console.log(temp);
   for (let i = 0; i < temp; i++) {
     num += "$" + (i + 1) + ",";
   }
@@ -77,8 +77,8 @@ const createMasterTypeEntry = async (req, res, next) => {
   num += `, NOW(), '${activity_log_json}'`;
   num += ")";
   sql = `INSERT INTO keppel.${table} ${columns} VALUES ${num} `;
-  console.log(sql);
-  console.log(insert);
+  // console.log(sql);
+  // console.log(insert);
   global.db
     .query(sql, insert)
     .then((result) => {
@@ -129,7 +129,7 @@ const updateMasterTypeSingle = async (req, res, next) => {
   // verifies if all the columns have been provided
   // returns false if failed
   // returns queryFields if success
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const activity_log = {
     date: today,
     name: req.user.name,
@@ -138,7 +138,7 @@ const updateMasterTypeSingle = async (req, res, next) => {
       tableInfo[req.params.type].id
     } ${req.params.id}`,
   };
-  console.log(tableInfo);
+  // console.log(tableInfo);
   const activity_log_json = JSON.stringify(activity_log);
 
   function verifyColumns(
@@ -154,15 +154,15 @@ const updateMasterTypeSingle = async (req, res, next) => {
 			if( !(x.column_name in columns) )
 				return false;
 		}*/
-    console.log(columns);
-    tableInfo[tableName].fields.forEach((x) => console.log(x.column_name));
+    // console.log(columns);
+    // tableInfo[tableName].fields.forEach((x) => console.log(x.column_name));
 
-    console.log(
-      tableInfo[tableName].fields.every((x) => columns.includes(x.column_name)),
-      tableInfo[tableName].fields.every(
-        (x) => entries[x.column_name] !== undefined
-      )
-    );
+    // console.log(
+    //   tableInfo[tableName].fields.every((x) => columns.includes(x.column_name)),
+    //   tableInfo[tableName].fields.every(
+    //     (x) => entries[x.column_name] !== undefined
+    //   )
+    // );
 
     const queryFields = [];
     for (let field of tableInfo[tableName].fields) {
@@ -201,7 +201,7 @@ const updateMasterTypeSingle = async (req, res, next) => {
   let entryKeys = Object.keys(req.body.entries);
   // verify columns are filled in
   const q = verifyColumns(table, req.body.entries);
-  console.log(q);
+  // console.log(q);
   if (!q) return res.status(400).json("entries invalid");
 
   // build query
@@ -213,15 +213,15 @@ const updateMasterTypeSingle = async (req, res, next) => {
 			${setQ}, activity_log = activity_log || '${activity_log_json}'
             WHERE ${idColumn}=$${i}`;
 
-  console.log(query);
+  // console.log(query);
   const p = q.map((x) => x.value);
   p.push(req.params.id);
-  console.log(p);
+  // console.log(p);
 
   global.db.query(query, p, (err1, result) => {
     if (err1) {
       // throw err;
-      console.log(err1);
+      // console.log(err1);
       return res.status(500).json({
         msg: err1,
       });

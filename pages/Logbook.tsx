@@ -17,7 +17,7 @@ import {
 } from "@table-library/react-table-library";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import { useTheme } from "@table-library/react-table-library/theme";
-import instance from '../axios.config.js';
+import instance from "../axios.config.js";
 import { GetServerSidePropsContext } from "next";
 import styles from "../styles/Logbook.module.css";
 import { SlLock, SlLockOpen } from "react-icons/sl";
@@ -37,8 +37,6 @@ export interface logbookData {
   [key: string]: string | number;
   id: string | number;
 }
-
-
 
 const Logbook = ({
   data,
@@ -89,7 +87,7 @@ const Logbook = ({
       return;
     }
 
-    console.log(labelValue, entryValue, staff);
+    // console.log(labelValue, entryValue, staff);
 
     try {
       const result = await instance.post("/api/logbook", {
@@ -119,7 +117,7 @@ const Logbook = ({
     } else {
       setLoading(false);
     }
-    console.log(plants);
+    // console.log(plants);
   }, []);
 
   useEffect(() => {
@@ -130,14 +128,15 @@ const Logbook = ({
 
   useEffect(() => {
     if (!isReady) {
-
       const getLogbook = async (pageNumber: number) => {
-        const response = await instance.get(`/api/logbook/${activeTab}?page=${pageNumber}`);
-        
+        const response = await instance.get(
+          `/api/logbook/${activeTab}?page=${pageNumber}`
+        );
+
         setLogbookData(response.data.rows);
       };
-      
-      getLogbook(page).then(res => setIsReady(true));
+
+      getLogbook(page).then((res) => setIsReady(true));
     }
   }, [page, activeTab]);
 
@@ -147,7 +146,7 @@ const Logbook = ({
       setActiveTab(tab);
       setPage(1);
     }
-  }
+  };
 
   const onLockHandler = () => {
     localStorage.setItem("staff", JSON.stringify(staff));
@@ -180,181 +179,189 @@ const Logbook = ({
       <ModuleContent>
         <ul className="nav nav-tabs">
           {plants.map((plant) => {
-            return <li key={plant.plant_id} className={`nav-link ${activeTab == plant.plant_id ? "active" : ""}`}
-            onClick={() => activeTab != plant.plant_id && switchTab(plant.plant_id)}>
-            {plant.plant_name}
-          </li>
+            return (
+              <li
+                key={plant.plant_id}
+                className={`nav-link ${
+                  activeTab == plant.plant_id ? "active" : ""
+                }`}
+                onClick={() =>
+                  activeTab != plant.plant_id && switchTab(plant.plant_id)
+                }
+              >
+                {plant.plant_name}
+              </li>
+            );
           })}
         </ul>
-        <div className="p-5" style={{border: "solid #e9ecef 1px"}}>
-
-        
-        <form className={styles.logbookForm} onSubmit={submitHandler}>
-          <div className={styles.addEntryInputs}>
-            {/* <input type="text" value={formatDate(new Date().toString())} disabled name="date" /> */}
-            <input
-              type="text"
-              placeholder="Label"
-              name="label"
-              value={label}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                setLabel(event.target.value)
-              }
-              className="form-control"
-              style={{ marginLeft: 0 }}
-            />
-            <AssignToSelect
-              onChange={(option: any) => {
-                setStaff((prevState) => {
-                  return { ...prevState, first: option!.value };
-                });
-              }}
-              plantId={user.data?.allocated_plants}
-              isSingle
-              style={{
-                width: "25rem",
-                zIndex: 10,
-                marginRight: "0.5rem",
-                marginLeft: "0.5rem",
-              }}
-              defaultIds={staff.first ? [staff.first] : undefined}
-              disabled={lock}
-              value={staff.first}
-            />
-            <AssignToSelect
-              onChange={(option: any) => {
-                setStaff((prevState) => {
-                  return { ...prevState, second: option!.value };
-                });
-              }}
-              plantId={user.data?.allocated_plants}
-              isSingle
-              style={{
-                width: "25rem",
-                zIndex: 10,
-                marginRight: "0.5rem",
-                marginLeft: "0.5rem",
-              }}
-              defaultIds={staff.second ? [staff.second] : undefined}
-              disabled={lock}
-              value={staff.second}
-            />
-
-            {!lock && (
-              <SlLockOpen
-                size={25}
-                style={{ cursor: "pointer", marginBottom: "0.1rem" }}
-                onClick={
-                  staff.first && staff.second && staff.first !== staff.second
-                    ? onLockHandler
-                    : () => setModal(true)
+        <div className="p-5" style={{ border: "solid #e9ecef 1px" }}>
+          <form className={styles.logbookForm} onSubmit={submitHandler}>
+            <div className={styles.addEntryInputs}>
+              {/* <input type="text" value={formatDate(new Date().toString())} disabled name="date" /> */}
+              <input
+                type="text"
+                placeholder="Label"
+                name="label"
+                value={label}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  setLabel(event.target.value)
                 }
+                className="form-control"
+                style={{ marginLeft: 0 }}
               />
-            )}
-            {lock && (
-              <SlLock
-                size={25}
-                style={{ cursor: "pointer", marginBottom: "0.1rem" }}
-                onClick={onUnlockHandler}
-                color="#c21010"
+              <AssignToSelect
+                onChange={(option: any) => {
+                  setStaff((prevState) => {
+                    return { ...prevState, first: option!.value };
+                  });
+                }}
+                plantId={user.data?.allocated_plants}
+                isSingle
+                style={{
+                  width: "25rem",
+                  zIndex: 10,
+                  marginRight: "0.5rem",
+                  marginLeft: "0.5rem",
+                }}
+                defaultIds={staff.first ? [staff.first] : undefined}
+                disabled={lock}
+                value={staff.first}
               />
-            )}
-          </div>
-          <div className={styles.entryDiv}>
-            <textarea
-              cols={20}
-              rows={5}
-              placeholder="Entry Details"
-              name="entry"
-              value={entry}
-              onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
-                setEntry(event.target.value)
-              }
-              className="form-control"
-              style={{resize: "none", overflow: "auto", width: "100%"}}
+              <AssignToSelect
+                onChange={(option: any) => {
+                  setStaff((prevState) => {
+                    return { ...prevState, second: option!.value };
+                  });
+                }}
+                plantId={user.data?.allocated_plants}
+                isSingle
+                style={{
+                  width: "25rem",
+                  zIndex: 10,
+                  marginRight: "0.5rem",
+                  marginLeft: "0.5rem",
+                }}
+                defaultIds={staff.second ? [staff.second] : undefined}
+                disabled={lock}
+                value={staff.second}
+              />
+
+              {!lock && (
+                <SlLockOpen
+                  size={25}
+                  style={{ cursor: "pointer", marginBottom: "0.1rem" }}
+                  onClick={
+                    staff.first && staff.second && staff.first !== staff.second
+                      ? onLockHandler
+                      : () => setModal(true)
+                  }
+                />
+              )}
+              {lock && (
+                <SlLock
+                  size={25}
+                  style={{ cursor: "pointer", marginBottom: "0.1rem" }}
+                  onClick={onUnlockHandler}
+                  color="#c21010"
+                />
+              )}
+            </div>
+            <div className={styles.entryDiv}>
+              <textarea
+                cols={20}
+                rows={5}
+                placeholder="Entry Details"
+                name="entry"
+                value={entry}
+                onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  setEntry(event.target.value)
+                }
+                className="form-control"
+                style={{ resize: "none", overflow: "auto", width: "100%" }}
+              />
+            </div>
+            <div className="d-flex justify-content-end">
+              <button type="submit" className="ms-auto btn btn-primary">
+                Log Entry
+              </button>
+            </div>
+          </form>
+
+          <ModuleSimplePopup
+            modalOpenState={modal}
+            setModalOpenState={setModal}
+            text="Both staff must be selected and must be different from each other in
+            order to lock!"
+            title="Lock Error"
+            icon={SimpleIcon.Exclaim}
+            shouldCloseOnOverlayClick={true}
+          ></ModuleSimplePopup>
+          {!loading && (
+            <Table
+              data={{ nodes: logbookData }}
+              theme={theme}
+              layout={{ custom: true }}
+            >
+              {(logbookData: logbookData[]) => (
+                <>
+                  <Header>
+                    <HeaderRow>
+                      <HeaderCell resize>Time</HeaderCell>
+                      <HeaderCell resize>Label</HeaderCell>
+                      <HeaderCell resize>Entry</HeaderCell>
+                      <HeaderCell resize>Duty Staff 1</HeaderCell>
+                      <HeaderCell resize>Duty Staff 2</HeaderCell>
+                    </HeaderRow>
+                  </Header>
+
+                  <Body>
+                    {logbookData.map((row, index) => {
+                      return (
+                        <Row key={index} item={{ id: row.logbook_id }}>
+                          <Cell>
+                            {moment(new Date(row.date)).format(
+                              "MMMM Do YYYY, h:mm:ss a"
+                            )}
+                          </Cell>
+                          <Cell>{row.label}</Cell>
+                          <Cell>{row.entry}</Cell>
+                          <Cell>{row.staff1}</Cell>
+                          <Cell>{row.staff2}</Cell>
+                        </Row>
+                      );
+                    })}
+                  </Body>
+                </>
+              )}
+            </Table>
+          )}
+          <div className={styles2.requestPagination}>
+            <FiChevronsLeft
+              size={25}
+              className={`${styles2.paginationChevron} ${
+                page - 1 > 0 ? styles2.active : styles2.disabled
+              }`}
+              onClick={() => setPage(1)}
+            />
+            <span>
+              {page - 1 > 0 && (
+                <PageButton setPage={setPage}>{page - 1}</PageButton>
+              )}
+              <PageButton active setPage={setPage}>
+                {page}
+              </PageButton>
+              {page + 1 <= totalPages && (
+                <PageButton setPage={setPage}>{page + 1}</PageButton>
+              )}
+            </span>
+            <FiChevronsRight
+              size={25}
+              className={`${styles2.paginationChevron} ${
+                page < totalPages ? styles2.active : styles2.disabled
+              }`}
+              onClick={() => setPage(totalPages)}
             />
           </div>
-          <div className="d-flex justify-content-end">
-
-          <button type="submit" className="ms-auto btn btn-primary">
-            Log Entry
-          </button>
-          </div>
-        </form>
-        
-        <ModuleSimplePopup
-          modalOpenState={modal}
-          setModalOpenState={setModal}
-          text="Both staff must be selected and must be different from each other in
-            order to lock!"
-          title="Lock Error"
-          icon={SimpleIcon.Exclaim}
-          shouldCloseOnOverlayClick={true}
-        ></ModuleSimplePopup>
-        {!loading && (
-          <Table
-            data={{ nodes: logbookData }}
-            theme={theme}
-            layout={{ custom: true }}
-          >
-            {(logbookData: logbookData[]) => (
-              <>
-                <Header>
-                  <HeaderRow>
-                    <HeaderCell resize>Time</HeaderCell>
-                    <HeaderCell resize>Label</HeaderCell>
-                    <HeaderCell resize>Entry</HeaderCell>
-                    <HeaderCell resize>Duty Staff 1</HeaderCell>
-                    <HeaderCell resize>Duty Staff 2</HeaderCell>
-                  </HeaderRow>
-                </Header>
-
-                <Body>
-                  {logbookData.map((row, index) => {
-                    return (
-                      <Row key={index} item={{ id: row.logbook_id }}>
-                        <Cell>{moment(new Date(row.date)).format(
-                            "MMMM Do YYYY, h:mm:ss a"
-                            )}</Cell>
-                        <Cell>{row.label}</Cell>
-                        <Cell>{row.entry}</Cell>
-                        <Cell>{row.staff1}</Cell>
-                        <Cell>{row.staff2}</Cell>
-                      </Row>
-                    );
-                  })}
-                </Body>
-              </>
-            )}
-          </Table>
-        )}
-        <div className={styles2.requestPagination}>
-          <FiChevronsLeft
-            size={25}
-            className={`${styles2.paginationChevron} ${
-              page - 1 > 0 ? styles2.active : styles2.disabled
-            }`}
-            onClick={() => setPage(1)}
-          />
-          <span>
-            {page - 1 > 0 && (
-              <PageButton setPage={setPage}>{page - 1}</PageButton>
-            )}
-            <PageButton active setPage={setPage}>
-              {page}
-            </PageButton>
-            {page + 1 <= totalPages && (
-              <PageButton setPage={setPage}>{page + 1}</PageButton>
-            )}
-          </span>
-          <FiChevronsRight
-            size={25}
-            className={`${styles2.paginationChevron} ${
-              page < totalPages ? styles2.active : styles2.disabled
-            }`}
-            onClick={() => setPage(totalPages)}
-          />
-        </div>
         </div>
       </ModuleContent>
     </ModuleMain>
@@ -373,15 +380,17 @@ export const getServerSideProps = async (
     },
   };
 
-  
   const plants = await instance.get(`api/getPlants`, headers);
   const response = await instance.get(
     `/api/logbook/${plants.data[0].plant_id}?page=1`,
     headers
   );
 
-
   return {
-    props: { data: response.data.rows, totalPages: response.data.total, plants: plants.data },
+    props: {
+      data: response.data.rows,
+      totalPages: response.data.total,
+      plants: plants.data,
+    },
   };
 };

@@ -17,7 +17,7 @@ interface SearchBarProps {
 const AssetSearchBar = forwardRef((props: SearchBarProps, ref: any) => {
   function handleChange() {
     if (props.onChange) {
-      console.log("running change");
+      // console.log("running change");
       return props.onChange();
     } else {
       return () => {};

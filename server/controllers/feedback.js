@@ -81,8 +81,10 @@ const getAllFeedBackQuery = (expand, search) => {
     activity_log: "f.activity_log",
     completed_date: "f.completed_date",
     remarks: "f.remarks",
-    createdByUser: "concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser",
-    assigned_user_name: "concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigned_user_name",
+    createdByUser:
+      "concat( concat(createdU.first_name ,' '), createdU.last_name ) AS createdByUser",
+    assigned_user_name:
+      "concat( concat(assignU.first_name ,' '), assignU.last_name ) AS assigned_user_name",
     loc_room: "pl.loc_room",
     loc_id: "pl.loc_id",
     loc_floor: "pl.loc_floor",
@@ -93,8 +95,8 @@ const getAllFeedBackQuery = (expand, search) => {
     status: "st.status",
     name: "f.name",
     created_user_id: "f.created_user_id",
-    completed_img: "f.completed_img"
-  }
+    completed_img: "f.completed_img",
+  };
 
   if (expand) {
     const expandArr = expand.split(",");
@@ -134,7 +136,7 @@ const getAllFeedBackQuery = (expand, search) => {
     `;
 
   return query;
-}
+};
 
 const getPendingFeedbackQuery = (expand, search) => {
   return (
@@ -146,7 +148,7 @@ const getPendingFeedbackQuery = (expand, search) => {
       ORDER BY f.feedback_id DESC
       `
   );
-}
+};
 
 const getAssignedFeedbackQuery = (expand, search) => {
   return (
@@ -167,7 +169,7 @@ const getAssignedFeedbackQuery = (expand, search) => {
       ORDER BY f.feedback_id DESC
       `
   );
-}
+};
 
 const getCompletedFeedbackQuery = (expand, search) => {
   return (
@@ -188,7 +190,7 @@ const getCompletedFeedbackQuery = (expand, search) => {
       ORDER BY f.feedback_id desc
       `
   );
-}
+};
 
 const fetchPendingFeedback = async (req, res, next) => {
   const page = req.query.page || 1;
@@ -196,21 +198,22 @@ const fetchPendingFeedback = async (req, res, next) => {
   const search = req.query.search || null;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await global.db.query(getPendingFeedbackQuery(expand, search), [
-    req.user.id,
-  ]);
+  const totalRows = await global.db.query(
+    getPendingFeedbackQuery(expand, search),
+    [req.user.id]
+  );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
     getPendingFeedbackQuery(expand, search) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
-    console.log(query)
+  // console.log(query)
 
   try {
     const result = await global.db.query(query, [req.user.id]);
     //if (result.rows.length == 0)
-      //return res.status(204).json({ msg: "No Feedback" });
+    //return res.status(204).json({ msg: "No Feedback" });
 
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {
@@ -242,9 +245,10 @@ const fetchAssignedFeedback = async (req, res, next) => {
   const search = req.query.search || null;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await global.db.query(getAssignedFeedbackQuery(expand, search), [
-    req.user.id,
-  ]);
+  const totalRows = await global.db.query(
+    getAssignedFeedbackQuery(expand, search),
+    [req.user.id]
+  );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -287,9 +291,10 @@ const fetchCompletedFeedback = async (req, res, next) => {
   const search = req.query.search || null;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await global.db.query(getCompletedFeedbackQuery(expand, search), [
-    req.user.id,
-  ]);
+  const totalRows = await global.db.query(
+    getCompletedFeedbackQuery(expand, search),
+    [req.user.id]
+  );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -366,7 +371,6 @@ const fetchFilteredFeedback = async (req, res, next) => {
 const assignFeedback = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
-
   const sql = `
         UPDATE
             keppel.feedback
@@ -384,7 +388,7 @@ const assignFeedback = async (req, res, next) => {
             feedback_id = $2
     `;
 
-    console.log(sql);
+  // console.log(sql);
 
   try {
     // console.log(req.params);
@@ -447,7 +451,6 @@ const completeFeedback = async (req, res, next) => {
                 
                 WHERE feedback_id = $4`;
 
-  
   // console.log(req.body);
   try {
     await global.db.query(sql, [
@@ -484,7 +487,7 @@ const completeFeedback = async (req, res, next) => {
 
     return res.status(200).json("Feedback successfully completed");
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     return res.status(500).json("Failure to complete Feedback");
   }
 };
@@ -506,7 +509,7 @@ const getSingleFeedback = async (req, res, next) => {
 
 const createFeedback = async (req, res, next) => {
   const feedback = req.body;
-  console.log(req.body);
+  // console.log(req.body);
   const sql = `INSERT INTO keppel.feedback 
               (name,
                 description,
@@ -526,7 +529,7 @@ const createFeedback = async (req, res, next) => {
     {
       date: today,
       name: req.user ? req.user.name : "Guest",
-      activity: `Created Feedback on ${feedback.plantName} ${feedback.location}` ,
+      activity: `Created Feedback on ${feedback.plantName} ${feedback.location}`,
       activity_type: "PENDING",
     },
   ];

@@ -100,7 +100,7 @@ const downloadCSV = async (type: string, activeTabIndex: number) => {
     temp_link.click();
     temp_link.remove();
   } catch (e) {
-    console.log(e);
+    // console.log(e);
   }
 };
 
@@ -149,7 +149,7 @@ export default function Checklist(props: ChecklistProps) {
   };
 
   useEffect(() => {
-    console.log(props);
+    // console.log(props);
     if (data && !isValidating) {
       if (props?.filter) {
         if (data?.rows?.length > 0) {
@@ -321,7 +321,8 @@ export default function Checklist(props: ChecklistProps) {
                                       .reverse()
                                       .find(
                                         (activity) =>
-                                          activity["activity_type"] == "WORK DONE"
+                                          activity["activity_type"] ==
+                                          "WORK DONE"
                                       )!.date
                                   )
                                 ).format("MMMM Do YYYY, h:mm:ss a")}`
@@ -332,7 +333,8 @@ export default function Checklist(props: ChecklistProps) {
                                       .reverse()
                                       .find(
                                         (activity) =>
-                                          activity["activity_type"] == "APPROVED"
+                                          activity["activity_type"] ==
+                                          "APPROVED"
                                       )!.date
                                   )
                                 ).format("MMMM Do YYYY, h:mm:ss a")}`
@@ -342,7 +344,11 @@ export default function Checklist(props: ChecklistProps) {
                           </Cell>
                           <Cell>{item.assigneduser}</Cell>
                           <Cell>{item.signoffuser}</Cell>
-                          <Cell>{item.createdbyuser != " " ? item.createdbyuser : "System Generated"}</Cell>
+                          <Cell>
+                            {item.createdbyuser != " "
+                              ? item.createdbyuser
+                              : "System Generated"}
+                          </Cell>
                           <Cell>
                             {(user.data!.role_id === Role.Admin ||
                               user.data!.role_id === Role.Manager ||
@@ -354,7 +360,9 @@ export default function Checklist(props: ChecklistProps) {
                                   title={"Manage"}
                                 />
                               </Link>
-                            ) : item.status_id === 2 || item.status_id === 3 || item.status_id === 6 ? (
+                            ) : item.status_id === 2 ||
+                              item.status_id === 3 ||
+                              item.status_id === 6 ? (
                               <>
                                 <Link href={`/Checklist/Complete/${item.id}`}>
                                   <AiOutlineFileDone

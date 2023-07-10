@@ -38,7 +38,7 @@ const getSystemsFromPlant = async (req, res, next) => {
     (err, result) => {
       if (err) return res.status(500).json({ msg: err });
 
-      console.log;
+      // console.log;
       res.status(200).json(result.rows);
     }
   );
@@ -414,7 +414,7 @@ const fetchSystems = async (req, res, next) => {
   global.db.query(
     `SELECT system_id, system_name FROM keppel.system_master`,
     (err, result) => {
-      if (err) res.status(500).send(err)
+      if (err) res.status(500).send(err);
       else res.status(200).json(result.rows);
     }
   );
@@ -426,7 +426,7 @@ const fetchSystemAssets = async (req, res, next) => {
   global.db.query(q, (err1, result) => {
     if (err1) {
       // throw err;
-      console.log(err1);
+      // console.log(err1);
       return res.status(400).send({
         msg: err1,
       });
@@ -445,7 +445,7 @@ const fetchSystemAssetNames = async (req, res, next) => {
   global.db.query(q, (err1, result) => {
     if (err1) {
       // throw err;
-      console.log(err1);
+      // console.log(err1);
       return res.status(400).send({
         msg: err1,
       });
@@ -466,7 +466,7 @@ const fetchSubComponent1Names = async (req, res, next) => {
   global.db.query(q, (err1, result) => {
     if (err1) {
       // throw err;
-      console.log(err1);
+      // console.log(err1);
       return res.status(400).send({
         msg: err1,
       });
@@ -482,7 +482,7 @@ const fetch_asset_types = async (req, res, next) => {
   global.db.query(q, (err1, result) => {
     if (err1) {
       // throw err;
-      console.log(err1);
+      // console.log(err1);
       return res.status(400).send({
         msg: err1,
       });
@@ -493,7 +493,7 @@ const fetch_asset_types = async (req, res, next) => {
 };
 
 const editAsset = async (req, res, next) => {
-  console.log(req.body);
+  // console.log(req.body);
   var parent_asset;
 
   if (req.body.asset_type == "") {
@@ -527,8 +527,8 @@ const editAsset = async (req, res, next) => {
   var psa_id = req.body.psa_id;
   var uploaded_image = req.body.image;
   var uploaded_files = req.body.files;
-  console.log("req.body is here");
-  console.log(req.body);
+  // console.log("req.body is here");
+  // console.log(req.body);
   var system_id_lvl3 = req.body.system_id;
   var system_asset_id_lvl4 = req.body.system_asset_id;
   var parent_asset;
@@ -555,14 +555,14 @@ const editAsset = async (req, res, next) => {
   else {
     parent_asset = req.body.system_asset;
   }
-  console.log(
-    "Asset Type" +
-      asset_type +
-      "System Asset" +
-      req.body.system_asset_name +
-      "Parent Asset" +
-      parent_asset
-  );
+  // console.log(
+  //   "Asset Type" +
+  //     asset_type +
+  //     "System Asset" +
+  //     req.body.system_asset_name +
+  //     "Parent Asset" +
+  //     parent_asset
+  // );
   var system_asset_lvl5 = req.body.system_lvl_5;
   var level5 = req.body.system_lvl_5;
   var system_asset_lvl6 = req.body.system_lvl_6;
@@ -584,7 +584,7 @@ const editAsset = async (req, res, next) => {
 
   var plant_asset_instrument = "";
   plant_asset_instrument = req.body.system_asset_name;
-  console.log(req.body);
+  // console.log(req.body);
 
   var sql = `UPDATE keppel.plant_system_assets SET parent_asset='${parent_asset}',asset_type='${asset_type}',asset_description='${asset_description}',asset_location='${asset_location}',brand='${brand}',plant_asset_instrument='${plant_asset_instrument}',model_number='${model_number}',technical_specs='${technical_specs}',manufacture_country='${manufacture_country}',warranty='${warranty}',remarks='${remarks}',system_asset_lvl6='${system_asset_lvl6}',system_asset_lvl5='${system_asset_lvl5}',system_asset_lvl7='', uploaded_image = '${uploaded_image}', uploaded_files = '${uploaded_files}'  WHERE psa_id = '${psa_id}'`;
   // if only chosen up to Select System Asset and create a new asset name with an asset type
@@ -716,7 +716,7 @@ const editAsset = async (req, res, next) => {
   // console.log(compare(old.rows[0], updated.rows[0]));
   const fields = compare(old.rows[0], updated.rows[0]).join(", ");
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-    await global.db.query(
+  await global.db.query(
     `
     UPDATE keppel.plant_system_assets
     SET activity_log = activity_log || 
@@ -749,13 +749,13 @@ const compare = (old, updated) => {
     }
   }
 
-  console.log(fields);
+  // console.log(fields);
   return fields;
 };
 
 const addNewAsset = (req, res, next) => {
-  console.log("req.body is here");
-  console.log(req.body);
+  // console.log("req.body is here");
+  // console.log(req.body);
   var system_id_lvl3 = req.body.system_id;
   var system_asset_id_lvl4 = req.body.system_asset_id;
   var parent_asset;
@@ -782,14 +782,14 @@ const addNewAsset = (req, res, next) => {
   else {
     parent_asset = req.body.system_asset;
   }
-  console.log(
-    "Asset Type" +
-      asset_type +
-      "System Asset" +
-      req.body.system_asset_name +
-      "Parent Asset" +
-      parent_asset
-  );
+  // console.log(
+  //   "Asset Type" +
+  //     asset_type +
+  //     "System Asset" +
+  //     req.body.system_asset_name +
+  //     "Parent Asset" +
+  //     parent_asset
+  // );
   var system_asset_lvl5 = req.body.system_lvl_5;
   var level5 = req.body.system_lvl_5;
   var system_asset_lvl6 = req.body.system_lvl_6;
@@ -842,7 +842,7 @@ const addNewAsset = (req, res, next) => {
   } //end for
   parent_asset = req.body.system_asset_name;
   plant_asset_instrument = tag;
-  console.log(parent_asset, tag);
+  // console.log(parent_asset, tag);
 
   if (tag == system_asset_lvl5) {
     system_asset_lvl5 = asset_type;
@@ -862,7 +862,7 @@ const addNewAsset = (req, res, next) => {
 
   var sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)
         VALUES ('${system_id_lvl3}', '${system_asset_id_lvl4}', '${parent_asset}', '${asset_type}','${asset_description}','${asset_location}','${brand}','${plant_asset_instrument}','${model_number}','${technical_specs}','${manufacture_country}','${warranty}','${remarks}','${system_asset_lvl5}','${system_asset_lvl6}','', '${uploaded_image}','${uploaded_files}','${plant_id}')`;
-  console.log(sql);
+  // console.log(sql);
   // if only chosen up to Select System Asset and create a new asset name with an asset type
   if (
     req.body.system_lvl_6 == "" &&
@@ -907,7 +907,8 @@ const addNewAsset = (req, res, next) => {
   sql += "RETURNING psa_id";
 
   let psa_id;
-  global.db.query(sql)
+  global.db
+    .query(sql)
     .then((result) => {
       const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
       psa_id = result.rows[0].psa_id;
@@ -927,7 +928,7 @@ const addNewAsset = (req, res, next) => {
       created_date = now()
       WHERE psa_id = '${parseInt(psa_id)}';
       `;
-      console.log(query);
+      // console.log(query);
       return global.db.query(query);
     })
     .then((rows) => {
@@ -951,7 +952,7 @@ const deleteAsset = (req, res, next) => {
   var psa_id = req.body.psa_id;
   var q = `DELETE from keppel.history where asset_id = '${psa_id}';
   DELETE from keppel.plant_system_assets where psa_id = '${psa_id}'`;
-  console.log(q);
+  // console.log(q);
   global.db.query(q, function (err, result) {
     if (err) {
       console.log(err);
@@ -985,7 +986,7 @@ const fetchAssetHistory = (req, res, next) => {
           msg: err,
         });
       }
-      console.log(result.rows);
+      // console.log(result.rows);
       return res.status(200).send(result.rows);
     }
   );

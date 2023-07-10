@@ -27,7 +27,7 @@ interface ChecklistPageProps {
 }
 
 const createChecklist = async (checklist: CMMSChecklist, type: string) => {
-  console.log(checklist);
+  // console.log(checklist);
   return await instance
     .post(`/api/checklist/${type}`, { checklist })
     .then((res) => {
@@ -41,7 +41,7 @@ const editChecklistAPI = async (
   checklistId: number,
   assigned: boolean
 ) => {
-  console.log(checklistData);
+  // console.log(checklistData);
   return await instance
     .patch(`/api/checklist/record/${checklistId}`, { checklistData, assigned })
     .then((res) => {
@@ -72,7 +72,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
       setIncompleteModal(true);
     } else {
       setSuccessModal(true);
-      console.log(checklistData)
+      // console.log(checklistData)
       createChecklist(checklistData, checklistType);
       setTimeout(() => {
         router.push("/Checklist");

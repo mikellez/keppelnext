@@ -55,21 +55,27 @@ app.prepare().then(() => {
     next();
   }
 
-  const restrictEng = ["/Schedule/Manage", "/Dashboard/Manager", "/User/Management", "/User/Add"];
+  const restrictEng = [
+    "/Schedule/Manage",
+    "/Dashboard/Manager",
+    "/User/Management",
+    "/User/Add",
+  ];
   const restrictOps = [
     "/Schedule/Create",
     "/Schedule/Manage",
     "/Asset/New",
     "/Dashboard/Engineer",
     "/Dashboard/Manager",
-    "/User/Management",   
-    "/User/Add"
+    "/User/Management",
+    "/User/Add",
   ];
   const restrictManager = ["/Dashboard/Engineer", "/Dashboard/Specialist"];
   function accessControl(req, res, next) {
     if (req.user) {
-      if (req.user.role_id == 3 && (restrictEng.includes(req.path) ||         
-      req.path.startsWith("/User/Edit"))
+      if (
+        req.user.role_id == 3 &&
+        (restrictEng.includes(req.path) || req.path.startsWith("/User/Edit"))
       ) {
         res.redirect("/403");
       } else if (
@@ -79,15 +85,13 @@ app.prepare().then(() => {
           req.path.startsWith("/Asset/Edit") ||
           req.path.startsWith("/Request/Assign") ||
           req.path.startsWith("/Request/Manage") ||
-          req.path.startsWith("/Checklist/Manage")||
-          req.path.startsWith("/User/Edit")
-        )
+          req.path.startsWith("/Checklist/Manage") ||
+          req.path.startsWith("/User/Edit"))
       ) {
         res.redirect("/403");
       } else if ((req.user.role_id = 2 && restrictManager.includes(req.path))) {
         res.redirect("/403");
       }
-      
     }
     next();
   }
@@ -179,7 +183,7 @@ app.prepare().then(() => {
   var task = cron.schedule(
     "* * * * *",
     async () => {
-      console.log("trigger task");
+      // console.log("trigger task");
 
       // run workflow task - auto assign user
       await axios

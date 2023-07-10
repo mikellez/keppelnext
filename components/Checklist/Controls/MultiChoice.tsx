@@ -1,11 +1,10 @@
-import React, { useContext, useState } from 'react';
-import CheckControl from '../../../types/common/CheckControl';
-import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
+import React, { useContext, useState } from "react";
+import CheckControl from "../../../types/common/CheckControl";
+import { SectionsContext } from "../../../pages/Checklist/Complete/[id]";
 import { ImCross } from "react-icons/im";
 import checklistStyles from "../ChecklistTemplateCreator.module.css";
 import { ModuleDivider } from "../../ModuleLayout/ModuleDivider";
 import styles from "../../../styles/Checklist.module.scss";
-
 
 export class MultiChoiceControl extends CheckControl {
   choices: string[];
@@ -45,19 +44,32 @@ export class MultiChoiceControl extends CheckControl {
     };
   }
 
-    render(onChange: Function, onDelete: Function) {
-		return <MultiChoice multiChoiceObj={this} onChange={onChange} onDelete={onDelete} />
-	}
+  render(onChange: Function, onDelete: Function) {
+    return (
+      <MultiChoice
+        multiChoiceObj={this}
+        onChange={onChange}
+        onDelete={onDelete}
+      />
+    );
+  }
 
-	renderEditableForm(rowId: string, sectionId: string, index: number) {
-		return <MultiChoiceEditable multiChoiceObj={this} rowId={rowId} sectionId={sectionId} index={index} />
-	}
+  renderEditableForm(rowId: string, sectionId: string, index: number) {
+    return (
+      <MultiChoiceEditable
+        multiChoiceObj={this}
+        rowId={rowId}
+        sectionId={sectionId}
+        index={index}
+      />
+    );
+  }
   // renderReassignedEditableForm(rowId: string, sectionId: string) {
-	// 	return <MultiReassignedChoiceEditable multiChoiceObj={this} rowId={rowId} sectionId={sectionId} />
-	// }
-  
+  // 	return <MultiReassignedChoiceEditable multiChoiceObj={this} rowId={rowId} sectionId={sectionId} />
+  // }
+
   renderViewOnlyForm() {
-    return <MultiChoiceView multiChoiceObj={this} />
+    return <MultiChoiceView multiChoiceObj={this} />;
   }
 }
 
@@ -98,7 +110,7 @@ function Choice({
       )}
     </div>
   );
-};
+}
 
 export function MultiChoice({
   multiChoiceObj,
@@ -202,99 +214,109 @@ export function MultiChoice({
       </div>
     </div>
   );
-};
-
-function MultiChoiceEditable ({ multiChoiceObj, rowId, sectionId, index }: {
-	multiChoiceObj: MultiChoiceControl, 
-	rowId: string,
-	sectionId: string,
-  index: number
-}) {
-
-	const { setSections } = useContext(SectionsContext);
-  console.log(multiChoiceObj)
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setSections((prevSections) => {
-            const newSections = [...prevSections];
-            newSections.forEach(section => {
-                if (section.id === sectionId) {
-					const currentValue = section.getValue(rowId, multiChoiceObj.id);
-					if (e.target.checked) {
-						section.updateSection(rowId, multiChoiceObj.id, addEventTargetValue(currentValue, e.target.value));
-					} else {
-						section.updateSection(rowId, multiChoiceObj.id, removeEventTargetValue(currentValue, e.target.value));
-					}	
-                }
-            })
-            return newSections;
-        });
-	};
-
-	const addEventTargetValue = (current: string, value: string) => {
-		if (current.trim().length > 0) {
-			return Array.from(new Set((current + "," + value).split(","))).join(",");
-		}
-		return value;
-	};
-
-	const removeEventTargetValue = (current: string, value: string) => {
-		return current.split(",").filter(item => item != value).join(",");
-	};
-  
-	return (
-		<div className={styles.checkViewContainer}>
-			<h6>{multiChoiceObj.question}</h6>
-			{
-				multiChoiceObj.choices.map(choice => {
-					return (
-						<div key={choice} className="form-check">
-							<input 
-								type="checkbox"
-								value={choice}
-								className="form-check-input"
-								onChange={handleChange}
-								name={multiChoiceObj.id}
-                checked={multiChoiceObj.value.split(",").includes(choice)}
-							/>
-							<label className="form-check-label">
-								{choice}
-							</label>
-						</div>
-					)
-				})
-			}
-		</div>
-	);
-};
-
-function MultiChoiceView ({multiChoiceObj}: {multiChoiceObj: MultiChoiceControl}) {
-  return (
-    <div className={styles.checkViewContainer}>
-			<h6>{multiChoiceObj.question}</h6>
-			{
-				multiChoiceObj.choices.map(choice => {
-					return (
-						<div key={choice} className="form-check">
-							<input 
-								type="checkbox"
-								className="form-check-input"
-                disabled
-                checked={multiChoiceObj.value.split(",").includes(choice)}
-							/>
-							<label className="form-check-label">
-								{choice}
-							</label>
-						</div>
-					)
-				})
-			}
-		</div>
-  )
 }
 
+function MultiChoiceEditable({
+  multiChoiceObj,
+  rowId,
+  sectionId,
+  index,
+}: {
+  multiChoiceObj: MultiChoiceControl;
+  rowId: string;
+  sectionId: string;
+  index: number;
+}) {
+  const { setSections } = useContext(SectionsContext);
+  // console.log(multiChoiceObj)
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSections((prevSections) => {
+      const newSections = [...prevSections];
+      newSections.forEach((section) => {
+        if (section.id === sectionId) {
+          const currentValue = section.getValue(rowId, multiChoiceObj.id);
+          if (e.target.checked) {
+            section.updateSection(
+              rowId,
+              multiChoiceObj.id,
+              addEventTargetValue(currentValue, e.target.value)
+            );
+          } else {
+            section.updateSection(
+              rowId,
+              multiChoiceObj.id,
+              removeEventTargetValue(currentValue, e.target.value)
+            );
+          }
+        }
+      });
+      return newSections;
+    });
+  };
+
+  const addEventTargetValue = (current: string, value: string) => {
+    if (current.trim().length > 0) {
+      return Array.from(new Set((current + "," + value).split(","))).join(",");
+    }
+    return value;
+  };
+
+  const removeEventTargetValue = (current: string, value: string) => {
+    return current
+      .split(",")
+      .filter((item) => item != value)
+      .join(",");
+  };
+
+  return (
+    <div className={styles.checkViewContainer}>
+      <h6>{multiChoiceObj.question}</h6>
+      {multiChoiceObj.choices.map((choice) => {
+        return (
+          <div key={choice} className="form-check">
+            <input
+              type="checkbox"
+              value={choice}
+              className="form-check-input"
+              onChange={handleChange}
+              name={multiChoiceObj.id}
+              checked={multiChoiceObj.value.split(",").includes(choice)}
+            />
+            <label className="form-check-label">{choice}</label>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function MultiChoiceView({
+  multiChoiceObj,
+}: {
+  multiChoiceObj: MultiChoiceControl;
+}) {
+  return (
+    <div className={styles.checkViewContainer}>
+      <h6>{multiChoiceObj.question}</h6>
+      {multiChoiceObj.choices.map((choice) => {
+        return (
+          <div key={choice} className="form-check">
+            <input
+              type="checkbox"
+              className="form-check-input"
+              disabled
+              checked={multiChoiceObj.value.split(",").includes(choice)}
+            />
+            <label className="form-check-label">{choice}</label>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 // function MultiReassignedChoiceEditable ({ multiChoiceObj, rowId, sectionId }: {
-// 	multiChoiceObj: MultiChoiceControl, 
+// 	multiChoiceObj: MultiChoiceControl,
 // 	rowId: string,
 // 	sectionId: string
 // }) {
@@ -311,7 +333,7 @@ function MultiChoiceView ({multiChoiceObj}: {multiChoiceObj: MultiChoiceControl}
 // 						section.updateSection(rowId, multiChoiceObj.id, addEventTargetValue(currentValue, e.target.value));
 // 					} else {
 // 						section.updateSection(rowId, multiChoiceObj.id, removeEventTargetValue(currentValue, e.target.value));
-// 					}	
+// 					}
 //                 }
 //             })
 //             return newSections;
@@ -336,7 +358,7 @@ function MultiChoiceView ({multiChoiceObj}: {multiChoiceObj: MultiChoiceControl}
 // 				multiChoiceObj.choices.map(choice => {
 // 					return (
 // 						<div key={choice} className="form-check">
-// 							<input 
+// 							<input
 // 								type="checkbox"
 // 								value={choice}
 // 								className="form-check-input"

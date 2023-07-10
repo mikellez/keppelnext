@@ -17,7 +17,7 @@ export enum SimpleIcon {
   Check,
   Exclaim,
   Cross,
-  Question
+  Question,
 }
 
 interface ModuleSimplePopupProps {
@@ -33,7 +33,7 @@ interface ModuleSimplePopupProps {
 
 export default function ModuleSimplePopup(props: ModuleSimplePopupProps) {
   const toggleModal = () => {
-    console.log(props.modalOpenState);
+    // console.log(props.modalOpenState);
     props.setModalOpenState(!props.modalOpenState);
   };
 

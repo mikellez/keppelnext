@@ -288,7 +288,7 @@ const createWorkflow = (requestID, faultTypeID, plantLocationID) => {
 };
 
 const createRequest = async (req, res, next) => {
-  console.log(req.body);
+  // console.log(req.body);
   // console.log(req.file)
   const {
     requestTypeID,
@@ -456,12 +456,12 @@ const updateRequest = async (req, res, next) => {
   const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;
-  console.log([
-    req.body.assignedUser.value,
-    req.body.priority.p_id,
-    history,
-    req.params.request_id,
-  ]);
+  // console.log([
+  //   req.body.assignedUser.value,
+  //   req.body.priority.p_id,
+  //   history,
+  //   req.params.request_id,
+  // ]);
   global.db.query(
     `
 		UPDATE keppel.request SET 
@@ -782,7 +782,7 @@ const createRequestCSV = (req, res, next) => {
 };
 
 const rejectRequest = async (req, res) => {
-  console.log("correct");
+  // console.log("correct");
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const activity = `Rejected Request Case ID-${req.params.request_id}`;
   sql = `
@@ -799,7 +799,7 @@ const rejectRequest = async (req, res) => {
         )
 	WHERE request_id = $6`;
 
-  console.log("reject", sql);
+  // console.log("reject", sql);
   global.db.query(
     sql,
     [
@@ -812,7 +812,7 @@ const rejectRequest = async (req, res) => {
     ],
     (err, result) => {
       if (err) {
-        console.log(err);
+        // console.log(err);
         return res.status(500).send("Error in rejecting request");
       }
       return res.status(200).json("Request successfully rejected");
@@ -822,7 +822,7 @@ const rejectRequest = async (req, res) => {
 
 const approveRequest = async (req, res, next) => {
   // console.log(req.body);
-  console.log("wrong");
+  // console.log("wrong");
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const activity = `Approved Request Case ID-${req.params.request_id}`;
@@ -840,7 +840,7 @@ const approveRequest = async (req, res, next) => {
           'remarks', $5::text
         )
 	WHERE request_id = $6`;
-  console.log(sql);
+  // console.log(sql);
   global.db.query(
     sql,
     [

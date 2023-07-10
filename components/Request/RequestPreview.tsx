@@ -5,7 +5,7 @@ import styles from "../../styles/Request.module.scss";
 import { ModuleModal } from "../ModuleLayout/ModuleModal";
 import moment from "moment";
 import { AiOutlineDownload } from "react-icons/ai";
-import { BiDownload } from "react-icons/bi"
+import { BiDownload } from "react-icons/bi";
 import { FaDownload } from "react-icons/fa";
 import { TbSquareRoundedArrowRightFilled } from "react-icons/tb";
 import { useRouter } from "next/router";
@@ -35,7 +35,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
       return entry.activity_type === "COMPLETED";
     })
     .at(-1);
-  console.log(completedLog);
+  // console.log(completedLog);
   let completedDate = "N.A";
   if (completedLog) {
     const [day, month, year, hour, minute, second] =
@@ -71,7 +71,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
       const rejected = activity_log
         .reverse()
         .find((log) => log.activity_type === "REJECTED");
-      console.log("rejected", rejected);
+      // console.log("rejected", rejected);
       setComments({ "Rejection Comments": rejected?.remarks || "N.A" });
     }
   }, []);
@@ -80,7 +80,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
     <div>
       <table className={styles.table}>
         <tbody>
-          <tr style={{ marginBottom: "50px"}}>
+          <tr style={{ marginBottom: "50px" }}>
             <th>Request Type</th>
             <td>{props.request.request_name}</td>
           </tr>
@@ -114,7 +114,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
             <th>Assigned To</th>
             <td>{props.request.assigned_user_name || "N.A"}</td>
           </tr>
-          <tr >
+          <tr>
             <th>Requested By</th>
             <td>{props.request.created_by || "N.A"}</td>
           </tr>
@@ -131,17 +131,21 @@ export default function RequestPreview(props: RequestPreviewProps) {
                       height={150}
                       style={{ objectFit: "contain", cursor: "pointer" }}
                       alt="Fault Image"
-                      />
+                    />
                   </div>
 
-                  <div> 
+                  <div>
                     {/* <a href={faultUrl} download="FaultImage.jpg"> */}
-                      <FaDownload color="#c70f2b" size={16} onClick={() => {
+                    <FaDownload
+                      color="#c70f2b"
+                      size={16}
+                      onClick={() => {
                         const link = document.createElement("a");
                         link.href = faultUrl;
-                        link.download="FaultImage.jpg";
+                        link.download = "FaultImage.jpg";
                         link.click();
-                      }}/>
+                      }}
+                    />
                     {/* </a> */}
                   </div>
                 </div>
@@ -181,96 +185,106 @@ export default function RequestPreview(props: RequestPreviewProps) {
           ) : (
             <div></div>
           )}
-          {props.action == RequestAction.manage && props.request.complete_comments && (
-            <>
-              <tr>
-                <th>Completion Comments</th>
-                <td style={{ color: "#73777B", fontWeight: "BOLD" }}>
-                  {props.request.complete_comments || "N.A"}
-                </td>
-              </tr>
-              <tr>
-                <th>Completion Image</th>
-                <td>
-                  
-                  {completeUrl ? (
-                    <div className="d-flex align-items-center justify-content-between">
+          {props.action == RequestAction.manage &&
+            props.request.complete_comments && (
+              <>
+                <tr>
+                  <th>Completion Comments</th>
+                  <td style={{ color: "#73777B", fontWeight: "BOLD" }}>
+                    {props.request.complete_comments || "N.A"}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Completion Image</th>
+                  <td>
+                    {completeUrl ? (
+                      <div className="d-flex align-items-center justify-content-between">
+                        <div className="mb-2">
+                          <Image
+                            src={completeUrl}
+                            onClick={() => setCompletionModal(true)}
+                            width={150}
+                            height={150}
+                            style={{ objectFit: "contain", cursor: "pointer" }}
+                            alt="Fault Image"
+                          />
+                        </div>
+                        <div>
+                          {/* <a href={completeUrl} download="CompletionImage.jpg"> */}
+                          <FaDownload
+                            color="#c70f2b"
+                            size={16}
+                            onClick={() => {
+                              const link = document.createElement("a");
+                              link.href = completeUrl;
+                              link.download = "CompletionImage.jpg";
+                              link.click();
+                            }}
+                          />
+                          {/* </a> */}
+                        </div>
+                      </div>
+                    ) : (
+                      "No File"
+                    )}
 
-                      <div className="mb-2">
+                    {
+                      <ModuleModal
+                        isOpen={completionModal}
+                        closeModal={() => {
+                          setCompletionModal(false);
+                        }}
+                        className={styles.modal}
+                        closeOnOverlayClick={true}
+                        hideHeader
+                      >
                         <Image
-                        src={completeUrl}
-                        onClick={() => setCompletionModal(true)}
-                        width={150}
-                        height={150}
-                        style={{ objectFit: "contain", cursor: "pointer" }}
-                        alt="Fault Image"
+                          src={completeUrl}
+                          width={550}
+                          height={550}
+                          style={{ objectFit: "contain" }}
+                          alt="Completion Image"
                         />
-                      </div>
-                      <div>
-                        {/* <a href={completeUrl} download="CompletionImage.jpg"> */}
-                          <FaDownload color="#c70f2b" size={16} onClick={() => {
-                            const link = document.createElement("a");
-                            link.href = completeUrl;
-                            link.download = "CompletionImage.jpg"
-                            link.click();
-                          }}/>
-                        {/* </a> */}
-                      </div>
-                    </div>
-                    
-                  ) : (
-                    "No File"
-                  )}
-
-                  {
-                    <ModuleModal
-                      isOpen={completionModal}
-                      closeModal={() => {
-                        setCompletionModal(false);
-                      }}
-                      className={styles.modal}
-                      closeOnOverlayClick={true}
-                      hideHeader
-                    >
-                      <Image
-                        src={completeUrl}
-                        width={550}
-                        height={550}
-                        style={{ objectFit: "contain" }}
-                        alt="Completion Image"
-                      />
-                    </ModuleModal>
-                  }
-                </td>
-              </tr>
-              <tr>
-                <th>Completed Date</th>
-                <td
-                  style={{
-                    color: completedDate === "N.A" ? "#73777B" : "inherit",
-                    fontWeight: completedDate === "N.A" ? "bold" : "normal",
-                  }}
-                >
-                  {completedDate}
-                </td>
-              </tr>
-            </>
+                      </ModuleModal>
+                    }
+                  </td>
+                </tr>
+                <tr>
+                  <th>Completed Date</th>
+                  <td
+                    style={{
+                      color: completedDate === "N.A" ? "#73777B" : "inherit",
+                      fontWeight: completedDate === "N.A" ? "bold" : "normal",
+                    }}
+                  >
+                    {completedDate}
+                  </td>
+                </tr>
+              </>
+            )}
+          {props.request.associatedrequestid && (
+            <tr>
+              <th>Linked Request ID</th>
+              <td>
+                <div className="d-flex align-items-center">
+                  <span className="me-3">
+                    {props.request.associatedrequestid}
+                  </span>
+                  <TbSquareRoundedArrowRightFilled
+                    size={22}
+                    color="#c70f2b"
+                    cursor="pointer"
+                    title={"See this request"}
+                    onClick={() =>
+                      router.push(
+                        `/Request/View/${props.request.associatedrequestid}`
+                      )
+                    }
+                  />
+                </div>
+              </td>
+            </tr>
           )}
-          {props.request.associatedrequestid &&
-          <tr>
-            <th>Linked Request ID</th>
-            <td>
-              <div className="d-flex align-items-center">
-
-              <span className="me-3">
-                {props.request.associatedrequestid}
-              </span>
-              <TbSquareRoundedArrowRightFilled size={22} color="#c70f2b" cursor="pointer"
-                title={"See this request"} 
-                onClick={() => router.push(`/Request/View/${props.request.associatedrequestid}`)}/>
-              </div>
-            </td>
-          </tr>}
         </tbody>
       </table>
     </div>

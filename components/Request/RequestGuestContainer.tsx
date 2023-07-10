@@ -72,7 +72,7 @@ export default function RequestGuestContainer(props: any) {
     image: undefined,
   });
   useEffect(() => {
-    console.log(props.user);
+    // console.log(props.user);
     if (props.user) {
       setForm((prevState) => {
         return { ...prevState, name: "user" };
@@ -87,7 +87,7 @@ export default function RequestGuestContainer(props: any) {
   const [submissionModal, setSubmissionModal] = useState<boolean>(false);
 
   async function submitform() {
-    console.log(form);
+    // console.log(form);
     if (form.requestTypeID == "" || form.faultTypeID == "" || form.name == "") {
       setIsMissingDetailsModaOpen(true);
     } else {
@@ -106,7 +106,7 @@ export default function RequestGuestContainer(props: any) {
           headers: { "Content-Type": "multipart/form-data" },
         })
         .then((response) => {
-          console.log("ni hao");
+          // console.log("ni hao");
           setSubmissionModal(true);
           return response.data;
         })
@@ -272,23 +272,21 @@ export default function RequestGuestContainer(props: any) {
                 }}
               />
               {previewedFile && (
-              <div
-                className={`${formStyles.imageClick} form-group mt-3`}
-                onClick={() => setIsImage(true)}
-              >
-                <div>
-                  <label className="form-label">
-                    <p style={{ textDecoration: "underline" }}>
-                      View Feedback Image
-                    </p>
-                  </label>
+                <div
+                  className={`${formStyles.imageClick} form-group mt-3`}
+                  onClick={() => setIsImage(true)}
+                >
+                  <div>
+                    <label className="form-label">
+                      <p style={{ textDecoration: "underline" }}>
+                        View Feedback Image
+                      </p>
+                    </label>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
             </div>
           )}
-
-              
 
           {props.assignRequestData && (
             <div className="form-group">

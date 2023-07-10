@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { SlArrowDown } from "react-icons/sl";
 import DropdownOption from "./DropdownOption";
 import styles from "../../styles/Dropdown.module.css";
-import instance from '../../types/common/axios.config';
+import instance from "../../types/common/axios.config";
 import useComponentVisible from "./useComponentVisible";
 import { useRouter } from "next/router";
 import { useCurrentUser } from "../SWR";
@@ -14,21 +14,20 @@ export default function DropdownMenu() {
   const [isDropdowned, setIsDropdowned] = useState(false);
 
   const sendLogout = (): void => {
-    instance
-      .get("/api/user/logouthistory")
-      .then((response) => {
-
-      instance.post("/api/logout")
-      .then((response) => {
-        console.log("success", response);
-        localStorage.removeItem("staff");
-        window.location.href = "/";
-      })
-      .catch((e) => {
-        console.log("error", e);
-        alert("logout fail");
-      });
-  })};
+    instance.get("/api/user/logouthistory").then((response) => {
+      instance
+        .post("/api/logout")
+        .then((response) => {
+          // console.log("success", response);
+          localStorage.removeItem("staff");
+          window.location.href = "/";
+        })
+        .catch((e) => {
+          // console.log("error", e);
+          alert("logout fail");
+        });
+    });
+  };
 
   const logOut = (): boolean => {
     sendLogout();
@@ -39,7 +38,7 @@ export default function DropdownMenu() {
     if (isComponentVisible) setIsComponentVisible(false);
     else setIsComponentVisible(true);
   };
-  
+
   const router = useRouter();
   const user = useCurrentUser();
 
@@ -53,10 +52,10 @@ export default function DropdownMenu() {
       </button>
       {isComponentVisible && (
         <div className={styles.dropdownMenuContainer}>
-          <DropdownOption onClick={() => router.push("/Settings")}>Settings</DropdownOption>
-          <DropdownOption onClick={logOut}>
-            Logout
+          <DropdownOption onClick={() => router.push("/Settings")}>
+            Settings
           </DropdownOption>
+          <DropdownOption onClick={logOut}>Logout</DropdownOption>
         </div>
       )}
     </div>

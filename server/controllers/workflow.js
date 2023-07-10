@@ -64,28 +64,23 @@ const runWorkflowAssign = async (req, res, next) => {
 
   `;
 
-  global.db.query(
-    sql,
-    (err, result) => {
-      if (err) return res.status(500).json({ errormsg: err });
-      res.status(200).json(result.rows);
-    }
-  );
-}
+  global.db.query(sql, (err, result) => {
+    if (err) return res.status(500).json({ errormsg: err });
+    res.status(200).json(result.rows);
+  });
+};
 
 const autoSendEmail = (workflow) => {
   //TODO: construct email content, and send email
-  for(let i = 0; i < workflow.length; i++) {
-    const mail = new AutoSendWorkflowMail([workflow[i].user_email],
-      {
-        request_id: workflow[i].request_id,
-        user_name: workflow[i].user_name,
-        fault_type: workflow[i].fault_type,
-        fault_description: workflow[i].fault_description,
-        plant_name: workflow[i].plant_name,
-        created_at: workflow[i].created_date
-      }
-    );
+  for (let i = 0; i < workflow.length; i++) {
+    const mail = new AutoSendWorkflowMail([workflow[i].user_email], {
+      request_id: workflow[i].request_id,
+      user_name: workflow[i].user_name,
+      fault_type: workflow[i].fault_type,
+      fault_description: workflow[i].fault_description,
+      plant_name: workflow[i].plant_name,
+      created_at: workflow[i].created_date,
+    });
 
     mail.send();
   }
@@ -123,12 +118,10 @@ const runWorkflowEmail = async (req, res, next) => {
 
   `;
 
-  global.db.query(
-    sql,
-    (err, result) => {
-      if (err) return res.status(500).json({ errormsg: err });
+  global.db.query(sql, (err, result) => {
+    if (err) return res.status(500).json({ errormsg: err });
 
-      autoSendEmail(result.rows);
+    autoSendEmail(result.rows);
 
     res.status(200).json(result.rows);
   });
@@ -142,7 +135,7 @@ const createWorkflow = async (req, res, next) => {
   let user_id = 0;
   const activity_log = JSON.stringify("");
 
-  console.log("body", req.body);
+  // console.log("body", req.body);
 
   if (action === "assign-to") {
     isAssignTo = 1;
@@ -174,30 +167,22 @@ const updateWorkflow = async (req, res, next) => {
 
   const sql = `UPDATE keppel.workflow SET is_active = $1 WHERE id = $2`;
 
-  global.db.query(
-    sql,
-    [ +is_active, id ],
-    (err, result) => {
-      if (err) return res.status(500).json({ errormsg: err });
-      res.status(200).json(result.rows);
-    }
-  );
-}
+  global.db.query(sql, [+is_active, id], (err, result) => {
+    if (err) return res.status(500).json({ errormsg: err });
+    res.status(200).json(result.rows);
+  });
+};
 
 const deleteWorkflow = async (req, res, next) => {
   const { id } = req.params;
 
   const sql = `DELETE FROM keppel.workflow WHERE id = $1`;
 
-  global.db.query(
-    sql,
-    [ id ],
-    (err, result) => {
-      if (err) return res.status(500).json({ errormsg: err });
-      res.status(200).json(result.rows);
-    }
-  );
-}
+  global.db.query(sql, [id], (err, result) => {
+    if (err) return res.status(500).json({ errormsg: err });
+    res.status(200).json(result.rows);
+  });
+};
 
 module.exports = {
   listWorkflow,

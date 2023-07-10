@@ -37,7 +37,9 @@ function useRequest(
   const fieldsString = fields.join(",");
 
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
-    [`/api/request/${request_type}?page=${page}&search=${search}&expand=${fieldsString}`],
+    [
+      `/api/request/${request_type}?page=${page}&search=${search}&expand=${fieldsString}`,
+    ],
     requestFetcher,
     { revalidateOnFocus: false }
   );
@@ -45,22 +47,21 @@ function useRequest(
 
 function useSpecificRequest(request_id: number) {
   const requestFetcher = (url: string) =>
-      instance
+    instance
       .get<CMMSRequest>(url)
       .then((response) => {
-          response.data.created_date = new Date(response.data.created_date);
-          return response.data;
-        })
+        response.data.created_date = new Date(response.data.created_date);
+        return response.data;
+      })
       .catch((e) => {
-          throw new Error(e);
-        });
+        throw new Error(e);
+      });
   return useSWR<CMMSRequest, Error>(
     [`/api/request/${request_id}`],
     requestFetcher,
     { revalidateOnFocus: false }
   );
 }
-
 
 function useRequestFilter(props: RequestProps, page: number) {
   const requestFetcher = (url: string) =>
@@ -79,7 +80,9 @@ function useRequestFilter(props: RequestProps, page: number) {
       });
 
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
-    `/api/request/filter/${props?.status || 0}/${props?.plant || 0}/${props.datetype || 'all'}/${props?.date || 'all'}/${page}`,
+    `/api/request/filter/${props?.status || 0}/${props?.plant || 0}/${
+      props.datetype || "all"
+    }/${props?.date || "all"}/${page}`,
     requestFetcher,
     { revalidateOnFocus: false }
   );
@@ -125,7 +128,9 @@ function useFeedbackFilter(props: FeedbackFormProps, page: number) {
       });
 
   return useSWR<{ rows: CMMSFeedback[]; total: number }, Error>(
-    `/api/feedback/filter/${props.feedbackData.status || 0}/${props.feedbackData.plant_id || 0}/${page}`,
+    `/api/feedback/filter/${props.feedbackData.status || 0}/${
+      props.feedbackData.plant_id || 0
+    }/${page}`,
     feedbackFetcher,
     { revalidateOnFocus: false }
   );
@@ -154,13 +159,13 @@ function useChecklist(
 ) {
   const checklistFetcher = (url: string) =>
     instance
-      .get<{ rows: CMMSChecklist[]; total:number}>(url)
+      .get<{ rows: CMMSChecklist[]; total: number }>(url)
       .then((response) => response.data)
       .catch((e) => {
         throw new Error(e);
       });
 
-  return useSWR<{ rows: CMMSChecklist[]; total:number}, Error>(
+  return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
     [`/api/checklist/${checklist_type}?page=${page}&search=${search}`],
     checklistFetcher,
     { revalidateOnFocus: false }
@@ -177,7 +182,9 @@ function useChecklistFilter(props: ChecklistProps, page: number) {
       });
 
   return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
-    `/api/checklist/filter/${props?.status || 0}/${props?.plant || 0}/${props?.datetype || 'all'}/${props?.date || 'all'}/${page}`,
+    `/api/checklist/filter/${props?.status || 0}/${props?.plant || 0}/${
+      props?.datetype || "all"
+    }/${props?.date || "all"}/${page}`,
     checklistFetcher,
     { revalidateOnFocus: false }
   );
@@ -186,8 +193,8 @@ function useAccountlog(url: string) {
   const accountlogFetcher = (url: string) =>
     instance
       .get<any[]>(url)
-      .then((response) =>
-        response.data.map((singleLog) => {
+      .then((response) => {
+        const logs = response.data.logs.map((singleLog) => {
           return {
             id: singleLog.event_time,
             user_name: singleLog.user_name,
@@ -195,16 +202,19 @@ function useAccountlog(url: string) {
             description: singleLog.description,
             event_time: singleLog.event_time,
           };
-        })
-      )
+        });
+        return { logs, totalPages: response.data.totalPages };
+      })
       .catch((e) => {
         throw new Error(e);
       });
 
-  return useSWR<CMMSActivitylog[], Error>(
+  return useSWR<{ logs: CMMSActivitylog[]; totalPages: number }, Error>(
     url,
     accountlogFetcher,
-    { revalidateOnFocus: false }
+    {
+      revalidateOnFocus: false,
+    }
   );
 }
 
@@ -217,7 +227,7 @@ function useCurrentUser() {
     allocated_plants: number[];
     email: string;
     username: string;
-    employee_id: string
+    employee_id: string;
   }
 
   const userFetcher = (url: string) =>
@@ -348,7 +358,7 @@ function useChangeOfParts(
 function useWorkflow(page: number) {
   const workflowFetcher = (url: string) =>
     instance
-      .get< {rows : CMMSWorkflow[]; total : number }>(url)
+      .get<{ rows: CMMSWorkflow[]; total: number }>(url)
       .then((response) => {
         response.data.rows.forEach((s: CMMSWorkflow) => {
           s.created_date = new Date(s.created_date);
@@ -359,7 +369,7 @@ function useWorkflow(page: number) {
         throw new Error(e);
       });
 
-  return useSWR<{rows : CMMSWorkflow[]; total:number}, Error>(
+  return useSWR<{ rows: CMMSWorkflow[]; total: number }, Error>(
     [`/api/workflows?page=${page}`],
     workflowFetcher,
     { revalidateOnFocus: false }

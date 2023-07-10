@@ -1,5 +1,5 @@
 import formStyles from "../../styles/formStyles.module.css";
-import instance from '../../types/common/axios.config';
+import instance from "../../types/common/axios.config";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import React, { useState } from "react";
 import {
@@ -138,7 +138,7 @@ export default function NewAsset(props: NewAssetProps) {
         const dataURL = reader.result as string;
         setImagePreview(dataURL);
         setform({ ...form, image: dataURL });
-        console.log(form.image);
+        // console.log(form.image);
       };
     } else {
       setImagePreview(undefined);
@@ -237,11 +237,9 @@ export default function NewAsset(props: NewAssetProps) {
         user_id: user.data!.id,
       };
 
-      console.log(postData);
+      // console.log(postData);
       //post data to API
-      instance.post("/api/asset/addNewAsset", 
-        postData
-      );
+      instance.post("/api/asset/addNewAsset", postData);
       //open modal to show success
       setSubmissionModal(true);
     }
@@ -619,15 +617,15 @@ export default function NewAsset(props: NewAssetProps) {
             shouldCloseOnOverlayClick={true}
             buttons={[
               <button
-                  key={1}
-                  onClick={() => {
-                    setSubmissionModal(false);
-                    router.reload();
-                  }}
-                  className="btn btn-secondary"
-                >
-                  Submit another asset
-              </button>, 
+                key={1}
+                onClick={() => {
+                  setSubmissionModal(false);
+                  router.reload();
+                }}
+                className="btn btn-secondary"
+              >
+                Submit another asset
+              </button>,
               <button
                 key={2}
                 onClick={() => {
@@ -637,7 +635,7 @@ export default function NewAsset(props: NewAssetProps) {
                 className="btn btn-primary"
               >
                 Ok
-            </button>
+              </button>,
             ]}
             onRequestClose={() => {
               router.push("/Asset");
@@ -664,10 +662,7 @@ export const getServerSideProps: GetServerSideProps = async (
     },
   };
   // API to get plants, systems, asset types
-  const plants = await instance.get<CMMSPlant[]>(
-    `/api/getPlants`,
-    headers
-  );
+  const plants = await instance.get<CMMSPlant[]>(`/api/getPlants`, headers);
   const systems = await instance.get<CMMSSystem[]>(
     `/api/asset/systems`,
     headers
@@ -681,7 +676,7 @@ export const getServerSideProps: GetServerSideProps = async (
   if (systems.status !== 200) throw Error("Error getting systems");
   if (asset_type.status !== 200) throw Error("Error getting asset_type");
 
-  console.log(asset_type.data);
+  // console.log(asset_type.data);
 
   let props: NewAssetProps = {
     plants: plants.data,

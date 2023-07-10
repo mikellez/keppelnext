@@ -10,13 +10,17 @@ function rowElements(rows: { [key: string]: string }[], assignedUser: string) {
   return (
     <>
       {rows.map((row) => {
-        console.log(row);
+        // console.log(row);
         return (
           <tr key={row["date"] + row["name"] + row["role"]}>
             <td>{row["activity_type"]}</td>
-            <td>{row["activity"]  == "ASSIGNED" ? `ASSIGNED TO ${assignedUser}` : row["activity"]}</td>
             <td>
-              {moment(new Date(row["date"])).format('MMMM Do YYYY, h:mm:ss a')}
+              {row["activity"] == "ASSIGNED"
+                ? `ASSIGNED TO ${assignedUser}`
+                : row["activity"]}
+            </td>
+            <td>
+              {moment(new Date(row["date"])).format("MMMM Do YYYY, h:mm:ss a")}
             </td>
             <td>{row["name"]}</td>
           </tr>

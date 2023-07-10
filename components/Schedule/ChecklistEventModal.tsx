@@ -3,32 +3,37 @@ import Modal from "react-modal";
 import { useRouter } from "next/router";
 import { dateFormat, ScheduleInfo, toPeriodString } from "./ScheduleTemplate";
 import {
-    CMMSScheduleEvent,
-    CMMSUser,
-    CMMSSchedule,
-    CMMSTimeline,
+  CMMSScheduleEvent,
+  CMMSUser,
+  CMMSSchedule,
+  CMMSTimeline,
 } from "../../types/common/interfaces";
 import EventModalUser from "./EventModalUser";
 import { useCurrentUser } from "../SWR";
 import { GrClose, GrNew } from "react-icons/gr";
 import TooltipBtn from "../TooltipBtn";
 import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
-import ModuleSimplePopup, { SimpleIcon } from "../ModuleLayout/ModuleSimplePopup";
+import ModuleSimplePopup, {
+  SimpleIcon,
+} from "../ModuleLayout/ModuleSimplePopup";
 import styles from "../../styles/Schedule.module.scss";
 import instance from "../../types/common/axios.config";
-import ScheduleModal, { scheduleMaintenance, scheduleValidator } from "./ScheduleModal";
+import ScheduleModal, {
+  scheduleMaintenance,
+  scheduleValidator,
+} from "./ScheduleModal";
 import { Role } from "../../types/common/enums";
 
 interface CustomMouseEventHandler extends React.MouseEventHandler {
-    (event: React.MouseEvent | void): void;
+  (event: React.MouseEvent | void): void;
 }
 
 export interface ModalProps extends PropsWithChildren {
-    isOpen: boolean;
-    closeModal: CustomMouseEventHandler;
-    event?: CMMSScheduleEvent;
-    deleteEditDraft?: boolean;
-    editSingle?: boolean;
+  isOpen: boolean;
+  closeModal: CustomMouseEventHandler;
+  event?: CMMSScheduleEvent;
+  deleteEditDraft?: boolean;
+  editSingle?: boolean;
 }
 
 // export interface NewScheduleInfo extends CMMSSchedule {
@@ -37,226 +42,239 @@ export interface ModalProps extends PropsWithChildren {
 
 // Delete individual schedules during the draft phase
 async function deleteSchedule(id: number) {
-    return await instance
-        .delete("/api/schedule/" + id)
-        .then((res) => {
-            return res;
-        })
-        .catch((err) => console.log(err));
+  return await instance
+    .delete("/api/schedule/" + id)
+    .then((res) => {
+      return res;
+    })
+    .catch((err) => console.log(err));
 }
 
 export default function ChecklistEventModal(props: ModalProps) {
-    // Store the assigned users as a state
-    const [assignedUsers, setAssignedUsers] = useState<CMMSUser[]>([]);
-    const [editDeleteModal, setEditDeleteModal] = useState<boolean>(false);
-    const [editMode, setEditMode] = useState<boolean>(false);
-    const [newSchedule, setNewSchedule] = useState<CMMSSchedule>({} as CMMSSchedule);
-    const [scheduleModal, setScheduleModal] = useState<boolean>(false);
-    const [submitModal, setSubmitModal] = useState<boolean>(false);
-    const [failureModal, setFailureModal] = useState<boolean>(false);
-    const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
-    // const [scheduleObject, setScheduleObject] = useState<CMMSSchedule>();
+  // Store the assigned users as a state
+  const [assignedUsers, setAssignedUsers] = useState<CMMSUser[]>([]);
+  const [editDeleteModal, setEditDeleteModal] = useState<boolean>(false);
+  const [editMode, setEditMode] = useState<boolean>(false);
+  const [newSchedule, setNewSchedule] = useState<CMMSSchedule>(
+    {} as CMMSSchedule
+  );
+  const [scheduleModal, setScheduleModal] = useState<boolean>(false);
+  const [submitModal, setSubmitModal] = useState<boolean>(false);
+  const [failureModal, setFailureModal] = useState<boolean>(false);
+  const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
+  // const [scheduleObject, setScheduleObject] = useState<CMMSSchedule>();
 
     // Get the current user
     const { data: user, error } = useCurrentUser();
 
-    const router = useRouter();
+  const router = useRouter();
 
-    function closeModal() {
-        props.closeModal();
-        setEditMode(false);
-        if (editMode) setNewSchedule({} as CMMSSchedule);
+  function closeModal() {
+    props.closeModal();
+    setEditMode(false);
+    if (editMode) setNewSchedule({} as CMMSSchedule);
+  }
+
+  function handleDelete() {
+    if (props.event) {
+      deleteSchedule(props.event.extendedProps.scheduleId).then((result) => {
+        setEditDeleteModal(true);
+        setTimeout(() => {
+          router.replace(
+            "/Schedule/Timeline/" + props.event?.extendedProps.timelineId
+          );
+        }, 1000);
+      });
     }
+  }
 
-    function handleDelete() {
-        if (props.event) {
-            deleteSchedule(props.event.extendedProps.scheduleId).then((result) => {
-                setEditDeleteModal(true);
-                setTimeout(() => {
-                    router.replace("/Schedule/Timeline/" + props.event?.extendedProps.timelineId);
-                }, 1000);
-            });
-        }
-    }
-
-    function updateSchedule(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-        setNewSchedule((prev) => {
-            return {
-                ...prev,
-                [e.target.name]:
-                    e.target.name == "date" ? new Date(e.target.value) : e.target.value,
-            };
-        });
-    }
-
-    function submitEvent() {
-        setDisableSubmit(true);
-        const schedule: CMMSSchedule = {
-            checklistId: newSchedule.checklistId,
-            startDate: newSchedule.date as Date,
-            endDate: newSchedule.date as Date,
-            recurringPeriod: newSchedule.recurringPeriod,
-            assignedIds: newSchedule.assignedIds,
-            remarks: newSchedule.remarks,
-            plantId: newSchedule.plantId,
-            timelineId: newSchedule.timelineId,
-            reminderRecurrence: 1,
-            prevId: newSchedule.prevId,
-            status: 4,
-            index: newSchedule.index,
-        };
-
-        if (scheduleValidator(schedule)) {
-            console.log("working edit")
-            scheduleMaintenance(schedule).then((result) => {
-                setSubmitModal(true);
-                // router.push("/Schedule");
-                setTimeout(() => {
-                    setSubmitModal(false);
-                    setDisableSubmit(false);
-                    closeModal();
-                }, 1000);
-            });
-        } else {
-            setFailureModal(true);
-            setDisableSubmit(false);
-            setTimeout(() => {
-                setFailureModal(false);
-            }, 1000);
-        }
-    }
-
-    // check if remarks are the same
-    function isRemarkSame(oldRemark: string, newRemark: string) {
-        return oldRemark == newRemark;
-    }
-
-    // check if dates are the same
-    function isDateSame(oldDate: Date, newDate: Date) {
-        return oldDate.toISOString().slice(0, 10) == newDate.toISOString().slice(0, 10);
-    }
-
-    // check if assigned users are the same
-    function isAssignedSame(oldAssigned: number[], newAssigned: number[]) {
-        // if there are assigned users initially
-        if (oldAssigned) {
-            return oldAssigned.sort().join("") == newAssigned.sort().join("");
-        }
-        // if no assigned users initially, return true if no new assign or new assignment array is empty
-        else {
-            return !newAssigned || newAssigned.length == 0;
-        }
-    }
-
-    // function to handle boolean logic for submit button for edit single event
-    function isDisabled(
-        oldSchedule: CMMSScheduleEvent,
-        newSchedule: CMMSSchedule,
-        disabled: boolean
-    ) {
-        return (
-            isRemarkSame(oldSchedule.extendedProps.remarks, newSchedule.remarks) &&
-            isDateSame(oldSchedule.extendedProps.date as Date, newSchedule.date as Date) &&
-            isAssignedSame(oldSchedule.extendedProps.assignedIds, newSchedule.assignedIds) &&
-            disabled
-        );
-    }
-
-    // Start and end dates of the schedule
-    const startDate = new Date(props.event?.extendedProps.startDate as Date);
-    const endDate = new Date(props.event?.extendedProps.endDate as Date);
-    const period = props.event?.extendedProps.recurringPeriod as number;
-
-    // plus minus recurrence period from the day of the event
-    let date = new Date(props.event?.extendedProps.date as Date);
-    const upper = new Date(date.setDate(date.getDate() + period));
-    date = new Date(props.event?.extendedProps.date as Date);
-    const lower = new Date(date.setDate(date.getDate() - period));
-
-    // compare with today and the schedule date ranges
-    let today = new Date();
-    const upperStr = upper >= endDate ? endDate : upper;
-    today = new Date();
-    const lowerStr =
-        lower <= today
-            ? new Date(today.setDate(today.getDate() + 1))
-            : lower <= startDate
-            ? startDate
-            : lower;
-
-    useEffect(() => {
-        setEditDeleteModal(false);
-        setSubmitModal(false);
-        setDisableSubmit(true);
-
-        if (props.event) {
-            const users: CMMSUser[] = [];
-            const noOfAssigned = props.event.extendedProps.assignedIds
-                ? props.event.extendedProps.assignedIds.length
-                : 0;
-            for (let i = 0; i < noOfAssigned; i++) {
-                users.push({
-                    id: props.event.extendedProps.assignedIds[i],
-                    email: props.event.extendedProps.assignedEmails[i],
-                    fname: props.event.extendedProps.assignedFnames[i],
-                    lname: props.event.extendedProps.assignedLnames[i],
-                    username: props.event.extendedProps.assignedUsernames[i],
-                    role_name: props.event.extendedProps.assignedRoles[i],
-                });
-            }
-            setAssignedUsers(users);
-
-            setNewSchedule({
-                checklistId: props.event.extendedProps.checklistId,
-                checklistName: props.event.title,
-                startDate: new Date(props.event.extendedProps.startDate),
-                endDate: new Date(props.event.extendedProps.endDate),
-                date: props.event.extendedProps.date as Date,
-                recurringPeriod: props.event.extendedProps.recurringPeriod,
-                assignedIds: props.event.extendedProps.assignedIds,
-                remarks: props.event.extendedProps.remarks,
-                plantId: props.event.extendedProps.plantId as number,
-                plantName: props.event.extendedProps.plant,
-                timelineId: props.event.extendedProps.timelineId,
-                reminderRecurrence: 1,
-                prevId: props.event.extendedProps.scheduleId,
-                index: props.event.extendedProps.index,
-                scheduleId: props.event.extendedProps.scheduleId,
-            });
-
-            // setScheduleObject({
-            //     scheduleId: props.event.extendedProps.scheduleId,
-            //     checklistId: props.event.extendedProps.checklistId,
-            //     checklistName: props.event.title,
-            //     startDate: new Date(props.event.extendedProps.startDate),
-            //     endDate: new Date(props.event.extendedProps.endDate),
-            //     recurringPeriod: props.event.extendedProps.recurringPeriod,
-            //     assignedIds: props.event.extendedProps.assignedIds,
-            //     remarks: props.event.extendedProps.remarks,
-            //     plantId: props.event.extendedProps.plantId as number,
-            //     plantName: props.event?.extendedProps.plant,
-            //     timelineId: props.event.extendedProps.timelineId,
-            //     reminderRecurrence: 1,
-            // });
-        }
-    }, [props.event]);
-
-    const assignedUserElement = assignedUsers.map((user, index) => {
-        return (
-            // <span key={user.id} className={styles.eventModalAssignedUser}>{index + 1}. {user.name}</span>
-            <EventModalUser
-                key={user.id}
-                serial={index + 1}
-                role_name={user.role_name}
-                fname={user.fname as string}
-                lname={user.lname as string}
-                username={user.username as string}
-                id={user.id}
-                email={user.email as string}
-            />
-        );
+  function updateSchedule(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    setNewSchedule((prev) => {
+      return {
+        ...prev,
+        [e.target.name]:
+          e.target.name == "date" ? new Date(e.target.value) : e.target.value,
+      };
     });
-    console.log(newSchedule);
+  }
+
+  function submitEvent() {
+    setDisableSubmit(true);
+    const schedule: CMMSSchedule = {
+      checklistId: newSchedule.checklistId,
+      startDate: newSchedule.date as Date,
+      endDate: newSchedule.date as Date,
+      recurringPeriod: newSchedule.recurringPeriod,
+      assignedIds: newSchedule.assignedIds,
+      remarks: newSchedule.remarks,
+      plantId: newSchedule.plantId,
+      timelineId: newSchedule.timelineId,
+      reminderRecurrence: 1,
+      prevId: newSchedule.prevId,
+      status: 4,
+      index: newSchedule.index,
+    };
+
+    if (scheduleValidator(schedule)) {
+      scheduleMaintenance(schedule).then((result) => {
+        setSubmitModal(true);
+        // router.push("/Schedule");
+        setTimeout(() => {
+          setSubmitModal(false);
+          setDisableSubmit(false);
+          closeModal();
+        }, 1000);
+      });
+    } else {
+      setFailureModal(true);
+      setDisableSubmit(false);
+      setTimeout(() => {
+        setFailureModal(false);
+      }, 1000);
+    }
+  }
+
+  // check if remarks are the same
+  function isRemarkSame(oldRemark: string, newRemark: string) {
+    return oldRemark == newRemark;
+  }
+
+  // check if dates are the same
+  function isDateSame(oldDate: Date, newDate: Date) {
+    return (
+      oldDate.toISOString().slice(0, 10) == newDate.toISOString().slice(0, 10)
+    );
+  }
+
+  // check if assigned users are the same
+  function isAssignedSame(oldAssigned: number[], newAssigned: number[]) {
+    // if there are assigned users initially
+    if (oldAssigned) {
+      return oldAssigned.sort().join("") == newAssigned.sort().join("");
+    }
+    // if no assigned users initially, return true if no new assign or new assignment array is empty
+    else {
+      return !newAssigned || newAssigned.length == 0;
+    }
+  }
+
+  // function to handle boolean logic for submit button for edit single event
+  function isDisabled(
+    oldSchedule: CMMSScheduleEvent,
+    newSchedule: CMMSSchedule,
+    disabled: boolean
+  ) {
+    return (
+      isRemarkSame(oldSchedule.extendedProps.remarks, newSchedule.remarks) &&
+      isDateSame(
+        oldSchedule.extendedProps.date as Date,
+        newSchedule.date as Date
+      ) &&
+      isAssignedSame(
+        oldSchedule.extendedProps.assignedIds,
+        newSchedule.assignedIds
+      ) &&
+      disabled
+    );
+  }
+
+  // Start and end dates of the schedule
+  const startDate = new Date(props.event?.extendedProps.startDate as Date);
+  const endDate = new Date(props.event?.extendedProps.endDate as Date);
+  const period = props.event?.extendedProps.recurringPeriod as number;
+
+  // plus minus recurrence period from the day of the event
+  let date = new Date(props.event?.extendedProps.date as Date);
+  const upper = new Date(date.setDate(date.getDate() + period));
+  date = new Date(props.event?.extendedProps.date as Date);
+  const lower = new Date(date.setDate(date.getDate() - period));
+
+  // compare with today and the schedule date ranges
+  let today = new Date();
+  const upperStr = upper >= endDate ? endDate : upper;
+  today = new Date();
+  const lowerStr =
+    lower <= today
+      ? new Date(today.setDate(today.getDate() + 1))
+      : lower <= startDate
+      ? startDate
+      : lower;
+
+  useEffect(() => {
+    setEditDeleteModal(false);
+    setSubmitModal(false);
+    setDisableSubmit(true);
+
+    if (props.event) {
+      const users: CMMSUser[] = [];
+      const noOfAssigned = props.event.extendedProps.assignedIds
+        ? props.event.extendedProps.assignedIds.length
+        : 0;
+      for (let i = 0; i < noOfAssigned; i++) {
+        users.push({
+          id: props.event.extendedProps.assignedIds[i],
+          email: props.event.extendedProps.assignedEmails[i],
+          fname: props.event.extendedProps.assignedFnames[i],
+          lname: props.event.extendedProps.assignedLnames[i],
+          username: props.event.extendedProps.assignedUsernames[i],
+          role_name: props.event.extendedProps.assignedRoles[i],
+        });
+      }
+      setAssignedUsers(users);
+
+      setNewSchedule({
+        checklistId: props.event.extendedProps.checklistId,
+        checklistName: props.event.title,
+        startDate: new Date(props.event.extendedProps.startDate),
+        endDate: new Date(props.event.extendedProps.endDate),
+        date: props.event.extendedProps.date as Date,
+        recurringPeriod: props.event.extendedProps.recurringPeriod,
+        assignedIds: props.event.extendedProps.assignedIds,
+        remarks: props.event.extendedProps.remarks,
+        plantId: props.event.extendedProps.plantId as number,
+        plantName: props.event.extendedProps.plant,
+        timelineId: props.event.extendedProps.timelineId,
+        reminderRecurrence: 1,
+        prevId: props.event.extendedProps.scheduleId,
+        index: props.event.extendedProps.index,
+        scheduleId: props.event.extendedProps.scheduleId,
+      });
+
+      // setScheduleObject({
+      //     scheduleId: props.event.extendedProps.scheduleId,
+      //     checklistId: props.event.extendedProps.checklistId,
+      //     checklistName: props.event.title,
+      //     startDate: new Date(props.event.extendedProps.startDate),
+      //     endDate: new Date(props.event.extendedProps.endDate),
+      //     recurringPeriod: props.event.extendedProps.recurringPeriod,
+      //     assignedIds: props.event.extendedProps.assignedIds,
+      //     remarks: props.event.extendedProps.remarks,
+      //     plantId: props.event.extendedProps.plantId as number,
+      //     plantName: props.event?.extendedProps.plant,
+      //     timelineId: props.event.extendedProps.timelineId,
+      //     reminderRecurrence: 1,
+      // });
+    }
+  }, [props.event]);
+
+  const assignedUserElement = assignedUsers.map((user, index) => {
+    return (
+      // <span key={user.id} className={styles.eventModalAssignedUser}>{index + 1}. {user.name}</span>
+      <EventModalUser
+        key={user.id}
+        serial={index + 1}
+        role_name={user.role_name}
+        fname={user.fname as string}
+        lname={user.lname as string}
+        username={user.username as string}
+        id={user.id}
+        email={user.email as string}
+      />
+    );
+  });
+  // console.log(newSchedule);
 
     return (
         <div>
