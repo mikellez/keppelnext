@@ -5,50 +5,47 @@ import { CompactTable } from "@table-library/react-table-library/compact";
 import { Column } from "@table-library/react-table-library/types";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
+import instance from "../../../types/common/axios.config";
+import Pagination from "../../Pagination";
+import moment from "moment";
 
 interface HistoryItem {
-  id: string;
-  action: string;
+  activity_type: string;
+  activity: string;
   date: string;
   name: string;
-  status: string;
-  checklistId: string;
-  checklistName: string;
+  id: string;
+
 }
 
 const COLUMNS: Column<HistoryItem>[] = [
   {
-    label: "Status",
-    renderCell: (item) => item.status,
+    label: "Checklist Status",
+    renderCell: (item) => item.activity_type,
   },
   {
     label: "Action",
-    renderCell: (item) => item.action,
+    renderCell: (item) => item.activity,
   },
   {
     label: "Date",
-    renderCell: (item) => item.date,
+    renderCell: (item) => moment(new Date(item.date)).format("MMMM Do YYYY, h:mm:ss a"),
   },
   {
-    label: "Role",
+    label: "Action By",
     renderCell: (item) => item.name,
-  },
-  {
-    label: "Checklist ID",
-    renderCell: (item) => item.checklistId,
-  },
-  {
-    label: "Checklist Name",
-    renderCell: (item) => item.checklistName,
   },
 ];
 
 export default function AssetChecklistHistory({
-  history,
+  id,
 }: {
-  history: CMMSAssetChecklistHistory[];
+  id: number;
 }) {
   const [data, setData] = useState<HistoryItem[]>();
+  const [page, setPage] = useState<number>(1);
+  const [isReady, setReady] = useState<boolean>(false);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   const theme = useTheme([
     getTheme(),
@@ -75,33 +72,34 @@ export default function AssetChecklistHistory({
     },
   ]);
   useEffect(() => {
-    if (history) {
-      setData(
-        history.map((row) => {
-          return {
-            id: row.checklistId + row.status + row.date + row.action,
-            action: row.action,
-            date: row.date,
-            name: row.name,
-            status: row.status,
-            checklistId: row.checklistId,
-            checklistName: row.checklistName,
-          };
-        })
-      );
-    }
-  }, [history]);
+    instance.get(`/api/asset/history/checklist/${id}`)
+      .then(res => {
+        setData(res.data.rows);
+        setTotalPages(res.data.total);
+        setReady(true);
+
+    })
+    
+  }, [page, isReady])
 
   return (
     <div>
       {/* <h4 className={styles.assetDetailsHeader}>Checklist History</h4> */}
-      {data ? (
+      {isReady && data && data.length > 0? (
+        <div>
         <CompactTable
           columns={COLUMNS}
           data={{ nodes: data }}
           theme={theme}
           layout={{ fixedHeader: true }}
         />
+        <Pagination
+          setPage={setPage}
+          setReady={setReady}
+          totalPages={totalPages}
+          page={page} 
+          />
+        </div>
       ) : (
         <div>No Checklist History</div>
       )}

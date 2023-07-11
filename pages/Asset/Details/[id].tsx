@@ -68,8 +68,12 @@ const checkBase64 = (s: string): boolean => {
 };
 
 export default function AssetDetails(props: {
-  assetHistory: [CMMSAssetHistory];
+  assetHistory:  {
+    rows: CMMSAssetHistory[],
+    total: number
+  };
   COPHistory: [CMMSChangeOfParts];
+  id: number;
 }) {
   const [assetDetail, setAssetDetail] = useState<CMMSAssetDetails>(
     {} as CMMSAssetDetails
@@ -130,11 +134,11 @@ export default function AssetDetails(props: {
     );
   });
 
-  useEffect(() => {
-    props.assetHistory.map((history) => {
-      console.log("model data" + history);
-    });
-  }, [props.assetHistory]);
+  // useEffect(() => {
+  //   props.assetHistory.rows.map((history) => {
+  //     console.log("model data" + history);
+  //   });
+  // }, [props.assetHistory]);
 
   const formatDate = (oldDate: string) => {
     let strArray = [
@@ -295,16 +299,7 @@ export default function AssetDetails(props: {
                 )}
               </div>
             </div>
-            {/* {assetRequestHistory && (
-              <AssetRequestHistory
-                history={assetRequestHistory as CMMSAssetRequestHistory[]}
-              />
-            )}
-            {assetChecklistHistory && (
-              <AssetChecklistHistory
-                history={assetChecklistHistory as CMMSAssetChecklistHistory[]}
-              />
-            )} */}
+
           </>
         )}
       </ModuleContent>
@@ -312,11 +307,13 @@ export default function AssetDetails(props: {
         isOpen={assetHistoryModal}
         closeModal={() => setAssetHistoryModal(false)}
         closeOnOverlayClick={true}
+        large
       >
         <AssetHistoryModalContainer
-          checklistHistory={assetChecklistHistory!}
-          requestHistory={assetRequestHistory!}
+          // checklistHistory={assetChecklistHistory!}
+          // requestHistory={assetRequestHistory!}
           assetHistory={props.assetHistory}
+          id={props.id}
           // page={page}
         />
         {/* <table className="assetHistoryTable table">
@@ -376,8 +373,9 @@ export const getServerSideProps: GetServerSideProps = async (
     `/api/changeOfParts/?psa_id=` + psaId,
     headers
   );
+  console.log(assetHistory.data);
 
   return {
-    props: { assetHistory: assetHistory.data, COPHistory: COPHistory.data },
+    props: { assetHistory: assetHistory.data, COPHistory: COPHistory.data, id: psaId },
   };
 };

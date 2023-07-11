@@ -15,9 +15,7 @@ function rowElements(rows: { [key: string]: string }[], assignedUser: string) {
           <tr key={row["date"] + row["name"] + row["role"]}>
             <td>{row["activity_type"]}</td>
             <td>
-              {row["activity"] == "ASSIGNED"
-                ? `ASSIGNED TO ${assignedUser}`
-                : row["activity"]}
+              {row["activity"]}
             </td>
             <td>
               {moment(new Date(row["date"])).format("MMMM Do YYYY, h:mm:ss a")}

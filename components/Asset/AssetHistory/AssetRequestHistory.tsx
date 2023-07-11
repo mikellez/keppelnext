@@ -2,48 +2,50 @@ import React, { useEffect, useState } from "react";
 import { CMMSAssetRequestHistory } from "../../../types/common/interfaces";
 import styles from "../../styles/Asset.module.scss";
 import { CompactTable } from "@table-library/react-table-library/compact";
-import { TableNode } from "../../../pages/Request";
+import { Column } from "@table-library/react-table-library/types";
+
+// import { TableNode } from "../../../pages/Request";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
+import instance from "../../../types/common/axios.config";
+import Pagination from "../../Pagination";
+import moment from "moment";
 
-interface AssetHistoryProps {
-  history: CMMSAssetRequestHistory[];
+
+
+interface HistoryItem {
+  activity_type: string;
+  activity: string;
+  date: string;
+  name: string;
+  id: string;
+
 }
 
-const COLUMNS: any[] = [
+const COLUMNS: Column<HistoryItem>[] = [
   {
-    label: "Status",
-    renderCell: (item: TableNode<CMMSAssetRequestHistory>) => item.prop.status,
+    label: "Request Status",
+    renderCell: (item) => item.activity_type,
   },
   {
     label: "Action",
-    renderCell: (item: TableNode<CMMSAssetRequestHistory>) => item.prop.action,
+    renderCell: (item) => item.activity,
   },
   {
     label: "Date",
-    renderCell: (item: TableNode<CMMSAssetRequestHistory>) => item.prop.date,
+    renderCell: (item) => moment(new Date(item.date)).format("MMMM Do YYYY, h:mm:ss a")
   },
   {
-    label: "Role",
-    renderCell: (item: TableNode<CMMSAssetRequestHistory>) => item.prop.role,
-  },
-  {
-    label: "Name",
-    renderCell: (item: TableNode<CMMSAssetRequestHistory>) => item.prop.name,
-  },
-  {
-    label: "Case ID",
-    renderCell: (item: TableNode<CMMSAssetRequestHistory>) => item.prop.caseId,
-  },
-  {
-    label: "Fault Type",
-    renderCell: (item: TableNode<CMMSAssetRequestHistory>) =>
-      item.prop.faultType,
+    label: "Action By",
+    renderCell: (item) => item.name,
   },
 ];
 
-export default function AssetRequestHistory(props: AssetHistoryProps) {
-  const [data, setData] = useState<TableNode<CMMSAssetRequestHistory>[]>();
+export default function AssetRequestHistory({id}: {id: number}) {
+  const [data, setData] = useState<HistoryItem[]>();
+  const [page, setPage] = useState<number>(1);
+  const [isReady, setReady] = useState<boolean>(false);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   const theme = useTheme([
     getTheme(),
@@ -51,7 +53,7 @@ export default function AssetRequestHistory(props: AssetHistoryProps) {
       Table: `
                 --data-table-library_grid-template-columns: auto 8% 12% 12% 22% auto;
                 height: auto;
-                max-height: 300px;
+                max-height: 330px;
             `,
       HeaderCell: `
                 background-color: white !important;
@@ -71,28 +73,35 @@ export default function AssetRequestHistory(props: AssetHistoryProps) {
   ]);
 
   useEffect(() => {
-    if (props.history) {
-      setData(
-        props.history.map((row) => {
-          return {
-            prop: row,
-            id: row.caseId + row.status + row.date + row.action,
-          };
-        })
-      );
-    }
-  }, [props]);
+    instance.get(`/api/asset/history/request/${id}?page=${page}`)
+      .then(res => {
+        setData(res.data.rows);
+        setTotalPages(res.data.total);
+        setReady(true);
+
+    })
+    
+  }, [page, isReady])
 
   return (
-    <div>
+    <div className="pb-0" style={{padding: 0}}>
       {/* <h4 className={styles.assetDetailsHeader}>Request History</h4> */}
-      {data ? (
-        <CompactTable
-          columns={COLUMNS}
-          data={{ nodes: data }}
-          theme={theme}
-          layout={{ fixedHeader: true }}
-        />
+      {isReady && data && data.length > 0 ? (
+        <div>
+
+          <CompactTable
+            columns={COLUMNS}
+            data={{ nodes: data }}
+            theme={theme}
+            layout={{ fixedHeader: true }}
+            />
+          <Pagination
+          setPage={setPage}
+          setReady={setReady}
+          totalPages={totalPages}
+          page={page} 
+          />
+        </div>
       ) : (
         <div>No Request History</div>
       )}
