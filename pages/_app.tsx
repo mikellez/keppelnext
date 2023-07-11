@@ -16,6 +16,9 @@ import type { IIdleTimer } from "react-idle-timer";
 import instance from "../types/common/axios.config";
 import User from "./User/Management";
 
+const TIMEOUT_DURATION = 10 * 1000; // 30 minutes
+const PROMPT_BEFORE_IDLE_DURATION = 5 * 1000; // 30 minutes
+
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const { asPath, route, pathname } = router;
@@ -23,6 +26,46 @@ export default function App({ Component, pageProps }: AppProps) {
   const [isTimeout, setIsTimeout] = useState(false);
   const idleTimer = useRef(null);
   // const [timerStarted, setTimerStarted] = useState(false);
+
+  let inactivityTimer: any = null;
+
+  const handleUserActivity = () => {
+    setIsTimeout(false);
+    console.log("User did something", new Date().toLocaleTimeString());
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+      setIsTimeoutPrompt(true);
+      // Perform actions when user inactivity timeout occurs
+    }, TIMEOUT_DURATION - PROMPT_BEFORE_IDLE_DURATION);
+  };
+
+  useEffect(() => {
+    // Attach event listeners to detect user activity
+    window.addEventListener('mousemove', handleUserActivity);
+    window.addEventListener('keydown', handleUserActivity);
+
+    // Start the initial inactivity timer
+    inactivityTimer = setTimeout(() => {
+      console.log("User inactive", new Date().toLocaleTimeString());
+      // Perform actions when user inactivity timeout occurs
+      setIsTimeoutPrompt(true);
+      setIsTimeout(true);
+      
+    }, TIMEOUT_DURATION - PROMPT_BEFORE_IDLE_DURATION);
+
+    return () => {
+      // Clean up event listeners and clear the timeout when the component unmounts
+      window.removeEventListener('mousemove', handleUserActivity);
+      window.removeEventListener('keydown', handleUserActivity);
+      clearTimeout(inactivityTimer);
+    };
+  }, [isTimeout, isTimeoutPromt]);
+
+  useEffect(() => {
+    if (isTimeout && !asPath.includes("/Login")) {
+      sendLogout();
+    }
+  }, [isTimeout]);
 
   const sendLogout = (): void => {
     instance
