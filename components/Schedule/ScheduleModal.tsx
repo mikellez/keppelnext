@@ -87,6 +87,7 @@ export default function ScheduleMaintenanceModal(
       HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement
     >
   ) {
+    console.log(event.target.type);
     setNewSchedule((prev) => {
       let value =
         event.target.type === "date"
@@ -221,7 +222,7 @@ export default function ScheduleMaintenanceModal(
                       name="startDate"
                       value={
                         newSchedule.startDate
-                          ? newSchedule.startDate//newSchedule.startDate?.toISOString().slice(0, 10)
+                          ? newSchedule.startDate.toISOString().slice(0, 10)
                           : minDate
                       }
                       onChange={updateSchedule}
@@ -239,7 +240,7 @@ export default function ScheduleMaintenanceModal(
                       name="endDate"
                       value={
                         newSchedule.endDate
-                          ? newSchedule.endDate//newSchedule.endDate?.toISOString().slice(0, 10)
+                          ? newSchedule.endDate.toISOString().slice(0, 10)
                           : minDate
                       }
                       onChange={updateSchedule}
