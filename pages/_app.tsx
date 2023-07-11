@@ -16,8 +16,8 @@ import type { IIdleTimer } from "react-idle-timer";
 import instance from "../types/common/axios.config";
 import User from "./User/Management";
 
-const TIMEOUT_DURATION = 10 * 1000; // 30 minutes
-const PROMPT_BEFORE_IDLE_DURATION = 5 * 1000; // 30 minutes
+const TIMEOUT_DURATION = 30 * 60 * 1000; // 30 minutes
+const PROMPT_BEFORE_IDLE_DURATION = 15 * 60 * 1000; // 15 minutes
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -31,6 +31,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   const handleUserActivity = () => {
     setIsTimeout(false);
+    setIsTimeoutPrompt(false);
     console.log("User did something", new Date().toLocaleTimeString());
     clearTimeout(inactivityTimer);
     inactivityTimer = setTimeout(() => {
