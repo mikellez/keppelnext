@@ -1,10 +1,7 @@
-import React from 'react'
+import React from "react";
 
 const AssetFormTemplate = () => {
-  return (
-    <div>AssetFormTemplate</div>
-  )
-}
+  return <div>AssetFormTemplate</div>;
+};
 
-export default AssetFormTemplate
-a
+export default AssetFormTemplate;

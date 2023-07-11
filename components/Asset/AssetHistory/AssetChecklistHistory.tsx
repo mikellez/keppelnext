@@ -5,6 +5,8 @@ import { CompactTable } from "@table-library/react-table-library/compact";
 import { Column } from "@table-library/react-table-library/types";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
+import Pagination from "../../Pagination";
+import { ModuleContent } from "../../ModuleLayout/ModuleContent";
 
 interface HistoryItem {
   id: string;
@@ -49,6 +51,10 @@ export default function AssetChecklistHistory({
   history: CMMSAssetChecklistHistory[];
 }) {
   const [data, setData] = useState<HistoryItem[]>();
+  const [pageData, setPageData] = useState<HistoryItem[]>();
+  const [page, setPage] = useState<number>(0);
+  const [isReady, setIsReady] = useState<boolean>(true);
+  const LIMIT = 10;
 
   const theme = useTheme([
     getTheme(),
@@ -89,19 +95,33 @@ export default function AssetChecklistHistory({
           };
         })
       );
+      setPage(1);
     }
   }, [history]);
+
+  useEffect(() => {
+    const start = page * LIMIT - 1;
+    setPageData(data?.slice(start, start + LIMIT));
+  }, [page]);
 
   return (
     <div>
       {/* <h4 className={styles.assetDetailsHeader}>Checklist History</h4> */}
       {data ? (
-        <CompactTable
-          columns={COLUMNS}
-          data={{ nodes: data }}
-          theme={theme}
-          layout={{ fixedHeader: true }}
-        />
+        <ModuleContent>
+          <CompactTable
+            columns={COLUMNS}
+            data={{ nodes: pageData }}
+            theme={theme}
+            layout={{ fixedHeader: true }}
+          />
+          <Pagination
+            page={page}
+            setPage={setPage}
+            totalPages={history.length / 10}
+            setReady={setIsReady}
+          />
+        </ModuleContent>
       ) : (
         <div>No Checklist History</div>
       )}
