@@ -129,11 +129,12 @@ async function updateRequest(
 }
 
 export interface RequestContainerProps extends PropsWithChildren {
-  windowWidth: number;
+  windowWidth?: number;
   requestData?: RequestProps; // if not null, use data for creating new request (populate the dropdowns in create request page)
   // isAssignRequest?: boolean; // true: assign request page (prefill page), false : create new request page
   assignRequestData?: AssignRequestProps; // if not null, use data for assigning request
   linkedRequestData?: CMMSRequest;
+  isNotAssign: boolean;
 }
 
 export interface RequestProps {
