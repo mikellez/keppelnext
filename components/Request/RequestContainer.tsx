@@ -552,7 +552,7 @@ export default function RequestContainer(props: RequestContainerProps) {
           {!props.assignRequestData && (
             <div className="form-group">
               <div>
-                <label className="form-label">Image</label>
+                <label className="form-label">Fault Image</label>
                 <input
                   className="form-control"
                   type="file"
