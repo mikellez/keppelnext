@@ -75,11 +75,6 @@ export default function AssetChecklistHistory({ id }: { id: number }) {
     });
   }, [page, isReady]);
 
-  useEffect(() => {
-    const start = page * LIMIT - 1;
-    setPageData(data?.slice(start, start + LIMIT));
-  }, [page]);
-
   return (
     <div>
       {/* <h4 className={styles.assetDetailsHeader}>Checklist History</h4> */}
