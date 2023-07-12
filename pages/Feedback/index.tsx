@@ -1,3 +1,27 @@
+/* 
+  EXPLANATION OF Feedback MODULE
+  
+  The Feedback module is made of 3 major components:
+  - /components/feedback/FeedbackAssignmentForm.tsx
+  - /components/feedback/FeedbackCompletedForm.tsx
+  - /components/Guest/Feedback/[id].tsx
+
+  - FeedbackAssignmentForm is a form component that allows users to fill
+    in details to assign feedbacks that were submitted. Engineers and 
+    Managers can assign feedbacks to other users as well. Please 
+    review it for more details
+
+  - FeedbackCompleteForm is the form componenet that allows user to fill
+    in detail to complete the feedback that were assigned. Engineers and
+    managers can complete the feedbacks as well. Please review the componenet
+    for more information
+  
+  - Feedback/[id].tsx is a form component that allows guest and users to fill
+    in details to create and submit a new feedback. You can access with or without
+    an account. Please review the component for more details
+    
+*/
+
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
