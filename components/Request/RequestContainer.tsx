@@ -134,6 +134,7 @@ export interface RequestContainerProps extends PropsWithChildren {
   // isAssignRequest?: boolean; // true: assign request page (prefill page), false : create new request page
   assignRequestData?: AssignRequestProps; // if not null, use data for assigning request
   linkedRequestData?: CMMSRequest;
+  isNotAssign: boolean;
 }
 
 export interface RequestProps {
