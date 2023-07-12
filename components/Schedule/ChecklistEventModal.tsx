@@ -330,8 +330,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                                     </tr>
                                     <tr className={styles.eventModalTableRow}>
                                         <th>Date:</th>
-                                        {editMode && (props.event.extendedProps.recurringPeriod > 1 ||
-                                    props.event.extendedProps.isSingle) ? (
+                                        {editMode && props.event.extendedProps.recurringPeriod > 1  ? (
                                             <td>
                                                 <input
                                                     type="date"

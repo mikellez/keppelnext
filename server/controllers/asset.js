@@ -1,5 +1,6 @@
 const db = require("../../db");
 const moment = require("moment");
+const ITEMS_PER_PAGE = 10;
 
 const getUploadedFile = async (req, res, next) => {
   const psa_id = +req.params.psa_id;
@@ -338,75 +339,49 @@ const getAssetDetails = async (req, res, next) => {
 // Get the history of an asset instrument for either request or checklist
 const getAssetHistory = async (req, res, next) => {
   if (req.params.type === "request") {
-    const queryS = `SELECT rt.request_id, pt.priority, ft.fault_type, requesthistory 
-        FROM keppel.request AS rt
-        LEFT JOIN keppel.priority AS pt ON pt.p_id = rt.priority_id
-        LEFT JOIN keppel.fault_types AS ft ON ft.fault_id = rt.fault_id
-        WHERE psa_id = $1 AND requesthistory IS NOT NULL`;
-    global.db.query(queryS, [req.params.id], (err, found) => {
-      if (err) throw err;
-      if (found.rows.length === 0) {
-        return res.status(200).json("no history");
-      } else {
-        const historyArr = [];
-        found.rows.forEach((row) => {
-          const tmp = row.requesthistory.split("!");
-          tmp.forEach((tmpItem) => {
-            tmpItem +=
-              "_" + row.request_id + "_" + row.priority + "_" + row.fault_type;
-            historyArr.push(tmpItem);
-          });
-        });
-        return res.status(200).json(
-          historyArr.map((row) => {
-            const tmp = row.split("_");
-            return {
-              status: tmp[0],
-              action: tmp[1],
-              date: tmp[2].slice(0, -3),
-              role: tmp[3],
-              name: tmp[4],
-              caseId: tmp[5],
-              priority: tmp[6],
-              faultType: tmp[7],
-            };
-          })
-        );
-      }
-    });
-  } else if (req.params.type === "checklist") {
-    const queryS = `SELECT cm.checklist_id, cm.chl_name, cm.history 
-        FROM keppel.checklist_master AS cm
-        LEFT JOIN keppel.status_cm AS s ON cm.status_id = s.status_id
-        WHERE linkedassetids LIKE concat(concat('%', $1::text), '%') AND history IS NOT NULL`;
+    let queryS = `SELECT 
+    btrim(concat(activity.value -> 'activity_type'::text), '"'::text) AS activity_type,
+    btrim(((activity.value -> 'name'::text)::character varying)::text, '"'::text) AS name,
+    to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'YYYY-MM-DD HH24:mi:ss'::text) AS date,
+    btrim(concat(activity.value -> 'activity'::text), '"'::text) AS activity
+    FROM keppel.request,
+    LATERAL jsonb_array_elements(request.activity_log) activity(value)
+    WHERE psa_id = $1`;
+    try {
 
-    global.db.query(queryS, [req.params.id], (err, found) => {
-      if (err) throw err;
-      if (found.rows.length === 0) return res.status(200).json("no history");
-      else {
-        const historyArr = [];
-        found.rows.forEach((row) => {
-          const tmp = row.history.split(",");
-          tmp.forEach((item) => {
-            item += "_" + row.checklist_id + "_" + row.chl_name;
-            historyArr.push(item);
-          });
-        });
-        return res.status(200).json(
-          historyArr.map((row) => {
-            const tmp = row.split("_");
-            return {
-              action: tmp[0],
-              status: tmp[1],
-              date: tmp[2].slice(0, -3),
-              name: tmp[3],
-              checklistId: tmp[5],
-              checklistName: tmp[6],
-            };
-          })
-        );
+      const totalRows = await global.db.query(queryS, [req.params.id]);
+      const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+      const page = req.query.page || 1;
+      const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+      queryS += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`
+      const results = await global.db.query(queryS, [req.params.id]);
+      return res.status(200).json({ rows: results.rows, total: totalPages });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ msg: err });
+    }
+  } else if (req.params.type === "checklist") {
+      let queryS = `SELECT 
+      btrim(concat(activity.value -> 'activity_type'::text), '"'::text) AS activity_type,
+      btrim(((activity.value -> 'name'::text)::character varying)::text, '"'::text) AS name,
+      to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'YYYY-MM-DD HH24:mi:ss'::text) AS date,
+      btrim(concat(activity.value -> 'activity'::text), '"'::text) AS activity
+      FROM keppel.checklist_master,
+      LATERAL jsonb_array_elements(checklist_master.activity_log) activity(value)
+      WHERE ',' || linkedassetids || ',' LIKE  concat(concat('%,', $1::text) , ',%')`;
+      try {
+
+        const totalRows = await global.db.query(queryS, [req.params.id]);
+        const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+        const page = req.query.page || 1;
+        const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+        queryS += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`
+        const results = await global.db.query(queryS, [req.params.id]);
+        return res.status(200).json({ rows: results.rows, total: totalPages });
+      } catch (err) {
+        console.log(err);
+        return res.status(500).json({ msg: err });
       }
-    });
   }
 };
 
@@ -964,32 +939,43 @@ const deleteAsset = (req, res, next) => {
   });
 };
 
-const fetchAssetHistory = (req, res, next) => {
-  global.db.query(
-    // `SELECT h.history_id, h.action, h.user_id, h.fields, h.date, CONCAT(u.first_name, ' ', u.last_name) as name FROM keppel.history h
-    //     JOIN keppel.users u
-    //     ON u.user_id = h.user_id
-    //   WHERE asset_id = ${req.params.psa_Id}`,
-    `
-    SELECT 
-        to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'YYYY-MM-DD HH24:mi:ss'::text) AS history_id,
-		btrim(concat(activity.value -> 'activity_type'::text), '"'::text) AS action,
-		btrim(((activity.value -> 'name'::text)::character varying)::text, '"'::text) AS name,
-        to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'YYYY-MM-DD HH24:mi:ss'::text) AS date,
-		btrim(concat(activity.value -> 'fields'::text), '"'::text) AS fields
-         FROM keppel.plant_system_assets,
-        LATERAL jsonb_array_elements(plant_system_assets.activity_log) activity(value)
-		WHERE psa_id = ${req.params.psa_Id}`,
-    (err, result) => {
-      if (err) {
-        return res.status(400).send({
-          msg: err,
-        });
-      }
-      // console.log(result.rows);
-      return res.status(200).send(result.rows);
+const fetchAssetHistory = async (req, res, next) => {
+  let query = `SELECT 
+    to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'YYYY-MM-DD HH24:mi:ss'::text) AS history_id,
+    btrim(concat(activity.value -> 'activity_type'::text), '"'::text) AS action,
+    btrim(((activity.value -> 'name'::text)::character varying)::text, '"'::text) AS name,
+    to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'YYYY-MM-DD HH24:mi:ss'::text) AS date,
+    btrim(concat(activity.value -> 'fields'::text), '"'::text) AS fields
+    FROM keppel.plant_system_assets,
+    LATERAL jsonb_array_elements(plant_system_assets.activity_log) activity(value)
+    WHERE psa_id = $1`;
+    
+    try {
+    
+      const totalRows = await global.db.query(query, [req.params.psa_Id]);
+      const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+      const page = req.query.page || 1;
+      const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+    
+      query += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`
+      const results = await global.db.query(query, [req.params.psa_Id]);
+      return res.status(200).json({ rows: results.rows, total: totalPages });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ msg: error });
     }
-  );
+
+  // global.db.query(
+  //   query,
+  //   (err, result) => {
+  //     if (err) {
+  //       return res.status(400).send({
+  //         msg: err,
+  //       });
+  //     }
+  //     return res.status(200).send(result.rows);
+  //   }
+  // );
 };
 
 module.exports = {

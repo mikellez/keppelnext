@@ -5,6 +5,8 @@ import { CompactTable } from "@table-library/react-table-library/compact";
 import { Column } from "@table-library/react-table-library/types";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
+import instance from "../../../types/common/axios.config";
+import Pagination from "../../Pagination";
 
 interface HistoryItem {
   //   id: string;
@@ -45,12 +47,11 @@ const COLUMNS: Column<HistoryItem>[] = [
   },
 ];
 
-export default function AssetHistory({
-  history,
-}: {
-  history: CMMSAssetHistory[];
-}) {
+export default function AssetHistory({id}: {id: number}) {
   const [data, setData] = useState<HistoryItem[]>();
+  const [page, setPage] = useState<number>(1);
+  const [isReady, setReady] = useState<boolean>(false);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   const theme = useTheme([
     getTheme(),
@@ -76,10 +77,11 @@ export default function AssetHistory({
             `,
     },
   ]);
+
   useEffect(() => {
-    if (history.length > 0) {
-      setData(
-        history.map((row) => {
+    instance.get(`/api/asset/history/${id}`)
+      .then(res => {
+        setData(res.data.rows.map((row: CMMSAssetHistory) => {
           return {
             id: row.history_id + row.date.toString() + row.action,
             action: row.action,
@@ -88,22 +90,34 @@ export default function AssetHistory({
             name: row.name,
             fields: row.fields,
           };
-        })
-      );
-    }
-    // console.log(data);
-  }, [history]);
+        
+        }));
+        setTotalPages(res.data.total);
+        setReady(true);
+
+    })
+    
+  }, [page, isReady])
 
   return (
     <div>
       {/* <h4 className={styles.assetDetailsHeader}>Checklist History</h4> */}
-      {data && data!.length > 0 ? (
+      {isReady && data && data!.length > 0 ? (
+      <div>
+
         <CompactTable
           columns={COLUMNS}
           data={{ nodes: data }}
           theme={theme}
           layout={{ fixedHeader: true }}
-        />
+          />
+        <Pagination
+          setPage={setPage}
+          setReady={setReady}
+          totalPages={totalPages}
+          page={page} 
+          />
+        </div>
       ) : (
         <div>No Asset History</div>
       )}

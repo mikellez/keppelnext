@@ -18,22 +18,28 @@ import {
 import AssetChecklistHistory from "./AssetChecklistHistory";
 import AssetRequestHistory from "./AssetRequestHistory";
 import AssetHistory from "./AssetHistory";
+import Pagination from "../../Pagination";
 
 export default function AssetHistoryModalContainer({
-  checklistHistory,
-  requestHistory,
+  // checklistHistory,
+  // requestHistory,
   assetHistory,
+  id,
 }: //   page,
 {
-  checklistHistory: CMMSAssetChecklistHistory[];
-  requestHistory: CMMSAssetRequestHistory[];
-  assetHistory: CMMSAssetHistory[];
-  //   page: number;
+  // checklistHistory: CMMSAssetChecklistHistory[];
+  // requestHistory: CMMSAssetRequestHistory[];
+  assetHistory: {
+    rows: CMMSAssetHistory[],
+    total: number
+  };
+  id: number;
 }) {
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
   const [isReady, setIsReady] = useState<boolean>(true);
   //   const [shownData, setShownData] = useState([]);
   //   const [currPage, setCurrPage] = useState<number>(1);
+  
 
   const switchColumns = (index: number) => {
     if (isReady) {
@@ -43,7 +49,9 @@ export default function AssetHistoryModalContainer({
     }
   };
 
-  useEffect(() => {}, [activeTabIndex]);
+  useEffect(() => {
+
+  }, [activeTabIndex]);
 
   return (
     <ModuleContent>
@@ -78,11 +86,11 @@ export default function AssetHistoryModalContainer({
       {/* {isReady && shownData.length === 0 && <div></div>} */}
       {/* {isReady} */}
       {activeTabIndex == 0 ? (
-        <AssetHistory history={assetHistory} />
+        <AssetHistory id={id}/>
       ) : activeTabIndex == 1 ? (
-        <AssetRequestHistory history={requestHistory} />
+        <AssetRequestHistory id={id} />
       ) : activeTabIndex == 2 ? (
-        <AssetChecklistHistory history={checklistHistory} />
+        <AssetChecklistHistory id={id} />
       ) : (
         <div>No History</div>
       )}
