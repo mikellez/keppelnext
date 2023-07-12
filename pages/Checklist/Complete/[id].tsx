@@ -1,3 +1,21 @@
+/*
+  EXPLANATION OF CHECKLIST COMPLETE FORM PAGE
+
+  This is the landing page for completing an assigned checklist
+
+  This page is made up of 2 major components:
+  
+  - ChecklistDetails displays the overall details 
+    of the checklist. This can be found in 
+    /components/Checklist/ChecklistDetails.tsx
+
+  - ChecklistEditableForm is responsible for displaying the input checks in checklists. 
+    There are multiple levels of nested components that works similarly to ChecklistTemplateCreator.
+    This can be found in /components/Checklist/ChecklistEditableForm.tsx
+
+
+*/
+
 import React, { useState, useEffect, createContext } from "react";
 import {
   ModuleContent,

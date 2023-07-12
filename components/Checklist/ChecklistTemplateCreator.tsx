@@ -88,6 +88,9 @@ import {
     + ChecklistSection            - Handles CheckSections
     + ChecklistTemplateCreator    - Main exported component
 
+    ChecklistChecks renders Checks using objects(OOP) and its render() methods
+    to accomodate different types of checks
+
     full sections array would be as follows
 	sections: CheckSection[
 		{

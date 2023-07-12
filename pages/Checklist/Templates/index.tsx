@@ -1,3 +1,20 @@
+/*
+  EXPLANATION OF CHECKLIST TEMPLATES PAGE
+
+  This is the landing page for choosing a template to create
+  a new checklist
+
+  This page is made up of 2 major components:
+  
+  - checklistTemplateHTML which shows a list of all available templates
+    Found within this page itself
+
+  - ChecklistTemplatePlane is responsible for showing the preview of the 
+    chosen checklist template
+    This can be found in /components/Checklist/ChecklistTemplatePane.tsx
+*/
+
+
 import styles from "../../../styles/Checklist.module.scss";
 import React, { useEffect, useState } from "react";
 import Iframe from "react-iframe";
