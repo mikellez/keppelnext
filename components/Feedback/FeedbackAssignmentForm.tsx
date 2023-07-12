@@ -1,3 +1,26 @@
+/**
+ * EXPLANATION
+ * The following is a form component used for assigning feedbacks
+ * to other users. Due to the many features that the component supports,
+ * it takes in the following props
+ *
+ * props = {
+ * feedbackData
+ * setFeedbackData
+ * disableForm?
+ * }
+ *
+ * - feedbackData : CMMSFeedback, this is the data to be displayed on the
+ *   component, allowing the component to populate the nessary fields
+ *
+ * - setFeedbackData : React.Dispatch<React.SetStateAction<CMMSFeedback>>>
+ *   allows the component to change the data in the the parent component
+ *
+ * - disableForm : boolean | null, this disable the form inputs if nessasary
+ *
+ *
+ */
+
 import React, { useRef, useState, useEffect, CSSProperties } from "react";
 import RequiredIcon from "../RequiredIcon";
 import AssetSelect, { AssetOption } from "../Checklist/AssetSelect";
@@ -128,8 +151,12 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
                 props.setFeedbackData((prev: any) => {
                   return {
                     ...prev,
-                    ["assigned_user_id"]: (option as SingleValue<AssignedUserOption>)?.value,
-                    ["assigned_user_name"]: (option as SingleValue<AssignedUserOption>)?.label.split('|')[0],
+                    ["assigned_user_id"]: (
+                      option as SingleValue<AssignedUserOption>
+                    )?.value,
+                    ["assigned_user_name"]: (
+                      option as SingleValue<AssignedUserOption>
+                    )?.label.split("|")[0],
                   };
                 });
               }}
@@ -229,7 +256,7 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
           large
         >
           {/* <Image src={f.image} width={100} height={100} alt="" /> */}
-          <img width={'85%'} height={'85%'} src={f.image} alt="" />
+          <img width={"85%"} height={"85%"} src={f.image} alt="" />
         </ModuleModal>
       </ModuleContent>
     </ModuleContent>
