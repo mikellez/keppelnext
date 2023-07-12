@@ -1,3 +1,29 @@
+/**
+ * EXPLANATION
+ * The following is a form component used for viewing feedbacks
+ * once they are completed. Due to the many features that the
+ * component supports, it takes in the following props
+ *
+ * props = {
+ * feedbackData
+ * setFeedbackData
+ * disableForm?
+ * }
+ *
+ * - feedbackData : CMMSFeedback, this is the data to be displayed on the
+ *   component, allowing the component to populate the necessary fields
+ *
+ * - setFeedbackData : React.Dispatch<React.SetStateAction<CMMSFeedback>>>
+ *   allows the component to change the data in the the parent component
+ *
+ * - disableForm : boolean | null, this disables the form inputs if nessasary
+ *
+ *
+ * This is called in :
+ * - /pages/Feedback/View/[id].tsx
+ *
+ */
+
 import React, { useRef, useState, useEffect } from "react";
 import RequiredIcon from "../RequiredIcon";
 import { ModuleContent } from "../ModuleLayout/ModuleContent";
@@ -244,11 +270,11 @@ const FeedbackViewForm = (props: FeedbackFormProps) => {
         closeOnOverlayClick={true}
       >
         <img
-            width={"85%"}
-            height={"85%"}
-            src={props.feedbackData.image}
-            alt=""
-          />
+          width={"85%"}
+          height={"85%"}
+          src={props.feedbackData.image}
+          alt=""
+        />
       </ModuleModal>
       <ModuleModal
         isOpen={completeImage}

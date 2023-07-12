@@ -1,3 +1,29 @@
+/**
+ * EXPLANATION
+ * The following is a form component used for completing feedbacks
+ * Due to the many features that the component supports,
+ * it takes in the following props
+ *
+ * props = {
+ * feedbackData
+ * setFeedbackData
+ * disableForm?
+ * }
+ *
+ * - feedbackData : CMMSFeedback, this is the data to be displayed on the
+ *   component, allowing the component to populate the necessary fields
+ *
+ * - setFeedbackData : React.Dispatch<React.SetStateAction<CMMSFeedback>>>
+ *   allows the component to change the data in the the parent component
+ *
+ * - disableForm : boolean | null, this disables the form inputs if nessasary
+ *
+ *
+ * This is called in :
+ * - /pages/Feedback/Complete/[id].tsx
+ *
+ */
+
 import React, { useRef, useState, useEffect } from "react";
 import RequiredIcon from "../RequiredIcon";
 import { ModuleContent } from "../ModuleLayout/ModuleContent";
@@ -39,7 +65,6 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
     // props.setFeedbackData(props.feedbackData);
     // const image = new Image(props.feedbackData.image);
     // image.src = props.feedbackData.image;
-
     // console.log(props.feedbackData.image);
   }, [props.feedbackData]);
 
@@ -299,7 +324,12 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
         closeModal={() => setFeedbackImage(false)}
         closeOnOverlayClick={true}
       >
-        <img width={"85%"} height={"85%"} src={props.feedbackData.image} alt="" />
+        <img
+          width={"85%"}
+          height={"85%"}
+          src={props.feedbackData.image}
+          alt=""
+        />
       </ModuleModal>
       <ModuleModal
         isOpen={completeImage}

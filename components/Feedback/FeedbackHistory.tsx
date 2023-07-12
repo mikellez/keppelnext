@@ -1,3 +1,20 @@
+/**
+ * EXPLANATION
+ * The following is a function to map the history data to a table
+ * for easy reference.
+ *
+ * props = {
+ *  history
+ * }
+ *
+ * - history : {[key:string] : string}[], is an array of json which
+ *   gives the history of feedback
+ *
+ *
+ * This is called in :
+ * - /pages/Feedback/index.tsx
+ *
+ */
 import React, { useState, useEffect } from "react";
 
 interface FeedbackHistoryProps {
