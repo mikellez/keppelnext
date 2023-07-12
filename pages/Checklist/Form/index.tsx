@@ -1,3 +1,22 @@
+/*
+  EXPLANATION OF CHECKLIST FORM PAGE
+
+  This is the landing page for creating a new checklist or 
+  for assigning / editing a pending checklist
+
+  This page is made up of 2 major components:
+  
+  - ChecklistCreationForm is allows users to edit overall details 
+    of the new/pending checklists. This can be found in 
+    /components/Checklist/ChecklistCreationForm.tsx
+
+  - ChecklistTemplateCreator is responsible for adding (when creating)
+    and displaying of checks in checklists. There are multiple levels of
+    nested components that is further described within ChecklistTemplateCreator.
+    This can be found in /components/Checklist/ChecklistTemplateCreator.tsx
+*/
+
+
 import formStyles from "../../../styles/formStyles.module.css";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";

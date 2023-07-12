@@ -1,3 +1,43 @@
+/*
+  EXPLANATION OF CHECKLIST MODULE
+
+  Checklist has 2 types of data that we work with: Template and Record
+  Checklists will refer to records by default unless specified otherwise
+
+
+  There are many major components in the Checklist Module 
+  which will be explained in their relevant pages
+
+  The index page shows the a list of all 
+  checklist(records) organised by checklist statuses
+
+  This serves as the default landing page for the checklist module
+  This page is also used as a component under Dashboard Content
+
+  Components to note in the index page
+
+  - Checklist Table is made using the react-table-library 
+  found within /pages/Checklist/index.tsx
+
+  - ChecklistHistory which is a modal that displays the previous actions 
+  that were executed on a given record. This component can be found on
+  /components/Checklist/ChecklistHistory
+
+  interface ChecklistProps {
+    filter?: boolean;
+    status: number | string;
+    plant: number;
+    date: string;
+    datetype: string;
+    isReady: boolean;
+  }
+
+  These props are used on the Dashboard Content and is not used when
+  it is used as the landing page for checklist module
+
+*/
+
+
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import {

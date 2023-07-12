@@ -1,3 +1,24 @@
+/*
+  EXPLANATION OF CHECKLIST MANAGE FORM PAGE
+
+  This is the landing page for managing a completed checklist
+
+  This page is made up of one major component:
+  
+  - ChecklistPreview is made up of 2 major components, namely being
+    ChecklistDetails and ChecklistViewForm
+
+    - ChecklistDetails displays the overall details 
+      of the checklist. This can be found in 
+      /components/Checklist/ChecklistDetails.tsx
+
+    - ChecklistViewForm is responsible for displaying the input checks in checklists.
+      These checks are only shown as "view only" and cannot be edited 
+      There are multiple levels of nested components that works similarly to ChecklistTemplateCreator.
+      This can be found in /components/Checklist/ChecklistEditableForm.tsx
+*/
+
+
 import React, { useState, useEffect } from "react";
 import {
   ModuleContent,
