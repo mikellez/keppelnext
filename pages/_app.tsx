@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/globals.scss";
 import "../styles/index.scss";
 import type { AppProps } from "next/app";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import TopBar from "../components/TopBar/TopBar";
 import Footer from "../components/Footer";
@@ -11,17 +11,62 @@ import { StaffContextProvider } from "../components/Context/StaffContext";
 import { ModuleModal, SimpleIcon } from "../components";
 import ModuleSimplePopup from "../components/ModuleLayout/ModuleSimplePopup";
 import TooltipBtn from "../components/TooltipBtn";
-// import IdleTimer from "../components/IdleTimer";
-//import { useIdleTimer } from "react-idle-timer";
+import { useIdleTimer } from "react-idle-timer";
+import type { IIdleTimer } from "react-idle-timer";
 import instance from "../types/common/axios.config";
 import User from "./User/Management";
+
+const TIMEOUT_DURATION = 30 * 60 * 1000; // 30 minutes
+const PROMPT_BEFORE_IDLE_DURATION = 15 * 60 * 1000; // 15 minutes
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const { asPath, route, pathname } = router;
   const [isTimeoutPromt, setIsTimeoutPrompt] = useState(false);
   const [isTimeout, setIsTimeout] = useState(false);
-  const [timerStarted, setTimerStarted] = useState(false);
+  const idleTimer = useRef(null);
+  // const [timerStarted, setTimerStarted] = useState(false);
+
+  let inactivityTimer: any = null;
+
+  const handleUserActivity = () => {
+    setIsTimeout(false);
+    setIsTimeoutPrompt(false);
+    console.log("User did something", new Date().toLocaleTimeString());
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+      setIsTimeoutPrompt(true);
+      // Perform actions when user inactivity timeout occurs
+    }, TIMEOUT_DURATION - PROMPT_BEFORE_IDLE_DURATION);
+  };
+
+  useEffect(() => {
+    // Attach event listeners to detect user activity
+    window.addEventListener('mousemove', handleUserActivity);
+    window.addEventListener('keydown', handleUserActivity);
+
+    // Start the initial inactivity timer
+    inactivityTimer = setTimeout(() => {
+      console.log("User inactive", new Date().toLocaleTimeString());
+      // Perform actions when user inactivity timeout occurs
+      setIsTimeoutPrompt(true);
+      setIsTimeout(true);
+      
+    }, TIMEOUT_DURATION - PROMPT_BEFORE_IDLE_DURATION);
+
+    return () => {
+      // Clean up event listeners and clear the timeout when the component unmounts
+      window.removeEventListener('mousemove', handleUserActivity);
+      window.removeEventListener('keydown', handleUserActivity);
+      clearTimeout(inactivityTimer);
+    };
+  }, [isTimeout, isTimeoutPromt]);
+
+  useEffect(() => {
+    if (isTimeout && !asPath.includes("/Login")) {
+      sendLogout();
+    }
+  }, [isTimeout]);
 
   const sendLogout = (): void => {
     instance
@@ -37,29 +82,35 @@ export default function App({ Component, pageProps }: AppProps) {
       });
   };
 
-  /*function onPrompt() {
-    setIsTimeoutPrompt(true);
-    setIsTimeout(true);
-  }
-  function onActive() {
-    setIsTimeout(false);
-    setIsTimeoutPrompt(false);
-  }
-  function onIdle() {
-    if (isTimeout) {
-      setIsTimeout(false);
-      setIsTimeoutPrompt(false);
-      // idleTimer.e
-      sendLogout();
-      setTimerStarted(false);
-      idleTimer.pause();
+  function _onPrompt(event?: Event, idleTimer?: IIdleTimer) {
+    if (!asPath.includes("/Login")) {
+      setIsTimeoutPrompt(true);
+      setIsTimeout(true);
     }
-  }*/
+  }
+  function _onActive(event?: Event, idleTimer?: IIdleTimer) {
+    if (!asPath.includes("/Login")) {
+      setIsTimeout(false);
+      idleTimer!.reset();
+    }
+  }
+  function _onIdle(event?: Event, idleTimer?: IIdleTimer) {
+    if (!asPath.includes("/Login")) {
+      if (isTimeout) {
+        sendLogout();
+      }
+    }
+  }
 
-  /*const idleTimer = useIdleTimer({
-    onPrompt: onPrompt,
-    onIdle: onIdle,
-    onActive: onActive,
+  // if (!asPath.includes("/Login")) {
+  /*const timer = useIdleTimer({
+    ref: idleTimer,
+    syncTimers: 1,
+    // ref: idleTimer,
+    onPrompt: _onPrompt,
+    onIdle: _onIdle,
+    onActive: _onActive,
+    onAction: _onActive,
     promptBeforeIdle: 15 * 1000 * 60,
     timeout: 30 * 1000 * 60,
     // promptBeforeIdle: 5 * 1000,
@@ -67,24 +118,15 @@ export default function App({ Component, pageProps }: AppProps) {
     crossTab: true,
     stopOnIdle: true,
   });*/
+  // }
 
-  useEffect(() => {
-    // if (!timer) {
-    //   setTimer(
-    //     new IdleTimer({
-    //       timeout: 15, //expire after 10 seconds
-    //       onTimeout: () => {
-    //         setIsTimeout(true);
-    //       },
-    //       onExpired: sendLogout,
-    //     })
-    //   );
-    // }
-    /*if (!timerStarted && !asPath.includes("/Login")) {
-      idleTimer.start();
-      setTimerStarted(true);
-    }*/
-  }, [asPath]);
+  // useEffect(() => {
+  //   if (!isTimeout) {
+  //     sendLogout();
+  //   } else {
+  //     setIsTimeout(true);
+  //   }
+  // }, []);
 
   useEffect(() => {
     require("bootstrap/dist/js/bootstrap.bundle.min.js");

@@ -4,7 +4,10 @@ const nextConfig = {
   swcMinify: true,
   typescript: {
     ignoreBuildErrors: true
-  }
+  },
+   publicRuntimeConfig: {
+    apiBaseUrl: process.env.API_BASE_URL
+  },
 }
 
 module.exports = nextConfig

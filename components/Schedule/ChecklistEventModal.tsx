@@ -64,8 +64,8 @@ export default function ChecklistEventModal(props: ModalProps) {
   const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
   // const [scheduleObject, setScheduleObject] = useState<CMMSSchedule>();
 
-  // Get the current user
-  const { data, error } = useCurrentUser();
+    // Get the current user
+    const { data: user, error } = useCurrentUser();
 
   const router = useRouter();
 
@@ -276,236 +276,249 @@ export default function ChecklistEventModal(props: ModalProps) {
   });
   // console.log(newSchedule);
 
-  return (
-    <div>
-      <Modal
-        isOpen={props.isOpen}
-        ariaHideApp={false}
-        onRequestClose={closeModal}
-        style={{
-          overlay: {
-            zIndex: 10000,
-            margin: "auto",
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.4)",
-          },
-          content: {
-            backgroundColor: "#F0F0F0",
-            height: "50%",
-            width: "50%",
-            margin: "auto",
-            border: "2px solid #393E46",
-          },
-        }}
-      >
-        {props.event && (
-          <div>
-            {/* Display event details on event select */}
-            <div className={styles.eventModalHeader}>
-              <h4 className={styles.eventModalTitle}>{props.event.title}</h4>
-              <GrClose
-                onClick={closeModal}
-                size={20}
-                className={styles.eventModalClose}
-              />
-            </div>
-            <div>
-              <table className={styles.eventModalTable}>
-                <tbody>
-                  <tr className={styles.eventModalTableRow}>
-                    <th>Schedule ID:</th>
-                    <td>{props.event.extendedProps.scheduleId}</td>
-                  </tr>
-                  <tr className={styles.eventModalTableRow}>
-                    <th>Checklist ID:</th>
-                    <td>{props.event.extendedProps.checklistId}</td>
-                  </tr>
-                  <tr className={styles.eventModalTableRow}>
-                    <th>Plant:</th>
-                    <td>{props.event.extendedProps.plant}</td>
-                  </tr>
-                  <tr className={styles.eventModalTableRow}>
-                    <th>Date:</th>
-                    {editMode ? (
-                      <td>
-                        <input
-                          type="date"
-                          className="form-control"
-                          value={(newSchedule?.date as Date)
-                            .toISOString()
-                            .slice(0, 10)}
-                          name="date"
-                          onChange={updateSchedule}
-                          min={lowerStr.toISOString().slice(0, 10)}
-                          max={upperStr.toISOString().slice(0, 10)}
-                          onKeyDown={(e) => e.preventDefault()}
-                        />
-                      </td>
-                    ) : (
-                      <td>
-                        {dateFormat(props.event.extendedProps.date as Date)}
-                      </td>
-                    )}
-                  </tr>
-                  <tr className={styles.eventModalTableRow}>
-                    <th>Start Date:</th>
-                    <td>
-                      {dateFormat(props.event.extendedProps.startDate as Date)}
-                    </td>
-                  </tr>
-                  <tr className={styles.eventModalTableRow}>
-                    <th>End Date:</th>
-                    <td>
-                      {dateFormat(props.event.extendedProps.endDate as Date)}
-                    </td>
-                  </tr>
-                  <tr className={styles.eventModalTableRow}>
-                    <th>Recurring Period:</th>
-                    <td>
-                      {toPeriodString(
-                        props.event.extendedProps.recurringPeriod
-                      )}
-                    </td>
-                  </tr>
-                  <tr className={styles.eventModalTableRow}>
-                    <th>Assigned To:</th>
-                    {editMode ? (
-                      <td>
-                        <AssignToSelect
-                          plantId={props.event.extendedProps.plantId as number}
-                          onChange={(value, action) => {
-                            setNewSchedule((prev) => {
-                              const newData = { ...prev };
-                              const ids: number[] = [];
-                              if (Array.isArray(value)) {
-                                value?.forEach((option: AssignedUserOption) => {
-                                  ids.push(option.value);
-                                });
-                              }
-                              newData.assignedIds = ids;
-                              return newData;
-                            });
-                          }}
-                          defaultIds={props.event.extendedProps.assignedIds}
-                        />
-                      </td>
-                    ) : (
-                      <td className={styles.eventModalAssignedUsers}>
-                        {assignedUserElement}
-                      </td>
-                    )}
-                  </tr>
-                  <tr className={styles.eventModalTableRow}>
-                    <th>Remarks:</th>
-                    {editMode ? (
-                      <td>
-                        <textarea
-                          className="form-control"
-                          value={newSchedule?.remarks}
-                          onChange={updateSchedule}
-                          name="remarks"
-                        ></textarea>
-                      </td>
-                    ) : (
-                      <td>{props.event.extendedProps.remarks}</td>
-                    )}
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              {props.deleteEditDraft && (
-                <div style={{ display: "flex" }}>
-                  <TooltipBtn
-                    toolTip={false}
-                    onClick={() => {
-                      setScheduleModal(true);
-                      closeModal();
-                    }}
-                    style={{ marginRight: "10px" }}
-                  >
-                    Edit
-                  </TooltipBtn>
-                  <TooltipBtn
-                    toolTip={false}
-                    onClick={handleDelete}
-                    style={{ marginLeft: "10px" }}
-                  >
-                    Delete
-                  </TooltipBtn>
-                </div>
-              )}
-              {props.editSingle &&
-                (data?.role_id as number) != Role.Specialist &&
-                (props.event.extendedProps.date as Date) > new Date() &&
-                (props.event.extendedProps.recurringPeriod > 1 ||
-                  props.event.extendedProps.isSingle) && (
-                  <div className={styles.eventModalButtonContainer}>
-                    <TooltipBtn
-                      toolTip={false}
-                      onClick={() => setEditMode((prev) => !prev)}
-                      style={{
-                        backgroundColor: editMode ? "#9EB23B" : "#B2B2B2",
-                        color: "#000000",
-                        border: "none",
-                      }}
-                    >
-                      {editMode ? "Cancel" : "Edit"}
-                    </TooltipBtn>
-                    {editMode && (
-                      <TooltipBtn
-                        toolTip={false}
-                        style={{ backgroundColor: "#EB1D36" }}
-                        disabled={isDisabled(
-                          props.event,
-                          newSchedule,
-                          disableSubmit
-                        )}
-                        onClick={submitEvent}
-                      >
-                        Confirm
-                      </TooltipBtn>
-                    )}
-                  </div>
-                )}
-            </div>
-          </div>
-        )}
-      </Modal>
-      <ModuleSimplePopup
-        modalOpenState={editDeleteModal}
-        setModalOpenState={setEditDeleteModal}
-        title="Maintenance Deleted"
-        text="Schedule Maintenance has been successfully deleted."
-        icon={SimpleIcon.Check}
-        shouldCloseOnOverlayClick={true}
-      />
-      <ModuleSimplePopup
-        modalOpenState={submitModal}
-        setModalOpenState={setSubmitModal}
-        title="Submitted"
-        text="Changes to event has to been sent for approval."
-        icon={SimpleIcon.Check}
-        shouldCloseOnOverlayClick={true}
-      />
-      <ModuleSimplePopup
-        modalOpenState={failureModal}
-        setModalOpenState={setFailureModal}
-        title="Incomplete Maintenance"
-        text="Please fill in the missing details for the maintenance."
-        icon={SimpleIcon.Cross}
-        shouldCloseOnOverlayClick={true}
-      />
+    return (
+        <div>
+            {props.event?.extendedProps.checklistId && <div>
 
-      <ScheduleModal
-        isOpen={scheduleModal}
-        closeModal={() => {
-          setScheduleModal(false);
-        }}
-        title="Schedule Maintenance"
-        scheduleEvent={newSchedule}
-      />
-    </div>
-  );
+            
+            <Modal
+                isOpen={props.isOpen}
+                ariaHideApp={false}
+                onRequestClose={closeModal}
+                style={{
+                    overlay: {
+                        zIndex: 10000,
+                        margin: "auto",
+                        width: "100%",
+                        height: "100%",
+                        backgroundColor: "rgba(0,0,0,0.4)",
+                    },
+                    content: {
+                        backgroundColor: "#F0F0F0",
+                        height: "50%",
+                        width: "50%",
+                        margin: "auto",
+                        border: "2px solid #393E46",
+                    },
+                }}
+            >
+                {props.event && (
+                    <div>
+                        {/* Display event details on event select */}
+                        <div className={styles.eventModalHeader}>
+                            <h4 className={styles.eventModalTitle}>{props.event.title}</h4>
+                            <GrClose
+                                onClick={closeModal}
+                                size={20}
+                                className={styles.eventModalClose}
+                            />
+                        </div>
+                        <div>
+                            <table className={styles.eventModalTable}>
+                                <tbody>
+                                    <tr className={styles.eventModalTableRow}>
+                                        <th>Schedule ID:</th>
+                                        <td>{props.event.extendedProps.scheduleId}</td>
+                                    </tr>
+                                    <tr className={styles.eventModalTableRow}>
+                                        <th>Checklist ID:</th>
+                                        <td>{props.event.extendedProps.checklistId}</td>
+                                    </tr>
+                                    <tr className={styles.eventModalTableRow}>
+                                        <th>Plant:</th>
+                                        <td>{props.event.extendedProps.plant}</td>
+                                    </tr>
+                                    <tr className={styles.eventModalTableRow}>
+                                        <th>Date:</th>
+                                        {editMode && props.event.extendedProps.recurringPeriod > 1  ? (
+                                            <td>
+                                                <input
+                                                    type="date"
+                                                    className="form-control"
+                                                    value={(newSchedule?.date as Date)
+                                                        .toISOString()
+                                                        .slice(0, 10)}
+                                                    name="date"
+                                                    onChange={updateSchedule}
+                                                    min={lowerStr.toISOString().slice(0, 10)}
+                                                    max={upperStr.toISOString().slice(0, 10)}
+                                                    onKeyDown={(e) => e.preventDefault()}
+                                                />
+                                            </td>
+                                        ) : (
+                                            <td>
+                                                {dateFormat(props.event.extendedProps.date as Date)}
+                                            </td>
+                                        )}
+                                    </tr>
+                                    <tr className={styles.eventModalTableRow}>
+                                        <th>Start Date:</th>
+                                        <td>
+                                            {dateFormat(
+                                                props.event.extendedProps.startDate as Date
+                                            )}
+                                        </td>
+                                    </tr>
+                                    <tr className={styles.eventModalTableRow}>
+                                        <th>End Date:</th>
+                                        <td>
+                                            {dateFormat(props.event.extendedProps.endDate as Date)}
+                                        </td>
+                                    </tr>
+                                    <tr className={styles.eventModalTableRow}>
+                                        <th>Recurring Period:</th>
+                                        <td>
+                                            {toPeriodString(
+                                                props.event.extendedProps.recurringPeriod
+                                            )}
+                                        </td>
+                                    </tr>
+                                    <tr className={styles.eventModalTableRow}>
+                                        <th>Assigned To:</th>
+                                        {editMode ? (
+                                            <td>
+                                                <AssignToSelect
+                                                    plantId={
+                                                        props.event.extendedProps.plantId as number
+                                                    }
+                                                    onChange={(value, action) => {
+                                                        setNewSchedule((prev) => {
+                                                            const newData = { ...prev };
+                                                            const ids: number[] = [];
+                                                            if (Array.isArray(value)) {
+                                                                value?.forEach(
+                                                                    (
+                                                                        option: AssignedUserOption
+                                                                    ) => {
+                                                                        ids.push(option.value);
+                                                                    }
+                                                                );
+                                                            }
+                                                            newData.assignedIds = ids;
+                                                            return newData;
+                                                        });
+                                                    }}
+                                                    defaultIds={
+                                                        props.event.extendedProps.assignedIds
+                                                    }
+                                                />
+                                            </td>
+                                        ) : (
+                                            <td className={styles.eventModalAssignedUsers}>
+                                                {assignedUserElement}
+                                            </td>
+                                        )}
+                                    </tr>
+                                    <tr className={styles.eventModalTableRow}>
+                                        <th>Remarks:</th>
+                                        {editMode ? (
+                                            <td>
+                                                <textarea
+                                                    className="form-control"
+                                                    value={newSchedule?.remarks}
+                                                    onChange={updateSchedule}
+                                                    name="remarks"
+                                                ></textarea>
+                                            </td>
+                                        ) : (
+                                            <td>{props.event.extendedProps.remarks}</td>
+                                        )}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                            {props.deleteEditDraft && (
+                                <div style={{ display: "flex" }}>
+                                    <TooltipBtn
+                                        toolTip={false}
+                                        onClick={() => {
+                                            setScheduleModal(true);
+                                            closeModal();
+                                        }}
+                                        style={{ marginRight: "10px" }}
+                                    >
+                                        Edit
+                                    </TooltipBtn>
+                                    <TooltipBtn
+                                        toolTip={false}
+                                        onClick={handleDelete}
+                                        style={{ marginLeft: "10px" }}
+                                    >
+                                        Delete
+                                    </TooltipBtn>
+                                </div>
+                            )}
+                            {props.editSingle &&
+                                (user?.role_id as number) != Role.Specialist &&
+                                (props.event.extendedProps.date as Date) > new Date() &&
+                                 (
+                                    <div className={styles.eventModalButtonContainer}>
+                                        <TooltipBtn
+                                            toolTip={false}
+                                            onClick={() => setEditMode((prev) => !prev)}
+                                            style={{
+                                                backgroundColor: editMode ? "#9EB23B" : "#B2B2B2",
+                                                color: "#000000",
+                                                border: "none",
+                                            }}
+                                        >
+                                            {editMode ? "Cancel" : "Edit"}
+                                        </TooltipBtn>
+                                        {editMode && (
+                                            <TooltipBtn
+                                                toolTip={false}
+                                                style={{ backgroundColor: "#EB1D36" }}
+                                                disabled={isDisabled(
+                                                    props.event,
+                                                    newSchedule,
+                                                    disableSubmit
+                                                )}
+                                                onClick={submitEvent}
+                                            >
+                                                Confirm
+                                            </TooltipBtn>
+                                        )}
+                                    </div>
+                                )}
+                        </div>
+                    </div>
+                )}
+            </Modal>
+            <ModuleSimplePopup
+                modalOpenState={editDeleteModal}
+                setModalOpenState={setEditDeleteModal}
+                title="Maintenance Deleted"
+                text="Schedule Maintenance has been successfully deleted."
+                icon={SimpleIcon.Check}
+                shouldCloseOnOverlayClick={true}
+            />
+            <ModuleSimplePopup
+                modalOpenState={submitModal}
+                setModalOpenState={setSubmitModal}
+                title="Submitted"
+                text="Changes to event has to been sent for approval."
+                icon={SimpleIcon.Check}
+                shouldCloseOnOverlayClick={true}
+            />
+            <ModuleSimplePopup
+                modalOpenState={failureModal}
+                setModalOpenState={setFailureModal}
+                title="Incomplete Maintenance"
+                text="Please fill in the missing details for the maintenance."
+                icon={SimpleIcon.Cross}
+                shouldCloseOnOverlayClick={true}
+            />
+
+            <ScheduleModal
+                isOpen={scheduleModal}
+                closeModal={() => {
+                    setScheduleModal(false);
+                }}
+                title="Schedule Maintenance"
+                scheduleEvent={newSchedule}
+            />
+            </div>}
+        </div>
+    );
 }
