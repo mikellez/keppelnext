@@ -277,7 +277,15 @@ export default function NewAsset(props: NewAssetProps) {
 
   return (
     <ModuleMain>
-      <ModuleHeader header="New Asset" />
+      <ModuleHeader header="New Asset">
+      <button
+            className={"btn btn-secondary"}
+            type="button"
+            onClick={() => router.back()}
+          >
+            Back
+          </button>  
+      </ModuleHeader>
       <ModuleContent includeGreyContainer grid>
         <div className={formStyles.halfContainer}>
           <div className="form-group">
