@@ -34,6 +34,14 @@ interface NewAssetProps {
   assetTypes: CMMSAssetType[];
 }
 
+interface CustomInputs {
+  system: string;
+  systemAsset: string;
+  asset_type_id: string;
+  system_asset_name: string;
+  sub_component_1: string;
+}
+
 export default function NewAsset(props: NewAssetProps) {
   const user = useCurrentUser();
   const router = useRouter();
@@ -69,7 +77,14 @@ export default function NewAsset(props: NewAssetProps) {
   const [isMultipleEntries, setIsMultipleEntries] = useState<boolean>(false);
   //state when submission is successful
   const [submissionModal, setSubmissionModal] = useState<boolean>(false);
-
+  //state to manage custom input
+  const [customInput, setCustomInput] = useState<CustomInputs>({
+    system: "",
+    systemAsset: "",
+    asset_type_id: "",
+    system_asset_name: "",
+    sub_component_1: "",
+  });
   type UploadedFile = [string, string];
 
   const [fileraw, setfileraw] = useState<UploadedFile[]>([]);
@@ -237,7 +252,7 @@ export default function NewAsset(props: NewAssetProps) {
         user_id: user.data!.id,
       };
 
-      // console.log(postData);
+      console.log(postData);
       //post data to API
       instance.post("/api/asset/addNewAsset", postData);
       //open modal to show success
@@ -333,64 +348,126 @@ export default function NewAsset(props: NewAssetProps) {
               System
               <RequiredIcon />
             </label>
-            <select
-              className="form-select"
-              onChange={handleForm}
-              name="system_id"
-            >
-              <option value="0" disabled hidden selected>
-                -- Select System --
-              </option>
-              {props.systems.map((system) => (
-                <option key={system.system_id} value={system.system_id}>
-                  {system.system_name}
+            <div className="input-group">
+              <select
+                className="form-select"
+                onChange={handleForm}
+                name="system_id"
+              >
+                <option value="0" disabled hidden selected>
+                  -- Select System --
                 </option>
-              ))}
-            </select>
+                {props.systems.map((system) => (
+                  <option key={system.system_id} value={system.system_id}>
+                    {system.system_name}
+                  </option>
+                ))}
+              </select>
+              <span className="input-group-text">or</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  onChange={e => {
+                    handleForm(e)
+                    setCustomInput(prev => {
+                      return {
+                        ...prev,
+                        [e.target.name]: e.target.value
+                      }
+                    })
+                  }}
+                  name="system_id"
+                  placeholder="Enter New Asset Type"
+                />
+            </div>
           </div>
           <div className="form-group">
             <label className="form-label">
               System Asset
               <RequiredIcon />
             </label>
-            <select
-              className="form-select"
-              defaultValue={0}
-              onChange={handleAssetNameSelect}
-              name="system_asset_id"
-            >
-              <option value={0} disabled hidden>
-                -- Select System Asset --
-              </option>
-              {systemAssetData !== undefined &&
-                systemAssetData.map((systemAsset) => (
-                  <option
-                    key={systemAsset.system_asset_id}
-                    value={systemAsset.system_asset_id}
-                  >
-                    {systemAsset.system_asset}
-                  </option>
-                ))}
-            </select>
+            <div className="input-group">
+
+            
+              <select
+                className="form-select"
+                defaultValue={0}
+                onChange={handleAssetNameSelect}
+                name="system_asset_id"
+              >
+                <option value={0} disabled hidden>
+                  -- Select System Asset --
+                </option>
+                {systemAssetData !== undefined &&
+                  systemAssetData.map((systemAsset) => (
+                    <option
+                      key={systemAsset.system_asset_id}
+                      value={systemAsset.system_asset_id}
+                    >
+                      {systemAsset.system_asset}
+                    </option>
+                  ))}
+              </select>
+              <span className="input-group-text">or</span>
+              <input
+                type="text"
+                className="form-control"
+                onChange={e => {
+                  handleForm(e)
+                  setCustomInput(prev => {
+                    return {
+                      ...prev,
+                      [e.target.name]: e.target.value
+                    }
+                  })
+                }}
+                name="asset_asset_id"
+                placeholder="Enter New System Asset"
+              />
+            </div>
           </div>
           <div className="form-group">
             <label className="form-label">
               Asset Type
               <RequiredIcon />
             </label>
-            <select
-              className="form-select"
-              defaultValue={""}
-              onChange={handleForm}
-              name="asset_type_id"
-            >
-              <option value={""}>NA</option>
-              {props.assetTypes.map((assetType) => (
-                <option key={assetType.asset_type} value={assetType.asset_type}>
-                  {assetType.asset_type}
+            <div className="input-group">
+
+            
+              <select
+                className="form-select"
+                defaultValue={""}
+                onChange={handleForm}
+                name="asset_type_id"
+                disabled={!!customInput.asset_type_id}
+              >
+                <option value={""} disabled hidden>
+                  -- Select Asset Type--
                 </option>
-              ))}
-            </select>
+                <option value={"NA"}>NA</option>
+                {props.assetTypes.map((assetType) => (
+                  <option key={assetType.asset_type} value={assetType.asset_type}>
+                    {assetType.asset_type}
+                  </option>
+                ))}
+              </select>
+              <span className="input-group-text">or</span>
+              <input
+                type="text"
+                className="form-control"
+                onChange={e => {
+                  handleForm(e)
+                  setCustomInput(prev => {
+                    return {
+                      ...prev,
+                      [e.target.name]: e.target.value
+                    }
+                  })
+                }}
+                name="asset_type_id"
+                placeholder="Enter New Asset Type"
+              />
+            </div>
           </div>
           <div className="form-group">
             <label className="form-label">
@@ -423,8 +500,17 @@ export default function NewAsset(props: NewAssetProps) {
               <input
                 type="text"
                 className="form-control"
-                onChange={handleForm}
-                name="system_asset_name_form"
+                onChange={e => {
+                  handleForm(e)
+                  setCustomInput(prev => {
+                    return {
+                      ...prev,
+                      [e.target.name]: e.target.value
+                    }
+                  })
+                }}
+                disabled={!form.asset_type_id}
+                name="system_asset_name"
                 placeholder="Enter New System Asset Name"
               />
             </div>
@@ -457,7 +543,7 @@ export default function NewAsset(props: NewAssetProps) {
                 type="text"
                 className="form-control"
                 onChange={handleForm}
-                name="sub_component_1_form"
+                name="sub_component_1"
                 placeholder="Enter New Sub-Component"
                 disabled={!form.asset_type_id}
               />
