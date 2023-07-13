@@ -124,6 +124,10 @@ function QRAssetImg({
 interface NewAssetProps {
   plants: CMMSPlant[];
 }
+interface OptionProps {
+  assetData: CMMSAsset;
+  optionIdx: number;
+}
 
 function QRCode(props: NewAssetProps) {
   const [selectedPlant, setSelectedPlant] = useState<number | null>(null);
@@ -134,13 +138,14 @@ function QRCode(props: NewAssetProps) {
     []
   );
   const searchRef = useRef({ value: "" });
-  const [filteredAssets, setFilteredAssets] = useState<CMMSAsset[]>([]);
+  const [filteredAssets, setFilteredAssets] = useState<OptionProps[]>([]);
   const [selectedPlantLoc, setSelectedPlantLoc] = useState<number | null>(null);
   const [selectedLocString, setSelectedLocString] = useState<string>("");
 
   const qrRef = useRef() as React.RefObject<HTMLDivElement>;
 
   const { data, error, isValidating, mutate } = useAsset(selectedPlant);
+  const [assetsOptions, setAssetOptions] = useState<OptionProps[]>();
 
   function assetSelect(e: React.ChangeEvent<HTMLSelectElement>) {
     if (data) {
@@ -148,8 +153,22 @@ function QRCode(props: NewAssetProps) {
       // console.log(selectedAssets);
       const newAsset = Array.from(e.target.options)
         .filter((o) => o.selected)
-        .map((o) => data[parseInt(o.value)]);
-      if (!selectedAssets.includes(newAsset[0])) {
+        .map((o) => {
+          // console.log(o);
+          // console.log(data);
+          return data[parseInt(o.value)];
+        });
+      // console.log(newAsset);
+      const left = selectedAssets.filter((ele) => {
+        if (ele.psa_id === newAsset[0].psa_id) {
+          return true;
+        } else {
+          return false;
+        }
+      }).length;
+      // console.log(newAsset, selectedAssets);
+
+      if (left == 0) {
         setSelectedAssets(selectedAssets.concat(newAsset));
       }
     }
@@ -183,10 +202,16 @@ function QRCode(props: NewAssetProps) {
         return plantLocs.filter((loc) => loc.plant_id === selectedPlant);
       });
     } else {
-      if (data) {
-        setFilteredAssets(data);
+      if (assetsOptions) {
+        setFilteredAssets(assetsOptions);
       }
     }
+    var i = 0;
+    const options = data?.map((ele) => {
+      return { assetData: ele, optionIdx: i++ };
+    });
+    // console.log(options);
+    setAssetOptions(options);
   }, [selectedPlant, data]);
 
   useEffect(() => {
@@ -202,8 +227,8 @@ function QRCode(props: NewAssetProps) {
     const currRef = searchRef.current.value;
     if (data) {
       setFilteredAssets(
-        data.filter((assets) =>
-          assets.asset_name.toLowerCase().includes(currRef.toLowerCase())
+        assetsOptions!.filter((op) =>
+          op.assetData.asset_name.toLowerCase().includes(currRef.toLowerCase())
         )
       );
     }
@@ -354,9 +379,9 @@ function QRCode(props: NewAssetProps) {
                     -- Select Asset --
                   </option>
                   {filteredAssets &&
-                    filteredAssets.map((asset, i) => (
-                      <option key={asset.psa_id} value={i}>
-                        {asset.asset_name}
+                    filteredAssets.map((opt) => (
+                      <option key={opt.assetData.psa_id} value={opt.optionIdx}>
+                        {opt.assetData.asset_name}
                       </option>
                     ))}
                 </select>
