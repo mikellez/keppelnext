@@ -7,6 +7,7 @@ import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import instance from "../../../types/common/axios.config";
 import Pagination from "../../Pagination";
+import moment from "moment";
 
 interface HistoryItem {
   //   id: string;
@@ -86,7 +87,7 @@ export default function AssetHistory({id}: {id: number}) {
             id: row.history_id + row.date.toString() + row.action,
             action: row.action,
             history_id: row.history_id,
-            date: new Date(row.date).toLocaleDateString(),
+            date: moment(new Date(row.date)).format("MMMM Do YYYY, h:mm:ss a"),
             name: row.name,
             fields: row.fields,
           };
