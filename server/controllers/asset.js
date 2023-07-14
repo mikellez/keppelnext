@@ -202,7 +202,7 @@ const getAssetsFromPlant = async (req, res, next) => {
   global.db.query(
     `SELECT psa_id, concat( system_asset , ' | ' , plant_asset_instrument) as "asset_name"  
             FROM keppel.system_assets AS t1 ,keppel.plant_system_assets AS t2
-            WHERE t1.system_asset_id = t2.system_asset_id_lvl4 AND plant_id = $1`,
+            WHERE t2.status = 1 AND t1.system_asset_id = t2.system_asset_id_lvl4 AND plant_id = $1`,
     [plant_id],
     (err, result) => {
       if (err) return res.status(500).json({ msg: err });
