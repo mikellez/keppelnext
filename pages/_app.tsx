@@ -32,7 +32,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const handleUserActivity = () => {
     setIsTimeout(false);
     setIsTimeoutPrompt(false);
-    console.log("User did something", new Date().toLocaleTimeString());
+    //console.log("User did something", new Date().toLocaleTimeString());
     clearTimeout(inactivityTimer);
     inactivityTimer = setTimeout(() => {
       setIsTimeoutPrompt(true);
@@ -47,7 +47,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
     // Start the initial inactivity timer
     inactivityTimer = setTimeout(() => {
-      console.log("User inactive", new Date().toLocaleTimeString());
+      //console.log("User inactive", new Date().toLocaleTimeString());
       // Perform actions when user inactivity timeout occurs
       setIsTimeoutPrompt(true);
       setIsTimeout(true);

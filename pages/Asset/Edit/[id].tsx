@@ -149,6 +149,25 @@ export default function EditAsset(props: EditAssetProps) {
     //open modal to show success
   }
 
+  //deactivate funciton
+  function deactivate() {
+    let postData: {} = {
+      psa_id: psa_id,
+    };
+    // console.log(postData);
+
+    // if confirmmodal true, allow delete
+    fetch("/api/asset/deactivateAsset", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(postData),
+    });
+
+    //open modal to show success
+  }
+
   function submission() {
     //if no errors, submit form
     //post data
@@ -567,7 +586,8 @@ export default function EditAsset(props: EditAssetProps) {
             <button
               key={2}
               onClick={() => {
-                deletion();
+                //deletion();
+                deactivate();
                 setdeleteModal(false);
                 // route back to assets
                 router.push("/Asset");
