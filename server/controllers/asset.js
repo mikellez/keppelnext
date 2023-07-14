@@ -202,7 +202,7 @@ const getAssetsFromPlant = async (req, res, next) => {
   global.db.query(
     `SELECT psa_id, concat( system_asset , ' | ' , plant_asset_instrument) as "asset_name"  
             FROM keppel.system_assets AS t1 ,keppel.plant_system_assets AS t2
-            WHERE t1.system_asset_id = t2.system_asset_id_lvl4 AND plant_id = $1`,
+            WHERE t2.status = 1 AND t1.system_asset_id = t2.system_asset_id_lvl4 AND plant_id = $1`,
     [plant_id],
     (err, result) => {
       if (err) return res.status(500).json({ msg: err });
@@ -260,7 +260,8 @@ const getAssetHierarchy = async (req, res, next) => {
     pm.plant_id = psa.plant_id and
     
     sa.system_asset_id = psa.system_asset_id_lvl4 and 
-    sm.system_id = sa.system_id
+    sm.system_id = sa.system_id and
+    psa.status = 1
     
     group by
     pm.plant_name,
@@ -937,6 +938,41 @@ const deleteAsset = (req, res, next) => {
   });
 };
 
+const deactivateAsset = (req, res, next) => {
+  var psa_id = req.body.psa_id;
+
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  
+  const activity_log = [
+    {
+      date: today,
+      name: req.user.name,
+      role: req.user.role_name,
+      activity: "DELETED Asset " + psa_id,
+      activity_type: "DELETED",
+      fields: "-",
+    },
+  ];
+
+  var q = `
+    UPDATE keppel.plant_system_assets 
+      SET status = 0,
+      activity_log = '${JSON.stringify(activity_log)}'
+    WHERE 
+      psa_id = '${psa_id}';
+  `;
+  // console.log(q);
+  global.db.query(q, function (err, result) {
+    if (err) {
+      console.log(err);
+    }
+
+    return res.status(200).send({
+      SuccessCode: "200",
+    });
+  });
+};
+
 const fetchAssetHistory = async (req, res, next) => {
   let query = `SELECT 
     to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'YYYY-MM-DD HH24:mi:ss'::text) AS history_id,
@@ -994,5 +1030,6 @@ module.exports = {
   addNewAsset,
   editAsset,
   deleteAsset,
+  deactivateAsset,
   getAllAssets,
 };

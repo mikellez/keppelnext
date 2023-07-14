@@ -1137,6 +1137,19 @@ router.post(
 );
 
 /**
+ * @api {post} /deactivateAsset Deactivate Asset
+ * @apiDescription Deactivate an asset.
+ * @apiGroup Asset
+ * @apiSuccess {number} -.psa_id Psa ID of the asset
+ *
+ */
+router.post(
+  "/asset/deactivateAsset",
+  checkIfLoggedInAPI,
+  controllers.asset.deactivateAsset
+);
+
+/**
  * @api {get} /fetchSystemAsset Gets all system assets(lvl 5) for the asset table
  * @apiDescription Gets all the system assets to display on the asset table
  * @apiName fetchSystemAsset
