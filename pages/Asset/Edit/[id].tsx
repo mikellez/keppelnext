@@ -42,6 +42,9 @@ export default function EditAsset(props: EditAssetProps) {
   const [assetDetail, setAssetDetail] = useState<CMMSAssetDetails>(
     {} as CMMSAssetDetails
   );
+  const [oldAssetData, setOldAssetData] = useState<CMMSAssetDetails>(
+    {} as CMMSAssetDetails
+  );
 
   const router = useRouter();
   const user = useCurrentUser();
@@ -63,6 +66,20 @@ export default function EditAsset(props: EditAssetProps) {
         system_asset: e.target.options[e.target.selectedIndex].text,
       };
     });
+  };
+
+  const formInputChange = (
+    labelName: keyof typeof oldAssetData,
+    value: string
+  ) => {
+    const val1 = oldAssetData[labelName];
+    // console.log(labelName);
+    const ref = document.getElementById(labelName);
+    if (val1 != value) {
+      ref!.style.backgroundColor = "yellow";
+    } else {
+      ref!.style.backgroundColor = "white";
+    }
   };
 
   //Function to get name of elements upon changing
@@ -187,6 +204,7 @@ export default function EditAsset(props: EditAssetProps) {
           system_asset_lvl5: result[0].asset_name,
           asset_name: "",
         });
+        setOldAssetData(assetDetail);
         setImagePreview(result[0].uploaded_image);
         setfileraw(result[0].uploaded_files);
       } else if (!result[0].system_asset_lvl6) {
@@ -196,6 +214,7 @@ export default function EditAsset(props: EditAssetProps) {
           system_asset_lvl6: result[0].asset_name,
           asset_name: "",
         });
+        setOldAssetData(assetDetail);
 
         setImagePreview(result[0].uploaded_image);
         setfileraw(result[0].uploaded_files);
@@ -383,9 +402,18 @@ export default function EditAsset(props: EditAssetProps) {
           <div className="form-group">
             <label className="form-label">Description</label>
             <input
+              id="asset_description"
               type="text"
               className="form-control"
-              onChange={handleForm}
+              onChange={(
+                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+              ) => {
+                handleForm(e);
+                formInputChange(
+                  e.target.name as keyof typeof oldAssetData,
+                  e.target.value
+                );
+              }}
               onBlur={handleForm}
               name="asset_description"
               placeholder="Enter Description"
@@ -396,9 +424,18 @@ export default function EditAsset(props: EditAssetProps) {
           <div className="form-group">
             <label className="form-label"> Location</label>
             <input
+              id="asset_location"
               type="text"
               className="form-control"
-              onChange={handleForm}
+              onChange={(
+                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+              ) => {
+                handleForm(e);
+                formInputChange(
+                  e.target.name as keyof typeof oldAssetData,
+                  e.target.value
+                );
+              }}
               onBlur={handleForm}
               name="asset_location"
               placeholder="Enter Location"
@@ -409,9 +446,18 @@ export default function EditAsset(props: EditAssetProps) {
           <div className="form-group">
             <label className="form-label"> Brand</label>
             <input
+              id="brand"
               type="text"
               className="form-control"
-              onChange={handleForm}
+              onChange={(
+                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+              ) => {
+                handleForm(e);
+                formInputChange(
+                  e.target.name as keyof typeof oldAssetData,
+                  e.target.value
+                );
+              }}
               onBlur={handleForm}
               name="brand"
               placeholder="Enter Brand"
@@ -422,9 +468,18 @@ export default function EditAsset(props: EditAssetProps) {
           <div className="form-group">
             <label className="form-label">Model Number</label>
             <input
+              id="model_number"
               type="text"
               className="form-control"
-              onChange={handleForm}
+              onChange={(
+                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+              ) => {
+                handleForm(e);
+                formInputChange(
+                  e.target.name as keyof typeof oldAssetData,
+                  e.target.value
+                );
+              }}
               onBlur={handleForm}
               name="model_number"
               placeholder="Enter Model Number"
@@ -435,9 +490,18 @@ export default function EditAsset(props: EditAssetProps) {
           <div className="form-group">
             <label className="form-label">Warranty</label>
             <input
+              id="warranty"
               type="text"
               className="form-control"
-              onChange={handleForm}
+              onChange={(
+                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+              ) => {
+                handleForm(e);
+                formInputChange(
+                  e.target.name as keyof typeof oldAssetData,
+                  e.target.value
+                );
+              }}
               onBlur={handleForm}
               name="warranty"
               placeholder="Enter Warranty"
@@ -448,9 +512,18 @@ export default function EditAsset(props: EditAssetProps) {
           <div className="form-group">
             <label className="form-label"> Tech Specs</label>
             <input
+              id="technical_specs"
               type="text"
               className="form-control"
-              onChange={handleForm}
+              onChange={(
+                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+              ) => {
+                handleForm(e);
+                formInputChange(
+                  e.target.name as keyof typeof oldAssetData,
+                  e.target.value
+                );
+              }}
               onBlur={handleForm}
               name="technical_specs"
               placeholder="Enter Tech Specs"
@@ -461,9 +534,18 @@ export default function EditAsset(props: EditAssetProps) {
           <div className="form-group">
             <label className="form-label">Manufacture Country</label>
             <input
+              id="manufacture_country"
               type="text"
               className="form-control"
-              onChange={handleForm}
+              onChange={(
+                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+              ) => {
+                handleForm(e);
+                formInputChange(
+                  e.target.name as keyof typeof oldAssetData,
+                  e.target.value
+                );
+              }}
               onBlur={handleForm}
               name="manufacture_country"
               placeholder="Enter Country"
@@ -474,9 +556,18 @@ export default function EditAsset(props: EditAssetProps) {
           <div className="form-group">
             <label className="form-label"> Remarks</label>
             <input
+              id="remarks"
               type="text"
               className="form-control"
-              onChange={handleForm}
+              onChange={(
+                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+              ) => {
+                handleForm(e);
+                formInputChange(
+                  e.target.name as keyof typeof oldAssetData,
+                  e.target.value
+                );
+              }}
               name="remarks"
               placeholder="Enter Remarks"
               defaultValue={assetDetail.remarks}

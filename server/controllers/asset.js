@@ -348,12 +348,11 @@ const getAssetHistory = async (req, res, next) => {
     LATERAL jsonb_array_elements(request.activity_log) activity(value)
     WHERE psa_id = $1`;
     try {
-
       const totalRows = await global.db.query(queryS, [req.params.id]);
       const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
       const page = req.query.page || 1;
       const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
-      queryS += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`
+      queryS += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
       const results = await global.db.query(queryS, [req.params.id]);
       return res.status(200).json({ rows: results.rows, total: totalPages });
     } catch (err) {
@@ -361,7 +360,7 @@ const getAssetHistory = async (req, res, next) => {
       return res.status(500).json({ msg: err });
     }
   } else if (req.params.type === "checklist") {
-      let queryS = `SELECT 
+    let queryS = `SELECT 
       btrim(concat(activity.value -> 'activity_type'::text), '"'::text) AS activity_type,
       btrim(((activity.value -> 'name'::text)::character varying)::text, '"'::text) AS name,
       to_timestamp(substr(((activity.value -> 'date'::text)::character varying)::text, 2, length(((activity.value -> 'date'::text)::character varying)::text) - 5), 'YYYY-MM-DD HH24:mi:ss'::text) AS date,
@@ -369,19 +368,18 @@ const getAssetHistory = async (req, res, next) => {
       FROM keppel.checklist_master,
       LATERAL jsonb_array_elements(checklist_master.activity_log) activity(value)
       WHERE ',' || linkedassetids || ',' LIKE  concat(concat('%,', $1::text) , ',%')`;
-      try {
-
-        const totalRows = await global.db.query(queryS, [req.params.id]);
-        const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
-        const page = req.query.page || 1;
-        const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
-        queryS += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`
-        const results = await global.db.query(queryS, [req.params.id]);
-        return res.status(200).json({ rows: results.rows, total: totalPages });
-      } catch (err) {
-        console.log(err);
-        return res.status(500).json({ msg: err });
-      }
+    try {
+      const totalRows = await global.db.query(queryS, [req.params.id]);
+      const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+      const page = req.query.page || 1;
+      const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+      queryS += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+      const results = await global.db.query(queryS, [req.params.id]);
+      return res.status(200).json({ rows: results.rows, total: totalPages });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ msg: err });
+    }
   }
 };
 
@@ -468,7 +466,7 @@ const fetch_asset_types = async (req, res, next) => {
 };
 
 const editAsset = async (req, res, next) => {
-  // console.log(req.body);
+  console.log(req.body);
   var parent_asset;
 
   if (req.body.asset_type == "") {
@@ -949,21 +947,20 @@ const fetchAssetHistory = async (req, res, next) => {
     FROM keppel.plant_system_assets,
     LATERAL jsonb_array_elements(plant_system_assets.activity_log) activity(value)
     WHERE psa_id = $1`;
-    
-    try {
-    
-      const totalRows = await global.db.query(query, [req.params.psa_Id]);
-      const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
-      const page = req.query.page || 1;
-      const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
-    
-      query += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`
-      const results = await global.db.query(query, [req.params.psa_Id]);
-      return res.status(200).json({ rows: results.rows, total: totalPages });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).json({ msg: error });
-    }
+
+  try {
+    const totalRows = await global.db.query(query, [req.params.psa_Id]);
+    const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+    const page = req.query.page || 1;
+    const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+
+    query += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+    const results = await global.db.query(query, [req.params.psa_Id]);
+    return res.status(200).json({ rows: results.rows, total: totalPages });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ msg: error });
+  }
 
   // global.db.query(
   //   query,
