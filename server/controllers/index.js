@@ -13,3 +13,4 @@ exports.setting        = require("./setting");
 exports.workflow        = require("./workflow");
 exports.feedback        = require("./feedback");
 exports.plantLocation   = require("./plantLocation");
+exports.license = require("./license");
