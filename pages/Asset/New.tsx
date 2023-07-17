@@ -402,7 +402,7 @@ export default function NewAsset(props: NewAssetProps) {
               <select
                 className="form-select"
                 defaultValue={""}
-                disabled={!form.asset_type_id}
+                disabled={!form.system_asset || !!form.system_asset_name_form}
                 onChange={handleForm}
                 name="system_asset_name"
               >
@@ -426,6 +426,7 @@ export default function NewAsset(props: NewAssetProps) {
                 onChange={handleForm}
                 name="system_asset_name_form"
                 placeholder="Enter New System Asset Name"
+                disabled={!form.system_asset}
               />
             </div>
           </div>
@@ -435,7 +436,7 @@ export default function NewAsset(props: NewAssetProps) {
               <select
                 className="form-select"
                 defaultValue={0}
-                disabled={!form.asset_type_id}
+                disabled={(!form.system_asset_name && !form.system_asset_name_form) || !!form.sub_component_1_form}
                 onChange={handleForm}
                 name="sub_component_1"
               >
@@ -459,7 +460,7 @@ export default function NewAsset(props: NewAssetProps) {
                 onChange={handleForm}
                 name="sub_component_1_form"
                 placeholder="Enter New Sub-Component"
-                disabled={!form.asset_type_id}
+                disabled={!form.system_asset_name && !form.system_asset_name_form}
               />
             </div>
           </div>
@@ -472,7 +473,7 @@ export default function NewAsset(props: NewAssetProps) {
                 type="text"
                 className="form-control"
                 placeholder="Enter New Sub-Component"
-                disabled={!form.asset_type_id}
+                disabled={!form.sub_component_1 && !form.sub_component_1_form}
               />
             </div>
           </div>
