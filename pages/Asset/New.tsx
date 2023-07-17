@@ -49,9 +49,12 @@ export default function NewAsset(props: NewAssetProps) {
   const [form, setform] = useState<CMMSAssetDetailsState>({
     plant_id: 0,
     system_id: 0,
+    system_form: "",
     system_asset_id: 0,
     system_asset: "",
+    system_asset_form: "",
     asset_type_id: "",
+    asset_type_form: "",
     system_asset_name: "",
     system_asset_name_form: "",
     sub_component_1: "",
@@ -353,6 +356,7 @@ export default function NewAsset(props: NewAssetProps) {
                 className="form-select"
                 onChange={handleForm}
                 name="system_id"
+                disabled={!!form.system_form}
               >
                 <option value="0" disabled hidden selected>
                   -- Select System --
@@ -367,17 +371,9 @@ export default function NewAsset(props: NewAssetProps) {
                 <input
                   type="text"
                   className="form-control"
-                  onChange={e => {
-                    handleForm(e)
-                    setCustomInput(prev => {
-                      return {
-                        ...prev,
-                        [e.target.name]: e.target.value
-                      }
-                    })
-                  }}
-                  name="system_id"
-                  placeholder="Enter New Asset Type"
+                  onChange={handleForm}
+                  name="system_form"
+                  placeholder="Enter System"
                 />
             </div>
           </div>
@@ -394,6 +390,7 @@ export default function NewAsset(props: NewAssetProps) {
                 defaultValue={0}
                 onChange={handleAssetNameSelect}
                 name="system_asset_id"
+                disabled={!!form.system_asset_form}
               >
                 <option value={0} disabled hidden>
                   -- Select System Asset --
@@ -412,16 +409,8 @@ export default function NewAsset(props: NewAssetProps) {
               <input
                 type="text"
                 className="form-control"
-                onChange={e => {
-                  handleForm(e)
-                  setCustomInput(prev => {
-                    return {
-                      ...prev,
-                      [e.target.name]: e.target.value
-                    }
-                  })
-                }}
-                name="asset_asset_id"
+                onChange={handleForm}
+                name="system_asset_form"
                 placeholder="Enter New System Asset"
               />
             </div>
@@ -439,7 +428,7 @@ export default function NewAsset(props: NewAssetProps) {
                 defaultValue={""}
                 onChange={handleForm}
                 name="asset_type_id"
-                disabled={!!customInput.asset_type_id}
+                disabled={!!form.asset_type_form}
               >
                 <option value={""} disabled hidden>
                   -- Select Asset Type--
@@ -455,16 +444,8 @@ export default function NewAsset(props: NewAssetProps) {
               <input
                 type="text"
                 className="form-control"
-                onChange={e => {
-                  handleForm(e)
-                  setCustomInput(prev => {
-                    return {
-                      ...prev,
-                      [e.target.name]: e.target.value
-                    }
-                  })
-                }}
-                name="asset_type_id"
+                onChange={handleForm}
+                name="asset_type_form"
                 placeholder="Enter New Asset Type"
               />
             </div>
@@ -479,7 +460,7 @@ export default function NewAsset(props: NewAssetProps) {
               <select
                 className="form-select"
                 defaultValue={""}
-                disabled={!form.asset_type_id}
+                disabled={!form.system_asset_id || !!form.system_asset_name_form}
                 onChange={handleForm}
                 name="system_asset_name"
               >
@@ -500,17 +481,9 @@ export default function NewAsset(props: NewAssetProps) {
               <input
                 type="text"
                 className="form-control"
-                onChange={e => {
-                  handleForm(e)
-                  setCustomInput(prev => {
-                    return {
-                      ...prev,
-                      [e.target.name]: e.target.value
-                    }
-                  })
-                }}
-                disabled={!form.asset_type_id}
-                name="system_asset_name"
+                onChange={handleForm}
+                disabled={!form.system_asset_id && !form.system_asset_form}
+                name="system_asset_name_form"
                 placeholder="Enter New System Asset Name"
               />
             </div>
@@ -521,7 +494,7 @@ export default function NewAsset(props: NewAssetProps) {
               <select
                 className="form-select"
                 defaultValue={0}
-                disabled={!form.asset_type_id}
+                disabled={!form.system_asset_name || !!form.sub_component_1_form}
                 onChange={handleForm}
                 name="sub_component_1"
               >
@@ -543,9 +516,9 @@ export default function NewAsset(props: NewAssetProps) {
                 type="text"
                 className="form-control"
                 onChange={handleForm}
-                name="sub_component_1"
+                name="sub_component_1_form"
                 placeholder="Enter New Sub-Component"
-                disabled={!form.asset_type_id}
+                disabled={!form.system_asset_name && !form.system_asset_name_form}
               />
             </div>
           </div>
@@ -554,11 +527,11 @@ export default function NewAsset(props: NewAssetProps) {
             <div className="input-group">
               <input
                 onChange={handleForm}
-                name="sub_component_2_form"
+                name="sub_component_2"
                 type="text"
                 className="form-control"
                 placeholder="Enter New Sub-Component"
-                disabled={!form.asset_type_id}
+                disabled={!form.asset_type_id && !form.sub_component_1_form}
               />
             </div>
           </div>
