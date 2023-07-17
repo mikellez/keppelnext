@@ -192,9 +192,9 @@ function useChecklistFilter(props: ChecklistProps, page: number) {
 function useAccountlog(url: string) {
   const accountlogFetcher = (url: string) =>
     instance
-      .get<any[]>(url)
+      .get(url)
       .then((response) => {
-        const logs = response.data.logs.map((singleLog) => {
+        const logs = response.data.logs.map((singleLog:any) => {
           return {
             id: singleLog.event_time,
             user_name: singleLog.user_name,
@@ -322,34 +322,48 @@ function useSubComponent1Name(
 
 function useChangeOfParts(
   copId: number | null,
+  limit: number,
+  page : number,
   options?: {
     plant_id?: number;
     psa_id?: number;
     type: "completed" | "scheduled" | null;
-  }
+    
+  },
+  
 ) {
   const changeOfPartsFetcher = async (url: string) => {
     let apiURL = copId ? `${url}/${copId}` : url;
-
+    apiURL += "&"
     if (options) {
       if (options.plant_id && options.type)
-        apiURL += `?plant_id=${options.plant_id}&type=${options.type}`;
-      else if (options.plant_id) apiURL += `?plant_id=${options.plant_id}`;
-      else if (options.type) apiURL += `?type=${options.type}`;
-      else if (options.psa_id && copId === null)
-        apiURL += `?psa_id=${options.psa_id}`;
-    }
+        apiURL += `plant_id=${options.plant_id}&type=${options.type}`;
+      else if (options.plant_id) {
+        apiURL += `plant_id=${options.plant_id}`
+      }
+      else if (options.type) {
+        apiURL += `type=${options.type}`
+      }
+      else if (options.psa_id && copId === null){
+        apiURL += `psa_id=${options.psa_id}`;
+
+      }
+    } 
 
     return await instance
       .get<CMMSChangeOfParts[]>(apiURL)
-      .then((response) => response.data)
+      .then((response) => {
+        // console.log(apiURL + "finding the query")
+        return response.data})
       .catch((e) => {
+        console.log(e + "in swr")
         throw new Error(e);
       });
   };
 
   return useSWR<CMMSChangeOfParts[], Error>(
-    ["/api/changeOfParts", copId, options],
+    [`/api/changeOfParts/${options?.type}?limit=${limit}&offset=${
+      (page - 1) * limit}`, copId, options],
     changeOfPartsFetcher,
     { revalidateOnFocus: false }
   );

@@ -68,9 +68,9 @@ const checkBase64 = (s: string): boolean => {
 };
 
 export default function AssetDetails(props: {
-  assetHistory:  {
-    rows: CMMSAssetHistory[],
-    total: number
+  assetHistory: {
+    rows: CMMSAssetHistory[];
+    total: number;
   };
   COPHistory: [CMMSChangeOfParts];
   id: number;
@@ -299,7 +299,6 @@ export default function AssetDetails(props: {
                 )}
               </div>
             </div>
-
           </>
         )}
       </ModuleContent>
@@ -370,12 +369,16 @@ export const getServerSideProps: GetServerSideProps = async (
     headers
   );
   const COPHistory = await instance.get(
-    `/api/changeOfParts/?psa_id=` + psaId,
+    `/api/changeOfParts/all/?psa_id=` + psaId,
     headers
   );
   console.log(assetHistory.data);
 
   return {
-    props: { assetHistory: assetHistory.data, COPHistory: COPHistory.data, id: psaId },
+    props: {
+      assetHistory: assetHistory.data,
+      COPHistory: COPHistory.data,
+      id: psaId,
+    },
   };
 };

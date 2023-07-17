@@ -11,92 +11,128 @@ import { useRouter } from "next/router";
 import { createChangeOfPartsServerSideProps } from "../../types/common/props";
 import { useChangeOfParts } from "../../components/SWR";
 import { useCurrentUser } from "../../components/SWR";
+import Pagination from "../../components/Pagination";
+import instance from "../../types/common/axios.config";
 
 export interface ChangeOfPartsPageProps {
-    changeOfParts: CMMSChangeOfParts[];
+  changeOfParts: CMMSChangeOfParts[];
 }
 
-const indexedColumn: ("scheduled" | "completed")[] = ["scheduled", "completed"]
+const indexedColumn: ("scheduled" | "completed")[] = ["scheduled", "completed"];
 
 const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
-    const [COPData, setCOPData] = useState<CMMSChangeOfParts[]>(props.changeOfParts);
-    const [selectedPlant, setSelectedPlant] = useState<number>()
-    const [selectedCOP, setSelectedCOP] = useState<CMMSChangeOfParts>({} as CMMSChangeOfParts);
-    const [activeCOPType, setActveCOPType] = useState<number>(0);
-    const [isReady, setIsReady] = useState<boolean>(false);
-    const router = useRouter();
-    const user = useCurrentUser();
+  const [COPData, setCOPData] = useState<CMMSChangeOfParts[]>(
+    props.changeOfParts
+  );
+  const [selectedPlant, setSelectedPlant] = useState<number>();
+  const [selectedCOP, setSelectedCOP] = useState<CMMSChangeOfParts>(
+    {} as CMMSChangeOfParts
+  );
+  const [activeCOPType, setActveCOPType] = useState<number>(0);
+  const [isReady, setIsReady] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [totalPage, setTotalPage] = useState<number>(0);
 
-    const updatePlant = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setIsReady(false);
-        setSelectedPlant(+e.target.value)
-    };
+  const PAGE_LIMIT = 10;
+  const router = useRouter();
+  const user = useCurrentUser();
 
-    const switchColumns = (activeIndex: number) => {
-        setIsReady(false);
-        setActveCOPType(activeIndex);
-    };
+  const updatePlant = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setIsReady(false);
+    setSelectedPlant(+e.target.value);
+  };
 
-    const { data, error, isValidating, mutate } = useChangeOfParts(null, {type: indexedColumn[activeCOPType], plant_id: selectedPlant});
+  const switchColumns = (activeIndex: number) => {
+    setIsReady(false);
+    setActveCOPType(activeIndex);
+    setPage(1);
+  };
 
-    useEffect(() => {
-        if (!isReady && data && !isValidating) {
-            if (data.length > 0) {
-                setCOPData(data);
-            } else {
-                setCOPData([]);
-            }
-            setIsReady(true);
-        } 
-    }, [data, isValidating, isReady]);
+  const { data, error, isValidating, mutate } = useChangeOfParts(
+    null,
+    PAGE_LIMIT,
+    page,
+    {
+      type: indexedColumn[activeCOPType],
+      plant_id: selectedPlant,
+    }
+  );
 
-    useEffect(() => {
-        if (user.data?.allocated_plants.length == 1) setSelectedPlant(user.data?.allocated_plants[0])
-    }, [user.data?.allocated_plants])
+  useEffect(() => {
+    const currTab = activeCOPType == 0 ? "scheduled" : "completed";
+    instance.get(`/api/changeOfParts/${currTab}`).then((ele) => {
+      const size = Math.round(ele.data.length / PAGE_LIMIT);
+      setTotalPage(size);
+    });
+  }, [activeCOPType]);
 
-    return (
-        <ModuleMain>
-            <ModuleHeader header="Change of Parts">
-                <TooltipBtn text="Create new" onClick={() => router.push("/ChangeOfParts/New")}>
-                    <VscNewFile size={22} />
-                </TooltipBtn>
+  useEffect(() => {
+    if (!isReady && data && !isValidating) {
+      if (data.length > 0) {
+        setCOPData(data);
+        // console.log(data);
+      } else {
+        setCOPData([]);
+      }
+      setIsReady(true);
+    }
+  }, [data, isValidating, isReady]);
 
-                <TooltipBtn
-                    text="Edit"
-                    disabled={(!selectedCOP.copId || selectedCOP.changedDate) as boolean}
-                    onClick={() => router.push("/ChangeOfParts/Edit/" + selectedCOP.copId)}
-                >
-                    <AiOutlineEdit size={22} />
-                </TooltipBtn>
+  useEffect(() => {
+    if (user.data?.allocated_plants.length == 1)
+      setSelectedPlant(user.data?.allocated_plants[0]);
+  }, [user.data?.allocated_plants]);
 
-                <PlantSelect
-                    onChange={updatePlant}
-                    allPlants
-                    accessControl
-                    default
-                />
+  return (
+    <ModuleMain>
+      <ModuleHeader header="Change of Parts">
+        <TooltipBtn
+          text="Create new"
+          onClick={() => router.push("/ChangeOfParts/New")}
+        >
+          <VscNewFile size={22} />
+        </TooltipBtn>
 
-            </ModuleHeader>
-            <ModuleContent>
-                <COPTable
-                    changeOfParts={COPData}
-                    setSelectedCOP={setSelectedCOP}
-                    selectedCOP={selectedCOP}
-                    isDisabledSelect={false}
-                    activeCOPType={activeCOPType}
-                    switchColumns={switchColumns}
-                    display={isReady}
-                />
-                {COPData.length === 0 && (
-                    activeCOPType === 0 ?
-                    <p>No Scheduled Change of Parts</p> :
-                    <p>No Completed Change of Parts</p>
-                )}
-            </ModuleContent>
-        </ModuleMain>
-    );
+        <TooltipBtn
+          text="Edit"
+          disabled={(!selectedCOP.copId || selectedCOP.changedDate) as boolean}
+          onClick={() =>
+            router.push("/ChangeOfParts/Edit/" + selectedCOP.copId)
+          }
+        >
+          <AiOutlineEdit size={22} />
+        </TooltipBtn>
+
+        <PlantSelect onChange={updatePlant} allPlants accessControl default />
+      </ModuleHeader>
+      <ModuleContent>
+        <COPTable
+          changeOfParts={COPData}
+          setSelectedCOP={setSelectedCOP}
+          selectedCOP={selectedCOP}
+          isDisabledSelect={false}
+          activeCOPType={activeCOPType}
+          switchColumns={switchColumns}
+          display={isReady}
+        />
+        {COPData.length === 0 &&
+          (activeCOPType === 0 ? (
+            <p>No Scheduled Change of Parts</p>
+          ) : (
+            <p>No Completed Change of Parts</p>
+          ))}
+      </ModuleContent>
+      <Pagination
+        page={page}
+        setPage={setPage}
+        totalPages={totalPage}
+        setReady={setIsReady}
+      />
+    </ModuleMain>
+  );
 };
 
 export default ChangeOfPartsPage;
 
-export const getServerSideProps: GetServerSideProps = createChangeOfPartsServerSideProps(false);
+export const getServerSideProps: GetServerSideProps =
+  createChangeOfPartsServerSideProps(false);
