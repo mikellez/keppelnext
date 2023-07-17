@@ -57,12 +57,12 @@ const createChangeOfPartsServerSideProps = (specificCOP: boolean, conditionalFun
 		};
 
 		const url = specificCOP && context.params?.id ? 
-			`/api/changeOfParts/${context.params!.id}` : 
+			`/api/changeOfParts/all/${context.params!.id}` : 
 			specificCOP && context.query.copId? 
-			`/api/changeOfParts/${context.query!.copId}` :
+			`/api/changeOfParts/all/${context.query!.copId}` :
 			specificCOP && context.query.assetId?
-			`/api/assetDetails/${context.query!.assetId}` :
-			`/api/changeOfParts`;
+			`/api/assetDetails/all/${context.query!.assetId}` :
+			`/api/changeOfParts/all`;
 	
 		const response = await instance.get<CMMSChangeOfParts[] | CMMSAssetDetails[]>(url, headers);
 

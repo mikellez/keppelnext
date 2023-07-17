@@ -346,7 +346,8 @@ router.patch(
   controllers.request.approveRequest
 );
 
-router.patch("/request/reject/:request_id", 
+router.patch(
+  "/request/reject/:request_id",
   checkIfLoggedInAPI,
   controllers.request.rejectRequest
 );
@@ -2020,10 +2021,18 @@ router
   .post(controllers.logbook.addEntryToLogbook);
 
 router
-  .route("/changeOfParts/:cop_id?", checkIfLoggedInAPI)
+  .route("/changeOfParts/all/:cop_id?", checkIfLoggedInAPI)
   .get(controllers.changeOfParts.fetchChangeOfParts)
   .post(controllers.changeOfParts.createNewChangeOfParts)
   .patch(controllers.changeOfParts.editChangeOfParts);
+
+router
+  .route("/changeOfParts/scheduled", checkIfLoggedInAPI)
+  .get(controllers.changeOfParts.fetchScheduleChangeOfParts);
+
+router
+  .route("/changeOfParts/completed", checkIfLoggedInAPI)
+  .get(controllers.changeOfParts.fetchCompletedChangeOfParts);
 
 router
   .get("/user/getUsers", checkIfLoggedInAPI, controllers.user.getUsers)
