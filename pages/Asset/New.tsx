@@ -367,14 +367,6 @@ export default function NewAsset(props: NewAssetProps) {
                   </option>
                 ))}
               </select>
-              <span className="input-group-text">or</span>
-                <input
-                  type="text"
-                  className="form-control"
-                  onChange={handleForm}
-                  name="system_form"
-                  placeholder="Enter System"
-                />
             </div>
           </div>
           <div className="form-group">
@@ -405,14 +397,6 @@ export default function NewAsset(props: NewAssetProps) {
                     </option>
                   ))}
               </select>
-              <span className="input-group-text">or</span>
-              <input
-                type="text"
-                className="form-control"
-                onChange={handleForm}
-                name="system_asset_form"
-                placeholder="Enter New System Asset"
-              />
             </div>
           </div>
           <div className="form-group">
@@ -440,14 +424,6 @@ export default function NewAsset(props: NewAssetProps) {
                   </option>
                 ))}
               </select>
-              <span className="input-group-text">or</span>
-              <input
-                type="text"
-                className="form-control"
-                onChange={handleForm}
-                name="asset_type_form"
-                placeholder="Enter New Asset Type"
-              />
             </div>
           </div>
           <div className="form-group">
