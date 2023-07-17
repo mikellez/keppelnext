@@ -93,6 +93,11 @@ const fetchDraftLicenses = async (req, res, next) => {
     }
 }
 
+const createLicense = async (req, res , next) => {
+
+}
+
 module.exports = {
-    fetchDraftLicenses
+    fetchDraftLicenses,
+    createLicense,
 }
