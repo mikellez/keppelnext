@@ -16,6 +16,10 @@ import ModuleSimplePopup, {
   SimpleIcon,
 } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import AssetDetails from "../Details/[id]";
+import HighlightChangedText from "../../../components/HighlightChangeText";
+import { renderToStaticMarkup } from "react-dom/server";
+import Input from "../../../components/Input";
+import Diff from "diff";
 
 interface EditAssetProps {
   header: string;
@@ -45,7 +49,6 @@ export default function EditAsset(props: EditAssetProps) {
   const [oldAssetData, setOldAssetData] = useState<CMMSAssetDetails>(
     {} as CMMSAssetDetails
   );
-
   const router = useRouter();
   const user = useCurrentUser();
 
@@ -72,22 +75,68 @@ export default function EditAsset(props: EditAssetProps) {
     labelName: keyof typeof oldAssetData,
     value: string
   ) => {
-    const val1 = oldAssetData[labelName];
-    // console.log(labelName);
-    const ref = document.getElementById(labelName);
-    if (val1 != value) {
-      ref!.style.backgroundColor = "yellow";
-    } else {
-      ref!.style.backgroundColor = "white";
+    // // console.log(labelName);
+    // const oldVal = oldAssetData[labelName]?.toString();
+    // console.log(oldVal);
+    // const ref = document.getElementById(labelName) as HTMLInputElement;
+    // if (oldVal !== value) {
+    // } else {
+    // }
+    // ref!.innerHTML = ` <mark>${value}</mark>`;
+    // console.log(ref);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLDivElement>) => {
+    // console.log(assetDetail);
+    // console.log(oldAssetData);
+
+    setAssetDetail((prevState) => {
+      return { ...prevState, [e.target.id]: e.target.innerText };
+    });
+    const currText = e.target.innerText;
+    const oldText =
+      oldAssetData[e.target.id as keyof CMMSAssetDetails]!.toString();
+
+    // let results = Diff.diffChars(currText, oldText);
+    // var output = "";
+    // results.forEach((item) => {
+    //   if (item.removed) {
+    //     output += `<span style="background-color:yellow">${item.value}</span>`;
+    //   } else if (!item.added) {
+    //     output += `${item.value}`;
+    //   }
+    // });
+
+    var result = document.createElement("div");
+    let idx = 0;
+    while (idx < currText.length && oldText.length) {
+      if (currText[idx] == oldText[idx]) {
+        result.innerHTML += <div>currText[idx]</div>;
+      } else {
+        // const wrapper = <mark>{currText[idx]}</mark>;
+        result.innerHTML += <mark>{currText[idx]}</mark>;
+      }
+      idx += 1;
     }
+    if (currText.length > idx) {
+      result.innerHTML += <mark>{currText.slice(idx)}</mark>;
+    }
+    // result += ;
+    console.log(result);
+
+    const ref = document.getElementById(e.target.id);
+    console.log(ref);
   };
 
   //Function to get name of elements upon changing
   const handleForm = (
     e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
   ) => {
+    console.log(e.target.id);
+    console.log(e.target.value);
+
     setAssetDetail((prevState) => {
-      return { ...prevState, [e.target.name]: e.target.value };
+      return { ...prevState, [e.target.id]: e.target.value };
     });
   };
   // console.log(assetDetail);
@@ -223,7 +272,6 @@ export default function EditAsset(props: EditAssetProps) {
           system_asset_lvl5: result[0].asset_name,
           asset_name: "",
         });
-        setOldAssetData(assetDetail);
         setImagePreview(result[0].uploaded_image);
         setfileraw(result[0].uploaded_files);
       } else if (!result[0].system_asset_lvl6) {
@@ -233,7 +281,6 @@ export default function EditAsset(props: EditAssetProps) {
           system_asset_lvl6: result[0].asset_name,
           asset_name: "",
         });
-        setOldAssetData(assetDetail);
 
         setImagePreview(result[0].uploaded_image);
         setfileraw(result[0].uploaded_files);
@@ -251,6 +298,7 @@ export default function EditAsset(props: EditAssetProps) {
           ...result[0],
         });
       }
+      setOldAssetData(assetDetail);
     });
   }, []);
   // console.log(assetDetail, 1);
@@ -272,6 +320,12 @@ export default function EditAsset(props: EditAssetProps) {
       </tr>
     );
   });
+
+  useEffect(() => {
+    const ref = document.getElementById("asset_description");
+    console.log(ref);
+  }, [assetDetail.asset_description]);
+
   return (
     <ModuleMain>
       <ModuleHeader header={props.header}></ModuleHeader>
@@ -420,23 +474,12 @@ export default function EditAsset(props: EditAssetProps) {
         <div className={formStyles.halfContainer}>
           <div className="form-group">
             <label className="form-label">Description</label>
-            <input
-              id="asset_description"
-              type="text"
+            <Input
               className="form-control"
-              onChange={(
-                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-              ) => {
-                handleForm(e);
-                formInputChange(
-                  e.target.name as keyof typeof oldAssetData,
-                  e.target.value
-                );
-              }}
-              onBlur={handleForm}
-              name="asset_description"
+              inputId="asset_description"
+              onBlur={handleInputChange}
               placeholder="Enter Description"
-              defaultValue={assetDetail.asset_description}
+              value={assetDetail.asset_description}
             />
           </div>
 
