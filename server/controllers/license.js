@@ -1,5 +1,20 @@
 const ITEMS_PER_PAGE = 10;
 
+const fetchLicenseTypes = async (req, res) => {
+    try {
+
+        const results = await global.db.query(`
+        SELECT * FROM keppel.license_type
+        `)
+        res.status(200).send(results.rows);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("An error has occured while fetching license types")
+    }
+
+}
+
+
 const fetchAllLicenseQuery = (expand, search) => {
     let expandCond = "";
     let SELECT_ARR = [];
@@ -100,4 +115,5 @@ const createLicense = async (req, res , next) => {
 module.exports = {
     fetchDraftLicenses,
     createLicense,
+    fetchLicenseTypes,
 }

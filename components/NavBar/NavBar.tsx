@@ -2,7 +2,7 @@ import React, { useEffect, useState, useTransition } from "react";
 import styles from "../../styles/Nav.module.scss";
 import { GrClose } from "react-icons/gr";
 import { BsList, BsHouseDoor } from "react-icons/bs";
-import { TbChecklist } from "react-icons/tb";
+import { TbChecklist, TbLicense } from "react-icons/tb";
 import {
   AiOutlineQrcode,
   AiOutlineControl,
@@ -164,6 +164,11 @@ export default function NavBar() {
               name="Feedback"
               path="/Feedback"
               icon={<AiOutlineForm size={21} />}
+            />
+            <NavLink
+              name="License"
+              path="/License"
+              icon={<TbLicense size={21} />}
             />
             <NavLink
               name="Workflow"

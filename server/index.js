@@ -172,6 +172,10 @@ app.prepare().then(() => {
   server.get("/Feedback*", checkIfLoggedIn, accessControl, (req, res) => {
     return handle(req, res);
   });
+
+  server.get("/License*", checkIfLoggedIn, accessControl, (req, res) => {
+    return handle(req, res);
+  });
   server.get("*", (req, res) => {
     return handle(req, res);
   });
