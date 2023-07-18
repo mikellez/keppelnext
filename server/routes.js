@@ -1797,6 +1797,12 @@ router.get(
   controllers.feedback.fetchPendingFeedback
 );
 
+router.get(
+  "/feedback/pending/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.feedback.fetchPendingFeedback
+);
+
 /**
  * @api {get} /feedback/pending Get Assigned Feedback
  * @apiDescription Get Assigned Feedback
@@ -1836,6 +1842,57 @@ router.get(
   controllers.feedback.fetchAssignedFeedback
 );
 
+router.get(
+  "/feedback/assigned/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.feedback.fetchAssignedFeedback
+);
+
+/**
+ * @api {get} /feedback/outstanding Get Outstanding Feedback
+ * @apiDescription Get Outstanding Feedback
+ * @apiName GetOutstandingFeedback
+ * @apiGroup Feedback
+ *
+ * @apiSuccess {Object} - Data Object
+ * @apiSuccess {Object[]} -.rows Array of Assigned Feedback
+ * @apiSuccess {Number} -.rows.id Feedback ID
+ * @apiSuccess {Number} -.rows.plant_loc_id Plant Location ID
+ * @apiSuccess {Number} -.rows.plant_id Plant ID
+ * @apiSuccess {String} -.rows.description Feedback Description
+ * @apiSuccess {Object} -.contact Contact Information
+ * @apiSuccess {String} -.rows.contact.number Contact Number, will be empty if not provided or user is Internal User
+ * @apiSuccess {Number} -.rows.contact.whatsapp Contact Method of Whatsapp, 0 if No, 1 if Yes
+ * @apiSuccess {Number} -.rows.contact.telegram Contact Method of Telegram, 0 if No, 1 if Yes
+ * @apiSuccess {String} -.rows.image base64 eoncded string of image
+ * @apiSuccess {String} -.rows.status_id Status ID (2 for ASSIGNED, 3 for REASSIGNED)
+ * @apiSuccess {String} -.rows.status Status of Feedback ("ASSIGNED" or "REASSIGNED")
+ * @apiSuccess {String} -.rows.activity_log Activity Log of Feedback
+ * @apiSuccess {String} -.rows.createdByUser Name of user who created feedback ("Guest" if external)
+ * @apiSuccess {String} -.rows.assigned_user_name Name of assignee
+ * @apiSuccess {Number} -.rows.assigned_user_id ID of assignee
+ * @apiSuccess {String} -.rows.loc_room Location Room
+ * @apiSuccess {String} -.rows.loc_floor Location Floor
+ * @apiSuccess {String} -.rows.plant_name
+ * @apiSuccess {String} -.rows.created_date Date of Feedback Creation
+ * @apiSuccess {Number} -.total Total Pages
+ *
+ * @apiError (Status Code 204) {Object} Empty {msg: "No Feedback"}
+ * @apiError (Error 500) {Object} InternalServerError {msg: error}
+ *
+ */
+router.get(
+  "/feedback/outstanding",
+  checkIfLoggedInAPI,
+  controllers.feedback.fetchOutstandingFeedback
+);
+
+router.get(
+  "/feedback/outstanding/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.feedback.fetchOutstandingFeedback
+);
+
 /**
  * @api {get} /feedback/pending Get Completed Feedback
  * @apiDescription Get Completed Feedback
@@ -1871,6 +1928,12 @@ router.get(
  */
 router.get(
   "/feedback/completed",
+  checkIfLoggedInAPI,
+  controllers.feedback.fetchCompletedFeedback
+);
+
+router.get(
+  "/feedback/completed/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.feedback.fetchCompletedFeedback
 );
@@ -2031,8 +2094,16 @@ router
   .get(controllers.changeOfParts.fetchScheduleChangeOfParts);
 
 router
+  .route("/changeOfParts/scheduled/:plant/:datetype/:date", checkIfLoggedInAPI)
+  .get(controllers.changeOfParts.fetchScheduleChangeOfParts);
+
+router
   .route("/changeOfParts/completed", checkIfLoggedInAPI)
   .get(controllers.changeOfParts.fetchCompletedChangeOfParts);
+
+router
+  .route("/changeOfParts/completed/:plant/:datetype/:date", checkIfLoggedInAPI)
+  .get(controllers.changeOfParts.fetchScheduleChangeOfParts);
 
 router
   .get("/user/getUsers", checkIfLoggedInAPI, controllers.user.getUsers)

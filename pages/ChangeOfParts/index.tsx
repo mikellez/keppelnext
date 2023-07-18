@@ -16,6 +16,8 @@ import instance from "../../types/common/axios.config";
 
 export interface ChangeOfPartsPageProps {
   changeOfParts: CMMSChangeOfParts[];
+  filter: boolean;
+  activeCOPType: number;
 }
 
 const indexedColumn: ("scheduled" | "completed")[] = ["scheduled", "completed"];
@@ -28,7 +30,7 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
   const [selectedCOP, setSelectedCOP] = useState<CMMSChangeOfParts>(
     {} as CMMSChangeOfParts
   );
-  const [activeCOPType, setActveCOPType] = useState<number>(0);
+  const [activeCOPType, setActveCOPType] = useState<number>(props?.filter ? props.activeCOPType : 0);
   const [isReady, setIsReady] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [totalPage, setTotalPage] = useState<number>(0);
@@ -103,7 +105,7 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
           <AiOutlineEdit size={22} />
         </TooltipBtn>
 
-        <PlantSelect onChange={updatePlant} allPlants accessControl default />
+        {!props?.filter && <PlantSelect onChange={updatePlant} allPlants accessControl default />}
       </ModuleHeader>
       <ModuleContent>
         <COPTable
@@ -112,8 +114,9 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
           selectedCOP={selectedCOP}
           isDisabledSelect={false}
           activeCOPType={activeCOPType}
-          switchColumns={switchColumns}
+          switchColumns={props?.filter ? null : switchColumns}
           display={isReady}
+          filter={props?.filter}
         />
         {COPData.length === 0 &&
           (activeCOPType === 0 ? (
