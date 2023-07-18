@@ -19,7 +19,7 @@ export default function Input(props: InputProps) {
       onBlur={props.onBlur}
       // onFocus={handleFocus}
     >
-      {props.value}
+      <div>{props.value}</div>
     </div>
   );
 }

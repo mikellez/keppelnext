@@ -52,6 +52,7 @@ export default function EditAsset(props: EditAssetProps) {
   const router = useRouter();
   const user = useCurrentUser();
 
+  const [testdetails, setTestDetails] = useState<any>("");
   const psa_id: string = router.query.id as string;
   const [submissionModal, setSubmissionModal] = useState<boolean>(false);
   const [confirmModal, setconfirmModal] = useState<boolean>(false);
@@ -90,42 +91,47 @@ export default function EditAsset(props: EditAssetProps) {
     // console.log(assetDetail);
     // console.log(oldAssetData);
 
-    setAssetDetail((prevState) => {
-      return { ...prevState, [e.target.id]: e.target.innerText };
-    });
-    const currText = e.target.innerText;
-    const oldText =
-      oldAssetData[e.target.id as keyof CMMSAssetDetails]!.toString();
+    const currText = assetDetail[e.target.id as keyof CMMSAssetDetails]
+      ? assetDetail[e.target.id as keyof CMMSAssetDetails]!.toString()
+      : "";
+    const oldText = oldAssetData[e.target.id as keyof CMMSAssetDetails]
+      ? oldAssetData[e.target.id as keyof CMMSAssetDetails]!.toString()
+      : "";
 
-    // let results = Diff.diffChars(currText, oldText);
-    // var output = "";
-    // results.forEach((item) => {
-    //   if (item.removed) {
-    //     output += `<span style="background-color:yellow">${item.value}</span>`;
-    //   } else if (!item.added) {
-    //     output += `${item.value}`;
-    //   }
-    // });
-
-    var result = document.createElement("div");
-    let idx = 0;
-    while (idx < currText.length && oldText.length) {
-      if (currText[idx] == oldText[idx]) {
-        result.innerHTML += <div>currText[idx]</div>;
+    var result = "";
+    let n = 0;
+    while (n < currText.length && n < oldText.length) {
+      if (currText[n] == oldText[n]) {
+        result += `${currText[n]}`;
       } else {
+        const start = n;
+        while (n < currText.length) {
+          if (currText[n] != oldText[n]) {
+            n++;
+          } else {
+            break;
+          }
+        }
         // const wrapper = <mark>{currText[idx]}</mark>;
-        result.innerHTML += <mark>{currText[idx]}</mark>;
+        result += `<mark>${currText.slice(start, n)}</mark>`;
       }
-      idx += 1;
+      n++;
     }
-    if (currText.length > idx) {
-      result.innerHTML += <mark>{currText.slice(idx)}</mark>;
+    if (currText.length > n) {
+      result += `<mark>${currText.slice(n)}</mark>`;
     }
     // result += ;
     console.log(result);
 
     const ref = document.getElementById(e.target.id);
-    console.log(ref);
+    ref!.innerHTML = result;
+    console.log(ref?.innerHTML);
+
+    setAssetDetail((prevState) => {
+      return { ...prevState, [e.target.id]: e.target.innerText };
+    });
+
+    setTestDetails(result);
   };
 
   //Function to get name of elements upon changing
