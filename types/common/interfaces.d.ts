@@ -35,9 +35,12 @@ interface CMMSAssetDetails extends CMMSAsset {
 interface CMMSAssetDetailsState {
   plant_id: number;
   system_id: number;
+  system_form: string;
   system_asset_id: number;
   system_asset: string;
+  system_asset_form: string;
   asset_type_id: string;
+  asset_type_form: string;
   system_asset_name: string;
   system_asset_name_form: string;
   sub_component_1: string;
