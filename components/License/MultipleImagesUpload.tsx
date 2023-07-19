@@ -1,7 +1,7 @@
 import React, {useEffect, useState, CSSProperties, useCallback} from 'react';
 import {useDropzone} from 'react-dropzone';
 import RequiredIcon from '../RequiredIcon';
-import { CMMSLicense } from '../../pages/License/Form';
+import { CMMSLicense } from '../../pages/License/New';
 import ModuleSimplePopup, { SimpleIcon } from '../ModuleLayout/ModuleSimplePopup';
 
 const thumbsContainer: CSSProperties = {

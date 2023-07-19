@@ -1,8 +1,7 @@
 import React, { useState, useEffect} from 'react';
 import instance from '../../types/common/axios.config';
 import { useRouter } from 'next/router';
-import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import { ModuleMain, ModuleHeader, ModuleContent } from '../../components';
+import { ModuleContent } from '../../components';
 import RequiredIcon from '../../components/RequiredIcon';
 import LicenseTypeSelect from '../../components/License/LicenseTypeSelect';
 import PlantLocSelect from '../../components/License/PlantLocSelect';
@@ -10,7 +9,7 @@ import AssignToSelect, { AssignedUserOption } from '../../components/Schedule/As
 import AssetSelect, { AssetOption } from '../../components/Checklist/AssetSelect';
 import MultipleImagesUpload from '../../components/License/MultipleImagesUpload';
 import { SingleValue, MultiValue } from 'react-select';
-import { CMMSLicense, CMMSLicenseType, CMMSPlantLocation, LicenseProps } from '../../pages/License/Form';
+import { CMMSLicense, CMMSLicenseType, CMMSPlantLocation, LicenseProps } from '../../pages/License/New';
 import ModuleSimplePopup, { SimpleIcon } from '../ModuleLayout/ModuleSimplePopup';
 
 

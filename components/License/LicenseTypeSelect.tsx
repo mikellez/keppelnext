@@ -1,6 +1,6 @@
 import React from "react";
 import RequiredIcon from "../RequiredIcon";
-import { CMMSLicenseType } from "../../pages/License/Form";
+import { CMMSLicenseType } from "../../pages/License/New";
 
 interface LicenseTypeSelectProps {
     optionsData: CMMSLicenseType[];

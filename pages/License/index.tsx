@@ -10,7 +10,7 @@ import { ModuleContent, ModuleHeader, ModuleMain } from '../../components';
 const License = () => {
     return <ModuleMain>
         <ModuleHeader title="License" header="License">
-        <Link href="/License/Form?action=New">
+        <Link href="/License/New">
           <TooltipBtn text="New Checklist">
             <MdPostAdd size={20} />
           </TooltipBtn>

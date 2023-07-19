@@ -53,8 +53,8 @@ const LicenseNew = (props: LicenseProps) => {
 
 
     return <ModuleMain>
-        <ModuleHeader title={router.query.action === "New" ? `Create License Tracking` : `Acquire License Tracking`} 
-        header={router.query.action === "New" ? `Create License Tracking` : `Acquire License Tracking`}>
+        <ModuleHeader title="Create License Tracking"
+        header="Create License Tracking">
             <button
             className={"btn btn-secondary"}
             type="button"
