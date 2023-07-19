@@ -87,51 +87,45 @@ export default function EditAsset(props: EditAssetProps) {
     // console.log(ref);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLDivElement>) => {
+  const handleInputChange = async (e: React.ChangeEvent<HTMLDivElement>) => {
     // console.log(assetDetail);
     // console.log(oldAssetData);
+    setAssetDetail((prevState) => {
+      console.log(e.target.innerHTML);
+      return { ...prevState, [e.target.id]: e.target.innerText };
+    });
+    const currText = e.target.innerText;
+    let oldText =
+      oldAssetData[e.target.id as keyof CMMSAssetDetails]!.toString();
 
-    const currText = assetDetail[e.target.id as keyof CMMSAssetDetails]
-      ? assetDetail[e.target.id as keyof CMMSAssetDetails]!.toString()
-      : "";
-    const oldText = oldAssetData[e.target.id as keyof CMMSAssetDetails]
-      ? oldAssetData[e.target.id as keyof CMMSAssetDetails]!.toString()
-      : "";
-
-    var result = "";
-    let n = 0;
-    while (n < currText.length && n < oldText.length) {
-      if (currText[n] == oldText[n]) {
-        result += `${currText[n]}`;
+    console.log(currText);
+    console.log(oldText);
+    var result = "<div>";
+    let idx = 0;
+    while (idx < currText.length && idx < oldText.length) {
+      if (currText[idx] === oldText[idx]) {
+        result += currText[idx];
+        idx++;
+        console.log(result);
       } else {
-        const start = n;
-        while (n < currText.length) {
-          if (currText[n] != oldText[n]) {
-            n++;
-          } else {
-            break;
-          }
+        const start = idx;
+        while (currText[idx] != oldText[idx]) {
+          idx++;
         }
-        // const wrapper = <mark>{currText[idx]}</mark>;
-        result += `<mark>${currText.slice(start, n)}</mark>`;
+        result += `<mark>${currText.slice(start, idx)}</mark>`;
+        console.log(result);
       }
-      n++;
     }
-    if (currText.length > n) {
-      result += `<mark>${currText.slice(n)}</mark>`;
+    if (currText.length > idx) {
+      result += `<mark>${currText.slice(idx)}</mark>`;
     }
+    result += "</div>";
     // result += ;
     console.log(result);
 
     const ref = document.getElementById(e.target.id);
     ref!.innerHTML = result;
     console.log(ref?.innerHTML);
-
-    setAssetDetail((prevState) => {
-      return { ...prevState, [e.target.id]: e.target.innerText };
-    });
-
-    setTestDetails(result);
   };
 
   //Function to get name of elements upon changing
@@ -305,6 +299,7 @@ export default function EditAsset(props: EditAssetProps) {
         });
       }
       setOldAssetData(assetDetail);
+      console.log("data is in" + oldAssetData);
     });
   }, []);
   // console.log(assetDetail, 1);
@@ -327,10 +322,10 @@ export default function EditAsset(props: EditAssetProps) {
     );
   });
 
-  useEffect(() => {
-    const ref = document.getElementById("asset_description");
-    console.log(ref);
-  }, [assetDetail.asset_description]);
+  // useEffect(() => {
+  //   const ref = document.getElementById("asset_description");
+  //   console.log(ref);
+  // }, [assetDetail.asset_description]);
 
   return (
     <ModuleMain>
@@ -486,6 +481,9 @@ export default function EditAsset(props: EditAssetProps) {
               onBlur={handleInputChange}
               placeholder="Enter Description"
               value={assetDetail.asset_description}
+              details={assetDetail}
+              setDetails={setAssetDetail}
+              oldDetails={oldAssetData}
             />
           </div>
 
