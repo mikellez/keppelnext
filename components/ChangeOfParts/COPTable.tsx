@@ -29,7 +29,7 @@ interface COPTableProps extends ChangeOfPartsPageProps {
   setSelectedCOP?: React.Dispatch<React.SetStateAction<CMMSChangeOfParts>>;
   isDisabledSelect: boolean;
   activeCOPType?: number;
-  switchColumns?: Function;
+  switchColumns?: Function | null;
   display?: boolean;
 }
 

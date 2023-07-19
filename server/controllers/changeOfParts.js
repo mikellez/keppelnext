@@ -1,7 +1,62 @@
 const db = require("../../db");
 const moment = require("moment");
 
-const fetchAllOfChangeOfPartsQuery = (req) => `
+const fetchAllOfChangeOfPartsQuery = (req) => {
+
+  let date = req.params.date || "all";
+  let datetype = req.params.datetype;
+  let plant = req.params.plant || 0;
+  let dateCond = "";
+  let userRoleCond = "";
+  let plantCond = "";
+
+  if (plant && plant != 0) {
+    plantCond = `AND psa.plant_id = '${plant}'`;
+  }
+
+  if (date !== "all") {
+    switch (datetype) {
+      case "week":
+        dateCond = `
+                  AND (
+                    (DATE_PART('week', COP.SCHEDULED_DATE::DATE) = DATE_PART('week', '${date}'::DATE) AND DATE_PART('year', COP.SCHEDULED_DATE::DATE) = DATE_PART('year', '${date}'::DATE))
+                    OR
+                    (DATE_PART('week', COP.CHANGED_DATE::DATE) = DATE_PART('week', '${date}'::DATE) AND DATE_PART('year', COP.CHANGED_DATE::DATE) = DATE_PART('year', '${date}'::DATE))
+                  )`;
+
+        break;
+
+      case "month":
+        dateCond = `
+                  AND (
+                    DATE_PART('month', COP.SCHEDULED_DATE::DATE) = DATE_PART('month', '${date}'::DATE) AND DATE_PART('year', COP.SCHEDULED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)
+                    OR
+                    DATE_PART('month', COP.CHANGED_DATE::DATE) = DATE_PART('month', '${date}'::DATE) AND DATE_PART('year', COP.CHANGED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)
+                  )`;
+
+        break;
+
+      case "year":
+        dateCond = `AND DATE_PART('year', COP.SCHEDULED_DATE::DATE) = DATE_PART('year', '${date}'::DATE) OR DATE_PART('year', COP.CHANGED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+
+      case "quarter":
+        dateCond = `
+                  AND (
+                    DATE_PART('quarter', COP.SCHEDULED_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) AND DATE_PART('year', COP.SCHEDULED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)
+                    OR
+                    DATE_PART('quarter', COP.CHANGED_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) AND DATE_PART('year', COP.CHANGED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)
+                  )`;
+
+        break;
+      default:
+        dateCond = `AND COP.CHANGED_DATE::DATE = '${date}'::DATE OR COP.SCHEDULED_DATE::DATE = '${date}'::DATE`;
+    }
+  }
+
+
+  return `
     SELECT 
         cop.cop_id,
         cop.psa_id,
@@ -25,8 +80,11 @@ const fetchAllOfChangeOfPartsQuery = (req) => `
                 UNNEST(string_to_array(allocatedplantids, ', ')::int[]) 
             FROM 
                 keppel.user_access WHERE user_id = ${req.user.id})
-        
-`;
+        ${dateCond}
+        ${plantCond}
+                
+  `;
+};
 
 const fetchChangeOfPartsByPlantQuery = (req) =>
   fetchAllOfChangeOfPartsQuery(req) +
