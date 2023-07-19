@@ -66,7 +66,65 @@ WHERE
 ORDER BY f.feedback_id DESC
 `;
 
-const getAllFeedBackQuery = (expand, search) => {
+const condition = (req) => {
+  let date = req.params.date || 'all';
+  let datetype = req.params.datetype;
+  let status = req.params.status || 0;
+  let plant = req.params.plant || 0;
+  let dateCond = "";
+  let statusCond = "";
+  let plantCond = "";
+  let userRoleCond = "";
+
+  if (plant && plant != 0) {
+    plantCond = `AND f.plant_loc_id = '${plant}'`;
+  }
+
+  if (date !== "all") {
+    switch (datetype) {
+      case "week":
+        dateCond = `
+                  AND DATE_PART('week', F.CREATED_DATE::DATE) = DATE_PART('week', '${date}'::DATE) 
+                  AND DATE_PART('year', F.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+
+      case "month":
+        dateCond = `
+                  AND DATE_PART('month', F.CREATED_DATE::DATE) = DATE_PART('month', '${date}'::DATE) 
+                  AND DATE_PART('year', F.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+
+      case "year":
+        dateCond = `AND DATE_PART('year', F.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+
+      case "quarter":
+        dateCond = `
+                  AND DATE_PART('quarter', F.CREATED_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) 
+                  AND DATE_PART('year', F.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+      default:
+        dateCond = `AND F.CREATED_DATE::DATE = '${date}'::DATE`;
+    }
+  }
+
+  return {
+    dateCond,
+    statusCond,
+    plantCond,
+    userRoleCond
+  }
+
+}
+
+const getAllFeedBackQuery = (req) => {
+  const expand = req.query.expand || null;
+  const search = req.query.search || null;
+
   let expandCond = "";
   let SELECT_ARR = [];
 
@@ -138,21 +196,27 @@ const getAllFeedBackQuery = (expand, search) => {
   return query;
 };
 
-const getPendingFeedbackQuery = (expand, search) => {
+const getPendingFeedbackQuery = (req) => {
+  const { dateCond, statusCond, plantCond, userRoleCond } = condition(req);
+
   return (
-    getAllFeedBackQuery(expand, search) +
+    getAllFeedBackQuery(req) +
     `
       WHERE 
           ua.user_id = $1 AND 
           (f.status_id = 1)
+          ${dateCond}
+          ${plantCond}
       ORDER BY f.feedback_id DESC
       `
   );
 };
 
-const getAssignedFeedbackQuery = (expand, search) => {
+const getAssignedFeedbackQuery = (req) => {
+  const { dateCond, statusCond, plantCond, userRoleCond } = condition(req);
+
   return (
-    getAllFeedBackQuery(expand, search) +
+    getAllFeedBackQuery(req) +
     `
       WHERE
           ua.user_id = $1 AND
@@ -166,14 +230,18 @@ const getAssignedFeedbackQuery = (expand, search) => {
             THEN assignU.user_id = $1
             ELSE True
             END)
+          ${dateCond}
+          ${plantCond}
       ORDER BY f.feedback_id DESC
       `
   );
 };
 
-const getCompletedFeedbackQuery = (expand, search) => {
+const getCompletedFeedbackQuery = (req) => {
+  const { dateCond, statusCond, plantCond, userRoleCond } = condition(req);
+
   return (
-    getAllFeedBackQuery(expand, search) +
+    getAllFeedBackQuery(req) +
     `
       WHERE
           ua.user_id = $1 AND
@@ -187,6 +255,8 @@ const getCompletedFeedbackQuery = (expand, search) => {
             THEN assignU.user_id = $1
             ELSE True
             END)
+          ${dateCond}
+          ${plantCond}
       ORDER BY f.feedback_id desc
       `
   );
@@ -199,13 +269,13 @@ const fetchPendingFeedback = async (req, res, next) => {
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
   const totalRows = await global.db.query(
-    getPendingFeedbackQuery(expand, search),
+    getPendingFeedbackQuery(req),
     [req.user.id]
   );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    getPendingFeedbackQuery(expand, search) +
+    getPendingFeedbackQuery(req) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   // console.log(query)
@@ -246,13 +316,41 @@ const fetchAssignedFeedback = async (req, res, next) => {
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
   const totalRows = await global.db.query(
-    getAssignedFeedbackQuery(expand, search),
+    getAssignedFeedbackQuery(req),
     [req.user.id]
   );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    getAssignedFeedbackQuery(expand, search) +
+    getAssignedFeedbackQuery(req) +
+    ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+
+  try {
+    const result = await global.db.query(query, [req.user.id]);
+    if (result.rows.length == 0)
+      return res.status(204).json({ msg: "No Feedback" });
+    // console.log(result.rows);
+    // console.log(totalPages);
+    return res.status(200).json({ rows: result.rows, total: totalPages });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+};
+
+const fetchOutstandingFeedback = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const expand = req.query.expand || null;
+  const search = req.query.search || null;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+
+  const totalRows = await global.db.query(
+    getAssignedFeedbackQuery(req),
+    [req.user.id]
+  );
+  const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+
+  const query =
+    getAssignedFeedbackQuery(req) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
@@ -292,13 +390,13 @@ const fetchCompletedFeedback = async (req, res, next) => {
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
   const totalRows = await global.db.query(
-    getCompletedFeedbackQuery(expand, search),
+    getCompletedFeedbackQuery(req),
     [req.user.id]
   );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
-    getCompletedFeedbackQuery(expand, search) +
+    getCompletedFeedbackQuery(req) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
   try {
@@ -599,6 +697,7 @@ const fetchEmailDetailsForSpecificFeedback = async (feedback_id) => {
 module.exports = {
   fetchPendingFeedback,
   fetchAssignedFeedback,
+  fetchOutstandingFeedback,
   fetchCompletedFeedback,
   fetchFilteredFeedback,
   createFeedback,

@@ -81,6 +81,10 @@ export interface FeedbackFormProps {
   setFeedbackData: React.Dispatch<React.SetStateAction<CMMSFeedback>>;
   disableForm?: boolean;
 }
+export interface FeedbackPageProps {
+  filter?: boolean;
+  activeTabIndex?: number;
+}
 
 // const downloadCSV = async (type: string, activeTabIndex: number) => {
 //   try {
@@ -101,10 +105,10 @@ export interface FeedbackFormProps {
 //   }
 // };
 
-export default function Feedback() {
+export default function Feedback(props: FeedbackPageProps) {
   const [feedbackItems, setFeedbackItems] = useState<CMMSFeedback[]>([]);
   const [isReady, setReady] = useState(false);
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [activeTabIndex, setActiveTabIndex] = useState(props?.filter ? props?.activeTabIndex : 0);
   const user = useCurrentUser();
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -181,7 +185,7 @@ export default function Feedback() {
       </ModuleHeader>
 
       <ModuleContent>
-        {
+        {!props?.filter &&
           <ul className="nav nav-tabs">
             <li
               onClick={() => {
