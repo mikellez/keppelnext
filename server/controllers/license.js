@@ -33,11 +33,11 @@ const fetchAllLicenseQuery = (expand, search) => {
         linked_asset: "psa.plant_asset_instrument AS linked_asset",
         assigned_user_id: "lc.assigned_user_id",
         assigned_user: "concat( concat(assignU.first_name, ' '), assignU.last_name) AS assigned_user",
-        images: "lc.images",
         acquisition_date: "lc.acquisition_date",
         expiry_date: "lc.expiry_date",
         status_id: "lc.status_id",
-        status:"sl.status"
+        status:"sl.status",
+        images: "lc.images"
     };
 
     if (expand) {
@@ -82,6 +82,32 @@ const fetchDraftLicenseQuery = (expand, search) => {
     `
 } 
 
+const fetchSingleLicense = async (req, res, next) => {
+    console.log('Fetching single license');
+    const expand = req.query.expand || false;
+    try {
+        const query = `
+            SELECT * FROM keppel.license WHERE license_id = $1
+        `
+        const result = await global.db.query(query, [req.params.id]);
+        res.status(200).send(result.rows[0]);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Error fetching license");
+    }
+}
+
+const fetchLicenseImages = async(req, res, next) => {
+    const query = `SELECT images FROM keppel.license WHERE license_id = $1`;
+    try {
+        const result = await global.db.query(query, [req.params.id]);
+        res.status(200).send(result.rows[0]);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Error fetching license images");
+    }
+}
+
 const fetchDraftLicenses = async (req, res, next) => {
     const page = req.query.page || 1;
     const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
@@ -108,12 +134,48 @@ const fetchDraftLicenses = async (req, res, next) => {
     }
 }
 
-const createLicense = async (req, res , next) => {
+const createLicense = async (req, res, next) => {
+    console.log("body: ", req.body);
+    const license = req.body;
+    console.log("files: ", req.files);
+    const images = req.files.map(file => file.buffer);
+    console.log("images: ", images);
 
+    const query = `
+        INSERT INTO keppel.license (
+            license_name,
+            license_provider,
+            license_type_id,
+            license_details,
+            plant_loc_id,
+            linked_asset_id,
+            assigned_user_id,
+            images
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `
+    try {
+        await global.db.query(query, [
+            license.license_name,
+            license.license_provider,
+            license.license_type_id,
+            license.license_details,
+            license.plantLoc_id,
+            license.linked_asset_id,
+            license.assigned_user_id,
+            images,
+        ])
+        res.status(200).send("Successfully created license");
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Error creating license");
+    }
 }
 
 module.exports = {
     fetchDraftLicenses,
     createLicense,
     fetchLicenseTypes,
+    createLicense,
+    fetchSingleLicense,
+    fetchLicenseImages,
 }

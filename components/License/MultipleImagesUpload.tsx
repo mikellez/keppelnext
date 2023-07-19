@@ -115,7 +115,7 @@ const MultipleImagesUpload = (props: MultipleImagesUploader) => {
 
     return (
       <section className="mb-3">
-          <label className="mb-3"> <RequiredIcon /> Attachment images</label>
+          <label className="mb-3"> <RequiredIcon /> Attach images</label>
           <div style={{
               flex: 1,
               display: 'flex',

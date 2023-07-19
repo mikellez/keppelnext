@@ -2102,9 +2102,17 @@ router.get("/plantLocation/:id", controllers.plantLocation.getSinglePlantLoc);
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
 
-router.get("/license_types", controllers.license.fetchLicenseTypes);
+router.get("/license_types", checkIfLoggedInAPI, controllers.license.fetchLicenseTypes);
 
-router.get("/license/draft", controllers.license.fetchDraftLicenses);
+router.post("/license", checkIfLoggedInAPI, upload.array("images", 5), controllers.license.createLicense);
+
+router.get("/license/draft", checkIfLoggedInAPI, controllers.license.fetchDraftLicenses);
+
+router
+  .route("/license/:id", checkIfLoggedInAPI)
+  .get(controllers.license.fetchSingleLicense);
+
+router.get("/license/images/:id", checkIfLoggedInAPI, controllers.license.fetchLicenseImages)
 
 router.get("/db/names", fetchDBNames);
 
