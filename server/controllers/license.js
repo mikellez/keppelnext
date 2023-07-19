@@ -135,11 +135,10 @@ const fetchDraftLicenses = async (req, res, next) => {
 }
 
 const createLicense = async (req, res, next) => {
-    console.log("body: ", req.body);
+    
     const license = req.body;
-    console.log("files: ", req.files);
     const images = req.files.map(file => file.buffer);
-    console.log("images: ", images);
+    const status = license.assigned_user_id ? 2 : 1
 
     const query = `
         INSERT INTO keppel.license (
@@ -150,8 +149,9 @@ const createLicense = async (req, res, next) => {
             plant_loc_id,
             linked_asset_id,
             assigned_user_id,
-            images
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            images,
+            status_id
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     `
     try {
         await global.db.query(query, [
@@ -163,6 +163,7 @@ const createLicense = async (req, res, next) => {
             license.linked_asset_id,
             license.assigned_user_id,
             images,
+            status,
         ])
         res.status(200).send("Successfully created license");
     } catch (err) {

@@ -2,6 +2,7 @@ import React, {useEffect, useState, CSSProperties, useCallback} from 'react';
 import {useDropzone} from 'react-dropzone';
 import RequiredIcon from '../RequiredIcon';
 import { CMMSLicense } from '../../pages/License/Form';
+import ModuleSimplePopup, { SimpleIcon } from '../ModuleLayout/ModuleSimplePopup';
 
 const thumbsContainer: CSSProperties = {
   display: 'flex',
@@ -25,18 +26,21 @@ const thumbsStyle: CSSProperties = {
 const thumbInner: CSSProperties = {
   display: 'flex',
   minWidth: 0,
-  overflow: 'hidden'
+  overflow: 'hidden',
+  justifyContent: 'center'
 };
 
 const img: CSSProperties = {
   display: 'block',
   width: 'auto',
-  height: '100%'
+  height: '100%',
+  
 };
 
 interface MultipleImagesUploader  {
     setLicenseForm: React.Dispatch<React.SetStateAction<CMMSLicense>>;
     isSubmitting: boolean;
+    files: File[]
 }
 
 
@@ -44,6 +48,7 @@ interface MultipleImagesUploader  {
 const MultipleImagesUpload = (props: MultipleImagesUploader) => {
     
   const [images, setImages] = useState<string[]>([]);
+  const [exceedLimit, setExceedLimit] = useState<boolean>(false);
 
   useEffect(() => {
     if (props.isSubmitting) {
@@ -57,6 +62,7 @@ const MultipleImagesUpload = (props: MultipleImagesUploader) => {
 
   const handleImages = (files: File[]) => {
     props.setLicenseForm(prev => {
+      console.log(prev.images.length);
       return {
         ...prev,
         "images": [...prev.images, ...files]
@@ -83,8 +89,15 @@ const MultipleImagesUpload = (props: MultipleImagesUploader) => {
   }
 
   const dropHandler = useCallback((acceptedFiles: File[]) => {
+    // console.log(acceptedFiles.length);
+    // console.log(props);
+    // console.log(props.files.length);
     if (acceptedFiles.length < 1) {
-        return
+        return;
+    }
+    if (acceptedFiles.length + props.files.length > 5) {
+      setExceedLimit(true);
+      return;
     }
     handleImages(acceptedFiles);
     setImages(prev => {
@@ -115,7 +128,7 @@ const MultipleImagesUpload = (props: MultipleImagesUploader) => {
 
     return (
       <section className="mb-3">
-          <label className="mb-3"> <RequiredIcon /> Attach images</label>
+          <label className="mb-3"> Attach images</label>
           <div style={{
               flex: 1,
               display: 'flex',
@@ -139,6 +152,13 @@ const MultipleImagesUpload = (props: MultipleImagesUploader) => {
         <aside style={thumbsContainer}>
           {thumbs}
         </aside>
+        <ModuleSimplePopup 
+            setModalOpenState={setExceedLimit}
+            modalOpenState={exceedLimit}
+            title="Too many images"
+            text="You are allowed to attach up to 5 images"
+            icon={SimpleIcon.Cross}
+            shouldCloseOnOverlayClick={true}/>
       </section>
     );
 }

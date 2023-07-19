@@ -11,14 +11,11 @@ import AssetSelect, { AssetOption } from '../../components/Checklist/AssetSelect
 import MultipleImagesUpload from '../../components/License/MultipleImagesUpload';
 import { SingleValue, MultiValue } from 'react-select';
 import { CMMSLicense, CMMSLicenseType, CMMSPlantLocation, LicenseProps } from '../../pages/License/Form';
-import ModuleSimplePopup from '../ModuleLayout/ModuleSimplePopup';
-import { SimpleIcon } from '../ModuleLayout/ModuleSimplePopup';
+import ModuleSimplePopup, { SimpleIcon } from '../ModuleLayout/ModuleSimplePopup';
 
-interface LicenseContainerProps {
-    data: LicenseProps
-}
 
-const LicenseContainer = (props: LicenseContainerProps) => {
+
+const LicenseContainer = ({data}: {data: LicenseProps}) => {
 
     const [licenseForm, setLicenseForm] = useState<CMMSLicense>({
 
@@ -28,13 +25,14 @@ const LicenseContainer = (props: LicenseContainerProps) => {
         license_details: "",
         plant_id: -1,
         plantLoc_id: -1,
-        linked_asset_id: null,
+        linked_asset_id: -1,
         assigned_user_id: null,
         images: [],
     })
 
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [successModal, setSuccessModal] = useState<boolean>(false);
+    const [missingFields, setMissingFields] = useState<boolean>(false);
 
     const router = useRouter();
 
@@ -88,36 +86,44 @@ const LicenseContainer = (props: LicenseContainerProps) => {
     }
 
     const handleSubmit = () => {
-        setIsSubmitting(true);
-        console.log(licenseForm);
-        const formData = new FormData();
-        for (const key of Object.keys(licenseForm)) {
-            console.log(key);
-            if (key !== "images" && !!licenseForm[key as keyof CMMSLicense]) {
-                formData.append(key, licenseForm[key as keyof CMMSLicense]!.toString());
-            } else {
-                const images = licenseForm.images as File[];
-                for (let i = 0; i < images.length; i++) {
-                    formData.append('images', images[i]);
+        if (!licenseForm.license_name || !licenseForm.license_provider || licenseForm.license_type_id === -1
+        || !licenseForm.license_details || licenseForm.plant_id === -1 
+        || licenseForm.plantLoc_id === -1 || licenseForm.linked_asset_id === -1) {
+            
+            setMissingFields(true);
+        } else {
+
+            setIsSubmitting(true);
+            console.log(licenseForm);
+            const formData = new FormData();
+            for (const key of Object.keys(licenseForm)) {
+                console.log(key);
+                if (key !== "images" && !!licenseForm[key as keyof CMMSLicense]) {
+                    formData.append(key, licenseForm[key as keyof CMMSLicense]!.toString());
+                } else {
+                    const images = licenseForm.images as File[];
+                    for (let i = 0; i < images.length; i++) {
+                        formData.append('images', images[i]);
+                    }
                 }
             }
+            instance.post("/api/license", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            }).then(res => {
+                console.log(res);
+                setIsSubmitting(false);
+                setSuccessModal(true);
+                setTimeout(() => {
+                    setSuccessModal(false);
+                    router.push("/License");
+                }, 1500)
+            }).catch(err => {
+                setIsSubmitting(false);
+                console.log(err);
+            })
         }
-        instance.post("/api/license", formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-          }).then(res => {
-            console.log(res);
-            setIsSubmitting(false);
-            setSuccessModal(true);
-            setTimeout(() => {
-                setSuccessModal(false);
-                router.push("/License");
-            }, 1500)
-          }).catch(err => {
-            setIsSubmitting(false);
-            console.log(err);
-          })
     }
-
+    
     return <div>
         <ModuleContent includeGreyContainer>
             <div className="row">
@@ -132,27 +138,28 @@ const LicenseContainer = (props: LicenseContainerProps) => {
                         <input type="text" name="license_provider" className="form-control" 
                             value={licenseForm.license_provider} onChange={handleInput}/>
                     </div>
-                    <LicenseTypeSelect optionsData={props.data.licenseTypes} onChange={handleInput}/>
+                    <LicenseTypeSelect optionsData={data.licenseTypes} onChange={handleInput}/>
                     <div className="mb-3">
                         <label className="form-label"><RequiredIcon/> License Details</label>
                         <input type="text" name="license_details" className="form-control" 
                             value={licenseForm.license_details} onChange={handleInput}/>
                     </div>
-                    <PlantLocSelect optionsData={props.data.plantLocs} onChange={handlePlantSelect}/>
+                    <PlantLocSelect optionsData={data.plantLocs} onChange={handlePlantSelect}/>
                     <div className="mb-3">
                         <label className="form-label"><RequiredIcon/> Linked Asset</label>
                         <AssetSelect isSingle plantId={licenseForm.plant_id == -1 ? 1: licenseForm.plant_id}
                         defaultIds={[]} onChange={handleLinkedAsset}/>
                     </div>
                     <div className="mb-3">
-                        <label className="form-label"><RequiredIcon/> Assign To</label>
+                        <label className="form-label"> Assign To</label>
                         <AssignToSelect isSingle plantId={licenseForm.plant_id == -1 ? 1: licenseForm.plant_id}
                             onChange={handleAssignee} disabled={licenseForm.plant_id === -1}/>
                     </div>
                     
                 </div>
                 <div className="col-6 ps-5">
-                <MultipleImagesUpload setLicenseForm={setLicenseForm} isSubmitting={isSubmitting}/>
+                <MultipleImagesUpload setLicenseForm={setLicenseForm} isSubmitting={isSubmitting} 
+                    files={licenseForm.images}/>
                 
                 </div>
             </div>
@@ -170,6 +177,13 @@ const LicenseContainer = (props: LicenseContainerProps) => {
             text="New license tracking successfully created"
             icon={SimpleIcon.Check}
             shouldCloseOnOverlayClick={false}/>
+            <ModuleSimplePopup 
+                setModalOpenState={setMissingFields}
+                modalOpenState={missingFields}
+                title="Missing Fields"
+                text="Please make sure that you have filled in the required fields"
+                icon={SimpleIcon.Cross}
+                shouldCloseOnOverlayClick={true}/>
     </div>
 }
 
