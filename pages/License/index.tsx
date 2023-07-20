@@ -159,11 +159,11 @@ const License = () => {
                       return (
                         <Row key={item.id} item={item}>
                           <Cell>{item.id}</Cell>
-                          <Cell>{item.linked_asset.asset_name}</Cell>
+                          <Cell>{item.linked_asset_id}</Cell>
                           <Cell>{item.plant_loc_id}</Cell>
                           <Cell>{item.license_name}</Cell>
                           <Cell>{item.license_provider}</Cell>
-                          <Cell>{item.license_type}</Cell>
+                          <Cell>{item.license_type_id}</Cell>
                           <Cell>
                             {item.acquisition_date
                               ? moment(new Date(item.acquisition_date)).format(

@@ -17,7 +17,7 @@ const fetchAllLicenseQuery = (expand, search) => {
   let SELECT_ARR = [];
 
   const SELECT = {
-    license_id: "lc.license_id",
+    license_id: "lc.license_id as id",
     license_name: "lc.license_name",
     license_provider: "lc.license_provider",
     license_type_id: "lc.license_type_id",

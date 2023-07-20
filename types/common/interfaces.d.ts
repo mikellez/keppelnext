@@ -472,26 +472,64 @@ interface CMMSPlantLoc {
   created_date?: string
 }
 
+// interface CMMSLicense {
+//   id : number
+//   license_id : number
+//   license_name : string
+//   license_provider : string
+//   license_type_id : number
+//   license_type : string
+//   license_details : string
+//   plant_loc_id : number
+//   loc_floor : string
+//   loc_room : string 
+//   linked_asset_id : number 
+//   linked_asset : CMMSAsset
+//   assigned_user_id : number 
+//   assigned_user : string 
+//   acquisition_date?: Date
+//   expiry_date?: Data 
+//   status_id: number
+//   status : string
+//   images? : string
+//   // activity_log : json
+// }
+
+interface LicenseProps {
+  plantLocs: CMMSPlantLocation[],
+  licenseTypes: CMMSLicenseType[],
+  license?: CMMSLicense,
+}
+
+interface CMMSPlantLocation {
+  plant_id: number,
+  plant_name: string,
+  loc_id: number,
+  loc_floor: string,
+  loc_room: string,
+}
+
+interface CMMSLicenseType {
+  type_id: number,
+  type: string,
+}
+
 interface CMMSLicense {
-  id : number
-  license_name : string
-  license_provider : string
-  license_type_id : number
-  license_type : string
-  license_details : string
-  plant_loc_id : number
-  loc_floor : string
-  loc_room : string 
-  linked_asset_id : number 
-  linked_asset : CMMSAsset
-  assigned_user_id : number 
-  assigned_user : string 
-  acquisition_date?: Date
-  expiry_date?: Data 
-  status_id: number
-  status : string
-  images? : string
-  // activity_log : json
+  id: number;
+  license_name: string;
+  license_provider: string;
+  license_type_id: number;
+  license_details: string;
+  status: string;
+  status_id: number;
+  plant_id: number;
+  plant_loc_id: number;
+  linked_asset_id: number | null;
+  assigned_user_id: number | null;
+  acquisition_date: Date | null
+  expiry_date : Date|null
+  images: File[];
+
 }
 
 export {
@@ -534,4 +572,6 @@ export {
   CMMSFeedback,
   CMMSPlantLoc,
   CMMSLicense,
+  LicenseProps,
+  CMMSLicenseType,
 };
