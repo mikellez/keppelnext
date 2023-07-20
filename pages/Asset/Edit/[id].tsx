@@ -46,12 +46,14 @@ export default function EditAsset(props: EditAssetProps) {
   const [assetDetail, setAssetDetail] = useState<CMMSAssetDetails>(
     {} as CMMSAssetDetails
   );
-  const [oldAssetData, setOldAssetData] = useState<CMMSAssetDetails>(
+  const [formAssetData, setFormAssetData] = useState<CMMSAssetDetails>(
     {} as CMMSAssetDetails
   );
+  const [initial, setInitial] = useState<boolean>(true);
   const router = useRouter();
   const user = useCurrentUser();
 
+  const [testdetails, setTestDetails] = useState<any>("");
   const psa_id: string = router.query.id as string;
   const [submissionModal, setSubmissionModal] = useState<boolean>(false);
   const [confirmModal, setconfirmModal] = useState<boolean>(false);
@@ -71,63 +73,6 @@ export default function EditAsset(props: EditAssetProps) {
     });
   };
 
-  const formInputChange = (
-    labelName: keyof typeof oldAssetData,
-    value: string
-  ) => {
-    // // console.log(labelName);
-    // const oldVal = oldAssetData[labelName]?.toString();
-    // console.log(oldVal);
-    // const ref = document.getElementById(labelName) as HTMLInputElement;
-    // if (oldVal !== value) {
-    // } else {
-    // }
-    // ref!.innerHTML = ` <mark>${value}</mark>`;
-    // console.log(ref);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLDivElement>) => {
-    // console.log(assetDetail);
-    // console.log(oldAssetData);
-
-    setAssetDetail((prevState) => {
-      return { ...prevState, [e.target.id]: e.target.innerText };
-    });
-    const currText = e.target.innerText;
-    const oldText =
-      oldAssetData[e.target.id as keyof CMMSAssetDetails]!.toString();
-
-    // let results = Diff.diffChars(currText, oldText);
-    // var output = "";
-    // results.forEach((item) => {
-    //   if (item.removed) {
-    //     output += `<span style="background-color:yellow">${item.value}</span>`;
-    //   } else if (!item.added) {
-    //     output += `${item.value}`;
-    //   }
-    // });
-
-    var result = document.createElement("div");
-    let idx = 0;
-    while (idx < currText.length && oldText.length) {
-      if (currText[idx] == oldText[idx]) {
-        result.innerHTML += <div>currText[idx]</div>;
-      } else {
-        // const wrapper = <mark>{currText[idx]}</mark>;
-        result.innerHTML += <mark>{currText[idx]}</mark>;
-      }
-      idx += 1;
-    }
-    if (currText.length > idx) {
-      result.innerHTML += <mark>{currText.slice(idx)}</mark>;
-    }
-    // result += ;
-    console.log(result);
-
-    const ref = document.getElementById(e.target.id);
-    console.log(ref);
-  };
-
   //Function to get name of elements upon changing
   const handleForm = (
     e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
@@ -135,7 +80,7 @@ export default function EditAsset(props: EditAssetProps) {
     console.log(e.target.id);
     console.log(e.target.value);
 
-    setAssetDetail((prevState) => {
+    setFormAssetData((prevState) => {
       return { ...prevState, [e.target.id]: e.target.value };
     });
   };
@@ -151,7 +96,7 @@ export default function EditAsset(props: EditAssetProps) {
       reader.onload = () => {
         const dataURL = reader.result as string;
         setImagePreview(dataURL);
-        setAssetDetail({ ...assetDetail, uploaded_image: dataURL });
+        setFormAssetData({ ...formAssetData, uploaded_image: dataURL });
       };
     } else {
       setImagePreview(undefined);
@@ -241,15 +186,31 @@ export default function EditAsset(props: EditAssetProps) {
       [key: string]: string | number;
     } = {
       psa_id: psa_id,
-      description: assetDetail.asset_description,
-      location: assetDetail.asset_location,
-      brand: assetDetail.brand,
-      model_number: assetDetail.model_number,
-      warranty: assetDetail.warranty,
-      tech_specs: assetDetail.technical_specs,
-      manufacture_country: assetDetail.manufacture_country,
-      remarks: assetDetail.remarks,
-      image: assetDetail.uploaded_image,
+      description: formAssetData.asset_description
+        ? formAssetData.asset_description
+        : assetDetail.asset_description,
+      location: formAssetData.asset_location
+        ? formAssetData.asset_location
+        : assetDetail.asset_location,
+      brand: formAssetData.brand ? formAssetData.brand : assetDetail.brand,
+      model_number: formAssetData.model_number
+        ? formAssetData.model_number
+        : assetDetail.model_number,
+      warranty: formAssetData.warranty
+        ? formAssetData.warranty
+        : assetDetail.warranty,
+      tech_specs: formAssetData.technical_specs
+        ? formAssetData.technical_specs
+        : assetDetail.technical_specs,
+      manufacture_country: formAssetData.manufacture_country
+        ? formAssetData.manufacture_country
+        : assetDetail.manufacture_country,
+      remarks: formAssetData.remarks
+        ? formAssetData.remarks
+        : assetDetail.remarks,
+      image: formAssetData.uploaded_image
+        ? formAssetData.uploaded_image
+        : assetDetail.uploaded_image,
       files: JSON.stringify(fileraw),
       user_id: user.data!.id,
     };
@@ -298,9 +259,9 @@ export default function EditAsset(props: EditAssetProps) {
           ...result[0],
         });
       }
-      setOldAssetData(assetDetail);
     });
   }, []);
+
   // console.log(assetDetail, 1);
   // console.log(assetDetail.plant_name, 2);
   //function TO MAP file name and value to variables
@@ -322,8 +283,11 @@ export default function EditAsset(props: EditAssetProps) {
   });
 
   useEffect(() => {
-    const ref = document.getElementById("asset_description");
-    console.log(ref);
+    if (initial && assetDetail) {
+      setFormAssetData(assetDetail);
+      setInitial(false);
+      console.log("data is in" + formAssetData);
+    }
   }, [assetDetail.asset_description]);
 
   return (
@@ -477,162 +441,101 @@ export default function EditAsset(props: EditAssetProps) {
             <Input
               className="form-control"
               inputId="asset_description"
-              onBlur={handleInputChange}
               placeholder="Enter Description"
               value={assetDetail.asset_description}
+              details={assetDetail}
+              setDetails={setFormAssetData}
+              // oldDetails={formAssetData}
             />
           </div>
 
           <div className="form-group">
             <label className="form-label"> Location</label>
-            <input
-              id="asset_location"
-              type="text"
+            <Input
               className="form-control"
-              onChange={(
-                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-              ) => {
-                handleForm(e);
-                formInputChange(
-                  e.target.name as keyof typeof oldAssetData,
-                  e.target.value
-                );
-              }}
-              onBlur={handleForm}
-              name="asset_location"
+              inputId="asset_location"
               placeholder="Enter Location"
-              defaultValue={assetDetail.asset_location}
+              value={assetDetail.asset_location}
+              details={assetDetail}
+              setDetails={setFormAssetData}
+              // oldDetails={formAssetData}
             />
           </div>
 
           <div className="form-group">
             <label className="form-label"> Brand</label>
-            <input
-              id="brand"
-              type="text"
+            <Input
               className="form-control"
-              onChange={(
-                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-              ) => {
-                handleForm(e);
-                formInputChange(
-                  e.target.name as keyof typeof oldAssetData,
-                  e.target.value
-                );
-              }}
-              onBlur={handleForm}
-              name="brand"
+              inputId="brand"
               placeholder="Enter Brand"
-              defaultValue={assetDetail.brand}
+              value={assetDetail.brand}
+              details={assetDetail}
+              setDetails={setFormAssetData}
+              // oldDetails={formAssetData}
             />
           </div>
 
           <div className="form-group">
             <label className="form-label">Model Number</label>
-            <input
-              id="model_number"
-              type="text"
+            <Input
               className="form-control"
-              onChange={(
-                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-              ) => {
-                handleForm(e);
-                formInputChange(
-                  e.target.name as keyof typeof oldAssetData,
-                  e.target.value
-                );
-              }}
-              onBlur={handleForm}
-              name="model_number"
+              inputId="model_number"
               placeholder="Enter Model Number"
-              defaultValue={assetDetail.model_number}
+              value={assetDetail.model_number}
+              details={assetDetail}
+              setDetails={setFormAssetData}
+              // oldDetails={formAssetData}
             />
           </div>
 
           <div className="form-group">
             <label className="form-label">Warranty</label>
-            <input
-              id="warranty"
-              type="text"
+            <Input
               className="form-control"
-              onChange={(
-                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-              ) => {
-                handleForm(e);
-                formInputChange(
-                  e.target.name as keyof typeof oldAssetData,
-                  e.target.value
-                );
-              }}
-              onBlur={handleForm}
-              name="warranty"
+              inputId="warranty"
               placeholder="Enter Warranty"
-              defaultValue={assetDetail.warranty}
+              value={assetDetail.warranty}
+              details={assetDetail}
+              setDetails={setFormAssetData}
+              // oldDetails={formAssetData}
             />
           </div>
 
           <div className="form-group">
             <label className="form-label"> Tech Specs</label>
-            <input
-              id="technical_specs"
-              type="text"
+            <Input
               className="form-control"
-              onChange={(
-                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-              ) => {
-                handleForm(e);
-                formInputChange(
-                  e.target.name as keyof typeof oldAssetData,
-                  e.target.value
-                );
-              }}
-              onBlur={handleForm}
-              name="technical_specs"
+              inputId="technical_specs"
               placeholder="Enter Tech Specs"
-              defaultValue={assetDetail.technical_specs}
+              value={assetDetail.technical_specs}
+              details={assetDetail}
+              setDetails={setFormAssetData}
+              // oldDetails={formAssetData}
             />
           </div>
-
           <div className="form-group">
             <label className="form-label">Manufacture Country</label>
-            <input
-              id="manufacture_country"
-              type="text"
+            <Input
               className="form-control"
-              onChange={(
-                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-              ) => {
-                handleForm(e);
-                formInputChange(
-                  e.target.name as keyof typeof oldAssetData,
-                  e.target.value
-                );
-              }}
-              onBlur={handleForm}
-              name="manufacture_country"
+              inputId="manufacture_country"
               placeholder="Enter Country"
-              defaultValue={assetDetail.manufacture_country}
+              value={assetDetail.manufacture_country}
+              details={assetDetail}
+              setDetails={setFormAssetData}
+              // oldDetails={formAssetData}
             />
           </div>
 
           <div className="form-group">
             <label className="form-label"> Remarks</label>
-            <input
-              id="remarks"
-              type="text"
+            <Input
               className="form-control"
-              onChange={(
-                e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-              ) => {
-                handleForm(e);
-                formInputChange(
-                  e.target.name as keyof typeof oldAssetData,
-                  e.target.value
-                );
-              }}
-              name="remarks"
+              inputId="remarks"
               placeholder="Enter Remarks"
-              defaultValue={assetDetail.remarks}
+              value={assetDetail.remarks}
+              details={assetDetail}
+              setDetails={setFormAssetData}
+              // oldDetails={formAssetData}
             />
           </div>
           <div className="form-group">

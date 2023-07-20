@@ -3,9 +3,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 export default function HighlightChangedText(
   oldValue: string,
-  newValue: string
+  newValue: string,
+  elementID: string
 ) {
   // Find the part to be highlighted
+  const ref = document.getElementById(elementID);
+
   const highlightStartIndex = 0;
   const highlightEndIndex = 3;
   const prefix = newValue.substring(0, highlightStartIndex);
@@ -19,7 +22,7 @@ export default function HighlightChangedText(
   const highlightedValue = (
     <React.Fragment>
       {prefix}
-      <span className="highlighted-text">{highlightedText}</span>
+      <mark>{highlightedText}</mark>
       {suffix}
     </React.Fragment>
   );
