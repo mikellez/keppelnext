@@ -2120,6 +2120,12 @@ router.get(
   checkIfLoggedInAPI,
   controllers.license.fetchDraftLicenses
 );
+router.get(
+  "/license/acquired",
+  checkIfLoggedInAPI,
+  controllers.license.fetchAcquiredLicenses
+);
+
 router
   .route("/license/:id", checkIfLoggedInAPI)
   .get(controllers.license.fetchSingleLicense);

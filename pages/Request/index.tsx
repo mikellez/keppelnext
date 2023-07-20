@@ -153,6 +153,8 @@ export const getColor = (status: string) => {
       return "red";
     case "REASSIGNED":
       return "#B71375";
+    case "ACQUIRED":
+      return "#0ebd05";
     default:
       return "#757575";
   }
@@ -209,7 +211,7 @@ export default function Request(props: RequestProps) {
       setIds(ids.filter((id) => id !== item.id));
     } else {
       setIds(ids.concat(item.id));
-      instance.get(`/api/request/${item.id}`).then((res) => {
+      instance.get(`/api/request/${item.id}`).then((res: any) => {
         const request = res.data;
         console.log(request.associatedrequestid);
         // update with further details
