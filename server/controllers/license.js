@@ -137,7 +137,7 @@ const fetchDraftLicenses = async (req, res, next) => {
 const createLicense = async (req, res, next) => {
     
     const license = req.body;
-    const images = req.files.map(file => file.buffer);
+    const images = req.files;
     const status = license.assigned_user_id ? 2 : 1
 
     const query = `
@@ -146,12 +146,13 @@ const createLicense = async (req, res, next) => {
             license_provider,
             license_type_id,
             license_details,
+            plant_id,
             plant_loc_id,
             linked_asset_id,
             assigned_user_id,
             images,
             status_id
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     `
     try {
         await global.db.query(query, [
@@ -159,7 +160,8 @@ const createLicense = async (req, res, next) => {
             license.license_provider,
             license.license_type_id,
             license.license_details,
-            license.plantLoc_id,
+            license.plant_id,
+            license.plant_loc_id,
             license.linked_asset_id,
             license.assigned_user_id,
             images,

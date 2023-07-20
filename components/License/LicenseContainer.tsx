@@ -14,7 +14,7 @@ import ModuleSimplePopup, { SimpleIcon } from '../ModuleLayout/ModuleSimplePopup
 
 
 
-const LicenseContainer = ({data}: {data: LicenseProps}) => {
+const LicenseContainer = ({data, create}: {data: LicenseProps, create: boolean}) => {
 
     const [licenseForm, setLicenseForm] = useState<CMMSLicense>({
 
@@ -23,8 +23,8 @@ const LicenseContainer = ({data}: {data: LicenseProps}) => {
         license_type_id: -1,
         license_details: "",
         plant_id: -1,
-        plantLoc_id: -1,
-        linked_asset_id: -1,
+        plant_loc_id: -1,
+        linked_asset_id: null,
         assigned_user_id: null,
         images: [],
     })
@@ -34,6 +34,12 @@ const LicenseContainer = ({data}: {data: LicenseProps}) => {
     const [missingFields, setMissingFields] = useState<boolean>(false);
 
     const router = useRouter();
+
+    useEffect(() => {
+        if (data.license) {
+            setLicenseForm(data.license);
+        }
+    }, [data.license])
 
     const handleInput = (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
         setLicenseForm(prev => {
@@ -52,7 +58,7 @@ const LicenseContainer = ({data}: {data: LicenseProps}) => {
             return {
                 ...prev,
                 "plant_id": +plant_id,
-                "plantLoc_id": +loc_id,
+                "plant_loc_id": +loc_id,
             }
         })
     }
@@ -85,18 +91,18 @@ const LicenseContainer = ({data}: {data: LicenseProps}) => {
     }
 
     const handleSubmit = () => {
+        console.log(licenseForm);
         if (!licenseForm.license_name || !licenseForm.license_provider || licenseForm.license_type_id === -1
         || !licenseForm.license_details || licenseForm.plant_id === -1 
-        || licenseForm.plantLoc_id === -1 || licenseForm.linked_asset_id === -1) {
+        || licenseForm.plant_loc_id === -1 || licenseForm.linked_asset_id === -1) {
             
             setMissingFields(true);
         } else {
 
             setIsSubmitting(true);
-            console.log(licenseForm);
+           
             const formData = new FormData();
             for (const key of Object.keys(licenseForm)) {
-                console.log(key);
                 if (key !== "images" && !!licenseForm[key as keyof CMMSLicense]) {
                     formData.append(key, licenseForm[key as keyof CMMSLicense]!.toString());
                 } else {
@@ -137,28 +143,44 @@ const LicenseContainer = ({data}: {data: LicenseProps}) => {
                         <input type="text" name="license_provider" className="form-control" 
                             value={licenseForm.license_provider} onChange={handleInput}/>
                     </div>
-                    <LicenseTypeSelect optionsData={data.licenseTypes} onChange={handleInput}/>
+                    <LicenseTypeSelect optionsData={data.licenseTypes} 
+                        onChange={handleInput} value={licenseForm.license_type_id}/>
                     <div className="mb-3">
                         <label className="form-label"><RequiredIcon/> License Details</label>
                         <input type="text" name="license_details" className="form-control" 
                             value={licenseForm.license_details} onChange={handleInput}/>
                     </div>
-                    <PlantLocSelect optionsData={data.plantLocs} onChange={handlePlantSelect}/>
+                    <PlantLocSelect optionsData={data.plantLocs} onChange={handlePlantSelect} 
+                        value={`${licenseForm.plant_id}-${licenseForm.plant_loc_id}`} 
+                        plant_loc_id={licenseForm.plant_loc_id}/>
                     <div className="mb-3">
                         <label className="form-label"><RequiredIcon/> Linked Asset</label>
                         <AssetSelect isSingle plantId={licenseForm.plant_id == -1 ? 1: licenseForm.plant_id}
-                        defaultIds={[]} onChange={handleLinkedAsset}/>
+                        defaultIds={licenseForm.linked_asset_id ? [licenseForm.linked_asset_id] : []} 
+                        onChange={handleLinkedAsset}/>
                     </div>
                     <div className="mb-3">
                         <label className="form-label"> Assign To</label>
-                        <AssignToSelect isSingle plantId={licenseForm.plant_id == -1 ? 1: licenseForm.plant_id}
-                            onChange={handleAssignee} disabled={licenseForm.plant_id === -1}/>
+                        <AssignToSelect isSingle={true} plantId={licenseForm.plant_id == -1 ? 1: licenseForm.plant_id}
+                            onChange={handleAssignee} disabled={licenseForm.plant_id === -1}
+                            defaultIds={licenseForm.assigned_user_id ? [licenseForm.assigned_user_id] : []}/>
                     </div>
                     
                 </div>
-                <div className="col-6 ps-5">
-                <MultipleImagesUpload setLicenseForm={setLicenseForm} isSubmitting={isSubmitting} 
-                    files={licenseForm.images}/>
+                <div className="col-6 ps-5 d-flex flex-column justify-content-between">
+                    <MultipleImagesUpload setLicenseForm={setLicenseForm} isSubmitting={isSubmitting} 
+                        files={licenseForm.images}/>
+                    {/* Create is true only for new license tracking */}
+                    {licenseForm.acquisition_date && <div>
+                        <div className='mb-3'>
+                            <label className="form-label">License Acquisition Date</label>
+                            <input type="text" name="acquisition_date" className="form-control" />
+                        </div>
+                        <div className='mb-3'>
+                            <label className="form-label">License Expiry Date</label>
+                            <input type="text" name="expiry_date" className="form-control" />
+                        </div>
+                    </div>}
                 
                 </div>
             </div>

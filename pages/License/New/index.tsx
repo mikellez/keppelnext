@@ -40,10 +40,13 @@ export interface CMMSLicense {
     license_type_id: number;
     license_details: string;
     plant_id: number;
-    plantLoc_id: number;
+    plant_loc_id: number;
     linked_asset_id: number | null;
     assigned_user_id: number | null;
     images: File[];
+    acquisition_date?: Date;
+    expiry_date?: Date;
+    status_id? : number
 
 }
 
@@ -63,7 +66,7 @@ const LicenseNew = (props: LicenseProps) => {
             Back
             </button>
         </ModuleHeader>
-        <LicenseContainer data={props}/>
+        <LicenseContainer data={props} create/>
     </ModuleMain>
 }
 
@@ -79,14 +82,15 @@ export const getServerSideProps: GetServerSideProps = async (
       console.log(context)
       const plantLocs = await instance.get("/api/plantLocation/self", headers);
       const licenseTypes = await instance.get("/api/license_types", headers);
-
+      let license;
       if (context.query.id) {
-        const license = await instance.get(`/api/license/${context.query.id}`, headers);
+        license = await instance.get(`/api/license/${context.query.id}`, headers);
       }
 
       let props: LicenseProps = {
         plantLocs: plantLocs.data,
         licenseTypes: licenseTypes.data,
+        license: license ? license.data : null,
       }
       
       return {

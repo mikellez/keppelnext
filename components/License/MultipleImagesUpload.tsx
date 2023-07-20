@@ -49,6 +49,7 @@ const MultipleImagesUpload = (props: MultipleImagesUploader) => {
     
   const [images, setImages] = useState<string[]>([]);
   const [exceedLimit, setExceedLimit] = useState<boolean>(false);
+  const [justInitialize, setJustInitialize] = useState<boolean>(true);
 
   useEffect(() => {
     if (props.isSubmitting) {
@@ -56,7 +57,21 @@ const MultipleImagesUpload = (props: MultipleImagesUploader) => {
         URL.revokeObjectURL(image);
       }
     }
-  }, [props.isSubmitting]);    
+  }, [props.isSubmitting]);   
+  
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     setImages(props.files.map(file => {
+  //       return URL.createObjectURL(
+  //         new Blob([
+  //           new Uint8Array(
+  //             file.data
+  //           ),
+  //         ])
+  //       )
+  //     }))
+  //   }, 1000)
+  // }, [])
 
   
 
@@ -92,6 +107,7 @@ const MultipleImagesUpload = (props: MultipleImagesUploader) => {
     // console.log(acceptedFiles.length);
     // console.log(props);
     // console.log(props.files.length);
+    setJustInitialize(false);
     if (acceptedFiles.length < 1) {
         return;
     }
@@ -99,6 +115,7 @@ const MultipleImagesUpload = (props: MultipleImagesUploader) => {
       setExceedLimit(true);
       return;
     }
+    
     handleImages(acceptedFiles);
     setImages(prev => {
       return [...prev, ...acceptedFiles.map(file => URL.createObjectURL(file))]

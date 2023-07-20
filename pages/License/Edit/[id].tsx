@@ -8,12 +8,12 @@ import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 
 
 const LicenseEdit = (props: LicenseProps) => {
-    
+    console.log(props);
     const router = useRouter();
 
     return <ModuleMain>
-        <ModuleHeader title="Acquire License Tracking"
-        header="Create License Tracking">
+        <ModuleHeader title="Edit License Tracking"
+        header="Edit License Tracking">
             <button
             className={"btn btn-secondary"}
             type="button"
@@ -22,10 +22,10 @@ const LicenseEdit = (props: LicenseProps) => {
             Back
             </button>
         </ModuleHeader>
-        <LicenseContainer data={props}/>
+        <LicenseContainer data={props} create={false}/>
     </ModuleMain>
 }
 
-const getServerSideProps = LicenseServerProps
+export const getServerSideProps = LicenseServerProps;
 
 export default LicenseEdit;
