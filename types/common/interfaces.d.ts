@@ -511,18 +511,20 @@ interface CMMSLicenseType {
 }
 
 interface CMMSLicense {
-  id?: number;
+  id: number;
   license_name: string;
   license_provider: string;
   license_type_id: number;
   license_type : string;
   license_details: string;
   plant_id: number;
+  plant_name: string;
   plant_loc_id: number;
   loc_floor: string;
   loc_room: string;
   linked_asset_id: number | null;
-  linked_asset: CMMSAssetDetails
+  linked_asset: string
+  linked_asset_name:acquisition_date
   assigned_user_id: number | null;
   assigned_user:string;
   acquisition_date: Date | null

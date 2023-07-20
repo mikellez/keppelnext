@@ -49,7 +49,7 @@ const License = () => {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns: 3em 4em 8em 6em 10em 8em 10em 10em 8em 7em 5em;",
+        "--data-table-library_grid-template-columns: 3em 6em 8em 8em 10em 8em 9em 8em 8em 7em 5em;",
     },
   ]);
 
@@ -65,7 +65,7 @@ const License = () => {
     setReady(false);
 
     const PARAMS = [
-      "license_id",
+      "id",
       "license_name",
       "status",
       "license_provider",
@@ -74,6 +74,9 @@ const License = () => {
       "expiry_date",
       "linked_asset",
       "plant_loc_id",
+      "plant_name",
+      "linked_asset_name",
+      "acquisition_date",
     ];
 
     instance
@@ -96,6 +99,10 @@ const License = () => {
         setLicenseItems([]);
       });
   }, [activeTabIndex, page]);
+
+  useEffect(() => {
+    console.log(licenseItems);
+  }, [licenseItems]);
 
   return (
     <ModuleMain>
@@ -159,11 +166,11 @@ const License = () => {
                       return (
                         <Row key={item.id} item={item}>
                           <Cell>{item.id}</Cell>
-                          <Cell>{item.linked_asset_id}</Cell>
-                          <Cell>{item.plant_loc_id}</Cell>
+                          <Cell>{item.linked_asset_name}</Cell>
+                          <Cell>{item.plant_name}</Cell>
                           <Cell>{item.license_name}</Cell>
                           <Cell>{item.license_provider}</Cell>
-                          <Cell>{item.license_type_id}</Cell>
+                          <Cell>{item.license_type}</Cell>
                           <Cell>
                             {item.acquisition_date
                               ? moment(new Date(item.acquisition_date)).format(
