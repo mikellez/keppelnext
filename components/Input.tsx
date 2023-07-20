@@ -30,7 +30,19 @@ export default function Input(props: InputProps) {
       props.setDetails((prevState: any) => {
         return {
           ...prevState,
-          [e.target.id]: e.target.innerText ? e.target.innerText : "-",
+          [e.target.id]:
+            e.target.innerText && e.target.innerText != "\n"
+              ? e.target.innerText
+              : "",
+        };
+
+        // console.log(e.target.innerHTML);
+      });
+    } else {
+      props.setDetails((prevState: any) => {
+        return {
+          ...prevState,
+          [e.target.id]: "",
         };
 
         // console.log(e.target.innerHTML);
