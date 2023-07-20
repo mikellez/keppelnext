@@ -1,8 +1,9 @@
 import React, {useEffect, useState, CSSProperties, useCallback} from 'react';
 import {useDropzone} from 'react-dropzone';
 import RequiredIcon from '../RequiredIcon';
-import { CMMSLicense } from '../../pages/License/New';
+
 import ModuleSimplePopup, { SimpleIcon } from '../ModuleLayout/ModuleSimplePopup';
+import { CMMSLicenseForm } from '../../types/common/interfaces';
 
 const thumbsContainer: CSSProperties = {
   display: 'flex',
@@ -38,7 +39,7 @@ const img: CSSProperties = {
 };
 
 interface MultipleImagesUploader  {
-    setLicenseForm: React.Dispatch<React.SetStateAction<CMMSLicense>>;
+    setLicenseForm: React.Dispatch<React.SetStateAction<CMMSLicenseForm>>;
     isSubmitting: boolean;
     files: File[]
 }

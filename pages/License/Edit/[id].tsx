@@ -3,8 +3,9 @@ import instance from '../../../types/common/axios.config';
 import { useRouter } from 'next/router';
 import { ModuleContent, ModuleHeader, ModuleMain } from '../../../components';
 import LicenseContainer from '../../../components/License/LicenseContainer';
-import { getServerSideProps as LicenseServerProps, CMMSLicense, CMMSLicenseType, CMMSPlantLocation, LicenseProps} from "../New/index";
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
+import { LicenseProps } from '../New';
+import { getServerSideProps as LicenseServerProps } from '../New';
 
 
 const LicenseEdit = (props: LicenseProps) => {

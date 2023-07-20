@@ -495,11 +495,7 @@ interface CMMSPlantLoc {
 //   // activity_log : json
 // }
 
-interface LicenseProps {
-  plantLocs: CMMSPlantLocation[],
-  licenseTypes: CMMSLicenseType[],
-  license?: CMMSLicense,
-}
+
 
 interface CMMSPlantLocation {
   plant_id: number,
@@ -515,7 +511,7 @@ interface CMMSLicenseType {
 }
 
 interface CMMSLicense {
-  id: number;
+  id?: number;
   license_name: string;
   license_provider: string;
   license_type_id: number;
@@ -535,6 +531,21 @@ interface CMMSLicense {
   status_id: number;
   images: File[];
 
+}
+
+interface CMMSLicenseForm {
+  license_name: string;
+  license_provider: string;
+  license_type_id: number;
+  license_details: string;
+  plant_id: number;
+  plant_loc_id: number;
+  linked_asset_id: number | null;
+  assigned_user_id: number | null;
+  acquisition_date?: Date;
+  expiry_date? : Date;
+  status_id?: number;
+  images: File[]
 }
 
 export {
@@ -576,7 +587,8 @@ export {
   CMMSWorkflow,
   CMMSFeedback,
   CMMSPlantLoc,
+  CMMSPlantLocation,
   CMMSLicense,
-  LicenseProps,
   CMMSLicenseType,
+  CMMSLicenseForm
 };

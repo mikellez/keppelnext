@@ -9,14 +9,16 @@ import AssignToSelect, { AssignedUserOption } from '../../components/Schedule/As
 import AssetSelect, { AssetOption } from '../../components/Checklist/AssetSelect';
 import MultipleImagesUpload from '../../components/License/MultipleImagesUpload';
 import { SingleValue, MultiValue } from 'react-select';
-import { CMMSLicense, CMMSLicenseType, CMMSPlantLocation, LicenseProps } from '../../pages/License/New';
+import { LicenseProps } from '../../pages/License/New';
 import ModuleSimplePopup, { SimpleIcon } from '../ModuleLayout/ModuleSimplePopup';
+import {  CMMSLicenseForm } from '../../types/common/interfaces';
+// import { LicenseProps } from "../"
 
 
 
 const LicenseContainer = ({data, create}: {data: LicenseProps, create: boolean}) => {
 
-    const [licenseForm, setLicenseForm] = useState<CMMSLicense>({
+    const [licenseForm, setLicenseForm] = useState<CMMSLicenseForm>({
 
         license_name: "",
         license_provider: "",
@@ -103,8 +105,8 @@ const LicenseContainer = ({data, create}: {data: LicenseProps, create: boolean})
            
             const formData = new FormData();
             for (const key of Object.keys(licenseForm)) {
-                if (key !== "images" && !!licenseForm[key as keyof CMMSLicense]) {
-                    formData.append(key, licenseForm[key as keyof CMMSLicense]!.toString());
+                if (key !== "images" && !!licenseForm[key as keyof CMMSLicenseForm]) {
+                    formData.append(key, licenseForm[key as keyof CMMSLicenseForm]!.toString());
                 } else {
                     const images = licenseForm.images as File[];
                     for (let i = 0; i < images.length; i++) {

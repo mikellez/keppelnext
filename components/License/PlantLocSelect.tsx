@@ -1,6 +1,6 @@
 import React from "react";
 import RequiredIcon from "../RequiredIcon";
-import { CMMSPlantLocation } from "../../pages/License/New";
+import { CMMSPlantLocation } from "../../types/common/interfaces";
 
 interface PlantLocSelectProps {
     optionsData: CMMSPlantLocation[];

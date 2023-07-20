@@ -15,7 +15,14 @@ import AssetSelect, {
 import MultipleImagesUpload from "../../../components/License/MultipleImagesUpload";
 import { SingleValue, MultiValue } from "react-select";
 import LicenseContainer from "../../../components/License/LicenseContainer";
-import { LicenseProps } from "../../../types/common/interfaces";
+import { CMMSLicenseType, CMMSPlantLocation, CMMSLicenseForm } from "../../../types/common/interfaces";
+
+
+export interface LicenseProps {
+  plantLocs: CMMSPlantLocation[],
+  licenseTypes: CMMSLicenseType[],
+  license?: CMMSLicenseForm,
+}
 
 const LicenseNew = (props: LicenseProps) => {
   const router = useRouter();
@@ -23,8 +30,8 @@ const LicenseNew = (props: LicenseProps) => {
 
     return <ModuleMain>
         <ModuleHeader 
-        // title="Create License Tracking"
-        // header="Create License Tracking"
+          title="Create License Tracking"
+          header="Create License Tracking"
         >
             <button
             className={"btn btn-secondary"}
@@ -36,7 +43,6 @@ const LicenseNew = (props: LicenseProps) => {
         </ModuleHeader>
         <LicenseContainer data={props} create/>
     </ModuleMain>
-  );
 };
 
 export const getServerSideProps: GetServerSideProps = async (
