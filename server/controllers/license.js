@@ -17,7 +17,7 @@ const fetchAllLicenseQuery = (expand, search) => {
   let SELECT_ARR = [];
 
   const SELECT = {
-    license_id: "lc.license_id as id",
+    id: "lc.license_id as id",
     license_name: "lc.license_name",
     license_provider: "lc.license_provider",
     license_type_id: "lc.license_type_id",
@@ -26,6 +26,7 @@ const fetchAllLicenseQuery = (expand, search) => {
     plant_loc_id: "lc.plant_loc_id",
     loc_floor: "pl.loc_floor",
     loc_room: "pl.loc_room",
+    plant_name: "",
     linked_asset_id: "lc.linked_asset_id",
     linked_asset: "psa.plant_asset_instrument AS linked_asset",
     assigned_user_id: "lc.assigned_user_id",

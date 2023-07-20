@@ -519,15 +519,20 @@ interface CMMSLicense {
   license_name: string;
   license_provider: string;
   license_type_id: number;
+  license_type : string;
   license_details: string;
-  status: string;
-  status_id: number;
   plant_id: number;
   plant_loc_id: number;
+  loc_floor: string;
+  loc_room: string;
   linked_asset_id: number | null;
+  linked_asset: CMMSAssetDetails
   assigned_user_id: number | null;
+  assigned_user:string;
   acquisition_date: Date | null
   expiry_date : Date|null
+  status: string;
+  status_id: number;
   images: File[];
 
 }
