@@ -41,7 +41,7 @@ const LicenseNew = (props: LicenseProps) => {
             Back
             </button>
         </ModuleHeader>
-        <LicenseContainer data={props} create/>
+        <LicenseContainer data={props} type="new"/>
     </ModuleMain>
 };
 

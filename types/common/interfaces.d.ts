@@ -529,11 +529,12 @@ interface CMMSLicense {
   expiry_date : Date|null
   status: string;
   status_id: number;
-  images: File[];
+  images?: File[];
 
 }
 
 interface CMMSLicenseForm {
+  license_id?: number;
   license_name: string;
   license_provider: string;
   license_type_id: number;

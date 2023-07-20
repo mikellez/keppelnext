@@ -2111,7 +2111,7 @@ router.get(
 router.post(
   "/license",
   checkIfLoggedInAPI,
-  upload.array("images", 5),
+  upload.array("images", 6),
   controllers.license.createLicense
 );
 
@@ -2123,6 +2123,11 @@ router.get(
 router
   .route("/license/:id", checkIfLoggedInAPI)
   .get(controllers.license.fetchSingleLicense);
+
+router.patch("/license/acquire/:id", 
+  checkIfLoggedInAPI,
+  controllers.license.acquireLicense
+);
 
 router.get(
   "/license/images/:id",

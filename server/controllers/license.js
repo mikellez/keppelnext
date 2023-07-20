@@ -88,7 +88,20 @@ const fetchSingleLicense = async (req, res, next) => {
   const expand = req.query.expand || false;
   try {
     const query = `
-            SELECT * FROM keppel.license WHERE license_id = $1
+            SELECT 
+                license_id,
+                license_name,
+                license_provider,
+                license_type_id,
+                license_details,
+                plant_loc_id,
+                plant_id,
+                linked_asset_id,
+                assigned_user_id,
+                acquisition_date,
+                expiry_date,
+                status_id
+            FROM keppel.license WHERE license_id = $1
         `;
     const result = await global.db.query(query, [req.params.id]);
     res.status(200).send(result.rows[0]);
@@ -98,10 +111,13 @@ const fetchSingleLicense = async (req, res, next) => {
   }
 };
 
+
+
 const fetchLicenseImages = async (req, res, next) => {
   const query = `SELECT images FROM keppel.license WHERE license_id = $1`;
   try {
     const result = await global.db.query(query, [req.params.id]);
+    console.log(result.rows[0]);
     res.status(200).send(result.rows[0]);
   } catch (err) {
     console.log(err);
@@ -137,6 +153,7 @@ const fetchDraftLicenses = async (req, res, next) => {
 
 const createLicense = async (req, res, next) => {
   const license = req.body;
+  console.log(req.files);
   const images = req.files.map((file) => file.buffer);
   const status = license.assigned_user_id ? 2 : 1;
 
@@ -174,6 +191,25 @@ const createLicense = async (req, res, next) => {
     }
 }
 
+const acquireLicense = async (req, res) => {
+    console.log("Acquiring license");
+    const query = `
+        UPDATE keppel.license SET
+            acquisition_date = $1,
+            expiry_date = $2,
+            status = 3
+        WHERE license_id = $3
+    `
+    try {
+        await global.db.query(query, [req.body.acquisition_date,
+        req.body.expiry_date, req.params.id]);
+        res.status(200).send("Successfully acquired license");
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Error occurred acquring license in the server")
+    }
+}
+
 module.exports = {
   fetchDraftLicenses,
   createLicense,
@@ -181,4 +217,5 @@ module.exports = {
   createLicense,
   fetchSingleLicense,
   fetchLicenseImages,
+  acquireLicense,
 };

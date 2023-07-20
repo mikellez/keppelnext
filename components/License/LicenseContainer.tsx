@@ -14,12 +14,15 @@ import ModuleSimplePopup, { SimpleIcon } from '../ModuleLayout/ModuleSimplePopup
 import {  CMMSLicenseForm } from '../../types/common/interfaces';
 // import { LicenseProps } from "../"
 
+export interface ImageStatus {
+    received: boolean;
+    processed: boolean;
+}
 
-
-const LicenseContainer = ({data, create}: {data: LicenseProps, create: boolean}) => {
+const LicenseContainer = ({data, type}: {data: LicenseProps, type: string}) => {
 
     const [licenseForm, setLicenseForm] = useState<CMMSLicenseForm>({
-
+        license_id: 0,
         license_name: "",
         license_provider: "",
         license_type_id: -1,
@@ -31,6 +34,14 @@ const LicenseContainer = ({data, create}: {data: LicenseProps, create: boolean})
         images: [],
     })
 
+    // fields can only be edited when creating or editing
+    const [dateOnly, setDateOnly] = useState<boolean>(type === "acquire")
+    // tracking image fetching and processing, used in MultipleImageUpload
+    const [imageProcess, setImageProcess] = useState<ImageStatus>({
+        received: false,
+        processed: false,
+    });
+    // used in MultipleImageUpload to handle URL.revokeObjectUrl to prevent memory leak
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [successModal, setSuccessModal] = useState<boolean>(false);
     const [missingFields, setMissingFields] = useState<boolean>(false);
@@ -42,6 +53,39 @@ const LicenseContainer = ({data, create}: {data: LicenseProps, create: boolean})
             setLicenseForm(data.license);
         }
     }, [data.license])
+
+    useEffect(() => {
+        if (type !== "new" && licenseForm.license_id && !imageProcess.received) {
+            instance.get(`api/license/images/${licenseForm.license_id}`)
+                .then(res => {
+                    console.log("images fetched");
+                    const files = res.data.images.map((image: { data: Iterable<number>; }, index: number) => {
+                        const blob = new Blob([
+                            new Uint8Array(image.data)
+                        ])
+                        return new File([blob], `file${index}`)
+                    })
+                    setLicenseForm(prev => {
+                        return {
+                            ...prev,
+                            "images": files
+                        }
+                    })
+                    setImageProcess(prev => {
+                        return {
+                            ...prev,
+                            "received": true
+                        }
+                    });
+                })
+        } 
+        if (type === "new") {
+            setImageProcess({
+                received: true,
+                processed: true,
+            })
+        }
+    }, [licenseForm, type])
 
     const handleInput = (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
         setLicenseForm(prev => {
@@ -83,13 +127,15 @@ const LicenseContainer = ({data, create}: {data: LicenseProps, create: boolean})
         })
     }
 
-    const handleImages = (files: File[]) => {
-        setLicenseForm(prev => {
-            return {
-                ...prev,
-                "images": [...prev.images, ...files]
-            }
-        })
+    const handleDate = (type: string) => {
+        return (event: React.ChangeEvent<HTMLInputElement>) => {
+            setLicenseForm(prev => {
+                return {
+                    ...prev,
+                    [type]: new Date(event.target.value)
+                }
+            })
+        }
     }
 
     const handleSubmit = () => {
@@ -99,9 +145,24 @@ const LicenseContainer = ({data, create}: {data: LicenseProps, create: boolean})
         || licenseForm.plant_loc_id === -1 || licenseForm.linked_asset_id === -1) {
             
             setMissingFields(true);
-        } else {
+        } else { // doing axios request
 
             setIsSubmitting(true);
+            if (type === "acquire") {
+                instance.patch(`api/license/acquire/${licenseForm.license_id}`, licenseForm)
+                    .then(res => {
+                        console.log(res);
+                        setIsSubmitting(false);
+                        setSuccessModal(true);
+                        setTimeout(() => {
+                            setSuccessModal(false);
+                            router.push("/License");
+                        }, 1500)
+                    }).catch(err => {
+                        setIsSubmitting(false);
+                        console.log(err);
+                    })
+            }
            
             const formData = new FormData();
             for (const key of Object.keys(licenseForm)) {
@@ -138,49 +199,52 @@ const LicenseContainer = ({data, create}: {data: LicenseProps, create: boolean})
                     <div className="mb-3">
                         <label className="form-label"><RequiredIcon/> License Name</label>
                         <input type="text" name="license_name" className="form-control" 
-                            value={licenseForm.license_name} onChange={handleInput}/>
+                            value={licenseForm.license_name} onChange={handleInput} disabled={dateOnly}/>
                     </div>
                     <div className="mb-3">
                         <label className="form-label"><RequiredIcon/> License Provider</label>
                         <input type="text" name="license_provider" className="form-control" 
-                            value={licenseForm.license_provider} onChange={handleInput}/>
+                            value={licenseForm.license_provider} onChange={handleInput} disabled={dateOnly}/>
                     </div>
                     <LicenseTypeSelect optionsData={data.licenseTypes} 
-                        onChange={handleInput} value={licenseForm.license_type_id}/>
+                        onChange={handleInput} value={licenseForm.license_type_id} disabled={dateOnly}/>
                     <div className="mb-3">
                         <label className="form-label"><RequiredIcon/> License Details</label>
                         <input type="text" name="license_details" className="form-control" 
-                            value={licenseForm.license_details} onChange={handleInput}/>
+                            value={licenseForm.license_details} onChange={handleInput} disabled={dateOnly}/>
                     </div>
                     <PlantLocSelect optionsData={data.plantLocs} onChange={handlePlantSelect} 
                         value={`${licenseForm.plant_id}-${licenseForm.plant_loc_id}`} 
-                        plant_loc_id={licenseForm.plant_loc_id}/>
+                        plant_loc_id={licenseForm.plant_loc_id} disabled={dateOnly}/>
                     <div className="mb-3">
                         <label className="form-label"><RequiredIcon/> Linked Asset</label>
                         <AssetSelect isSingle plantId={licenseForm.plant_id == -1 ? 1: licenseForm.plant_id}
                         defaultIds={licenseForm.linked_asset_id ? [licenseForm.linked_asset_id] : []} 
-                        onChange={handleLinkedAsset}/>
+                        onChange={handleLinkedAsset} disabled={dateOnly}/>
                     </div>
                     <div className="mb-3">
                         <label className="form-label"> Assign To</label>
                         <AssignToSelect isSingle={true} plantId={licenseForm.plant_id == -1 ? 1: licenseForm.plant_id}
-                            onChange={handleAssignee} disabled={licenseForm.plant_id === -1}
+                            onChange={handleAssignee} disabled={dateOnly || licenseForm.plant_id === -1}
                             defaultIds={licenseForm.assigned_user_id ? [licenseForm.assigned_user_id] : []}/>
                     </div>
                     
                 </div>
                 <div className="col-6 ps-5 d-flex flex-column justify-content-between">
-                    <MultipleImagesUpload setLicenseForm={setLicenseForm} isSubmitting={isSubmitting} 
-                        files={licenseForm.images}/>
+                    <MultipleImagesUpload setLicenseForm={setLicenseForm}
+                        files={licenseForm.images} imageStatus={imageProcess} 
+                        setImageStatus={setImageProcess} disabled={dateOnly}/>
                     {/* Create is true only for new license tracking */}
-                    {licenseForm.acquisition_date && <div>
+                    {(type === "acquire" || licenseForm.acquisition_date) && <div>
                         <div className='mb-3'>
                             <label className="form-label">License Acquisition Date</label>
-                            <input type="text" name="acquisition_date" className="form-control" />
+                            <input type="date" name="acquisition_date" className="form-control" 
+                                onChange={handleDate("acquisition_date")} disabled={!dateOnly}/>
                         </div>
                         <div className='mb-3'>
                             <label className="form-label">License Expiry Date</label>
-                            <input type="text" name="expiry_date" className="form-control" />
+                            <input type="date" name="expiry_date" className="form-control" 
+                                onChange={handleDate("expiry_date")} disabled={!dateOnly}/>
                         </div>
                     </div>}
                 
@@ -197,7 +261,10 @@ const LicenseContainer = ({data, create}: {data: LicenseProps, create: boolean})
             setModalOpenState={setSuccessModal}
             modalOpenState={successModal}
             title="Success"
-            text="New license tracking successfully created"
+            text={type === "new" ? "New license tracking successfully created" 
+                    : type === "acquire" ? "License acquisition updated successfully"
+                    : type === "edit" ? "License details edited successfully"
+                    : "License Renewal updated successfully"}
             icon={SimpleIcon.Check}
             shouldCloseOnOverlayClick={false}/>
             <ModuleSimplePopup 
