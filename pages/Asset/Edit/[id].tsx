@@ -290,6 +290,10 @@ export default function EditAsset(props: EditAssetProps) {
     }
   }, [assetDetail.asset_description]);
 
+  useEffect(() => {
+    console.log(formAssetData);
+  }, [formAssetData]);
+
   return (
     <ModuleMain>
       <ModuleHeader header={props.header}></ModuleHeader>
@@ -502,7 +506,7 @@ export default function EditAsset(props: EditAssetProps) {
           </div>
 
           <div className="form-group">
-            <label className="form-label"> Tech Specs</label>
+            <label className="form-label">Tech Specs</label>
             <Input
               className="form-control"
               inputId="technical_specs"

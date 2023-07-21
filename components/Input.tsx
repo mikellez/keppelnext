@@ -28,6 +28,11 @@ export default function Input(props: InputProps) {
   const handleBlur = (e: React.ChangeEvent<HTMLDivElement>) => {
     if (e.target.innerText !== props.placeholder) {
       props.setDetails((prevState: any) => {
+        console.log(
+          e.target.innerText && e.target.innerText != "\n"
+            ? e.target.innerText
+            : ""
+        );
         return {
           ...prevState,
           [e.target.id]:
@@ -48,7 +53,6 @@ export default function Input(props: InputProps) {
         // console.log(e.target.innerHTML);
       });
     }
-    // console.log(props);
     const currText = e.target.innerText;
     let oldText = props.details![props.inputId];
     // console.log(currText);
