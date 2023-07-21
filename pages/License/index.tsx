@@ -3,7 +3,6 @@ import instance from "../../types/common/axios.config";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import TooltipBtn from "../../components/TooltipBtn";
-import { BsFileEarmarkPlus } from "react-icons/bs";
 import {
   Table,
   Header,
@@ -31,7 +30,7 @@ import {
   AiOutlineFileDone,
   AiOutlineFolderView,
   AiOutlineHistory,
-  AiOutlineUserAdd,
+  AiOutlineEdit,
 } from "react-icons/ai";
 import { Role } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
@@ -39,6 +38,8 @@ import LoadingHourglass from "../../components/LoadingHourglass";
 import PlantSelect from "../../components/PlantSelect";
 import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 import LicenseHistory from "../../components/License/LicenseHistory";
+
+import { BiRefresh } from "react-icons/bi";
 
 const indexedColumn: ("draft" | "acquired" | "expired")[] = [
   "draft",
@@ -62,7 +63,7 @@ const License = () => {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns: 3em 6em 8em 8em 10em 8em 9em 8em 8em 7em 5em;",
+        "--data-table-library_grid-template-columns: 3em 6em 8em 8em 10em 8em 9em 8em 8em 7em 8em;",
     },
   ]);
 
@@ -93,6 +94,7 @@ const License = () => {
       "id",
       "license_name",
       "status",
+      "status_id",
       "license_provider",
       "license_type",
       "license_details",
@@ -239,10 +241,10 @@ const License = () => {
                             </span>
                           </Cell>
                           <Cell>
-                            {item.status_id === 2 || item.status_id === 3 ? (
+                            {item.status_id === 1 || item.status_id === 2 ? (
                               <>
                                 <Link href={`/License/Acquire/${item.id}`}>
-                                  <AiOutlineFileDone size={22} title={"A"} />
+                                  <AiOutlineFileDone size={22} title={"Acquire"} />
                                 </Link>
                               </>
                             ) : (
@@ -254,10 +256,16 @@ const License = () => {
                               //     <AiOutlineUserAdd size={22} title={"Assign"} />
                               //   </Link>
                               // )
-                              <Link href={`/License/View/${item.id}`}>
-                                <AiOutlineFolderView size={22} title={"View"} />
+                              <Link href={`/License/Renew/${item.id}`}>
+                                <BiRefresh size={22} title={"Renew"} />
                               </Link>
                             )}
+                            <Link href={`/License/Edit/${item.id}`}>
+                                <AiOutlineEdit size={22} title={"Edit"} />
+                            </Link>
+                            <Link href={`/License/View/${item.id}`}>
+                                <AiOutlineFolderView size={22} title={"View"} />
+                            </Link>
                             <AiOutlineHistory
                               color={"#C70F2B"}
                               // onClick={() => setHistory(item.activity_log)}

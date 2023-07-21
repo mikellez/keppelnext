@@ -364,6 +364,22 @@ const renewLicense = async (req, res) => {
   }
 };
 
+const deleteLicense = async (req, res) => {
+  const query = `
+    DELETE FROM keppel.license
+      WHERE license_id = $1  
+  `
+  try {
+    await global.db.query(query, [
+      req.params.id,
+    ]);
+    res.status(200).send("Successfully deleted license");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error occurred deleting license");
+  }
+}
+
 module.exports = {
   fetchDraftLicenses,
   createLicense,
@@ -374,6 +390,7 @@ module.exports = {
   editLicense,
   acquireLicense,
   renewLicense,
+  deleteLicense,
   fetchAcquiredLicenses,
   fetchExpiredLicenses,
 };

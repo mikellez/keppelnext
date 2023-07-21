@@ -2134,7 +2134,8 @@ router.get(
 
 router
   .route("/license/:id", checkIfLoggedInAPI)
-  .get(controllers.license.fetchSingleLicense);
+  .get(controllers.license.fetchSingleLicense)
+  .delete(controllers.license.deleteLicense);
 
 router.patch(
   "/license/:id",

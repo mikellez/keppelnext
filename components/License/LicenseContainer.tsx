@@ -18,7 +18,7 @@ import ModuleSimplePopup, {
   SimpleIcon,
 } from "../ModuleLayout/ModuleSimplePopup";
 import { CMMSLicenseForm } from "../../types/common/interfaces";
-// import { LicenseProps } from "../"
+import TooltipBtn from "../TooltipBtn";
 
 export interface ImageStatus {
   received: boolean;
@@ -58,17 +58,25 @@ const LicenseContainer = ({
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [successModal, setSuccessModal] = useState<boolean>(false);
     const [missingFields, setMissingFields] = useState<boolean>(false);
+    const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
 
   const router = useRouter();
+  console.log(type);
 
     useEffect(() => {
         if (data.license) {
             const license = data.license
-            setLicenseForm({
+            if (license.acquisition_date) {
+
+              setLicenseForm({
                 ...data.license,
                 "acquisition_date": new Date(license.acquisition_date as string),
                 "expiry_date": new Date(license.expiry_date as string)
-            });
+              });
+            } else {
+              setLicenseForm(license);
+            }
+
         }
     }, [data.license])
 
@@ -166,6 +174,14 @@ const LicenseContainer = ({
       });
     };
   };
+
+  const handleDelete = () => {
+    instance.delete(`/api/license/${licenseForm.license_id}`)
+      .then(res => {
+        console.log(res);
+        router.push("/License");
+      }).catch(err => console.log(err));
+  }
 
   const handleSubmit = () => {
     console.log(licenseForm);
@@ -302,14 +318,16 @@ const LicenseContainer = ({
                             <label className="form-label">License Acquisition Date</label>
                             <input type="date" name="acquisition_date" className="form-control" 
                                 onChange={handleDate("acquisition_date")} disabled={!dateOnly || type === "renew"}
-                                value={licenseForm.acquisition_date ? (licenseForm.acquisition_date as Date).toISOString().slice(0, 10) : ""}/>
+                                value={licenseForm.acquisition_date ? (licenseForm.acquisition_date as Date).toISOString().slice(0, 10) : ""}
+                                />
                         </div>
                         <div className='mb-3'>
                             <label className="form-label">License Expiry Date</label>
                             <input type="date" name="expiry_date" className="form-control" 
                                 onChange={handleDate("expiry_date")} disabled={!dateOnly}
                                 value={licenseForm.expiry_date ? (licenseForm.expiry_date as Date).toISOString().slice(0, 10) : ""}
-                                min={(licenseForm.expiry_date as Date)!.toISOString().slice(0, 10)}/>
+                                min={licenseForm.expiry_date ? (licenseForm.expiry_date as Date)!.toISOString().slice(0, 10) : ""}
+                            />
                         </div>
                     </div>}
                 
@@ -318,28 +336,55 @@ const LicenseContainer = ({
             
         </ModuleContent>
         <div className='d-flex justify-content-end'>
-            <button className="btn btn-primary d-flex" onClick={handleSubmit}>
-                Submit
-            </button>
+          {type === "edit" && <button className="btn btn-primary d-flex me-3" onClick={() => setConfirmDelete(true)}
+            style={{ backgroundColor: "#F7C04A", borderColor: "#F7C04A" }}>
+              Delete
+          </button>}
+          <button className="btn btn-primary d-flex" onClick={handleSubmit}>
+              Submit
+          </button>
         </div>
-            <ModuleSimplePopup 
-                setModalOpenState={setSuccessModal}
-                modalOpenState={successModal}
-                title="Success"
-                text={type === "new" ? "New license tracking successfully created" 
-                        : type === "acquire" ? "License acquisition updated successfully"
-                        : type === "renew" ? "License renewed successfully"
-                        : type === "edit" ? "License details edited successfully"
-                        : "License Renewal updated successfully"}
-                icon={SimpleIcon.Check}
-                shouldCloseOnOverlayClick={false}/>
-            <ModuleSimplePopup 
-                setModalOpenState={setMissingFields}
-                modalOpenState={missingFields}
-                title="Missing Fields"
-                text="Please make sure that you have filled in the required fields"
-                icon={SimpleIcon.Cross}
-                shouldCloseOnOverlayClick={true}/>
+          <ModuleSimplePopup 
+              setModalOpenState={setSuccessModal}
+              modalOpenState={successModal}
+              title="Success"
+              text={type === "new" ? "New license tracking successfully created" 
+                      : type === "acquire" ? "License acquisition updated successfully"
+                      : type === "renew" ? "License renewed successfully"
+                      : type === "edit" ? "License details edited successfully"
+                      : "License Renewal updated successfully"}
+              icon={SimpleIcon.Check}
+              shouldCloseOnOverlayClick={false}/>
+          <ModuleSimplePopup 
+              setModalOpenState={setMissingFields}
+              modalOpenState={missingFields}
+              title="Missing Fields"
+              text="Please make sure that you have filled in the required fields"
+              icon={SimpleIcon.Cross}
+              shouldCloseOnOverlayClick={true}/>
+          <ModuleSimplePopup 
+              setModalOpenState={setConfirmDelete}
+              modalOpenState={confirmDelete}
+              title="Are you sure?"
+              text="This action cannot be undone"
+              icon={SimpleIcon.Exclaim}
+              shouldCloseOnOverlayClick={true}
+              buttons={[
+                <button
+                  key="deleteConfirm"
+                  onClick={handleDelete}
+                  className="btn btn-primary"
+                >
+                  Delete
+                </button>,
+                <button
+                  key="deleteCancel"
+                  onClick={() => setConfirmDelete(false)}
+                  className="btn btn-secondary"
+                >
+                  Cancel
+                </button>
+              ]}/>
     </div>
 }
 
