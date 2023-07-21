@@ -1,13 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LicenseProps } from "../New";
 import Link from "next/link";
 import { ModuleMain, ModuleHeader, ModuleContent } from "../../../components";
-import { CMMSFeedback, CMMSLicense } from "../../../types/common/interfaces";
+import { CMMSLicenseForm } from "../../../types/common/interfaces";
 import LicenseContainer from "../../../components/License/LicenseContainer";
+import { getServerSideProps as LicenseServerProps } from "../New";
 
 export default function ViewLicense(props: LicenseProps) {
-  const [formData, setFormData] = useState<CMMSLicense>(props.feedbackData);
-
   return (
     <>
       <ModuleMain>
@@ -17,9 +16,11 @@ export default function ViewLicense(props: LicenseProps) {
           </Link>
         </ModuleHeader>
         <ModuleContent>
-          <LicenseContainer data={formData} type={} />
+          <LicenseContainer data={props} type={"acquire"} disabled={true} />
         </ModuleContent>
       </ModuleMain>
     </>
   );
 }
+
+export const getServerSideProps = LicenseServerProps;

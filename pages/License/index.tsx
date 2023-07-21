@@ -233,15 +233,16 @@ const License = () => {
                                   <AiOutlineFileDone size={22} title={"A"} />
                                 </Link>
                               </>
-                            ) : (user.data!.role_id === Role.Admin ||
-                                user.data!.role_id === Role.Manager ||
-                                user.data!.role_id === Role.Engineer) &&
-                              item.status_id === 1 ? (
-                              <Link href={`/Feedback/Assign/${item.id}`}>
-                                <AiOutlineUserAdd size={22} title={"Assign"} />
-                              </Link>
                             ) : (
-                              <Link href={`/Feedback/View/${item.id}`}>
+                              // : (user.data!.role_id === Role.Admin ||
+                              //     user.data!.role_id === Role.Manager ||
+                              //     user.data!.role_id === Role.Engineer) &&
+                              //   item.status_id === 1 ? (
+                              //   <Link href={`/Feedback/Assign/${item.id}`}>
+                              //     <AiOutlineUserAdd size={22} title={"Assign"} />
+                              //   </Link>
+                              // )
+                              <Link href={`/License/View/${item.id}`}>
                                 <AiOutlineFolderView size={22} title={"View"} />
                               </Link>
                             )}
