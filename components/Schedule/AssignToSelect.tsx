@@ -50,11 +50,7 @@ const AssignToSelect = (props: AssignToSelectProps) => {
   const animatedComponents = makeAnimated();
 
   const selectRef = useRef<any>(null);
-  // console.log(props.defaultIds);
 
-  useEffect(() => {
-    console.log(defaultOptions);
-  },[defaultOptions])
 
   useEffect(() => {
     if (!props.value && selectRef.current) {
@@ -94,12 +90,10 @@ const AssignToSelect = (props: AssignToSelectProps) => {
         if (props.defaultIds && props.defaultIds[0] != null) {
           updateDefault(users)
             .then((result) => {
-              console.log(result);
+
               setDefaultOptions(result);
           
               setIsReady(true);
-            }).then((result) => {
-              console.log(defaultOptions)
             })
             // .then(() => {
             // });
