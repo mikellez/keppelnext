@@ -2126,18 +2126,25 @@ router.get(
   controllers.license.fetchAcquiredLicenses
 );
 
+router.get(
+  "/license/expired",
+  checkIfLoggedInAPI,
+  controllers.license.fetchExpiredLicenses
+);
+
 router
   .route("/license/:id", checkIfLoggedInAPI)
-  .get(controllers.license.fetchSingleLicense)
-  
+  .get(controllers.license.fetchSingleLicense);
+
 router.patch(
-  "/license/:id", 
-  checkIfLoggedInAPI, 
-  upload.array("images", 6), 
+  "/license/:id",
+  checkIfLoggedInAPI,
+  upload.array("images", 6),
   controllers.license.editLicense
 );
 
-router.patch("/license/acquire/:id", 
+router.patch(
+  "/license/acquire/:id",
   checkIfLoggedInAPI,
   controllers.license.acquireLicense
 );

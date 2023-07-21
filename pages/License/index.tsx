@@ -40,7 +40,11 @@ import PlantSelect from "../../components/PlantSelect";
 import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 import LicenseHistory from "../../components/License/LicenseHistory";
 
-const indexedColumn: ("draft" | "acquired")[] = ["draft", "acquired"];
+const indexedColumn: ("draft" | "acquired" | "expired")[] = [
+  "draft",
+  "acquired",
+  "expired",
+];
 
 const License = () => {
   const [licenseItems, setLicenseItems] = useState<CMMSFeedback[]>([]);
@@ -154,6 +158,14 @@ const License = () => {
               className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
             >
               <span style={{ all: "unset" }}>Acquired</span>
+            </li>
+            <li
+              onClick={() => {
+                activeTabIndex !== 2 && switchColumns(2);
+              }}
+              className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
+            >
+              <span style={{ all: "unset" }}>Expired</span>
             </li>
           </ul>
         }
