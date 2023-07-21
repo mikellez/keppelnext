@@ -38,6 +38,7 @@ const fetchAllLicenseQuery = (expand, search) => {
     status_id: "lc.status_id",
     status: "sl.status",
     images: "lc.images",
+    activity_log: "lc.activity_log",
   };
 
   if (expand) {
