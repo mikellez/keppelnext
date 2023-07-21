@@ -15,7 +15,12 @@ import {
   OnClick,
 } from "@table-library/react-table-library";
 import { MdPostAdd } from "react-icons/md";
-import { ModuleContent, ModuleHeader, ModuleMain } from "../../components";
+import {
+  ModuleContent,
+  ModuleHeader,
+  ModuleMain,
+  ModuleModal,
+} from "../../components";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import { useCurrentUser } from "../../components/SWR";
@@ -32,8 +37,14 @@ import { Role } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
 import LoadingHourglass from "../../components/LoadingHourglass";
 import PlantSelect from "../../components/PlantSelect";
+import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
+import LicenseHistory from "../../components/License/LicenseHistory";
 
-const indexedColumn: ("draft" | "acquired")[] = ["draft", "acquired"];
+const indexedColumn: ("draft" | "acquired" | "expired")[] = [
+  "draft",
+  "acquired",
+  "expired",
+];
 
 const License = () => {
   const [licenseItems, setLicenseItems] = useState<CMMSFeedback[]>([]);
@@ -67,6 +78,13 @@ const License = () => {
     setSelectedPlant(+e.target.value);
   };
 
+  const handleDaysToExpire = (acq: Date, exp: Date) => {
+    const diff = exp.getTime() - acq.getTime();
+
+    const totalDays = Math.ceil(diff / (1000 * 3600 * 24));
+    return totalDays;
+  };
+
   useEffect(() => {
     console.log(selectedPlant);
     setReady(false);
@@ -84,6 +102,7 @@ const License = () => {
       "plant_name",
       "linked_asset_name",
       "acquisition_date",
+      "activity_log",
     ];
 
     instance
@@ -115,7 +134,6 @@ const License = () => {
     <ModuleMain>
       <ModuleHeader title="License" header="License">
         <PlantSelect onChange={changePlant} allPlants={true} />
-
         <Link href="/License/New">
           <TooltipBtn text="New License">
             <MdPostAdd size={20} />
@@ -140,6 +158,14 @@ const License = () => {
               className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
             >
               <span style={{ all: "unset" }}>Acquired</span>
+            </li>
+            <li
+              onClick={() => {
+                activeTabIndex !== 2 && switchColumns(2);
+              }}
+              className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
+            >
+              <span style={{ all: "unset" }}>Expired</span>
             </li>
           </ul>
         }
@@ -194,7 +220,14 @@ const License = () => {
                                 )
                               : null}
                           </Cell>
-                          <Cell>days</Cell>
+                          <Cell>
+                            {item.acquisition_date && item.expiry_date
+                              ? handleDaysToExpire(
+                                  new Date(item.acquisition_date),
+                                  new Date(item.expiry_date)
+                                ) + " days"
+                              : null}{" "}
+                          </Cell>
                           <Cell>
                             <span
                               style={{
@@ -212,24 +245,26 @@ const License = () => {
                                   <AiOutlineFileDone size={22} title={"A"} />
                                 </Link>
                               </>
-                            ) : (user.data!.role_id === Role.Admin ||
-                                user.data!.role_id === Role.Manager ||
-                                user.data!.role_id === Role.Engineer) &&
-                              item.status_id === 1 ? (
-                              <Link href={`/Feedback/Assign/${item.id}`}>
-                                <AiOutlineUserAdd size={22} title={"Assign"} />
-                              </Link>
                             ) : (
-                              <Link href={`/Feedback/View/${item.id}`}>
+                              // : (user.data!.role_id === Role.Admin ||
+                              //     user.data!.role_id === Role.Manager ||
+                              //     user.data!.role_id === Role.Engineer) &&
+                              //   item.status_id === 1 ? (
+                              //   <Link href={`/Feedback/Assign/${item.id}`}>
+                              //     <AiOutlineUserAdd size={22} title={"Assign"} />
+                              //   </Link>
+                              // )
+                              <Link href={`/License/View/${item.id}`}>
                                 <AiOutlineFolderView size={22} title={"View"} />
                               </Link>
                             )}
-                            {/* <AiOutlineHistory
+                            <AiOutlineHistory
                               color={"#C70F2B"}
-                              onClick={() => setHistory(item.activity_log)}
+                              // onClick={() => setHistory(item.activity_log)}
+                              onClick={() => setHistory([{ testing: "value" }])}
                               size={22}
                               title={"View History"}
-                            /> */}
+                            />
                           </Cell>
                         </Row>
                       );
@@ -258,6 +293,15 @@ const License = () => {
           >
             <LoadingHourglass />
           </div>
+        )}
+        {history && (
+          <ModuleModal
+            isOpen={!!history}
+            closeModal={() => setHistory(undefined)}
+            closeOnOverlayClick={true}
+          >
+            <LicenseHistory history={history} />
+          </ModuleModal>
         )}
       </ModuleContent>
     </ModuleMain>

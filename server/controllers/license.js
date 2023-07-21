@@ -38,6 +38,7 @@ const fetchAllLicenseQuery = (expand, search) => {
     status_id: "lc.status_id",
     status: "sl.status",
     images: "lc.images",
+    activity_log: "lc.activity_log",
   };
 
   if (expand) {
@@ -86,6 +87,21 @@ const fetchDraftLicenseQuery = (expand, search, plantId) => {
       WHERE ua.user_id = $1 AND
       (lc.status_id = 1 OR lc.status_id = 2)
   `;
+  if (plantId == 0) {
+    return q;
+  } else {
+    return q + ` AND lc.plant_id = ${plantId}`;
+  }
+};
+
+const fetchExpiredLicenseQuery = (expand, search, plantId) => {
+  const q =
+    fetchAllLicenseQuery(expand, search) +
+    `
+      WHERE ua.user_id = $1 AND
+      (lc.status_id = 4)
+  `;
+  // console.log(plantId);
   if (plantId == 0) {
     return q;
   } else {
@@ -202,6 +218,33 @@ const fetchAcquiredLicenses = async (req, res, next) => {
     return res.status(500).json({ msg: err });
   }
 };
+const fetchExpiredLicenses = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
+  const plantId = req.query.plantId || 0;
+
+  const pagesQuery =
+    `SELECT COUNT(*) AS row_count FROM (` +
+    fetchExpiredLicenseQuery(expand, search, plantId) +
+    `) subquery`;
+
+  try {
+    const tmp = await global.db.query(pagesQuery, [req.user.id]);
+    const totalRows = tmp.rows[0].row_count;
+    const totalPages = Math.ceil(+totalRows / ITEMS_PER_PAGE);
+    const query =
+      fetchExpiredLicenseQuery(expand, search, plantId) +
+      ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+    // console.log(query);
+    const result = await global.db.query(query, [req.user.id]);
+    return res.status(200).json({ rows: result.rows, total: totalPages });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ msg: err });
+  }
+};
 
 const createLicense = async (req, res, next) => {
   const license = req.body;
@@ -261,25 +304,25 @@ const editLicense = async (req, res) => {
             images = $9
         WHERE license_id = $10
     `;
-    try {
-      await global.db.query(query, [
-        license.license_name,
-        license.license_provider,
-        license.license_type_id,
-        license.license_details,
-        license.plant_id,
-        license.plant_loc_id,
-        license.linked_asset_id,
-        license.assigned_user_id,
-        images,
-        req.params.id
-      ]);
-      res.status(200).send("Successfully editing license");
-    } catch (err) {
-      console.log(err);
-      res.status(500).send("Error editing license");
-    }
-}
+  try {
+    await global.db.query(query, [
+      license.license_name,
+      license.license_provider,
+      license.license_type_id,
+      license.license_details,
+      license.plant_id,
+      license.plant_loc_id,
+      license.linked_asset_id,
+      license.assigned_user_id,
+      images,
+      req.params.id,
+    ]);
+    res.status(200).send("Successfully editing license");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error editing license");
+  }
+};
 
 const acquireLicense = async (req, res) => {
   const query = `
@@ -332,4 +375,5 @@ module.exports = {
   acquireLicense,
   renewLicense,
   fetchAcquiredLicenses,
+  fetchExpiredLicenses,
 };
