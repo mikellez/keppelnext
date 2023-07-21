@@ -52,6 +52,7 @@ import Image from "next/image";
 import moment from "moment";
 import { TbSquareRoundedArrowRightFilled } from "react-icons/tb";
 import Link from "next/link";
+import SelectWithTooltip from "../SelectWithTooltip";
 
 type FormValues = {
   requestTypeID: number;
@@ -464,7 +465,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                 <option value={-1}>{assignRequestData.asset_name}</option>
               )}
             </select> */}
-            <Select
+            <SelectWithTooltip
               className="form-control"
               id="formControlTagAsset"
               {...register("taggedAssetID", { required: true })}

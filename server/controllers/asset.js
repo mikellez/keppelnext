@@ -1,5 +1,6 @@
 const db = require("../../db");
 const moment = require("moment");
+const { getFieldsDiff } = require("../global");
 const ITEMS_PER_PAGE = 10;
 
 const getUploadedFile = async (req, res, next) => {
@@ -200,9 +201,28 @@ const getAssetsFromPlant = async (req, res, next) => {
     res.status(400).json({ msg: "plant id not provided" });
 
   global.db.query(
-    `SELECT psa_id, concat( system_asset , ' | ' , plant_asset_instrument) as "asset_name"  
-            FROM keppel.system_assets AS t1 ,keppel.plant_system_assets AS t2
-            WHERE t2.status = 1 AND t1.system_asset_id = t2.system_asset_id_lvl4 AND plant_id = $1`,
+    `
+    SELECT 
+      psa_id, 
+      concat( 
+        t3.system_name, 
+        ' | ', 
+        t1.system_asset , 
+        case when t2.system_asset_lvl6 != '' then ' | ' else '' end, 
+        t2.system_asset_lvl6, case WHEN t2.system_asset_lvl7 !='' then ' | ' else '' end, 
+        t2.system_asset_lvl7, case WHEN plant_asset_instrument is not null then ' | ' else '' end,  
+        plant_asset_instrument
+      ) as "asset_name"  
+    FROM 
+      keppel.system_assets AS t1 ,
+      keppel.plant_system_assets AS t2,
+      keppel.system_master AS t3
+
+    WHERE 
+      t2.status = 1 
+      AND t1.system_asset_id = t2.system_asset_id_lvl4 
+      AND t3.system_id = t2.system_id_lvl3
+      AND plant_id = $1`,
     [plant_id],
     (err, result) => {
       if (err) return res.status(500).json({ msg: err });
@@ -560,7 +580,25 @@ const editAsset = async (req, res, next) => {
   plant_asset_instrument = req.body.system_asset_name;
   // console.log(req.body);
 
-  var sql = `UPDATE keppel.plant_system_assets SET parent_asset='${parent_asset}',asset_type='${asset_type}',asset_description='${asset_description}',asset_location='${asset_location}',brand='${brand}',plant_asset_instrument='${plant_asset_instrument}',model_number='${model_number}',technical_specs='${technical_specs}',manufacture_country='${manufacture_country}',warranty='${warranty}',remarks='${remarks}',system_asset_lvl6='${system_asset_lvl6}',system_asset_lvl5='${system_asset_lvl5}',system_asset_lvl7='', uploaded_image = '${uploaded_image}', uploaded_files = '${uploaded_files}'  WHERE psa_id = '${psa_id}'`;
+  var sql = `UPDATE 
+    keppel.plant_system_assets 
+      SET 
+      parent_asset='${parent_asset}',
+      asset_type='${asset_type}',
+      asset_description='${asset_description}',
+      asset_location='${asset_location}',
+      brand='${brand}',
+      plant_asset_instrument='${plant_asset_instrument}',
+      model_number='${model_number}',
+      technical_specs='${technical_specs}',
+      manufacture_country='${manufacture_country}',
+      warranty='${warranty}',remarks='${remarks}',
+      system_asset_lvl6='${system_asset_lvl6}',
+      system_asset_lvl5='${system_asset_lvl5}',
+      system_asset_lvl7='', 
+      uploaded_image = '${uploaded_image}', 
+      uploaded_files = '${uploaded_files}'  
+      WHERE psa_id = '${psa_id}'`;
   // if only chosen up to Select System Asset and create a new asset name with an asset type
   if (
     req.body.system_lvl_6 == "" &&
@@ -688,22 +726,27 @@ const editAsset = async (req, res, next) => {
   await global.db.query(sql);
   const updated = await global.db.query(assetQuery);
   // console.log(compare(old.rows[0], updated.rows[0]));
-  const fields = compare(old.rows[0], updated.rows[0]).join(", ");
+  //const fields = compare(old.rows[0], updated.rows[0]).join(", ");
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const fields = getFieldsDiff(old.rows[0], updated.rows[0]);
+
+  const activity_log = [{
+    date: today,
+    name: req.user.name,
+    role: req.user.role_name,
+    activity: `Edited Asset: [${fields.map(field=>`${field.field}: ${field.oldValue} => ${field.newValue}`).join(", ")}]`,
+    activity_type: "EDITED",
+    fields: [fields]
+  }];
+
+  console.log(activity_log)
+
   await global.db.query(
     `
     UPDATE keppel.plant_system_assets
-    SET activity_log = activity_log || 
-    jsonb_build_object(
-      'date', '${today}',
-      'name', '${req.user.name}',
-      'role', '${req.user.role_name}',
-      'activity', 'Edited Asset ${psa_id}: ${fields}',
-      'activity_type', 'EDITED',
-      'fields', '${fields}'
-    )
+    SET activity_log = activity_log || $1::jsonb
     WHERE psa_id = '${psa_id}';
-    `
+    `, [JSON.stringify(activity_log)]
   );
 
   res.status(200).send({
