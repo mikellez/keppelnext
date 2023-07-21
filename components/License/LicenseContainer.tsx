@@ -148,7 +148,7 @@ const LicenseContainer = ({data, type}: {data: LicenseProps, type: string}) => {
         } else { // doing axios request
 
             setIsSubmitting(true);
-            if (type === "acquire") {
+            if (type === "acquire") { //acquire
                 instance.patch(`api/license/acquire/${licenseForm.license_id}`, licenseForm)
                     .then(res => {
                         console.log(res);
@@ -162,8 +162,8 @@ const LicenseContainer = ({data, type}: {data: LicenseProps, type: string}) => {
                         setIsSubmitting(false);
                         console.log(err);
                     })
-            } else {
-                const formData = new FormData();
+            } else if (type === "new" || type === "edit") {
+                const formData = new FormData(); //process form data for both new and edit
                 for (const key of Object.keys(licenseForm)) {
                     if (key == "images") {
                         const images = licenseForm.images as File[];
@@ -175,21 +175,38 @@ const LicenseContainer = ({data, type}: {data: LicenseProps, type: string}) => {
                         formData.append(key, licenseForm[key as keyof CMMSLicenseForm]!.toString());
                     }
                 }
-                instance.post("/api/license", formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                }).then(res => {
-                    console.log(res);
-                    setIsSubmitting(false);
-                    setSuccessModal(true);
-                    setTimeout(() => {
-                        setSuccessModal(false);
-                        router.push("/License");
-                    }, 1500)
-                }).catch(err => {
-                    setIsSubmitting(false);
-                    console.log(err);
-                })
-            }
+                if (type === "new") { // new
+
+                    instance.post("/api/license", formData, {
+                        headers: { "Content-Type": "multipart/form-data" },
+                    }).then(res => {
+                        console.log(res);
+                        setIsSubmitting(false);
+                        setSuccessModal(true);
+                        setTimeout(() => {
+                            setSuccessModal(false);
+                            router.push("/License");
+                        }, 1500)
+                    }).catch(err => {
+                        setIsSubmitting(false);
+                        console.log(err);
+                    })
+                } else { //edit
+                    instance.patch(`api/license/${licenseForm.license_id}`, formData)
+                    .then(res => {
+                        console.log(res);
+                        setIsSubmitting(false);
+                        setSuccessModal(true);
+                        setTimeout(() => {
+                            setSuccessModal(false);
+                            router.push("/License");
+                        }, 1500)
+                    }).catch(err => {
+                        setIsSubmitting(false);
+                        console.log(err);
+                    })
+                }
+            } 
         }
     }
     

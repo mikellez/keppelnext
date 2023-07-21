@@ -132,7 +132,6 @@ const fetchLicenseImages = async (req, res, next) => {
   const query = `SELECT images FROM keppel.license WHERE license_id = $1`;
   try {
     const result = await global.db.query(query, [req.params.id]);
-    console.log(result.rows[0]);
     res.status(200).send(result.rows[0]);
   } catch (err) {
     console.log(err);
@@ -234,6 +233,44 @@ const createLicense = async (req, res, next) => {
   }
 };
 
+const editLicense = async (req, res) => {
+  const license = req.body;
+  console.log(req.files);
+  const images = req.files.map((file) => file.buffer);
+  const query = `
+        UPDATE keppel.license 
+        SET 
+            license_name = $1,
+            license_provider = $2,
+            license_type_id = $3,
+            license_details = $4,
+            plant_id = $5,
+            plant_loc_id = $6,
+            linked_asset_id = $7,
+            assigned_user_id = $8,
+            images = $9
+        WHERE license_id = $10
+    `;
+    try {
+      await global.db.query(query, [
+        license.license_name,
+        license.license_provider,
+        license.license_type_id,
+        license.license_details,
+        license.plant_id,
+        license.plant_loc_id,
+        license.linked_asset_id,
+        license.assigned_user_id,
+        images,
+        req.params.id
+      ]);
+      res.status(200).send("Successfully editing license");
+    } catch (err) {
+      console.log(err);
+      res.status(500).send("Error editing license");
+    }
+}
+
 const acquireLicense = async (req, res) => {
     console.log("Acquiring license");
     const query = `
@@ -260,6 +297,7 @@ module.exports = {
   createLicense,
   fetchSingleLicense,
   fetchLicenseImages,
+  editLicense,
   acquireLicense,
   fetchAcquiredLicenses,
 };
