@@ -75,27 +75,37 @@ const fetchAllLicenseQuery = (expand, search) => {
               FROM  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
               WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = lc.linked_asset_id
         `;
+  // console.log(query);
   return query;
 };
 
-const fetchDraftLicenseQuery = (expand, search) => {
-  return (
+const fetchDraftLicenseQuery = (expand, search, plantId) => {
+  const q =
     fetchAllLicenseQuery(expand, search) +
     `
-        WHERE ua.user_id = $1 AND
-        (lc.status_id = 1 OR lc.status_id = 2)
-    `
-  );
+      WHERE ua.user_id = $1 AND
+      (lc.status_id = 1 OR lc.status_id = 2)
+  `;
+  if (plantId == 0) {
+    return q;
+  } else {
+    return q + ` AND lc.plant_id = ${plantId}`;
+  }
 };
 
-const fetchAcquiredLicenseQuery = (expand, search) => {
-  return (
+const fetchAcquiredLicenseQuery = (expand, search, plantId) => {
+  const q =
     fetchAllLicenseQuery(expand, search) +
     `
-        WHERE ua.user_id = $1 AND
-        (lc.status_id = 3)
-    `
-  );
+      WHERE ua.user_id = $1 AND
+      (lc.status_id = 3)
+  `;
+  // console.log(plantId);
+  if (plantId == 0) {
+    return q;
+  } else {
+    return q + ` AND lc.plant_id = ${plantId}`;
+  }
 };
 
 const fetchSingleLicense = async (req, res, next) => {
@@ -126,8 +136,6 @@ const fetchSingleLicense = async (req, res, next) => {
   }
 };
 
-
-
 const fetchLicenseImages = async (req, res, next) => {
   const query = `SELECT images FROM keppel.license WHERE license_id = $1`;
   try {
@@ -144,10 +152,11 @@ const fetchDraftLicenses = async (req, res, next) => {
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
+  const plantId = req.query.plantId || 0;
 
   const pagesQuery =
     `SELECT COUNT(*) AS row_count FROM (` +
-    fetchDraftLicenseQuery(expand, search) +
+    fetchDraftLicenseQuery(expand, search, plantId) +
     `) subquery`;
 
   try {
@@ -155,7 +164,7 @@ const fetchDraftLicenses = async (req, res, next) => {
     const totalRows = tmp.rows[0].row_count;
     const totalPages = Math.ceil(+totalRows / ITEMS_PER_PAGE);
     const query =
-      fetchDraftLicenseQuery(expand, search) +
+      fetchDraftLicenseQuery(expand, search, plantId) +
       ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
     // console.log(query);
     const result = await global.db.query(query, [req.user.id]);
@@ -171,10 +180,11 @@ const fetchAcquiredLicenses = async (req, res, next) => {
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
+  const plantId = req.query.plantId || 0;
 
   const pagesQuery =
     `SELECT COUNT(*) AS row_count FROM (` +
-    fetchAcquiredLicenseQuery(expand, search) +
+    fetchAcquiredLicenseQuery(expand, search, plantId) +
     `) subquery`;
 
   try {
@@ -182,7 +192,7 @@ const fetchAcquiredLicenses = async (req, res, next) => {
     const totalRows = tmp.rows[0].row_count;
     const totalPages = Math.ceil(+totalRows / ITEMS_PER_PAGE);
     const query =
-      fetchAcquiredLicenseQuery(expand, search) +
+      fetchAcquiredLicenseQuery(expand, search, plantId) +
       ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
     // console.log(query);
     const result = await global.db.query(query, [req.user.id]);
@@ -272,23 +282,26 @@ const editLicense = async (req, res) => {
 }
 
 const acquireLicense = async (req, res) => {
-    console.log("Acquiring license");
-    const query = `
+  console.log("Acquiring license");
+  const query = `
         UPDATE keppel.license SET
             acquisition_date = $1,
             expiry_date = $2,
             status_id = 3
         WHERE license_id = $3
-    `
-    try {
-        await global.db.query(query, [req.body.acquisition_date,
-        req.body.expiry_date, req.params.id]);
-        res.status(200).send("Successfully acquired license");
-    } catch (err) {
-        console.log(err);
-        res.status(500).send("Error occurred acquring license in the server")
-    }
-}
+    `;
+  try {
+    await global.db.query(query, [
+      req.body.acquisition_date,
+      req.body.expiry_date,
+      req.params.id,
+    ]);
+    res.status(200).send("Successfully acquired license");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error occurred acquring license in the server");
+  }
+};
 
 module.exports = {
   fetchDraftLicenses,

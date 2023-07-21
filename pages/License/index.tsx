@@ -31,6 +31,7 @@ import {
 import { Role } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
 import LoadingHourglass from "../../components/LoadingHourglass";
+import PlantSelect from "../../components/PlantSelect";
 
 const indexedColumn: ("draft" | "acquired")[] = ["draft", "acquired"];
 
@@ -41,6 +42,7 @@ const License = () => {
   const user = useCurrentUser();
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedPlant, setSelectedPlant] = useState<number>(0);
   const [history, setHistory] = useState<
     { [key: string]: string }[] | undefined
   >(undefined);
@@ -61,7 +63,12 @@ const License = () => {
     }
   };
 
+  const changePlant = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedPlant(+e.target.value);
+  };
+
   useEffect(() => {
+    console.log(selectedPlant);
     setReady(false);
 
     const PARAMS = [
@@ -81,7 +88,7 @@ const License = () => {
 
     instance
       .get(
-        `/api/license/${indexedColumn[activeTabIndex]}?page=${page}&expand=${PARAMS}`
+        `/api/license/${indexedColumn[activeTabIndex]}?page=${page}&expand=${PARAMS}&plantId=${selectedPlant}`
       )
       .then((response) => {
         setLicenseItems(
@@ -98,7 +105,7 @@ const License = () => {
         setReady(true);
         setLicenseItems([]);
       });
-  }, [activeTabIndex, page]);
+  }, [selectedPlant, activeTabIndex, page]);
 
   useEffect(() => {
     console.log(licenseItems);
@@ -107,6 +114,8 @@ const License = () => {
   return (
     <ModuleMain>
       <ModuleHeader title="License" header="License">
+        <PlantSelect onChange={changePlant} allPlants={true} />
+
         <Link href="/License/New">
           <TooltipBtn text="New License">
             <MdPostAdd size={20} />
