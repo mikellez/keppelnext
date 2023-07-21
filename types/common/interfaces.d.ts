@@ -545,8 +545,8 @@ interface CMMSLicenseForm {
   plant_loc_id: number;
   linked_asset_id: number | null;
   assigned_user_id: number | null;
-  acquisition_date?: Date;
-  expiry_date? : Date;
+  acquisition_date?: Date | string;
+  expiry_date? : Date | string;
   status_id?: number;
   images: File[]
 }

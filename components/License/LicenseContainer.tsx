@@ -162,33 +162,34 @@ const LicenseContainer = ({data, type}: {data: LicenseProps, type: string}) => {
                         setIsSubmitting(false);
                         console.log(err);
                     })
-            }
-           
-            const formData = new FormData();
-            for (const key of Object.keys(licenseForm)) {
-                if (key !== "images" && !!licenseForm[key as keyof CMMSLicenseForm]) {
-                    formData.append(key, licenseForm[key as keyof CMMSLicenseForm]!.toString());
-                } else {
-                    const images = licenseForm.images as File[];
-                    for (let i = 0; i < images.length; i++) {
-                        formData.append('images', images[i]);
+            } else {
+                const formData = new FormData();
+                for (const key of Object.keys(licenseForm)) {
+                    if (key == "images") {
+                        const images = licenseForm.images as File[];
+                        for (let i = 0; i < images.length; i++) {
+                            console.log(i);
+                            formData.append('images', images[i]);
+                        }
+                    } else if (!!licenseForm[key as keyof CMMSLicenseForm]){
+                        formData.append(key, licenseForm[key as keyof CMMSLicenseForm]!.toString());
                     }
                 }
+                instance.post("/api/license", formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                }).then(res => {
+                    console.log(res);
+                    setIsSubmitting(false);
+                    setSuccessModal(true);
+                    setTimeout(() => {
+                        setSuccessModal(false);
+                        router.push("/License");
+                    }, 1500)
+                }).catch(err => {
+                    setIsSubmitting(false);
+                    console.log(err);
+                })
             }
-            instance.post("/api/license", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            }).then(res => {
-                console.log(res);
-                setIsSubmitting(false);
-                setSuccessModal(true);
-                setTimeout(() => {
-                    setSuccessModal(false);
-                    router.push("/License");
-                }, 1500)
-            }).catch(err => {
-                setIsSubmitting(false);
-                console.log(err);
-            })
         }
     }
     
@@ -239,12 +240,14 @@ const LicenseContainer = ({data, type}: {data: LicenseProps, type: string}) => {
                         <div className='mb-3'>
                             <label className="form-label">License Acquisition Date</label>
                             <input type="date" name="acquisition_date" className="form-control" 
-                                onChange={handleDate("acquisition_date")} disabled={!dateOnly}/>
+                                onChange={handleDate("acquisition_date")} disabled={!dateOnly}
+                                value={licenseForm.acquisition_date ? (licenseForm.acquisition_date as string).slice(0, 10) : ""}/>
                         </div>
                         <div className='mb-3'>
                             <label className="form-label">License Expiry Date</label>
                             <input type="date" name="expiry_date" className="form-control" 
-                                onChange={handleDate("expiry_date")} disabled={!dateOnly}/>
+                                onChange={handleDate("expiry_date")} disabled={!dateOnly}
+                                value={licenseForm.expiry_date ? (licenseForm.expiry_date as string).slice(0, 10) : ""}/>
                         </div>
                     </div>}
                 

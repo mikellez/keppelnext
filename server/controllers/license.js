@@ -67,7 +67,7 @@ const fetchAllLicenseQuery = (expand, search) => {
             concat(concat ('%', (SELECT plant_id FROM keppel.plant_location tmp1 WHERE tmp1.loc_id = lc.plant_loc_id)), '%')
             LEFT JOIN keppel.license_type lt ON lc.license_type_id = lt.type_id
             LEFT JOIN keppel.plant_location pl ON lc.plant_loc_id = pl.loc_id
-            Left JOin keppel.plant_master pm ON pl.plant_id = pm.plant_id
+            Left JOIN keppel.plant_master pm ON pl.plant_id = pm.plant_id
             LEFT JOIN keppel.plant_system_assets psa ON lc.linked_asset_id = psa.psa_id
             LEFT JOIN keppel.users assignU ON lc.assigned_user_id = assignU.user_id   
             LEFT JOIN keppel.status_lm sl ON lc.status_id = sl.status_id
@@ -75,7 +75,6 @@ const fetchAllLicenseQuery = (expand, search) => {
               FROM  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
               WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = lc.linked_asset_id
         `;
-  console.log(query);
   return query;
 };
 
@@ -234,6 +233,25 @@ const createLicense = async (req, res, next) => {
     res.status(500).send("Error creating license");
   }
 };
+
+const acquireLicense = async (req, res) => {
+    console.log("Acquiring license");
+    const query = `
+        UPDATE keppel.license SET
+            acquisition_date = $1,
+            expiry_date = $2,
+            status_id = 3
+        WHERE license_id = $3
+    `
+    try {
+        await global.db.query(query, [req.body.acquisition_date,
+        req.body.expiry_date, req.params.id]);
+        res.status(200).send("Successfully acquired license");
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Error occurred acquring license in the server")
+    }
+}
 
 module.exports = {
   fetchDraftLicenses,
