@@ -10,8 +10,8 @@ const LicenseAcquire = (props: LicenseProps) => {
     const router = useRouter();
 
     return <ModuleMain>
-        <ModuleHeader title="Acquire License"
-        header="Acquire License">
+        <ModuleHeader title="Renew License"
+        header="Renew License">
             <button
             className={"btn btn-secondary"}
             type="button"
@@ -20,7 +20,7 @@ const LicenseAcquire = (props: LicenseProps) => {
             Back
             </button>
         </ModuleHeader>
-        <LicenseContainer data={props} type="acquire"/>
+        <LicenseContainer data={props} type="renew"/>
     </ModuleMain>
 }
 

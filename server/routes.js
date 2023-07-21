@@ -2142,6 +2142,11 @@ router.patch("/license/acquire/:id",
   controllers.license.acquireLicense
 );
 
+router.patch("/license/renew/:id",
+  checkIfLoggedInAPI,
+  controllers.license.renewLicense
+);
+
 router.get(
   "/license/images/:id",
   checkIfLoggedInAPI,

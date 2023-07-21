@@ -282,7 +282,6 @@ const editLicense = async (req, res) => {
 }
 
 const acquireLicense = async (req, res) => {
-  console.log("Acquiring license");
   const query = `
         UPDATE keppel.license SET
             acquisition_date = $1,
@@ -299,7 +298,26 @@ const acquireLicense = async (req, res) => {
     res.status(200).send("Successfully acquired license");
   } catch (err) {
     console.log(err);
-    res.status(500).send("Error occurred acquring license in the server");
+    res.status(500).send("Error occurred acquiring license in the server");
+  }
+};
+
+const renewLicense = async (req, res) => {
+  console.log("Acquiring license");
+  const query = `
+        UPDATE keppel.license SET
+            expiry_date = $1
+        WHERE license_id = $2
+    `;
+  try {
+    await global.db.query(query, [
+      req.body.expiry_date,
+      req.params.id,
+    ]);
+    res.status(200).send("Successfully renewed license");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error occurred renewing license in the server");
   }
 };
 
@@ -312,5 +330,6 @@ module.exports = {
   fetchLicenseImages,
   editLicense,
   acquireLicense,
+  renewLicense,
   fetchAcquiredLicenses,
 };

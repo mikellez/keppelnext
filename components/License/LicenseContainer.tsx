@@ -35,7 +35,7 @@ const LicenseContainer = ({data, type}: {data: LicenseProps, type: string}) => {
     })
 
     // fields can only be edited when creating or editing
-    const [dateOnly, setDateOnly] = useState<boolean>(type === "acquire")
+    const [dateOnly, setDateOnly] = useState<boolean>(type === "acquire" || type === "renew")
     // tracking image fetching and processing, used in MultipleImageUpload
     const [imageProcess, setImageProcess] = useState<ImageStatus>({
         received: false,
@@ -50,7 +50,12 @@ const LicenseContainer = ({data, type}: {data: LicenseProps, type: string}) => {
 
     useEffect(() => {
         if (data.license) {
-            setLicenseForm(data.license);
+            const license = data.license
+            setLicenseForm({
+                ...data.license,
+                "acquisition_date": new Date(license.acquisition_date as string),
+                "expiry_date": new Date(license.expiry_date as string)
+            });
         }
     }, [data.license])
 
@@ -162,7 +167,22 @@ const LicenseContainer = ({data, type}: {data: LicenseProps, type: string}) => {
                         setIsSubmitting(false);
                         console.log(err);
                     })
-            } else if (type === "new" || type === "edit") {
+            } else if (type === "renew") { //renew
+                instance.patch(`api/license/renew/${licenseForm.license_id}`, licenseForm)
+                .then(res => {
+                    console.log(res);
+                    setIsSubmitting(false);
+                    setSuccessModal(true);
+                    setTimeout(() => {
+                        setSuccessModal(false);
+                        router.push("/License");
+                    }, 1500)
+                }).catch(err => {
+                    setIsSubmitting(false);
+                    console.log(err);
+                })
+            }
+            else if (type === "new" || type === "edit") {
                 const formData = new FormData(); //process form data for both new and edit
                 for (const key of Object.keys(licenseForm)) {
                     if (key == "images") {
@@ -257,14 +277,15 @@ const LicenseContainer = ({data, type}: {data: LicenseProps, type: string}) => {
                         <div className='mb-3'>
                             <label className="form-label">License Acquisition Date</label>
                             <input type="date" name="acquisition_date" className="form-control" 
-                                onChange={handleDate("acquisition_date")} disabled={!dateOnly}
-                                value={licenseForm.acquisition_date ? (licenseForm.acquisition_date as string).slice(0, 10) : ""}/>
+                                onChange={handleDate("acquisition_date")} disabled={!dateOnly || type === "renew"}
+                                value={licenseForm.acquisition_date ? (licenseForm.acquisition_date as Date).toISOString().slice(0, 10) : ""}/>
                         </div>
                         <div className='mb-3'>
                             <label className="form-label">License Expiry Date</label>
                             <input type="date" name="expiry_date" className="form-control" 
                                 onChange={handleDate("expiry_date")} disabled={!dateOnly}
-                                value={licenseForm.expiry_date ? (licenseForm.expiry_date as string).slice(0, 10) : ""}/>
+                                value={licenseForm.expiry_date ? (licenseForm.expiry_date as Date).toISOString().slice(0, 10) : ""}
+                                min={(licenseForm.expiry_date as Date)!.toISOString().slice(0, 10)}/>
                         </div>
                     </div>}
                 
@@ -283,6 +304,7 @@ const LicenseContainer = ({data, type}: {data: LicenseProps, type: string}) => {
             title="Success"
             text={type === "new" ? "New license tracking successfully created" 
                     : type === "acquire" ? "License acquisition updated successfully"
+                    : type === "renew" ? "License renewed successfully"
                     : type === "edit" ? "License details edited successfully"
                     : "License Renewal updated successfully"}
             icon={SimpleIcon.Check}
