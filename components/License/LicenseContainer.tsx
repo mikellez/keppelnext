@@ -176,7 +176,7 @@ const LicenseContainer = ({
   };
 
   const handleDelete = () => {
-    instance.delete(`/api/license/${licenseForm.license_id}`)
+    instance.patch(`/api/license/${licenseForm.license_id}`)
       .then(res => {
         console.log(res);
         router.push("/License");
