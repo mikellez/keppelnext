@@ -435,6 +435,26 @@ const deleteLicense = async (req, res) => {
   }
 }
 
+const fetchExpiryDates = async (req, res) => {
+  const plantId = req.query.plantId || 0;
+  let query = fetchAllLicenseQuery("id,license_name,expiry_date","") + `
+    WHERE ua.user_id = $1 AND
+    expiry_date IS NOT NULL
+  `
+  if (plantId != 0) {
+    query += "AND lc.plant_id = $2"
+  }
+  try {
+    const results = plantId === "0" 
+      ? await global.db.query(query, [req.user.id])
+      : await global.db.query(query, [req.user.id, plantId]);
+    res.status(200).send(results.rows);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error has occured getting expiry dates of all licenses")
+  }
+}
+
 module.exports = {
   fetchDraftLicenses,
   fetchLicenseTypes,
@@ -447,4 +467,5 @@ module.exports = {
   deleteLicense,
   fetchAcquiredLicenses,
   fetchExpiredLicenses,
+  fetchExpiryDates,
 };

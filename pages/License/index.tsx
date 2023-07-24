@@ -143,7 +143,7 @@ const License = () => {
     <ModuleMain>
       <ModuleHeader 
         title="License" 
-        header="License"
+        header={calendarView ? "Monitor License Expiry" : "License"}
         leftChildren={
           <div className={`${scheduleStyles.eventModalHeader} mt-2`}>
               <label className={scheduleStyles.toggle}>
@@ -151,7 +151,10 @@ const License = () => {
                       type="checkbox"
                       onChange={() => setCalendarView((prev) => !prev)}
                   />
-                  <span className={scheduleStyles.slider}></span>
+                  <span 
+                    title={calendarView ? "See License List" : "Monitor License Expiry"} 
+                    className={scheduleStyles.slider}>
+                  </span>
               </label>
               <div id="top-toggle-img" className="ms-3">
                 {calendarView ? (
@@ -169,7 +172,7 @@ const License = () => {
           </TooltipBtn>
         </Link>
       </ModuleHeader>
-      <ModuleContent>
+      {calendarView ? <LicenseCalendar selectedPlant={selectedPlant}/> : <ModuleContent>
         {
           <ul className="nav nav-tabs">
             <li
@@ -338,7 +341,7 @@ const License = () => {
             <LicenseHistory history={history} />
           </ModuleModal>
         )}
-      </ModuleContent>
+      </ModuleContent>}
     </ModuleMain>
   );
 };
