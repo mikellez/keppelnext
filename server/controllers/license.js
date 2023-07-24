@@ -77,6 +77,7 @@ const fetchAllLicenseQuery = (expand, search) => {
             LEFT JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
               FROM  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
               WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = lc.linked_asset_id
+        WHERE lc.status_id != 6
         `;
   // console.log(query);
   return query;
@@ -86,9 +87,8 @@ const fetchDraftLicenseQuery = (expand, search, plantId) => {
   const q =
     fetchAllLicenseQuery(expand, search) +
     `
-      WHERE ua.user_id = $1 AND
-      (lc.status_id = 1 OR lc.status_id = 2) AND
-      lc.deleted = false
+      AND ua.user_id = $1 AND
+      (lc.status_id = 1 OR lc.status_id = 2)
   `;
   if (plantId == 0) {
     return q;
@@ -101,9 +101,8 @@ const fetchExpiredLicenseQuery = (expand, search, plantId) => {
   const q =
     fetchAllLicenseQuery(expand, search) +
     `
-      WHERE ua.user_id = $1 AND
-      (lc.status_id = 4) AND
-      lc.deleted = false
+      AND ua.user_id = $1 AND
+      (lc.status_id = 4)
   `;
   // console.log(plantId);
   if (plantId == 0) {
@@ -117,9 +116,8 @@ const fetchAcquiredLicenseQuery = (expand, search, plantId) => {
   const q =
     fetchAllLicenseQuery(expand, search) +
     `
-      WHERE ua.user_id = $1 AND
-      (lc.status_id = 3) AND
-      lc.deleted = false
+      AND ua.user_id = $1 AND
+      (lc.status_id = 3)
   `;
   // console.log(plantId);
   if (plantId == 0) {
@@ -278,9 +276,8 @@ const createLicense = async (req, res, next) => {
             assigned_user_id,
             images,
             status_id,
-            activity_log,
-            deleted
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+            activity_log
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     `;
   try {
     await global.db.query(query, [
@@ -294,8 +291,7 @@ const createLicense = async (req, res, next) => {
       license.assigned_user_id,
       images,
       status,
-      JSON.stringify(activity_log),
-      false
+      JSON.stringify(activity_log)
     ]);
     res.status(200).send("Successfully created license");
   } catch (err) {
@@ -413,7 +409,7 @@ const deleteLicense = async (req, res) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const query = `
     UPDATE keppel.license SET
-      deleted = true,
+      status_id = 6,
       activity_log = activity_log || 
         jsonb_build_object(
           'date', '${today}',
@@ -438,7 +434,7 @@ const deleteLicense = async (req, res) => {
 const fetchExpiryDates = async (req, res) => {
   const plantId = req.query.plantId || 0;
   let query = fetchAllLicenseQuery("id,license_name,expiry_date","") + `
-    WHERE ua.user_id = $1 AND
+    AND ua.user_id = $1 AND
     expiry_date IS NOT NULL
   `
   if (plantId != 0) {

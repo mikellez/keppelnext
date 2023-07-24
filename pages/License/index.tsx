@@ -47,10 +47,11 @@ import LicenseCalendar from "../../components/License/LicenseCalendar";
 import { BiRefresh } from "react-icons/bi";
 import { Divider } from "antd";
 
-const indexedColumn: ("draft" | "acquired" | "expired")[] = [
+const indexedColumn: ("draft" | "acquired" | "expired" | "archived")[] = [
   "draft",
   "acquired",
   "expired",
+  "archived",
 ];
 
 const License = () => {
@@ -199,6 +200,14 @@ const License = () => {
             >
               <span style={{ all: "unset" }}>Expired</span>
             </li>
+            <li
+              onClick={() => {
+                activeTabIndex !== 3 && switchColumns(3);
+              }}
+              className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
+            >
+              <span style={{ all: "unset" }}>Archived</span>
+            </li>
           </ul>
         }
         {isReady && licenseItems.length === 0 && <div></div>}
@@ -271,13 +280,13 @@ const License = () => {
                             </span>
                           </Cell>
                           <Cell>
-                            {item.status_id === 1 || item.status_id === 2 ? (
+                            {item.status_id === 2 && 
                               <>
                                 <Link href={`/License/Acquire/${item.id}`}>
                                   <AiOutlineFileDone size={22} title={"Acquire"} />
                                 </Link>
-                              </>
-                            ) : (
+                              </>}
+                            {item.status_id === 3 &&
                               // : (user.data!.role_id === Role.Admin ||
                               //     user.data!.role_id === Role.Manager ||
                               //     user.data!.role_id === Role.Engineer) &&
@@ -289,7 +298,7 @@ const License = () => {
                               <Link href={`/License/Renew/${item.id}`}>
                                 <BiRefresh size={22} title={"Renew"} />
                               </Link>
-                            )}
+                            }
                             <Link href={`/License/Edit/${item.id}`}>
                                 <AiOutlineEdit size={22} title={"Edit"} />
                             </Link>

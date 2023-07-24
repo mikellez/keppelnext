@@ -739,7 +739,7 @@ const completeChecklist = async (req, res, next) => {
 };
 
 const editChecklistRecord = async (req, res, next) => {
-  const data = req.body.checklist;
+  const data = req.body.checklistData;
   const assigned = req.body.assigned;
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 

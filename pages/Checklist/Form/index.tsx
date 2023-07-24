@@ -60,10 +60,11 @@ const editChecklistAPI = async (
   checklistId: number,
   assigned: boolean
 ) => {
-  // console.log(checklistData);
+  console.log(checklistData);
   return await instance
     .patch(`/api/checklist/record/${checklistId}`, { checklistData, assigned })
     .then((res) => {
+      console.log("Test")
       return res.data;
     })
     .catch((err) => console.log(err));
