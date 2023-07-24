@@ -268,8 +268,7 @@ const License = () => {
                             </Link>
                             <AiOutlineHistory
                               color={"#C70F2B"}
-                              // onClick={() => setHistory(item.activity_log)}
-                              onClick={() => setHistory([{ testing: "value" }])}
+                              onClick={() => setHistory(item.activity_log)}
                               size={22}
                               title={"View History"}
                             />
@@ -307,6 +306,7 @@ const License = () => {
             isOpen={!!history}
             closeModal={() => setHistory(undefined)}
             closeOnOverlayClick={true}
+            large
           >
             <LicenseHistory history={history} />
           </ModuleModal>
