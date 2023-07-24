@@ -206,6 +206,14 @@ const License = () => {
               >
                 <span style={{ all: "unset" }}>Expired</span>
               </li>
+              <li
+                onClick={() => {
+                  activeTabIndex !== 3 && switchColumns(3);
+                }}
+                className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
+              >
+                <span style={{ all: "unset" }}>Archived</span>
+              </li>
             </ul>
           }
           {isReady && licenseItems.length === 0 && <div></div>}
