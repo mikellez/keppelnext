@@ -223,7 +223,7 @@ const fetchAcquiredLicenses = async (req, res, next) => {
 };
 const fetchExpiredLicenses = async (req, res, next) => {
   const page = req.query.page || 1;
-  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE || 0;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
   const plantId = req.query.plantId || 0;
@@ -368,7 +368,7 @@ const acquireLicense = async (req, res) => {
       req.body.acquisition_date,
       req.body.expiry_date,
       req.params.id,
-      `License ID-${req.params.id} Acquired`
+      `License ID-${req.params.id} Acquired`,
     ]);
     res.status(200).send("Successfully acquired license");
   } catch (err) {
@@ -418,38 +418,41 @@ const deleteLicense = async (req, res) => {
           'activity_type', 'DELETED'
         )
       WHERE license_id = $1  
-  `
+  `;
   try {
     await global.db.query(query, [
       req.params.id,
-      `License ID-${req.params.id} Deleted`
+      `License ID-${req.params.id} Deleted`,
     ]);
     res.status(200).send("Successfully deleted license");
   } catch (err) {
     console.log(err);
     res.status(500).send("Error occurred deleting license");
   }
-}
+};
 
 const fetchExpiryDates = async (req, res) => {
   const plantId = req.query.plantId || 0;
   let query = fetchAllLicenseQuery("id,license_name,expiry_date","") + `
     AND ua.user_id = $1 AND
     expiry_date IS NOT NULL
-  `
+  `;
   if (plantId != 0) {
-    query += "AND lc.plant_id = $2"
+    query += "AND lc.plant_id = $2";
   }
   try {
-    const results = plantId === "0" 
-      ? await global.db.query(query, [req.user.id])
-      : await global.db.query(query, [req.user.id, plantId]);
+    const results =
+      plantId === "0"
+        ? await global.db.query(query, [req.user.id])
+        : await global.db.query(query, [req.user.id, plantId]);
     res.status(200).send(results.rows);
   } catch (err) {
     console.log(err);
-    res.status(500).send("Error has occured getting expiry dates of all licenses")
+    res
+      .status(500)
+      .send("Error has occured getting expiry dates of all licenses");
   }
-}
+};
 
 module.exports = {
   fetchDraftLicenses,

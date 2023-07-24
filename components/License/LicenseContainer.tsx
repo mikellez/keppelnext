@@ -458,9 +458,11 @@ const LicenseContainer = ({
           </button>
           </div>
         )}
-        <button className="btn btn-primary d-flex" onClick={handleSubmit}>
-          Submit
-        </button>
+        {!disabled && (
+          <button className="btn btn-primary d-flex" onClick={handleSubmit}>
+            Submit
+          </button>
+        )}
       </div>
       <ModuleSimplePopup
         setModalOpenState={setSuccessModal}

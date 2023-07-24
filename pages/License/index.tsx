@@ -43,8 +43,8 @@ import LicenseHistory from "../../components/License/LicenseHistory";
 import scheduleStyles from "../../styles/Schedule.module.scss";
 import LicenseCalendar from "../../components/License/LicenseCalendar";
 
-
 import { BiRefresh } from "react-icons/bi";
+import fetchExpiredLicense from "../../server/services/licenseCron";
 import { Divider } from "antd";
 
 const indexedColumn: ("draft" | "acquired" | "expired" | "archived")[] = [
@@ -136,36 +136,39 @@ const License = () => {
       });
   }, [selectedPlant, activeTabIndex, page]);
 
-  useEffect(() => {
-    console.log(licenseItems);
-  }, [licenseItems]);
+  // useEffect(() => {
+  //   console.log(licenseItems);
+  // }, [licenseItems]);
 
   return (
     <ModuleMain>
-      <ModuleHeader 
-        title="License" 
+      <ModuleHeader
+        title="License"
         header={calendarView ? "Monitor License Expiry" : "License"}
         leftChildren={
           <div className={`${scheduleStyles.eventModalHeader} mt-2`}>
-              <label className={scheduleStyles.toggle}>
-                  <input
-                      type="checkbox"
-                      onChange={() => setCalendarView((prev) => !prev)}
-                  />
-                  <span 
-                    title={calendarView ? "See License List" : "Monitor License Expiry"} 
-                    className={scheduleStyles.slider}>
-                  </span>
-              </label>
-              <div id="top-toggle-img" className="ms-3">
-                {calendarView ? (
-                    <BsCalendar4Week size={20} />
-                ) : (
-                    <BsListUl size={20} />
-                )}
-              </div>
+            <label className={scheduleStyles.toggle}>
+              <input
+                type="checkbox"
+                onChange={() => setCalendarView((prev) => !prev)}
+              />
+              <span
+                title={
+                  calendarView ? "See License List" : "Monitor License Expiry"
+                }
+                className={scheduleStyles.slider}
+              ></span>
+            </label>
+            <div id="top-toggle-img" className="ms-3">
+              {calendarView ? (
+                <BsCalendar4Week size={20} />
+              ) : (
+                <BsListUl size={20} />
+              )}
+            </div>
           </div>
-        }>
+        }
+      >
         <PlantSelect onChange={changePlant} allPlants={true} />
         <Link href="/License/New">
           <TooltipBtn text="New License">
@@ -173,184 +176,183 @@ const License = () => {
           </TooltipBtn>
         </Link>
       </ModuleHeader>
-      {calendarView ? <LicenseCalendar selectedPlant={selectedPlant}/> : <ModuleContent>
-        {
-          <ul className="nav nav-tabs">
-            <li
-              onClick={() => {
-                activeTabIndex !== 0 && switchColumns(0);
-              }}
-              className={"nav-link" + (activeTabIndex === 0 ? " active" : "")}
-            >
-              <span style={{ all: "unset" }}>Drafts</span>
-            </li>
-            <li
-              onClick={() => {
-                activeTabIndex !== 1 && switchColumns(1);
-              }}
-              className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
-            >
-              <span style={{ all: "unset" }}>Acquired</span>
-            </li>
-            <li
-              onClick={() => {
-                activeTabIndex !== 2 && switchColumns(2);
-              }}
-              className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
-            >
-              <span style={{ all: "unset" }}>Expired</span>
-            </li>
-            <li
-              onClick={() => {
-                activeTabIndex !== 3 && switchColumns(3);
-              }}
-              className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
-            >
-              <span style={{ all: "unset" }}>Archived</span>
-            </li>
-          </ul>
-        }
-        {isReady && licenseItems.length === 0 && <div></div>}
-        {isReady ? (
-          <>
-            <Table
-              data={{ nodes: licenseItems }}
-              theme={theme}
-              layout={{ custom: true, horizontalScroll: true }}
-            >
-              {(tableList: CMMSLicense[]) => (
-                <>
-                  <Header>
-                    <HeaderRow>
-                      <HeaderCell resize>ID</HeaderCell>
-                      <HeaderCell resize>Asset</HeaderCell>
-                      <HeaderCell resize>Plant Location</HeaderCell>
-                      <HeaderCell resize>License</HeaderCell>
-                      <HeaderCell resize>License Provider</HeaderCell>
-                      <HeaderCell resize>License Type</HeaderCell>
-                      <HeaderCell resize>Aquisition Date</HeaderCell>
-                      <HeaderCell resize>Expiry Date</HeaderCell>
-                      <HeaderCell resize>Days To Expiry</HeaderCell>
-                      <HeaderCell resize>Status</HeaderCell>
-                      <HeaderCell resize>Actions</HeaderCell>
-                    </HeaderRow>
-                  </Header>
+      {calendarView ? (
+        <LicenseCalendar selectedPlant={selectedPlant} />
+      ) : (
+        <ModuleContent>
+          {
+            <ul className="nav nav-tabs">
+              <li
+                onClick={() => {
+                  activeTabIndex !== 0 && switchColumns(0);
+                }}
+                className={"nav-link" + (activeTabIndex === 0 ? " active" : "")}
+              >
+                <span style={{ all: "unset" }}>Drafts</span>
+              </li>
+              <li
+                onClick={() => {
+                  activeTabIndex !== 1 && switchColumns(1);
+                }}
+                className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
+              >
+                <span style={{ all: "unset" }}>Acquired</span>
+              </li>
+              <li
+                onClick={() => {
+                  activeTabIndex !== 2 && switchColumns(2);
+                }}
+                className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
+              >
+                <span style={{ all: "unset" }}>Expired</span>
+              </li>
+            </ul>
+          }
+          {isReady && licenseItems.length === 0 && <div></div>}
+          {isReady ? (
+            <>
+              <Table
+                data={{ nodes: licenseItems }}
+                theme={theme}
+                layout={{ custom: true, horizontalScroll: true }}
+              >
+                {(tableList: CMMSLicense[]) => (
+                  <>
+                    <Header>
+                      <HeaderRow>
+                        <HeaderCell resize>ID</HeaderCell>
+                        <HeaderCell resize>Asset</HeaderCell>
+                        <HeaderCell resize>Plant Location</HeaderCell>
+                        <HeaderCell resize>License</HeaderCell>
+                        <HeaderCell resize>License Provider</HeaderCell>
+                        <HeaderCell resize>License Type</HeaderCell>
+                        <HeaderCell resize>Aquisition Date</HeaderCell>
+                        <HeaderCell resize>Expiry Date</HeaderCell>
+                        <HeaderCell resize>Days To Expiry</HeaderCell>
+                        <HeaderCell resize>Status</HeaderCell>
+                        <HeaderCell resize>Actions</HeaderCell>
+                      </HeaderRow>
+                    </Header>
 
-                  <Body>
-                    {tableList.map((item) => {
-                      // console.log(item);
-                      return (
-                        <Row key={item.id} item={item}>
-                          <Cell>{item.id}</Cell>
-                          <Cell>{item.linked_asset_name}</Cell>
-                          <Cell>{item.plant_name}</Cell>
-                          <Cell>{item.license_name}</Cell>
-                          <Cell>{item.license_provider}</Cell>
-                          <Cell>{item.license_type}</Cell>
-                          <Cell>
-                            {item.acquisition_date
-                              ? moment(new Date(item.acquisition_date)).format(
-                                  "MMMM Do YYYY, h:mm:ss a"
-                                )
-                              : null}
-                          </Cell>
-                          <Cell>
-                            {item.expiry_date
-                              ? moment(new Date(item.expiry_date)).format(
-                                  "MMMM Do YYYY, h:mm:ss a"
-                                )
-                              : null}
-                          </Cell>
-                          <Cell>
-                            {item.acquisition_date && item.expiry_date
-                              ? handleDaysToExpire(
-                                  new Date(item.acquisition_date),
-                                  new Date(item.expiry_date)
-                                ) + " days"
-                              : null}{" "}
-                          </Cell>
-                          <Cell>
-                            <span
-                              style={{
-                                color: getColor(item.status),
-                                fontWeight: "bold",
-                              }}
-                            >
-                              {item.status}
-                            </span>
-                          </Cell>
-                          <Cell>
-                            {item.status_id === 2 && 
-                              <>
-                                <Link href={`/License/Acquire/${item.id}`}>
-                                  <AiOutlineFileDone size={22} title={"Acquire"} />
+                    <Body>
+                      {tableList.map((item) => {
+                        // console.log(item);
+                        return (
+                          <Row key={item.id} item={item}>
+                            <Cell>{item.id}</Cell>
+                            <Cell>{item.linked_asset_name}</Cell>
+                            <Cell>{item.plant_name}</Cell>
+                            <Cell>{item.license_name}</Cell>
+                            <Cell>{item.license_provider}</Cell>
+                            <Cell>{item.license_type}</Cell>
+                            <Cell>
+                              {item.acquisition_date
+                                ? moment(
+                                    new Date(item.acquisition_date)
+                                  ).format("MMMM Do YYYY, h:mm:ss a")
+                                : null}
+                            </Cell>
+                            <Cell>
+                              {item.expiry_date
+                                ? moment(new Date(item.expiry_date)).format(
+                                    "MMMM Do YYYY, h:mm:ss a"
+                                  )
+                                : null}
+                            </Cell>
+                            <Cell>
+                              {item.acquisition_date && item.expiry_date
+                                ? handleDaysToExpire(
+                                    new Date(item.acquisition_date),
+                                    new Date(item.expiry_date)
+                                  ) + " days"
+                                : null}{" "}
+                            </Cell>
+                            <Cell>
+                              <span
+                                style={{
+                                  color: getColor(item.status),
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {item.status}
+                              </span>
+                            </Cell>
+                            <Cell>
+                              {item.status_id === 1 || item.status_id === 2 ? (
+                                <>
+                                  <Link href={`/License/Acquire/${item.id}`}>
+                                    <AiOutlineFileDone
+                                      size={22}
+                                      title={"Acquire"}
+                                    />
+                                  </Link>
+                                </>
+                              ) : (
+                                // : (user.data!.role_id === Role.Admin ||
+                                //     user.data!.role_id === Role.Manager ||
+                                //     user.data!.role_id === Role.Engineer) &&
+                                //   item.status_id === 1 ? (
+                                //   <Link href={`/Feedback/Assign/${item.id}`}>
+                                //     <AiOutlineUserAdd size={22} title={"Assign"} />
+                                //   </Link>
+                                // )
+                                <Link href={`/License/Renew/${item.id}`}>
+                                  <BiRefresh size={22} title={"Renew"} />
                                 </Link>
-                              </>}
-                            {item.status_id === 3 &&
-                              // : (user.data!.role_id === Role.Admin ||
-                              //     user.data!.role_id === Role.Manager ||
-                              //     user.data!.role_id === Role.Engineer) &&
-                              //   item.status_id === 1 ? (
-                              //   <Link href={`/Feedback/Assign/${item.id}`}>
-                              //     <AiOutlineUserAdd size={22} title={"Assign"} />
-                              //   </Link>
-                              // )
-                              <Link href={`/License/Renew/${item.id}`}>
-                                <BiRefresh size={22} title={"Renew"} />
-                              </Link>
-                            }
-                            <Link href={`/License/Edit/${item.id}`}>
+                              )}
+                              <Link href={`/License/Edit/${item.id}`}>
                                 <AiOutlineEdit size={22} title={"Edit"} />
-                            </Link>
-                            <Link href={`/License/View/${item.id}`}>
+                              </Link>
+                              <Link href={`/License/View/${item.id}`}>
                                 <AiOutlineFolderView size={22} title={"View"} />
-                            </Link>
-                            <AiOutlineHistory
-                              color={"#C70F2B"}
-                              onClick={() => setHistory(item.activity_log)}
-                              size={22}
-                              title={"View History"}
-                            />
-                          </Cell>
-                        </Row>
-                      );
-                    })}
-                  </Body>
-                </>
-              )}
-            </Table>
+                              </Link>
+                              <AiOutlineHistory
+                                color={"#C70F2B"}
+                                onClick={() => setHistory(item.activity_log)}
+                                size={22}
+                                title={"View History"}
+                              />
+                            </Cell>
+                          </Row>
+                        );
+                      })}
+                    </Body>
+                  </>
+                )}
+              </Table>
 
-            <Pagination
-              setPage={setPage}
-              setReady={setReady}
-              totalPages={totalPages}
-              page={page}
-            />
-          </>
-        ) : (
-          <div
-            style={{
-              position: "absolute",
-              top: "100%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              textAlign: "center",
-            }}
-          >
-            <LoadingHourglass />
-          </div>
-        )}
-        {history && (
-          <ModuleModal
-            isOpen={!!history}
-            closeModal={() => setHistory(undefined)}
-            closeOnOverlayClick={true}
-            large
-          >
-            <LicenseHistory history={history} />
-          </ModuleModal>
-        )}
-      </ModuleContent>}
+              <Pagination
+                setPage={setPage}
+                setReady={setReady}
+                totalPages={totalPages}
+                page={page}
+              />
+            </>
+          ) : (
+            <div
+              style={{
+                position: "absolute",
+                top: "100%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                textAlign: "center",
+              }}
+            >
+              <LoadingHourglass />
+            </div>
+          )}
+          {history && (
+            <ModuleModal
+              isOpen={!!history}
+              closeModal={() => setHistory(undefined)}
+              closeOnOverlayClick={true}
+              large
+            >
+              <LicenseHistory history={history} />
+            </ModuleModal>
+          )}
+        </ModuleContent>
+      )}
     </ModuleMain>
   );
 };
