@@ -97,5 +97,5 @@ const fetchDraftLicenses = async (req, res, next) => {
 };
 
 module.exports = {
-  fetchDraftLicenses,
-};
+    fetchDraftLicenses,
+}
