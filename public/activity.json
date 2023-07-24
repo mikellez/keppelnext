@@ -9,5 +9,9 @@
     "Assets":{
         "table": "keppel.plant_system_assets",
         "format": "yyyy-mm-dd HH24:MI:SS:text"
+    },
+    "ScheduleChecklist":{
+        "table": "keppel.schedule_checklist",
+        "format": "yyyy-mm-dd HH24:MI:SS:text"
     }
 }

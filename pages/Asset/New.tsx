@@ -296,13 +296,13 @@ export default function NewAsset(props: NewAssetProps) {
   return (
     <ModuleMain>
       <ModuleHeader header="New Asset">
-      <button
-            className={"btn btn-secondary"}
-            type="button"
-            onClick={() => router.back()}
-          >
-            Back
-          </button>  
+        <button
+          className={"btn btn-secondary"}
+          type="button"
+          onClick={() => router.back()}
+        >
+          Back
+        </button>
       </ModuleHeader>
       <ModuleContent includeGreyContainer grid>
         <div className={formStyles.halfContainer}>
@@ -375,8 +375,6 @@ export default function NewAsset(props: NewAssetProps) {
               <RequiredIcon />
             </label>
             <div className="input-group">
-
-            
               <select
                 className="form-select"
                 defaultValue={0}
@@ -405,8 +403,6 @@ export default function NewAsset(props: NewAssetProps) {
               <RequiredIcon />
             </label>
             <div className="input-group">
-
-            
               <select
                 className="form-select"
                 defaultValue={""}
@@ -419,7 +415,10 @@ export default function NewAsset(props: NewAssetProps) {
                 </option>
                 <option value={"NA"}>NA</option>
                 {props.assetTypes.map((assetType) => (
-                  <option key={assetType.asset_type} value={assetType.asset_type}>
+                  <option
+                    key={assetType.asset_type}
+                    value={assetType.asset_type}
+                  >
                     {assetType.asset_type}
                   </option>
                 ))}
@@ -436,7 +435,9 @@ export default function NewAsset(props: NewAssetProps) {
               <select
                 className="form-select"
                 defaultValue={""}
-                disabled={!form.system_asset_id || !!form.system_asset_name_form}
+                disabled={
+                  !form.system_asset_id || !!form.system_asset_name_form
+                }
                 onChange={handleForm}
                 name="system_asset_name"
               >
@@ -461,7 +462,7 @@ export default function NewAsset(props: NewAssetProps) {
                 disabled={!form.system_asset_id && !form.system_asset_form}
                 name="system_asset_name_form"
                 placeholder="Enter New System Asset Name"
-                disabled={!form.system_asset}
+                // disabled={!form.system_asset}
               />
             </div>
           </div>
@@ -471,7 +472,10 @@ export default function NewAsset(props: NewAssetProps) {
               <select
                 className="form-select"
                 defaultValue={0}
-                disabled={(!form.system_asset_name && !form.system_asset_name_form) || !!form.sub_component_1_form}
+                disabled={
+                  (!form.system_asset_name && !form.system_asset_name_form) ||
+                  !!form.sub_component_1_form
+                }
                 onChange={handleForm}
                 name="sub_component_1"
               >
@@ -495,7 +499,9 @@ export default function NewAsset(props: NewAssetProps) {
                 onChange={handleForm}
                 name="sub_component_1_form"
                 placeholder="Enter New Sub-Component"
-                disabled={!form.system_asset_name && !form.system_asset_name_form}
+                disabled={
+                  !form.system_asset_name && !form.system_asset_name_form
+                }
               />
             </div>
           </div>

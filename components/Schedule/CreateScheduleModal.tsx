@@ -89,7 +89,7 @@ async function checkScheduleList(scheduleList: CMMSSchedule[]) {
       !scheduleList[i].startDate ||
       !scheduleList[i].endDate ||
       !scheduleList[i].remarks ||
-      scheduleList[i].remarks === "" ||
+      // scheduleList[i].remarks === "" ||
       scheduleList[i].recurringPeriod === -1
     ) {
       return scheduleList[i].scheduleId;

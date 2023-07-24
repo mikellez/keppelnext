@@ -1,6 +1,8 @@
 const db = require("../../db");
 const moment = require("moment");
 const dateHandler = require("../dateHandler");
+const { getFieldsDiff } = require("../global");
+const { activity } = require(".");
 
 // Function to get a schdeule dates
 const makeScheduleDict = (arr) => {
@@ -645,6 +647,21 @@ const manageSingleEvent = (req, res, next) => {
 
 const createSingleEvent = (req, res, next) => {
   const data = req.body.schedule;
+  const name = req.user.name;
+  const role_name = req.user.role;
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
+  const history = `PENDING_previous date: ${data.prevDate}_created by ${data.userId}`;
+  const activity_log = [
+    {
+      date: today,
+      name: req.user.name,
+      role: role_name,
+      activity: "Schedule Created",
+      activity_type: "PENDING",
+    },
+  ];
+
   global.db.query(
     `INSERT INTO KEPPEL.SCHEDULE_CHECKLIST 
             (
@@ -661,20 +678,22 @@ const createSingleEvent = (req, res, next) => {
                 PREV_SCHEDULE_ID,
                 TIMELINE_ID,
                 STATUS,
-                INDEX
+                INDEX,
+                ACTIVITY_LOG
             )
-            VALUES ($1, $2, $3, $4, 0, 1, $5, $6, ARRAY [${data.userIds}], $7, $8, $9, 4, $10)`,
+            VALUES ($1, $2, $3, $4, 0, 1, $5, $6, ARRAY [${data.userIds}], $7, $8, $9, 4, $10, $11)`,
     [
       data.checklistId,
       data.remarks,
       data.startDate,
       data.endDate,
-      `PENDING_previous date: ${data.prevDate}_created by ${data.userId}`,
+      history,
       data.userId,
       data.plantId,
       req.params.schedule_id,
       data.timelineId,
       req.params.index,
+      JSON.stringify(activity_log)
     ],
     (err) => {
       if (err) throw err;
@@ -776,23 +795,42 @@ const getScheduleById = (req, res, next) => {
 };
 
 const updateSchedule = async (req, res, next) => {
+  const name = req.user.name;
+  const role_name = req.user.role_name;
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
   global.db.query(
     `
     UPDATE keppel.schedule_checklist SET
-        checklist_template_id = $1,
-        remarks = $2,
-        start_date = $3, 
-        end_date = $4, 
-        recurrence_period = $5, 
-        reminder_recurrence = $6, 
-        scheduler_history = CONCAT('created by',$7::varchar), 
-        user_id = $8, 
-        scheduler_userids_for_email = $9::int[], 
-        plant_id = $10, 
-        timeline_id = $11, 
-        prev_schedule_id = $12, 
-        status = 3 
-    WHERE schedule_id = $13;`,
+      checklist_template_id = $1,
+      remarks = $2,
+      start_date = $3, 
+      end_date = $4, 
+      recurrence_period = $5, 
+      reminder_recurrence = $6, 
+      scheduler_history = CONCAT('created by',$7::varchar), 
+      user_id = $8, 
+      scheduler_userids_for_email = $9::int[], 
+      plant_id = $10, 
+      timeline_id = $11, 
+      prev_schedule_id = $12, 
+      status = 3
+    FROM keppel.schedule_checklist t
+    WHERE keppel.schedule_checklist.schedule_id = $13
+    AND keppel.schedule_checklist.schedule_id = t.schedule_id
+    RETURNING 
+      t.checklist_template_id AS checklistId,
+      t.remarks AS remarks,
+      TO_CHAR(t.start_date::TIMESTAMP WITH TIME ZONE AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS startDate,
+      TO_CHAR(t.end_date::TIMESTAMP WITH TIME ZONE AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS endDate,
+      t.recurrence_period AS recurringPeriod,
+      t.reminder_recurrence AS reminderRecurrence,
+      t.user_id AS userId,
+      t.scheduler_userids_for_email AS assignedIds,
+      t.plant_id AS plantId,
+      t.timeline_id AS timelineId,
+      t.prev_schedule_id AS prevId
+    ;`,
     [
       req.body.schedule.checklistId,
       req.body.schedule.remarks,
@@ -806,11 +844,45 @@ const updateSchedule = async (req, res, next) => {
       req.body.schedule.plantId,
       req.body.schedule.timelineId,
       req.body.schedule.prevId,
-      req.body.schedule.scheduleId,
+      req.body.schedule.scheduleId
     ],
     (err, result) => {
-      if (err) throw res.status(500).send("unable to update schedule");
-      if (result) return res.status(200).send("schedule successfully updated");
+      if (err) {
+        console.log(err)
+        throw res.status(500).send("unable to update schedule");
+      }
+      if (result) {
+        const updatedSchedule = result.rows[0];
+        const fields = getFieldsDiff(updatedSchedule, req.body.schedule);
+
+        const activity_log = [{
+          date: today,
+          name: name,
+          role: role_name,
+          activity: `Edited Schedule: [${fields.map(field=>`${field.field}: ${field.oldValue} => ${field.newValue}`).join(", ")}]`,
+          activity_type: "Edited",
+          fields: [fields]
+        }];
+
+        console.log(activity_log)
+
+        global.db.query(
+          `UPDATE 
+            keppel.schedule_checklist 
+            SET 
+              activity_log = activity_log || $1::jsonb
+              WHERE schedule_id = $2`,
+          [
+            JSON.stringify(activity_log), 
+            req.body.schedule.scheduleId
+          ],
+          (err, result) => {
+            if (err) console.log(err)
+          }
+        );
+
+        return res.status(200).send("schedule updated successfully")
+      }
     }
   );
 };
