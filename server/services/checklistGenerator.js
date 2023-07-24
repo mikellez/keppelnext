@@ -98,8 +98,8 @@ const createChecklistFromTemplate = async (schedule) => {
     {
       date: today,
       name: "System Generated",
-      activity: assignedID ? "ASSIGNED" : "PENDING",
-      activity_type: "Created Checklist Record",
+      activity: "Created Checklist Record",
+      activity_type: assignedID ? "ASSIGNED" : "PENDING",
     },
   ];
   const status = assignedID ? 2 : 1;

@@ -2132,10 +2132,16 @@ router.get(
   controllers.license.fetchExpiredLicenses
 );
 
+router.get(
+  "/license/expiry_dates",
+  checkIfLoggedInAPI,
+  controllers.license.fetchExpiryDates
+)
+
 router
   .route("/license/:id", checkIfLoggedInAPI)
   .get(controllers.license.fetchSingleLicense)
-  .delete(controllers.license.deleteLicense);
+  .patch(controllers.license.deleteLicense);
 
 router.patch(
   "/license/:id",
@@ -2154,6 +2160,8 @@ router.patch("/license/renew/:id",
   checkIfLoggedInAPI,
   controllers.license.renewLicense
 );
+
+
 
 router.get(
   "/license/images/:id",

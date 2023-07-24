@@ -195,7 +195,7 @@ interface CMMSPlant {
 interface CMMSEvent {
   title: string;
   start?: Date | string;
-  extendedProps: { [key: string]: any };
+  extendedProps?: { [key: string]: any };
 }
 
 interface CMMSScheduleEvent extends CMMSEvent {
