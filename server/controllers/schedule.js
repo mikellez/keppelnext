@@ -861,7 +861,7 @@ const updateSchedule = async (req, res, next) => {
           role: role_name,
           activity: `Edited Schedule: [${fields.map(field=>`${field.field}: ${field.oldValue} => ${field.newValue}`).join(", ")}]`,
           activity_type: "Edited",
-          fields: [fields]
+          fields: fields
         }];
 
         console.log(activity_log)

@@ -736,7 +736,7 @@ const editAsset = async (req, res, next) => {
     role: req.user.role_name,
     activity: `Edited Asset: [${fields.map(field=>`${field.field}: ${field.oldValue} => ${field.newValue}`).join(", ")}]`,
     activity_type: "EDITED",
-    fields: [fields]
+    fields: fields
   }];
 
   console.log(activity_log)

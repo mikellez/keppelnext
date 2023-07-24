@@ -25,6 +25,21 @@ interface HistoryItem {
   name: string;
 }
 
+const renderFields = (fields: string) => {
+  if(fields === '' || !fields) return '';
+  const items = JSON.parse(fields);
+  return (
+    <>
+      {items.map((item) => (
+        <div key={item.field}>
+          <b>{item.field}:</b>{` ${item.oldValue} => `}
+          <mark>{item.newValue}</mark>
+        </div>
+      ))}
+    </>
+  );
+}
+
 const COLUMNS: Column<HistoryItem>[] = [
   //   {
   //     label: "Status",
@@ -44,7 +59,7 @@ const COLUMNS: Column<HistoryItem>[] = [
   },
   {
     label: "Fields changed",
-    renderCell: (item) => item.fields,
+    renderCell: (item) => renderFields(item.fields),
   },
 ];
 
