@@ -127,7 +127,7 @@ const fetchAcquiredLicenseQuery = (expand, search, plantId) => {
   }
 };
 
-const fetchArchiveLicenseQuery = (expand, search, plantId) => {
+const fetchArchivedLicenseQuery = (expand, search, plantId) => {
   const q =
     fetchAllLicenseQuery(expand, search) +
     `
@@ -263,7 +263,7 @@ const fetchExpiredLicenses = async (req, res, next) => {
   }
 };
 
-const fetchArchiveLicenses = async (req, res, next) => {
+const fetchArchivedLicenses = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
   const expand = req.query.expand || false;
@@ -272,7 +272,7 @@ const fetchArchiveLicenses = async (req, res, next) => {
 
   const pagesQuery =
     `SELECT COUNT(*) AS row_count FROM (` +
-    fetchArchiveLicenseQuery(expand, search, plantId) +
+    fetchArchivedLicenseQuery(expand, search, plantId) +
     `) subquery`;
 
   try {
@@ -280,7 +280,7 @@ const fetchArchiveLicenses = async (req, res, next) => {
     const totalRows = tmp.rows[0].row_count;
     const totalPages = Math.ceil(+totalRows / ITEMS_PER_PAGE);
     const query =
-      fetchArchiveLicenseQuery(expand, search, plantId) +
+      fetchArchivedLicenseQuery(expand, search, plantId) +
       ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
     // console.log(query);
     const result = await global.db.query(query, [req.user.id]);
@@ -511,5 +511,5 @@ module.exports = {
   fetchAcquiredLicenses,
   fetchExpiredLicenses,
   fetchExpiryDates,
-  fetchArchiveLicenses,
+  fetchArchivedLicenses,
 };

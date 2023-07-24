@@ -155,6 +155,10 @@ export const getColor = (status: string) => {
       return "#B71375";
     case "ACQUIRED":
       return "#0ebd05";
+    case "ARCHIVED":
+      return "#ff8b3d";
+    case "EXPIRED":
+      return "#B71375";
     default:
       return "#757575";
   }

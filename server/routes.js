@@ -2139,9 +2139,9 @@ router.get(
 );
 
 router.get(
-  "/license/archive",
+  "/license/archived",
   checkIfLoggedInAPI,
-  controllers.license.fetchArchiveLicenses
+  controllers.license.fetchArchivedLicenses
 );
 
 router
