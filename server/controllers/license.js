@@ -278,8 +278,9 @@ const createLicense = async (req, res, next) => {
             assigned_user_id,
             images,
             status_id,
-            activity_log
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+            activity_log,
+            deleted
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
     `;
   try {
     await global.db.query(query, [
@@ -294,6 +295,7 @@ const createLicense = async (req, res, next) => {
       images,
       status,
       JSON.stringify(activity_log),
+      false
     ]);
     res.status(200).send("Successfully created license");
   } catch (err) {

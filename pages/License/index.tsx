@@ -32,14 +32,20 @@ import {
   AiOutlineHistory,
   AiOutlineEdit,
 } from "react-icons/ai";
+import { BsCalendar4Week, BsListUl } from "react-icons/bs";
+
 import { Role } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
 import LoadingHourglass from "../../components/LoadingHourglass";
 import PlantSelect from "../../components/PlantSelect";
 import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 import LicenseHistory from "../../components/License/LicenseHistory";
+import scheduleStyles from "../../styles/Schedule.module.scss";
+import LicenseCalendar from "../../components/License/LicenseCalendar";
+
 
 import { BiRefresh } from "react-icons/bi";
+import { Divider } from "antd";
 
 const indexedColumn: ("draft" | "acquired" | "expired")[] = [
   "draft",
@@ -49,11 +55,12 @@ const indexedColumn: ("draft" | "acquired" | "expired")[] = [
 
 const License = () => {
   const [licenseItems, setLicenseItems] = useState<CMMSFeedback[]>([]);
-  const [isReady, setReady] = useState(false);
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [isReady, setReady] = useState<boolean>(false);
+  const [calendarView, setCalendarView] = useState<boolean>(false);
+  const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
   const user = useCurrentUser();
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
   const [selectedPlant, setSelectedPlant] = useState<number>(0);
   const [history, setHistory] = useState<
     { [key: string]: string }[] | undefined
@@ -134,7 +141,27 @@ const License = () => {
 
   return (
     <ModuleMain>
-      <ModuleHeader title="License" header="License">
+      <ModuleHeader 
+        title="License" 
+        header="License"
+        leftChildren={
+          <div className={`${scheduleStyles.eventModalHeader} mt-2`}>
+              <label className={scheduleStyles.toggle}>
+                  <input
+                      type="checkbox"
+                      onChange={() => setCalendarView((prev) => !prev)}
+                  />
+                  <span className={scheduleStyles.slider}></span>
+              </label>
+              <div id="top-toggle-img" className="ms-3">
+                {calendarView ? (
+                    <BsCalendar4Week size={20} />
+                ) : (
+                    <BsListUl size={20} />
+                )}
+              </div>
+          </div>
+        }>
         <PlantSelect onChange={changePlant} allPlants={true} />
         <Link href="/License/New">
           <TooltipBtn text="New License">
