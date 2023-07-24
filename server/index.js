@@ -11,6 +11,7 @@ const checklistGenerator = require("./services/checklistGenerator");
 const controllers = require("./controllers");
 const { apiLimiter, loginLimiter } = require("./rateLimiter");
 const { access } = require("fs");
+const licenseCron = require("./services/licenseCron");
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -212,6 +213,7 @@ app.prepare().then(() => {
   );
 
   task.start();
+  licenseCron.start();
 
   checklistGenerator.start();
 });

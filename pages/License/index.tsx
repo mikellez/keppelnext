@@ -40,6 +40,7 @@ import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 import LicenseHistory from "../../components/License/LicenseHistory";
 
 import { BiRefresh } from "react-icons/bi";
+import fetchExpiredLicense from "../../server/services/licenseCron";
 
 const indexedColumn: ("draft" | "acquired" | "expired")[] = [
   "draft",
@@ -128,9 +129,9 @@ const License = () => {
       });
   }, [selectedPlant, activeTabIndex, page]);
 
-  useEffect(() => {
-    console.log(licenseItems);
-  }, [licenseItems]);
+  // useEffect(() => {
+  //   console.log(licenseItems);
+  // }, [licenseItems]);
 
   return (
     <ModuleMain>
@@ -244,7 +245,10 @@ const License = () => {
                             {item.status_id === 1 || item.status_id === 2 ? (
                               <>
                                 <Link href={`/License/Acquire/${item.id}`}>
-                                  <AiOutlineFileDone size={22} title={"Acquire"} />
+                                  <AiOutlineFileDone
+                                    size={22}
+                                    title={"Acquire"}
+                                  />
                                 </Link>
                               </>
                             ) : (
@@ -261,10 +265,10 @@ const License = () => {
                               </Link>
                             )}
                             <Link href={`/License/Edit/${item.id}`}>
-                                <AiOutlineEdit size={22} title={"Edit"} />
+                              <AiOutlineEdit size={22} title={"Edit"} />
                             </Link>
                             <Link href={`/License/View/${item.id}`}>
-                                <AiOutlineFolderView size={22} title={"View"} />
+                              <AiOutlineFolderView size={22} title={"View"} />
                             </Link>
                             <AiOutlineHistory
                               color={"#C70F2B"}

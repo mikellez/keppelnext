@@ -4,8 +4,8 @@ class FeedbackMail extends Mail {
   constructor(recipient, subject, content, feedback, carbon_copy = null) {
     // console.log(feedback);
     const emailContent = `
-            Dear ${feedback.name},</br></br>
-            ${content}</br>
+            Dear ${feedback.name},<br></br>
+            ${content}<br/>
         `;
     super(recipient, subject, emailContent, carbon_copy);
   }

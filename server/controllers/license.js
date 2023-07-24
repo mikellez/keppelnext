@@ -220,7 +220,7 @@ const fetchAcquiredLicenses = async (req, res, next) => {
 };
 const fetchExpiredLicenses = async (req, res, next) => {
   const page = req.query.page || 1;
-  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE || 0;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
   const plantId = req.query.plantId || 0;
@@ -353,10 +353,7 @@ const renewLicense = async (req, res) => {
         WHERE license_id = $2
     `;
   try {
-    await global.db.query(query, [
-      req.body.expiry_date,
-      req.params.id,
-    ]);
+    await global.db.query(query, [req.body.expiry_date, req.params.id]);
     res.status(200).send("Successfully renewed license");
   } catch (err) {
     console.log(err);
@@ -368,17 +365,15 @@ const deleteLicense = async (req, res) => {
   const query = `
     DELETE FROM keppel.license
       WHERE license_id = $1  
-  `
+  `;
   try {
-    await global.db.query(query, [
-      req.params.id,
-    ]);
+    await global.db.query(query, [req.params.id]);
     res.status(200).send("Successfully deleted license");
   } catch (err) {
     console.log(err);
     res.status(500).send("Error occurred deleting license");
   }
-}
+};
 
 module.exports = {
   fetchDraftLicenses,
