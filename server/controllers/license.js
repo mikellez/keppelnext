@@ -447,6 +447,32 @@ const renewLicense = async (req, res) => {
   }
 };
 
+const archiveLicense = async (req, res) => {
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const query = `
+    UPDATE keppel.license SET
+      status_id = 5,
+      activity_log = activity_log || 
+        jsonb_build_object(
+          'date', '${today}',
+          'name', '${req.user.name}',
+          'activity', $2::text,
+          'activity_type', 'ARCHIVED'
+        )
+      WHERE license_id = $1  
+  `;
+  try {
+    await global.db.query(query, [
+      req.params.id,
+      `License ID-${req.params.id} Archived`,
+    ]);
+    res.status(200).send("Successfully archived license");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error occurred archiving license");
+  }
+}
+
 const deleteLicense = async (req, res) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const query = `
@@ -507,6 +533,7 @@ module.exports = {
   editLicense,
   acquireLicense,
   renewLicense,
+  archiveLicense,
   deleteLicense,
   fetchAcquiredLicenses,
   fetchExpiredLicenses,

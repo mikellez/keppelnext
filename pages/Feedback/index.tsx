@@ -141,6 +141,7 @@ export default function Feedback() {
       "loc_floor",
       "loc_room",
       "name",
+      "status_id",
     ];
 
     instance
@@ -148,6 +149,7 @@ export default function Feedback() {
         `/api/feedback/${indexedColumn[activeTabIndex]}?page=${page}&expand=${PARAMS}`
       )
       .then((response) => {
+        console.log(response.data.rows);
         setFeedbackItems(
           response.data.rows.map((row: CMMSFeedback) => {
             return {

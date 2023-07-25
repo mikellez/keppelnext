@@ -61,6 +61,7 @@ const LicenseContainer = ({
   const [successModal, setSuccessModal] = useState<boolean>(false);
   const [missingFields, setMissingFields] = useState<boolean>(false);
   const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
+  const [confirmArchive, setConfirmArchive] = useState<boolean>(false);
 
   const router = useRouter();
   console.log(type);
@@ -174,6 +175,15 @@ const LicenseContainer = ({
       });
     };
   };
+
+  const handleArchive = () => {
+    instance.patch(`/api/license/archive/${licenseForm.license_id}`)
+      .then(res => {
+        console.log(res);
+        router.push("/License");
+      })
+      .catch((err) => console.log(err));
+  }
 
   const handleDelete = () => {
     instance
@@ -440,15 +450,7 @@ const LicenseContainer = ({
       </ModuleContent>
       <div className="d-flex justify-content-end">
         
-        {type === "edit" && (
-          <div>
-            <button
-            className="btn btn-primary d-flex me-3"
-            onClick={() => setConfirmDelete(true)}
-            style={{ backgroundColor: "#F7C04A", borderColor: "#F7C04A" }}
-          >
-            Archive
-          </button>
+        {type === "edit" && 
           <button
             className="btn btn-primary d-flex me-3"
             onClick={() => setConfirmDelete(true)}
@@ -456,8 +458,15 @@ const LicenseContainer = ({
           >
             Delete
           </button>
-          </div>
-        )}
+        }
+        {type === "edit" && 
+          <button
+            className="btn btn-primary d-flex me-3"
+            onClick={() => setConfirmArchive(true)}
+            style={{ backgroundColor: "#FF8B3D", borderColor: "#FF8B3D" }}
+          >
+            Archive
+          </button>}
         {!disabled && (
           <button className="btn btn-primary d-flex" onClick={handleSubmit}>
             Submit
@@ -508,6 +517,31 @@ const LicenseContainer = ({
           <button
             key="deleteCancel"
             onClick={() => setConfirmDelete(false)}
+            className="btn btn-secondary"
+          >
+            Cancel
+          </button>,
+        ]}
+      />
+      <ModuleSimplePopup
+        setModalOpenState={setConfirmArchive}
+        modalOpenState={confirmArchive}
+        title="Are you sure?"
+        text="This action cannot be undone"
+        icon={SimpleIcon.Exclaim}
+        shouldCloseOnOverlayClick={true}
+        buttons={[
+          <button
+            key="archiveConfirm"
+            onClick={handleArchive}
+            className="btn"
+            style={{backgroundColor: "#FF8B3D" }}
+          >
+            Archive
+          </button>,
+          <button
+            key="archiveCancel"
+            onClick={() => setConfirmArchive(false)}
             className="btn btn-secondary"
           >
             Cancel

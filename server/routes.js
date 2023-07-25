@@ -2279,7 +2279,7 @@ router.get(
 router
   .route("/license/:id", checkIfLoggedInAPI)
   .get(controllers.license.fetchSingleLicense)
-  .patch(controllers.license.deleteLicense);
+  .delete(controllers.license.deleteLicense);
 
 router.patch(
   "/license/:id",
@@ -2292,6 +2292,12 @@ router.patch(
   "/license/acquire/:id",
   checkIfLoggedInAPI,
   controllers.license.acquireLicense
+);
+
+router.patch(
+  "/license/archive/:id",
+  checkIfLoggedInAPI,
+  controllers.license.archiveLicense
 );
 
 router.patch(
