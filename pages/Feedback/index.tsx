@@ -141,6 +141,7 @@ export default function Feedback() {
       "loc_floor",
       "loc_room",
       "name",
+      "status_id",
     ];
 
     instance

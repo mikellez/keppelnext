@@ -127,6 +127,20 @@ const fetchAcquiredLicenseQuery = (expand, search, plantId) => {
   }
 };
 
+const fetchArchivedLicenseQuery = (expand, search, plantId) => {
+  const q =
+    fetchAllLicenseQuery(expand, search) +
+    `
+    AND ua.user_id = $1 AND
+    (lc.status_id = 5)
+  `;
+  if (plantId == 0) {
+    return q;
+  } else {
+    return q + ` AND lc.plant_id = ${plantId}`;
+  }
+};
+
 const fetchSingleLicense = async (req, res, next) => {
   console.log("Fetching single license");
   const expand = req.query.expand || false;
@@ -249,6 +263,34 @@ const fetchExpiredLicenses = async (req, res, next) => {
   }
 };
 
+const fetchArchivedLicenses = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
+  const plantId = req.query.plantId || 0;
+
+  const pagesQuery =
+    `SELECT COUNT(*) AS row_count FROM (` +
+    fetchArchivedLicenseQuery(expand, search, plantId) +
+    `) subquery`;
+
+  try {
+    const tmp = await global.db.query(pagesQuery, [req.user.id]);
+    const totalRows = tmp.rows[0].row_count;
+    const totalPages = Math.ceil(+totalRows / ITEMS_PER_PAGE);
+    const query =
+      fetchArchivedLicenseQuery(expand, search, plantId) +
+      ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+    // console.log(query);
+    const result = await global.db.query(query, [req.user.id]);
+    return res.status(200).json({ rows: result.rows, total: totalPages });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ msg: err });
+  }
+};
+
 const createLicense = async (req, res, next) => {
   const license = req.body;
   console.log(req.files);
@@ -291,7 +333,7 @@ const createLicense = async (req, res, next) => {
       license.assigned_user_id,
       images,
       status,
-      JSON.stringify(activity_log)
+      JSON.stringify(activity_log),
     ]);
     res.status(200).send("Successfully created license");
   } catch (err) {
@@ -433,7 +475,9 @@ const deleteLicense = async (req, res) => {
 
 const fetchExpiryDates = async (req, res) => {
   const plantId = req.query.plantId || 0;
-  let query = fetchAllLicenseQuery("id,license_name,expiry_date","") + `
+  let query =
+    fetchAllLicenseQuery("id,license_name,expiry_date", "") +
+    `
     AND ua.user_id = $1 AND
     expiry_date IS NOT NULL
   `;
@@ -467,4 +511,5 @@ module.exports = {
   fetchAcquiredLicenses,
   fetchExpiredLicenses,
   fetchExpiryDates,
+  fetchArchivedLicenses,
 };

@@ -2136,7 +2136,13 @@ router.get(
   "/license/expiry_dates",
   checkIfLoggedInAPI,
   controllers.license.fetchExpiryDates
-)
+);
+
+router.get(
+  "/license/archived",
+  checkIfLoggedInAPI,
+  controllers.license.fetchArchivedLicenses
+);
 
 router
   .route("/license/:id", checkIfLoggedInAPI)
@@ -2156,12 +2162,11 @@ router.patch(
   controllers.license.acquireLicense
 );
 
-router.patch("/license/renew/:id",
+router.patch(
+  "/license/renew/:id",
   checkIfLoggedInAPI,
   controllers.license.renewLicense
 );
-
-
 
 router.get(
   "/license/images/:id",
