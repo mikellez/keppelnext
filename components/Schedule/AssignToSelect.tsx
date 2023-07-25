@@ -51,6 +51,7 @@ const AssignToSelect = (props: AssignToSelectProps) => {
 
   const selectRef = useRef<any>(null);
 
+
   useEffect(() => {
     if (!props.value && selectRef.current) {
       selectRef.current.setValue("");
@@ -89,11 +90,13 @@ const AssignToSelect = (props: AssignToSelectProps) => {
         if (props.defaultIds && props.defaultIds[0] != null) {
           updateDefault(users)
             .then((result) => {
-              return setDefaultOptions(result);
-            })
-            .then(() => {
+
+              setDefaultOptions(result);
+          
               setIsReady(true);
-            });
+            })
+            // .then(() => {
+            // });
         } else {
           setIsReady(true);
         }
@@ -116,7 +119,8 @@ const AssignToSelect = (props: AssignToSelectProps) => {
           styles={customStyles}
           defaultValue={props.isSingle ? defaultOptions[0] : defaultOptions}
           isDisabled={props.disabled}
-          ref={selectRef}
+          value={props.isSingle ? defaultOptions[0] : defaultOptions}
+          // ref={selectRef}
         />
       )}
     </div>

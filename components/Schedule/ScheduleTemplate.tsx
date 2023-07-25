@@ -297,7 +297,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                 <span className={styles.slider}></span>
                             </label>
 
-                            <div style={{ marginLeft: "10px" }} id="top-toggle-img">
+                            <div className="ms-3" id="top-toggle-img">
                                 {toggleCalendarOrListView ? (
                                     <BsCalendar4Week size={20} />
                                 ) : (
