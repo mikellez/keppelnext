@@ -440,15 +440,7 @@ const LicenseContainer = ({
       </ModuleContent>
       <div className="d-flex justify-content-end">
         
-        {type === "edit" && (
-          <div>
-            <button
-            className="btn btn-primary d-flex me-3"
-            onClick={() => setConfirmDelete(true)}
-            style={{ backgroundColor: "#F7C04A", borderColor: "#F7C04A" }}
-          >
-            Archive
-          </button>
+        {type === "edit" && 
           <button
             className="btn btn-primary d-flex me-3"
             onClick={() => setConfirmDelete(true)}
@@ -456,8 +448,15 @@ const LicenseContainer = ({
           >
             Delete
           </button>
-          </div>
-        )}
+        }
+        {type === "edit" && 
+          <button
+            className="btn btn-primary d-flex me-3"
+            onClick={() => setConfirmDelete(true)}
+            style={{ backgroundColor: "#FF8B3D", borderColor: "#F7C04A" }}
+          >
+            Archive
+          </button>}
         {!disabled && (
           <button className="btn btn-primary d-flex" onClick={handleSubmit}>
             Submit
