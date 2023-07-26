@@ -11,6 +11,7 @@ import {
   BsInfoCircle,
   BsQuestionCircle,
 } from "react-icons/bs";
+import LoadingHourglass from "../LoadingHourglass";
 
 export enum SimpleIcon {
   Info,
@@ -18,6 +19,7 @@ export enum SimpleIcon {
   Exclaim,
   Cross,
   Question,
+  Loading,
 }
 
 interface ModuleSimplePopupProps {
@@ -50,7 +52,10 @@ export default function ModuleSimplePopup(props: ModuleSimplePopupProps) {
     if (props.icon === SimpleIcon.Question)
       return <BsQuestionCircle size={122} color="#CD0404" />;
 
-    return <BsInfoCircle size={108} color="#009EFF" />;
+    if (props.icon === SimpleIcon.Info) 
+      return <BsInfoCircle size={108} color="#009EFF" />;
+    if (props.icon === SimpleIcon.Loading)
+      return <LoadingHourglass/>;
   };
 
   return (

@@ -500,6 +500,14 @@ const LicenseContainer = ({
         shouldCloseOnOverlayClick={true}
       />
       <ModuleSimplePopup
+        setModalOpenState={setIsSubmitting}
+        modalOpenState={isSubmitting}
+        title="We are processing your request"
+        text="This may take a short while. We will redirect you to the License Page after the request is processed"
+        icon={SimpleIcon.Loading}
+        shouldCloseOnOverlayClick={true}
+      />
+      <ModuleSimplePopup
         setModalOpenState={setConfirmDelete}
         modalOpenState={confirmDelete}
         title="Are you sure?"
