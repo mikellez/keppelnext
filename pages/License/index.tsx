@@ -286,7 +286,7 @@ const License = () => {
                               </span>
                             </Cell>
                             <Cell>
-                              {item.status_id === 1 || item.status_id === 2 ? (
+                              {item.status_id === 2 && 
                                 <>
                                   <Link href={`/License/Acquire/${item.id}`}>
                                     <AiOutlineFileDone
@@ -295,19 +295,20 @@ const License = () => {
                                     />
                                   </Link>
                                 </>
-                              ) : (
-                                // : (user.data!.role_id === Role.Admin ||
+                              }
+                                {/* //  user.data!.role_id === Role.Admin ||
                                 //     user.data!.role_id === Role.Manager ||
                                 //     user.data!.role_id === Role.Engineer) &&
                                 //   item.status_id === 1 ? (
                                 //   <Link href={`/Feedback/Assign/${item.id}`}>
                                 //     <AiOutlineUserAdd size={22} title={"Assign"} />
                                 //   </Link>
-                                // )
+                                //  */}
+                              {item.status_id === 3 &&
                                 <Link href={`/License/Renew/${item.id}`}>
                                   <BiRefresh size={22} title={"Renew"} />
                                 </Link>
-                              )}
+                              }
                               <Link href={`/License/Edit/${item.id}`}>
                                 <AiOutlineEdit size={22} title={"Edit"} />
                               </Link>
