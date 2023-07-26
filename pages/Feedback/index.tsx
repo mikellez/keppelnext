@@ -63,6 +63,8 @@ import {
   AiOutlineHistory,
   AiOutlineUserAdd,
 } from "react-icons/ai";
+import Tooltip from 'rc-tooltip';
+import 'rc-tooltip/assets/bootstrap_white.css';
 import PageButton from "../../components/PageButton";
 import styles from "../../styles/Request.module.scss";
 import { Role } from "../../types/common/enums";
@@ -245,7 +247,14 @@ export default function Feedback(props: FeedbackPageProps) {
                       return (
                         <Row key={item.id} item={item}>
                           <Cell>{item.id}</Cell>
-                          <Cell>{item.description}</Cell>
+                          <Cell>
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.description}</span>}>
+                                  <div>{item.description}</div>
+                              </Tooltip>
+                            </Cell>
                           <Cell>
                             <span
                               style={{
@@ -257,16 +266,47 @@ export default function Feedback(props: FeedbackPageProps) {
                             </span>
                           </Cell>
                           <Cell>
-                            {moment(new Date(item.created_date)).format(
-                              "MMMM Do YYYY, h:mm:ss a"
-                            )}
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{moment(new Date(item.created_date)).format("MMMM Do YYYY, h:mm:ss a")}</span>}>
+                                  <div>
+                                    {moment(new Date(item.created_date)).format("MMMM Do YYYY, h:mm:ss a")}
+                                  </div>
+                              </Tooltip>
                           </Cell>
-                          <Cell>{item.assigned_user_name}</Cell>
-                          <Cell>{item.plant_name}</Cell>
                           <Cell>
-                            {item.loc_floor} floor, {item.loc_room}
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.assigned_user_name}</span>}>
+                                  <div>{item.assigned_user_name}</div>
+                              </Tooltip>
+                            </Cell>
+                          <Cell>
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span>{item.plant_name}</span>}>
+                                  <div>{item.plant_name}</div>
+                              </Tooltip>
+                            </Cell>
+                          <Cell>
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.loc_floor} floor, {item.loc_room}</span>}>
+                                  <div>{item.loc_floor} floor, {item.loc_room}</div>
+                              </Tooltip>
                           </Cell>
-                          <Cell>{item.name}</Cell>
+                          <Cell>
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.name}</span>}>
+                                  <div>{item.name}</div>
+                              </Tooltip>
+                            </Cell>
                           <Cell>
                             {item.status_id === 2 || item.status_id === 3 ? (
                               <>

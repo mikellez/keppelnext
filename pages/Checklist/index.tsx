@@ -79,6 +79,10 @@ import {
   AiOutlineFileProtect,
   AiOutlineHistory,
 } from "react-icons/ai";
+
+import Tooltip from 'rc-tooltip';
+import 'rc-tooltip/assets/bootstrap_white.css';
+
 import PageButton from "../../components/PageButton";
 import styles from "../../styles/Request.module.scss";
 import { Role } from "../../types/common/enums";
@@ -342,7 +346,14 @@ export default function Checklist(props: ChecklistProps) {
                       return (
                         <Row key={item.id} item={item}>
                           <Cell>{item.id}</Cell>
-                          <Cell>{item.description}</Cell>
+                          <Cell>
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.description}</span>}>
+                                  <div>{item.description}</div>
+                              </Tooltip>
+                          </Cell>
                           <Cell>
                             <span
                               style={{
@@ -354,40 +365,100 @@ export default function Checklist(props: ChecklistProps) {
                             </span>
                           </Cell>
                           <Cell>
-                            {activeTabIndex === 2
-                              ? `${moment(
-                                  new Date(
-                                    item.activity_log
-                                      .reverse()
-                                      .find(
-                                        (activity) =>
-                                          activity["activity_type"] ==
-                                          "WORK DONE"
-                                      )!.date
-                                  )
-                                ).format("MMMM Do YYYY, h:mm:ss a")}`
-                              : activeTabIndex === 3
-                              ? `${moment(
-                                  new Date(
-                                    item.activity_log
-                                      .reverse()
-                                      .find(
-                                        (activity) =>
-                                          activity["activity_type"] ==
-                                          "APPROVED"
-                                      )!.date
-                                  )
-                                ).format("MMMM Do YYYY, h:mm:ss a")}`
-                              : `${moment(new Date(item.created_date)).format(
-                                  "MMMM Do YYYY, h:mm:ss a"
-                                )}`}
+                          <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={
+                                <span>
+                                  {activeTabIndex === 2
+                                  ? `${moment(
+                                      new Date(
+                                        item.activity_log
+                                          .reverse()
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ==
+                                              "WORK DONE"
+                                          )!.date
+                                      )
+                                    ).format("MMMM Do YYYY, h:mm:ss a")}`
+                                  : activeTabIndex === 3
+                                  ? `${moment(
+                                      new Date(
+                                        item.activity_log
+                                          .reverse()
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ==
+                                              "APPROVED"
+                                          )!.date
+                                      )
+                                    ).format("MMMM Do YYYY, h:mm:ss a")}`
+                                  : `${moment(new Date(item.created_date)).format(
+                                      "MMMM Do YYYY, h:mm:ss a"
+                                    )}`}
+                                </span>}>
+
+                                <div>
+                                  {activeTabIndex === 2
+                                  ? `${moment(
+                                    new Date(
+                                      item.activity_log
+                                        .reverse()
+                                        .find(
+                                          (activity) =>
+                                            activity["activity_type"] ==
+                                            "WORK DONE"
+                                        )!.date
+                                    )
+                                  ).format("MMMM Do YYYY, h:mm:ss a")}`
+                                : activeTabIndex === 3
+                                ? `${moment(
+                                    new Date(
+                                      item.activity_log
+                                        .reverse()
+                                        .find(
+                                          (activity) =>
+                                            activity["activity_type"] ==
+                                            "APPROVED"
+                                        )!.date
+                                    )
+                                  ).format("MMMM Do YYYY, h:mm:ss a")}`
+                                : `${moment(new Date(item.created_date)).format(
+                                    "MMMM Do YYYY, h:mm:ss a"
+                                  )}`}
+                                </div>
+                                </Tooltip>
+                            
                           </Cell>
-                          <Cell>{item.assigneduser}</Cell>
-                          <Cell>{item.signoffuser}</Cell>
                           <Cell>
-                            {item.createdbyuser != " "
-                              ? item.createdbyuser
-                              : "System Generated"}
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.assigneduser}</span>}>
+                                  <div>{item.assigneduser}</div>
+                              </Tooltip>
+                            </Cell>
+                          <Cell>
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.signoffuser}</span>}>
+                                  <div>{item.signoffuser}</div>
+                              </Tooltip>
+                            </Cell>
+                          <Cell>
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={
+                                <span>
+                                  {item.createdbyuser != " " ? item.createdbyuser : "System Generated"}
+                                </span>}>
+                                <div>
+                                  {item.createdbyuser != " " ? item.createdbyuser : "System Generated"}
+                                </div>
+                              </Tooltip>
                           </Cell>
                           <Cell>
                             {(user.data!.role_id === Role.Admin ||
