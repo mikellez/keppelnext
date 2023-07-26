@@ -272,9 +272,9 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     const getDraftLicense = instance.get(`/api/license/draft/${plant}/${datetype}/${date}?expand=${PARAMS.join(",")}`);
     const getAcquiredLicense = instance.get(`/api/license/acquired/${plant}/${datetype}/${date}?expand=${PARAMS.join(",")}`);
 
-    const getLicenseExpiredIn30 = instance.get(`/api/license/expired/${plant}/${datetype}/${date}/30`);
-    const getLicenseExpiredIn60 = instance.get(`/api/license/expired/${plant}/${datetype}/${date}/60`);
-    const getLicenseExpiredIn90 = instance.get(`/api/license/expired/${plant}/${datetype}/${date}/90`);
+    const getLicenseExpiredIn30 = instance.get(`/api/license/expired/${plant}/${datetype}/${date}/30?expand=${PARAMS.join(",")}`);
+    const getLicenseExpiredIn60 = instance.get(`/api/license/expired/${plant}/${datetype}/${date}/60?expand=${PARAMS.join(",")}`);
+    const getLicenseExpiredIn90 = instance.get(`/api/license/expired/${plant}/${datetype}/${date}/90?expand=${PARAMS.join(",")}`);
     
     const getAllFeedback = await Promise.all([getDraftLicense, getAcquiredLicense, getLicenseExpiredIn30, getLicenseExpiredIn60, getLicenseExpiredIn90]);
 

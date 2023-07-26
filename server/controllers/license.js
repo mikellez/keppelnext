@@ -216,12 +216,13 @@ const fetchExpiredLicenseInDaysQuery = (req) => {
   const { dateCond, plantCond } = condition(req);
   const plantId = req.query.plantId || 0;
   const days = req.params.days;
+  let daysCond = "";
   if(days==30){
-    const daysCond = `AND DATE_PART('days',AGE(lc.expiry_date,CURRENT_dATE)) <= ${days}`;
+    daysCond = `AND DATE_PART('days',AGE(lc.expiry_date,CURRENT_dATE)) <= ${days}`;
   } else if(days==60){
-    const daysCond = `AND (DATE_PART('day', lc.expiry_date - CURRENT_DATE) > 30 AND DATE_PART('day', lc.expiry_date - CURRENT_DATE) <= 60)`;
+    daysCond = `AND (DATE_PART('day', lc.expiry_date - CURRENT_DATE) > 30 AND DATE_PART('day', lc.expiry_date - CURRENT_DATE) <= 60)`;
   } else if(days==90){
-    const daysCond = `AND (DATE_PART('day', lc.expiry_date - CURRENT_DATE) > 60 AND DATE_PART('day', lc.expiry_date - CURRENT_DATE) <= 90)`;
+    daysCond = `AND (DATE_PART('day', lc.expiry_date - CURRENT_DATE) > 60 AND DATE_PART('day', lc.expiry_date - CURRENT_DATE) <= 90)`;
   }
 
   const q =
@@ -233,6 +234,7 @@ const fetchExpiredLicenseInDaysQuery = (req) => {
     ${plantCond}
     ${daysCond}
   `;
+  console.log(q)
   if (plantId == 0) {
     return q;
   } else {
