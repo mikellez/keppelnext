@@ -372,7 +372,7 @@ export const getServerSideProps: GetServerSideProps = async (
     `/api/changeOfParts/all/?psa_id=` + psaId,
     headers
   );
-  console.log(assetHistory.data);
+  // console.log(assetHistory.data);
 
   return {
     props: {

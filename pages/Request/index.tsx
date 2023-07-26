@@ -219,7 +219,7 @@ export default function Request(props: RequestProps) {
       setIds(ids.concat(item.id));
       instance.get(`/api/request/${item.id}`).then((res: any) => {
         const request = res.data;
-        console.log(request.associatedrequestid);
+        // console.log(request.associatedrequestid);
         // update with further details
         setRequestItems((prev) =>
           prev.map((req) =>

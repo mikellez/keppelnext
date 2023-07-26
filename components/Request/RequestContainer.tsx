@@ -70,7 +70,7 @@ async function getAssets(plant_id: number) {
       return response.data;
     })
     .catch((e) => {
-      console.log("error getting assets");
+      // console.log("error getting assets");
       console.log(e);
       return null;
     });
@@ -102,7 +102,7 @@ async function createRequest(
       return response.data;
     })
     .catch((e) => {
-      console.log("error creating request");
+      // console.log("error creating request");
       console.log(e);
       return null;
     });

@@ -16,7 +16,6 @@
     This can be found in /components/Checklist/ChecklistTemplateCreator.tsx
 */
 
-
 import formStyles from "../../../styles/formStyles.module.css";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
@@ -60,11 +59,11 @@ const editChecklistAPI = async (
   checklistId: number,
   assigned: boolean
 ) => {
-  console.log(checklistData);
+  // console.log(checklistData);
   return await instance
     .patch(`/api/checklist/record/${checklistId}`, { checklistData, assigned })
     .then((res) => {
-      console.log("Test")
+      // console.log("Test")
       return res.data;
     })
     .catch((err) => console.log(err));

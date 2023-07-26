@@ -6,7 +6,7 @@ import React, { MouseEvent, useEffect, useState } from "react";
 import { ModuleMain, ModuleHeader, ModuleContent } from "../../components";
 import { Nullish } from "@table-library/react-table-library/types/common";
 import useSWR from "swr";
-import instance from '../../types/common/axios.config';
+import instance from "../../types/common/axios.config";
 import {
   Table,
   Header,
@@ -35,7 +35,7 @@ interface CMMSMasterData {
   [column_name: string]: string;
 }
 
-const indexedColumn: string[] = Object.keys(info)
+const indexedColumn: string[] = Object.keys(info);
 
 function useMaster(type: string) {
   interface CMMSMasterInfo {
@@ -43,8 +43,8 @@ function useMaster(type: string) {
     fields: any[];
   }
 
-  const requestFetcher = async(url: string, type:string) => {
-      return await instance
+  const requestFetcher = async (url: string, type: string) => {
+    return await instance
       .get<CMMSMasterInfo>(url + type)
       .then((response) => {
         let info: CMMSMaster = {
@@ -55,8 +55,7 @@ function useMaster(type: string) {
         return info;
       })
       .catch((e) => {
-        console.log("error getting requests");
-        console.log(e);
+        console.log("error getting requests", e);
         throw new Error(e);
       });
   };
@@ -177,7 +176,7 @@ export default function Master() {
   };
 
   useEffect(() => {
-    if (!isReady && data && !isValidating && (data.data.length > 0)) {
+    if (!isReady && data && !isValidating && data.data.length > 0) {
       let len = Object.keys(data.data[0]).length - 3;
       let sizes = "";
       for (let i = 0; i < len; i++)
@@ -186,9 +185,13 @@ export default function Master() {
       setMasterItems(
         data.data.map((row): CMMSMasterData => {
           const { activity_log, created_date, ...newRow } = row;
-          return Object.assign({}, {
-            id: row[data.idName],
-          }, newRow);
+          return Object.assign(
+            {},
+            {
+              id: row[data.idName],
+            },
+            newRow
+          );
         })
       );
       setReady(true);
@@ -279,89 +282,105 @@ export default function Master() {
       />
 
       <ModuleContent>
-      <div className="scrollable-tabs" style={{ overflowX: "auto"}}>
-  <ul className="nav nav-tabs" style={{ display: "flex", flexWrap: "nowrap", padding: 0, margin: 0, listStyleType: "none" }}>
-    {indexedColumn.map((item, index) => (
-      <li
-        key={index}
-        onClick={() => {
-          activeTabIndex !== index && switchColumns(index);
-        }}
-        className={"nav-link" + (activeTabIndex === index ? " active" : "")}
-        style={{ padding: "10px" }}
-      >
-        <span style={{ all: "unset" }}>{item}</span>
-      </li>
-    ))}
-  </ul>
-  <style>
-        {`
+        <div className="scrollable-tabs" style={{ overflowX: "auto" }}>
+          <ul
+            className="nav nav-tabs"
+            style={{
+              display: "flex",
+              flexWrap: "nowrap",
+              padding: 0,
+              margin: 0,
+              listStyleType: "none",
+            }}
+          >
+            {indexedColumn.map((item, index) => (
+              <li
+                key={index}
+                onClick={() => {
+                  activeTabIndex !== index && switchColumns(index);
+                }}
+                className={
+                  "nav-link" + (activeTabIndex === index ? " active" : "")
+                }
+                style={{ padding: "10px" }}
+              >
+                <span style={{ all: "unset" }}>{item}</span>
+              </li>
+            ))}
+          </ul>
+          <style>
+            {`
           .scrollable-tabs::-webkit-scrollbar {
             width: 0;
             height: 0;
           }
         `}
-      </style>
-</div>
+          </style>
+        </div>
         {isReady && (
           <Table
-          data={{ nodes: masterItems }}
-          theme={theme}
-          layout={{ custom: true }}
-        >
-          {(tableList: CMMSMasterData[]) => {
-            const newtableList = tableList.map((item) => {
-              const {activity_log, created_date, ...newItem } = item;
-              return newItem;
-            });
-            return (
-              <>
-                <Header>
-                  <HeaderRow>
-                    {tableList.length > 0 &&
-                      Object.keys(tableList[0]).slice(1).map((k) => {
-                        return (
-                          <HeaderCell resize key={k}>
-                            {k}
-                          </HeaderCell>
-                        );
-                      })}
-                  <HeaderCell resize>Actions</HeaderCell>
-                  </HeaderRow>
-                </Header>               
-                <Body>
-                  {tableList.map((item) => (
-                    <Row key={item.id} item={item} onClick={editRow}>
+            data={{ nodes: masterItems }}
+            theme={theme}
+            layout={{ custom: true }}
+          >
+            {(tableList: CMMSMasterData[]) => {
+              const newtableList = tableList.map((item) => {
+                const { activity_log, created_date, ...newItem } = item;
+                return newItem;
+              });
+              return (
+                <>
+                  <Header>
+                    <HeaderRow>
                       {tableList.length > 0 &&
-                        Object.keys(tableList[0]).slice(1).map((k) => {
-                          if (typeof item[k] === "boolean"){
-                            return <Cell key={item[k]}>{item[k] ? "Yes" : "No"} </Cell>;
-                          } else{
-                          return <Cell key={item[k]}>{item[k]}</Cell>;
-                          }
-                        })}
-                      <Cell>
-                        <MasterActions
-                          id={item.id}
-                          onClickDelete={onDeleteClick}
-                          editHref={
-                            "/Master/Edit?type=" +
-                            indexedColumn[activeTabIndex] +
-                            "&id=" +
-                            item.id
-                          }
-                        />
-                      </Cell>
-                    </Row>
-                  ))}
-                </Body>
-              </>
-            );
-          }}
-        </Table>
-        
-        
-        
+                        Object.keys(tableList[0])
+                          .slice(1)
+                          .map((k) => {
+                            return (
+                              <HeaderCell resize key={k}>
+                                {k}
+                              </HeaderCell>
+                            );
+                          })}
+                      <HeaderCell resize>Actions</HeaderCell>
+                    </HeaderRow>
+                  </Header>
+                  <Body>
+                    {tableList.map((item) => (
+                      <Row key={item.id} item={item} onClick={editRow}>
+                        {tableList.length > 0 &&
+                          Object.keys(tableList[0])
+                            .slice(1)
+                            .map((k) => {
+                              if (typeof item[k] === "boolean") {
+                                return (
+                                  <Cell key={item[k]}>
+                                    {item[k] ? "Yes" : "No"}{" "}
+                                  </Cell>
+                                );
+                              } else {
+                                return <Cell key={item[k]}>{item[k]}</Cell>;
+                              }
+                            })}
+                        <Cell>
+                          <MasterActions
+                            id={item.id}
+                            onClickDelete={onDeleteClick}
+                            editHref={
+                              "/Master/Edit?type=" +
+                              indexedColumn[activeTabIndex] +
+                              "&id=" +
+                              item.id
+                            }
+                          />
+                        </Cell>
+                      </Row>
+                    ))}
+                  </Body>
+                </>
+              );
+            }}
+          </Table>
         )}
       </ModuleContent>
     </ModuleMain>

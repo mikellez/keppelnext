@@ -64,7 +64,7 @@ const LicenseContainer = ({
   const [confirmArchive, setConfirmArchive] = useState<boolean>(false);
 
   const router = useRouter();
-  console.log(type);
+  // console.log(type);
 
   useEffect(() => {
     if (data.license) {
@@ -86,7 +86,7 @@ const LicenseContainer = ({
       instance
         .get(`api/license/images/${licenseForm.license_id}`)
         .then((res) => {
-          console.log("images fetched");
+          // console.log("images fetched");
           const files = res.data.images.map(
             (image: { data: Iterable<number> }, index: number) => {
               const blob = new Blob([new Uint8Array(image.data)]);
@@ -177,26 +177,27 @@ const LicenseContainer = ({
   };
 
   const handleArchive = () => {
-    instance.patch(`/api/license/archive/${licenseForm.license_id}`)
-      .then(res => {
-        console.log(res);
+    instance
+      .patch(`/api/license/archive/${licenseForm.license_id}`)
+      .then((res) => {
+        // console.log(res);
         router.push("/License");
       })
       .catch((err) => console.log(err));
-  }
+  };
 
   const handleDelete = () => {
     instance
       .delete(`/api/license/${licenseForm.license_id}`)
       .then((res) => {
-        console.log(res);
+        // console.log(res);
         router.push("/License");
       })
       .catch((err) => console.log(err));
   };
 
   const handleSubmit = () => {
-    console.log(licenseForm);
+    // console.log(licenseForm);
     if (
       !licenseForm.license_name ||
       !licenseForm.license_provider ||
@@ -216,7 +217,7 @@ const LicenseContainer = ({
         instance
           .patch(`api/license/acquire/${licenseForm.license_id}`, licenseForm)
           .then((res) => {
-            console.log(res);
+            // console.log(res);
             setIsSubmitting(false);
             setSuccessModal(true);
             setTimeout(() => {
@@ -233,7 +234,7 @@ const LicenseContainer = ({
         instance
           .patch(`api/license/renew/${licenseForm.license_id}`, licenseForm)
           .then((res) => {
-            console.log(res);
+            // console.log(res);
             setIsSubmitting(false);
             setSuccessModal(true);
             setTimeout(() => {
@@ -251,7 +252,7 @@ const LicenseContainer = ({
           if (key == "images") {
             const images = licenseForm.images as File[];
             for (let i = 0; i < images.length; i++) {
-              console.log(i);
+              // console.log(i);
               formData.append("images", images[i]);
             }
           } else if (!!licenseForm[key as keyof CMMSLicenseForm]) {
@@ -269,7 +270,7 @@ const LicenseContainer = ({
               headers: { "Content-Type": "multipart/form-data" },
             })
             .then((res) => {
-              console.log(res);
+              // console.log(res);
               setIsSubmitting(false);
               setSuccessModal(true);
               setTimeout(() => {
@@ -286,7 +287,7 @@ const LicenseContainer = ({
           instance
             .patch(`api/license/${licenseForm.license_id}`, formData)
             .then((res) => {
-              console.log(res);
+              // console.log(res);
               setIsSubmitting(false);
               setSuccessModal(true);
               setTimeout(() => {
@@ -449,8 +450,7 @@ const LicenseContainer = ({
         </div>
       </ModuleContent>
       <div className="d-flex justify-content-end">
-        
-        {type === "edit" && 
+        {type === "edit" && (
           <button
             className="btn btn-primary d-flex me-3"
             onClick={() => setConfirmDelete(true)}
@@ -458,15 +458,16 @@ const LicenseContainer = ({
           >
             Delete
           </button>
-        }
-        {type === "edit" && 
+        )}
+        {type === "edit" && (
           <button
             className="btn btn-primary d-flex me-3"
             onClick={() => setConfirmArchive(true)}
             style={{ backgroundColor: "#FF8B3D", borderColor: "#FF8B3D" }}
           >
             Archive
-          </button>}
+          </button>
+        )}
         {!disabled && (
           <button className="btn btn-primary d-flex" onClick={handleSubmit}>
             Submit
@@ -543,7 +544,7 @@ const LicenseContainer = ({
             key="archiveConfirm"
             onClick={handleArchive}
             className="btn"
-            style={{backgroundColor: "#FF8B3D" }}
+            style={{ backgroundColor: "#FF8B3D" }}
           >
             Archive
           </button>,

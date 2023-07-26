@@ -77,8 +77,8 @@ export default function EditAsset(props: EditAssetProps) {
   const handleForm = (
     e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
   ) => {
-    console.log(e.target.id);
-    console.log(e.target.value);
+    // console.log(e.target.id);
+    // console.log(e.target.value);
 
     setFormAssetData((prevState) => {
       return { ...prevState, [e.target.id]: e.target.value };
@@ -286,12 +286,12 @@ export default function EditAsset(props: EditAssetProps) {
     if (initial && assetDetail) {
       setFormAssetData(assetDetail);
       setInitial(false);
-      console.log("data is in" + formAssetData);
+      // console.log("data is in" + formAssetData);
     }
   }, [assetDetail.asset_description]);
 
   useEffect(() => {
-    console.log(formAssetData);
+    // console.log(formAssetData);
   }, [formAssetData]);
 
   return (
