@@ -52,6 +52,8 @@ import {
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 
+import Tooltip from 'rc-tooltip';
+import 'rc-tooltip/assets/bootstrap_white.css';
 import {
   useRequest,
   useRequestFilter,
@@ -217,7 +219,7 @@ export default function Request(props: RequestProps) {
       setIds(ids.concat(item.id));
       instance.get(`/api/request/${item.id}`).then((res: any) => {
         const request = res.data;
-        console.log(request.associatedrequestid);
+        // console.log(request.associatedrequestid);
         // update with further details
         setRequestItems((prev) =>
           prev.map((req) =>
@@ -424,8 +426,22 @@ export default function Request(props: RequestProps) {
                         <React.Fragment key={item.id}>
                           <Row item={item} onClick={handleExpand}>
                             <Cell>{item.id}</Cell>
-                            <Cell>{item.fault_name}</Cell>
-                            <Cell>{item.plant_name}</Cell>
+                            <Cell>
+                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.fault_name}</span>}>
+                                  <div>{item.fault_name}</div>
+                                </Tooltip>
+                            </Cell>
+                            <Cell>
+                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.plant_name}</span>}>
+                                  <div>{item.plant_name}</div>
+                                </Tooltip>
+                            </Cell>
                             <Cell
                               style={{
                                 color: getColor(item.priority),
@@ -443,7 +459,11 @@ export default function Request(props: RequestProps) {
                               {item.status}
                             </Cell>
                             <Cell>
-                              {activeTabIndex === 2
+                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >
+                                  {activeTabIndex === 2
                                 ? `${moment(
                                     new Date(
                                       item.activity_log
@@ -470,9 +490,55 @@ export default function Request(props: RequestProps) {
                                 : `${moment(new Date(item.created_date)).format(
                                     "MMMM Do YYYY, h:mm:ss a"
                                   )}`}
+                                </span>}>
+
+                                <div>
+                                  {activeTabIndex === 2
+                                  ? `${moment(
+                                      new Date(
+                                        item.activity_log
+                                          .reverse()
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ==
+                                              "COMPLETED"
+                                          )!.date
+                                      )
+                                    ).format("MMMM Do YYYY, h:mm:ss a")}`
+                                  : activeTabIndex === 3
+                                  ? `${moment(
+                                      new Date(
+                                        item.activity_log
+                                          .reverse()
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ==
+                                              "APPROVED"
+                                          )!.date
+                                      )
+                                    ).format("MMMM Do YYYY, h:mm:ss a")}`
+                                  : `${moment(new Date(item.created_date)).format(
+                                      "MMMM Do YYYY, h:mm:ss a"
+                                    )}`}
+                                </div>
+                                </Tooltip>
                             </Cell>
-                            <Cell>{item.asset_name}</Cell>
-                            <Cell>{item.created_by}</Cell>
+                            <Cell>
+                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.asset_name}</span>}>
+                                  <div>{item.asset_name}</div>
+                                </Tooltip>
+                              </Cell>
+                            <Cell>
+                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.created_by}</span>}>
+                                  <div>{item.created_by}</div>
+                                </Tooltip>
+                            </Cell>
                             <Cell>
                               <div className={styles.iconsDiv}>
                                 {(item.status_id === 1 ||

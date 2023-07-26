@@ -2248,6 +2248,12 @@ router.get(
   controllers.license.fetchDraftLicenses
 );
 
+router.get(
+  "/license/draft/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.license.fetchDraftLicenses
+);
+
 /**
  * @api {get} /license/acquired?page=&expand=&plantId=&search= Get Acquired License
  * @apiDescription Acquired License
@@ -2270,6 +2276,12 @@ router.get(
 
 router.get(
   "/license/acquired",
+  checkIfLoggedInAPI,
+  controllers.license.fetchAcquiredLicenses
+);
+
+router.get(
+  "/license/acquired/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.license.fetchAcquiredLicenses
 );
@@ -2340,18 +2352,77 @@ router.get(
  *
  * @apiError (Error 500) {Object} Internal Server Error {msg : error}
  */
-
 router.get(
   "/license/archived",
   checkIfLoggedInAPI,
   controllers.license.fetchArchivedLicenses
 );
 
+/**
+ * @api {get} /license/:id
+ * @apiDescription Fetch single License
+ * @apiName fetchSingleLicense
+ * @apiGroup License
+ *
+ * @apiParams {Number} id Unique ID of the license
+ *
+ *
+ * @apiSuccess {CMMSLicenseForm} -
+ * @apiSuccess {String} -.license_id ID of license
+ * @apiSuccess {String} -.license_name Name of license
+ * @apiSuccess {String} -.license_provider Provider of license
+ * @apiSuccess {Number} -.license_type_id type of license
+ * @apiSuccess {String} -.license_details description of license
+ * @apiSuccess {Number} -.plant_id plant id of asset that license if for
+ * @apiSuccess {Number} -.plant_loc_id location id of asset license
+ * @apiSuccess {Number} -.linked_asset_id id of linked asset
+ * @apiSuccess {Number} -.assigned_user_id assigned user
+ * @apiSuccess {Date} -.acquisition_date Aquired license Date
+ * @apiSuccess {Date} -.expiry_date License Expiry Date
+ * @apiSuccess {Number} -.status_id status of license
+ *
+ * @apiError (Error 500) {Object} Error Fetching license
+ *
+ * @api {delete} /license/:id
+ * @apiDescription Delete Single License
+ * @apiName deleteLicense
+ * @apiGroup License
+ *
+ * @apiParams {Number} id ID of License to delete
+ *
+ * @apiSuccess {String} Successfully deleted License
+ *
+ * @apiError {String} Error occurred deleting license
+ */
 router
   .route("/license/:id", checkIfLoggedInAPI)
   .get(controllers.license.fetchSingleLicense)
   .delete(controllers.license.deleteLicense);
 
+/**
+ * @api {patch} /license/:id
+ * @apiDescription Edit License
+ * @apiName editLicense
+ * @apiGroup License
+ *
+ * @apiParams {Number} id ID of License to delete
+ *
+ * @apiBody {CMMSLicenseForm} -.license CMMSLicenseForm Object
+ * @apiBody {String} -.license.license_name Name of license
+ * @apiBody {String} -.license.license_provider Provider of license
+ * @apiBody {Number} -.license.license_type_id type of license
+ * @apiBody {String} -.license.license_details description of license
+ * @apiBody {Number} -.license.plant_id plant id of asset that license if for
+ * @apiBody {Number} -.license.plant_loc_id location id of asset license
+ * @apiBody {Number} -.license.linked_asset_id id of linked asset
+ * @apiBody {Number} -.license.assigned_user_id assigned user
+ * @apiBody {File[]} -.images images tag to asset/license
+ *
+ *
+ * @apiSuccess {String} Successfully editing license
+ *
+ * @apiError {String} Error editing license
+ */
 router.patch(
   "/license/:id",
   checkIfLoggedInAPI,
@@ -2359,28 +2430,73 @@ router.patch(
   controllers.license.editLicense
 );
 
+/**
+ * @api {patch} /license/acquire/:id
+ * @apiDescription Acquire License
+ * @apiName acquireLicense
+ * @apiGroup License
+ *
+ * @apiParams {Number} id ID of License to acquire
+ *
+ * @apiBody {Date} -.acquisition_date License Acquired date
+ * @apiBody {Date} -.expiry_date Date of expiry for License
+ *
+ * @apiSuccess {String} Successfully acquired license
+ *
+ * @apiError {String} Error editing license
+ *
+ */
 router.patch(
   "/license/acquire/:id",
   checkIfLoggedInAPI,
   controllers.license.acquireLicense
 );
 
-router.patch(
-  "/license/archive/:id",
-  checkIfLoggedInAPI,
-  controllers.license.archiveLicense
-);
-
+/**
+ * @api {patch} /license/renew/:id
+ * @apiDescription Renew License
+ * @apiName renewLicense
+ * @apiGroup License
+ *
+ * @apiParams {Number} id ID of License to acquire
+ *
+ * @apiBody {Date} -.expiry_date Date of expiry for License
+ *
+ * @apiSuccess {String} Successfully renew license
+ *
+ * @apiError {String} Error renewing license in the server
+ *
+ */
 router.patch(
   "/license/renew/:id",
   checkIfLoggedInAPI,
   controllers.license.renewLicense
 );
 
+/**
+ * @api /license/images/:id
+ * @apiDescription fetch license images
+ * @apiName fetchLicenseImages
+ * @apiGroup License
+ *
+ * @apiParams {Number} id ID of License to acquire
+ *
+ * @apiSuccess {Object} - Image Datas
+ * @apiSuccess {File[]} -.images Data of the Images
+ *
+ * @apiError {String} Error fetching license images
+ */
+
 router.get(
   "/license/images/:id",
   checkIfLoggedInAPI,
   controllers.license.fetchLicenseImages
+);
+
+router.get(
+  "/license/expired/:plant/:datetype/:date/:days",
+  checkIfLoggedInAPI,
+  controllers.license.fetchExpiredLicensesInDays
 );
 
 router.get("/db/names", fetchDBNames);

@@ -22,17 +22,17 @@ export default function Input(props: InputProps) {
       setOldData(props.details);
       setIsInitial(false);
     }
-    console.log("running");
+    // console.log("running");
   }, [props.details]);
 
   const handleBlur = (e: React.ChangeEvent<HTMLDivElement>) => {
     if (e.target.innerText !== props.placeholder) {
       props.setDetails((prevState: any) => {
-        console.log(
-          e.target.innerText && e.target.innerText != "\n"
-            ? e.target.innerText
-            : ""
-        );
+        // console.log(
+        //   e.target.innerText && e.target.innerText != "\n"
+        //     ? e.target.innerText
+        //     : ""
+        // );
         return {
           ...prevState,
           [e.target.id]:
@@ -65,7 +65,7 @@ export default function Input(props: InputProps) {
         if (currText[idx] === oldText[idx]) {
           result += currText[idx];
           idx++;
-          console.log(result);
+          // console.log(result);
         } else {
           const start = idx;
           while (currText[idx] != oldText[idx] && idx < currText.length) {
@@ -95,7 +95,7 @@ export default function Input(props: InputProps) {
       result += "<mark>" + currText + "</mark>";
     }
     result += "</div>";
-    console.log(result);
+    // console.log(result);
     const ref = document.getElementById(e.target.id);
     ref!.innerHTML = result;
   };

@@ -85,7 +85,7 @@ export function FileUpload({
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     //TODO
-    console.log("yeah");
+    // console.log("yeah");
   };
 
   return (
@@ -179,7 +179,7 @@ function FileUploadEditable({
           >
             View File
           </p>
-          
+
           <ModuleModal
             closeModal={() => setModalOpen(false)}
             isOpen={modalOpen}
@@ -210,8 +210,8 @@ function FileUploadView({
     <div className={styles.checkViewContainer}>
       <h6>{fileControlObj.question}</h6>
       <div>
-            <ImagePreview previewObjURL={fileControlObj.value}/>
-          </div>
+        <ImagePreview previewObjURL={fileControlObj.value} />
+      </div>
       {/* <p onClick={() => setModalOpen(true)} className={requestStyles.editIcon}>
         View File
       </p>

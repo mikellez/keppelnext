@@ -24,17 +24,16 @@ const SelectWithTooltip = ({
   className?: string;
   id?: string;
   isDisabled?: boolean;
-
 }) => {
   const [selectedOption, setSelectedOption] = useState<SelectedOptionProps>();
 
   const handleSelectChange = (selectedOption: SelectedOptionProps) => {
-    console.log(selectedOption)
+    // console.log(selectedOption)
     onChange(selectedOption);
     setSelectedOption(selectedOption);
   };
 
-  return ( 
+  return (
     <div>
       <Select
         id={id}
@@ -45,16 +44,15 @@ const SelectWithTooltip = ({
         defaultValue={defaultValue}
         options={options}
       />
-      {selectedOption &&
+      {selectedOption && (
         <ReactTooltip
           anchorId={id}
           place="bottom"
           content={selectedOption?.label}
         />
-      }
+      )}
     </div>
-
-   );
-}
+  );
+};
 
 export default SelectWithTooltip;

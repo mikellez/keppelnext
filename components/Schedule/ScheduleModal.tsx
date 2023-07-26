@@ -87,7 +87,7 @@ export default function ScheduleMaintenanceModal(
       HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement
     >
   ) {
-    console.log(event.target.type);
+    // console.log(event.target.type);
     setNewSchedule((prev) => {
       let value =
         event.target.type === "date"

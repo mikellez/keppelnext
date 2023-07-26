@@ -26,62 +26,66 @@ import AssetSelect, {
 import MultipleImagesUpload from "../../../components/License/MultipleImagesUpload";
 import { SingleValue, MultiValue } from "react-select";
 import LicenseContainer from "../../../components/License/LicenseContainer";
-import { CMMSLicenseType, CMMSPlantLocation, CMMSLicenseForm } from "../../../types/common/interfaces";
-
+import {
+  CMMSLicenseType,
+  CMMSPlantLocation,
+  CMMSLicenseForm,
+} from "../../../types/common/interfaces";
 
 export interface LicenseProps {
-  plantLocs: CMMSPlantLocation[],
-  licenseTypes: CMMSLicenseType[],
-  license?: CMMSLicenseForm,
+  plantLocs: CMMSPlantLocation[];
+  licenseTypes: CMMSLicenseType[];
+  license?: CMMSLicenseForm;
 }
 
 const LicenseNew = (props: LicenseProps) => {
   const router = useRouter();
 
-
-    return <ModuleMain>
-        <ModuleHeader 
-          title="Create License Tracking"
-          header="Create License Tracking"
+  return (
+    <ModuleMain>
+      <ModuleHeader
+        title="Create License Tracking"
+        header="Create License Tracking"
+      >
+        <button
+          className={"btn btn-secondary"}
+          type="button"
+          onClick={() => router.back()}
         >
-            <button
-            className={"btn btn-secondary"}
-            type="button"
-            onClick={() => router.back()}
-            >
-            Back
-            </button>
-        </ModuleHeader>
-        <LicenseContainer data={props} type="new"/>
+          Back
+        </button>
+      </ModuleHeader>
+      <LicenseContainer data={props} type="new" />
     </ModuleMain>
+  );
 };
 
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-    const headers = {
-        withCredentials: true,
-        headers: {
-          Cookie: context.req.headers.cookie,
-        },
-      };
-      console.log(context)
-      const plantLocs = await instance.get("/api/plantLocation/self", headers);
-      const licenseTypes = await instance.get("/api/license_types", headers);
-      let license;
-      if (context.query.id) {
-        license = await instance.get(`/api/license/${context.query.id}`, headers);
-      }
+  const headers = {
+    withCredentials: true,
+    headers: {
+      Cookie: context.req.headers.cookie,
+    },
+  };
+  // console.log(context)
+  const plantLocs = await instance.get("/api/plantLocation/self", headers);
+  const licenseTypes = await instance.get("/api/license_types", headers);
+  let license;
+  if (context.query.id) {
+    license = await instance.get(`/api/license/${context.query.id}`, headers);
+  }
 
-      let props: LicenseProps = {
-        plantLocs: plantLocs.data,
-        licenseTypes: licenseTypes.data,
-        license: license ? license.data : null,
-      }
-      
-      return {
-        props: props
-      }
-}
+  let props: LicenseProps = {
+    plantLocs: plantLocs.data,
+    licenseTypes: licenseTypes.data,
+    license: license ? license.data : null,
+  };
+
+  return {
+    props: props,
+  };
+};
 
 export default LicenseNew;

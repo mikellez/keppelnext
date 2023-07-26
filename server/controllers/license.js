@@ -2,6 +2,56 @@ const moment = require("moment");
 
 const ITEMS_PER_PAGE = 10;
 
+const condition = (req) => {
+  let date = req.params.date || "all";
+  let datetype = req.params.datetype;
+  let plant = req.params.plant || 0;
+  let dateCond = "";
+  let plantCond = "";
+
+  if (plant && plant != 0) {
+    plantCond = `AND LC.plant_id = '${plant}'`;
+  }
+
+  if (date !== "all") {
+    switch (datetype) {
+      case "week":
+        dateCond = `
+                  AND DATE_PART('week', LC.ACQUISITION_DATE::DATE) = DATE_PART('week', '${date}'::DATE) 
+                  AND DATE_PART('year', LC.ACQUISITION_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+
+      case "month":
+        dateCond = `
+                  AND DATE_PART('month', LC.ACQUISITION_DATE::DATE) = DATE_PART('month', '${date}'::DATE) 
+                  AND DATE_PART('year', LC.ACQUISITION_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+
+      case "year":
+        dateCond = `AND DATE_PART('year', LC.ACQUISITION_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+
+      case "quarter":
+        dateCond = `
+                  AND DATE_PART('quarter', LC.ACQUISITION_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) 
+                  AND DATE_PART('year', LC.ACQUISITION_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+      default:
+        dateCond = `AND LC.ACQUISITION_DATE::DATE = '${date}'::DATE`;
+    }
+  }
+
+  return {
+    dateCond,
+    plantCond
+  };
+
+}
+
 const fetchLicenseTypes = async (req, res) => {
   try {
     const results = await global.db.query(`
@@ -14,9 +64,10 @@ const fetchLicenseTypes = async (req, res) => {
   }
 };
 
-const fetchAllLicenseQuery = (expand, search) => {
+const fetchAllLicenseQuery = (req) => {
   let expandCond = "";
   let SELECT_ARR = [];
+  const expand = req.query.expand || false;
 
   const SELECT = {
     id: "lc.license_id As id",
@@ -83,12 +134,17 @@ const fetchAllLicenseQuery = (expand, search) => {
   return query;
 };
 
-const fetchDraftLicenseQuery = (expand, search, plantId) => {
+const fetchDraftLicenseQuery = (req) => {
+  const { dateCond, plantCond } = condition(req);
+  const plantId = req.query.plantId || 0;
+
   const q =
-    fetchAllLicenseQuery(expand, search) +
+    fetchAllLicenseQuery(req) +
     `
       AND ua.user_id = $1 AND
       (lc.status_id = 1 OR lc.status_id = 2)
+      ${dateCond}
+      ${plantCond}
   `;
   if (plantId == 0) {
     return q;
@@ -97,12 +153,17 @@ const fetchDraftLicenseQuery = (expand, search, plantId) => {
   }
 };
 
-const fetchExpiredLicenseQuery = (expand, search, plantId) => {
+const fetchExpiredLicenseQuery = (req) => {
+  const { dateCond, plantCond } = condition(req);
+  const plantId = req.query.plantId || 0;
+
   const q =
-    fetchAllLicenseQuery(expand, search) +
+    fetchAllLicenseQuery(req) +
     `
       AND ua.user_id = $1 AND
       (lc.status_id = 4)
+      ${dateCond}
+      ${plantCond}
   `;
   // console.log(plantId);
   if (plantId == 0) {
@@ -112,12 +173,17 @@ const fetchExpiredLicenseQuery = (expand, search, plantId) => {
   }
 };
 
-const fetchAcquiredLicenseQuery = (expand, search, plantId) => {
+const fetchAcquiredLicenseQuery = (req) => {
+  const { dateCond, plantCond } = condition(req);
+  const plantId = req.query.plantId || 0;
+
   const q =
-    fetchAllLicenseQuery(expand, search) +
+    fetchAllLicenseQuery(req) +
     `
       AND ua.user_id = $1 AND
       (lc.status_id = 3)
+      ${dateCond}
+      ${plantCond}
   `;
   // console.log(plantId);
   if (plantId == 0) {
@@ -127,13 +193,48 @@ const fetchAcquiredLicenseQuery = (expand, search, plantId) => {
   }
 };
 
-const fetchArchivedLicenseQuery = (expand, search, plantId) => {
+const fetchArchivedLicenseQuery = (req) => {
+  const { dateCond, plantCond } = condition(req);
+  const plantId = req.query.plantId || 0;
+
   const q =
-    fetchAllLicenseQuery(expand, search) +
+    fetchAllLicenseQuery(req) +
     `
     AND ua.user_id = $1 AND
     (lc.status_id = 5)
+    ${dateCond}
+    ${plantCond}
   `;
+  if (plantId == 0) {
+    return q;
+  } else {
+    return q + ` AND lc.plant_id = ${plantId}`;
+  }
+};
+
+const fetchExpiredLicenseInDaysQuery = (req) => {
+  const { dateCond, plantCond } = condition(req);
+  const plantId = req.query.plantId || 0;
+  const days = req.params.days;
+  let daysCond = "";
+  if(days==30){
+    daysCond = `AND DATE_PART('days',AGE(lc.expiry_date,CURRENT_dATE)) <= ${days}`;
+  } else if(days==60){
+    daysCond = `AND (DATE_PART('day', lc.expiry_date - CURRENT_DATE) > 30 AND DATE_PART('day', lc.expiry_date - CURRENT_DATE) <= 60)`;
+  } else if(days==90){
+    daysCond = `AND (DATE_PART('day', lc.expiry_date - CURRENT_DATE) > 60 AND DATE_PART('day', lc.expiry_date - CURRENT_DATE) <= 90)`;
+  }
+
+  const q =
+    fetchAllLicenseQuery(req) +
+    `
+    AND ua.user_id = $1 AND
+    (lc.status_id = 3)
+    ${dateCond}
+    ${plantCond}
+    ${daysCond}
+  `;
+  console.log(q)
   if (plantId == 0) {
     return q;
   } else {
@@ -142,7 +243,7 @@ const fetchArchivedLicenseQuery = (expand, search, plantId) => {
 };
 
 const fetchSingleLicense = async (req, res, next) => {
-  console.log("Fetching single license");
+  // console.log("Fetching single license");
   const expand = req.query.expand || false;
   try {
     const query = `
@@ -189,7 +290,7 @@ const fetchDraftLicenses = async (req, res, next) => {
 
   const pagesQuery =
     `SELECT COUNT(*) AS row_count FROM (` +
-    fetchDraftLicenseQuery(expand, search, plantId) +
+    fetchDraftLicenseQuery(req) +
     `) subquery`;
 
   try {
@@ -197,7 +298,7 @@ const fetchDraftLicenses = async (req, res, next) => {
     const totalRows = tmp.rows[0].row_count;
     const totalPages = Math.ceil(+totalRows / ITEMS_PER_PAGE);
     const query =
-      fetchDraftLicenseQuery(expand, search, plantId) +
+      fetchDraftLicenseQuery(req) +
       ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
     // console.log(query);
     const result = await global.db.query(query, [req.user.id]);
@@ -217,7 +318,7 @@ const fetchAcquiredLicenses = async (req, res, next) => {
 
   const pagesQuery =
     `SELECT COUNT(*) AS row_count FROM (` +
-    fetchAcquiredLicenseQuery(expand, search, plantId) +
+    fetchAcquiredLicenseQuery(req) +
     `) subquery`;
 
   try {
@@ -225,7 +326,7 @@ const fetchAcquiredLicenses = async (req, res, next) => {
     const totalRows = tmp.rows[0].row_count;
     const totalPages = Math.ceil(+totalRows / ITEMS_PER_PAGE);
     const query =
-      fetchAcquiredLicenseQuery(expand, search, plantId) +
+      fetchAcquiredLicenseQuery(req) +
       ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
     // console.log(query);
     const result = await global.db.query(query, [req.user.id]);
@@ -244,7 +345,7 @@ const fetchExpiredLicenses = async (req, res, next) => {
 
   const pagesQuery =
     `SELECT COUNT(*) AS row_count FROM (` +
-    fetchExpiredLicenseQuery(expand, search, plantId) +
+    fetchExpiredLicenseQuery(req) +
     `) subquery`;
 
   try {
@@ -252,7 +353,7 @@ const fetchExpiredLicenses = async (req, res, next) => {
     const totalRows = tmp.rows[0].row_count;
     const totalPages = Math.ceil(+totalRows / ITEMS_PER_PAGE);
     const query =
-      fetchExpiredLicenseQuery(expand, search, plantId) +
+      fetchExpiredLicenseQuery(req) +
       ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
     // console.log(query);
     const result = await global.db.query(query, [req.user.id]);
@@ -272,7 +373,7 @@ const fetchArchivedLicenses = async (req, res, next) => {
 
   const pagesQuery =
     `SELECT COUNT(*) AS row_count FROM (` +
-    fetchArchivedLicenseQuery(expand, search, plantId) +
+    fetchArchivedLicenseQuery(req) +
     `) subquery`;
 
   try {
@@ -280,7 +381,35 @@ const fetchArchivedLicenses = async (req, res, next) => {
     const totalRows = tmp.rows[0].row_count;
     const totalPages = Math.ceil(+totalRows / ITEMS_PER_PAGE);
     const query =
-      fetchArchivedLicenseQuery(expand, search, plantId) +
+      fetchArchivedLicenseQuery(req) +
+      ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+    // console.log(query);
+    const result = await global.db.query(query, [req.user.id]);
+    return res.status(200).json({ rows: result.rows, total: totalPages });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ msg: err });
+  }
+};
+
+const fetchExpiredLicensesInDays = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
+  const plantId = req.query.plantId || 0;
+
+  const pagesQuery =
+    `SELECT COUNT(*) AS row_count FROM (` +
+    fetchExpiredLicenseInDaysQuery(req) +
+    `) subquery`;
+
+  try {
+    const tmp = await global.db.query(pagesQuery, [req.user.id]);
+    const totalRows = tmp.rows[0].row_count;
+    const totalPages = Math.ceil(+totalRows / ITEMS_PER_PAGE);
+    const query =
+      fetchExpiredLicenseInDaysQuery(req) +
       ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
     // console.log(query);
     const result = await global.db.query(query, [req.user.id]);
@@ -293,7 +422,7 @@ const fetchArchivedLicenses = async (req, res, next) => {
 
 const createLicense = async (req, res, next) => {
   const license = req.body;
-  console.log(req.files);
+  // console.log(req.files);
   const images = req.files.map((file) => file.buffer);
   const status = license.assigned_user_id ? 2 : 1;
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
@@ -344,7 +473,7 @@ const createLicense = async (req, res, next) => {
 
 const editLicense = async (req, res) => {
   const license = req.body;
-  console.log(req.files);
+  // console.log(req.files);
   const images = req.files.map((file) => file.buffer);
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const query = `
@@ -539,4 +668,5 @@ module.exports = {
   fetchExpiredLicenses,
   fetchExpiryDates,
   fetchArchivedLicenses,
+  fetchExpiredLicensesInDays
 };
