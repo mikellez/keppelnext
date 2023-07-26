@@ -1,3 +1,24 @@
+/*
+  Explanation of Licnese Container
+
+  This component is the form that contains all the fields regarding a license.
+  It is used in the New, Edit, Acquire, Renew and View pages.
+
+  props: {
+    data: LicenseProps,
+    type: string,
+    disabled: boolean,
+  }
+
+  LicenseProps contains data to populate the PlantLocSelect and LicenseType
+  dropdowns. It also contains the fetched data of a license (optional, null
+  in New Page)
+  type represents the page type (New, Edit, etc.)
+  disabled is true on the View Page to provide a view-only format
+
+*/
+
+
 import React, { useState, useEffect } from "react";
 import instance from "../../types/common/axios.config";
 import { useRouter } from "next/router";
