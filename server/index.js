@@ -11,7 +11,12 @@ const checklistGenerator = require("./services/checklistGenerator");
 const controllers = require("./controllers");
 const { apiLimiter, loginLimiter } = require("./rateLimiter");
 const { access } = require("fs");
+<<<<<<< HEAD
+const morgan = require('morgan');
+const helmet = require('helmet');
+=======
 const licenseCron = require("./services/licenseCron");
+>>>>>>> c0b88a73f400d107725aa772897302d49aa82c8e
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -21,6 +26,7 @@ const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
   const server = express();
+  server.use(helmet());
   server.use(
     cors({
       origin: `http://localhost:${process.env.PORT}`,
@@ -28,6 +34,7 @@ app.prepare().then(() => {
     })
   );
   server.use(bodyParser.json({ limit: "50mb", extended: true }));
+  server.use(morgan('combined'));
   server.use(
     bodyParser.urlencoded({
       limit: "50mb",
@@ -38,6 +45,10 @@ app.prepare().then(() => {
   server.use(bodyParser.text({ limit: "200mb" }));
   server.use(dbConnection);
   userAuth(server);
+  server.use(function(req, res, next) {
+    res.set({ 'Content-Security-Policy': "script-src 'self' 'unsafe-eval'" });
+    next();
+  });
   server.use("/api/login", loginLimiter);
   server.use("/api/*", apiLimiter);
 
