@@ -195,7 +195,7 @@ interface CMMSPlant {
 interface CMMSEvent {
   title: string;
   start?: Date | string;
-  extendedProps: { [key: string]: any };
+  extendedProps?: { [key: string]: any };
 }
 
 interface CMMSScheduleEvent extends CMMSEvent {
@@ -472,6 +472,87 @@ interface CMMSPlantLoc {
   created_date?: string
 }
 
+// interface CMMSLicense {
+//   id : number
+//   license_id : number
+//   license_name : string
+//   license_provider : string
+//   license_type_id : number
+//   license_type : string
+//   license_details : string
+//   plant_loc_id : number
+//   loc_floor : string
+//   loc_room : string 
+//   linked_asset_id : number 
+//   linked_asset : CMMSAsset
+//   assigned_user_id : number 
+//   assigned_user : string 
+//   acquisition_date?: Date
+//   expiry_date?: Data 
+//   status_id: number
+//   status : string
+//   images? : string
+//   // activity_log : json
+// }
+
+
+
+interface CMMSPlantLocation {
+  plant_id: number,
+  plant_name: string,
+  loc_id: number,
+  loc_floor: string,
+  loc_room: string,
+}
+
+interface CMMSLicenseType {
+  type_id: number,
+  type: string,
+}
+
+interface CMMSLicense {
+  id: number;
+  license_name: string;
+  license_provider: string;
+  license_type_id: number;
+  license_type : string;
+  license_details: string;
+  plant_id: number;
+  plant_name: string;
+  plant_loc_id: number;
+  loc_floor: string;
+  loc_room: string;
+  linked_asset_id: number | null;
+  linked_asset: string
+  linked_asset_name:acquisition_date
+  assigned_user_id: number | null;
+  assigned_user:string;
+  acquisition_date: Date | null
+  expiry_date : Date|null
+  status: string;
+  status_id: number;
+  activity_log : { [key: string]: string }[];
+  images?: File[];
+
+}
+
+
+interface CMMSLicenseForm {
+  license_id?: number;
+  license_name: string;
+  license_provider: string;
+  license_type_id: number;
+  license_details: string;
+  plant_id: number;
+  plant_loc_id: number;
+  linked_asset_id: number | null;
+  assigned_user_id: number | null;
+  acquisition_date?: Date | string;
+  expiry_date? : Date | string;
+  status_id?: number;
+  images: File[]
+}
+
 export {
   CMMSBaseType,
   CMMSUser,
@@ -511,4 +592,8 @@ export {
   CMMSWorkflow,
   CMMSFeedback,
   CMMSPlantLoc,
+  CMMSPlantLocation,
+  CMMSLicense,
+  CMMSLicenseType,
+  CMMSLicenseForm
 };

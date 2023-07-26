@@ -72,7 +72,8 @@ const AssetSelect = forwardRef((props: AssetSelectProps, ref: any) => {
                     options={options}
                     defaultValue={props.isSingle ? defaultOptions![0] : defaultOptions}
                     isDisabled={props.disabled}
-                    ref={ref}
+                    value={props.isSingle ? defaultOptions![0] : defaultOptions}
+                    // ref={ref}
                 />
             }
         </div>

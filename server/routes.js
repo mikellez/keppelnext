@@ -2165,13 +2165,223 @@ router.get(
   controllers.plantLocation.getAllPlantLoc
 );
 
+router.get("/plantLocation/self", controllers.plantLocation.getUserPlantLocs);
 
 router.get("/plantLocation/:id", controllers.plantLocation.getSinglePlantLoc);
+
 //.get("/workflow/run/checklist", controllers.workflow.runWorkflowChecklist);
 
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
 
-router.get("/license/draft", controllers.license.fetchDraftLicenses)
+/**
+ * @api {get} /license_types
+ * @apiDescription License Types
+ * @apiName Fetch license Type
+ * @apiGroup License
+ *
+ * @apiSuccess {Object} - Data Object
+ * @apiSuccess {Object[]} -.rows Array of License Type
+ * @apiSuccess {Number} -.rows.type_id license Type ID
+ * @apiSuccess {Number} -.rows.type type of license
+ *
+ *
+ * @apiError (Error 500) {String} Internal Server Error "An error has occured while fetching license types"
+ */
+
+router.get(
+  "/license_types",
+  checkIfLoggedInAPI,
+  controllers.license.fetchLicenseTypes
+);
+
+/**
+ * @api {post} /license Create License
+ * @apiDescription Create License
+ * @apiName createLicense
+ * @apiGroup License
+ *
+ * @apiBody {CMMSLicenseForm} -.license CMMSLicenseForm Object
+ * @apiBody {String} -.license.license_name Name of license
+ * @apiBody {String} -.license.license_provider Provider of license
+ * @apiBody {Number} -.license.license_type_id type of license
+ * @apiBody {String} -.license.license_details description of license
+ * @apiBody {Number} -.license.plant_id plant id of asset that license if for
+ * @apiBody {Number} -.license.plant_loc_id location id of asset license
+ * @apiBody {Number} -.license.linked_asset_id id of linked asset
+ * @apiBody {Number} -.license.assigned_user_id assigned user
+ * @apiBody {File[]} -.images images tag to asset/license
+ *
+ * @apiSuccess {String} Success "Successfully created license"
+ * @apiError (Error 500) {String} Internal Server Error "Error creating license"
+ */
+
+router.post(
+  "/license",
+  checkIfLoggedInAPI,
+  upload.array("images", 6),
+  controllers.license.createLicense
+);
+
+/**
+ * @api {get} /license/draft?page=&expand=&plantId=&search= Get Draft License
+ * @apiDescription Draft License
+ * @apiName fetchDraftLicense
+ * @apiGroup License
+ * 
+ * @apiQuery {Number} page Page of Draft License shown
+ * @apiQuery {String[]} expand Types of parameters needed in the query 
+ * @apiQuery {Number} plantId To filter by plants, 0 by default
+ * @apiQuery {String} Search To search for specifics in the DB (Not implemented yet)
+
+ * 
+ * @apiSuccess {JSON} - Data of Draft License and total page
+ * @apiSuccess {CMMSLicense[]} -.rows Array of License Draft
+ * @apiSuccess {Number} -.total Total number of pages of Draft License in the DB
+ *
+ * 
+ * @apiError (Error 500) {Object} Internal Server Error {msg : error}
+ */
+
+router.get(
+  "/license/draft",
+  checkIfLoggedInAPI,
+  controllers.license.fetchDraftLicenses
+);
+
+/**
+ * @api {get} /license/acquired?page=&expand=&plantId=&search= Get Acquired License
+ * @apiDescription Acquired License
+ * @apiName fetchAcquiredLicense
+ * @apiGroup License
+ *
+ * @apiQuery {Number} page Page of Acquired License shown
+ * @apiQuery {String[]} expand Types of parameters needed in the query
+ * @apiQuery {Number} plantId To filter by plants, 0 by default
+ * @apiQuery {String} Search To search for specifics in the DB (Not implemented yet)
+ *
+ *
+ * @apiSuccess {JSON} - Data of Acquired License and total page
+ * @apiSuccess {CMMSLicense[]} -.rows Array of Acquired License
+ * @apiSuccess {Number} -.total Total number of pages of Acquired License in the DB
+ *
+ *
+ * @apiError (Error 500) {Object} Internal Server Error {msg : error}
+ */
+
+router.get(
+  "/license/acquired",
+  checkIfLoggedInAPI,
+  controllers.license.fetchAcquiredLicenses
+);
+
+/**
+ * @api {get} /license/expired?page=&expand=&plantId=&search= Get Expired license
+ * @apiDescription Expired License
+ * @apiName fetchExpiredLicense
+ * @apiGroup License
+ *
+ * @apiQuery {Number} page Page of Expired License shown
+ * @apiQuery {String[]} expand Types of parameters needed in the query
+ * @apiQuery {Number} plantId To filter by plants, 0 by default
+ * @apiQuery {String} Search To search for specifics in the DB (Not implemented yet)
+ *
+ *
+ * @apiSuccess {JSON} - Data of Expired License and total page
+ * @apiSuccess {CMMSLicense[]} -.rows Array of Expired License
+ * @apiSuccess {Number} -.total Total number of pages of Expired License in the DB
+ *
+ *
+ * @apiError (Error 500) {Object} Internal Server Error {msg : error}
+ */
+
+router.get(
+  "/license/expired",
+  checkIfLoggedInAPI,
+  controllers.license.fetchExpiredLicenses
+);
+
+/**
+ * @api {get} /license/expiry_dates?plantId= Get License Expiry Dates
+ * @apiDescription Fetch expiry_dates of License
+ * @apiName fetchExpiryDates
+ * @apiGroup License
+ *
+ * @apiQuery {Number} plantId To filter by plants, 0 by default
+ *
+ *
+ * @apiSuccess {Date[]} - Data of Expiry Dates
+ *
+ *
+ * @apiError (Error 500) {Object} Internal Server Error "Error has occured getting expiry dates of all licenses"
+ */
+
+router.get(
+  "/license/expiry_dates",
+  checkIfLoggedInAPI,
+  controllers.license.fetchExpiryDates
+);
+
+/**
+ * @api {get} /license/archived?page=&expand=&plantId=&search= Get Archived License
+ * @apiDescription Archived License
+ * @apiName fetchArchivedLicense
+ * @apiGroup License
+ *
+ * @apiQuery {Number} page Page of Archived License shown
+ * @apiQuery {String[]} expand Types of parameters needed in the query
+ * @apiQuery {Number} plantId To filter by plants, 0 by default
+ * @apiQuery {String} Search To search for specifics in the DB (Not implemented yet)
+ *
+ *
+ * @apiSuccess {JSON} - Data of Archived License and total page
+ * @apiSuccess {CMMSLicense[]} -.rows Array of Archived License
+ * @apiSuccess {Number} -.total Total number of pages of Archived License in the DB
+ *
+ *
+ * @apiError (Error 500) {Object} Internal Server Error {msg : error}
+ */
+
+router.get(
+  "/license/archived",
+  checkIfLoggedInAPI,
+  controllers.license.fetchArchivedLicenses
+);
+
+router
+  .route("/license/:id", checkIfLoggedInAPI)
+  .get(controllers.license.fetchSingleLicense)
+  .delete(controllers.license.deleteLicense);
+
+router.patch(
+  "/license/:id",
+  checkIfLoggedInAPI,
+  upload.array("images", 6),
+  controllers.license.editLicense
+);
+
+router.patch(
+  "/license/acquire/:id",
+  checkIfLoggedInAPI,
+  controllers.license.acquireLicense
+);
+
+router.patch(
+  "/license/archive/:id",
+  checkIfLoggedInAPI,
+  controllers.license.archiveLicense
+);
+
+router.patch(
+  "/license/renew/:id",
+  checkIfLoggedInAPI,
+  controllers.license.renewLicense
+);
+
+router.get(
+  "/license/images/:id",
+  checkIfLoggedInAPI,
+  controllers.license.fetchLicenseImages
+);
 
 router.get("/db/names", fetchDBNames);
 
