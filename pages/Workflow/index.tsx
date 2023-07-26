@@ -11,6 +11,8 @@ import {
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 
+import Tooltip from 'rc-tooltip';
+import 'rc-tooltip/assets/bootstrap_white.css';
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { Switch, Tag } from "antd";
 import { useCurrentUser, useWorkflow } from "../../components/SWR";
@@ -164,17 +166,37 @@ const Workflow = () => {
       label: "Workflow Statement",
       renderCell: (item) =>
         item.action == 1 ? (
-          <>
-            When fault type at <b>{item.plant_name}</b> is of type{" "}
-            <b>{item.fault_type}</b> then {item.statement}{" "}
-            <b>{item.assigneduser}</b>
-          </>
+          <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+              placement="bottom" 
+              trigger={["hover"]} 
+              overlay={
+              <span>
+                When fault type at <b>{item.plant_name}</b> is of type{" "}
+                <b>{item.fault_type}</b> then {item.statement}{" "}
+                <b>{item.assigneduser}</b>
+              </span>}>
+              <div>
+                When fault type at <b>{item.plant_name}</b> is of type{" "}
+                <b>{item.fault_type}</b> then {item.statement}{" "}
+                <b>{item.assigneduser}</b>
+              </div>
+            </Tooltip>
         ) : (
-          <>
-            When fault type at <b>{item.plant_name}</b> is of type{" "}
-            <b>{item.fault_type}</b> then {item.statement}{" "}
-            <b>{item.user_email}</b>
-          </>
+          <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+              placement="bottom" 
+              trigger={["hover"]} 
+              overlay={
+              <span>
+                When fault type at <b>{item.plant_name}</b> is of type{" "}
+                <b>{item.fault_type}</b> then {item.statement}{" "}
+                <b>{item.user_email}</b>
+              </span>}>
+              <div>
+                When fault type at <b>{item.plant_name}</b> is of type{" "}
+                <b>{item.fault_type}</b> then {item.statement}{" "}
+                <b>{item.user_email}</b>
+              </div>
+            </Tooltip>
         ),
     },
     {
@@ -229,8 +251,8 @@ const Workflow = () => {
         </Link>
       </ModuleHeader>
       <ModuleContent>
-        {isReady && workflow && (
-          <>
+        {isReady && workflow && (       
+          <>          
             <CompactTable
               columns={COLUMNS}
               data={{ nodes: workflow }}
