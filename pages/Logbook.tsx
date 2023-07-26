@@ -17,6 +17,8 @@ import {
 } from "@table-library/react-table-library";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import { useTheme } from "@table-library/react-table-library/theme";
+import Tooltip from 'rc-tooltip';
+import 'rc-tooltip/assets/bootstrap_white.css';
 import instance from "../axios.config.js";
 import { GetServerSidePropsContext } from "next";
 import styles from "../styles/Logbook.module.css";
@@ -324,9 +326,30 @@ const Logbook = ({
                             )}
                           </Cell>
                           <Cell>{row.label}</Cell>
-                          <Cell>{row.entry}</Cell>
-                          <Cell>{row.staff1}</Cell>
-                          <Cell>{row.staff2}</Cell>
+                          <Cell>
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{row.entry}</span>}>
+                                  <div>{row.entry}</div>
+                              </Tooltip>
+                          </Cell>
+                          <Cell>
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{row.staff1}</span>}>
+                                  <div>{row.staff1}</div>
+                              </Tooltip>
+                            </Cell>
+                          <Cell>
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{row.staff2}</span>}>
+                                  <div>{row.staff2}</div>
+                              </Tooltip>
+                            </Cell>
                         </Row>
                       );
                     })}

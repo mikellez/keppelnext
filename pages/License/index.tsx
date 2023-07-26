@@ -43,6 +43,8 @@ import LicenseHistory from "../../components/License/LicenseHistory";
 import scheduleStyles from "../../styles/Schedule.module.scss";
 import LicenseCalendar from "../../components/License/LicenseCalendar";
 
+import Tooltip from 'rc-tooltip';
+import 'rc-tooltip/assets/bootstrap_white.css';
 import { BiRefresh } from "react-icons/bi";
 import fetchExpiredLicense from "../../server/services/licenseCron";
 import { Divider } from "antd";
@@ -248,24 +250,79 @@ const License = () => {
                         return (
                           <Row key={item.id} item={item}>
                             <Cell>{item.id}</Cell>
-                            <Cell>{item.linked_asset_name}</Cell>
-                            <Cell>{item.plant_name}</Cell>
-                            <Cell>{item.license_name}</Cell>
-                            <Cell>{item.license_provider}</Cell>
-                            <Cell>{item.license_type}</Cell>
                             <Cell>
-                              {item.acquisition_date
-                                ? moment(
-                                    new Date(item.acquisition_date)
-                                  ).format("MMMM Do YYYY, h:mm:ss a")
-                                : null}
+                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.linked_asset_name}</span>}>
+                                  <div>{item.linked_asset_name}</div>
+                              </Tooltip>
                             </Cell>
                             <Cell>
-                              {item.expiry_date
-                                ? moment(new Date(item.expiry_date)).format(
-                                    "MMMM Do YYYY, h:mm:ss a"
-                                  )
-                                : null}
+                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.plant_name}</span>}>
+                                  <div>{item.plant_name}</div>
+                              </Tooltip>
+                            </Cell>
+                            <Cell>
+                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.license_name}</span>}>
+                                  <div>{item.license_name}</div>
+                              </Tooltip>
+                            </Cell>
+                            <Cell>
+                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.license_provider}</span>}>
+                                  <div>{item.license_provider}</div>
+                              </Tooltip>
+                            </Cell>
+                            <Cell>
+                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{item.license_type}</span>}>
+                                  <div>{item.license_type}</div>
+                              </Tooltip>
+                            </Cell>
+                            <Cell>
+                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={
+                                  <span>
+                                    {item.acquisition_date ? 
+                                    moment(new Date(item.acquisition_date)).format("MMMM Do YYYY, h:mm:ss a")
+                                    : null}
+                                  </span>}>
+                                <div>
+                                  {item.acquisition_date ? 
+                                  moment(new Date(item.acquisition_date)).format("MMMM Do YYYY, h:mm:ss a")
+                                  : null}
+                                </div>
+                              </Tooltip>
+                            </Cell>
+                            <Cell>
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={
+                                  <span>
+                                    {item.expiry_date ? 
+                                    moment(new Date(item.expiry_date)).format("MMMM Do YYYY, h:mm:ss a")
+                                    : null}
+                                  </span>}>
+                                <div>
+                                  {item.expiry_date ? 
+                                  moment(new Date(item.expiry_date)).format("MMMM Do YYYY, h:mm:ss a")
+                                  : null}
+                                </div>
+                              </Tooltip>
                             </Cell>
                             <Cell>
                               {item.acquisition_date && item.expiry_date
