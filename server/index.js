@@ -14,6 +14,7 @@ const { access } = require("fs");
 const morgan = require('morgan');
 const helmet = require('helmet');
 const licenseCron = require("./services/licenseCron");
+const workflowCron = require("./services/workflowCron");
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -193,34 +194,8 @@ app.prepare().then(() => {
     console.log(`Ready on Port ${process.env.PORT}`);
   });
 
-  var task = cron.schedule(
-    "* * * * *",
-    async () => {
-      // console.log("trigger task");
 
-      // run workflow task - auto assign user
-      await axios
-        .get(`http://localhost:${process.env.PORT}/api/workflow/run/assign`)
-        .catch((err) => {
-          console.log(err.response);
-          console.log("Unable to run workflow task - assign user");
-        });
-
-      // run workflow task - auto send email
-      await axios
-        .get(`http://localhost:${process.env.PORT}/api/workflow/run/email`)
-        .catch((err) => {
-          console.log(err.response);
-          console.log("Unable to run workflow task - send email");
-        });
-      //console.log(result.data)
-    },
-    {
-      scheduled: true,
-    }
-  );
-
-  task.start();
+  workflowCron.start();
   licenseCron.start();
 
   checklistGenerator.start();
