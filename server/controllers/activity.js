@@ -4,7 +4,7 @@ const tableInfo = require("../../public/master.json");
 const activityLog = require("../../public/activity.json");
 
 const ITEMS_PER_PAGE = 10;
-
+//test comment
 let query = `
     SELECT concat(ii.first_name, ' ', ii.last_name) AS user_name,
             'Login events'::text AS type,
