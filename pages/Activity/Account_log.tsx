@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PickerWithType from "../../components/PickerWithType";
+import Tooltip from 'rc-tooltip';
+import 'rc-tooltip/assets/bootstrap_white.css';
 import { ModuleContent, ModuleHeader, ModuleMain } from "../../components";
 import { Select } from "antd";
 import moment from "moment";
@@ -256,8 +258,18 @@ export default function AccountLog() {
                       return (
                         <Row key={index} item={item}>
                           <Cell>{item.user_name}</Cell>
-                          <Cell>{item.type}</Cell>
-                          <Cell>{item.description}</Cell>
+                          <Cell>{item.type}</Cell>         
+                          <Cell>
+                          {/*Using the rc-tooltip library https://www.npmjs.com/package/rc-tooltip*/}
+                          <Tooltip 
+                          overlayInnerStyle={{
+                            "fontSize": "0.7rem"}} 
+                          placement="bottom" 
+                          trigger={["hover"]} 
+                          overlay={<span >{item.description}</span>}>
+                            <div>{item.description}</div>
+                          </Tooltip>
+                            </Cell>
                           <Cell>
                             {item.event_time
                               ? moment(new Date(item.event_time)).format(
