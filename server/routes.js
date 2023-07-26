@@ -2248,6 +2248,12 @@ router.get(
   controllers.license.fetchDraftLicenses
 );
 
+router.get(
+  "/license/draft/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.license.fetchDraftLicenses
+);
+
 /**
  * @api {get} /license/acquired?page=&expand=&plantId=&search= Get Acquired License
  * @apiDescription Acquired License
@@ -2270,6 +2276,12 @@ router.get(
 
 router.get(
   "/license/acquired",
+  checkIfLoggedInAPI,
+  controllers.license.fetchAcquiredLicenses
+);
+
+router.get(
+  "/license/acquired/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.license.fetchAcquiredLicenses
 );
@@ -2381,6 +2393,12 @@ router.get(
   "/license/images/:id",
   checkIfLoggedInAPI,
   controllers.license.fetchLicenseImages
+);
+
+router.get(
+  "/license/expired/:plant/:datetype/:date/:days",
+  checkIfLoggedInAPI,
+  controllers.license.fetchExpiredLicensesInDays
 );
 
 router.get("/db/names", fetchDBNames);

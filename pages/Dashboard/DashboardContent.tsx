@@ -38,8 +38,10 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
   const [isRequestReady, setIsRequestReady] = useState<boolean>(false);
   const [isCOPReady, setIsCOPReady] = useState<boolean>(false);
   const [isFeedbackReady, setIsFeedbackReady] = useState<boolean>(false);
+  const [isLicenseReady, setIsLicenseReady] = useState<boolean>(false);
   const [plant, setPlant] = useState<number>(0);
   const [field, setField] = useState<string>("status");
+  const [expiredLicenseInDays, setExpiredLicencesInDays] = useState<string>("status");
   const [pickerwithtype, setPickerWithType] = useState<{
     date: string,
     datetype: PickerType
@@ -63,10 +65,15 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     totalOutstandingFeedback: number;
     totalCompletedFeedback: number;
   }>({ totalPendingFeedback: 0, totalOutstandingFeedback: 0, totalCompletedFeedback: 0 });
+  const [license, setLicense] = useState<{
+    totalDraftLicense: number;
+    totalAcquiredLicense: number;
+  }>({ totalDraftLicense: 0, totalAcquiredLicense: 0 });
   const [checklistData, setChecklistData] = useState<CMMSDashboardData[]>();
   const [requestData, setRequestData] = useState<CMMSDashboardData[]>();
   const [copData, setCOPData] = useState<CMMSDashboardData[]>();
   const [feedbackData, setFeedbackData] = useState<CMMSDashboardData[]>();
+  const [licenseData, setLicenseData] = useState<CMMSDashboardData[]>();
 
   const handleDateChange: DatePickerProps['onChange'] = (date, dateString) => {
     setPickerWithType({ date: dateString ? moment(date?.toDate()).format("YYYY-MM-DD") : 'all', datetype: pickerwithtype.datetype });
@@ -200,6 +207,51 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     setIsFeedbackReady(true);
   }
 
+  const fetchLicenses = async () => {
+    const { datetype, date } = pickerwithtype;
+    const PARAMS = ["id"];
+
+    const getDraftLicense = instance.get(`/api/license/draft/${plant}/${datetype}/${date}?expand=${PARAMS.join(",")}`);
+    const getAcquiredLicense = instance.get(`/api/license/acquired/${plant}/${datetype}/${date}?expand=${PARAMS.join(",")}`);
+
+    const getLicenseExpiredIn30 = instance.get(`/api/license/expired/${plant}/${datetype}/${date}/30`);
+    const getLicenseExpiredIn60 = instance.get(`/api/license/expired/${plant}/${datetype}/${date}/60`);
+    const getLicenseExpiredIn90 = instance.get(`/api/license/expired/${plant}/${datetype}/${date}/90`);
+    
+    const getAllFeedback = await Promise.all([getDraftLicense, getAcquiredLicense, getLicenseExpiredIn30, getLicenseExpiredIn60, getLicenseExpiredIn90]);
+
+    const draftLicense = getAllFeedback[0].data?.rows;
+    const acquiredLicense = getAllFeedback[1].data?.rows;
+    const licenseExpiredIn30 = getAllFeedback[2].data?.rows;
+    const licenseExpiredIn60 = getAllFeedback[3].data?.rows;
+    const licenseExpiredIn90 = getAllFeedback[4].data?.rows;
+
+    if(expiredLicenseInDays == 'expiry') {
+      setLicenseData([
+        {'name': 'Expired in 30 days', 'value': licenseExpiredIn30?.length || 0, 'fill': '#C74B50', 'id': 1},
+        {'name': 'Expired in 60 days', 'value': licenseExpiredIn60?.length || 0, 'fill': '#810CA8', 'id': 2},
+        {'name': 'Expired in 90 days', 'value': licenseExpiredIn90?.length || 0, 'fill': '#03C988', 'id': 3},
+      ]);
+    } else {
+      setLicenseData([
+        {'name': 'Draft', 'value': draftLicense?.length || 0, 'fill': '#C74B50', 'id': 1},
+        {'name': 'Acquired', 'value': acquiredLicense?.length || 0, 'fill': '#810CA8', 'id': 2},
+      ]);
+    }
+
+    setLicense({
+      totalDraftLicense: draftLicense?.length || 0,
+      totalAcquiredLicense: acquiredLicense?.length || 0,
+    });
+
+    console.log(licenseData)
+
+    setTimeout(() => {
+      setIsReady(true);
+    }, 500);
+    setIsLicenseReady(true);
+  }
+
   useEffect(() => {
     const { datetype, date } = pickerwithtype;
 
@@ -211,6 +263,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             fetchChecklists();
             fetchCOPs();
             fetchFeedbacks();
+            fetchLicenses();
           }
       })
 
@@ -223,11 +276,11 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
       fetchRequests();
       fetchChecklists();
       fetchCOPs();
-      fetchFeedbacks();
+      fetchLicenses();
     }
     
 
-  }, [plant, field, pickerwithtype, active]);
+  }, [plant, field, pickerwithtype, active, expiredLicenseInDays]);
 
 
   const totalRequest = requestData?.reduce((accumulator, currentValue) => {
@@ -240,6 +293,9 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     return accumulator + currentValue.value;
   }, 0);
   const totalFeedback = feedbackData?.reduce((accumulator, currentValue) => {
+    return accumulator + currentValue.value;
+  }, 0);
+  const totalLicense = licenseData?.reduce((accumulator, currentValue) => {
     return accumulator + currentValue.value;
   }, 0);
 
@@ -257,6 +313,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
   const { totalPendingChecklist, totalOutstandingChecklist, totalClosedChecklist } = checklist;
   const { totalScheduledCOP, totalCompletedCOP } = cop;
   const { totalPendingFeedback, totalOutstandingFeedback, totalCompletedFeedback } = feedback;
+  const { totalDraftLicense, totalAcquiredLicense } = license;
 
   return (
     <ModuleMain>
@@ -434,6 +491,59 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             )}
           </DashboardBox>
           }
+
+          <DashboardBox
+            id="draft-license-box"
+            title="Draft Licenses"
+            style={{ gridArea: "m" }}
+            onClick={handleDashboardClick} 
+            className={active === "draft-license-box" ? styles.active : ""}
+          >
+            <p className={styles.dashboardPendingdNumber}>
+              {totalDraftLicense}
+            </p>
+          </DashboardBox>
+          <DashboardBox
+            id="acquired-license-box"
+            title="Acquired Licenses"
+            style={{ gridArea: "n" }}
+            onClick={handleDashboardClick}
+            className={active === "acquired-license-box" ? styles.active : ""}
+          >
+            <p className={styles.dashboardOutstandingNumber}>
+              {totalAcquiredLicense}
+            </p>
+          </DashboardBox>
+          <DashboardBox
+            id=""
+            title=""
+            style={{ gridArea: "o" }}
+            onClick={handleDashboardClick}
+          >
+          </DashboardBox>
+          {showTotalContainer && <DashboardBox
+            title={"Total Licenses: " + totalLicense}
+            style={{ gridArea: "p" }}
+            filter={
+              <select
+                className={`form-select ${styles.dashboardRequestButton}`}
+                onChange={(event) => {
+                  setExpiredLicencesInDays(event.target.value);
+                }}
+              >
+                <option value="status">Status</option>
+                <option value="expiry">Expiry</option>
+              </select>
+            }
+          >
+            {licenseData && licenseData.length > 0 ? (
+              <PChart data={licenseData} />
+            ) : (
+              <p className={styles.dashboardNoChart}>No licenses</p>
+            )}
+          </DashboardBox>
+          }
+
         </div>
         {showDiv === 'pending-requests-box' && 
           <Request 
