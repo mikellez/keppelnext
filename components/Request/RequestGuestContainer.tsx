@@ -124,7 +124,7 @@ export default function RequestGuestContainer(props: any) {
 
       reader.onload = () => {
         setPreviewedFile(reader.result as string);
-        setForm((prevState) => {
+        setForm((prevState: any) => {
           return { ...prevState, image: selectedFile };
         });
       };

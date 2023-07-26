@@ -142,7 +142,7 @@ const fetchArchivedLicenseQuery = (expand, search, plantId) => {
 };
 
 const fetchSingleLicense = async (req, res, next) => {
-  console.log("Fetching single license");
+  // console.log("Fetching single license");
   const expand = req.query.expand || false;
   try {
     const query = `
@@ -293,7 +293,7 @@ const fetchArchivedLicenses = async (req, res, next) => {
 
 const createLicense = async (req, res, next) => {
   const license = req.body;
-  console.log(req.files);
+  // console.log(req.files);
   const images = req.files.map((file) => file.buffer);
   const status = license.assigned_user_id ? 2 : 1;
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
@@ -344,7 +344,7 @@ const createLicense = async (req, res, next) => {
 
 const editLicense = async (req, res) => {
   const license = req.body;
-  console.log(req.files);
+  // console.log(req.files);
   const images = req.files.map((file) => file.buffer);
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const query = `

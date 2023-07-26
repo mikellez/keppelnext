@@ -255,7 +255,7 @@ export default function NewAsset(props: NewAssetProps) {
         user_id: user.data!.id,
       };
 
-      console.log(postData);
+      // console.log(postData);
       //post data to API
       instance.post("/api/asset/addNewAsset", postData);
       //open modal to show success

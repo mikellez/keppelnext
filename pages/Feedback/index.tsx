@@ -108,7 +108,9 @@ export interface FeedbackPageProps {
 export default function Feedback(props: FeedbackPageProps) {
   const [feedbackItems, setFeedbackItems] = useState<CMMSFeedback[]>([]);
   const [isReady, setReady] = useState(false);
-  const [activeTabIndex, setActiveTabIndex] = useState(props?.filter ? props?.activeTabIndex : 0);
+  const [activeTabIndex, setActiveTabIndex] = useState(
+    props?.filter ? props?.activeTabIndex : 0
+  );
   const user = useCurrentUser();
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -153,7 +155,7 @@ export default function Feedback(props: FeedbackPageProps) {
         `/api/feedback/${indexedColumn[activeTabIndex]}?page=${page}&expand=${PARAMS}`
       )
       .then((response) => {
-        console.log(response.data.rows);
+        // console.log(response.data.rows);
         setFeedbackItems(
           response.data.rows.map((row: CMMSFeedback) => {
             return {
@@ -187,7 +189,7 @@ export default function Feedback(props: FeedbackPageProps) {
       </ModuleHeader>
 
       <ModuleContent>
-        {!props?.filter &&
+        {!props?.filter && (
           <ul className="nav nav-tabs">
             <li
               onClick={() => {
@@ -214,7 +216,7 @@ export default function Feedback(props: FeedbackPageProps) {
               <span style={{ all: "unset" }}>Completed</span>
             </li>
           </ul>
-        }
+        )}
         {isReady && feedbackItems.length === 0 && <div></div>}
         {isReady ? (
           <>

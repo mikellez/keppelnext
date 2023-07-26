@@ -14,7 +14,7 @@ import RequestPreview, {
   RequestPreviewProps,
   RequestAction,
 } from "../../../components/Request/RequestPreview";
-import instance from '../../../types/common/axios.config';
+import instance from "../../../types/common/axios.config";
 import { CMMSRequest } from "../../../types/common/interfaces";
 import { useRouter } from "next/router";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
@@ -25,21 +25,22 @@ import { downloadPDF } from "../View/[id]";
 
 const manageRequest = async (id: number, status: number, comments?: string) => {
   if (status == 4) {
-
     return await instance({
       url: `/api/request/approve/${id}`,
       method: "patch",
       data: { comments: comments },
     })
-    .then((res) => {
-      return res.data;
-    })
-    .catch((err) => console.log(err));
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => console.log(err));
   } else {
-    return await instance.patch(`/api/request/reject/${id}`, {comments: comments})
-      .then(res => {
-        console.log(res.data);
-      }).catch((err) => console.log(err));
+    return await instance
+      .patch(`/api/request/reject/${id}`, { comments: comments })
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => console.log(err));
   }
 };
 
@@ -80,11 +81,18 @@ export default function CompleteRequest(props: RequestPreviewProps) {
     <>
       <ModuleMain>
         <ModuleHeader title="New Request" header="Manage Request">
-          <TooltipBtn text="Download PDF" onClick={() => downloadPDF(parseInt(id as string))}>
+          <TooltipBtn
+            text="Download PDF"
+            onClick={() => downloadPDF(parseInt(id as string))}
+          >
             <HiOutlineDownload size={20} />
           </TooltipBtn>
-          <button className={"btn btn-secondary"} type="button" onClick={() => router.back()}>
-              Back
+          <button
+            className={"btn btn-secondary"}
+            type="button"
+            onClick={() => router.back()}
+          >
+            Back
           </button>
         </ModuleHeader>
         <ModuleContent>
@@ -147,9 +155,7 @@ export const getServerSideProps: GetServerSideProps = async (
     `/api/request/` + context.params?.id
   );
 
-  if (
-    !getSpecificRequest.data
-  ) {
+  if (!getSpecificRequest.data) {
     return {
       redirect: {
         destination: "/404",

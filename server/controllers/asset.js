@@ -351,7 +351,7 @@ const getAssetDetails = async (req, res, next) => {
     [req.params.psa_id],
     (err, result) => {
       if (err) throw err;
-      else console.log(result.rows);
+      // else console.log(result.rows);
       res.status(200).json(result.rows);
     }
   );
@@ -487,7 +487,7 @@ const fetch_asset_types = async (req, res, next) => {
 };
 
 const editAsset = async (req, res, next) => {
-  console.log(req.body);
+  // console.log(req.body);
   var parent_asset;
 
   if (req.body.asset_type == "") {
@@ -730,23 +730,30 @@ const editAsset = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const fields = getFieldsDiff(old.rows[0], updated.rows[0]);
 
-  const activity_log = [{
-    date: today,
-    name: req.user.name,
-    role: req.user.role_name,
-    activity: `Edited Asset: [${fields.map(field=>`${field.field}: ${field.oldValue} => ${field.newValue}`).join(", ")}]`,
-    activity_type: "EDITED",
-    fields: fields
-  }];
+  const activity_log = [
+    {
+      date: today,
+      name: req.user.name,
+      role: req.user.role_name,
+      activity: `Edited Asset: [${fields
+        .map(
+          (field) => `${field.field}: ${field.oldValue} => ${field.newValue}`
+        )
+        .join(", ")}]`,
+      activity_type: "EDITED",
+      fields: fields,
+    },
+  ];
 
-  console.log(activity_log)
+  // console.log(activity_log)
 
   await global.db.query(
     `
     UPDATE keppel.plant_system_assets
     SET activity_log = activity_log || $1::jsonb
     WHERE psa_id = '${psa_id}';
-    `, [JSON.stringify(activity_log)]
+    `,
+    [JSON.stringify(activity_log)]
   );
 
   res.status(200).send({
@@ -826,7 +833,6 @@ const addNewAsset = (req, res, next) => {
   var uploaded_image = req.body.image;
   var uploaded_files = req.body.files;
 
-
   plant_asset_instrument = req.body.system_asset_name;
 
   /*** determine parent asset; plant asset instrument and subsequent level if any, to be set as asset type ****/
@@ -887,7 +893,7 @@ const addNewAsset = (req, res, next) => {
     typeof req.body.system_lvl_5 === "undefined" &&
     asset_type != req.body.system_asset
   ) {
-    console.log(1)
+    console.log(1);
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)
         VALUES ('${system_id_lvl3}', '${system_asset_id_lvl4}', '${system_asset_name}', '${asset_type}','${asset_description}','${asset_location}','${brand}','${system_asset_name_2}','${model_number}','${technical_specs}','${manufacture_country}','${warranty}','${remarks}','${system_asset_name}','','', '${uploaded_image}','${uploaded_files}','${plant_id}')`;
   }
@@ -896,16 +902,11 @@ const addNewAsset = (req, res, next) => {
     req.body.system_lvl_6 == "" &&
     typeof req.body.system_lvl_5 === "undefined"
   ) {
-    console.log(2)
+    console.log(2);
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)
         VALUES ('${system_id_lvl3}', '${system_asset_id_lvl4}', '${system_asset_name_2}', '${system_asset_name_2}','${asset_description}','${asset_location}','${brand}','${system_asset_name_2}','${model_number}','${technical_specs}','${manufacture_country}','${warranty}','${remarks}','${system_asset_name}','${system_asset_name_2}','', '${uploaded_image}','${uploaded_files}','${plant_id}')`;
-  }
-
-  else if (
-    req.body.system_lvl_5 === "" &&
-    req.body.system_lvl_6 === ""
-  ) {
-    console.log(7)
+  } else if (req.body.system_lvl_5 === "" && req.body.system_lvl_6 === "") {
+    console.log(7);
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)
         VALUES ('${system_id_lvl3}', '${system_asset_id_lvl4}', '${asset_type}', '${asset_type}','${asset_description}','${asset_location}','${brand}','${plant_asset_instrument}','${model_number}','${technical_specs}','${manufacture_country}','${warranty}','${remarks}','${system_asset_name}','${asset_type}','', '${uploaded_image}','${uploaded_files}','${plant_id}')`;
   }
@@ -1044,7 +1045,7 @@ const deactivateAsset = (req, res, next) => {
   var psa_id = req.body.psa_id;
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  
+
   const activity_log = [
     {
       date: today,
