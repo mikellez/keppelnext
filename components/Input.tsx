@@ -1,4 +1,7 @@
 /**
+ *
+ * EXPLANATION OF INPUT COMPONENT
+ *
  * This module creates a input label that highlights the changes onBlur
  * Uses the contentEditable function for divs
  *
