@@ -1,4 +1,18 @@
-// import CaretPositioning from "./EditCaretPositioning";
+/**
+ * This module creates a input label that highlights the changes onBlur
+ * Uses the contentEditable function for divs
+ *
+ * props :
+ * - className : allows user to apply CSS to the input,
+ * - inputID : unique id for each input to allow getElementByID to reference it (detail[inputID] should return the value)
+ * - placeholder : default value for each input
+ * - value : its current value, if null will display the placeholder
+ * - setDetails : to update the value when the input is changed
+ * - details : the details parsed into input
+ *
+ *
+ */
+
 import React, { useEffect, useState } from "react";
 import { CMMSAssetDetails } from "../types/common/interfaces";
 import { useAsset } from "./SWR";
