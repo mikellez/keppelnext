@@ -11,8 +11,8 @@ const checklistGenerator = require("./services/checklistGenerator");
 const controllers = require("./controllers");
 const { apiLimiter, loginLimiter } = require("./rateLimiter");
 const { access } = require("fs");
-const morgan = require('morgan');
-const helmet = require('helmet');
+const morgan = require("morgan");
+const helmet = require("helmet");
 const licenseCron = require("./services/licenseCron");
 const workflowCron = require("./services/workflowCron");
 
@@ -32,7 +32,7 @@ app.prepare().then(() => {
     })
   );
   server.use(bodyParser.json({ limit: "50mb", extended: true }));
-  server.use(morgan('combined'));
+  server.use(morgan("combined"));
   server.use(
     bodyParser.urlencoded({
       limit: "50mb",
@@ -43,8 +43,8 @@ app.prepare().then(() => {
   server.use(bodyParser.text({ limit: "200mb" }));
   server.use(dbConnection);
   userAuth(server);
-  server.use(function(req, res, next) {
-    res.set({ 'Content-Security-Policy': "script-src 'self' 'unsafe-eval'" });
+  server.use(function (req, res, next) {
+    res.set({ "Content-Security-Policy": "script-src 'self' 'unsafe-eval'" });
     next();
   });
   server.use("/api/login", loginLimiter);
@@ -194,9 +194,7 @@ app.prepare().then(() => {
     console.log(`Ready on Port ${process.env.PORT}`);
   });
 
-
   workflowCron.start();
   licenseCron.start();
-
   checklistGenerator.start();
 });
