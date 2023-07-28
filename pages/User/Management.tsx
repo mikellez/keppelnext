@@ -15,7 +15,7 @@ import instance from "../../types/common/axios.config";
 import { ModuleHeader, ModuleMain } from "../../components";
 import TooltipBtn from "../../components/TooltipBtn";
 import Link from "next/link";
-import { BsFileEarmarkPlus, BsPencilSquare, BsTrashFill } from "react-icons/bs";
+import { BsFileEarmarkPlus, BsPencilSquare, BsTrashFill, BsPersonBadge } from "react-icons/bs";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import { HiOutlineDownload } from "react-icons/hi";
 import ModuleSimplePopup from "../../components/ModuleLayout/ModuleSimplePopup";
@@ -66,6 +66,7 @@ export default function User() {
     "6em 20% calc(80% - 12em) 6em;"
   );
   const [deleteModalID, setDeleteModalID] = useState<number>(0);
+  const [impersonateUserID , setImpersonateUserID] = useState<number>(0);
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [isDeleteSuccess, setDeleteSuccess] = useState<boolean>(false);
 
@@ -101,6 +102,23 @@ export default function User() {
     setDeleteModalID(parseInt(e.currentTarget.name));
     setModalOpen(true);
   };
+  const onImpersonateClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    setImpersonateUserID(parseInt(e.currentTarget.name));
+    impersonateUser();
+  };
+  async function impersonateUser() {
+    try {
+      let res = await instance.post(`/api/admin/impersonate/${impersonateUserID}`);
+      // console.log(res);
+
+      if(res.status == 200){
+        // Re-route to dashboard
+        router.push('/Dashboard');
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
   async function deleteMaster() {
     try {
       let res = await instance.delete(`/api/user/deleteUser/${deleteModalID}`);
@@ -167,6 +185,17 @@ export default function User() {
                     >
                       <BsPencilSquare />
                     </Link>
+                    <button
+                      onClick={onImpersonateClick}
+                      name={"" + item.user_id}
+                      style={{
+                        all: "unset",
+                        cursor: "pointer",
+                        marginLeft: "10px",
+                      }}
+                    >
+                      <BsPersonBadge />
+                    </button>
                   </Cell>
                 </Row>
               ))}
