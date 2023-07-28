@@ -24,7 +24,7 @@ const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
   const server = express();
-  server.use(helmet());
+  //server.use(helmet());
   server.use(
     cors({
       origin: `http://localhost:${process.env.PORT}`,
@@ -43,10 +43,10 @@ app.prepare().then(() => {
   server.use(bodyParser.text({ limit: "200mb" }));
   server.use(dbConnection);
   userAuth(server);
-  server.use(function(req, res, next) {
+  /*server.use(function(req, res, next) {
     res.set({ 'Content-Security-Policy': "script-src 'self' 'unsafe-eval'" });
     next();
-  });
+  });*/
   server.use("/api/login", loginLimiter);
   server.use("/api/*", apiLimiter);
 
