@@ -41,7 +41,8 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
   const [isLicenseReady, setIsLicenseReady] = useState<boolean>(false);
   const [plant, setPlant] = useState<number>(0);
   const [field, setField] = useState<string>("status");
-  const [expiredLicenseInDays, setExpiredLicencesInDays] = useState<string>("status");
+  const [expiredLicenseInDays, setExpiredLicencesInDays] =
+    useState<string>("status");
   const [pickerwithtype, setPickerWithType] = useState<{
     date: string;
     datetype: PickerType;
@@ -72,7 +73,11 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     totalPendingFeedback: number;
     totalOutstandingFeedback: number;
     totalCompletedFeedback: number;
-  }>({ totalPendingFeedback: 0, totalOutstandingFeedback: 0, totalCompletedFeedback: 0 });
+  }>({
+    totalPendingFeedback: 0,
+    totalOutstandingFeedback: 0,
+    totalCompletedFeedback: 0,
+  });
   const [license, setLicense] = useState<{
     totalDraftLicense: number;
     totalAcquiredLicense: number;
@@ -269,61 +274,112 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     const { datetype, date } = pickerwithtype;
     const PARAMS = ["id"];
 
-    const getDraftLicense = instance.get(`/api/license/draft/${plant}/${datetype}/${date}?expand=${PARAMS.join(",")}`);
-    const getAcquiredLicense = instance.get(`/api/license/acquired/${plant}/${datetype}/${date}?expand=${PARAMS.join(",")}`);
+    const getDraftLicense = instance.get(
+      `/api/license/draft/${plant}/${datetype}/${date}?expand=${PARAMS.join(
+        ","
+      )}`
+    );
+    const getAcquiredLicense = instance.get(
+      `/api/license/acquired/${plant}/${datetype}/${date}?expand=${PARAMS.join(
+        ","
+      )}`
+    );
 
-    const getLicenseExpiredIn30 = instance.get(`/api/license/expired/${plant}/${datetype}/${date}/30?expand=${PARAMS.join(",")}`);
-    const getLicenseExpiredIn60 = instance.get(`/api/license/expired/${plant}/${datetype}/${date}/60?expand=${PARAMS.join(",")}`);
-    const getLicenseExpiredIn90 = instance.get(`/api/license/expired/${plant}/${datetype}/${date}/90?expand=${PARAMS.join(",")}`);
-    
-    const getAllFeedback = await Promise.all([getDraftLicense, getAcquiredLicense, getLicenseExpiredIn30, getLicenseExpiredIn60, getLicenseExpiredIn90]);
+    const getLicenseExpiredIn30 = instance.get(
+      `/api/license/expired/${plant}/${datetype}/${date}/30?expand=${PARAMS.join(
+        ","
+      )}`
+    );
+    const getLicenseExpiredIn60 = instance.get(
+      `/api/license/expired/${plant}/${datetype}/${date}/60?expand=${PARAMS.join(
+        ","
+      )}`
+    );
+    const getLicenseExpiredIn90 = instance.get(
+      `/api/license/expired/${plant}/${datetype}/${date}/90?expand=${PARAMS.join(
+        ","
+      )}`
+    );
+
+    const getAllFeedback = await Promise.all([
+      getDraftLicense,
+      getAcquiredLicense,
+      getLicenseExpiredIn30,
+      getLicenseExpiredIn60,
+      getLicenseExpiredIn90,
+    ]);
 
     const draftLicense = getAllFeedback[0].data?.rows;
     const acquiredLicense = getAllFeedback[1].data?.rows;
     const licenseExpiredIn30 = getAllFeedback[2].data?.rows;
     const licenseExpiredIn60 = getAllFeedback[3].data?.rows;
     const licenseExpiredIn90 = getAllFeedback[4].data?.rows;
+    console.log(getAllFeedback);
 
-    if(expiredLicenseInDays == 'expiry') {
+    if (expiredLicenseInDays == "expiry") {
       setLicenseData([
-        {'name': 'Expired in 30 days', 'value': licenseExpiredIn30?.length || 0, 'fill': '#C74B50', 'id': 1},
-        {'name': 'Expired in 60 days', 'value': licenseExpiredIn60?.length || 0, 'fill': '#810CA8', 'id': 2},
-        {'name': 'Expired in 90 days', 'value': licenseExpiredIn90?.length || 0, 'fill': '#03C988', 'id': 3},
+        {
+          name: "Expired in 30 days",
+          value: licenseExpiredIn30?.length || 0,
+          fill: "#C74B50",
+          id: 1,
+        },
+        {
+          name: "Expired in 60 days",
+          value: licenseExpiredIn60?.length || 0,
+          fill: "#810CA8",
+          id: 2,
+        },
+        {
+          name: "Expired in 90 days",
+          value: licenseExpiredIn90?.length || 0,
+          fill: "#03C988",
+          id: 3,
+        },
       ]);
     } else {
       setLicenseData([
-        {'name': 'Draft', 'value': draftLicense?.length || 0, 'fill': '#C74B50', 'id': 1},
-        {'name': 'Acquired', 'value': acquiredLicense?.length || 0, 'fill': '#810CA8', 'id': 2},
+        {
+          name: "Draft",
+          value: draftLicense?.length || 0,
+          fill: "#C74B50",
+          id: 1,
+        },
+        {
+          name: "Acquired",
+          value: acquiredLicense?.length || 0,
+          fill: "#810CA8",
+          id: 2,
+        },
       ]);
     }
-
+    console.log(licenseData);
     setLicense({
       totalDraftLicense: draftLicense?.length || 0,
       totalAcquiredLicense: acquiredLicense?.length || 0,
     });
 
-    console.log(licenseData)
-
     setTimeout(() => {
       setIsReady(true);
     }, 500);
     setIsLicenseReady(true);
-  }
+  };
 
   useEffect(() => {
     const { datetype, date } = pickerwithtype;
 
-    if([3, 4].includes(role_id)) { // engineer, specialist
-      getPlants("/api/getUserPlants").then(result => {
-          if (result) {
-            setPlant(result[0].plant_id)
-            fetchRequests();
-            fetchChecklists();
-            fetchCOPs();
-            fetchFeedbacks();
-            fetchLicenses();
-          }
-      })
+    if ([3, 4].includes(role_id)) {
+      // engineer, specialist
+      getPlants("/api/getUserPlants").then((result) => {
+        if (result) {
+          setPlant(result[0].plant_id);
+          fetchRequests();
+          fetchChecklists();
+          fetchCOPs();
+          fetchFeedbacks();
+          fetchLicenses();
+        }
+      });
 
       if (role_id == 4) {
         setShowTotalContainer(false);
@@ -334,9 +390,11 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
       fetchCOPs();
       fetchLicenses();
     }
-    
-
   }, [plant, field, pickerwithtype, active, expiredLicenseInDays]);
+
+  useEffect(() => {
+    console.log(licenseData);
+  }, [licenseData]);
 
   const totalRequest = requestData?.reduce((accumulator, currentValue) => {
     return accumulator + currentValue.value;
@@ -351,7 +409,8 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     return accumulator + currentValue.value;
   }, 0);
   const totalLicense = licenseData?.reduce((accumulator, currentValue) => {
-    return accumulator + currentValue.value;
+    console.log(accumulator);
+    return +accumulator + +currentValue.value;
   }, 0);
 
   if (!isReady) {
@@ -379,7 +438,11 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     totalClosedChecklist,
   } = checklist;
   const { totalScheduledCOP, totalCompletedCOP } = cop;
-  const { totalPendingFeedback, totalOutstandingFeedback, totalCompletedFeedback } = feedback;
+  const {
+    totalPendingFeedback,
+    totalOutstandingFeedback,
+    totalCompletedFeedback,
+  } = feedback;
   const { totalDraftLicense, totalAcquiredLicense } = license;
 
   return (
@@ -590,23 +653,24 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               {totalCompletedFeedback}
             </p>
           </DashboardBox>
-          {showTotalContainer && <DashboardBox
-            title={"Total Feedbacks: " + totalFeedback}
-            style={{ gridArea: "p" }}
-          >
-            {feedbackData && feedbackData.length > 0 ? (
-              <PChart data={feedbackData} />
-            ) : (
-              <p className={styles.dashboardNoChart}>No feedbacks</p>
-            )}
-          </DashboardBox>
-          }
+          {showTotalContainer && (
+            <DashboardBox
+              title={"Total Feedbacks: " + totalFeedback}
+              style={{ gridArea: "p" }}
+            >
+              {feedbackData && feedbackData.length > 0 ? (
+                <PChart data={feedbackData} />
+              ) : (
+                <p className={styles.dashboardNoChart}>No feedbacks</p>
+              )}
+            </DashboardBox>
+          )}
 
           <DashboardBox
             id="draft-license-box"
             title="Draft Licenses"
             style={{ gridArea: "m" }}
-            onClick={handleDashboardClick} 
+            onClick={handleDashboardClick}
             className={active === "draft-license-box" ? styles.active : ""}
           >
             <p className={styles.dashboardPendingdNumber}>
@@ -629,31 +693,33 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             title=""
             style={{ gridArea: "o" }}
             onClick={handleDashboardClick}
-          >
-          </DashboardBox>
-          {showTotalContainer && <DashboardBox
-            title={"Total Licenses: " + totalLicense}
-            style={{ gridArea: "p" }}
-            filter={
-              <select
-                className={`form-select ${styles.dashboardRequestButton}`}
-                onChange={(event) => {
-                  setExpiredLicencesInDays(event.target.value);
-                }}
-              >
-                <option value="status">Status</option>
-                <option value="expiry">Expiry</option>
-              </select>
-            }
-          >
-            {licenseData && licenseData.length > 0 ? (
-              <PChart data={licenseData} />
-            ) : (
-              <p className={styles.dashboardNoChart}>No licenses</p>
-            )}
-          </DashboardBox>
-          }
+          ></DashboardBox>
+          {showTotalContainer && (
+            <DashboardBox
+              title={"Total Licenses: " + totalLicense}
+              style={{ gridArea: "p" }}
+              filter={
+                <select
+                  className={`form-select ${styles.dashboardRequestButton}`}
+                  onChange={(event) => {
+                    setExpiredLicencesInDays(event.target.value);
+                    // console.log(event.target.value);
+                  }}
+                >
+                  <option value="status">Status</option>
+                  <option value="expiry">Expiry</option>
+                </select>
+              }
+            >
+              {/* <PChart data={licenseData ? licenseData! : []} /> */}
 
+              {licenseData && licenseData.length > 0 ? (
+                <PChart data={licenseData} />
+              ) : (
+                <p className={styles.dashboardNoChart}>No licenses</p>
+              )}
+            </DashboardBox>
+          )}
         </div>
         {showDiv === "pending-requests-box" && (
           <Request
