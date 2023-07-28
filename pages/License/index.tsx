@@ -1,3 +1,24 @@
+/** 
+  EXPLANATION OF LICENSE MODULE
+
+  This module serves to track the status of licenses which are tagged to a single asset.
+  We track the status by allowing users to update the acquisition and expiry dates of a license.
+  Email reminders are sent every 90/60/30 days before the expiry date to request for
+  the renewal of a license.
+
+  Major Components to take note of in this index page
+
+  - License Table is made using the react-table-library found within this file itself
+  - LicenseHistory which is a modal that displays the previous actions 
+  that were executed on a given license. This component can be found on
+  /components/License/LicenseHistory
+  - LicenseCalendar is the alternative view that will show up (replacing the License Table)
+  when toggled (beside the header). The calendar displays the expiry date of the licenses.
+  The LicenseCalendar is made using the @fullcalendar/react library and can be found on 
+  /components/License/LicenseCalendar
+ */
+
+
 import React, { useEffect, useState } from "react";
 import instance from "../../types/common/axios.config";
 import { useRouter } from "next/router";

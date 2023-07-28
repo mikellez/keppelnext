@@ -1,3 +1,14 @@
+/*
+  Explanation of License New Page
+
+  This is the landing page responsible for the creation of a new license to be tracked
+
+  This page is made up a single major container
+
+  - LicenseContainer (More information can be found within LicenseContainer)
+*/
+
+
 import React, { useState, useEffect } from "react";
 import instance from "../../../types/common/axios.config";
 import { useRouter } from "next/router";

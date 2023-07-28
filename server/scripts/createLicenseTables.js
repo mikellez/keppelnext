@@ -1,7 +1,7 @@
 const { connectDB, dellocateGlobalDB } = require("../db/dbAPI");
 
 const main = async () => {
-    connectDB("cmms_dev");
+    connectDB("cmms_prd");
     await global.db.query(`
         CREATE TABLE IF NOT EXISTS keppel.status_lm
         (

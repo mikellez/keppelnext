@@ -1,3 +1,14 @@
+/*
+  Explanation of License Renew Page
+
+  This is the landing page responsible for the renewing of an existing license.
+  Only the expiry_date field can be updated in this page.
+
+  This page is made up a single major container
+
+  - LicenseContainer (More information can be found within LicenseContainer)
+*/
+
 import React from 'react';
 import { useRouter } from 'next/router';
 import { ModuleContent, ModuleHeader, ModuleMain } from '../../../components';

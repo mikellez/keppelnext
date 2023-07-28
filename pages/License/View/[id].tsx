@@ -1,3 +1,13 @@
+/*
+  Explanation of License View Page
+
+  This is the landing page that displays the details of a license in a view-only format
+
+  This page is made up a single major container
+
+  - LicenseContainer (More information can be found within LicenseContainer)
+*/
+
 import React, { useEffect, useState } from "react";
 import { LicenseProps } from "../New";
 import Link from "next/link";
@@ -16,7 +26,7 @@ export default function ViewLicense(props: LicenseProps) {
           </Link>
         </ModuleHeader>
         <ModuleContent>
-          <LicenseContainer data={props} type={"acquire"} disabled={true} />
+          <LicenseContainer data={props} type={"view"} disabled={true} />
         </ModuleContent>
       </ModuleMain>
     </>
