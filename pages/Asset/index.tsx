@@ -14,6 +14,40 @@ import { AiOutlineSearch } from "react-icons/ai";
 import styles from "../../styles/Asset.module.scss";
 import { useRouter } from "next/router";
 
+/*
+  EXPLANATION OF ASSETS MODULE
+
+  Each asset includes many subcomponents that follow a hierarchy as shown below:
+
+  # Asset 1 
+    # Plant 1 (Lvl 3)
+        # System 1 (Lvl 4)
+            # System Asset 1 (Lvl 5)
+                # Asset Type 
+                # System Asset Name (Lvl 6)
+                    # Sub-Component (Lvl 7)
+  # Asset 2
+    # Plant 2 (Lvl 3)
+        # System 2 (Lvl 4)
+            # System Asset 2 (Lvl 5)
+                # Asset Type 
+                # System Asset Name (Lvl 6)
+                    # Sub-Component (Lvl 7)
+  .
+  . 
+  .
+
+
+  The index page shows the asset management page, which displays a list of all assets(records) 
+  organised by the hierarchy mentioned above
+  This serves as the default landing page for the assets module
+
+  The 'New' page shows the new Asset creation page, which can be navigated to by clicking the "Create New Asset"
+  button beside the Search bar on the top right of the index page
+
+*/
+
+
 // Get request to fetch all the assets from db
 const getAssets = async () => {
     return await instance

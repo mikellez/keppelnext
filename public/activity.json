@@ -13,5 +13,13 @@
     "ScheduleChecklist":{
         "table": "keppel.schedule_checklist",
         "format": "yyyy-mm-dd HH24:MI:SS:text"
+    },
+    "License": {
+        "table": "keppel.license",
+        "format": "yyyy-mm-dd HH24:MI:SS:text"
+    },
+    "Feedback": {
+        "table": "keppel.feedback",
+        "format": "yyyy-mm-dd HH24:MI:SS:text"
     }
 }
