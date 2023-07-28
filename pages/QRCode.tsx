@@ -1,3 +1,21 @@
+/* 
+  EXPLANATION OF QRCode MODULE
+
+  This module is responsbile for the generation of QR Codes. 
+  These QR Codes are used to redirect users to submitting a request or
+  to submit a feedback.
+  A QR Code generated for request is tagged to an asset.
+  A QR Code generated for feedback is tagged to a plant location
+
+  This page contains 2 separate functional components
+  
+  - QRAssetImg - THE QR Code component for an asset (request)
+  - QRFeedbackImg - The QR Code component for a plant location (feedback)
+
+  These components can be clicked on the be download by the users on this module.
+  The downloading logic is handled by the html2canvas and downloadjs library
+*/
+
 import formStyles from "../styles/formStyles.module.css";
 import styles from "../styles/QRCode.module.css";
 
