@@ -81,19 +81,45 @@ router.post("/admin/impersonate/:user_id", checkIfAdmin, (req,res) =>{
   global.db.query(sqlQuery, (err, result) => {
       if(err)							return res.status(500).send(err);
       if(result.rows.length < 1)		return res.status(404).send('User not found');
-      console.log(result.rows[0]);
-
-      // Save the current user ID in a session variable
-      req.session.previousUserId = req.user.id;
+      const previousUserId = req.user.id;
 
       // Log in the user
       req.login(result.rows[0], (err) => {
         if (err) {
           return res.status(500).send(err);
         }
+        // Save the current user ID in a session variable
+        req.session.previousUserId = previousUserId;
         return res.status(200).json("success");
       });
   });
+  
+
+});
+
+router.post("/admin/revert", (req,res) =>{
+  
+  if (!req.session.previousUserId) {
+    return res.status(400).send('Cannot revert');
+  }
+
+  // Query to find back the admin user
+  const sqlQuery = 'SELECT * from keppel.users where user_id =' + req.session.previousUserId;
+
+  global.db.query(sqlQuery, (err, result) => {
+    if(err)							return res.status(500).send(err);
+    if(result.rows.length < 1)		return res.status(404).send('User not found');
+
+    // Log in the user
+    req.login(result.rows[0], (err) => {
+      if (err) {
+        return res.status(500).send(err);
+      }
+      // Clear the session variable after reverting
+      delete req.session.previousUserId;
+      return res.status(200).json("success");
+    });
+});
 
 });
 

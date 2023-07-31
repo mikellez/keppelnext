@@ -8,6 +8,7 @@ import TopBar from "../components/TopBar/TopBar";
 import Footer from "../components/Footer";
 import nProgress from "nprogress";
 import { StaffContextProvider } from "../components/Context/StaffContext";
+import { AdminContextProvider } from "../components/Context/AdminContext";
 import { ModuleModal, SimpleIcon } from "../components";
 import ModuleSimplePopup from "../components/ModuleLayout/ModuleSimplePopup";
 import TooltipBtn from "../components/TooltipBtn";
@@ -162,23 +163,25 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <div>
-        <TopBar />
-        <div
-          style={
-            {
-              position: "relative",
-              minHeight: "calc(100vh - 4rem)",
+        <AdminContextProvider>
+          <TopBar />
+          <div
+            style={
+              {
+                position: "relative",
+                minHeight: "calc(100vh - 4rem)",
+              }
+              // minheight -4rem due to top bar height of 4 rem
             }
-            // minheight -4rem due to top bar height of 4 rem
-          }
-        >
-          <div style={{ paddingBottom: "12rem" }}>
-            <StaffContextProvider>
-              <Component {...pageProps} />
-            </StaffContextProvider>
+          >
+            <div style={{ paddingBottom: "12rem" }}>
+                <StaffContextProvider>
+                  <Component {...pageProps} />
+                </StaffContextProvider>
+            </div>
+            <Footer />
           </div>
-          <Footer />
-        </div>
+        </AdminContextProvider>
       </div>
       <ModuleSimplePopup
         modalOpenState={isTimeoutPromt}

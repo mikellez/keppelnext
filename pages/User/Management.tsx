@@ -20,6 +20,7 @@ import { AiOutlineUserAdd } from "react-icons/ai";
 import { HiOutlineDownload } from "react-icons/hi";
 import ModuleSimplePopup from "../../components/ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
+import { useAdminContext } from "../../components/Context/AdminContext";
 
 const downloadCSV = async () => {
   try {
@@ -40,7 +41,7 @@ const downloadCSV = async () => {
   }
 };
 
-const getUser = async () => {
+const getUsers = async () => {
   const url = "/api/user/getUsers";
   return await instance
     .get(url)
@@ -54,12 +55,38 @@ const getUser = async () => {
     });
 };
 
+const checkAdmin = async () => {
+  const url = "/api/user";
+  return await instance
+    .get(url)
+    .then((res) => {
+      // console.log(res.data);
+      return res.data;
+    })
+    .catch((err) => {
+      console.log(err.response);
+      return err.response.status;
+    });
+}
+
 export default function User() {
+
+  const { isAdmin, setIsAdminHandler } = useAdminContext();
+
   useEffect(() => {
-    getUser().then((res) => {
+    getUsers().then((res) => {
       setData(res);
     });
   }, []);
+
+  // If current logged in user is admin, show the impersonate button. Else hide it
+  useEffect(() => {
+    checkAdmin().then((res) => {
+      if(res.role_id == 1)
+        setIsAdminHandler(true);
+    });
+  }, []);
+
   const router = useRouter();
   const [data, setData] = useState<CMMSEmployee[]>([]);
   const [columnSizes, setColumnSizes] = useState<string>(
@@ -111,9 +138,9 @@ export default function User() {
       let res = await instance.post(`/api/admin/impersonate/${impersonateUserID}`);
       // console.log(res);
 
-      if(res.status == 200){
-        // Re-route to dashboard
-        router.push('/Dashboard');
+      if(res.status == 200){ 
+        //router.push('/Dashboard', undefined, {shallow: false});
+        window.location.href = '/Dashboard';
       }
     } catch (e) {
       console.log(e);
@@ -185,17 +212,18 @@ export default function User() {
                     >
                       <BsPencilSquare />
                     </Link>
-                    <button
-                      onClick={onImpersonateClick}
-                      name={"" + item.user_id}
-                      style={{
-                        all: "unset",
-                        cursor: "pointer",
-                        marginLeft: "10px",
-                      }}
-                    >
-                      <BsPersonBadge />
-                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={onImpersonateClick}
+                        name={"" + item.user_id}
+                        style={{
+                          all: "unset",
+                          cursor: "pointer",
+                          marginLeft: "10px",
+                        }}
+                      >
+                        <BsPersonBadge />
+                      </button>)}
                   </Cell>
                 </Row>
               ))}
