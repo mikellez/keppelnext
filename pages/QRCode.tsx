@@ -159,7 +159,7 @@ function QRCode(props: NewAssetProps) {
   const [filteredAssets, setFilteredAssets] = useState<OptionProps[]>([]);
   const [selectedPlantLoc, setSelectedPlantLoc] = useState<number | null>(null);
   const [selectedLocString, setSelectedLocString] = useState<string>("");
-
+  const [initialLoad, setInitialLoad] = useState<boolean>(true);
   const qrRef = useRef() as React.RefObject<HTMLDivElement>;
 
   const { data, error, isValidating, mutate } = useAsset(selectedPlant);
@@ -225,12 +225,21 @@ function QRCode(props: NewAssetProps) {
       }
     }
     var i = 0;
-    const options = data?.map((ele) => {
-      return { assetData: ele, optionIdx: i++ };
-    });
-    // console.log(options);
-    setAssetOptions(options);
+    if (data && initialLoad) {
+      console.log("data : " + data);
+      const options = data!.map((ele) => {
+        return { assetData: ele, optionIdx: i++ };
+      });
+      // console.log(options);
+      setAssetOptions(options);
+      setFilteredAssets(options);
+      setInitialLoad(true);
+    }
   }, [selectedPlant, data]);
+
+  // useEffect(() => {
+  //   if (assetsOptions) setFilteredAssets(assetsOptions!);
+  // }, [assetsOptions]);
 
   useEffect(() => {
     if (selectedPlantLoc) {
@@ -319,6 +328,7 @@ function QRCode(props: NewAssetProps) {
               onChange={(e) => {
                 // console.log(e.target.value);
                 setSelectedPlant(parseInt(e.target.value));
+                setInitialLoad(true);
                 // console.log(selectedPlant);
               }}
             >
