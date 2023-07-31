@@ -1,3 +1,18 @@
+/**
+ *
+ * Explanation of LicenseCron Module
+ *
+ * This module helps to automatically check for expired license everymoring at 0800
+ * and emails the finding to the assignee
+ *
+ * This module also checks for license expiring in 30,60,90 days and send a reminder
+ * to the assigned party
+ *
+ * This module makes use of Cron from node
+ *
+ *
+ */
+
 const { ExpireLicenseMail } = require("../mailer/LicenseMail");
 const { ReminderLicenseMail } = require("../mailer/LicenseMail");
 const cron = require("node-cron");

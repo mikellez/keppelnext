@@ -47,10 +47,9 @@ const condition = (req) => {
 
   return {
     dateCond,
-    plantCond
+    plantCond,
   };
-
-}
+};
 
 const fetchLicenseTypes = async (req, res) => {
   try {
@@ -217,11 +216,11 @@ const fetchExpiredLicenseInDaysQuery = (req) => {
   const plantId = req.query.plantId || 0;
   const days = req.params.days;
   let daysCond = "";
-  if(days==30){
-    daysCond = `AND DATE_PART('days',AGE(lc.expiry_date,CURRENT_dATE)) <= ${days}`;
-  } else if(days==60){
+  if (days == "30") {
+    daysCond = `AND DATE_PART('day',lc.expiry_date - CURRENT_DATE) <= 30`;
+  } else if (days == "60") {
     daysCond = `AND (DATE_PART('day', lc.expiry_date - CURRENT_DATE) > 30 AND DATE_PART('day', lc.expiry_date - CURRENT_DATE) <= 60)`;
-  } else if(days==90){
+  } else if (days == "90") {
     daysCond = `AND (DATE_PART('day', lc.expiry_date - CURRENT_DATE) > 60 AND DATE_PART('day', lc.expiry_date - CURRENT_DATE) <= 90)`;
   }
 
@@ -234,7 +233,7 @@ const fetchExpiredLicenseInDaysQuery = (req) => {
     ${plantCond}
     ${daysCond}
   `;
-  console.log(q)
+  // console.log(q);
   if (plantId == 0) {
     return q;
   } else {
@@ -330,12 +329,15 @@ const fetchAcquiredLicenses = async (req, res, next) => {
       ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
     // console.log(query);
     const result = await global.db.query(query, [req.user.id]);
-    return res.status(200).json({ rows: result.rows, total: totalPages });
+    return res
+      .status(200)
+      .json({ rows: result.rows, total: totalPages, count: pagesQuery });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ msg: err });
   }
 };
+
 const fetchExpiredLicenses = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE || 0;
@@ -397,7 +399,7 @@ const fetchExpiredLicensesInDays = async (req, res, next) => {
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
-  const plantId = req.query.plantId || 0;
+  const plantId = req.query.plant || 0;
 
   const pagesQuery =
     `SELECT COUNT(*) AS row_count FROM (` +
@@ -413,7 +415,9 @@ const fetchExpiredLicensesInDays = async (req, res, next) => {
       ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
     // console.log(query);
     const result = await global.db.query(query, [req.user.id]);
-    return res.status(200).json({ rows: result.rows, total: totalPages });
+    return res
+      .status(200)
+      .json({ rows: result.rows, total: totalPages, count: totalRows });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ msg: err });
@@ -668,5 +672,5 @@ module.exports = {
   fetchExpiredLicenses,
   fetchExpiryDates,
   fetchArchivedLicenses,
-  fetchExpiredLicensesInDays
+  fetchExpiredLicensesInDays,
 };
