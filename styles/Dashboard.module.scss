@@ -4,19 +4,20 @@
     "a b c d"
     "e f g h"
     "i j k l"
-    "m n o p";
+    "m n o p"
+    "q r s t";
   gap: 10px;
 }
 
 @media only screen and (max-width: 1200px) {
   .dashboardMain {
-    grid-template-areas: "a b" "c d" "e f" "g g";
-  }
+    grid-template-areas: "a b" "c d" "e f" "g h" "i j" "k l" "m n" "o p" "q r" "s t";
+  } 
 }
 
 @media only screen and (max-width: 900px) {
   .dashboardMain {
-    grid-template-areas: "a" "b" "c" "d" "e" "f" "g";
+    grid-template-areas: "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s" "t";
   }
 }
 

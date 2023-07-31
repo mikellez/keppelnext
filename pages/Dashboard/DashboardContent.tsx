@@ -215,6 +215,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
   const fetchFeedbacks = async () => {
     const { datetype, date } = pickerwithtype;
 
+    console.log(`/api/feedback/pending/${plant}/${datetype}/${date}`);
     const getPendingFeedback = instance.get(
       `/api/feedback/pending/${plant}/${datetype}/${date}`
     );
@@ -230,10 +231,13 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
       getOustandingFeedback,
       getCompletedFeedback,
     ]);
+    console.log(getAllFeedback);
 
     const pendingFeedback = getAllFeedback[0].data?.rows;
     const outstandingFeedback = getAllFeedback[1].data?.rows;
     const completedFeedback = getAllFeedback[2].data?.rows;
+
+    console.log(getAllFeedback);
 
     setFeedbackData([
       {
@@ -284,7 +288,6 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
         ","
       )}`
     );
-
     const getLicenseExpiredIn30 = instance.get(
       `/api/license/expired/${plant}/${datetype}/${date}/30?expand=${PARAMS.join(
         ","
@@ -301,7 +304,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
       )}`
     );
 
-    const getAllFeedback = await Promise.all([
+    const getAllLicense = await Promise.all([
       getDraftLicense,
       getAcquiredLicense,
       getLicenseExpiredIn30,
@@ -309,12 +312,12 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
       getLicenseExpiredIn90,
     ]);
 
-    const draftLicense = getAllFeedback[0].data?.rows;
-    const acquiredLicense = getAllFeedback[1].data?.rows;
-    const licenseExpiredIn30 = getAllFeedback[2].data?.rows;
-    const licenseExpiredIn60 = getAllFeedback[3].data?.rows;
-    const licenseExpiredIn90 = getAllFeedback[4].data?.rows;
-    console.log(getAllFeedback);
+    const draftLicense = getAllLicense[0].data?.rows;
+    const acquiredLicense = getAllLicense[1].data?.rows;
+    const licenseExpiredIn30 = getAllLicense[2].data?.rows;
+    const licenseExpiredIn60 = getAllLicense[3].data?.rows;
+    const licenseExpiredIn90 = getAllLicense[4].data?.rows;
+    // console.log(getAllLicense);
 
     if (expiredLicenseInDays == "expiry") {
       setLicenseData([
@@ -353,7 +356,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
         },
       ]);
     }
-    console.log(licenseData);
+    // console.log(licenseData);
     setLicense({
       totalDraftLicense: draftLicense?.length || 0,
       totalAcquiredLicense: acquiredLicense?.length || 0,
@@ -388,13 +391,14 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
       fetchRequests();
       fetchChecklists();
       fetchCOPs();
+      fetchFeedbacks();
       fetchLicenses();
     }
   }, [plant, field, pickerwithtype, active, expiredLicenseInDays]);
 
-  useEffect(() => {
-    console.log(licenseData);
-  }, [licenseData]);
+  // useEffect(() => {
+  //   console.log(licenseData);
+  // }, [licenseData]);
 
   const totalRequest = requestData?.reduce((accumulator, currentValue) => {
     return accumulator + currentValue.value;
@@ -409,9 +413,13 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     return accumulator + currentValue.value;
   }, 0);
   const totalLicense = licenseData?.reduce((accumulator, currentValue) => {
-    console.log(accumulator);
+    // console.log(accumulator);
     return +accumulator + +currentValue.value;
   }, 0);
+
+  useEffect(() => {
+    console.log(feedbackData);
+  }, [feedbackData]);
 
   if (!isReady) {
     return (
@@ -605,7 +613,12 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               {totalCompletedCOP}
             </p>
           </DashboardBox>
-          <DashboardBox title="" style={{ gridArea: "k" }}></DashboardBox>
+          <DashboardBox
+            id=""
+            title=""
+            style={{ gridArea: "k" }}
+            onClick={handleDashboardClick}
+          ></DashboardBox>
           {showTotalContainer && (
             <DashboardBox
               title={"Total Change of Parts: " + totalCOP}
@@ -626,7 +639,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             className={active === "pending-feedback-box" ? styles.active : ""}
           >
             <p className={styles.dashboardPendingdNumber}>
-              {totalPendingFeedback}
+              {feedback.totalPendingFeedback}
             </p>
           </DashboardBox>
           <DashboardBox
@@ -639,7 +652,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             }
           >
             <p className={styles.dashboardOutstandingNumber}>
-              {totalOutstandingFeedback}
+              {feedback.totalOutstandingFeedback}
             </p>
           </DashboardBox>
           <DashboardBox
@@ -650,7 +663,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             className={active === "completed-feedback-box" ? styles.active : ""}
           >
             <p className={styles.dashboardCompletedNumber}>
-              {totalCompletedFeedback}
+              {feedback.totalCompletedFeedback}
             </p>
           </DashboardBox>
           {showTotalContainer && (
@@ -661,6 +674,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               {feedbackData && feedbackData.length > 0 ? (
                 <PChart data={feedbackData} />
               ) : (
+                // <PChart data={feedbackData!} />
                 <p className={styles.dashboardNoChart}>No feedbacks</p>
               )}
             </DashboardBox>
@@ -669,7 +683,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
           <DashboardBox
             id="draft-license-box"
             title="Draft Licenses"
-            style={{ gridArea: "m" }}
+            style={{ gridArea: "q" }}
             onClick={handleDashboardClick}
             className={active === "draft-license-box" ? styles.active : ""}
           >
@@ -680,7 +694,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
           <DashboardBox
             id="acquired-license-box"
             title="Acquired Licenses"
-            style={{ gridArea: "n" }}
+            style={{ gridArea: "r" }}
             onClick={handleDashboardClick}
             className={active === "acquired-license-box" ? styles.active : ""}
           >
@@ -691,13 +705,13 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
           <DashboardBox
             id=""
             title=""
-            style={{ gridArea: "o" }}
+            style={{ gridArea: "s" }}
             onClick={handleDashboardClick}
           ></DashboardBox>
           {showTotalContainer && (
             <DashboardBox
               title={"Total Licenses: " + totalLicense}
-              style={{ gridArea: "p" }}
+              style={{ gridArea: "t" }}
               filter={
                 <select
                   className={`form-select ${styles.dashboardRequestButton}`}

@@ -216,11 +216,11 @@ const fetchExpiredLicenseInDaysQuery = (req) => {
   const plantId = req.query.plantId || 0;
   const days = req.params.days;
   let daysCond = "";
-  if (days == 30) {
-    daysCond = `AND DATE_PART('day',lc.expiry_date - CURRENT_DATE) <= ${days}`;
-  } else if (days == 60) {
+  if (days == "30") {
+    daysCond = `AND DATE_PART('day',lc.expiry_date - CURRENT_DATE) <= 30`;
+  } else if (days == "60") {
     daysCond = `AND (DATE_PART('day', lc.expiry_date - CURRENT_DATE) > 30 AND DATE_PART('day', lc.expiry_date - CURRENT_DATE) <= 60)`;
-  } else if (days == 90) {
+  } else if (days == "90") {
     daysCond = `AND (DATE_PART('day', lc.expiry_date - CURRENT_DATE) > 60 AND DATE_PART('day', lc.expiry_date - CURRENT_DATE) <= 90)`;
   }
 
@@ -337,6 +337,7 @@ const fetchAcquiredLicenses = async (req, res, next) => {
     return res.status(500).json({ msg: err });
   }
 };
+
 const fetchExpiredLicenses = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE || 0;
@@ -405,7 +406,6 @@ const fetchExpiredLicensesInDays = async (req, res, next) => {
     fetchExpiredLicenseInDaysQuery(req) +
     `) subquery`;
 
-  // console.log(pagesQuery);
   try {
     const tmp = await global.db.query(pagesQuery, [req.user.id]);
     const totalRows = tmp.rows[0].row_count;
