@@ -1794,7 +1794,7 @@ router.post("/feedback", controllers.feedback.createFeedback);
 router.get(
   "/feedback/pending",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchPendingFeedback
+  controllers.feedbackKnex.fetchPendingFeedback
 );
 
 router.get(
@@ -1839,7 +1839,7 @@ router.get(
 router.get(
   "/feedback/assigned",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchAssignedFeedback
+  controllers.feedbackKnex.fetchAssignedFeedback
 );
 
 router.get(
@@ -1884,7 +1884,7 @@ router.get(
 router.get(
   "/feedback/outstanding",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchOutstandingFeedback
+  controllers.feedbackKnex.fetchOutstandingFeedback
 );
 
 router.get(
@@ -1929,7 +1929,7 @@ router.get(
 router.get(
   "/feedback/completed",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchCompletedFeedback
+  controllers.feedbackKnex.fetchCompletedFeedback
 );
 
 router.get(
