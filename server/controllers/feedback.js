@@ -1,5 +1,3 @@
-const knexConfig = require('../db/knexConfig');
-const knex = require('knex')(knexConfig.development);
 const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
@@ -485,7 +483,7 @@ const assignFeedback = async (req, res, next) => {
 
   try {
     const data = await global.db.query(sql, [
-      req.body.assigned_user_id.value,
+      req.body.assigned_user_id,
       req.params.id,
     ]);
 

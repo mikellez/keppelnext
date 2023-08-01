@@ -68,47 +68,47 @@ const conditionGen = (req) => {
   
   }
 
-const feedbackQuery = async () => {
-    const query = knex
-      .select(
-        'f.feedback_id as id',
-        'f.plant_loc_id',
-        'f.plant_id',
-        'f.description',
-        'f.contact',
-        'f.imageurl as image',
-        'f.status_id',
-        'f.activity_log',
-        'f.completed_date',
-        'f.remarks',
-        knex.raw("concat(concat(createdu.first_name, ' '), createdu.last_name) AS createdByUser"),
-        knex.raw("concat(concat(assignu.first_name, ' '), assignu.last_name) AS assigned_user_name"),
-        'pl.loc_room',
-        'pl.loc_id',
-        'pl.loc_floor',
-        'pm.plant_name',
-        'pm.plant_id',
-        'f.created_date',
-        'f.assigned_user_id',
-        'st.status',
-        'f.name',
-        'f.created_user_id',
-        'f.completed_img'
-      )
-      .from('keppel.users AS u')
-      .join('keppel.user_access AS ua', 'u.user_id', '=', 'ua.user_id')
-      .join('keppel.feedback AS f', knex.raw("ua.allocatedplantids LIKE concat(concat('%', f.plant_id::text), '%')"))
-      .leftJoin(
-        knex.raw('(SELECT t3.feedback_id FROM keppel.feedback AS t3 GROUP BY t3.feedback_id) tmp1'),
-        'tmp1.feedback_id',
-        'f.feedback_id'
-      )
-      .leftJoin('keppel.users AS assignu', 'assignu.user_id', 'f.assigned_user_id')
-      .leftJoin('keppel.users AS createdu', 'createdu.user_id', 'f.created_user_id')
-      .leftJoin('keppel.plant_master AS pm', 'pm.plant_id', 'f.plant_id')
-      .leftJoin('keppel.plant_location AS pl', 'pl.loc_id', 'f.plant_loc_id')
-      .join('keppel.status_fm AS st', 'st.status_id', 'f.status_id');
-}
+// const feedbackQuery = async () => {
+//     const query = knex
+//       .select(
+//         'f.feedback_id as id',
+//         'f.plant_loc_id',
+//         'f.plant_id',
+//         'f.description',
+//         'f.contact',
+//         'f.imageurl as image',
+//         'f.status_id',
+//         'f.activity_log',
+//         'f.completed_date',
+//         'f.remarks',
+//         knex.raw("concat(concat(createdu.first_name, ' '), createdu.last_name) AS createdByUser"),
+//         knex.raw("concat(concat(assignu.first_name, ' '), assignu.last_name) AS assigned_user_name"),
+//         'pl.loc_room',
+//         'pl.loc_id',
+//         'pl.loc_floor',
+//         'pm.plant_name',
+//         'pm.plant_id',
+//         'f.created_date',
+//         'f.assigned_user_id',
+//         'st.status',
+//         'f.name',
+//         'f.created_user_id',
+//         'f.completed_img'
+//       )
+//       .from('keppel.users AS u')
+//       .join('keppel.user_access AS ua', 'u.user_id', '=', 'ua.user_id')
+//       .join('keppel.feedback AS f', knex.raw("ua.allocatedplantids LIKE concat(concat('%', f.plant_id::text), '%')"))
+//       .leftJoin(
+//         knex.raw('(SELECT t3.feedback_id FROM keppel.feedback AS t3 GROUP BY t3.feedback_id) tmp1'),
+//         'tmp1.feedback_id',
+//         'f.feedback_id'
+//       )
+//       .leftJoin('keppel.users AS assignu', 'assignu.user_id', 'f.assigned_user_id')
+//       .leftJoin('keppel.users AS createdu', 'createdu.user_id', 'f.created_user_id')
+//       .leftJoin('keppel.plant_master AS pm', 'pm.plant_id', 'f.plant_id')
+//       .leftJoin('keppel.plant_location AS pl', 'pl.loc_id', 'f.plant_loc_id')
+//       .join('keppel.status_fm AS st', 'st.status_id', 'f.status_id');
+// }
 
 const specificFeedbackQuery = async (expand, cond, pageOptions, user_id) => {
     let expandCond = "";
@@ -121,7 +121,7 @@ const specificFeedbackQuery = async (expand, cond, pageOptions, user_id) => {
         plant_id: "f.plant_id",
         description: "f.description",
         contact: "f.contact",
-        image: "f.imageurl",
+        image: "f.imageurl AS image",
         status_id: "f.status_id",
         activity_log: "f.activity_log",
         completed_date: "f.completed_date",
@@ -193,6 +193,10 @@ const specificFeedbackQuery = async (expand, cond, pageOptions, user_id) => {
         query.where("ua.user_id", user_id)
     }
 
+    if (cond.feedback_id) {
+        query.where("f.feedback_id", cond.feedback_id)
+    }
+
     if (cond.status_id) {
         query.whereIn('f.status_id', cond.status_id)
     }
@@ -223,7 +227,7 @@ const fetchPendingFeedback = async (req, res, next) => {
     
     const condition = conditionGen(req);
     condition.status_id = [1];
-
+    
     const pageOptions = {
         limit: ITEMS_PER_PAGE,
         offset: offsetItems
@@ -304,6 +308,24 @@ const fetchCompletedFeedback = async (req, res, next) => {
     }
 }
 
+const fetchSingleFeedback = async (req, res, next) => {
+    const condition = {
+        feedback_id: req.params.id
+    };
+    try {
+        const result = await specificFeedbackQuery(null, condition, null, req.user.id);
+        if (result.length > 0) {
+            return res.status(200).send(result[0]);
+          } else {
+            return res.status(404).send("No Feedback found");
+        }
+
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+}
+
 const createFeedback = async (req, res, next) => {
     const data = req.body;
     const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
@@ -329,11 +351,123 @@ const createFeedback = async (req, res, next) => {
         activity_log: JSON.stringify(activity_log),
     }
     try {
-        await knex("keppel.feedback").insert(feedback)
+        await knex("keppel.feedback").insert(feedback);
+        
+        const mail = new CreateFeedbackMail([feedback.contact.email], {
+            name: feedback.name,
+            description: feedback.comments,
+            created_date: today,
+        });
+      
+        await mail.send();
         res.status(200).send("Feedback successfully created")
     } catch (err) {
         console.log(err);
-        next(err);
+        return res.status(500).send("Failure to create feedback");
+    }
+}
+
+const assignFeedback = async (req, res, next) => {
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    const activityLog = {
+        date: today,
+        name: req.user.name,
+        activity: `Assigned Feedback Case ID-${req.params.id} to ${req.body.assigned_user_name}`,
+        activity_type: 'ASSIGNED'
+    };
+    const updatedFields = {
+        status_id: 2,
+        activity_log: knex.raw(`activity_log || ?::jsonb`, [JSON.stringify(activityLog)]),
+        assigned_user_id: req.body.assigned_user_id
+    }
+    try {
+        await knex('keppel.feedback')
+            .where("feedback_id", req.params.id)
+            .update(updatedFields)
+
+        const {
+            assigned_user_email,
+            creator_email,
+            plant_name,
+            status,
+            name,
+            description,
+            created_date,
+            completed_date,
+            } = await fetchEmailDetailsForSpecificFeedback(req.params.id);
+        
+        const mail = new AssignFeedbackMail(
+        [assigned_user_email, req.user.email],
+        {
+            plant_name: plant_name,
+            name: name,
+            description: description,
+            id: req.body.id,
+            created_date: today,
+        }
+        );
+    
+        await mail.send();
+
+        res.status(200).send("Feedback successfully assigned")
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send("Failure to assign feedback");
+    }
+}
+
+const completeFeedback = async (req, res, next) => {
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    const activityLog = {
+        date: today,
+        name: req.user.name,
+        activity: `Completed Feedback Case ID-${req.params.id}`,
+        activity_type: 'WORK DONE'
+    };
+
+    const updatedFields = {
+        status_id: 4,
+        remarks: req.body.remarks,
+        completed_date: today,
+        completed_img: req.body.completed_img,
+        activity_log: knex.raw(`activity_log || ?::jsonb`, [JSON.stringify(activityLog)]),
+    };
+
+    try {
+        await knex("keppel.feedback")
+            .where("feedback_id", req.params.id)
+            .update(updatedFields);
+
+        const {
+            assigned_user_email,
+            creator_email,
+            plant_name,
+            status,
+            name,
+            description,
+            created_date,
+            completed_date,
+            remarks,
+            } = await fetchEmailDetailsForSpecificFeedback(req.params.id);
+        
+            const mail = new CompletedFeedbackMail(
+            [assigned_user_email, creator_email, req.body.contact.email],
+            {
+                plant_name: plant_name,
+                name: name,
+                remarks: remarks,
+                id: req.body.id,
+                created_date: today,
+                completed_date: today,
+            }
+            );
+        
+            await mail.send();
+
+        res.status(200).send("Feedback successfully completed")
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send("Failure to complete feedback");
     }
 }
 
@@ -343,4 +477,7 @@ module.exports = {
     fetchCompletedFeedback,
     fetchOutstandingFeedback,
     createFeedback,
+    assignFeedback,
+    completeFeedback,
+    fetchSingleFeedback, 
 }

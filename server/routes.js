@@ -2018,7 +2018,7 @@ router.get(
 router.get(
   "/feedback/:id",
   checkIfLoggedInAPI,
-  controllers.feedback.getSingleFeedback
+  controllers.feedbackKnex.fetchSingleFeedback
 );
 
 /**
@@ -2039,7 +2039,7 @@ router.get(
 router.patch(
   "/feedback/assign/:id",
   checkIfLoggedInAPI,
-  controllers.feedback.assignFeedback
+  controllers.feedbackKnex.assignFeedback
 );
 
 /**
@@ -2059,7 +2059,7 @@ router.patch(
 router.patch(
   "/feedback/complete/:id",
   checkIfLoggedInAPI,
-  controllers.feedback.completeFeedback
+  controllers.feedbackKnex.completeFeedback
 );
 
 router.get(
