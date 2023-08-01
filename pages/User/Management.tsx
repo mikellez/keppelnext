@@ -21,6 +21,8 @@ import { HiOutlineDownload } from "react-icons/hi";
 import ModuleSimplePopup from "../../components/ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
 import { useAdminContext } from "../../components/Context/AdminContext";
+import { selectImpersonationState, setImpersonationState } from "../../redux/impersonationSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const downloadCSV = async () => {
   try {
@@ -129,18 +131,22 @@ export default function User() {
     setDeleteModalID(parseInt(e.currentTarget.name));
     setModalOpen(true);
   };
-  const onImpersonateClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    setImpersonateUserID(parseInt(e.currentTarget.name));
-    impersonateUser();
+  const dispatch = useDispatch();
+
+  const onImpersonateClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    impersonateUser(parseInt(e.currentTarget.name));
   };
-  async function impersonateUser() {
+  async function impersonateUser(impersonateUserID:number) {
     try {
       let res = await instance.post(`/api/admin/impersonate/${impersonateUserID}`);
       // console.log(res);
 
-      if(res.status == 200){ 
-        //router.push('/Dashboard', undefined, {shallow: false});
+      if(res.status == 200){      
+        // Re-direct back to home page under impersonated user   
         window.location.href = '/Dashboard';
+
+        // Dispatch to notify the store that impersonation state has changed
+        dispatch(setImpersonationState(true));
       }
     } catch (e) {
       console.log(e);

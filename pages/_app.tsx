@@ -16,11 +16,15 @@ import { useIdleTimer } from "react-idle-timer";
 import type { IIdleTimer } from "react-idle-timer";
 import instance from "../types/common/axios.config";
 import User from "./User/Management";
+import {wrapper} from "../redux/store";
+import { PersistGate } from "redux-persist/integration/react";
+import { Provider } from "react-redux";
 
 const TIMEOUT_DURATION = 30 * 60 * 1000; // 30 minutes
 const PROMPT_BEFORE_IDLE_DURATION = 15 * 60 * 1000; // 15 minutes
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps, ...rest }: AppProps) {
+  const { store, props } = wrapper.useWrappedStore(rest);
   const router = useRouter();
   const { asPath, route, pathname } = router;
   const [isTimeoutPromt, setIsTimeoutPrompt] = useState(false);
@@ -163,25 +167,29 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <div>
-        <AdminContextProvider>
-          <TopBar />
-          <div
-            style={
-              {
-                position: "relative",
-                minHeight: "calc(100vh - 4rem)",
+        <Provider store={store}>
+        <PersistGate persistor={store.__persistor}>
+          <AdminContextProvider>
+            <TopBar />
+            <div
+              style={
+                {
+                  position: "relative",
+                  minHeight: "calc(100vh - 4rem)",
+                }
+                // minheight -4rem due to top bar height of 4 rem
               }
-              // minheight -4rem due to top bar height of 4 rem
-            }
-          >
-            <div style={{ paddingBottom: "12rem" }}>
-                <StaffContextProvider>
-                  <Component {...pageProps} />
-                </StaffContextProvider>
+            >
+              <div style={{ paddingBottom: "12rem" }}>
+                  <StaffContextProvider>
+                    <Component {...pageProps} />
+                  </StaffContextProvider>
+              </div>
+              <Footer />
             </div>
-            <Footer />
-          </div>
-        </AdminContextProvider>
+          </AdminContextProvider>
+        </PersistGate>
+        </Provider>
       </div>
       <ModuleSimplePopup
         modalOpenState={isTimeoutPromt}
@@ -202,3 +210,4 @@ export default function App({ Component, pageProps }: AppProps) {
     </>
   );
 }
+
