@@ -83,7 +83,8 @@ export default function ManageSchedule() {
                 setTimelineId(0);
                 setOutcomeModal(true);
                 setTimeout(() => {
-                    router.push("/Schedule/");
+                    // Re-direct to same page (Manage Schedule)
+                    router.reload();
                 }, 1000)
                 
             });
@@ -92,7 +93,8 @@ export default function ManageSchedule() {
             manageSingleEvent(scheduleList[0], action).then(result => {
                 setOutcomeModal(true);
                 setTimeout(() => {
-                    router.push("/Schedule/");
+                    // Re-direct to same page (Manage Schedule)
+                    router.reload();
                 }, 1000)
             })
         }
