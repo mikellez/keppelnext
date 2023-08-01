@@ -1756,7 +1756,7 @@ router.get(
  *
  * @apiError (Error 500) {String} InternalServerError "Failure to create feedback"
  */
-router.post("/feedback", controllers.feedback.createFeedback);
+router.post("/feedback", controllers.feedbackKnex.createFeedback);
 
 /**
  * @api {get} /feedback/pending Get Pending Feedback
@@ -1800,7 +1800,7 @@ router.get(
 router.get(
   "/feedback/pending/:plant/:datetype/:date",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchPendingFeedback
+  controllers.feedbackKnex.fetchPendingFeedback
 );
 
 /**
@@ -1845,7 +1845,7 @@ router.get(
 router.get(
   "/feedback/assigned/:plant/:datetype/:date",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchAssignedFeedback
+  controllers.feedbackKnex.fetchAssignedFeedback
 );
 
 /**
@@ -1890,7 +1890,7 @@ router.get(
 router.get(
   "/feedback/outstanding/:plant/:datetype/:date",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchOutstandingFeedback
+  controllers.feedbackKnex.fetchOutstandingFeedback
 );
 
 /**
@@ -1935,7 +1935,7 @@ router.get(
 router.get(
   "/feedback/completed/:plant/:datetype/:date",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchCompletedFeedback
+  controllers.feedbackKnex.fetchCompletedFeedback
 );
 
 /**

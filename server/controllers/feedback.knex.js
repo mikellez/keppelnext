@@ -1,3 +1,8 @@
+/**
+ * FetchFilteredFeedback is not added from the original feedback.js as it is not
+ * used on the frontend
+ */
+
 const knexConfig = require('../db/knexConfig');
 const knex = require('knex')(knexConfig.development);
 const moment = require("moment");
@@ -8,6 +13,60 @@ const {
 } = require("../mailer/FeedbackMail");
 
 const ITEMS_PER_PAGE = 10;
+
+const conditionGen = (req) => {
+    let date = req.params.date || 'all';
+    let datetype = req.params.datetype;
+    // let status = req.params.status || 0;
+    let plant = req.params.plant || 0;
+    // let dateCond = "";
+    // let statusCond = "";
+    // let plantCond = "";
+    // let userRoleCond = "";
+    const cond = {}
+
+    if (plant && plant != 0) {
+        cond.plant_id = [plant,];
+    //   plantCond = `AND f.plant_loc_id = '${plant}'`;
+    }
+  
+    if (date !== "all") {
+      switch (datetype) {
+        case "week":
+          dateCond = `
+                    DATE_PART('week', F.CREATED_DATE::DATE) = DATE_PART('week', '${date}'::DATE) 
+                    DATE_PART('year', F.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+  
+          break;
+  
+        case "month":
+          dateCond = `
+                    DATE_PART('month', F.CREATED_DATE::DATE) = DATE_PART('month', '${date}'::DATE) 
+                    DATE_PART('year', F.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+  
+          break;
+  
+        case "year":
+          dateCond = `DATE_PART('year', F.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+  
+          break;
+  
+        case "quarter":
+          dateCond = `
+                    DATE_PART('quarter', F.CREATED_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) 
+                    DATE_PART('year', F.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+  
+          break;
+        default:
+          dateCond = `F.CREATED_DATE::DATE = '${date}'::DATE`;
+
+        cond.dateCond = dateCond;
+      }
+    }
+  
+    return cond;
+  
+  }
 
 const feedbackQuery = async () => {
     const query = knex
@@ -162,9 +221,9 @@ const fetchPendingFeedback = async (req, res, next) => {
     // const search = req.query.search || null;
     const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
     
-    const condition = {
-        status_id: [1]
-    }
+    const condition = conditionGen(req);
+    condition.status_id = [1];
+
     const pageOptions = {
         limit: ITEMS_PER_PAGE,
         offset: offsetItems
@@ -183,14 +242,15 @@ const fetchAssignedFeedback = async (req, res, next) => {
     const expand = req.query.expand || null;
     // const search = req.query.search || null;
     const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
-    
-    const condition = {
-        status_id: [2]
-    }
+
+    const condition = conditionGen(req);
+    condition.status_id = [2];
+
     const pageOptions = {
         limit: ITEMS_PER_PAGE,
         offset: offsetItems
     }
+
     try {
         const results = await specificFeedbackQuery(expand, condition, pageOptions, req.user.id);
         res.status(200).json({rows: results})
@@ -206,9 +266,9 @@ const fetchOutstandingFeedback = async (req, res, next) => {
     // const search = req.query.search || null;
     const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
     
-    const condition = {
-        status_id: [2]
-    }
+    const condition = conditionGen(req);
+    condition.status_id = [2];
+
     const pageOptions = {
         limit: ITEMS_PER_PAGE,
         offset: offsetItems
@@ -228,9 +288,9 @@ const fetchCompletedFeedback = async (req, res, next) => {
     // const search = req.query.search || null;
     const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
     
-    const condition = {
-        status_id: [4]
-    }
+    const condition = conditionGen(req);
+    condition.status_id = [4];
+
     const pageOptions = {
         limit: ITEMS_PER_PAGE,
         offset: offsetItems
@@ -244,9 +304,43 @@ const fetchCompletedFeedback = async (req, res, next) => {
     }
 }
 
+const createFeedback = async (req, res, next) => {
+    const data = req.body;
+    const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    const activity_log = [
+        {
+          date: today,
+          name: req.user ? req.user.name : "Guest",
+          activity: `Created Feedback on ${data.plantName} ${data.location}`,
+          activity_type: "PENDING",
+        },
+    ];
+    const feedback = {
+        name: data.name,
+        description: data.comments,
+        plant_loc_id: data.taggedLocID,
+        imageurl: data.image,
+        plant_id: data.plantID,
+        contact: JSON.stringify(data.contact),
+        created_user_id: req.user ? req.user.id : 55,
+        status_id: 1,
+        created_date: today,
+        completed_img: data.completed_img,
+        activity_log: JSON.stringify(activity_log),
+    }
+    try {
+        await knex("keppel.feedback").insert(feedback)
+        res.status(200).send("Feedback successfully created")
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+}
+
 module.exports = {
     fetchPendingFeedback,
     fetchAssignedFeedback,
     fetchCompletedFeedback,
     fetchOutstandingFeedback,
+    createFeedback,
 }
