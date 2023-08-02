@@ -144,7 +144,7 @@ export default function NavBar() {
                     Manage Schedules
                   </NavDropdownLink>
                 )}
-              <NavDropdownLink href="/Schedule/View/Drafts">
+              <NavDropdownLink href="/Schedule/View/Pending">
                 View Drafts
               </NavDropdownLink>
             </NavDropdown>

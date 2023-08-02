@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
 import instance from "../../../types/common/axios.config";
-import { useRouter } from "next/router";
-import Link from "next/link";
-import TooltipBtn from "../../../components/TooltipBtn";
 import {
   Table,
   Header,
@@ -23,42 +20,41 @@ import {
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import { useCurrentUser } from "../../../components/SWR";
-import {
-  CMMSFeedback,
-  CMMSLicense,
-  CMMSSchedule,
-  CMMSTimeline,
-} from "../../../types/common/interfaces";
+import { CMMSTimeline } from "../../../types/common/interfaces";
 import { getColor } from "../../Request";
 import LoadingHourglass from "../../../components/LoadingHourglass";
-import Pagination from "../../../components/Pagination";
 import {
   AiOutlineEdit,
   AiOutlineFileDone,
   AiOutlineFolderView,
   AiOutlineHistory,
 } from "react-icons/ai";
-import { BiRefresh } from "react-icons/bi";
+import { BiCommentCheck } from "react-icons/bi";
 import Tooltip from "rc-tooltip";
 import moment from "moment";
 import { getTimelinesByStatus } from "../../../components/Schedule/TimelineSelect";
 import { Modal } from "antd";
 import CreateScheduleModal from "../../../components/Schedule/CreateScheduleModal";
 import { ScheduleCreateOptions } from "../Create";
+import { ScheduleInfo } from "../../../components/Schedule/ScheduleTemplate";
+import { getSchedules } from "../Timeline/[id]";
+import ApproveSchedulePreviewModal from "../../../components/Schedule/ApproveSchedulePreviewModal";
 
 // 3 : Draft, 1 : approved
-const indexedColumn: (3 | 1)[] = [3, 1];
+const indexedColumn: (3 | 4)[] = [3, 4];
 
-export default function Drafts() {
-  const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
+export default function Pending() {
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [isReady, setReady] = useState<boolean>(false);
   const [scheduleTimelines, setScheduleTimelines] = useState<CMMSTimeline[]>(
     []
   );
+  const [approveModal, setApproveModal] = useState<boolean>(false);
   const [submitModal, setSubmitModal] = useState<boolean>(false);
   const [selectedTimeline, setSelectedTimeline] = useState<number>();
+  const [selectedTimelineItem, setSelectedTimelineItem] =
+    useState<ScheduleInfo[]>();
   const theme = useTheme([
     getTheme(),
     {
@@ -66,6 +62,32 @@ export default function Drafts() {
         "--data-table-library_grid-template-columns: 5em 20em 10em 25em 13em 8em;",
     },
   ]);
+
+  const { data } = useCurrentUser();
+
+  const checkManager = (role: number) => {
+    if (role == 1 || role == 2) {
+      return true;
+    } else if (role == 3 || role == 4) {
+      return false;
+    }
+  };
+  const [isManager, setIsManager] = useState<boolean>();
+  const [activeTabIndex, setActiveTabIndex] = useState<number>(
+    isManager ? 1 : 0
+  );
+
+  useEffect(() => {
+    const role = data?.role_id;
+    if (role == 1 || role == 2) {
+      setIsManager(true);
+      setActiveTabIndex(1);
+    } else if (role == 3 || role == 4) {
+      setIsManager(false);
+      setActiveTabIndex(0);
+    }
+    console.log(role);
+  }, [data]);
 
   const handleOptions = (activeTab: number) => {
     if (activeTab == 0) {
@@ -75,54 +97,61 @@ export default function Drafts() {
     }
   };
 
-  const switchColumns = (index: number) => {
-    if (isReady) {
-      setReady(false);
-      setActiveTabIndex(index);
-      // setPage(1);
+  useEffect(() => {
+    const role = data?.role_id;
+    if (role) {
+      setIsManager(checkManager(role));
+      getTimelinesByStatus(
+        indexedColumn[activeTabIndex],
+        activeTabIndex == 0 ? true : false
+      )
+        .then((result: any) => {
+          if (result) {
+            //   console.log(result);
+            setScheduleTimelines(result);
+          } else {
+            setScheduleTimelines([]);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          setScheduleTimelines([]);
+        });
+
+      setReady(true);
     }
-  };
+  }, [activeTabIndex, data]);
 
   useEffect(() => {
-    getTimelinesByStatus(indexedColumn[activeTabIndex], true)
-      .then((result) => {
-        if (result) {
-          //   console.log(result);
-          setScheduleTimelines(result);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-
-    setReady(true);
-  }, [activeTabIndex]);
+    if (selectedTimeline) {
+      getSchedules(selectedTimeline!)
+        .then((res) => {
+          if (res) {
+            setSelectedTimelineItem(res);
+          }
+        })
+        .catch(console.log);
+    }
+  }, [selectedTimeline]);
 
   return (
     <ModuleMain>
-      <ModuleHeader title="View Draft schedule" header="View Draft Schedule" />
+      <ModuleHeader
+        title="Pending Schedule Task"
+        header="Pending Schedule Task"
+      />
       <ModuleContent>
         {
           <ul className="nav nav-tabs">
-            <li
-              onClick={() => {
-                activeTabIndex !== 0 && switchColumns(0);
-              }}
-              className={"nav-link" + (activeTabIndex === 0 ? " active" : "")}
-            >
-              <span style={{ all: "unset" }}>Drafts</span>
-            </li>
-            <li
-              onClick={() => {
-                activeTabIndex !== 1 && switchColumns(1);
-              }}
-              className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
-            >
-              <span style={{ all: "unset" }}>Approved</span>
+            <li className={"nav-link"}>
+              <span style={{ all: "unset" }}>
+                {handleOptions(activeTabIndex)}
+              </span>
             </li>
           </ul>
         }
-        {isReady && scheduleTimelines?.length === 0 && <div> no Schedules</div>}
+
+        {isReady && scheduleTimelines?.length === 0 && <div></div>}
         {isReady ? (
           <>
             <Table
@@ -197,24 +226,41 @@ export default function Drafts() {
                             </Tooltip>
                           </Cell>
                           <Cell>
-                            <AiOutlineEdit
-                              color="#C70F2B"
-                              size={22}
-                              title={"Edit"}
-                              onClick={() => {
-                                setSelectedTimeline(item.id);
-                                setSubmitModal(true);
-                              }}
-                            />
-                            {/* <Link href={`/License/View/${item.id}`}>
-                              <AiOutlineFolderView size={22} title={"View"} />
-                            </Link> */}
-                            {/* <AiOutlineHistory
-                              color={"#C70F2B"}
-                              onClick={() => setHistory(item.activity_log)}
-                              size={22}
-                              title={"View History"}
-                            /> */}
+                            {!isManager ? (
+                              <Tooltip
+                                overlayInnerStyle={{ fontSize: "0.7rem" }}
+                                placement="bottom"
+                                trigger={["hover"]}
+                                overlay={<span>{"Approve"}</span>}
+                              >
+                                <AiOutlineEdit
+                                  color="#C70F2B"
+                                  size={22}
+                                  title={"Edit"}
+                                  onClick={() => {
+                                    setSelectedTimeline(item.id);
+                                    setSubmitModal(true);
+                                  }}
+                                />
+                              </Tooltip>
+                            ) : (
+                              <Tooltip
+                                overlayInnerStyle={{ fontSize: "0.7rem" }}
+                                placement="bottom"
+                                trigger={["hover"]}
+                                overlay={<span>{"Approve"}</span>}
+                              >
+                                <BiCommentCheck
+                                  color="#C70F2B"
+                                  size={22}
+                                  title={"Approve"}
+                                  onClick={() => {
+                                    setApproveModal(true);
+                                    setSelectedTimeline(item.id);
+                                  }}
+                                />
+                              </Tooltip>
+                            )}
                           </Cell>
                         </Row>
                       );
@@ -223,13 +269,6 @@ export default function Drafts() {
                 </>
               )}
             </Table>
-
-            {/* <Pagination
-              setPage={setPage}
-              setReady={setReady}
-              totalPages={totalPages}
-              page={page}
-            /> */}
           </>
         ) : (
           <div
@@ -256,10 +295,20 @@ export default function Drafts() {
         )} */}
         <CreateScheduleModal
           isOpen={submitModal}
-          closeModal={() => setSubmitModal(false)}
+          closeModal={() => {
+            setSubmitModal(false);
+          }}
           option={handleOptions(activeTabIndex)}
           title={"Create from " + handleOptions(activeTabIndex)?.toString()}
           specificTimelineId={selectedTimeline}
+          closeOnBlur={true}
+        />
+        <ApproveSchedulePreviewModal
+          modalOpenRef={approveModal}
+          setModalRef={setApproveModal}
+          title="Approve"
+          scheduleInfo={selectedTimelineItem!}
+          timelineId={selectedTimeline!}
         />
       </ModuleContent>
     </ModuleMain>

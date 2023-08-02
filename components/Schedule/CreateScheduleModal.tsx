@@ -57,6 +57,7 @@ interface CreateScheduleModalProps extends ModalProps {
   timelineId?: number;
   isManage?: boolean;
   specificTimelineId?: number;
+  closeOnBlur?: boolean;
 }
 
 // Create a new timeline
@@ -284,6 +285,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
     <Modal
       ariaHideApp={false}
       isOpen={props.isOpen}
+      shouldCloseOnOverlayClick={props.closeOnBlur ? true : false}
       style={{
         overlay: {
           zIndex: 10000,

@@ -410,7 +410,8 @@ const getTimelineByStatus = (req, res, next) => {
         return timeline;
       });
       return res.status(200).json(found.rows);
-    } else return res.status(404).json({ message: "No timeline found" });
+    } else return res.status(200).json([]);
+    // res.status(404).json({ message: "No timeline found" });
   });
 };
 
