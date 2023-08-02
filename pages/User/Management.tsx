@@ -15,11 +15,14 @@ import instance from "../../types/common/axios.config";
 import { ModuleHeader, ModuleMain } from "../../components";
 import TooltipBtn from "../../components/TooltipBtn";
 import Link from "next/link";
-import { BsFileEarmarkPlus, BsPencilSquare, BsTrashFill } from "react-icons/bs";
+import { BsFileEarmarkPlus, BsPencilSquare, BsTrashFill, BsPersonBadge } from "react-icons/bs";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import { HiOutlineDownload } from "react-icons/hi";
 import ModuleSimplePopup from "../../components/ModuleLayout/ModuleSimplePopup";
 import { useRouter } from "next/router";
+import { useAdminContext } from "../../components/Context/AdminContext";
+import { selectImpersonationState, setImpersonationState } from "../../redux/impersonationSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const downloadCSV = async () => {
   try {
@@ -40,7 +43,7 @@ const downloadCSV = async () => {
   }
 };
 
-const getUser = async () => {
+const getUsers = async () => {
   const url = "/api/user/getUsers";
   return await instance
     .get(url)
@@ -54,18 +57,45 @@ const getUser = async () => {
     });
 };
 
+const checkAdmin = async () => {
+  const url = "/api/user";
+  return await instance
+    .get(url)
+    .then((res) => {
+      // console.log(res.data);
+      return res.data;
+    })
+    .catch((err) => {
+      console.log(err.response);
+      return err.response.status;
+    });
+}
+
 export default function User() {
+
+  const { isAdmin, setIsAdminHandler } = useAdminContext();
+
   useEffect(() => {
-    getUser().then((res) => {
+    getUsers().then((res) => {
       setData(res);
     });
   }, []);
+
+  // If current logged in user is admin, show the impersonate button. Else hide it
+  useEffect(() => {
+    checkAdmin().then((res) => {
+      if(res.role_id == 1)
+        setIsAdminHandler(true);
+    });
+  }, []);
+
   const router = useRouter();
   const [data, setData] = useState<CMMSEmployee[]>([]);
   const [columnSizes, setColumnSizes] = useState<string>(
     "6em 20% calc(80% - 12em) 6em;"
   );
   const [deleteModalID, setDeleteModalID] = useState<number>(0);
+  const [impersonateUserID , setImpersonateUserID] = useState<number>(0);
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [isDeleteSuccess, setDeleteSuccess] = useState<boolean>(false);
 
@@ -101,6 +131,27 @@ export default function User() {
     setDeleteModalID(parseInt(e.currentTarget.name));
     setModalOpen(true);
   };
+  const dispatch = useDispatch();
+
+  const onImpersonateClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    impersonateUser(parseInt(e.currentTarget.name));
+  };
+  async function impersonateUser(impersonateUserID:number) {
+    try {
+      let res = await instance.post(`/api/admin/impersonate/${impersonateUserID}`);
+      // console.log(res);
+
+      if(res.status == 200){      
+        // Re-direct back to home page under impersonated user   
+        window.location.href = '/Dashboard';
+
+        // Dispatch to notify the store that impersonation state has changed
+        dispatch(setImpersonationState(true));
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
   async function deleteMaster() {
     try {
       let res = await instance.delete(`/api/user/deleteUser/${deleteModalID}`);
@@ -167,6 +218,18 @@ export default function User() {
                     >
                       <BsPencilSquare />
                     </Link>
+                    {isAdmin && (
+                      <button
+                        onClick={onImpersonateClick}
+                        name={"" + item.user_id}
+                        style={{
+                          all: "unset",
+                          cursor: "pointer",
+                          marginLeft: "10px",
+                        }}
+                      >
+                        <BsPersonBadge />
+                      </button>)}
                   </Cell>
                 </Row>
               ))}
