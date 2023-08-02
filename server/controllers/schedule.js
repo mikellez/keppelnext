@@ -300,7 +300,7 @@ const createTimeline = async (req, res, next) => {
 // Get timeline details
 const getTimeline = async (req, res, next) => {
   global.db.query(
-    `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, ST.status, PM.plant_name
+    `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, ST.status, PM.plant_name, ST.created_date
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
@@ -388,13 +388,13 @@ const getTimelineByStatus = (req, res, next) => {
     return res.status(404).json({ message: "Invalid timeline id provided" });
 
   const queryS = req.params.id
-    ? `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name, ST.status
+    ? `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name, ST.status, ST.created_date
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
     WHERE status = $1 AND
     created_by = ${req.user.id}`
-    : `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name, ST.status
+    : `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name, ST.status, ST.created_date
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
@@ -693,7 +693,7 @@ const createSingleEvent = (req, res, next) => {
       req.params.schedule_id,
       data.timelineId,
       req.params.index,
-      JSON.stringify(activity_log)
+      JSON.stringify(activity_log),
     ],
     (err) => {
       if (err) throw err;
@@ -844,27 +844,34 @@ const updateSchedule = async (req, res, next) => {
       req.body.schedule.plantId,
       req.body.schedule.timelineId,
       req.body.schedule.prevId,
-      req.body.schedule.scheduleId
+      req.body.schedule.scheduleId,
     ],
     (err, result) => {
       if (err) {
-        console.log(err)
+        console.log(err);
         throw res.status(500).send("unable to update schedule");
       }
       if (result) {
         const updatedSchedule = result.rows[0];
         const fields = getFieldsDiff(updatedSchedule, req.body.schedule);
 
-        const activity_log = [{
-          date: today,
-          name: name,
-          role: role_name,
-          activity: `Edited Schedule: [${fields.map(field=>`${field.field}: ${field.oldValue} => ${field.newValue}`).join(", ")}]`,
-          activity_type: "Edited",
-          fields: fields
-        }];
+        const activity_log = [
+          {
+            date: today,
+            name: name,
+            role: role_name,
+            activity: `Edited Schedule: [${fields
+              .map(
+                (field) =>
+                  `${field.field}: ${field.oldValue} => ${field.newValue}`
+              )
+              .join(", ")}]`,
+            activity_type: "Edited",
+            fields: fields,
+          },
+        ];
 
-        console.log(activity_log)
+        console.log(activity_log);
 
         global.db.query(
           `UPDATE 
@@ -872,16 +879,13 @@ const updateSchedule = async (req, res, next) => {
             SET 
               activity_log = activity_log || $1::jsonb
               WHERE schedule_id = $2`,
-          [
-            JSON.stringify(activity_log), 
-            req.body.schedule.scheduleId
-          ],
+          [JSON.stringify(activity_log), req.body.schedule.scheduleId],
           (err, result) => {
-            if (err) console.log(err)
+            if (err) console.log(err);
           }
         );
 
-        return res.status(200).send("schedule updated successfully")
+        return res.status(200).send("schedule updated successfully");
       }
     }
   );

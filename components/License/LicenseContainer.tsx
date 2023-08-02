@@ -382,9 +382,7 @@ const LicenseContainer = ({
               disabled={disabled || dateOnly}
             />
             <div className="mb-3">
-              <label className="form-label">
-                <RequiredIcon /> Linked Asset
-              </label>
+              <label className="form-label">Linked Asset</label>
               <AssetSelect
                 isSingle
                 plantId={licenseForm.plant_id == -1 ? 1 : licenseForm.plant_id}

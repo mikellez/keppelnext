@@ -7,6 +7,8 @@
   option
   timelineId
   isManage
+  specificTimelineId
+
 
   - option is a prop that accepts an enum value in ScheduleCreateOptions
     It is a way of defining a usage of the modal whether it will
@@ -20,6 +22,8 @@
     When isManage is used, the modal is entirely for view purposes and 
     no edits can be made
 
+  - specificTimelineId is used when you only want to parse in only 1 prop to the modal
+    this is used in the drafts page where we want to submit specific schedules for approval
 */
 
 import React, { useEffect, useState } from "react";
@@ -52,6 +56,7 @@ interface CreateScheduleModalProps extends ModalProps {
   option?: ScheduleCreateOptions;
   timelineId?: number;
   isManage?: boolean;
+  specificTimelineId?: number;
 }
 
 // Create a new timeline
@@ -318,6 +323,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
                 name="name"
                 userCreated={true}
                 optionTitle="existing drafts"
+                specificTimelineId={props.specificTimelineId}
               />
             </label>
           )}
