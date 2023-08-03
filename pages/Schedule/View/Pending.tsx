@@ -98,11 +98,10 @@ export default function Pending() {
   };
 
   useEffect(() => {
-    const role = data?.role_id;
-    if (role) {
-      setIsManager(checkManager(role));
+    if (data?.role_id) {
+      setIsManager(checkManager(data.role_id));
       getTimelinesByStatus(
-        indexedColumn[activeTabIndex],
+        indexedColumn[checkManager(data.role_id) ? 1 : 0],
         activeTabIndex == 0 ? true : false
       )
         .then((result: any) => {
