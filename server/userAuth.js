@@ -9,7 +9,7 @@ const moment = require('moment');
 module.exports = (server) => {
     server.use(session({
         secret: "secret",
-        resave: false,
+        resave: true,
         saveUninitialized: false
     }))
     server.use(passport.initialize());
@@ -44,23 +44,21 @@ module.exports = (server) => {
     });
 
     passport.deserializeUser((id, cb) => {
+        console.log(global.db);
         global.db.query(`SELECT 
                 user_name,
                 user_email,
-                employee_id,
                 user_id,
                 first_name,
-                last_name,
-                role_id,
-                role_name,
-                STRING_TO_ARRAY(allocatedplantids, ', ') as allocated_plants
+                last_name
             FROM 
-                keppel.user_access 
+                keppel.users
             WHERE 
                 user_id = $1::integer`, [id], (err, result) => {
             if (err) return cb(err);
             
             const data = result.rows[0];
+            console.log("ID: " + id)
             console.log("Result: " + data)
             const userInfo = {
                 employee_id: data.employee_id,

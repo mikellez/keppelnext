@@ -28,22 +28,24 @@ const fetchDBNames = async (req, res, next) => {
 const dbConnection = async (req, res, next) => {
   if (req.path === "/api/login" || checkIfGuestPath(req.path)) {
     const { database } = req.body;
+    console.log(database);
     if (!database) await connectDB("cmms_dev");
-    else await connectDB(database);
+    else {
+      console.log("here");
+      await connectDB(database);
+    }
   }
-  console.log("hello knexxx", global.knex)
 
   next();
 };
 
 const connectDB = async (dbName) => {
-  console.log("Connecting to databases")
   const dbConfig = dbJSON[dbName];
+  console.log(dbConfig);
   const pool = new Pool(dbConfig);
   global.db = pool;
-  const knexInstance = await require('knex')(knexJSON["cmms_dev"]);
+  const knexInstance = await require('knex')(knexJSON[dbName]);
   global.knex = knexInstance;
-  console.log("Finished")
 };
 
 const dellocateGlobalDB = async () => {

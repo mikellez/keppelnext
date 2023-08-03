@@ -197,4 +197,4 @@ const main = async (newDB) => {
   }
 };
 
-main("internal_test_db");
+main("test_db");
