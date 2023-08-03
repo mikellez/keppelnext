@@ -1,3 +1,25 @@
+/**
+ * Documentation of view pending Schedule Module
+ *
+ *
+ * This module makes use of 2 main componenets
+ * - CreateScheduleModal
+ * - ApproveSchedulePreviewModal
+ *
+ * The page will show different data depending on the user role_id from useCurrentUser
+ * Drafts will be shown when the role_ids are 3 4 while pending drafts will be shown when
+ * role_id is 1 or 2.
+ *
+ * For each entry there will be a action button at the end.
+ * For drafts - Submit button at the end will open the CreateScheduleModal
+ * For Approval - ApproveSchedulePreviewModal will be shown
+ *
+ *
+ * upon any action, the page will be reloaded
+ *
+ *
+ */
+
 import React, { useEffect, useState } from "react";
 import instance from "../../../types/common/axios.config";
 import {
@@ -86,7 +108,7 @@ export default function Pending() {
       setIsManager(false);
       setActiveTabIndex(0);
     }
-    console.log(role);
+    // console.log(role);
   }, [data]);
 
   const handleOptions = (activeTab: number) => {
@@ -247,7 +269,7 @@ export default function Pending() {
                                 overlayInnerStyle={{ fontSize: "0.7rem" }}
                                 placement="bottom"
                                 trigger={["hover"]}
-                                overlay={<span>{"Approve"}</span>}
+                                overlay={<span>{"Manage"}</span>}
                               >
                                 <BiCommentCheck
                                   color="#C70F2B"

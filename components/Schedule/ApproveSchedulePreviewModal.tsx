@@ -12,6 +12,22 @@ import {
   manageSingleEvent,
 } from "../../pages/Schedule/Manage";
 
+/**
+ * Explanation for Approval Schedule Preview Modal
+ *
+ * This Module creates a preview of the schedule before either rejecting or approving it.
+ *
+ * This uses props from the parent class:
+ *
+ * - modalOpenRef : the ref to open the modal
+ * - setModalRef : the method to set open/close state of the modal
+ * - title : title of the modal
+ * - timelineID : The time line that is shown for preview
+ * - scheduleInfo : the list of event in the timeline to display
+ *
+ *
+ *
+ */
 interface ApproveSchedulePreviewModalProps {
   modalOpenRef: boolean;
   setModalRef: React.Dispatch<React.SetStateAction<boolean>>;
