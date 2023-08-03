@@ -12,13 +12,6 @@
         "database":"internal_test_db",
         "user":"postgres",
         "password":"123Az!!!"
-    },
-    "cmms_prd": {
-        "host":"192.168.20.96",
-        "port":5432,
-        "database":"cmms_prd",
-        "user":"postgres",
-        "password":"123Az!!!"
     }
 }
     

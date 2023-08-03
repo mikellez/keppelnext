@@ -3,8 +3,6 @@
  * used on the frontend
  */
 
-const knexConfig = require('../db/knexConfig');
-const knex = require('knex')(knexConfig.development);
 const moment = require("moment");
 const {
   CreateFeedbackMail,
@@ -68,48 +66,6 @@ const conditionGen = (req) => {
   
   }
 
-// const feedbackQuery = async () => {
-//     const query = knex
-//       .select(
-//         'f.feedback_id as id',
-//         'f.plant_loc_id',
-//         'f.plant_id',
-//         'f.description',
-//         'f.contact',
-//         'f.imageurl as image',
-//         'f.status_id',
-//         'f.activity_log',
-//         'f.completed_date',
-//         'f.remarks',
-//         knex.raw("concat(concat(createdu.first_name, ' '), createdu.last_name) AS createdByUser"),
-//         knex.raw("concat(concat(assignu.first_name, ' '), assignu.last_name) AS assigned_user_name"),
-//         'pl.loc_room',
-//         'pl.loc_id',
-//         'pl.loc_floor',
-//         'pm.plant_name',
-//         'pm.plant_id',
-//         'f.created_date',
-//         'f.assigned_user_id',
-//         'st.status',
-//         'f.name',
-//         'f.created_user_id',
-//         'f.completed_img'
-//       )
-//       .from('keppel.users AS u')
-//       .join('keppel.user_access AS ua', 'u.user_id', '=', 'ua.user_id')
-//       .join('keppel.feedback AS f', knex.raw("ua.allocatedplantids LIKE concat(concat('%', f.plant_id::text), '%')"))
-//       .leftJoin(
-//         knex.raw('(SELECT t3.feedback_id FROM keppel.feedback AS t3 GROUP BY t3.feedback_id) tmp1'),
-//         'tmp1.feedback_id',
-//         'f.feedback_id'
-//       )
-//       .leftJoin('keppel.users AS assignu', 'assignu.user_id', 'f.assigned_user_id')
-//       .leftJoin('keppel.users AS createdu', 'createdu.user_id', 'f.created_user_id')
-//       .leftJoin('keppel.plant_master AS pm', 'pm.plant_id', 'f.plant_id')
-//       .leftJoin('keppel.plant_location AS pl', 'pl.loc_id', 'f.plant_loc_id')
-//       .join('keppel.status_fm AS st', 'st.status_id', 'f.status_id');
-// }
-
 const specificFeedbackQuery = async (expand, cond, pageOptions, user_id) => {
     let expandCond = "";
     let SELECT_ARR = [];
@@ -172,12 +128,12 @@ const specificFeedbackQuery = async (expand, cond, pageOptions, user_id) => {
     expandCond = SELECT_ARR;
     console.log(SELECT_RAW_ARR)
     
-    const query = knex
+    const query = global.knex
         .select(expandCond)
-        .select(SELECT_RAW_ARR.map(field => knex.raw(field)))
+        .select(SELECT_RAW_ARR.map(field => global.knex.raw(field)))
             .from('keppel.users AS u')
             .join('keppel.user_access AS ua', 'u.user_id', '=', 'ua.user_id')
-            .join('keppel.feedback AS f', knex.raw("ua.allocatedplantids LIKE concat(concat('%', f.plant_id::text), '%')"))
+            .join('keppel.feedback AS f', global.knex.raw("ua.allocatedplantids LIKE concat(concat('%', f.plant_id::text), '%')"))
             .leftJoin('keppel.users AS assignu', 'assignu.user_id', 'f.assigned_user_id')
             .leftJoin('keppel.users AS createdu', 'createdu.user_id', 'f.created_user_id')
             .leftJoin('keppel.plant_master AS pm', 'pm.plant_id', 'f.plant_id')
@@ -309,6 +265,7 @@ const fetchCompletedFeedback = async (req, res, next) => {
 }
 
 const fetchSingleFeedback = async (req, res, next) => {
+    console.log(db.dbName)
     const condition = {
         feedback_id: req.params.id
     };
@@ -351,7 +308,7 @@ const createFeedback = async (req, res, next) => {
         activity_log: JSON.stringify(activity_log),
     }
     try {
-        await knex("keppel.feedback").insert(feedback);
+        await global.knex("keppel.feedback").insert(feedback);
         
         const mail = new CreateFeedbackMail([feedback.contact.email], {
             name: feedback.name,
@@ -377,11 +334,11 @@ const assignFeedback = async (req, res, next) => {
     };
     const updatedFields = {
         status_id: 2,
-        activity_log: knex.raw(`activity_log || ?::jsonb`, [JSON.stringify(activityLog)]),
+        activity_log: global.knex.raw(`activity_log || ?::jsonb`, [JSON.stringify(activityLog)]),
         assigned_user_id: req.body.assigned_user_id
     }
     try {
-        await knex('keppel.feedback')
+        await global.knex('keppel.feedback')
             .where("feedback_id", req.params.id)
             .update(updatedFields)
 
@@ -430,11 +387,11 @@ const completeFeedback = async (req, res, next) => {
         remarks: req.body.remarks,
         completed_date: today,
         completed_img: req.body.completed_img,
-        activity_log: knex.raw(`activity_log || ?::jsonb`, [JSON.stringify(activityLog)]),
+        activity_log: global.knex.raw(`activity_log || ?::jsonb`, [JSON.stringify(activityLog)]),
     };
 
     try {
-        await knex("keppel.feedback")
+        await global.knex("keppel.feedback")
             .where("feedback_id", req.params.id)
             .update(updatedFields);
 

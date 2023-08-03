@@ -2,6 +2,8 @@ const knexConfig = require('../db/knexConfig');
 const knex = require('knex')(knexConfig.development); // Replace 'development' with the desired environment
 
 test = async () => {
+  // globalThis.hello = "Hello world"
+  console.log(globalThis);
   const query = knex(knex.raw("keppel.checklist_master"))
   
   query.whereIn(

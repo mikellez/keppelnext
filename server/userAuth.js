@@ -9,7 +9,7 @@ const moment = require('moment');
 module.exports = (server) => {
     server.use(session({
         secret: "secret",
-        resave: true,
+        resave: false,
         saveUninitialized: false
     }))
     server.use(passport.initialize());
@@ -61,6 +61,7 @@ module.exports = (server) => {
             if (err) return cb(err);
             
             const data = result.rows[0];
+            console.log("Result: " + data)
             const userInfo = {
                 employee_id: data.employee_id,
                 id: data.user_id,
