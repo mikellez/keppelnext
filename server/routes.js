@@ -2215,14 +2215,57 @@ router
     controllers.workflow.deleteWorkflow
   );
 
+/**
+ * @api {get} /plantLocation Get All Plant Locations
+ * @apiDescription Get all plant locations
+ * @apiName getPlantLocations
+ * @apiGroup PlantLocation
+ * 
+ * @apiSuccess {Object[]} - Data Array of Plant Location Objects
+ * @apiSuccess {Number} -.id Plant Location ID
+ * @apiSuccess {Number} -.plant_id Plant ID
+ * @apiSuccess {String} -.location Plant Location Description
+ * 
+ * @apiError (Error 500) {String} Internal Server Error "Error has occurred in the server"
+ */
 router.get(
   "/plantLocation",
   checkIfLoggedInAPI,
   controllers.plantLocation.getAllPlantLoc
 );
 
+/**
+ * @api {get} /plantLocation/self Get your assigned plant locations
+ * @apiDescription Get assigned plant locations
+ * @apiName getAssignedPlantLocations
+ * @apiGroup PlantLocation
+ * 
+ * @apiSuccess {Object[]} - Data Array of Plant Location Objects
+ * @apiSuccess {Number} -.id Plant Location ID
+ * @apiSuccess {Number} -.plant_id Plant ID
+ * @apiSuccess {String} -.location Plant Location Description
+ * 
+ * @apiError (Error 500) {String} Internal Server Error "Error has occurred in the server"
+ */
 router.get("/plantLocation/self", controllers.plantLocation.getUserPlantLocs);
 
+/**
+ * @api {get} /plantLocation/:id Get single plant location
+ * @apiDescription Get single plant location
+ * @apiName getSinglePlantLocations
+ * @apiGroup PlantLocation
+ * 
+ * @apiParam {String} id Plant Location ID
+ * 
+ * @apiSuccess {Object[]} - Data Array of Plant Location Objects
+ * @apiSuccess {Number} -.loc_id Plant Location ID
+ * @apiSuccess {Number} -.plant_id Plant ID
+ * @apiSuccess {String} -.plant_name Plant Name
+ * @apiSuccess {String} -.loc_floor Plant Location Floor
+ * @apiSuccess {String} -.loc_room Plant Location Room
+ * 
+ * @apiError (Error 500) {String} Internal Server Error "Error has occurred in the server"
+ */
 router.get("/plantLocation/:id", controllers.plantLocation.getSinglePlantLoc);
 
 //.get("/workflow/run/checklist", controllers.workflow.runWorkflowChecklist);
@@ -2230,15 +2273,14 @@ router.get("/plantLocation/:id", controllers.plantLocation.getSinglePlantLoc);
 // router.get("/user/getUser/:id", checkIfLoggedInAPI, controllers.setting.getUser);
 
 /**
- * @api {get} /license_types
+ * @api {get} /license_types Get License Types
  * @apiDescription License Types
  * @apiName Fetch license Type
  * @apiGroup License
  *
- * @apiSuccess {Object} - Data Object
- * @apiSuccess {Object[]} -.rows Array of License Type
- * @apiSuccess {Number} -.rows.type_id license Type ID
- * @apiSuccess {Number} -.rows.type type of license
+ * @apiSuccess {Object[]} - Array of License Type
+ * @apiSuccess {Number} -.type_id license Type ID
+ * @apiSuccess {Number} -.type type of license
  *
  *
  * @apiError (Error 500) {String} Internal Server Error "An error has occured while fetching license types"

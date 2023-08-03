@@ -8,7 +8,7 @@ const getAllPlantLoc = async (req, res, next) => {
         })
     } catch (e) {
         console.log(e);
-        res.status(500).send("Error has occured in the server")
+        res.status(500).send("Error has occurred in the server")
     }
 }
 
