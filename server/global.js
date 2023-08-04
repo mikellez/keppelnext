@@ -1,3 +1,10 @@
+/**
+ * 
+ * @param {"key": value} oldSchedule 
+ * @param {"key": value} newSchedule 
+ * @returns {Array} changes 
+ */
+
 function getFieldsDiff(oldSchedule, newSchedule) {
   const changes = [];
   // console.log(oldSchedule, newSchedule)
