@@ -32,7 +32,7 @@ app.prepare().then(() => {
     })
   );
   server.use(bodyParser.json({ limit: "50mb", extended: true }));
-  server.use(morgan('combined'));
+  // server.use(morgan('combined'));
   server.use(
     bodyParser.urlencoded({
       limit: "50mb",
