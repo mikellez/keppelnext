@@ -169,7 +169,7 @@ export default function Pending() {
                 }}
                 className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
               >
-                <span style={{ all: "unset" }}>Acquired</span>
+                <span style={{ all: "unset" }}>Pending</span>
               </li>
             ) : (
               <></>
