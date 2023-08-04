@@ -203,27 +203,27 @@ export default function Pending() {
                           <Cell>{item.id}</Cell>
                           <Cell>{item.name}</Cell>
                           <Cell>
-                            <Tooltip
+                            {/* <Tooltip
                               overlayInnerStyle={{ fontSize: "0.7rem" }}
                               placement="bottom"
                               trigger={["hover"]}
                               overlay={<span>{item.plantId}</span>}
-                            >
-                              <div>{item.plantName}</div>
-                            </Tooltip>
+                            > */}
+                            <div>{item.plantName}</div>
+                            {/* </Tooltip> */}
                           </Cell>
                           <Cell>
-                            <Tooltip
+                            {/* <Tooltip
                               overlayInnerStyle={{ fontSize: "0.7rem" }}
                               placement="bottom"
                               trigger={["hover"]}
                               overlay={<span>{item.description}</span>}
-                            >
-                              <div>{item.description}</div>
-                            </Tooltip>
+                            > */}
+                            <div>{item.description}</div>
+                            {/* </Tooltip> */}
                           </Cell>
                           <Cell>
-                            <Tooltip
+                            {/* <Tooltip
                               overlayInnerStyle={{ fontSize: "0.7rem" }}
                               placement="bottom"
                               trigger={["hover"]}
@@ -236,51 +236,51 @@ export default function Pending() {
                                     : null}
                                 </span>
                               }
-                            >
-                              <div>
-                                {item.created_date
-                                  ? moment(new Date(item.created_date)).format(
-                                      "MMMM Do YYYY, h:mm:ss a"
-                                    )
-                                  : null}
-                              </div>
-                            </Tooltip>
+                            > */}
+                            <div>
+                              {item.created_date
+                                ? moment(new Date(item.created_date)).format(
+                                    "MMMM Do YYYY, h:mm:ss a"
+                                  )
+                                : null}
+                            </div>
+                            {/* </Tooltip> */}
                           </Cell>
                           <Cell>
                             {!isManager ? (
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={<span>{"Approve"}</span>}
-                              >
-                                <AiOutlineEdit
-                                  color="#C70F2B"
-                                  size={22}
-                                  title={"Edit"}
-                                  onClick={() => {
-                                    setSelectedTimeline(item.id);
-                                    setSubmitModal(true);
-                                  }}
-                                />
-                              </Tooltip>
+                              // <Tooltip
+                              //   overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              //   placement="bottom"
+                              //   trigger={["hover"]}
+                              //   overlay={<span>{"Approve"}</span>}
+                              // >
+                              <AiOutlineEdit
+                                color="#C70F2B"
+                                size={22}
+                                title={"Edit"}
+                                onClick={() => {
+                                  setSelectedTimeline(item.id);
+                                  setSubmitModal(true);
+                                }}
+                              />
                             ) : (
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={<span>{"Manage"}</span>}
-                              >
-                                <BiCommentCheck
-                                  color="#C70F2B"
-                                  size={22}
-                                  title={"Approve"}
-                                  onClick={() => {
-                                    setApproveModal(true);
-                                    setSelectedTimeline(item.id);
-                                  }}
-                                />
-                              </Tooltip>
+                              // </Tooltip>
+                              // <Tooltip
+                              //   overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              //   placement="bottom"
+                              //   trigger={["hover"]}
+                              //   overlay={<span>{"Manage"}</span>}
+                              // >
+                              <BiCommentCheck
+                                color="#C70F2B"
+                                size={22}
+                                title={"Approve"}
+                                onClick={() => {
+                                  setApproveModal(true);
+                                  setSelectedTimeline(item.id);
+                                }}
+                              />
+                              // </Tooltip>
                             )}
                           </Cell>
                         </Row>
@@ -330,6 +330,7 @@ export default function Pending() {
           title="Approve"
           scheduleInfo={selectedTimelineItem!}
           timelineId={selectedTimeline!}
+          closeOnBlur
         />
       </ModuleContent>
     </ModuleMain>

@@ -34,6 +34,7 @@ interface ApproveSchedulePreviewModalProps {
   title: string;
   timelineId: number;
   scheduleInfo: ScheduleInfo[];
+  closeOnBlur?: boolean;
 }
 
 export default function ApproveSchedulePreviewModal(
@@ -83,36 +84,44 @@ export default function ApproveSchedulePreviewModal(
         title="approve"
         large
         hideHeader
+        closeOnOverlayClick={props.closeOnBlur ? true : false}
       >
         <ScheduleTemplate
           title="Schedule Preview"
           header="Schedule Preview"
           schedules={props.scheduleInfo}
-        />
-        <label>
-          <p>Remarks</p>
-          <textarea
-            className="form-control"
-            rows={2}
-            maxLength={150}
-            style={{ resize: "none" }}
-            onChange={(e) => setRemarks(e.target.value)}
-          ></textarea>
-        </label>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-          }}
         >
-          <TooltipBtn toolTip={false} onClick={() => handleClick(1)}>
-            {" "}
-            Approve{" "}
-          </TooltipBtn>
-          <TooltipBtn toolTip={false} onClick={() => handleClick(3)}>
-            {" "}
-            Reject{" "}
-          </TooltipBtn>{" "}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+            }}
+          >
+            <TooltipBtn toolTip={false} onClick={() => handleClick(1)}>
+              {" "}
+              Approve{" "}
+            </TooltipBtn>
+            <TooltipBtn
+              toolTip={false}
+              onClick={() => handleClick(3)}
+              style={{ marginLeft: "10px" }}
+            >
+              {" "}
+              Reject{" "}
+            </TooltipBtn>{" "}
+          </div>
+        </ScheduleTemplate>
+        <div style={{ float: "right" }}>
+          <label>
+            <p>Remarks</p>
+            <textarea
+              className="form-control"
+              rows={2}
+              maxLength={150}
+              style={{ resize: "none" }}
+              onChange={(e) => setRemarks(e.target.value)}
+            ></textarea>
+          </label>
         </div>
       </ModuleModal>
 
