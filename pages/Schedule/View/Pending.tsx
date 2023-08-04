@@ -252,7 +252,7 @@ export default function Pending() {
                             {/* </Tooltip> */}
                           </Cell>
                           <Cell>
-                            {checkManager(data?.role_id) ? (
+                            {activeTabIndex == 0 ? (
                               // <Tooltip
                               //   overlayInnerStyle={{ fontSize: "0.7rem" }}
                               //   placement="bottom"
