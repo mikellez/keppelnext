@@ -52,7 +52,7 @@ import {
   AiOutlineHistory,
 } from "react-icons/ai";
 import { BiCommentCheck } from "react-icons/bi";
-import Tooltip from "rc-tooltip";
+
 import moment from "moment";
 import { getTimelinesByStatus } from "../../../components/Schedule/TimelineSelect";
 import { Modal } from "antd";
@@ -61,9 +61,18 @@ import { ScheduleCreateOptions } from "../Create";
 import { ScheduleInfo } from "../../../components/Schedule/ScheduleTemplate";
 import { getSchedules } from "../Timeline/[id]";
 import ApproveSchedulePreviewModal from "../../../components/Schedule/ApproveSchedulePreviewModal";
+import Tooltip from "rc-tooltip";
 
 // 3 : Draft, 1 : approved
 const indexedColumn: (3 | 4)[] = [3, 4];
+const checkManager = (role: number | undefined) => {
+  if (!role) return false;
+  if (role == 1 || role == 2) {
+    return true;
+  } else if (role == 3 || role == 4) {
+    return false;
+  }
+};
 
 export default function Pending() {
   const [page, setPage] = useState<number>(1);
@@ -86,30 +95,7 @@ export default function Pending() {
   ]);
 
   const { data } = useCurrentUser();
-
-  const checkManager = (role: number) => {
-    if (role == 1 || role == 2) {
-      return true;
-    } else if (role == 3 || role == 4) {
-      return false;
-    }
-  };
-  const [isManager, setIsManager] = useState<boolean>();
-  const [activeTabIndex, setActiveTabIndex] = useState<number>(
-    isManager ? 1 : 0
-  );
-
-  useEffect(() => {
-    const role = data?.role_id;
-    if (role == 1 || role == 2) {
-      setIsManager(true);
-      setActiveTabIndex(1);
-    } else if (role == 3 || role == 4) {
-      setIsManager(false);
-      setActiveTabIndex(0);
-    }
-    // console.log(role);
-  }, [data]);
+  const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
 
   const handleOptions = (activeTab: number) => {
     if (activeTab == 0) {
@@ -121,11 +107,7 @@ export default function Pending() {
 
   useEffect(() => {
     if (data?.role_id) {
-      setIsManager(checkManager(data.role_id));
-      getTimelinesByStatus(
-        indexedColumn[checkManager(data.role_id) ? 1 : 0],
-        activeTabIndex == 0 ? true : false
-      )
+      getTimelinesByStatus(indexedColumn[activeTabIndex])
         .then((result: any) => {
           if (result) {
             //   console.log(result);
@@ -142,6 +124,14 @@ export default function Pending() {
       setReady(true);
     }
   }, [activeTabIndex, data]);
+
+  const switchColumns = (index: number) => {
+    if (isReady) {
+      setReady(false);
+      setActiveTabIndex(index);
+      // setPage(1);
+    }
+  };
 
   useEffect(() => {
     if (selectedTimeline) {
@@ -164,11 +154,26 @@ export default function Pending() {
       <ModuleContent>
         {
           <ul className="nav nav-tabs">
-            <li className={"nav-link"}>
-              <span style={{ all: "unset" }}>
-                {handleOptions(activeTabIndex)}
-              </span>
+            <li
+              onClick={() => {
+                activeTabIndex !== 0 && switchColumns(0);
+              }}
+              className={"nav-link" + (activeTabIndex === 0 ? " active" : "")}
+            >
+              <span style={{ all: "unset" }}>Drafts</span>
             </li>
+            {checkManager(data?.role_id) ? (
+              <li
+                onClick={() => {
+                  activeTabIndex !== 1 && switchColumns(1);
+                }}
+                className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
+              >
+                <span style={{ all: "unset" }}>Acquired</span>
+              </li>
+            ) : (
+              <></>
+            )}
           </ul>
         }
 
@@ -203,14 +208,14 @@ export default function Pending() {
                           <Cell>{item.id}</Cell>
                           <Cell>{item.name}</Cell>
                           <Cell>
-                            {/* <Tooltip
+                            <Tooltip
                               overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              placement="bottom"
+                              // placement="bottom"
                               trigger={["hover"]}
                               overlay={<span>{item.plantId}</span>}
-                            > */}
-                            <div>{item.plantName}</div>
-                            {/* </Tooltip> */}
+                            >
+                              <div>{item.plantName}</div>
+                            </Tooltip>
                           </Cell>
                           <Cell>
                             {/* <Tooltip
@@ -247,7 +252,7 @@ export default function Pending() {
                             {/* </Tooltip> */}
                           </Cell>
                           <Cell>
-                            {!isManager ? (
+                            {checkManager(data?.role_id) ? (
                               // <Tooltip
                               //   overlayInnerStyle={{ fontSize: "0.7rem" }}
                               //   placement="bottom"
