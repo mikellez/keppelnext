@@ -26,6 +26,8 @@ export default function DropdownMenu() {
         .then((response) => {
           // console.log("success", response);
           localStorage.removeItem("staff");
+          // Set impersonation to false in case impersonation user logs out straightaway:
+          dispatch(setImpersonationState(false));
           window.location.href = "/";
         })
         .catch((e) => {

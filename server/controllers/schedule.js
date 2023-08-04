@@ -280,8 +280,22 @@ const getUserPlants = async (req, res, next) => {
 
 // Create a new timeline
 const createTimeline = async (req, res, next) => {
+  const today = moment().format("YYYY-MM-DD HH:mm:ss");
+  const name = req.user.name;
+  const role_name = req.user.role_name;
+  
+  const activity_log = [
+    {
+      date: today,
+      name: name,
+      role: role_name,
+      activity: "Schedule Timeline Created",
+      activity_type: "PENDING",
+    },
+  ];
+
   global.db.query(
-    "INSERT INTO keppel.schedule_timelines (timeline_name, description, created_date, created_by, status, plant_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING timeline_id",
+    "INSERT INTO keppel.schedule_timelines (timeline_name, description, created_date, created_by, status, plant_id, activity_log) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING timeline_id",
     [
       req.body.data.name,
       req.body.data.description,
@@ -289,6 +303,7 @@ const createTimeline = async (req, res, next) => {
       req.user.id,
       3,
       req.body.data.plantId,
+      JSON.stringify(activity_log)
     ],
     (err, found) => {
       if (err) throw err;
@@ -417,10 +432,37 @@ const getTimelineByStatus = (req, res, next) => {
 
 // Edit timeline details
 const editTimeline = (req, res, next) => {
+  const today = moment().format("YYYY-MM-DD HH:mm:ss");
+  const name = req.user.name;
+  const role_name = req.user.role_name;
+
   global.db.query(
-    `UPDATE keppel.schedule_timelines SET timeline_name = $1, description = $2 WHERE timeline_id = $3 RETURNING timeline_id`,
+    `UPDATE keppel.schedule_timelines SET timeline_name = $1, description = $2 WHERE timeline_id = $3 RETURNING timeline_id, timeline_name, description`,
     [req.body.data.name, req.body.data.description, req.params.id],
     (err, found) => {
+      const updatedSchedule = found.rows[0];
+      const newSchedule = {
+        timeline_name: req.body.data.name,
+        description: req.body.data.description,
+      }
+      const fields = getFieldsDiff(updatedSchedule, newSchedule);
+
+      const activity_log = [
+        {
+          date: today,
+          name: name,
+          role: role_name,
+          activity: `Edited Timeline: [${fields
+            .map(
+              (field) =>
+                `${field.field}: ${field.oldValue} => ${field.newValue}`
+            )
+            .join(", ")}]`,
+          activity_type: "Edited",
+          fields: fields,
+        },
+      ];
+
       if (err) throw err;
       if (found) return res.status(200).json(found.rows[0].timeline_id);
     }
@@ -430,6 +472,23 @@ const editTimeline = (req, res, next) => {
 // Change the status of timeline (Approve/Reject) Note that reject becomes draft
 const changeTimelineStatus = (req, res, next) => {
   const status = +req.params.status;
+  const today = moment().format("YYYY-MM-DD HH:mm:ss");
+  const name = req.user.name;
+  const role_name = req.user.role_name;
+  let activity = '';
+  let activityType = '';
+
+  if(status === 1) {
+    activity = `Approved Timeline Case ID-${req.params.id}`;
+    activityType = 'APPROVED';
+  } else if(status === 2) {
+    activity = `Rejected Timeline Case ID-${req.params.id}`;
+    activityType = 'REJECTED';
+  } else if(status === 4) {
+    activity = `Pending Timeline Case ID-${req.params.id}`;
+    activityType = 'PENDING';
+  }
+
   const queryS =
     status === 1
       ? `
@@ -449,14 +508,14 @@ const changeTimelineStatus = (req, res, next) => {
       AND start_date IS NOT NULL;
       
       UPDATE keppel.schedule_checklist sc
-      SET status = 5 
+      SET status = 5
       WHERE timeline_id IN (
         SELECT timeline_id FROM keppel.schedule_timelines st WHERE st.plant_id = (
           SELECT plant_id FROM keppel.schedule_timelines
             WHERE timeline_id = ${req.params.id}
         ) AND st.status = 1
       );
-      
+
       
       UPDATE keppel.schedule_timelines 
       SET status = 5 
@@ -464,15 +523,53 @@ const changeTimelineStatus = (req, res, next) => {
                                 WHERE timeline_id = ${req.params.id});
       
       
+      UPDATE keppel.schedule_timelines 
+      SET status = 1,
+      activity_log = activity_log || 
+        jsonb_build_object(
+          'date', '${today}'::text,
+          'name', '${name}'::text,
+          'role', '${role_name}'::text,
+          'activity', '${activity}'::text,
+          'activity_type', '${activityType}'::text
+        )
+      WHERE timeline_id = ${req.params.id} RETURNING *;
       
-      
-      UPDATE keppel.schedule_timelines SET status = 1 WHERE timeline_id = ${req.params.id} RETURNING *;
-      
-      UPDATE keppel.schedule_checklist SET status = 1 WHERE timeline_id = ${req.params.id};
+      UPDATE keppel.schedule_checklist 
+      SET status = 1,
+      activity_log = activity_log || 
+        jsonb_build_object(
+          'date', '${today}'::text,
+          'name', '${name}'::text,
+          'role', '${role_name}'::text,
+          'activity', '${activity}'::text,
+          'activity_type', '${activityType}'::text
+        )
+       WHERE timeline_id = ${req.params.id};
     `
       : `
-    UPDATE keppel.schedule_checklist SET status = ${req.params.status} WHERE timeline_id = ${req.params.id};
-    UPDATE keppel.schedule_timelines SET status = ${req.params.status} WHERE timeline_id = ${req.params.id} RETURNING *;
+    UPDATE keppel.schedule_checklist 
+    SET status = ${req.params.status},
+      activity_log = activity_log || 
+        jsonb_build_object(
+          'date', '${today}'::text,
+          'name', '${name}'::text,
+          'role', '${role_name}'::text,
+          'activity', '${activity}'::text,
+          'activity_type', '${activityType}'::text
+        )
+    WHERE timeline_id = ${req.params.id};
+    UPDATE keppel.schedule_timelines 
+    SET status = ${req.params.status},
+      activity_log = activity_log || 
+        jsonb_build_object(
+          'date', '${today}'::text,
+          'name', '${name}'::text,
+          'role', '${role_name}'::text,
+          'activity', '${activity}'::text,
+          'activity_type', '${activityType}'::text
+        )
+    WHERE timeline_id = ${req.params.id} RETURNING *;
     `;
   global.db.query(queryS, (err, found) => {
     if (err) throw err;
@@ -556,10 +653,23 @@ const getOpsAndEngineers = async (req, res, next) => {
 };
 
 const insertSchedule = async (req, res, next) => {
+  const name = req.user.name;
+  const role_name = req.user.role_name;
+  const today = moment().format("YYYY-MM-DD HH:mm:ss");
+  const activity_log = [
+    {
+      date: today,
+      name: name,
+      role: role_name,
+      activity: "Schedule Created",
+      activity_type: "DRAFT",
+    },
+  ];
+
   global.db.query(
     `INSERT INTO keppel.schedule_checklist
-        (checklist_template_id, remarks, start_date, end_date, recurrence_period, reminder_recurrence, scheduler_history, user_id, scheduler_userids_for_email, plant_id, timeline_id, prev_schedule_id, status, index) 
-        VALUES ($1, $2, $3, $4, $5, $6, CONCAT('created by',$7::varchar), $8, $9::int[], $10, $11, $12, $13, $14);`,
+        (checklist_template_id, remarks, start_date, end_date, recurrence_period, reminder_recurrence, scheduler_history, user_id, scheduler_userids_for_email, plant_id, timeline_id, prev_schedule_id, status, index, activity_log) 
+        VALUES ($1, $2, $3, $4, $5, $6, CONCAT('created by',$7::varchar), $8, $9::int[], $10, $11, $12, $13, $14, $15);`,
     [
       req.body.schedule.checklistId,
       req.body.schedule.remarks,
@@ -575,6 +685,7 @@ const insertSchedule = async (req, res, next) => {
       req.body.schedule.prevId,
       req.body.schedule.status,
       req.body.schedule.index,
+      JSON.stringify(activity_log),
     ],
     (err, result) => {
       if (err) throw err;
@@ -584,16 +695,34 @@ const insertSchedule = async (req, res, next) => {
 };
 
 const manageSingleEvent = (req, res, next) => {
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const name = req.user.name;
+  const role_name = req.user.role;
+
+  const activityApproved = `Approved Checklist Case ID-${req.body.schedule.schedule_id}`;
+  const activityRejected = `Rejected Checklist Case ID-${req.body.schedule.schedule_id}`;
+
   if (req.body.action === "approve") {
     global.db.query(
-      "UPDATE KEPPEL.SCHEDULE_CHECKLIST SET STATUS = 1 WHERE SCHEDULE_ID = $1 RETURNING INDEX, PREV_SCHEDULE_ID",
+      `UPDATE KEPPEL.SCHEDULE_CHECKLIST 
+        SET STATUS = 1,
+        activity_log = activity_log ||
+        jsonb_build_object(
+          'date', '${today}'::text,
+          'name', '${name}'::text,
+          'role', '${role_name}'::text,
+          'activity', '${activityApproved}'::text,
+          'activity_type', 'APPROVED',
+          'remarks', $5::text
+        )
+       WHERE SCHEDULE_ID = $1 RETURNING INDEX, PREV_SCHEDULE_ID`,
       [req.body.schedule.schedule_id],
       (err, found) => {
         if (err) throw err;
         // console.log(found.rows);
         global.db.query(
           `UPDATE KEPPEL.SCHEDULE_CHECKLIST 
-            SET EXCLUSION_LIST = ARRAY_APPEND(EXCLUSION_LIST, ${found.rows[0].index}) 
+            SET EXCLUSION_LIST = ARRAY_APPEND(EXCLUSION_LIST, ${found.rows[0].index}),
             WHERE SCHEDULE_ID = ${found.rows[0].prev_schedule_id}; 
 
             SELECT SC.SCHEDULE_ID, 
@@ -619,7 +748,18 @@ const manageSingleEvent = (req, res, next) => {
     );
   } else if (req.body.action === "reject") {
     global.db.query(
-      "UPDATE KEPPEL.SCHEDULE_CHECKLIST SET STATUS = 2 WHERE SCHEDULE_ID = $1",
+      `UPDATE KEPPEL.SCHEDULE_CHECKLIST 
+      SET STATUS = 2, 
+        activity_log = activity_log ||
+        jsonb_build_object(
+          'date', '${today}'::text,
+          'name', '${name}'::text,
+          'role', '${role_name}'::text,
+          'activity', '${activityRejected}'::text,
+          'activity_type', 'REJECTED',
+          'remarks', $5::text
+        )
+      WHERE SCHEDULE_ID = $1`,
       [req.body.schedule.schedule_id],
       (err, found) => {
         if (err) throw err;
@@ -634,9 +774,36 @@ const manageSingleEvent = (req, res, next) => {
             END_DATE = $2,
             REMARKS = $3,
             SCHEDULER_USERIDS_FOR_EMAIL = ARRAY [${data.userIds}]
-            WHERE SCHEDULE_ID = $4`,
+            WHERE SCHEDULE_ID = $4
+            RETURNING start_date, end_date, remarks, scheduler_userids_for_email
+            `,
       [data.startDate, data.endDate, data.remarks, req.params.schedule_id],
       (err, found) => {
+        const updatedSchedule = found.rows[0];
+        const newSchedule = {
+          start_date: data.startDate,
+          end_date: data.endDate,
+          remarks: data.remarks,
+          scheduler_userids_for_email: data.userIds,
+        }
+        const fields = getFieldsDiff(updatedSchedule, newSchedule);
+
+        const activity_log = [
+          {
+            date: today,
+            name: name,
+            role: role_name,
+            activity: `Edited Schedule: [${fields
+              .map(
+                (field) =>
+                  `${field.field}: ${field.oldValue} => ${field.newValue}`
+              )
+              .join(", ")}]`,
+            activity_type: "Edited",
+            fields: fields,
+          },
+        ];
+
         if (err) throw err;
         return res.status(200).send("event edited");
       }
@@ -659,7 +826,7 @@ const createSingleEvent = (req, res, next) => {
       name: req.user.name,
       role: role_name,
       activity: "Schedule Created",
-      activity_type: "PENDING",
+      activity_type: "DRAFT",
     },
   ];
 
@@ -872,7 +1039,7 @@ const updateSchedule = async (req, res, next) => {
           },
         ];
 
-        console.log(activity_log);
+        //console.log(activity_log);
 
         global.db.query(
           `UPDATE 
