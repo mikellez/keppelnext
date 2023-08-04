@@ -210,9 +210,9 @@ export default function Pending() {
                           <Cell>
                             <Tooltip
                               overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              // placement="bottom"
+                              placement="bottom"
                               trigger={["hover"]}
-                              overlay={<span>{item.plantId}</span>}
+                              overlay={<span>{item.plantName}</span>}
                             >
                               <div>{item.plantName}</div>
                             </Tooltip>
