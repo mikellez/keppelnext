@@ -24,6 +24,8 @@
 
   - specificTimelineId is used when you only want to parse in only 1 prop to the modal
     this is used in the drafts page where we want to submit specific schedules for approval
+
+  - closeOnblur is to allow the prop to close when blur
 */
 
 import React, { useEffect, useState } from "react";
@@ -94,7 +96,7 @@ async function checkScheduleList(scheduleList: CMMSSchedule[]) {
       !scheduleList[i].recurringPeriod ||
       !scheduleList[i].startDate ||
       !scheduleList[i].endDate ||
-      !scheduleList[i].remarks ||
+      // !scheduleList[i].remarks ||
       // scheduleList[i].remarks === "" ||
       scheduleList[i].recurringPeriod === -1
     ) {

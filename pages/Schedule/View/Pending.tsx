@@ -1,3 +1,25 @@
+/**
+ * Documentation of view pending Schedule Module
+ *
+ *
+ * This module makes use of 2 main componenets
+ * - CreateScheduleModal
+ * - ApproveSchedulePreviewModal
+ *
+ * The page will show different data depending on the user role_id from useCurrentUser
+ * Drafts will be shown when the role_ids are 3 4 while pending drafts will be shown when
+ * role_id is 1 or 2.
+ *
+ * For each entry there will be a action button at the end.
+ * For drafts - Submit button at the end will open the CreateScheduleModal
+ * For Approval - ApproveSchedulePreviewModal will be shown
+ *
+ *
+ * upon any action, the page will be reloaded
+ *
+ *
+ */
+
 import React, { useEffect, useState } from "react";
 import instance from "../../../types/common/axios.config";
 import {
@@ -30,7 +52,7 @@ import {
   AiOutlineHistory,
 } from "react-icons/ai";
 import { BiCommentCheck } from "react-icons/bi";
-import Tooltip from "rc-tooltip";
+
 import moment from "moment";
 import { getTimelinesByStatus } from "../../../components/Schedule/TimelineSelect";
 import { Modal } from "antd";
@@ -39,9 +61,18 @@ import { ScheduleCreateOptions } from "../Create";
 import { ScheduleInfo } from "../../../components/Schedule/ScheduleTemplate";
 import { getSchedules } from "../Timeline/[id]";
 import ApproveSchedulePreviewModal from "../../../components/Schedule/ApproveSchedulePreviewModal";
+import Tooltip from "rc-tooltip";
 
 // 3 : Draft, 1 : approved
 const indexedColumn: (3 | 4)[] = [3, 4];
+const checkManager = (role: number | undefined) => {
+  if (!role) return false;
+  if (role == 1 || role == 2) {
+    return true;
+  } else if (role == 3 || role == 4) {
+    return false;
+  }
+};
 
 export default function Pending() {
   const [page, setPage] = useState<number>(1);
@@ -64,30 +95,7 @@ export default function Pending() {
   ]);
 
   const { data } = useCurrentUser();
-
-  const checkManager = (role: number) => {
-    if (role == 1 || role == 2) {
-      return true;
-    } else if (role == 3 || role == 4) {
-      return false;
-    }
-  };
-  const [isManager, setIsManager] = useState<boolean>();
-  const [activeTabIndex, setActiveTabIndex] = useState<number>(
-    isManager ? 1 : 0
-  );
-
-  useEffect(() => {
-    const role = data?.role_id;
-    if (role == 1 || role == 2) {
-      setIsManager(true);
-      setActiveTabIndex(1);
-    } else if (role == 3 || role == 4) {
-      setIsManager(false);
-      setActiveTabIndex(0);
-    }
-    console.log(role);
-  }, [data]);
+  const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
 
   const handleOptions = (activeTab: number) => {
     if (activeTab == 0) {
@@ -98,13 +106,8 @@ export default function Pending() {
   };
 
   useEffect(() => {
-    const role = data?.role_id;
-    if (role) {
-      setIsManager(checkManager(role));
-      getTimelinesByStatus(
-        indexedColumn[activeTabIndex],
-        activeTabIndex == 0 ? true : false
-      )
+    if (data?.role_id) {
+      getTimelinesByStatus(indexedColumn[activeTabIndex])
         .then((result: any) => {
           if (result) {
             //   console.log(result);
@@ -121,6 +124,14 @@ export default function Pending() {
       setReady(true);
     }
   }, [activeTabIndex, data]);
+
+  const switchColumns = (index: number) => {
+    if (isReady) {
+      setReady(false);
+      setActiveTabIndex(index);
+      // setPage(1);
+    }
+  };
 
   useEffect(() => {
     if (selectedTimeline) {
@@ -143,11 +154,26 @@ export default function Pending() {
       <ModuleContent>
         {
           <ul className="nav nav-tabs">
-            <li className={"nav-link"}>
-              <span style={{ all: "unset" }}>
-                {handleOptions(activeTabIndex)}
-              </span>
+            <li
+              onClick={() => {
+                activeTabIndex !== 0 && switchColumns(0);
+              }}
+              className={"nav-link" + (activeTabIndex === 0 ? " active" : "")}
+            >
+              <span style={{ all: "unset" }}>Drafts</span>
             </li>
+            {checkManager(data?.role_id) ? (
+              <li
+                onClick={() => {
+                  activeTabIndex !== 1 && switchColumns(1);
+                }}
+                className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
+              >
+                <span style={{ all: "unset" }}>Pending</span>
+              </li>
+            ) : (
+              <></>
+            )}
           </ul>
         }
 
@@ -182,27 +208,27 @@ export default function Pending() {
                           <Cell>{item.id}</Cell>
                           <Cell>{item.name}</Cell>
                           <Cell>
-                            <Tooltip
+                            {/* <Tooltip
                               overlayInnerStyle={{ fontSize: "0.7rem" }}
                               placement="bottom"
                               trigger={["hover"]}
-                              overlay={<span>{item.plantId}</span>}
-                            >
-                              <div>{item.plantName}</div>
-                            </Tooltip>
+                              overlay={<span>{item.plantName}</span>}
+                            > */}
+                            <div>{item.plantName}</div>
+                            {/* </Tooltip> */}
                           </Cell>
                           <Cell>
-                            <Tooltip
+                            {/* <Tooltip
                               overlayInnerStyle={{ fontSize: "0.7rem" }}
                               placement="bottom"
                               trigger={["hover"]}
                               overlay={<span>{item.description}</span>}
-                            >
-                              <div>{item.description}</div>
-                            </Tooltip>
+                            > */}
+                            <div>{item.description}</div>
+                            {/* </Tooltip> */}
                           </Cell>
                           <Cell>
-                            <Tooltip
+                            {/* <Tooltip
                               overlayInnerStyle={{ fontSize: "0.7rem" }}
                               placement="bottom"
                               trigger={["hover"]}
@@ -215,51 +241,51 @@ export default function Pending() {
                                     : null}
                                 </span>
                               }
-                            >
-                              <div>
-                                {item.created_date
-                                  ? moment(new Date(item.created_date)).format(
-                                      "MMMM Do YYYY, h:mm:ss a"
-                                    )
-                                  : null}
-                              </div>
-                            </Tooltip>
+                            > */}
+                            <div>
+                              {item.created_date
+                                ? moment(new Date(item.created_date)).format(
+                                    "MMMM Do YYYY, h:mm:ss a"
+                                  )
+                                : null}
+                            </div>
+                            {/* </Tooltip> */}
                           </Cell>
                           <Cell>
-                            {!isManager ? (
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={<span>{"Approve"}</span>}
-                              >
-                                <AiOutlineEdit
-                                  color="#C70F2B"
-                                  size={22}
-                                  title={"Edit"}
-                                  onClick={() => {
-                                    setSelectedTimeline(item.id);
-                                    setSubmitModal(true);
-                                  }}
-                                />
-                              </Tooltip>
+                            {activeTabIndex == 0 ? (
+                              // <Tooltip
+                              //   overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              //   placement="bottom"
+                              //   trigger={["hover"]}
+                              //   overlay={<span>{"Approve"}</span>}
+                              // >
+                              <AiOutlineEdit
+                                color="#C70F2B"
+                                size={22}
+                                title={"Edit"}
+                                onClick={() => {
+                                  setSelectedTimeline(item.id);
+                                  setSubmitModal(true);
+                                }}
+                              />
                             ) : (
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={<span>{"Approve"}</span>}
-                              >
-                                <BiCommentCheck
-                                  color="#C70F2B"
-                                  size={22}
-                                  title={"Approve"}
-                                  onClick={() => {
-                                    setApproveModal(true);
-                                    setSelectedTimeline(item.id);
-                                  }}
-                                />
-                              </Tooltip>
+                              // </Tooltip>
+                              // <Tooltip
+                              //   overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              //   placement="bottom"
+                              //   trigger={["hover"]}
+                              //   overlay={<span>{"Manage"}</span>}
+                              // >
+                              <BiCommentCheck
+                                color="#C70F2B"
+                                size={22}
+                                title={"Approve"}
+                                onClick={() => {
+                                  setApproveModal(true);
+                                  setSelectedTimeline(item.id);
+                                }}
+                              />
+                              // </Tooltip>
                             )}
                           </Cell>
                         </Row>
@@ -309,6 +335,7 @@ export default function Pending() {
           title="Approve"
           scheduleInfo={selectedTimelineItem!}
           timelineId={selectedTimeline!}
+          closeOnBlur
         />
       </ModuleContent>
     </ModuleMain>

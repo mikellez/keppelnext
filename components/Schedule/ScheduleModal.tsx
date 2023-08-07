@@ -49,14 +49,16 @@ async function editDraftSchedule(schedule: CMMSSchedule) {
 // return false if schedule is invalid
 export function scheduleValidator(schedule: CMMSSchedule) {
   return !(
-    !schedule.checklistId ||
-    !schedule.startDate ||
-    !schedule.endDate ||
-    !schedule.checklistId ||
-    !schedule.recurringPeriod ||
-    schedule.recurringPeriod === -1 ||
-    (!schedule.reminderRecurrence && schedule.reminderRecurrence != 0) ||
-    !schedule.remarks
+    (
+      !schedule.checklistId ||
+      !schedule.startDate ||
+      !schedule.endDate ||
+      !schedule.checklistId ||
+      !schedule.recurringPeriod ||
+      schedule.recurringPeriod === -1 ||
+      (!schedule.reminderRecurrence && schedule.reminderRecurrence != 0)
+    )
+    // ||!schedule.remarks
   );
 }
 

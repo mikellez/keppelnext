@@ -144,9 +144,16 @@ export default function NavBar() {
                     Manage Schedules
                   </NavDropdownLink>
                 )}
-              <NavDropdownLink href="/Schedule/View/Pending">
+              {(data?.role_id == Role.Admin || data?.role_id == Role.Manager || data?.role_id == Role.Engineer) &&
+              (<NavDropdownLink
+                href={
+                  data?.role_id == Role.Admin || data?.role_id == Role.Manager || data?.role_id == Role.Engineer
+                    ? "/Schedule/View/Pending"
+                    : ""
+                }
+              >
                 View Pending Schedules
-              </NavDropdownLink>
+              </NavDropdownLink>)}
             </NavDropdown>
             <NavLink
               name="Checklist"

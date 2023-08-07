@@ -182,7 +182,7 @@ export default function ManageSchedule() {
         )}
         {isHistory ? (
           <TooltipBtn
-            text="Schdedule info"
+            text="Schedule info"
             onClick={() => setManageModal(true)}
             disabled={!timelineId}
           >
