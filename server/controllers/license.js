@@ -120,7 +120,7 @@ const fetchAllLicenseQuery = (req) => {
             concat(concat ('%', (SELECT plant_id FROM keppel.plant_location tmp1 WHERE tmp1.loc_id = lc.plant_loc_id)), '%')
             LEFT JOIN keppel.license_type lt ON lc.license_type_id = lt.type_id
             LEFT JOIN keppel.plant_location pl ON lc.plant_loc_id = pl.loc_id
-            Left JOIN keppel.plant_master pm ON pl.plant_id = pm.plant_id
+            Left JOIN keppel.plant_master pm ON lc.plant_id = pm.plant_id
             LEFT JOIN keppel.plant_system_assets psa ON lc.linked_asset_id = psa.psa_id
             LEFT JOIN keppel.users assignU ON lc.assigned_user_id = assignU.user_id   
             LEFT JOIN keppel.status_lm sl ON lc.status_id = sl.status_id

@@ -231,7 +231,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
       getOustandingFeedback,
       getCompletedFeedback,
     ]);
-    console.log(getAllFeedback);
+    // console.log(getAllFeedback);
 
     const pendingFeedback = getAllFeedback[0].data?.rows;
     const outstandingFeedback = getAllFeedback[1].data?.rows;

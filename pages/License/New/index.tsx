@@ -8,23 +8,11 @@
   - LicenseContainer (More information can be found within LicenseContainer)
 */
 
-
 import React, { useState, useEffect } from "react";
 import instance from "../../../types/common/axios.config";
 import { useRouter } from "next/router";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { ModuleMain, ModuleHeader, ModuleContent } from "../../../components";
-import RequiredIcon from "../../../components/RequiredIcon";
-import LicenseTypeSelect from "../../../components/License/LicenseTypeSelect";
-import PlantLocSelect from "../../../components/License/PlantLocSelect";
-import AssignToSelect, {
-  AssignedUserOption,
-} from "../../../components/Schedule/AssignToSelect";
-import AssetSelect, {
-  AssetOption,
-} from "../../../components/Checklist/AssetSelect";
-import MultipleImagesUpload from "../../../components/License/MultipleImagesUpload";
-import { SingleValue, MultiValue } from "react-select";
 import LicenseContainer from "../../../components/License/LicenseContainer";
 import {
   CMMSLicenseType,
@@ -33,7 +21,7 @@ import {
 } from "../../../types/common/interfaces";
 
 export interface LicenseProps {
-  plantLocs: CMMSPlantLocation[];
+  plants: CMMSPlantLocation[];
   licenseTypes: CMMSLicenseType[];
   license?: CMMSLicenseForm;
 }
@@ -70,7 +58,7 @@ export const getServerSideProps: GetServerSideProps = async (
     },
   };
   // console.log(context)
-  const plantLocs = await instance.get("/api/plantLocation/self", headers);
+  const plants = await instance.get("/api/plants", headers);
   const licenseTypes = await instance.get("/api/license_types", headers);
   let license;
   if (context.query.id) {
@@ -78,7 +66,7 @@ export const getServerSideProps: GetServerSideProps = async (
   }
 
   let props: LicenseProps = {
-    plantLocs: plantLocs.data,
+    plants: plants.data,
     licenseTypes: licenseTypes.data,
     license: license ? license.data : null,
   };

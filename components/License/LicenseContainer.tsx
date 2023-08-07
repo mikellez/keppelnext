@@ -18,7 +18,6 @@
 
 */
 
-
 import React, { useState, useEffect } from "react";
 import instance from "../../types/common/axios.config";
 import { useRouter } from "next/router";
@@ -225,8 +224,8 @@ const LicenseContainer = ({
       licenseForm.license_type_id === -1 ||
       !licenseForm.license_details ||
       licenseForm.plant_id === -1 ||
-      licenseForm.plant_loc_id === -1 ||
-      licenseForm.linked_asset_id === -1
+      licenseForm.plant_loc_id === -1
+      // ||licenseForm.linked_asset_id === -1
     ) {
       setMissingFields(true);
     } else {
@@ -376,16 +375,14 @@ const LicenseContainer = ({
               />
             </div>
             <PlantLocSelect
-              optionsData={data.plantLocs}
+              optionsData={data.plants}
               onChange={handlePlantSelect}
-              value={`${licenseForm.plant_id}-${licenseForm.plant_loc_id}`}
-              plant_loc_id={licenseForm.plant_loc_id}
+              value={`${licenseForm.plant_id}`}
+              plant_id={licenseForm.plant_id}
               disabled={disabled || dateOnly}
             />
             <div className="mb-3">
-              <label className="form-label">
-                <RequiredIcon /> Linked Asset
-              </label>
+              <label className="form-label">Linked Asset</label>
               <AssetSelect
                 isSingle
                 plantId={licenseForm.plant_id == -1 ? 1 : licenseForm.plant_id}
