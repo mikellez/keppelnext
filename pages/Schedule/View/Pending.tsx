@@ -149,7 +149,7 @@ export default function Pending() {
     <ModuleMain>
       <ModuleHeader
         title="Pending Schedule Task"
-        header="Pending Schedule Task"
+        header={activeTabIndex === 0 ? "Schedule Drafts" : "Pending Schedules"}
       />
       <ModuleContent>
         {
