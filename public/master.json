@@ -172,7 +172,7 @@
 			"column_name": "status"
 		}]
 	},
-	"system_assets":{
+	"system_assets": {
 		"internalName": "system_assets",
 		"name": "System Assets",
 		"id": "system_asset_id",
@@ -187,8 +187,16 @@
 		{
 			"column_label": "System Asset",
 			"column_name": "system_asset"
-		}
-	]
+		}]
+	},
+	"license_type": {
+		"internalName": "license_type",
+		"name": "License Types",
+		"id": "type_id",
+		"fields": [{
+			"column_label": "License Type",
+			"column_name": "license_type"
+		}]
 	}
 	
 }

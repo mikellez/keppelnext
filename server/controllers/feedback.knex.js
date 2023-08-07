@@ -23,6 +23,10 @@ const conditionGen = (req) => {
     // let userRoleCond = "";
     const cond = {}
 
+    if (req.params.id) {
+        cond.feedback_id = req.params.id;
+    }
+
     if (plant && plant != 0) {
         cond.plant_id = [plant,];
     //   plantCond = `AND f.plant_loc_id = '${plant}'`;
@@ -66,7 +70,7 @@ const conditionGen = (req) => {
   
   }
 
-const specificFeedbackQuery = async (expand, cond, pageOptions, user_id) => {
+const specificFeedbackQuery = async (req, options) => {
     let expandCond = "";
     let SELECT_ARR = [];
     const rawFields = ["createdByUser", "assigned_user_name"]
@@ -101,8 +105,8 @@ const specificFeedbackQuery = async (expand, cond, pageOptions, user_id) => {
 
     SELECT_ARR = [];
     SELECT_RAW_ARR = [];
-    if (expand) {
-        const expandArr = expand.split(",");
+    if (req.expand) {
+        const expandArr = req.expand.split(",");
 
         for (let i = 0; i < expandArr.length; i++) {
             if (rawFields.includes(expandArr[i])) {
@@ -141,12 +145,17 @@ const specificFeedbackQuery = async (expand, cond, pageOptions, user_id) => {
             .leftJoin('keppel.status_fm AS st', 'st.status_id', 'f.status_id')
 
 
+    const cond = {
+        ...conditionGen(req),
+        ...options,
+    };
+
     if (cond.userCond) {
         query.where(function () {
-            this.where("ua.user_id", user_id).orWhere("f.assigned_user_id", user_id)
+            this.where("ua.user_id", req.user.id).orWhere("f.assigned_user_id", req.user.id)
         })
     } else {
-        query.where("ua.user_id", user_id)
+        query.where("ua.user_id", req.user.id)
     }
 
     if (cond.feedback_id) {
@@ -163,8 +172,12 @@ const specificFeedbackQuery = async (expand, cond, pageOptions, user_id) => {
         query.whereRaw(cond.date)
     }
     
-    if (pageOptions) {
-        query.limit(pageOptions.limit).offset(pageOptions.offset)
+    if(req.query.page) {
+        const page = req.query.page || 1;
+        const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+    // }
+    // if (pageOptions) {
+        query.limit(ITEMS_PER_PAGE).offset(offsetItems)
     }
 
     query.orderBy("f.feedback_id", "desc")
@@ -176,20 +189,12 @@ const specificFeedbackQuery = async (expand, cond, pageOptions, user_id) => {
 }
 
 const fetchPendingFeedback = async (req, res, next) => {
-    const page = req.query.page || 1;
-    const expand = req.query.expand || null;
-    // const search = req.query.search || null;
-    const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
-    
-    const condition = conditionGen(req);
-    condition.status_id = [1];
-    
-    const pageOptions = {
-        limit: ITEMS_PER_PAGE,
-        offset: offsetItems
+
+    const options = {
+        status_id: [1],
     }
     try {
-        const results = await specificFeedbackQuery(expand, condition, pageOptions, req.user.id);
+        const results = await specificFeedbackQuery(req, options);
         res.status(200).json({rows: results})
     } catch (err) {
         console.log(err);
@@ -198,21 +203,13 @@ const fetchPendingFeedback = async (req, res, next) => {
 }
 
 const fetchAssignedFeedback = async (req, res, next) => {
-    const page = req.query.page || 1;
-    const expand = req.query.expand || null;
-    // const search = req.query.search || null;
-    const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-    const condition = conditionGen(req);
-    condition.status_id = [2];
-
-    const pageOptions = {
-        limit: ITEMS_PER_PAGE,
-        offset: offsetItems
+    const options = {
+        status_id: [2],
     }
 
     try {
-        const results = await specificFeedbackQuery(expand, condition, pageOptions, req.user.id);
+        const results = await specificFeedbackQuery(req, options);
         res.status(200).json({rows: results})
     } catch (err) {
         console.log(err);
@@ -221,20 +218,13 @@ const fetchAssignedFeedback = async (req, res, next) => {
 }
 
 const fetchOutstandingFeedback = async (req, res, next) => {
-    const page = req.query.page || 1;
-    const expand = req.query.expand || null;
-    // const search = req.query.search || null;
-    const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
     
-    const condition = conditionGen(req);
-    condition.status_id = [2];
-
-    const pageOptions = {
-        limit: ITEMS_PER_PAGE,
-        offset: offsetItems
+    const options = {
+        status_id: [2],
     }
+
     try {
-        const results = await specificFeedbackQuery(expand, condition, pageOptions, req.user.id);
+        const results = await specificFeedbackQuery(req, options);
         res.status(200).json({rows: results})
     } catch (err) {
         console.log(err);
@@ -243,20 +233,13 @@ const fetchOutstandingFeedback = async (req, res, next) => {
 }
 
 const fetchCompletedFeedback = async (req, res, next) => {
-    const page = req.query.page || 1;
-    const expand = req.query.expand || null;
-    // const search = req.query.search || null;
-    const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
     
-    const condition = conditionGen(req);
-    condition.status_id = [4];
-
-    const pageOptions = {
-        limit: ITEMS_PER_PAGE,
-        offset: offsetItems
+    const options = {
+        status_id: [4],
     }
+
     try {
-        const results = await specificFeedbackQuery(expand, condition, pageOptions, req.user.id);
+        const results = await specificFeedbackQuery(req, options);
         res.status(200).json({rows: results})
     } catch (err) {
         console.log(err);
@@ -265,12 +248,12 @@ const fetchCompletedFeedback = async (req, res, next) => {
 }
 
 const fetchSingleFeedback = async (req, res, next) => {
-    console.log(db.dbName)
-    const condition = {
-        feedback_id: req.params.id
-    };
+    // console.log(db.dbName)
+    // const condition = {
+    //     feedback_id: req.params.id
+    // };
     try {
-        const result = await specificFeedbackQuery(null, condition, null, req.user.id);
+        const result = await specificFeedbackQuery(req);
         if (result.length > 0) {
             return res.status(200).send(result[0]);
           } else {
@@ -405,9 +388,9 @@ const completeFeedback = async (req, res, next) => {
             created_date,
             completed_date,
             remarks,
-            } = await fetchEmailDetailsForSpecificFeedback(req.params.id);
+        } = await fetchEmailDetailsForSpecificFeedback(req.params.id);
         
-            const mail = new CompletedFeedbackMail(
+        const mail = new CompletedFeedbackMail(
             [assigned_user_email, creator_email, req.body.contact.email],
             {
                 plant_name: plant_name,
@@ -417,9 +400,9 @@ const completeFeedback = async (req, res, next) => {
                 created_date: today,
                 completed_date: today,
             }
-            );
-        
-            await mail.send();
+        );
+    
+        await mail.send();
 
         res.status(200).send("Feedback successfully completed")
     } catch (err) {

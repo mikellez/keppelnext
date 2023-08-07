@@ -64,26 +64,26 @@ export default function New(props: NewMasterEntryProps) {
   const { isSubmitting, errors } = formState;
 
   const formSubmit: SubmitHandler<FormValues> = async (data) => {
-    // console.log(data);
-    const values = Object.values(data["entries"]);
-    if (values.includes("")) {
-      setIsMissingDetailsModaOpen2(true);
-    } else {
-      return await instance
-        .post("/api/master/new/add", data)
-        .then((res) => {
-          // console.log(res.data)
-          setSubmissionModal(true);
-          return res.data;
-        })
-        .catch((err) => {
-          // console.log(err);
-          // console.log(err.response.data.table);
-          if (err.response.data.table === "system_assets") {
-            setIsNotValid(true);
-          }
-        });
-    }
+    console.log(data);
+    // const values = Object.values(data["entries"]);
+    // if (values.includes("")) {
+    //   setIsMissingDetailsModaOpen2(true);
+    // } else {
+    //   return await instance
+    //     .post("/api/master/new/add", data)
+    //     .then((res) => {
+    //       // console.log(res.data)
+    //       setSubmissionModal(true);
+    //       return res.data;
+    //     })
+    //     .catch((err) => {
+    //       // console.log(err);
+    //       // console.log(err.response.data.table);
+    //       if (err.response.data.table === "system_assets") {
+    //         setIsNotValid(true);
+    //       }
+    //     });
+    // }
   };
 
   function changePlant(e: React.ChangeEvent<HTMLSelectElement>) {

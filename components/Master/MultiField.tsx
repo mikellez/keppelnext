@@ -241,5 +241,5 @@ export function MultiFields(props: MultiFieldProps) {
     });
   };
 
-  return <div className={formStyles.halfContainer}>{fieldE && fieldE}</div>;
+  return <div className={formStyles.halfContainer}>{fieldE}</div>;
 }
