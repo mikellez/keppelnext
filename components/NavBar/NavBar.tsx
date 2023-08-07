@@ -146,11 +146,7 @@ export default function NavBar() {
                 )}
               {(data?.role_id == Role.Admin || data?.role_id == Role.Manager || data?.role_id == Role.Engineer) &&
               (<NavDropdownLink
-                href={
-                  data?.role_id == Role.Admin || data?.role_id == Role.Manager || data?.role_id == Role.Engineer
-                    ? "/Schedule/View/Pending"
-                    : ""
-                }
+                href="/Schedule/View/Pending"
               >
                 View Pending Schedules
               </NavDropdownLink>)}
