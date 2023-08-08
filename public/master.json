@@ -195,7 +195,7 @@
 		"id": "type_id",
 		"fields": [{
 			"column_label": "License Type",
-			"column_name": "license_type"
+			"column_name": "type"
 		}]
 	}
 	

@@ -122,11 +122,7 @@ export function MultiFields(props: MultiFieldProps) {
     newEntries[column_name] = e.target.value;
     setEntries(newEntries);
 
-    props.onChange({
-      target: {
-        value: entries,
-      },
-    });
+    props.onChange(entries);
   };
   async function getDropdownValues(
     url: string,
