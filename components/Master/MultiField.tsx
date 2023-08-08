@@ -122,11 +122,7 @@ export function MultiFields(props: MultiFieldProps) {
     newEntries[column_name] = e.target.value;
     setEntries(newEntries);
 
-    props.onChange({
-      target: {
-        value: entries,
-      },
-    });
+    props.onChange(entries);
   };
   async function getDropdownValues(
     url: string,
@@ -241,5 +237,5 @@ export function MultiFields(props: MultiFieldProps) {
     });
   };
 
-  return <div className={formStyles.halfContainer}>{fieldE && fieldE}</div>;
+  return <div className={formStyles.halfContainer}>{fieldE}</div>;
 }

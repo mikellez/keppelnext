@@ -57,14 +57,14 @@ FROM
     JOIN keppel.status_fm st ON st.status_id = f.status_id	
 `;
 
-const fetchPendingFeedbackQuery =
-  fetchAllFeedbackQuery +
-  `
-WHERE 
-    ua.user_id = $1 AND 
-    (f.status_id = 1)
-ORDER BY f.feedback_id DESC
-`;
+// const fetchPendingFeedbackQuery =
+//   fetchAllFeedbackQuery +
+//   `
+// WHERE 
+//     ua.user_id = $1 AND 
+//     (f.status_id = 1)
+// ORDER BY f.feedback_id DESC
+// `;
 
 const condition = (req) => {
   let date = req.params.date || 'all';
@@ -180,12 +180,6 @@ const getAllFeedBackQuery = (req) => {
         keppel.users u
         JOIN keppel.user_access ua ON u.user_id = ua.user_id
         JOIN keppel.feedback f  on ua.allocatedplantids LIKE concat(concat('%',f.plant_id::text), '%')
-        LEFT JOIN (
-            SELECT 
-                t3.feedback_id
-            FROM  
-                keppel.feedback AS t3
-            GROUP BY t3.feedback_id) tmp1 ON tmp1.feedback_id = f.feedback_id
         LEFT JOIN keppel.users assignU ON assignU.user_id = f.assigned_user_id
         LEFT JOIN keppel.users createdU ON createdU.user_id = f.created_user_id
         LEFT JOIN keppel.plant_master pm ON pm.plant_id = f.plant_id
@@ -291,23 +285,23 @@ const fetchPendingFeedback = async (req, res, next) => {
   }
 };
 
-const fetchAssignedFeedbackQuery =
-  fetchAllFeedbackQuery +
-  `
-WHERE 
-    ua.user_id = $1 AND 
-    (f.status_id is null or f.status_id = 2 or f.status_id = 3) AND
-    (CASE
-      WHEN (SELECT ua.role_id
-          FROM
-              keppel.user_access ua
-          WHERE
-              ua.user_id = $1) = 4
-      THEN assignU.user_id = $1
-      ELSE True
-      END) 
-ORDER BY f.feedback_id DESC
-`;
+// const fetchAssignedFeedbackQuery =
+//   fetchAllFeedbackQuery +
+//   `
+// WHERE 
+//     ua.user_id = $1 AND 
+//     (f.status_id is null or f.status_id = 2 or f.status_id = 3) AND
+//     (CASE
+//       WHEN (SELECT ua.role_id
+//           FROM
+//               keppel.user_access ua
+//           WHERE
+//               ua.user_id = $1) = 4
+//       THEN assignU.user_id = $1
+//       ELSE True
+//       END) 
+// ORDER BY f.feedback_id DESC
+// `;
 
 const fetchAssignedFeedback = async (req, res, next) => {
   const page = req.query.page || 1;
@@ -365,23 +359,23 @@ const fetchOutstandingFeedback = async (req, res, next) => {
   }
 };
 
-const fetchCompletedFeedbackQuery =
-  fetchAllFeedbackQuery +
-  `				
-WHERE 
-    ua.user_id = $1 AND 
-    (f.status_id = 4) AND
-    (CASE
-      WHEN (SELECT ua.role_id
-          FROM
-              keppel.user_access ua
-          WHERE
-              ua.user_id = $1) = 4
-      THEN assignU.user_id = $1
-      ELSE True
-      END)
-ORDER BY f.feedback_id desc
-`;
+// const fetchCompletedFeedbackQuery =
+//   fetchAllFeedbackQuery +
+//   `				
+// WHERE 
+//     ua.user_id = $1 AND 
+//     (f.status_id = 4) AND
+//     (CASE
+//       WHEN (SELECT ua.role_id
+//           FROM
+//               keppel.user_access ua
+//           WHERE
+//               ua.user_id = $1) = 4
+//       THEN assignU.user_id = $1
+//       ELSE True
+//       END)
+// ORDER BY f.feedback_id desc
+// `;
 
 const fetchCompletedFeedback = async (req, res, next) => {
   const page = req.query.page || 1;
@@ -486,16 +480,12 @@ const assignFeedback = async (req, res, next) => {
             feedback_id = $2
     `;
 
-  // console.log(sql);
 
   try {
-    // console.log(req.params);
-    // console.log(req.body);
     const data = await global.db.query(sql, [
-      req.body.assigned_user_id.value,
+      req.body.assigned_user_id,
       req.params.id,
     ]);
-    // console.log(fetchEmailDetailsForSpecificFeedback(req.body.id));
 
     const {
       assigned_user_email,
@@ -549,7 +539,6 @@ const completeFeedback = async (req, res, next) => {
                 
                 WHERE feedback_id = $4`;
 
-  // console.log(req.body);
   try {
     await global.db.query(sql, [
       req.body.remarks,

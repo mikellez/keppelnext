@@ -179,6 +179,7 @@ export default function Master() {
     if (!isReady && data && !isValidating && data.data.length > 0) {
       let len = Object.keys(data.data[0]).length - 3;
       let sizes = "";
+      // console.log("RESIZING ", data)
       for (let i = 0; i < len; i++)
         sizes += "calc((100% - 12em) / " + len + ") ";
       setColumnSizes("6em " + sizes + "6em");

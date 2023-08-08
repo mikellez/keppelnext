@@ -1812,7 +1812,7 @@ router.get(
  *
  * @apiError (Error 500) {String} InternalServerError "Failure to create feedback"
  */
-router.post("/feedback", controllers.feedback.createFeedback);
+router.post("/feedback", controllers.feedbackKnex.createFeedback);
 
 /**
  * @api {get} /feedback/pending Get Pending Feedback
@@ -1850,13 +1850,13 @@ router.post("/feedback", controllers.feedback.createFeedback);
 router.get(
   "/feedback/pending",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchPendingFeedback
+  controllers.feedbackKnex.fetchPendingFeedback
 );
 
 router.get(
   "/feedback/pending/:plant/:datetype/:date",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchPendingFeedback
+  controllers.feedbackKnex.fetchPendingFeedback
 );
 
 /**
@@ -1895,13 +1895,13 @@ router.get(
 router.get(
   "/feedback/assigned",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchAssignedFeedback
+  controllers.feedbackKnex.fetchAssignedFeedback
 );
 
 router.get(
   "/feedback/assigned/:plant/:datetype/:date",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchAssignedFeedback
+  controllers.feedbackKnex.fetchAssignedFeedback
 );
 
 /**
@@ -1940,13 +1940,13 @@ router.get(
 router.get(
   "/feedback/outstanding",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchOutstandingFeedback
+  controllers.feedbackKnex.fetchOutstandingFeedback
 );
 
 router.get(
   "/feedback/outstanding/:plant/:datetype/:date",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchOutstandingFeedback
+  controllers.feedbackKnex.fetchOutstandingFeedback
 );
 
 /**
@@ -1985,13 +1985,13 @@ router.get(
 router.get(
   "/feedback/completed",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchCompletedFeedback
+  controllers.feedbackKnex.fetchCompletedFeedback
 );
 
 router.get(
   "/feedback/completed/:plant/:datetype/:date",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchCompletedFeedback
+  controllers.feedbackKnex.fetchCompletedFeedback
 );
 
 /**
@@ -2074,7 +2074,7 @@ router.get(
 router.get(
   "/feedback/:id",
   checkIfLoggedInAPI,
-  controllers.feedback.getSingleFeedback
+  controllers.feedbackKnex.fetchSingleFeedback
 );
 
 /**
@@ -2095,7 +2095,7 @@ router.get(
 router.patch(
   "/feedback/assign/:id",
   checkIfLoggedInAPI,
-  controllers.feedback.assignFeedback
+  controllers.feedbackKnex.assignFeedback
 );
 
 /**
@@ -2115,7 +2115,7 @@ router.patch(
 router.patch(
   "/feedback/complete/:id",
   checkIfLoggedInAPI,
-  controllers.feedback.completeFeedback
+  controllers.feedbackKnex.completeFeedback
 );
 
 router.get(

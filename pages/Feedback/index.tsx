@@ -305,8 +305,8 @@ export default function Feedback(props: FeedbackPageProps) {
                             <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
                                 placement="bottom" 
                                 trigger={["hover"]} 
-                                overlay={<span >{item.name}</span>}>
-                                  <div>{item.name}</div>
+                                overlay={<span >{item.createdbyuser}</span>}>
+                                  <div>{item.createdbyuser}</div>
                               </Tooltip>
                             </Cell>
                           <Cell>
