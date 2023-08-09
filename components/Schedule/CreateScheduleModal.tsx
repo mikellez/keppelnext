@@ -222,6 +222,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
         // Disable submit button
         setDisableSubmit(true);
         checkScheduleList(scheduleList).then((result) => {
+          //To check whether there is missing details
           if (result != -1) {
             setScheduleList((prevList) => {
               return prevList.map((s) => {

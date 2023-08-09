@@ -175,15 +175,16 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
 
   const fetchCOPs = async () => {
     const { datetype, date } = pickerwithtype;
+    const PARAMS = ["id"];
 
     setIsRequestReady(false);
 
     const getScheduledCOP = instance.get(
-      `/api/changeOfParts/scheduled/${plant}/${datetype}/${date}`
+      `/api/changeOfParts/scheduled/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
     );
 
     const getCompletedCOP = instance.get(
-      `/api/changeOfParts/completed/${plant}/${datetype}/${date}`
+      `/api/changeOfParts/completed/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
     );
 
     const getAllCOP = await Promise.all([getScheduledCOP, getCompletedCOP]);
@@ -214,16 +215,17 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
 
   const fetchFeedbacks = async () => {
     const { datetype, date } = pickerwithtype;
+    const PARAMS = ["id"];
 
     console.log(`/api/feedback/pending/${plant}/${datetype}/${date}`);
     const getPendingFeedback = instance.get(
-      `/api/feedback/pending/${plant}/${datetype}/${date}`
+      `/api/feedback/pending/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')})`
     );
     const getOustandingFeedback = instance.get(
-      `/api/feedback/outstanding/${plant}/${datetype}/${date}`
+      `/api/feedback/outstanding/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')})`
     );
     const getCompletedFeedback = instance.get(
-      `/api/feedback/completed/${plant}/${datetype}/${date}`
+      `/api/feedback/completed/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')})`
     );
 
     const getAllFeedback = await Promise.all([
