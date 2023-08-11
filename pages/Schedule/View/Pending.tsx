@@ -140,7 +140,7 @@ export default function Pending() {
     if (isReady) {
       setReady(false);
       setActiveTabIndex(index);
-      // setPage(1);
+      setPage(1);
     }
   };
 
@@ -290,8 +290,8 @@ export default function Pending() {
                                 }}
                                 style={{cursor: "pointer"}}
                               />
-                            ) : (
-                              // </Tooltip>
+                              // {/* </Tooltip> */}
+                              ) : (
                               // <Tooltip
                               //   overlayInnerStyle={{ fontSize: "0.7rem" }}
                               //   placement="bottom"
@@ -308,7 +308,7 @@ export default function Pending() {
                                 }}
                                 style={{cursor: "pointer"}}
                               />
-                              // </Tooltip>
+                              // {/* </Tooltip> */}
                             )}
                           </Cell>
                         </Row>
