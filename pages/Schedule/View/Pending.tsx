@@ -282,6 +282,7 @@ export default function Pending() {
                                   setSelectedTimeline(item.id);
                                   setSubmitModal(true);
                                 }}
+                                style={{cursor: "pointer"}}
                               />
                             ) : (
                               // </Tooltip>
@@ -299,6 +300,7 @@ export default function Pending() {
                                   setApproveModal(true);
                                   setSelectedTimeline(item.id);
                                 }}
+                                style={{cursor: "pointer"}}
                               />
                               // </Tooltip>
                             )}

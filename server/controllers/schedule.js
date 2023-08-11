@@ -442,8 +442,8 @@ const getScheduleDrafts = async (req, res) => {
       ST.timeline_id as id,
       ST.timeline_name as name,
       ST.description, 
-      ST.plant_id, 
-      PM.plant_name, 
+      ST.plant_id as plantId, 
+      PM.plant_name as "plantName", 
       ST.status, 
       ST.created_date
     FROM keppel.schedule_timelines ST 
@@ -478,8 +478,8 @@ const getPendingTimelines = async (req, res) => {
       ST.timeline_id as id, 
       ST.timeline_name as name, 
       ST.description, 
-      ST.plant_id, 
-      PM.plant_name, 
+      ST.plant_id as plantId, 
+      PM.plant_name as "plantName", 
       ST.status, 
       ST.created_date
     FROM 
