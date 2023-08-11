@@ -62,6 +62,7 @@ import { ScheduleInfo } from "../../../components/Schedule/ScheduleTemplate";
 import { getSchedules } from "../Timeline/[id]";
 import ApproveSchedulePreviewModal from "../../../components/Schedule/ApproveSchedulePreviewModal";
 import Tooltip from "rc-tooltip";
+import Pagination from "../../../components/Pagination";
 
 // 3 : Draft, 1 : approved
 const indexedColumn: (3 | 4)[] = [3, 4];
@@ -107,23 +108,35 @@ export default function Pending() {
 
   useEffect(() => {
     if (data?.role_id) {
-      getTimelinesByStatus(indexedColumn[activeTabIndex])
-        .then((result: any) => {
-          if (result) {
-            //   console.log(result);
-            setScheduleTimelines(result);
-          } else {
-            setScheduleTimelines([]);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          setScheduleTimelines([]);
-        });
+      if (activeTabIndex == 0) { // Drafts Created by User
 
+        instance.get(`/api/timeline_drafts?page=${page}`)
+          .then((res: any) => {
+              console.log(res)
+              setScheduleTimelines(res.data.rows);
+              setTotalPages(res.data.totalPages)
+          })
+          .catch((err) => {
+            console.log(err);
+            setScheduleTimelines([]);
+          });
+        
+        
+      } else { // Pending Timelines in User's allocated plants
+          instance.get(`/api/timeline_pending?page=${page}`)
+            .then(res => {
+              console.log(res);
+              setScheduleTimelines(res.data.rows);
+              setTotalPages(res.data.totalPages)
+            }) 
+            .catch(err => {
+              console.log(err);
+              setScheduleTimelines([])
+            })
+      }
       setReady(true);
     }
-  }, [activeTabIndex, data]);
+  }, [activeTabIndex, data, page]);
 
   const switchColumns = (index: number) => {
     if (isReady) {
@@ -177,8 +190,10 @@ export default function Pending() {
           </ul>
         }
 
-        {isReady && scheduleTimelines?.length === 0 && <div></div>}
-        {isReady ? (
+        {isReady && scheduleTimelines?.length === 0 && <div>
+          {activeTabIndex === 0 ? "No Schedule Drafts" : "No Pending Schedules"}
+        </div>}
+        {isReady && scheduleTimelines?.length > 0 && (
           <>
             <Table
               data={{ nodes: scheduleTimelines }}
@@ -295,8 +310,15 @@ export default function Pending() {
                 </>
               )}
             </Table>
+            <Pagination 
+              setPage={setPage}
+              setReady={setReady}
+              totalPages={totalPages}
+              page={page}  
+            />
           </>
-        ) : (
+        )}
+        {!isReady && (
           <div
             style={{
               position: "absolute",

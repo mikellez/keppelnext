@@ -1638,6 +1638,17 @@ router
   .patch(controllers.schedule.changeTimelineStatus);
 
 router.get(
+  "/timeline_drafts",
+  checkIfLoggedInAPI,
+  controllers.schedule.getScheduleDrafts
+)
+router.get(
+  "/timeline_pending",
+  checkIfLoggedInAPI,
+  controllers.schedule.getPendingTimelines
+)
+
+router.get(
   "/getAssignedUsers/:plant_id",
   checkIfLoggedInAPI,
   controllers.schedule.getOpsAndEngineers
@@ -1747,7 +1758,7 @@ router
 /**
  * @api {get} /event Get all Pending Schedule Checklists
  * @apiDescription Get all Pending Schedule Checklists
- * @apiName GetPendingChecklists
+ * @apiName GetPendingSchedule
  * @apiGroup Schedule
  *
  * @apiSuccess {Object[]} - Array of Pending Schedule Checklists
