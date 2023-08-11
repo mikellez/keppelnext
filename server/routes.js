@@ -1649,6 +1649,12 @@ router.get(
 )
 
 router.get(
+  "/timeline_completed",
+  checkIfLoggedInAPI,
+  controllers.schedule.getCompletedTimelines
+)
+
+router.get(
   "/getAssignedUsers/:plant_id",
   checkIfLoggedInAPI,
   controllers.schedule.getOpsAndEngineers

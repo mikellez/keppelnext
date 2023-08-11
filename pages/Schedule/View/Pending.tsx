@@ -108,32 +108,30 @@ export default function Pending() {
 
   useEffect(() => {
     if (data?.role_id) {
-      if (activeTabIndex == 0) { // Drafts Created by User
-
-        instance.get(`/api/timeline_drafts?page=${page}`)
-          .then((res: any) => {
-              console.log(res)
-              setScheduleTimelines(res.data.rows);
-              setTotalPages(res.data.totalPages)
-          })
-          .catch((err) => {
-            console.log(err);
-            setScheduleTimelines([]);
-          });
-        
-        
-      } else { // Pending Timelines in User's allocated plants
-          instance.get(`/api/timeline_pending?page=${page}`)
-            .then(res => {
-              console.log(res);
-              setScheduleTimelines(res.data.rows);
-              setTotalPages(res.data.totalPages)
-            }) 
-            .catch(err => {
-              console.log(err);
-              setScheduleTimelines([])
-            })
+      let url = "";
+      switch (activeTabIndex) {
+        case 0:
+          url = `/api/timeline_drafts?page=${page}`;
+          break;
+        case 1:
+          url = `/api/timeline_pending?page=${page}`;
+          break;
+        case 2:
+          url = `/api/timeline_completed?page=${page}`;
+          break;
       }
+        
+      instance.get(url)
+        .then((res: any) => {
+            console.log(res)
+            setScheduleTimelines(res.data.rows);
+            setTotalPages(res.data.totalPages)
+        })
+        .catch((err) => {
+          console.log(err);
+          setScheduleTimelines([]);
+        });
+     
       setReady(true);
     }
   }, [activeTabIndex, data, page]);
@@ -175,7 +173,8 @@ export default function Pending() {
             >
               <span style={{ all: "unset" }}>Drafts</span>
             </li>
-            {checkManager(data?.role_id) ? (
+            {checkManager(data?.role_id) && (
+              <>
               <li
                 onClick={() => {
                   activeTabIndex !== 1 && switchColumns(1);
@@ -184,8 +183,15 @@ export default function Pending() {
               >
                 <span style={{ all: "unset" }}>Pending</span>
               </li>
-            ) : (
-              <></>
+              <li
+              onClick={() => {
+                activeTabIndex !== 2 && switchColumns(2);
+              }}
+              className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
+            >
+              <span style={{ all: "unset" }}>Completed</span>
+            </li>
+            </>
             )}
           </ul>
         }
