@@ -571,7 +571,7 @@ const changeTimelineStatus = (req, res, next) => {
   const queryS =
     status === 1
       ? `
-      UPDATE keppel.schedule_checklist
+      /*UPDATE keppel.schedule_checklist
       SET start_date = NULL, end_date = NULL
       WHERE timeline_id = (SELECT timeline_id FROM keppel.schedule_timelines 
                            WHERE status = 1 AND plant_id = (SELECT plant_id FROM keppel.schedule_timelines
@@ -585,8 +585,9 @@ const changeTimelineStatus = (req, res, next) => {
                 WHERE status = 1 AND plant_id = (SELECT plant_id FROM keppel.schedule_timelines
                                 WHERE timeline_id = ${req.params.id}))
       AND start_date IS NOT NULL;
+      */
       
-      UPDATE keppel.schedule_checklist sc
+      /*UPDATE keppel.schedule_checklist sc
       SET status = 5
       WHERE timeline_id IN (
         SELECT timeline_id FROM keppel.schedule_timelines st WHERE st.plant_id = (
@@ -594,12 +595,12 @@ const changeTimelineStatus = (req, res, next) => {
             WHERE timeline_id = ${req.params.id}
         ) AND st.status = 1
       );
-
       
       UPDATE keppel.schedule_timelines 
       SET status = 5 
       WHERE status = 1 AND plant_id = (SELECT plant_id FROM keppel.schedule_timelines
                                 WHERE timeline_id = ${req.params.id});
+                                */
       
       
       UPDATE keppel.schedule_timelines 

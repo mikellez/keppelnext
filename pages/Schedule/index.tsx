@@ -70,7 +70,7 @@ export default function Schedule() {
 	const [scheduleList, setScheduleList] = useState<ScheduleInfo[]>([]);
 	const [changeOfParts, setChangeOfParts] = useState<CMMSChangeOfParts[]>([]);
 
-	const { data, error, isValidating, mutate } = useChangeOfParts(null, {plant_id: selectedPlant, type: null});
+	const { data, error, isValidating, mutate } = useChangeOfParts(null, 10, 1, {plant_id: selectedPlant, type: 'scheduled'});
 
 	useEffect(() => {
 		updateSchedules(selectedPlant);
