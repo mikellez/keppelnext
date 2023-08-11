@@ -2,14 +2,14 @@ const dbJSON = require("./db.config.json");
 const { Pool } = require("pg");
 
 const guestPaths = [
-  // "/api/request/types",
-  // "/api/fault/types",
-  // "/api/request/plant/",
-  // "/api/request/asset/",
-  // "/api/feedback/",
-  // "/api/user",
-  // "/api/plantLocation",
-  // "/api/workflow",
+  "/api/request/types",
+  "/api/fault/types",
+  "/api/request/plant/",
+  "/api/request/asset/",
+  "/api/feedback/",
+  "/api/user",
+  "/api/plantLocation",
+  "/api/workflow",
 ];
 
 const checkIfGuestPath = (path) => {
@@ -25,6 +25,7 @@ const fetchDBNames = async (req, res, next) => {
 };
 
 const dbConnection = (req, res, next) => {
+  console.log(global.db)
   if (!global.db && (req.path == "/api/login" || checkIfGuestPath(req.path))) {
     console.log("path: " + req.path);
     const { database } = req.body;
