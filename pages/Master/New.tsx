@@ -64,7 +64,7 @@ export default function New(props: NewMasterEntryProps) {
   const { isSubmitting, errors } = formState;
 
   const formSubmit: SubmitHandler<FormValues> = async (data) => {
-    // console.log(data);
+    console.log(data);
     const values = Object.values(data["entries"]);
     if (values.includes("")) {
       setIsMissingDetailsModaOpen2(true);
@@ -72,12 +72,12 @@ export default function New(props: NewMasterEntryProps) {
       return await instance
         .post("/api/master/new/add", data)
         .then((res) => {
-          // console.log(res.data)
+          console.log(res.data)
           setSubmissionModal(true);
           return res.data;
         })
         .catch((err) => {
-          // console.log(err);
+          console.log(err);
           // console.log(err.response.data.table);
           if (err.response.data.table === "system_assets") {
             setIsNotValid(true);

@@ -3,6 +3,9 @@ const moment = require("moment");
 const dateHandler = require("../dateHandler");
 const { getFieldsDiff } = require("../global");
 const { activity } = require(".");
+const { listenerCount } = require("process");
+
+const ITEMS_PER_PAGE = 10;
 
 // Function to get a schdeule dates
 const makeScheduleDict = (arr) => {
@@ -429,6 +432,82 @@ const getTimelineByStatus = (req, res, next) => {
     // res.status(404).json({ message: "No timeline found" });
   });
 };
+
+const getScheduleDrafts = async (req, res) => {
+  const page = req.query.page || 1;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+
+  let query = `
+    SELECT 
+      ST.timeline_id as id,
+      ST.timeline_name as name,
+      ST.description, 
+      ST.plant_id as plantId, 
+      PM.plant_name as "plantName", 
+      ST.status, 
+      ST.created_date
+    FROM keppel.schedule_timelines ST 
+    JOIN keppel.plant_master PM ON ST.plant_id = PM.plant_id
+    WHERE 
+      status = 3
+      AND created_by = $1
+  `
+
+  const pageQuery = `SELECT COUNT(*) AS row_count FROM (` +
+    query +
+  `) subquery`;
+  try {
+    const tmp = await global.db.query(pageQuery, [req.user.id]);
+    const totalRows = tmp.rows[0].row_count;
+    const totalPages = Math.ceil(+totalRows / ITEMS_PER_PAGE);
+    query += `LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`
+    const result = await global.db.query(query, [req.user.id]);
+    res.status(200).send({rows: result.rows, totalPages: totalPages});
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+}
+
+const getPendingTimelines = async (req, res) => {
+  const page = req.query.page || 1;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  let query = `
+    SELECT 
+      ST.timeline_id as id, 
+      ST.timeline_name as name, 
+      ST.description, 
+      ST.plant_id as plantId, 
+      PM.plant_name as "plantName", 
+      ST.status, 
+      ST.created_date
+    FROM 
+      keppel.users u
+      JOIN keppel.user_access ua ON u.user_id = ua.user_id
+      JOIN keppel.schedule_timelines ST ON ua.allocatedplantids LIKE concat(concat('%',ST.plant_id::text), '%')
+      JOIN keppel.plant_master PM ON ST.plant_id = PM.plant_id
+    WHERE 
+      status = 4 
+      AND ua.user_id = $1
+  `
+  const pageQuery = `SELECT COUNT(*) AS row_count FROM (` +
+    query +
+  `) subquery`;
+  try {
+    const tmp = await global.db.query(pageQuery, [req.user.id]);
+    const totalRows = tmp.rows[0].row_count;
+    const totalPages = Math.ceil(+totalRows / ITEMS_PER_PAGE);
+    query += `LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`
+    const result = await global.db.query(query, [req.user.id]);
+    res.status(200).send({rows: result.rows, totalPages: totalPages});
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+
+}
 
 // Edit timeline details
 const editTimeline = (req, res, next) => {
@@ -1077,6 +1156,8 @@ module.exports = {
   manageSingleEvent,
   createSingleEvent,
   getPendingSingleEvents,
+  getPendingTimelines,
+  getScheduleDrafts,
   getScheduleById,
   updateSchedule,
   getPlantById,

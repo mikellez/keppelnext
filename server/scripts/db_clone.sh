@@ -16,7 +16,7 @@ touch $backup_file
 echo $backup_file " successfully created"
 echo "dumping database into "$backup_file
 
-pg_dump -U $username -h $host $database -s > "$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"/$backup_file
+pg_dump -U $username -h $host -s $database > "$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"/$backup_file
 createdb -U $username -h $host $new_database
 psql -U $username -h $host $new_database < $backup_file
 

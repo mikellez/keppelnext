@@ -38,7 +38,7 @@ const fetchMasterTypeEntry = async (req, res, next) => {
 };
 
 const createMasterTypeEntry = async (req, res, next) => {
-  // console.log(req.body);
+  console.log("hello: ", req.body);
   let table = tableInfo[req.body.type].internalName;
   // console.log(tableInfo)
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
@@ -77,7 +77,7 @@ const createMasterTypeEntry = async (req, res, next) => {
   num += `, NOW(), '${activity_log_json}'`;
   num += ")";
   sql = `INSERT INTO keppel.${table} ${columns} VALUES ${num} `;
-  // console.log(sql);
+  console.log(sql);
   // console.log(insert);
   global.db
     .query(sql, insert)
@@ -89,6 +89,7 @@ const createMasterTypeEntry = async (req, res, next) => {
     .catch((err) => {
       // console.log(err.table)
       // return err.table
+      console.log(err);
       return res.status(500).send({
         msg: err,
         table: err.table,

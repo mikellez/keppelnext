@@ -91,15 +91,30 @@ export default function ApproveSchedulePreviewModal(
           header="Schedule Preview"
           schedules={props.scheduleInfo}
         >
-          <div
-            style={{
+
+        </ScheduleTemplate>
+        <div className="d-flex align-items-center justify-content-around px-3">
+          <div style={{flex: "4"}}>
+            <label>
+              <p>Remarks</p>
+            </label>
+              <textarea
+                className="form-control"
+                rows={5}
+                maxLength={50}
+                style={{ resize: "none", width: "80%", boxShadow: "0px 0px 50px 0px rgba(0, 0, 0, 0.1)"}}
+                onChange={(e) => setRemarks(e.target.value)}
+              ></textarea>
+          </div>
+          <div style={{
               display: "flex",
-              flexDirection: "row",
-            }}
-          >
-            <TooltipBtn toolTip={false} onClick={() => handleClick(1)}>
-              {" "}
-              Approve{" "}
+              flex: "1"
+            }}>
+            <TooltipBtn 
+              toolTip={false} 
+              style={{backgroundColor: "green", borderColor: "green"}}
+              onClick={() => handleClick(1)}>
+              Approve
             </TooltipBtn>
             <TooltipBtn
               toolTip={false}
@@ -110,18 +125,6 @@ export default function ApproveSchedulePreviewModal(
               Reject{" "}
             </TooltipBtn>{" "}
           </div>
-        </ScheduleTemplate>
-        <div style={{ float: "right" }}>
-          <label>
-            <p>Remarks</p>
-            <textarea
-              className="form-control"
-              rows={2}
-              maxLength={150}
-              style={{ resize: "none" }}
-              onChange={(e) => setRemarks(e.target.value)}
-            ></textarea>
-          </label>
         </div>
       </ModuleModal>
 
