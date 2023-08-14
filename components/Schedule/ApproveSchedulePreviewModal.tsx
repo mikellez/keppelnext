@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ModuleModal } from "../ModuleLayout/ModuleModal";
 import TooltipBtn from "../TooltipBtn";
 import ScheduleTemplate, { ScheduleInfo } from "./ScheduleTemplate";
@@ -29,6 +29,7 @@ import {
  *
  */
 interface ApproveSchedulePreviewModalProps {
+  tabIndex: number;
   modalOpenRef: boolean;
   setModalRef: React.Dispatch<React.SetStateAction<boolean>>;
   title: string;
@@ -45,6 +46,14 @@ export default function ApproveSchedulePreviewModal(
   const [outcomeModal, setOutcomeModal] = useState<boolean>(false);
   const [status, setStatus] = useState<number>(0);
   const [remarks, setRemarks] = useState<string>("");
+  const [approveVisible, setApproveVisible] = useState<boolean>(
+    props.tabIndex != 2
+  );
+  // const [isReady, setIsReady] = useState<boolean>(true);
+
+  useEffect(() => {
+    setApproveVisible(props.tabIndex != 2);
+  }, [props.tabIndex]);
 
   function handleClick(newStatus: number) {
     if (remarks === "" && newStatus != 1) {
@@ -91,39 +100,49 @@ export default function ApproveSchedulePreviewModal(
           header="Schedule Preview"
           schedules={props.scheduleInfo}
         >
-
+          <div style={{ flex: "2", display: "flex", alignItems: "end" }}>
+            <div
+              style={{
+                display: "flex",
+                flex: "1",
+              }}
+            >
+              {approveVisible && (
+                <TooltipBtn
+                  toolTip={false}
+                  style={{ backgroundColor: "green", borderColor: "green" }}
+                  onClick={() => handleClick(1)}
+                >
+                  Approve
+                </TooltipBtn>
+              )}
+              <TooltipBtn
+                toolTip={false}
+                onClick={() => handleClick(3)}
+                style={{ marginLeft: "10px" }}
+              >
+                {" "}
+                Reject{" "}
+              </TooltipBtn>{" "}
+            </div>
+          </div>
         </ScheduleTemplate>
         <div className="d-flex align-items-center justify-content-around px-3">
-          <div style={{flex: "4"}}>
+          <div style={{ flex: "2" }}>
             <label>
               <p>Remarks</p>
             </label>
-              <textarea
-                className="form-control"
-                rows={5}
-                maxLength={50}
-                style={{ resize: "none", width: "80%", boxShadow: "0px 0px 50px 0px rgba(0, 0, 0, 0.1)"}}
-                onChange={(e) => setRemarks(e.target.value)}
-              ></textarea>
-          </div>
-          <div style={{
-              display: "flex",
-              flex: "1"
-            }}>
-            <TooltipBtn 
-              toolTip={false} 
-              style={{backgroundColor: "green", borderColor: "green"}}
-              onClick={() => handleClick(1)}>
-              Approve
-            </TooltipBtn>
-            <TooltipBtn
-              toolTip={false}
-              onClick={() => handleClick(3)}
-              style={{ marginLeft: "10px" }}
-            >
-              {" "}
-              Reject{" "}
-            </TooltipBtn>{" "}
+            <textarea
+              className="form-control"
+              rows={5}
+              maxLength={50}
+              style={{
+                resize: "none",
+                width: "80%",
+                boxShadow: "0px 0px 50px 0px rgba(0, 0, 0, 0.1)",
+              }}
+              onChange={(e) => setRemarks(e.target.value)}
+            />
           </div>
         </div>
       </ModuleModal>

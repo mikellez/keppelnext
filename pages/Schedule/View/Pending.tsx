@@ -91,7 +91,7 @@ export default function Pending() {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns: 5em 20em 10em 25em 13em 8em;",
+        "--data-table-library_grid-template-columns: 5em 15em 10em 10em 25em 10em 5em;",
     },
   ]);
 
@@ -120,18 +120,19 @@ export default function Pending() {
           url = `/api/timeline_completed?page=${page}`;
           break;
       }
-        
-      instance.get(url)
+
+      instance
+        .get(url)
         .then((res: any) => {
-            console.log(res)
-            setScheduleTimelines(res.data.rows);
-            setTotalPages(res.data.totalPages)
+          console.log(res);
+          setScheduleTimelines(res.data.rows);
+          setTotalPages(res.data.totalPages);
         })
         .catch((err) => {
           console.log(err);
           setScheduleTimelines([]);
         });
-     
+
       setReady(true);
     }
   }, [activeTabIndex, data, page]);
@@ -175,30 +176,38 @@ export default function Pending() {
             </li>
             {checkManager(data?.role_id) && (
               <>
-              <li
-                onClick={() => {
-                  activeTabIndex !== 1 && switchColumns(1);
-                }}
-                className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
-              >
-                <span style={{ all: "unset" }}>Pending</span>
-              </li>
-              <li
-              onClick={() => {
-                activeTabIndex !== 2 && switchColumns(2);
-              }}
-              className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
-            >
-              <span style={{ all: "unset" }}>Completed</span>
-            </li>
-            </>
+                <li
+                  onClick={() => {
+                    activeTabIndex !== 1 && switchColumns(1);
+                  }}
+                  className={
+                    "nav-link" + (activeTabIndex === 1 ? " active" : "")
+                  }
+                >
+                  <span style={{ all: "unset" }}>Pending</span>
+                </li>
+                <li
+                  onClick={() => {
+                    activeTabIndex !== 2 && switchColumns(2);
+                  }}
+                  className={
+                    "nav-link" + (activeTabIndex === 2 ? " active" : "")
+                  }
+                >
+                  <span style={{ all: "unset" }}>Completed</span>
+                </li>
+              </>
             )}
           </ul>
         }
 
-        {isReady && scheduleTimelines?.length === 0 && <div>
-          {activeTabIndex === 0 ? "No Schedule Drafts" : "No Pending Schedules"}
-        </div>}
+        {isReady && scheduleTimelines?.length === 0 && (
+          <div>
+            {activeTabIndex === 0
+              ? "No Schedule Drafts"
+              : "No Pending Schedules"}
+          </div>
+        )}
         {isReady && scheduleTimelines?.length > 0 && (
           <>
             <Table
@@ -212,6 +221,7 @@ export default function Pending() {
                     <HeaderRow>
                       <HeaderCell resize>ID</HeaderCell>
                       <HeaderCell resize>Schedule Name</HeaderCell>
+                      <HeaderCell resize>Schedule Date</HeaderCell>
                       <HeaderCell resize>Plant Name</HeaderCell>
                       <HeaderCell resize>Description</HeaderCell>
                       <HeaderCell resize>Date Created</HeaderCell>
@@ -228,6 +238,7 @@ export default function Pending() {
                         <Row key={item.id} item={key}>
                           <Cell>{item.id}</Cell>
                           <Cell>{item.name}</Cell>
+                          <Cell>{}</Cell>
                           <Cell>
                             {/* <Tooltip
                               overlayInnerStyle={{ fontSize: "0.7rem" }}
@@ -272,6 +283,7 @@ export default function Pending() {
                             </div>
                             {/* </Tooltip> */}
                           </Cell>
+
                           <Cell>
                             {activeTabIndex == 0 ? (
                               // <Tooltip
@@ -288,10 +300,10 @@ export default function Pending() {
                                   setSelectedTimeline(item.id);
                                   setSubmitModal(true);
                                 }}
-                                style={{cursor: "pointer"}}
+                                style={{ cursor: "pointer" }}
                               />
+                            ) : (
                               // {/* </Tooltip> */}
-                              ) : (
                               // <Tooltip
                               //   overlayInnerStyle={{ fontSize: "0.7rem" }}
                               //   placement="bottom"
@@ -306,7 +318,7 @@ export default function Pending() {
                                   setApproveModal(true);
                                   setSelectedTimeline(item.id);
                                 }}
-                                style={{cursor: "pointer"}}
+                                style={{ cursor: "pointer" }}
                               />
                               // {/* </Tooltip> */}
                             )}
@@ -318,11 +330,11 @@ export default function Pending() {
                 </>
               )}
             </Table>
-            <Pagination 
+            <Pagination
               setPage={setPage}
               setReady={setReady}
               totalPages={totalPages}
-              page={page}  
+              page={page}
             />
           </>
         )}
@@ -360,6 +372,7 @@ export default function Pending() {
           closeOnBlur={true}
         />
         <ApproveSchedulePreviewModal
+          tabIndex={activeTabIndex}
           modalOpenRef={approveModal}
           setModalRef={setApproveModal}
           title="Approve"
