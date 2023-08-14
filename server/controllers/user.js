@@ -3,21 +3,32 @@ const bcrypt = require("bcryptjs");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
 
-const getUsers = (req, res, next) => {
-  global.db.query(
-    `SELECT 
-        employee_id,
-        CONCAT(first_name, ' ', last_name) AS full_name,
-        user_id,
-        role_name
-    FROM 
-        keppel.user_access
-    `,
+const ITEMS_PER_PAGE = 10;
+
+const getUsers = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const offsetItems = (page - 1) * ITEMS_PER_PAGE;
+  let totalPages;
+  let q = `SELECT 
+    employee_id,
+    CONCAT(first_name, ' ', last_name) AS full_name,
+    user_id,
+    role_name
+  FROM 
+    keppel.user_access
+  `;
+  // Query to get total number of users
+  const Result = await global.db.query(q);
+  // Calculate total pages required based on number of user records
+  totalPages = Math.ceil(Result.rowCount / ITEMS_PER_PAGE);
+  q += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+  // Query again to get required amount for the particular page
+  global.db.query(q,
     [],
     (err, result) => {
       if (err) throw err;
       if (result) {
-        res.status(200).send(result.rows);
+        res.status(200).json({rows: result.rows, total: totalPages});
       }
     }
   );
