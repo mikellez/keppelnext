@@ -451,6 +451,7 @@ const getScheduleDrafts = async (req, res) => {
     WHERE 
       status = 3
       AND created_by = $1
+    ORDER BY ST.created_date DESC
   `
 
   const pageQuery = `SELECT COUNT(*) AS row_count FROM (` +
@@ -481,7 +482,8 @@ const getPendingTimelines = async (req, res) => {
       ST.plant_id as "plantId", 
       PM.plant_name as "plantName", 
       ST.status, 
-      ST.created_date
+      ST.created_date,
+      ST.activity_log
     FROM 
       keppel.users u
       JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -490,6 +492,7 @@ const getPendingTimelines = async (req, res) => {
     WHERE 
       status = 4 
       AND ua.user_id = $1
+      ORDER BY COALESCE(TO_TIMESTAMP((ST.activity_log->>-1)::jsonb->>'date', 'YYYY-MM-DD HH24:MI:SS'), '1970-01-01'::timestamp) DESC
   `
   const pageQuery = `SELECT COUNT(*) AS row_count FROM (` +
     query +
