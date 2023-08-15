@@ -152,6 +152,30 @@ const main = async () => {
   }
 };
 
-module.exports = cron.schedule("0 0 7 * * *", () => {
-  main();
-});
+const runMainManually = async () => {
+  try {
+    console.log("Manually triggering main...");
+    await main();
+    console.log("Manual execution of main completed.");
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const start = async () => {
+  module.exports = cron.schedule("0 0 7 * * *", () => {
+    main();
+  });
+}
+
+module.exports = { start };
+
+// Check if the script is being run directly
+if (require.main === module) {
+  if (process.argv[2] === "manual") {
+    runMainManually(); // Run the main function manually
+  } else {
+    // Schedule the cron job
+    start();
+  }
+}
