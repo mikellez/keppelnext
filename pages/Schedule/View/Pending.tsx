@@ -91,7 +91,7 @@ export default function Pending() {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns: 5em 15em 10em 10em 25em 10em 5em;",
+        "--data-table-library_grid-template-columns: 5em 15em 10em 10em 20em 15em 5em;",
     },
   ]);
 

@@ -530,6 +530,8 @@ const getCompletedTimelines = async (req, res) => {
     WHERE 
       status = 5
       AND ua.user_id = $1
+    ORDER BY ST.activity_log -> (jsonb_array_length(ST.activity_log) -1) ->> 'date' DESC
+
   `
   const pageQuery = `SELECT COUNT(*) AS row_count FROM (` +
     query +
