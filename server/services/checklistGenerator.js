@@ -1,15 +1,11 @@
 const cron = require("node-cron");
 const { Client } = require("pg");
 const moment = require("moment");
+const dbJSON = require("../db/db.config.json");
 
 const connectDB = () => {
-  const client = new Client({
-    host: "192.168.20.96",
-    port: 5432,
-    database: "cmms_dev",
-    user: "postgres",
-    password: "123Az!!!",
-  });
+  const dbName = dbJSON["cmms_dev"];
+  const client = new Client(dbName);
   client.connect();
   return client;
 };
@@ -156,6 +152,30 @@ const main = async () => {
   }
 };
 
-module.exports = cron.schedule("0 0 7 * * *", () => {
-  main();
-});
+const runMainManually = async () => {
+  try {
+    console.log("Manually triggering main...");
+    await main();
+    console.log("Manual execution of main completed.");
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const start = async () => {
+  module.exports = cron.schedule("0 0 7 * * *", () => {
+    main();
+  });
+}
+
+module.exports = { start };
+
+// Check if the script is being run directly
+if (require.main === module) {
+  if (process.argv[2] === "manual") {
+    runMainManually(); // Run the main function manually
+  } else {
+    // Schedule the cron job
+    start();
+  }
+}
