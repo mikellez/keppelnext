@@ -42,7 +42,7 @@ export default function ApproveSchedulePreviewModal(
   props: ApproveSchedulePreviewModalProps
 ) {
   const [confirmModal, setConfirmModal] = useState<boolean>(false);
-  const [remarksModal, setRemarksModal] = useState<boolean>(false);
+  // const [remarksModal, setRemarksModal] = useState<boolean>(false);
   const [outcomeModal, setOutcomeModal] = useState<boolean>(false);
   const [status, setStatus] = useState<number>(0);
   const [remarks, setRemarks] = useState<string>("");
@@ -58,7 +58,7 @@ export default function ApproveSchedulePreviewModal(
   function handleClick(newStatus: number) {
     if (remarks === "" && newStatus != 1) {
       //Prompt for remarks
-      setRemarksModal(true);
+      // setRemarksModal(true);
     } else {
       // Prompt for confirm
       setConfirmModal(true);
@@ -68,7 +68,7 @@ export default function ApproveSchedulePreviewModal(
   function handleManage(newStatus: number) {
     if (remarks === "" && newStatus != 1) {
       //Prompt for remarks
-      setRemarksModal(true);
+      // setRemarksModal(true);
     } else {
       changeTimelineStatus(newStatus, props.timelineId as number)
         .then((result) => {
@@ -86,7 +86,7 @@ export default function ApproveSchedulePreviewModal(
   }
 
   const ContentHeader = () => {
-    return (
+    return props.tabIndex == 1 ? (
           <div className="d-flex align-items-center justify-content-around py-3">
             <div style={{ flex: "4" }}>
               <label>
@@ -103,7 +103,7 @@ export default function ApproveSchedulePreviewModal(
                 onChange={(e) => setRemarks(e.target.value)}
               />
             </div>
-          {approveVisible && (
+
             <TooltipBtn
               toolTip={false}
               style={{ backgroundColor: "green", borderColor: "green" }}
@@ -111,7 +111,6 @@ export default function ApproveSchedulePreviewModal(
             >
               Approve
             </TooltipBtn>
-          )}
           <TooltipBtn
             toolTip={false}
             onClick={() => handleClick(3)}
@@ -121,7 +120,12 @@ export default function ApproveSchedulePreviewModal(
             Reject{" "}
           </TooltipBtn>{" "}
         </div>
-    );
+    ) : (
+      <div>
+        
+      </div>
+    )
+    ;
   }
 
   return (
