@@ -161,7 +161,11 @@ export default function Pending() {
     <ModuleMain>
       <ModuleHeader
         title="Pending Schedule Task"
-        header={activeTabIndex === 0 ? "Schedule Drafts" : "Pending Schedules"}
+        header={activeTabIndex === 0 
+            ? "Schedule Drafts" 
+            : activeTabIndex === 1
+              ? "Pending Schedules"
+              : "Completed Schedules"}
       />
       <ModuleContent>
         {
@@ -285,7 +289,7 @@ export default function Pending() {
                           </Cell>
 
                           <Cell>
-                            {activeTabIndex == 0 ? (
+                            {activeTabIndex == 0 ? 
                               // <Tooltip
                               //   overlayInnerStyle={{ fontSize: "0.7rem" }}
                               //   placement="bottom"
@@ -295,14 +299,14 @@ export default function Pending() {
                               <AiOutlineEdit
                                 color="#C70F2B"
                                 size={22}
-                                title={"Edit"}
+                                title="Edit"
                                 onClick={() => {
                                   setSelectedTimeline(item.id);
                                   setSubmitModal(true);
                                 }}
                                 style={{ cursor: "pointer" }}
                               />
-                            ) : (
+                             : activeTabIndex == 1 ?
                               // {/* </Tooltip> */}
                               // <Tooltip
                               //   overlayInnerStyle={{ fontSize: "0.7rem" }}
@@ -313,7 +317,7 @@ export default function Pending() {
                               <BiCommentCheck
                                 color="#C70F2B"
                                 size={22}
-                                title={"Approve"}
+                                title="Approve"
                                 onClick={() => {
                                   setApproveModal(true);
                                   setSelectedTimeline(item.id);
@@ -321,7 +325,16 @@ export default function Pending() {
                                 style={{ cursor: "pointer" }}
                               />
                               // {/* </Tooltip> */}
-                            )}
+                            : <AiOutlineFolderView
+                            color="#C70F2B"
+                            size={22}
+                            title="View"
+                            onClick={() => {
+                              setApproveModal(true);
+                              setSelectedTimeline(item.id);
+                            }}
+                            style={{ cursor: "pointer" }}
+                          />}
                           </Cell>
                         </Row>
                       );
