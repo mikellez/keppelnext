@@ -44,3 +44,4 @@ next-env.d.ts
 
 #config
 server/db/db.knexConfig.json
+server/db/db.config.json
