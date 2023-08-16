@@ -23,6 +23,9 @@ import { useRouter } from "next/router";
 import { useAdminContext } from "../../components/Context/AdminContext";
 import { selectImpersonationState, setImpersonationState } from "../../redux/impersonationSlice";
 import { useDispatch, useSelector } from "react-redux";
+import Pagination from "../../components/Pagination";
+import LoadingHourglass from "../../components/LoadingHourglass";
+
 
 const downloadCSV = async () => {
   try {
@@ -43,8 +46,8 @@ const downloadCSV = async () => {
   }
 };
 
-const getUsers = async () => {
-  const url = "/api/user/getUsers";
+const getUsers = async (page:number) => {
+  const url = `/api/user/getUsers?page=${page}`;
   return await instance
     .get(url)
     .then((res) => {
@@ -74,12 +77,22 @@ const checkAdmin = async () => {
 export default function User() {
 
   const { isAdmin, setIsAdminHandler } = useAdminContext();
+  // Tracks the current page
+  const [page, setPage] = useState(1);
+  // Get the total number of pages
+  const [totalPages, setTotalPages] = useState(1);
+  const [isReady, setReady] = useState(false);
 
+ // Gets list of users during initial render or whenever page is changed 
   useEffect(() => {
-    getUsers().then((res) => {
-      setData(res);
+    setReady(false);
+    getUsers(page).then((res) => {
+      setTotalPages(res.total);
+      // Getting the user data
+      setData(res.rows);
+      setReady(true);
     });
-  }, []);
+  }, [page]);
 
   // If current logged in user is admin, show the impersonate button. Else hide it
   useEffect(() => {
@@ -174,116 +187,127 @@ export default function User() {
           </TooltipBtn>
         </Link>
       </ModuleHeader>
-      <Table data={{ nodes: data }} theme={theme}>
-        {(tableList: CMMSEmployee[]) => (
-          <>
-            <Header>
-              <HeaderRow>
-                <HeaderCell>Employee ID</HeaderCell>
-                <HeaderCell>Name</HeaderCell>
-                <HeaderCell>Role</HeaderCell>
-                <HeaderCell>Actions</HeaderCell>
-              </HeaderRow>
-            </Header>
+      {isReady && (
+        <>
+        <Table data={{ nodes: data }} theme={theme}>
+          {(tableList: CMMSEmployee[]) => (
+            <>
+              <Header>
+                <HeaderRow>
+                  <HeaderCell>Employee ID</HeaderCell>
+                  <HeaderCell>Name</HeaderCell>
+                  <HeaderCell>Role</HeaderCell>
+                  <HeaderCell>Actions</HeaderCell>
+                </HeaderRow>
+              </Header>
 
-            <Body>
-              {tableList.map((item) => (
-                <Row key={item.id} item={item} name={item.user_id}>
-                  <Cell>{item.employee_id}</Cell>
-                  <Cell>{item.full_name}</Cell>
-                  <Cell>{item.role_name}</Cell>
-                  <Cell
-                    style={{
-                      display: "flex",
-                      flexFlow: "row wrap",
-                      justifyContent: "space-around",
-                      // marginRight: "10%",
-                      // marginLeft: "10%",
-                    }}
-                  >
-                    <button
-                      onClick={onDeleteClick}
-                      name={"" + item.user_id}
+              <Body>
+                {tableList.map((item) => (
+                  <Row key={item.id} item={item} name={item.user_id}>
+                    <Cell>{item.employee_id}</Cell>
+                    <Cell>{item.full_name}</Cell>
+                    <Cell>{item.role_name}</Cell>
+                    <Cell
                       style={{
-                        all: "unset",
-                        cursor: "pointer",
-                        marginRight: "10px",
+                        display: "flex",
+                        flexFlow: "row wrap",
+                        justifyContent: "space-around",
+                        // marginRight: "10%",
+                        // marginLeft: "10%",
                       }}
                     >
-                      <BsTrashFill />
-                    </button>
-                    <Link
-                      href={`/User/Edit/${item.user_id}`}
-                      style={{ all: "unset", cursor: "pointer" }}
-                    >
-                      <BsPencilSquare />
-                    </Link>
-                    {isAdmin && (
                       <button
-                        onClick={onImpersonateClick}
+                        onClick={onDeleteClick}
                         name={"" + item.user_id}
                         style={{
                           all: "unset",
                           cursor: "pointer",
-                          marginLeft: "10px",
+                          marginRight: "10px",
                         }}
                       >
-                        <BsPersonBadge />
-                      </button>)}
-                  </Cell>
-                </Row>
-              ))}
-            </Body>
-          </>
-        )}
-      </Table>
-      <ModuleSimplePopup
-        modalOpenState={isModalOpen}
-        setModalOpenState={setModalOpen}
-        title="Confirm Deletion"
-        text={"Are you sure you want to delete this User?" + deleteModalID}
-        icon={2}
-        shouldCloseOnOverlayClick={true}
-        buttons={[
-          <button
-            key="deleteConfirm"
-            onClick={deleteMaster}
-            className="btn btn-primary"
-          >
-            Delete
-          </button>,
-          <button
-            key="deleteCancel"
-            onClick={() => setModalOpen(false)}
-            className="btn btn-secondary"
-          >
-            Cancel
-          </button>,
-        ]}
-      />
-      <ModuleSimplePopup
-        modalOpenState={isDeleteSuccess}
-        setModalOpenState={setDeleteSuccess}
-        title="Success"
-        text={
-          // "ID " + deleteModalID +
-          "User has been deleted"
-        }
-        icon={1}
-        shouldCloseOnOverlayClick={true}
-        buttons={
-          <button
-            onClick={() => {
-              setDeleteSuccess(false);
-              setModalOpen(false);
-              router.reload();
-            }}
-            className="btn btn-primary"
-          >
-            Ok
-          </button>
-        }
-      />
+                        <BsTrashFill />
+                      </button>
+                      <Link
+                        href={`/User/Edit/${item.user_id}`}
+                        style={{ all: "unset", cursor: "pointer" }}
+                      >
+                        <BsPencilSquare />
+                      </Link>
+                      {isAdmin && (
+                        <button
+                          onClick={onImpersonateClick}
+                          name={"" + item.user_id}
+                          style={{
+                            all: "unset",
+                            cursor: "pointer",
+                            marginLeft: "10px",
+                          }}
+                        >
+                          <BsPersonBadge />
+                        </button>)}
+                    </Cell>
+                  </Row>
+                ))}
+              </Body>
+            </>
+          )}
+        </Table>
+        <Pagination
+            page={page}
+            setPage={setPage}
+            totalPages={totalPages}
+            setReady={setReady}
+          />
+        <ModuleSimplePopup
+          modalOpenState={isModalOpen}
+          setModalOpenState={setModalOpen}
+          title="Confirm Deletion"
+          text={"Are you sure you want to delete this User?" + deleteModalID}
+          icon={2}
+          shouldCloseOnOverlayClick={true}
+          buttons={[
+            <button
+              key="deleteConfirm"
+              onClick={deleteMaster}
+              className="btn btn-primary"
+            >
+              Delete
+            </button>,
+            <button
+              key="deleteCancel"
+              onClick={() => setModalOpen(false)}
+              className="btn btn-secondary"
+            >
+              Cancel
+            </button>,
+          ]}
+        />
+        <ModuleSimplePopup
+          modalOpenState={isDeleteSuccess}
+          setModalOpenState={setDeleteSuccess}
+          title="Success"
+          text={
+            // "ID " + deleteModalID +
+            "User has been deleted"
+          }
+          icon={1}
+          shouldCloseOnOverlayClick={true}
+          buttons={
+            <button
+              onClick={() => {
+                setDeleteSuccess(false);
+                setModalOpen(false);
+                router.reload();
+              }}
+              className="btn btn-primary"
+            >
+              Ok
+            </button>
+          }
+        />
+      </>
+      )}
+      {!isReady && <LoadingHourglass />}
     </ModuleMain>
   );
 }

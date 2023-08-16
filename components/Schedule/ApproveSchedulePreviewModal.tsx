@@ -42,7 +42,7 @@ export default function ApproveSchedulePreviewModal(
   props: ApproveSchedulePreviewModalProps
 ) {
   const [confirmModal, setConfirmModal] = useState<boolean>(false);
-  const [remarksModal, setRemarksModal] = useState<boolean>(false);
+  // const [remarksModal, setRemarksModal] = useState<boolean>(false);
   const [outcomeModal, setOutcomeModal] = useState<boolean>(false);
   const [status, setStatus] = useState<number>(0);
   const [remarks, setRemarks] = useState<string>("");
@@ -58,7 +58,7 @@ export default function ApproveSchedulePreviewModal(
   function handleClick(newStatus: number) {
     if (remarks === "" && newStatus != 1) {
       //Prompt for remarks
-      setRemarksModal(true);
+      // setRemarksModal(true);
     } else {
       // Prompt for confirm
       setConfirmModal(true);
@@ -68,7 +68,7 @@ export default function ApproveSchedulePreviewModal(
   function handleManage(newStatus: number) {
     if (remarks === "" && newStatus != 1) {
       //Prompt for remarks
-      setRemarksModal(true);
+      // setRemarksModal(true);
     } else {
       changeTimelineStatus(newStatus, props.timelineId as number)
         .then((result) => {
@@ -85,6 +85,49 @@ export default function ApproveSchedulePreviewModal(
     }
   }
 
+  const ContentHeader = () => {
+    return props.tabIndex == 1 ? (
+          <div className="d-flex align-items-center justify-content-around py-3">
+            <div style={{ flex: "4" }}>
+              <label>
+                <p>Remarks</p>
+              </label>
+              <textarea
+                className="form-control"
+                rows={5}
+                maxLength={50}
+                style={{
+                  resize: "none",
+                  width: "80%"
+                }}
+                onChange={(e) => setRemarks(e.target.value)}
+              />
+            </div>
+
+            <TooltipBtn
+              toolTip={false}
+              style={{ backgroundColor: "green", borderColor: "green" }}
+              onClick={() => handleClick(1)}
+            >
+              Approve
+            </TooltipBtn>
+          <TooltipBtn
+            toolTip={false}
+            onClick={() => handleClick(3)}
+            style={{ marginLeft: "10px" }}
+          >
+            {" "}
+            Reject{" "}
+          </TooltipBtn>{" "}
+        </div>
+    ) : (
+      <div>
+        
+      </div>
+    )
+    ;
+  }
+
   return (
     <>
       <ModuleModal
@@ -99,52 +142,8 @@ export default function ApproveSchedulePreviewModal(
           title="Schedule Preview"
           header="Schedule Preview"
           schedules={props.scheduleInfo}
-        >
-          <div style={{ flex: "2", display: "flex", alignItems: "end" }}>
-            <div
-              style={{
-                display: "flex",
-                flex: "1",
-              }}
-            >
-              {approveVisible && (
-                <TooltipBtn
-                  toolTip={false}
-                  style={{ backgroundColor: "green", borderColor: "green" }}
-                  onClick={() => handleClick(1)}
-                >
-                  Approve
-                </TooltipBtn>
-              )}
-              <TooltipBtn
-                toolTip={false}
-                onClick={() => handleClick(3)}
-                style={{ marginLeft: "10px" }}
-              >
-                {" "}
-                Reject{" "}
-              </TooltipBtn>{" "}
-            </div>
-          </div>
-        </ScheduleTemplate>
-        <div className="d-flex align-items-center justify-content-around px-3">
-          <div style={{ flex: "2" }}>
-            <label>
-              <p>Remarks</p>
-            </label>
-            <textarea
-              className="form-control"
-              rows={5}
-              maxLength={50}
-              style={{
-                resize: "none",
-                width: "80%",
-                boxShadow: "0px 0px 50px 0px rgba(0, 0, 0, 0.1)",
-              }}
-              onChange={(e) => setRemarks(e.target.value)}
-            />
-          </div>
-        </div>
+          contentHeader={<ContentHeader/>} 
+        />
       </ModuleModal>
 
       <ModuleSimplePopup

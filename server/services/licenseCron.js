@@ -19,15 +19,11 @@ const cron = require("node-cron");
 const { Client } = require("pg");
 const moment = require("moment");
 const exp = require("constants");
+const dbJSON = require("../db/db.config.json");
 
 const connectDB = () => {
-  const client = new Client({
-    host: "192.168.20.96",
-    port: 5432,
-    database: "cmms_dev",
-    user: "postgres",
-    password: "123Az!!!",
-  });
+  const dbName = dbJSON["cmms_dev"];
+  const client = new Client(dbName);
   client.connect();
   return client;
 };

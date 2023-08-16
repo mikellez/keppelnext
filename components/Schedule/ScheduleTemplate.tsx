@@ -25,6 +25,7 @@ interface ScheduleTemplateInfo extends PropsWithChildren {
     changeOfParts?: CMMSChangeOfParts[];
     timeline?: number;
     children?: ReactNode;
+    contentHeader?: ReactNode;
 }
 
 export interface ScheduleInfo {
@@ -310,6 +311,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     {props.children}
                 </ModuleHeader>
                 <ModuleContent>
+                    {props.contentHeader}
                     {toggleCalendarOrListView ? (
                         // Render Full calendar view
                         <>
