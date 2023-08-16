@@ -22,7 +22,7 @@ const exp = require("constants");
 const dbJSON = require("../db/db.config.json");
 
 const connectDB = () => {
-  const dbName = dbJSON["cmms_dev"];
+  const dbName = dbJSON["cmms"];
   const client = new Client(dbName);
   client.connect();
   return client;

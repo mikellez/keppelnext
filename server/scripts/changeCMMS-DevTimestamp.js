@@ -1,7 +1,7 @@
 const { connectDB, dellocateGlobalDB } = require("../db/dbAPI");
 
 const runScript = async () => {
-  connectDB("cmms_dev");
+  connectDB("cmms");
   global.db
     .query(
       `ALTER TABLE keppel.testevents

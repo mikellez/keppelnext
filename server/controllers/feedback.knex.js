@@ -411,6 +411,12 @@ const completeFeedback = async (req, res, next) => {
     }
 }
 
+const createFeedbackCSV = async (req, res, next) => {
+}
+
+const getFeedbackCSV = async (req, res, next) => {
+}
+
 module.exports = {
     fetchPendingFeedback,
     fetchAssignedFeedback,
@@ -420,4 +426,6 @@ module.exports = {
     assignFeedback,
     completeFeedback,
     fetchSingleFeedback, 
+    createFeedbackCSV,
+    getFeedbackCSV
 }
