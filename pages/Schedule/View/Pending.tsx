@@ -87,11 +87,13 @@ export default function Pending() {
   const [selectedTimeline, setSelectedTimeline] = useState<number>();
   const [selectedTimelineItem, setSelectedTimelineItem] =
     useState<ScheduleInfo[]>();
+  const [scheduleTimelineItems, setScheduleTimelineItems] =
+    useState<ScheduleInfo>();
   const theme = useTheme([
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns: 5em 15em 10em 10em 25em 10em 5em;",
+        "--data-table-library_grid-template-columns: 5em 20em 10em 25em 15em 5em;",
     },
   ]);
 
@@ -109,9 +111,11 @@ export default function Pending() {
   useEffect(() => {
     if (data?.role_id) {
       let url = "";
+      let itemURL = "";
       switch (activeTabIndex) {
         case 0:
           url = `/api/timeline_drafts?page=${page}`;
+          // itemURL =
           break;
         case 1:
           url = `/api/timeline_pending?page=${page}`;
@@ -151,6 +155,7 @@ export default function Pending() {
         .then((res) => {
           if (res) {
             setSelectedTimelineItem(res);
+            console.log(selectedTimeline);
           }
         })
         .catch(console.log);
@@ -221,7 +226,6 @@ export default function Pending() {
                     <HeaderRow>
                       <HeaderCell resize>ID</HeaderCell>
                       <HeaderCell resize>Schedule Name</HeaderCell>
-                      <HeaderCell resize>Schedule Date</HeaderCell>
                       <HeaderCell resize>Plant Name</HeaderCell>
                       <HeaderCell resize>Description</HeaderCell>
                       <HeaderCell resize>Date Created</HeaderCell>
@@ -238,7 +242,6 @@ export default function Pending() {
                         <Row key={item.id} item={key}>
                           <Cell>{item.id}</Cell>
                           <Cell>{item.name}</Cell>
-                          <Cell>{}</Cell>
                           <Cell>
                             {/* <Tooltip
                               overlayInnerStyle={{ fontSize: "0.7rem" }}
