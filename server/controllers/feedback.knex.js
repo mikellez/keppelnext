@@ -4,12 +4,15 @@
  */
 
 const moment = require("moment");
+const fs = require("fs");
+const path = require('path');
 const { generateCSV } = require("../csvGenerator");
 const {
   CreateFeedbackMail,
   AssignFeedbackMail,
   CompletedFeedbackMail,
 } = require("../mailer/FeedbackMail");
+const { json } = require("stream/consumers");
 
 const ITEMS_PER_PAGE = 10;
 
@@ -423,6 +426,35 @@ const createFeedbackCSV = async (req, res, next) => {
 }
 
 const getFeedbackCSV = async (req, res, next) => {
+    // Get the folder path: (replace csv folder path here)
+    const directoryPath = path.join(__dirname, '..', 'feedbackCsv');
+    const csvFiles = [];
+
+    // Used to keep track of the total files read
+    let processedFiles = 0;
+
+    // Read folder directory:
+    fs.readdir(directoryPath, (err, files) => {
+        if (err) {
+          return res.status(500).send('Error reading Feedback Folder directory');
+        }
+        // Check for empty directory - no feedback files:
+        if(files.length === 0){
+            return res.status(404).send('No CSV files stored');
+        }
+        
+        files.forEach(file => {
+            // Only retrieve those files with the required date
+            if (file.includes(req.params.date)){
+                csvFiles.push(file);
+            }
+            processedFiles++;
+        });
+        // Async func so want to ensure that all files have been processed before returning the full array
+        if(processedFiles == files.length){
+            return res.status(200).send(csvFiles);
+        }
+      });
 }
 
 module.exports = {
