@@ -86,7 +86,8 @@ const FeedbackContainer = (props: any) => {
       setIsMissingDetailsModaOpen(true);
     } else {
       await instance
-        .post("/api/feedback", form)
+        //.post("/api/feedback", form)
+        .post("/api/feedback/file", form)
         .then((res) => {
           // console.log(res.data);
           router.push("/Guest/Feedback/Submitted");

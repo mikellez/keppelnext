@@ -2130,6 +2130,16 @@ router.patch(
   controllers.feedbackKnex.completeFeedback
 );
 
+router.post(
+  "/feedback/csv",
+  controllers.feedbackKnex.createFeedbackCSV
+)
+
+router.get(
+  "/feedback/csv",
+  controllers.feedbackKnex.getFeedbackCSV
+)
+
 router.get(
   "/activity/account_log",
   checkIfLoggedInAPI,

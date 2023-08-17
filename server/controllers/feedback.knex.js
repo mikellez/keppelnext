@@ -4,6 +4,7 @@
  */
 
 const moment = require("moment");
+const { generateCSV } = require("../csvGenerator");
 const {
   CreateFeedbackMail,
   AssignFeedbackMail,
@@ -411,6 +412,19 @@ const completeFeedback = async (req, res, next) => {
     }
 }
 
+const createFeedbackCSV = async (req, res, next) => {
+    console.log(req.body)
+  generateCSV(req.body).then((buffer) => {
+    res.set({
+      "Content-Type": "text/csv",
+    });
+    return res.status(200).send(buffer);
+  });
+}
+
+const getFeedbackCSV = async (req, res, next) => {
+}
+
 module.exports = {
     fetchPendingFeedback,
     fetchAssignedFeedback,
@@ -420,4 +434,6 @@ module.exports = {
     assignFeedback,
     completeFeedback,
     fetchSingleFeedback, 
+    createFeedbackCSV,
+    getFeedbackCSV
 }

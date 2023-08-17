@@ -28,7 +28,7 @@ const fetchDBNames = async (req, res, next) => {
 const dbConnection = async (req, res, next) => {
   if (!global.db && (req.path === "/api/login" || checkIfGuestPath(req.path))) {
     const { database } = req.body;
-    if (!database) await connectDB("cmms_dev");
+    if (!database) await connectDB("cmms");
     else {
       console.log("here");
       await connectDB(database);

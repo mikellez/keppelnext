@@ -10,7 +10,7 @@ const main = async () => {
   if (args.length != 1) {
     throw new Error("1 argument required only");
   }
-  connectDB("cmms_dev");
+  connectDB("cmms");
   await global.db.query(`UPDATE ${args[0]}
     SET activity_log = (
       SELECT jsonb_agg(

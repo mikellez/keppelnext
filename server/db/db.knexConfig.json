@@ -1,5 +1,5 @@
 {
-    "cmms_dev": {
+    "cmms": {
         "client": "pg",
         "connection": {
             "host": "192.168.20.96",
