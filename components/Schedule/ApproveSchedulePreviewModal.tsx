@@ -19,11 +19,13 @@ import {
  *
  * This uses props from the parent class:
  *
+ * - tabIndex : the Tab that is currently open, thus changing the beheviour of the modal
  * - modalOpenRef : the ref to open the modal
  * - setModalRef : the method to set open/close state of the modal
  * - title : title of the modal
  * - timelineID : The time line that is shown for preview
  * - scheduleInfo : the list of event in the timeline to display
+ * - closeOnBlue : should the modal close on blur
  *
  *
  *
@@ -87,46 +89,42 @@ export default function ApproveSchedulePreviewModal(
 
   const ContentHeader = () => {
     return props.tabIndex == 1 ? (
-          <div className="d-flex align-items-center justify-content-around py-3">
-            <div style={{ flex: "4" }}>
-              <label>
-                <p>Remarks</p>
-              </label>
-              <textarea
-                className="form-control"
-                rows={5}
-                maxLength={50}
-                style={{
-                  resize: "none",
-                  width: "80%"
-                }}
-                onChange={(e) => setRemarks(e.target.value)}
-              />
-            </div>
-
-            <TooltipBtn
-              toolTip={false}
-              style={{ backgroundColor: "green", borderColor: "green" }}
-              onClick={() => handleClick(1)}
-            >
-              Approve
-            </TooltipBtn>
-          <TooltipBtn
-            toolTip={false}
-            onClick={() => handleClick(3)}
-            style={{ marginLeft: "10px" }}
-          >
-            {" "}
-            Reject{" "}
-          </TooltipBtn>{" "}
+      <div className="d-flex align-items-center justify-content-around py-3">
+        <div style={{ flex: "4" }}>
+          <label>
+            <p>Remarks</p>
+          </label>
+          <textarea
+            className="form-control"
+            rows={5}
+            maxLength={50}
+            style={{
+              resize: "none",
+              width: "80%",
+            }}
+            onChange={(e) => setRemarks(e.target.value)}
+          />
         </div>
-    ) : (
-      <div>
-        
+        <TooltipBtn
+          toolTip={false}
+          style={{ backgroundColor: "green", borderColor: "green" }}
+          onClick={() => handleClick(1)}
+        >
+          Approve
+        </TooltipBtn>
+        <TooltipBtn
+          toolTip={false}
+          onClick={() => handleClick(3)}
+          style={{ marginLeft: "10px" }}
+        >
+          {" "}
+          Reject{" "}
+        </TooltipBtn>{" "}
       </div>
-    )
-    ;
-  }
+    ) : (
+      <div></div>
+    );
+  };
 
   return (
     <>
@@ -142,7 +140,7 @@ export default function ApproveSchedulePreviewModal(
           title="Schedule Preview"
           header="Schedule Preview"
           schedules={props.scheduleInfo}
-          contentHeader={<ContentHeader/>} 
+          contentHeader={<ContentHeader />}
         />
       </ModuleModal>
 

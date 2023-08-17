@@ -10,10 +10,11 @@
  * Drafts will be shown when the role_ids are 3 4 while pending drafts will be shown when
  * role_id is 1 or 2.
  *
+ *
  * For each entry there will be a action button at the end.
  * For drafts - Submit button at the end will open the CreateScheduleModal
  * For Approval - ApproveSchedulePreviewModal will be shown
- *
+ * For Completed - ApproveSchedulePreviewModal will be shown with its remarks, accept, reject columns removed.
  *
  * upon any action, the page will be reloaded
  *
