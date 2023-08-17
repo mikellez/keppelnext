@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Table,
   Header,
@@ -25,6 +25,7 @@ import { selectImpersonationState, setImpersonationState } from "../../redux/imp
 import { useDispatch, useSelector } from "react-redux";
 import Pagination from "../../components/Pagination";
 import LoadingHourglass from "../../components/LoadingHourglass";
+import SearchBar from "../../components/SearchBar/SearchBar";
 
 
 const downloadCSV = async () => {
@@ -46,8 +47,9 @@ const downloadCSV = async () => {
   }
 };
 
-const getUsers = async (page:number) => {
-  const url = `/api/user/getUsers?page=${page}`;
+const getUsers = async (page:number, search = "") => {
+  console.log(search);
+  const url = `/api/user/getUsers?page=${page}&search=${search}`;
   return await instance
     .get(url)
     .then((res) => {
@@ -86,7 +88,8 @@ export default function User() {
  // Gets list of users during initial render or whenever page is changed 
   useEffect(() => {
     setReady(false);
-    getUsers(page).then((res) => {
+    getUsers(page, searchRef.current.value).then((res) => {
+      // console.log(res)
       setTotalPages(res.total);
       // Getting the user data
       setData(res.rows);
@@ -111,6 +114,7 @@ export default function User() {
   const [impersonateUserID , setImpersonateUserID] = useState<number>(0);
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [isDeleteSuccess, setDeleteSuccess] = useState<boolean>(false);
+  const searchRef = useRef({value: ""});
 
   const theme = useTheme([
     getTheme(),
@@ -175,9 +179,24 @@ export default function User() {
     }
   }
 
+  const handleSearch = () => {
+    setReady(false);
+    setPage(1);
+    getUsers(1, searchRef.current.value)
+      .then(res => {
+        setData(res.rows);
+        setTotalPages(res.total);
+        setReady(true);
+      });
+
+  }
+
   return (
     <ModuleMain>
       <ModuleHeader title="User Management" header="User Tables">
+        <SearchBar 
+          ref={searchRef}
+          onSubmit={handleSearch}/>
         <TooltipBtn onClick={() => downloadCSV()} text="Export CSV">
           <HiOutlineDownload size={20} />
         </TooltipBtn>

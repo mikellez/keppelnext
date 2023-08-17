@@ -5,8 +5,15 @@ const moment = require("moment");
 
 const ITEMS_PER_PAGE = 10;
 
+// const searchCondition = (search) => {
+//   `
+//     WHERE full_name Li
+//   `
+// }
+
 const getUsers = async (req, res, next) => {
   const page = req.query.page || 1;
+  const search = req.query.search || "";
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
   let totalPages;
   let q = `SELECT 
@@ -16,15 +23,18 @@ const getUsers = async (req, res, next) => {
     role_name
   FROM 
     keppel.user_access
+  WHERE
+    CONCAT(first_name, ' ', last_name) LIKE $1
   `;
+  console.log(q);
   // Query to get total number of users
-  const Result = await global.db.query(q);
+  const Result = await global.db.query(q, ["%" + search + "%"]);
   // Calculate total pages required based on number of user records
   totalPages = Math.ceil(Result.rowCount / ITEMS_PER_PAGE);
   q += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
   // Query again to get required amount for the particular page
   global.db.query(q,
-    [],
+    ["%" + search + "%"],
     (err, result) => {
       if (err) throw err;
       if (result) {
