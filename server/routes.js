@@ -16,10 +16,9 @@ function checkIfLoggedInAPI(req, res, next) {
   next();
 }
 
-function checkIfAdmin(req, res, next){
+function checkIfAdmin(req, res, next) {
   // If not admin, then reject
-  if (req.user.role_id != 1)
-    return res.status(401).json("you are not admin");
+  if (req.user.role_id != 1) return res.status(401).json("you are not admin");
   next();
 }
 
@@ -74,41 +73,38 @@ router.post("/logout", (req, res) => {
   });
 });
 
-
-router.post("/admin/impersonate/:user_id", checkIfAdmin, (req,res) =>{
+router.post("/admin/impersonate/:user_id", checkIfAdmin, (req, res) => {
   const { user_id } = req.params;
-  const sqlQuery = 'SELECT * from keppel.users where user_id =' + user_id;
+  const sqlQuery = "SELECT * from keppel.users where user_id =" + user_id;
   global.db.query(sqlQuery, (err, result) => {
-      if(err)							return res.status(500).send(err);
-      if(result.rows.length < 1)		return res.status(404).send('User not found');
-      const previousUserId = req.user.id;
+    if (err) return res.status(500).send(err);
+    if (result.rows.length < 1) return res.status(404).send("User not found");
+    const previousUserId = req.user.id;
 
-      // Log in the user
-      req.login(result.rows[0], (err) => {
-        if (err) {
-          return res.status(500).send(err);
-        }
-        // Save the current user ID in a session variable
-        req.session.previousUserId = previousUserId;
-        return res.status(200).json("success");
-      });
+    // Log in the user
+    req.login(result.rows[0], (err) => {
+      if (err) {
+        return res.status(500).send(err);
+      }
+      // Save the current user ID in a session variable
+      req.session.previousUserId = previousUserId;
+      return res.status(200).json("success");
+    });
   });
-  
-
 });
 
-router.post("/admin/revert", (req,res) =>{
-  
+router.post("/admin/revert", (req, res) => {
   if (!req.session.previousUserId) {
-    return res.status(400).send('Cannot revert');
+    return res.status(400).send("Cannot revert");
   }
 
   // Query to find back the admin user
-  const sqlQuery = 'SELECT * from keppel.users where user_id =' + req.session.previousUserId;
+  const sqlQuery =
+    "SELECT * from keppel.users where user_id =" + req.session.previousUserId;
 
   global.db.query(sqlQuery, (err, result) => {
-    if(err)							return res.status(500).send(err);
-    if(result.rows.length < 1)		return res.status(404).send('User not found');
+    if (err) return res.status(500).send(err);
+    if (result.rows.length < 1) return res.status(404).send("User not found");
 
     // Log in the user
     req.login(result.rows[0], (err) => {
@@ -119,8 +115,7 @@ router.post("/admin/revert", (req,res) =>{
       delete req.session.previousUserId;
       return res.status(200).json("success");
     });
-});
-
+  });
 });
 
 /**
@@ -1641,18 +1636,18 @@ router.get(
   "/timeline_drafts",
   checkIfLoggedInAPI,
   controllers.schedule.getScheduleDrafts
-)
+);
 router.get(
   "/timeline_pending",
   checkIfLoggedInAPI,
   controllers.schedule.getPendingTimelines
-)
+);
 
 router.get(
   "/timeline_completed",
   checkIfLoggedInAPI,
   controllers.schedule.getCompletedTimelines
-)
+);
 
 router.get(
   "/getAssignedUsers/:plant_id",
@@ -2237,12 +2232,12 @@ router
  * @apiDescription Get all plant locations
  * @apiName getPlantLocations
  * @apiGroup PlantLocation
- * 
+ *
  * @apiSuccess {Object[]} - Data Array of Plant Location Objects
  * @apiSuccess {Number} -.id Plant Location ID
  * @apiSuccess {Number} -.plant_id Plant ID
  * @apiSuccess {String} -.location Plant Location Description
- * 
+ *
  * @apiError (Error 500) {String} Internal Server Error "Error has occurred in the server"
  */
 router.get(
@@ -2256,12 +2251,12 @@ router.get(
  * @apiDescription Get assigned plant locations
  * @apiName getAssignedPlantLocations
  * @apiGroup PlantLocation
- * 
+ *
  * @apiSuccess {Object[]} - Data Array of Plant Location Objects
  * @apiSuccess {Number} -.id Plant Location ID
  * @apiSuccess {Number} -.plant_id Plant ID
  * @apiSuccess {String} -.location Plant Location Description
- * 
+ *
  * @apiError (Error 500) {String} Internal Server Error "Error has occurred in the server"
  */
 router.get("/plantLocation/self", controllers.plantLocation.getUserPlantLocs);
@@ -2271,16 +2266,16 @@ router.get("/plantLocation/self", controllers.plantLocation.getUserPlantLocs);
  * @apiDescription Get single plant location
  * @apiName getSinglePlantLocations
  * @apiGroup PlantLocation
- * 
+ *
  * @apiParam {String} id Plant Location ID
- * 
+ *
  * @apiSuccess {Object[]} - Data Array of Plant Location Objects
  * @apiSuccess {Number} -.loc_id Plant Location ID
  * @apiSuccess {Number} -.plant_id Plant ID
  * @apiSuccess {String} -.plant_name Plant Name
  * @apiSuccess {String} -.loc_floor Plant Location Floor
  * @apiSuccess {String} -.loc_room Plant Location Room
- * 
+ *
  * @apiError (Error 500) {String} Internal Server Error "Error has occurred in the server"
  */
 router.get("/plantLocation/:id", controllers.plantLocation.getSinglePlantLoc);
