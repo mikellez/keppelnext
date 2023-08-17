@@ -11,6 +11,7 @@ const {
   CompletedFeedbackMail,
 } = require("../mailer/FeedbackMail");
 const fs = require("fs");
+const md5 = require("blueimp-md5");
 
 const ITEMS_PER_PAGE = 10;
 
@@ -424,7 +425,9 @@ const createFeedbackCSV = async (req, res, next) => {
   //   console.log(req.body);
   data = req.body;
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  const fileName = moment(today).format("YYYY-MM-DD_HH-mm-ss") + ".csv";
+  const fileName =
+    md5(moment(today).format("YYYY-MM-DD_HH-mm-ss"), data.name + data.email) +
+    ".csv";
   //   console.log(fileName);
 
   const activity_log = [
@@ -450,6 +453,7 @@ const createFeedbackCSV = async (req, res, next) => {
       activity_log: JSON.stringify(activity_log),
     },
   ];
+  //   fs.writeFile("./server/feedbackCSV/" + fileName,JSON.parse(feedback[0]),)
   generateCSV(feedback).then((buffer) => {
     res.set({
       "Content-Type": "text/csv",
