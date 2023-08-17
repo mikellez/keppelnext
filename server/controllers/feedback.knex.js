@@ -425,8 +425,11 @@ const createFeedbackCSV = async (req, res, next) => {
   //   console.log(req.body);
   data = req.body;
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  const fileName = moment(today).format("YYYY-MM-DD_HH-mm-ss") + "-";
-  md5(data.name + data.email) + ".csv";
+  const fileName =
+    moment(today).format("YYYY-MM-DD_HH-mm-ss") +
+    "-" +
+    md5(data.name + data.email) +
+    ".csv";
   //   console.log(fileName);
 
   const activity_log = [
