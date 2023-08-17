@@ -2136,7 +2136,7 @@ router.post(
 )
 
 router.get(
-  "/feedback/csv",
+  "/feedback/csv/:date",
   controllers.feedbackKnex.getFeedbackCSV
 )
 

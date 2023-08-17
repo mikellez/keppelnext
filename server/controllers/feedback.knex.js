@@ -12,7 +12,6 @@ const {
   AssignFeedbackMail,
   CompletedFeedbackMail,
 } = require("../mailer/FeedbackMail");
-const fs = require("fs");
 const md5 = require("blueimp-md5");
 const { json } = require("stream/consumers");
 
@@ -476,7 +475,7 @@ const createFeedbackCSV = async (req, res, next) => {
 
 const getFeedbackCSV = async (req, res, next) => {
     // Get the folder path: (replace csv folder path here)
-    const directoryPath = path.join(__dirname, '..', 'feedbackCsv');
+    const directoryPath = path.join(__dirname, '..', 'feedbackCSV');
     const csvFiles = [];
 
     // Used to keep track of the total files read
@@ -501,6 +500,10 @@ const getFeedbackCSV = async (req, res, next) => {
         });
         // Async func so want to ensure that all files have been processed before returning the full array
         if(processedFiles == files.length){
+            // If csvFile array is empty means no csv found for given date
+            if(csvFiles.length == 0){
+                return res.status(404).send('No CSV files found for date: ' + req.params.date);
+            }
             return res.status(200).send(csvFiles);
         }
       });
