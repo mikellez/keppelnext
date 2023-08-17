@@ -60,14 +60,14 @@ FROM
 // const fetchPendingFeedbackQuery =
 //   fetchAllFeedbackQuery +
 //   `
-// WHERE 
-//     ua.user_id = $1 AND 
+// WHERE
+//     ua.user_id = $1 AND
 //     (f.status_id = 1)
 // ORDER BY f.feedback_id DESC
 // `;
 
 const condition = (req) => {
-  let date = req.params.date || 'all';
+  let date = req.params.date || "all";
   let datetype = req.params.datetype;
   let status = req.params.status || 0;
   let plant = req.params.plant || 0;
@@ -116,10 +116,9 @@ const condition = (req) => {
     dateCond,
     statusCond,
     plantCond,
-    userRoleCond
-  }
-
-}
+    userRoleCond,
+  };
+};
 
 const getAllFeedBackQuery = (req) => {
   const expand = req.query.expand || null;
@@ -262,10 +261,9 @@ const fetchPendingFeedback = async (req, res, next) => {
   const search = req.query.search || null;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await global.db.query(
-    getPendingFeedbackQuery(req),
-    [req.user.id]
-  );
+  const totalRows = await global.db.query(getPendingFeedbackQuery(req), [
+    req.user.id,
+  ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -288,8 +286,8 @@ const fetchPendingFeedback = async (req, res, next) => {
 // const fetchAssignedFeedbackQuery =
 //   fetchAllFeedbackQuery +
 //   `
-// WHERE 
-//     ua.user_id = $1 AND 
+// WHERE
+//     ua.user_id = $1 AND
 //     (f.status_id is null or f.status_id = 2 or f.status_id = 3) AND
 //     (CASE
 //       WHEN (SELECT ua.role_id
@@ -299,7 +297,7 @@ const fetchPendingFeedback = async (req, res, next) => {
 //               ua.user_id = $1) = 4
 //       THEN assignU.user_id = $1
 //       ELSE True
-//       END) 
+//       END)
 // ORDER BY f.feedback_id DESC
 // `;
 
@@ -309,10 +307,9 @@ const fetchAssignedFeedback = async (req, res, next) => {
   const search = req.query.search || null;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await global.db.query(
-    getAssignedFeedbackQuery(req),
-    [req.user.id]
-  );
+  const totalRows = await global.db.query(getAssignedFeedbackQuery(req), [
+    req.user.id,
+  ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -337,10 +334,9 @@ const fetchOutstandingFeedback = async (req, res, next) => {
   const search = req.query.search || null;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await global.db.query(
-    getAssignedFeedbackQuery(req),
-    [req.user.id]
-  );
+  const totalRows = await global.db.query(getAssignedFeedbackQuery(req), [
+    req.user.id,
+  ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -361,9 +357,9 @@ const fetchOutstandingFeedback = async (req, res, next) => {
 
 // const fetchCompletedFeedbackQuery =
 //   fetchAllFeedbackQuery +
-//   `				
-// WHERE 
-//     ua.user_id = $1 AND 
+//   `
+// WHERE
+//     ua.user_id = $1 AND
 //     (f.status_id = 4) AND
 //     (CASE
 //       WHEN (SELECT ua.role_id
@@ -383,10 +379,9 @@ const fetchCompletedFeedback = async (req, res, next) => {
   const search = req.query.search || null;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
-  const totalRows = await global.db.query(
-    getCompletedFeedbackQuery(req),
-    [req.user.id]
-  );
+  const totalRows = await global.db.query(getCompletedFeedbackQuery(req), [
+    req.user.id,
+  ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -479,7 +474,6 @@ const assignFeedback = async (req, res, next) => {
         WHERE 
             feedback_id = $2
     `;
-
 
   try {
     const data = await global.db.query(sql, [
