@@ -1,4 +1,6 @@
+require("dotenv").config();
 const cron = require("node-cron");
+const axios = require("axios");
 
 var task = cron.schedule(
   "* * * * *",

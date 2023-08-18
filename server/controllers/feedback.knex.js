@@ -275,7 +275,8 @@ const fetchSingleFeedback = async (req, res, next) => {
 
 const createFeedback = async (req, res, next) => {
   const data = req.body;
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  console.log('data', data)
+  /*const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const activity_log = [
     {
       date: today,
@@ -297,13 +298,30 @@ const createFeedback = async (req, res, next) => {
     completed_img: data.completed_img,
     activity_log: JSON.stringify(activity_log),
   };
+  */
+  const { name, description, plant_loc_id, imageurl, plant_id, contact, created_user_id, created_date, completed_img, activity_log } = data;
+
+  const feedback = {
+    name,
+    description,
+    plant_loc_id,
+    imageurl,
+    plant_id,
+    contact,
+    created_user_id,
+    status_id: 1,
+    created_date,
+    completed_img,
+    activity_log
+  }
+
   try {
     await global.knex("keppel.feedback").insert(feedback);
 
-    const mail = new CreateFeedbackMail([feedback.contact.email], {
-      name: feedback.name,
-      description: feedback.comments,
-      created_date: today,
+    const mail = new CreateFeedbackMail([JSON.parse(feedback.contact)['email']], {
+      name,
+      description,
+      created_date
     });
 
     await mail.send();
@@ -431,6 +449,7 @@ const createFeedbackCSV = async (req, res, next) => {
     md5(data.name + data.email) +
     ".csv";
   //   console.log(fileName);
+    data.contact['email'] = data.email;
 
   const activity_log = [
     {

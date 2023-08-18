@@ -11,6 +11,7 @@ const guestPaths = [
   "/api/user",
   "/api/plantLocation",
   "/api/workflow",
+  "/api/feedback",
 ];
 
 const checkIfGuestPath = (path) => {
@@ -44,6 +45,7 @@ const connectDB = async (dbName) => {
   const pool = new Pool(dbConfig);
   global.db = pool;
   const knexInstance = await require('knex')(knexJSON[dbName]);
+  console.log(knexInstance);
   global.knex = knexInstance;
 };
 
