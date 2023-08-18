@@ -493,7 +493,8 @@ const createFeedbackCSV = async (req, res, next) => {
 };
 
 const getFeedbackCSV = async (req, res, next) => {
-    // Get the folder path: (replace csv folder path here)
+
+       // Get the folder path: (replace csv folder path here)
     const directoryPath = path.join(__dirname, '..', 'feedbackCSV');
     const csvFiles = [];
 
@@ -501,31 +502,30 @@ const getFeedbackCSV = async (req, res, next) => {
     let processedFiles = 0;
 
     // Read folder directory:
-    fs.readdir(directoryPath, (err, files) => {
+    fs.readdir(directoryPath, (err, filenames) => {
         if (err) {
-          return res.status(500).send('Error reading Feedback Folder directory');
+            console.error('Error while reading files directory:', err);
+            res.status(500).send('Error while reading files directory.');
+        } else {
+            const filesArray = [];
+
+            filenames.forEach((filename) => {
+                const filePath = path.join(directoryPath, filename);
+
+                fs.readFile(filePath, 'utf8', (err, base64Content) => {
+                    if (err) {
+                        console.error(`Error while reading file ${filename}:`, err);
+                    } else {
+                        filesArray.push({ filename, content: base64Content });
+
+                        if (filesArray.length === filenames.length) {
+                            res.status(200).json(filesArray);
+                        }
+                    }
+                });
+            });
         }
-        // Check for empty directory - no feedback files:
-        if(files.length === 0){
-            return res.status(404).send('No CSV files stored');
-        }
-        
-        files.forEach(file => {
-            // Only retrieve those files with the required date
-            if (file.includes(req.params.date)){
-                csvFiles.push(file);
-            }
-            processedFiles++;
-        });
-        // Async func so want to ensure that all files have been processed before returning the full array
-        if(processedFiles == files.length){
-            // If csvFile array is empty means no csv found for given date
-            if(csvFiles.length == 0){
-                return res.status(404).send('No CSV files found for date: ' + req.params.date);
-            }
-            return res.status(200).send(csvFiles);
-        }
-      });
+    }); 
 }
 
 module.exports = {

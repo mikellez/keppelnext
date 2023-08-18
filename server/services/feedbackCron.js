@@ -18,70 +18,87 @@ const createFeedbacks = async () => {
   const { FEEDBACK_SERVER, FEEDBACK_SERVER_PORT, FEEDBACK_SERVER_HTTP } = process.env;
   const client = connectDB();
 
-  const directoryPath = './server/feedbackCSV'; // Replace with the actual directory path
+  const directoryPath = './server/feedbackCSV2'; // Replace with the actual directory path
   const yesterdayDate = moment().subtract(1, 'days').format('YYYY-MM-DD');
 
-  fs.readdir(directoryPath, (err, files) => {
-    if (err) {
-      console.error('Error reading directory:', err);
-      return;
-    }
+  try {
+      const response = await axios.get(`${FEEDBACK_SERVER_HTTP}://${FEEDBACK_SERVER}:${FEEDBACK_SERVER_PORT}/api/feedback/csv/${yesterdayDate}`);
+      const fileArray = response.data;
 
-    const filteredFiles = files.filter(file => file.startsWith(yesterdayDate));
+      const savedFiles = [];
 
-    filteredFiles.forEach(file => {
-      const filePath = path.join(directoryPath, file);
-      fs.readFile(filePath, 'utf8', (err, data) => {
+      for (const file of fileArray) {
+          const filename = file.filename;
+          const content = file.content;
+
+          const savePath = path.join(__dirname, '/../feedbackCSV2', filename);
+          const decodedContent = Buffer.from(content, 'utf8');
+
+          fs.writeFileSync(savePath, decodedContent);
+          
+          savedFiles.push(filename);
+      }
+
+      console.log('Saved files:', savedFiles)
+
+      fs.readdir(directoryPath, (err, files) => {
         if (err) {
-          console.error('Error reading file:', err);
+          console.error('Error reading directory:', err);
           return;
         }
-        // Process data from the file
-        let columnData = {};
-        const lines = data.split('\n');
 
-        lines.forEach((line, lineIndex) => {
-          const columns = line.split(','); // Split line into columns based on comma (CSV)
+        const filteredFiles = files.filter(file => file.startsWith(yesterdayDate));
 
-          if (lineIndex === 0) {
-            headers = columns.map(header => header.trim());
-          } else {
-            columns.forEach((column, columnIndex) => {
-              const header = headers[columnIndex];
-              let value = column.trim();
-              if (!columnData[header]) {
-                columnData[header] = "";
+        filteredFiles.forEach(file => {
+          const filePath = path.join(directoryPath, file);
+          fs.readFile(filePath, 'utf8', (err, data) => {
+            if (err) {
+              console.error('Error reading file:', err);
+              return;
+            }
+            // Process data from the file
+            let columnData = {};
+            const lines = data.split('\n');
+
+            lines.forEach((line, lineIndex) => {
+              const columns = line.split(','); // Split line into columns based on comma (CSV)
+
+              if (lineIndex === 0) {
+                headers = columns.map(header => header.trim());
+              } else {
+                columns.forEach((column, columnIndex) => {
+                  const header = headers[columnIndex];
+                  let value = column.trim();
+                  if (!columnData[header]) {
+                    columnData[header] = "";
+                  }
+
+                  value = value.replaceAll("^", ",");
+
+                  columnData[header] = JSON.parse(value);
+                });
+
+                axios.post(`${FEEDBACK_SERVER_HTTP}://${FEEDBACK_SERVER}:${FEEDBACK_SERVER_PORT}/api/feedback`, columnData).then((res) => {
+                  console.log("Feedback created for " + filePath);
+                }).catch((err) => {
+                  //console.log(err.response);
+                  console.log("Unable to create feedback");
+                });
+
               }
-
-              value = value.replaceAll("^", ",");
-
-              columnData[header] = JSON.parse(value);
             });
 
-            axios.post(`${FEEDBACK_SERVER_HTTP}://${FEEDBACK_SERVER}:${FEEDBACK_SERVER_PORT}/api/feedback`, columnData).then((res) => {
-              console.log("Feedback created for " + filePath);
-            }).catch((err) => {
-              //console.log(err.response);
-              console.log("Unable to create feedback");
-            });
-
-            return;
-          }
+          });
         });
-
+        
+        console.log('Files with date format YYYY-MM-DD:', filteredFiles);
       });
-    });
-    
-    console.log('Files with date format YYYY-MM-DD:', filteredFiles);
-  });
 
-  //await axios.get(`${FEEDBACK_SERVER_HTTP}://${FEEDBACK_SERVER}:${FEEDBACK_SERVER_PORT}/api/feedback/csv/:date`).then(async (res) => { 
-    // transform csv and send to api
-    //const form = new FormData();
-    //console.log(res)
+  } catch (err) {
+      console.error('Error while fetching and saving files:', err);
+  }
 
-    //await instance.post(`/api/feedback`, form);
-  //});
+
 
 }
 
