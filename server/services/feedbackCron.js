@@ -6,6 +6,7 @@ const dbJSON = require("../db/db.config.json");
 const axios = require("axios");
 const fs = require("fs");
 const path = require('path');
+const Rsync = require("rsync");
 
 const connectDB = () => {
   const dbName = dbJSON["cmms"];
@@ -18,39 +19,43 @@ const createFeedbacks = async () => {
   const { FEEDBACK_SERVER, FEEDBACK_SERVER_PORT, FEEDBACK_SERVER_HTTP } = process.env;
   const client = connectDB();
 
-  const directoryPath = './server/feedbackCSV2'; // Replace with the actual directory path
   const yesterdayDate = moment().subtract(1, 'days').format('YYYY-MM-DD');
+  const localDirectoryPath = './server/feedbackCSV2/' + yesterdayDate + "/"; // Replace with the actual directory path
+  const remoteDirectoryPath = './server/feedbackCSV/' + yesterdayDate + "/"; // // Replace with the actual directory path on public remote server
+
+  // Constructing the rsync command - https://www.npmjs.com/package/rsync 
+  var rsync = new Rsync()
+  .flags("az") // The -a flag copies the full directory not just a file
+  //.shell("ssh") // Uncomment when public remote server has been setup 
+  // note - need to generate SSH key pair on internal server and pass public key to remote server:
+  // https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server  
+  .source(remoteDirectoryPath) 
+  .destination(localDirectoryPath); 
+
+  // CSV Files with the same date will be stored together
+  if(!fs.existsSync(localDirectoryPath)){
+    fs.mkdirSync(localDirectoryPath, { recursive: true });
+  }
 
   try {
-      const response = await axios.get(`${FEEDBACK_SERVER_HTTP}://${FEEDBACK_SERVER}:${FEEDBACK_SERVER_PORT}/api/feedback/csv/${yesterdayDate}`);
-      const fileArray = response.data;
-
-      const savedFiles = [];
-
-      for (const file of fileArray) {
-          const filename = file.filename;
-          const content = file.content;
-
-          const savePath = path.join(__dirname, '/../feedbackCSV2', filename);
-          const decodedContent = Buffer.from(content, 'utf8');
-
-          fs.writeFileSync(savePath, decodedContent);
-          
-          savedFiles.push(filename);
+    // Execute the rsync command
+    rsync.execute(function(error, code, cmd) {
+      if(error){
+        console.error('Error copying files:', error);
+        return;
       }
-
-      console.log('Saved files:', savedFiles)
-
-      fs.readdir(directoryPath, (err, files) => {
+      console.log('Command execution complete:', cmd);
+      fs.readdir(localDirectoryPath, (err, files) => {
         if (err) {
           console.error('Error reading directory:', err);
           return;
         }
-
+        
+        // Getting the files with the required date and extracting their content 
         const filteredFiles = files.filter(file => file.startsWith(yesterdayDate));
 
         filteredFiles.forEach(file => {
-          const filePath = path.join(directoryPath, file);
+          const filePath = path.join(localDirectoryPath, file);
           fs.readFile(filePath, 'utf8', (err, data) => {
             if (err) {
               console.error('Error reading file:', err);
@@ -90,10 +95,9 @@ const createFeedbacks = async () => {
 
           });
         });
-        
         console.log('Files with date format YYYY-MM-DD:', filteredFiles);
       });
-
+    });
   } catch (err) {
       console.error('Error while fetching and saving files:', err);
   }

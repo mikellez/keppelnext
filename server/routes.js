@@ -2136,11 +2136,6 @@ router.post(
 )
 
 router.get(
-  "/feedback/csv/:date",
-  controllers.feedbackKnex.getFeedbackCSV
-)
-
-router.get(
   "/activity/account_log",
   checkIfLoggedInAPI,
   controllers.activity.getEventtHistory
