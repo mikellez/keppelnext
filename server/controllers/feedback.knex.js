@@ -445,6 +445,8 @@ const createFeedbackCSV = async (req, res, next) => {
   //   console.log(req.body);
   data = req.body;
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const dateToday = moment(new Date()).format("YYYY-MM-DD");
+  const dir = "./server/feedbackCSV/" + dateToday + "/"; // Replace with actual path on public server
   const fileName =
     moment(today).format("YYYY-MM-DD_HH-mm-ss") +
     "-" +
@@ -481,7 +483,12 @@ const createFeedbackCSV = async (req, res, next) => {
     res.set({
       "Content-Type": "text/csv",
     });
-    fs.writeFileSync("./server/feedbackCSV/" + fileName, buffer, (err) => {
+    // Create Folder by date
+    if(!fs.existsSync(dir)){
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    // Create CSV file in folder by date
+    fs.writeFileSync(dir + fileName, buffer, (err) => {
       if (err) {
         throw err;
       } else {
@@ -494,8 +501,8 @@ const createFeedbackCSV = async (req, res, next) => {
 
 const getFeedbackCSV = async (req, res, next) => {
 
-       // Get the folder path: (replace csv folder path here)
-    const directoryPath = path.join(__dirname, '..', 'feedbackCSV');
+    // Get the folder path: (replace csv folder path here)
+    const directoryPath = path.join(__dirname, '..', 'feedbackCSV', req.params.date); 
     const csvFiles = [];
 
     // Used to keep track of the total files read

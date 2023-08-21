@@ -80,6 +80,7 @@
 		"react-tooltip": "^5.18.1",
 		"recharts": "^2.4.3",
 		"redux-persist": "^6.0.0",
+		"rsync": "^0.6.1",
 		"sass": "^1.57.1",
 		"sharp": "^0.31.3",
 		"svg-to-pdfkit": "^0.1.8",
