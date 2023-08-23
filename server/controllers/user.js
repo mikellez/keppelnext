@@ -24,7 +24,7 @@ const getUsers = async (req, res, next) => {
   FROM 
     keppel.user_access
   WHERE
-    CONCAT(first_name, ' ', last_name) LIKE $1
+    CONCAT(first_name, ' ', last_name) ILIKE $1
   `;
   console.log(q);
   // Query to get total number of users
