@@ -94,7 +94,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
       user.data &&
       props.checklist &&
       user.data?.id != props.checklist?.signoff_user_id &&
-      user.data.role_id != Role.Admin
+      user.data.role_id === Role.Specialist
     ) {
       router.push("/403");
     } else {
