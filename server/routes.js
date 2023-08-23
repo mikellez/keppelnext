@@ -2130,15 +2130,32 @@ router.patch(
   controllers.feedbackKnex.completeFeedback
 );
 
-router.post(
-  "/feedback/csv",
-  controllers.feedbackKnex.createFeedbackCSV
-)
+/**
+ * @api {post} /feedback/csv/
+ * @apiDescription Create Feedback and store on External Server
+ * @apiName createFeedbackCSV
+ * @apiGroup Feedback
+ *
+ * @apiBody {Object} - Feedback Object
+ * @apiBody {String} -.name Name of user who gave the feedback
+ * @apiBody {String} -.comments Feedback Comments by the user
+ * @apiBody {Number} -.taggedLocID Location ID
+ * @apiBody {String} -.image base64 encoded string of image
+ * @apiBody {Number} -.plantID Plant ID
+ * @apiBody {String} -.email Email of user who created the feedback
+ * @apiBody {Object} -.contact Contact Information
+ * @apiBody {String} -.contact.number Contact Number, will be empty if not provided or user is Internal User
+ * @apiBody {Number} -.contact.whatsapp Contact Method of Whatsapp, 0 if No, 1 if Yes
+ * @apiBody {Number} -.contact.telegram Contact Method of Telegram, 0 if No, 1 if Yes
+ *
+ *
+ * @apiSuccess {String} staus 200 ""
+ * @apiError (Error 500) {String}
+ */
 
-router.get(
-  "/feedback/csv/:date",
-  controllers.feedbackKnex.getFeedbackCSV
-)
+router.post("/feedback/csv", controllers.feedbackKnex.createFeedbackCSV);
+
+router.get("/feedback/csv/:date", controllers.feedbackKnex.getFeedbackCSV);
 
 router.get(
   "/activity/account_log",

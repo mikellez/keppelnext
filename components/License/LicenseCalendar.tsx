@@ -23,7 +23,9 @@ const LicenseCalendar = ({ selectedPlant }: { selectedPlant: number }) => {
     // if (selectedPlant) {
 
     instance
-      .get(`/api/license/expiry_dates?plantId=${selectedPlant}`)
+      .get(
+        `/api/license/expiry_dates?plantId=${selectedPlant}&expend=id,license_name,expiry_date`
+      )
       .then((res) => {
         // console.log(selectedPlant);
         const expiryEvents = res.data.map((row: ExpiryDate) => {

@@ -67,6 +67,7 @@ const fetchAllLicenseQuery = (req) => {
   let expandCond = "";
   let SELECT_ARR = [];
   const expand = req.query.expand || false;
+  console.log(expand);
 
   const SELECT = {
     id: "lc.license_id As id",
@@ -631,11 +632,12 @@ const deleteLicense = async (req, res) => {
     res.status(500).send("Error occurred deleting license");
   }
 };
+// "id,license_name,expiry_date"
 
 const fetchExpiryDates = async (req, res) => {
   const plantId = req.query.plantId || 0;
   let query =
-    fetchAllLicenseQuery("id,license_name,expiry_date", "") +
+    fetchAllLicenseQuery(req) +
     `
     AND ua.user_id = $1 AND
     expiry_date IS NOT NULL
