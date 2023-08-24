@@ -27,7 +27,7 @@ import instance from "../../../types/common/axios.config";
 
 const createChangeOfParts = async (formData: CMMSChangeOfParts) => {
   return await instance
-    .post(`/api/changeOfParts/`, { formData })
+    .post(`/api/changeOfParts/all`, { formData })
     .then((res) => {
       return res.data;
     })
