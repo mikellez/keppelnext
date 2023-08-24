@@ -167,6 +167,7 @@ export const getServerSideProps: GetServerSideProps =
   createChangeOfPartsServerSideProps(
     true,
     (response: AxiosResponse<CMMSChangeOfParts[]>) => {
-      return !!response.data;
+      return true;
+      //return !!response.data;
     }
   );
