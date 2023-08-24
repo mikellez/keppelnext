@@ -30,7 +30,7 @@ const COPForm = (props: COPFormProps) => {
         }
 
         if (field === "plantId") {
-            assetRef.current.setValue("");
+            assetRef?.current?.setValue("");
         }
     };
 

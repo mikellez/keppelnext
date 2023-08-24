@@ -219,13 +219,13 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
 
     console.log(`/api/feedback/pending/${plant}/${datetype}/${date}`);
     const getPendingFeedback = instance.get(
-      `/api/feedback/pending/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')})`
+      `/api/feedback/pending/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
     );
     const getOustandingFeedback = instance.get(
-      `/api/feedback/outstanding/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')})`
+      `/api/feedback/outstanding/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
     );
     const getCompletedFeedback = instance.get(
-      `/api/feedback/completed/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')})`
+      `/api/feedback/completed/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
     );
 
     const getAllFeedback = await Promise.all([
