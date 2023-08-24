@@ -209,6 +209,7 @@ export default function Request(props: RequestProps) {
     setActiveTabIndex(index);
     setRequestItems([]);
     setPage(1);
+    setIds([]);
   };
 
   const handleExpand = async (item: RequestItem) => {
