@@ -1,6 +1,6 @@
 // import axios from "axios";
 const axios = require("axios");
-const getConfig = require("next/config");
+import getConfig  from "next/config";
 
 const { publicRuntimeConfig } = getConfig();
 const { apiBaseUrl } = publicRuntimeConfig;
