@@ -80,7 +80,6 @@ const WorkflowNew = ({
           required: true,
           options: [
             { label: "Fault Request", value: 1 },
-            { label: "test", value: 2 },
           ],
         },
       ],
