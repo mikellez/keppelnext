@@ -16,8 +16,7 @@ const dbJSON = require("../db/db.config.json");
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
-const { exec } = require("child_process");
-const { stdout, stderr } = require("process");
+const Rsync = require("rsync");
 
 const connectDB = () => {
   const dbName = dbJSON["cmms"];
@@ -26,101 +25,65 @@ const connectDB = () => {
   return client;
 };
 
-const createFeedbackRsync = async (callback) => {
-  const {
-    FOLDER_NAME,
-    FEEDBACK_USERNAME,
-    FEEDBACK_HOSTNAME,
-    FEEDBACK_SERVER,
-    FEEDBACK_SERVER_PORT,
-    FEEDBACK_SERVER_HTTP,
-  } = process.env;
-  const yesterdayDate = moment().subtract(1, "days").format("YYYY-MM-DD");
-  const fileDes = `./server/feedbackCSV2/${yesterdayDate}`;
-  const fileSrc = `'${FEEDBACK_USERNAME}'@${FEEDBACK_HOSTNAME}:./${FOLDER_NAME}/server/feedbackCSV/${yesterdayDate}`;
-  exec(`rsync -a ${fileSrc}/ ${fileDes}`, (err, stdout, stderr) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    if (stderr) {
-      console.log(stderr);
-      return;
-    }
-    console.log(stdout);
-    callback();
-  });
-};
-
 const createFeedbacks = async () => {
   const { FEEDBACK_SERVER, FEEDBACK_SERVER_PORT, FEEDBACK_SERVER_HTTP } =
     process.env;
   const client = connectDB();
 
-  createFeedbackRsync(() => {
-    const yesterdayDate = moment().subtract(1, "days").format("YYYY-MM-DD");
-    const directoryPath = `./server/feedbackCSV2/${yesterdayDate}`; // Replace with the actual directory path
-    fs.readdir(directoryPath, (err, files) => {
-      if (err) {
-        console.error("Error reading directory:", err);
+  const yesterdayDate = moment().subtract(1, "days").format("YYYY-MM-DD");
+  const localDirectoryPath = "./server/feedbackCSV2/" + yesterdayDate + "/"; // Replace with the actual directory path
+  const remoteDirectoryPath = "./server/feedbackCSV/" + yesterdayDate + "/"; // // Replace with the actual directory path on public remote server
+
+  // Constructing the rsync command - https://www.npmjs.com/package/rsync
+  var rsync = new Rsync()
+    .flags("az") // The -a flag copies the full directory not just a file
+    //.shell("ssh") // Uncomment when public remote server has been setup
+    // note - need to generate SSH key pair on internal server and pass public key to remote server:
+    // https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server
+    .source(remoteDirectoryPath)
+    .destination(localDirectoryPath);
+
+  // CSV Files with the same date will be stored together
+  if (!fs.existsSync(localDirectoryPath)) {
+    fs.mkdirSync(localDirectoryPath, { recursive: true });
+  }
+
+  try {
+    // Execute the rsync command
+    rsync.execute(function (error, code, cmd) {
+      if (error) {
+        console.error("Error copying files:", error);
         return;
       }
+      console.log("Command execution complete:", cmd);
+      fs.readdir(localDirectoryPath, (err, files) => {
+        if (err) {
+          console.error("Error reading directory:", err);
+          return;
+        }
 
-      const filteredFiles = files.filter((file) =>
-        file.startsWith(yesterdayDate)
-      );
+        // Getting the files with the required date and extracting their content
+        const filteredFiles = files.filter((file) =>
+          file.startsWith(yesterdayDate)
+        );
 
-      filteredFiles.forEach((file) => {
-        const filePath = path.join(directoryPath, file);
-        fs.readFile(filePath, "utf8", (err, data) => {
-          if (err) {
-            console.error("Error reading file:", err);
-            return;
-          }
-          // Process data from the file
-          let columnData = {};
-          const lines = data.split("\n");
-
-          lines.forEach((line, lineIndex) => {
-            const columns = line.split(","); // Split line into columns based on comma (CSV)
-
-            if (lineIndex === 0) {
-              headers = columns.map((header) => header.trim());
-            } else {
-              columns.forEach((column, columnIndex) => {
-                const header = headers[columnIndex];
-                let value = column.trim();
-                if (!columnData[header]) {
-                  columnData[header] = "";
-                }
-
-                value = value.replaceAll("^", ",");
-
-                columnData[header] = JSON.parse(value);
-              });
-
-              axios
-                .post(
-                  `${FEEDBACK_SERVER_HTTP}://${FEEDBACK_SERVER}:${FEEDBACK_SERVER_PORT}/api/feedback`,
-                  columnData
-                )
-                .then((res) => {
-                  console.log("Feedback created for " + filePath);
-                })
-                .catch((err) => {
-                  //console.log(err.response);
-                  console.log("Unable to create feedback");
-                });
-
+        filteredFiles.forEach((file) => {
+          const filePath = path.join(localDirectoryPath, file);
+          fs.readFile(filePath, "utf8", (err, data) => {
+            if (err) {
+              console.error("Error reading file:", err);
               return;
             }
           });
         });
+        console.log("Files with date format YYYY-MM-DD:", filteredFiles);
       });
 
       console.log("Files with date format YYYY-MM-DD:", filteredFiles);
     });
-  });
+  } catch (err) {
+    console.error("Error while fetching and saving files:", err);
+  }
 };
 
 const main = async () => {

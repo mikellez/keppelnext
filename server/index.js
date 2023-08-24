@@ -15,6 +15,7 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const licenseCron = require("./services/licenseCron");
 const workflowCron = require("./services/workflowCron");
+const feedbackCron = require("./services/feedbackCron");
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -196,6 +197,7 @@ app.prepare().then(() => {
 
 
   workflowCron.start();
+  feedbackCron.start();
   licenseCron.start();
 
   checklistGenerator.start();

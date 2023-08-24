@@ -445,6 +445,8 @@ const createFeedbackCSV = async (req, res, next) => {
   //   console.log(req.body);
   data = req.body;
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const dateToday = moment(new Date()).format("YYYY-MM-DD");
+  const dir = "./server/feedbackCSV/" + dateToday + "/"; // Replace with actual path on public server
   const fileName =
     moment(today).format("YYYY-MM-DD_HH-mm-ss") +
     "-" +
@@ -506,42 +508,6 @@ const createFeedbackCSV = async (req, res, next) => {
   });
 };
 
-const getFeedbackCSV = async (req, res, next) => {
-
-       // Get the folder path: (replace csv folder path here)
-    const directoryPath = path.join(__dirname, '..', 'feedbackCSV');
-    const csvFiles = [];
-
-    // Used to keep track of the total files read
-    let processedFiles = 0;
-
-    // Read folder directory:
-    fs.readdir(directoryPath, (err, filenames) => {
-        if (err) {
-            console.error('Error while reading files directory:', err);
-            res.status(500).send('Error while reading files directory.');
-        } else {
-            const filesArray = [];
-
-            filenames.forEach((filename) => {
-                const filePath = path.join(directoryPath, filename);
-
-                fs.readFile(filePath, 'utf8', (err, base64Content) => {
-                    if (err) {
-                        console.error(`Error while reading file ${filename}:`, err);
-                    } else {
-                        filesArray.push({ filename, content: base64Content });
-
-                        if (filesArray.length === filenames.length) {
-                            res.status(200).json(filesArray);
-                        }
-                    }
-                });
-            });
-        }
-    }); 
-}
-
 module.exports = {
   fetchPendingFeedback,
   fetchAssignedFeedback,
@@ -552,5 +518,4 @@ module.exports = {
   completeFeedback,
   fetchSingleFeedback,
   createFeedbackCSV,
-  getFeedbackCSV,
 };

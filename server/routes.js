@@ -2155,8 +2155,6 @@ router.patch(
 
 router.post("/feedback/csv", controllers.feedbackKnex.createFeedbackCSV);
 
-router.get("/feedback/csv/:date", controllers.feedbackKnex.getFeedbackCSV);
-
 router.get(
   "/activity/account_log",
   checkIfLoggedInAPI,
