@@ -67,7 +67,7 @@ const fetchAllLicenseQuery = (req) => {
   let expandCond = "";
   let SELECT_ARR = [];
   const expand = req.query.expand || false;
-  console.log(expand);
+  // console.log(expand);
 
   const SELECT = {
     id: "lc.license_id As id",
