@@ -483,12 +483,20 @@ const createFeedbackCSV = async (req, res, next) => {
     res.set({
       "Content-Type": "text/csv",
     });
-    // Create Folder by date
-    if(!fs.existsSync(dir)){
-      fs.mkdirSync(dir, { recursive: true });
+    const folderPath = `./server/feedbackCSV/${moment(new Date()).format("YYYY-MM-DD")}/`; // Change this to the path you want to check/create
+
+    // Check if the folder exists
+    if (!fs.existsSync(folderPath)) {
+      // If it doesn't exist, create it
+      fs.mkdirSync(folderPath);
+      console.log(`Folder '${folderPath}' created.`);
+
+
+    } else {
+      console.log(`Folder '${folderPath}' already exists.`);
     }
-    // Create CSV file in folder by date
-    fs.writeFileSync(dir + fileName, buffer, (err) => {
+
+    fs.writeFileSync(folderPath + fileName, buffer, (err) => {
       if (err) {
         throw err;
       } else {
@@ -496,6 +504,7 @@ const createFeedbackCSV = async (req, res, next) => {
       }
     });
     return res.status(200).send(buffer);
+
   });
 };
 

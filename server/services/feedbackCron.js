@@ -61,39 +61,8 @@ const createFeedbacks = async () => {
               console.error('Error reading file:', err);
               return;
             }
-            // Process data from the file
-            let columnData = {};
-            const lines = data.split('\n');
-
-            lines.forEach((line, lineIndex) => {
-              const columns = line.split(','); // Split line into columns based on comma (CSV)
-
-              if (lineIndex === 0) {
-                headers = columns.map(header => header.trim());
-              } else {
-                columns.forEach((column, columnIndex) => {
-                  const header = headers[columnIndex];
-                  let value = column.trim();
-                  if (!columnData[header]) {
-                    columnData[header] = "";
-                  }
-
-                  value = value.replaceAll("^", ",");
-
-                  columnData[header] = JSON.parse(value);
-                });
-
-                axios.post(`${FEEDBACK_SERVER_HTTP}://${FEEDBACK_SERVER}:${FEEDBACK_SERVER_PORT}/api/feedback`, columnData).then((res) => {
-                  console.log("Feedback created for " + filePath);
-                }).catch((err) => {
-                  //console.log(err.response);
-                  console.log("Unable to create feedback");
-                });
-
-              }
-            });
-
           });
+
         });
         console.log('Files with date format YYYY-MM-DD:', filteredFiles);
       });
@@ -103,8 +72,7 @@ const createFeedbacks = async () => {
   }
 
 
-
-}
+};
 
 const main = async () => {
   try {
@@ -131,7 +99,7 @@ const start = async () => {
   module.exports = cron.schedule("0 0 7 * * *", () => {
     main();
   });
-}
+};
 
 module.exports = { start };
 
