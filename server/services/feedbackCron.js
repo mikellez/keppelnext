@@ -85,7 +85,7 @@ const createFeedbacks = async () => {
 const updatePublicServerStore = async (client) => {
   const { FEEDBACK_SERVER_HTTP, FEEDBACK_SERVER, FEEDBACK_SERVER_PORT } = process.env;
   try{
-    
+
     // Query for plant_location and plant_master data
     const plantLocationResult = await client.query(`SELECT loc_id as id, plant_id, concat(concat(loc_floor, ' Floor - '), loc_room) as location
     FROM keppel.plant_location`);
@@ -141,7 +141,7 @@ const runMainManually = async () => {
 };
 
 const start = async () => {
-  module.exports = cron.schedule("*/30 * * * * *", () => {
+  module.exports = cron.schedule("0 0 7 * * *", () => {
     main();
   });
 };
