@@ -26,18 +26,17 @@ const connectDB = () => {
 };
 
 const createFeedbacks = async () => {
-  const { FEEDBACK_SERVER, FEEDBACK_SERVER_PORT, FEEDBACK_SERVER_HTTP } =
-    process.env;
+  const { FEEDBACK_USERNAME, FEEDBACK_HOSTNAME, FEEDBACK_CSVPATH } = process.env;
   const client = connectDB();
 
   const yesterdayDate = moment().subtract(1, "days").format("YYYY-MM-DD");
   const localDirectoryPath = "./server/feedbackCSV2/" + yesterdayDate + "/"; // Replace with the actual directory path
-  const remoteDirectoryPath = "./server/feedbackCSV/" + yesterdayDate + "/"; // // Replace with the actual directory path on public remote server
+  const remoteDirectoryPath = `${FEEDBACK_USERNAME}@${FEEDBACK_HOSTNAME}:${FEEDBACK_CSVPATH}${yesterdayDate}/`; // // Replace with the actual directory path on public remote server
 
   // Constructing the rsync command - https://www.npmjs.com/package/rsync
   var rsync = new Rsync()
-    .flags("az") // The -a flag copies the full directory not just a file
-    //.shell("ssh") // Uncomment when public remote server has been setup
+    .flags("a") // The -a flag copies the full directory not just a file
+    .shell("ssh") // Uncomment when public remote server has been setup
     // note - need to generate SSH key pair on internal server and pass public key to remote server:
     // https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server
     .source(remoteDirectoryPath)
@@ -78,8 +77,6 @@ const createFeedbacks = async () => {
         });
         console.log("Files with date format YYYY-MM-DD:", filteredFiles);
       });
-
-      console.log("Files with date format YYYY-MM-DD:", filteredFiles);
     });
   } catch (err) {
     console.error("Error while fetching and saving files:", err);
