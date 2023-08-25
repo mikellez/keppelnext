@@ -742,9 +742,7 @@ export default function Request(props: RequestProps) {
                                         >
                                           <strong>Manage</strong>
                                         </Link>
-                                      ) : (data?.role_id === Role.Engineer ||
-                                          data?.role_id === Role.Specialist) &&
-                                        (item.status_id === 2 ||
+                                      ) : (item.status_id === 2 ||
                                           item.status_id === 5) ? (
                                         <Link
                                           href={`/Request/Complete/${item.id}`}

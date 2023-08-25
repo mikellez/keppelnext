@@ -14,6 +14,7 @@ import ModuleSimplePopup, {
 } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import formStyles from "../../../styles/formStyles.module.css";
 import instance from "../../../types/common/axios.config";
+import { Role } from "../../../types/common/enums";
 
 interface CMMSUserEdit {
   first_name?: string;
@@ -62,6 +63,7 @@ const getUsersplantData = async (id: number) => {
 };
 
 export default function EditUser() {
+  const user = useCurrentUser();
   const router = useRouter();
   const user_id: string = router.query.id as string;
   const [plantsAmmended, setPlantsAmmended]: [number[], any] = useState([]);
@@ -298,6 +300,7 @@ export default function EditUser() {
               onChange={handleFormNumber}
               name="role_id"
               value={userDetails.role_id}
+              disabled={user.data?.role_id !== Role.Admin}
             >
               <option value={1}>Admin</option>
               <option value={2}>Manager</option>
