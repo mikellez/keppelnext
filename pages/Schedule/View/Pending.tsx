@@ -69,9 +69,9 @@ import Pagination from "../../../components/Pagination";
 const indexedColumn: (3 | 4)[] = [3, 4];
 const checkManager = (role: number | undefined) => {
   if (!role) return false;
-  if (role == 1 || role == 2) {
+  if (role == 1 || role == 2 || role == 3) {
     return true;
-  } else if (role == 3 || role == 4) {
+  } else if (role == 4) {
     return false;
   }
 };

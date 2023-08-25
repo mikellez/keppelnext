@@ -10,6 +10,10 @@ const fetchAllOfChangeOfPartsQuery = (req) => {
   let userRoleCond = "";
   let plantCond = "";
 
+  if(req.user.role_id === 4) {
+    userRoleCond = `AND cop.assigned_user_id = ${req.user.id}`;
+  }
+
   if (plant && plant != 0) {
     plantCond = `AND psa.plant_id = '${plant}'`;
   }
@@ -56,7 +60,7 @@ const fetchAllOfChangeOfPartsQuery = (req) => {
   }
 
 
-  return `
+  const query =  `
     SELECT 
         cop.cop_id,
         cop.psa_id,
@@ -82,8 +86,11 @@ const fetchAllOfChangeOfPartsQuery = (req) => {
                 keppel.user_access WHERE user_id = ${req.user.id})
         ${dateCond}
         ${plantCond}
+        ${userRoleCond}
                 
   `;
+
+  return query;
 };
 
 const fetchChangeOfPartsByPlantQuery = (req) =>

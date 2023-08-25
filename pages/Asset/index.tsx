@@ -13,6 +13,8 @@ import { ColDef, IRowNode, GridOptions, RowDoubleClickedEvent } from "ag-grid-co
 import { AiOutlineSearch } from "react-icons/ai";
 import styles from "../../styles/Asset.module.scss";
 import { useRouter } from "next/router";
+import { Role } from "../../types/common/enums";
+import { useCurrentUser } from "../../components/SWR";
 
 /*
   EXPLANATION OF ASSETS MODULE
@@ -61,6 +63,7 @@ const getAssets = async () => {
 };
 
 const Asset = () => {
+    const user = useCurrentUser();
     const [rowData, setRowData] = useState(); // Set rowData to Array of Objects, one Object per Row
     // Store gridApi as a state, this is very useful
     const [gridApi, setGridApi] = useState<GridApi>();
@@ -270,11 +273,13 @@ const Asset = () => {
                     />
                     <AiOutlineSearch size={20} color="#3C4048" />
                 </div>
-                <Link href="/Asset/New">
-                    <TooltipBtn text="Create new asset">
-                        <RiFileAddLine size={20} />
-                    </TooltipBtn>
-                </Link>
+                {(user.data?.role_id === Role.Admin || user.data?.role_id === Role.Engineer || user.data?.role_id == Role.Manager) &&
+                    <Link href="/Asset/New">
+                        <TooltipBtn text="Create new asset">
+                            <RiFileAddLine size={20} />
+                        </TooltipBtn>
+                    </Link>
+                }
             </ModuleHeader>
             <ModuleContent>
                 <div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>

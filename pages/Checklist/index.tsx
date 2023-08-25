@@ -262,11 +262,15 @@ export default function Checklist(props: ChecklistProps) {
             setChecklistItems([]);
           }}
         />
+        {(user.data?.role_id === Role.Admin ||
+          user.data?.role_id === Role.Manager ||
+          user.data?.role_id === Role.Engineer) &&
         <Link href="/Checklist/Form?action=New">
           <TooltipBtn text="New Checklist">
             <BsFileEarmarkPlus size={20} />
           </TooltipBtn>
         </Link>
+        }
         <TooltipBtn
           onClick={() => downloadCSV("checklist", activeTabIndex)}
           text="Export CSV"
@@ -487,7 +491,7 @@ export default function Checklist(props: ChecklistProps) {
                                   <AiOutlineEdit size={22} title={"Edit"} />
                                 </Link>
                               </>
-                            ) : item.status_id === 1 ? (
+                            ) : item.status_id === 1 && user.data?.role_id !== Role.Specialist ? (
                               <Link
                                 href={`/Checklist/Form/?action=Edit&id=${item.id}`}
                               >

@@ -2196,7 +2196,7 @@ router
 
 router
   .route("/changeOfParts/completed/:plant/:datetype/:date", checkIfLoggedInAPI)
-  .get(controllers.changeOfParts.fetchScheduleChangeOfParts);
+  .get(controllers.changeOfParts.fetchCompletedChangeOfParts);
 
 router
   .get("/user/getUsers", checkIfLoggedInAPI, controllers.user.getUsers)

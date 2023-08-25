@@ -162,6 +162,8 @@ const License = () => {
   //   console.log(licenseItems);
   // }, [licenseItems]);
 
+  const access = user.data?.role_id == Role.Admin || user.data?.role_id == Role.Engineer || user.data?.role_id == Role.Manager;
+
   return (
     <ModuleMain>
       <ModuleHeader
@@ -192,11 +194,12 @@ const License = () => {
         }
       >
         <PlantSelect onChange={changePlant} allPlants={true} />
-        <Link href="/License/New">
+        {access &&<Link href="/License/New">
           <TooltipBtn text="New License">
             <MdPostAdd size={20} />
           </TooltipBtn>
         </Link>
+        }
       </ModuleHeader>
       {calendarView ? (
         <LicenseCalendar selectedPlant={selectedPlant} />
@@ -387,7 +390,7 @@ const License = () => {
                               </span>
                             </Cell>
                             <Cell>
-                              {item.status_id === 2 && (
+                              {access && item.status_id === 2 && (
                                 <>
                                   <Link href={`/License/Acquire/${item.id}`}>
                                     <AiOutlineFileDone
@@ -405,23 +408,26 @@ const License = () => {
                                 //     <AiOutlineUserAdd size={22} title={"Assign"} />
                                 //   </Link>
                                 //  */}
-                              {item.status_id === 3 && (
+                              {access && item.status_id === 3 && (
                                 <Link href={`/License/Renew/${item.id}`}>
                                   <BiRefresh size={22} title={"Renew"} />
                                 </Link>
                               )}
-                              <Link href={`/License/Edit/${item.id}`}>
-                                <AiOutlineEdit size={22} title={"Edit"} />
-                              </Link>
+                              {access &&
+                                <Link href={`/License/Edit/${item.id}`}>
+                                  <AiOutlineEdit size={22} title={"Edit"} />
+                                </Link>
+                              }
                               <Link href={`/License/View/${item.id}`}>
                                 <AiOutlineFolderView size={22} title={"View"} />
                               </Link>
-                              <AiOutlineHistory
+                              {access && <AiOutlineHistory
                                 color={"#C70F2B"}
                                 onClick={() => setHistory(item.activity_log)}
                                 size={22}
                                 title={"View History"}
                               />
+                              }
                             </Cell>
                           </Row>
                         );

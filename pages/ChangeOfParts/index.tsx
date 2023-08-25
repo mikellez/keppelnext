@@ -13,6 +13,7 @@ import { useChangeOfParts } from "../../components/SWR";
 import { useCurrentUser } from "../../components/SWR";
 import Pagination from "../../components/Pagination";
 import instance from "../../types/common/axios.config";
+import { Role } from "../../types/common/enums";
 
 export interface ChangeOfPartsPageProps {
   changeOfParts: CMMSChangeOfParts[];
@@ -63,7 +64,7 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
   useEffect(() => {
     const currTab = activeCOPType == 0 ? "scheduled" : "completed";
     instance.get(`/api/changeOfParts/${currTab}`).then((ele) => {
-      const size = Math.round(ele.data.length / PAGE_LIMIT);
+      const size = Math.ceil(ele.data.length / PAGE_LIMIT);
       setTotalPage(size);
     });
   }, [activeCOPType]);
@@ -95,6 +96,7 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
           <VscNewFile size={22} />
         </TooltipBtn>
 
+        {(user.data?.role_id == Role.Admin || user.data?.role_id == Role.Manager || user.data?.role_id == Role.Engineer) &&
         <TooltipBtn
           text="Edit"
           disabled={(!selectedCOP.copId || selectedCOP.changedDate) as boolean}
@@ -104,6 +106,7 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
         >
           <AiOutlineEdit size={22} />
         </TooltipBtn>
+        }
 
         {!props?.filter && <PlantSelect onChange={updatePlant} allPlants accessControl default />}
       </ModuleHeader>

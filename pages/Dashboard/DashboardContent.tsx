@@ -23,12 +23,15 @@ import ChangeOfPartsPage from "../ChangeOfParts";
 import Feedback from "../Feedback";
 import { set } from "nprogress";
 import instance from "../../types/common/axios.config";
+import { Role } from "../../types/common/enums";
+import { useCurrentUser } from "../../components/SWR";
 
 const { Option } = Select;
 
 type PickerType = "date";
 
 export default function DashboardContent({ role_id }: { role_id: number }) {
+  const user = useCurrentUser();
   const [showTotalContainer, setShowTotalContainer] = useState<boolean>(true);
   const [page, setPage] = useState(1);
   const [showDiv, setShowDiv] = useState<string>();
@@ -455,6 +458,8 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
   } = feedback;
   const { totalDraftLicense, totalAcquiredLicense } = license;
 
+  const access = user.data!.role_id === Role.Admin || user.data!.role_id === Role.Manager || user.data!.role_id === Role.Engineer;
+
   return (
     <ModuleMain>
       <ModuleHeader header="Dashboard">
@@ -633,7 +638,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               )}
             </DashboardBox>
           )}
-          <DashboardBox
+          {access && <DashboardBox
             id="pending-feedback-box"
             title="Pending Feedbacks"
             style={{ gridArea: "m" }}
@@ -644,7 +649,8 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               {feedback.totalPendingFeedback}
             </p>
           </DashboardBox>
-          <DashboardBox
+          }
+          {access && <DashboardBox
             id="outstanding-feedback-box"
             title="Outstanding Feedbacks"
             style={{ gridArea: "n" }}
@@ -657,7 +663,8 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               {feedback.totalOutstandingFeedback}
             </p>
           </DashboardBox>
-          <DashboardBox
+          }
+          {access && <DashboardBox
             id="completed-feedback-box"
             title="Completed Feedbacks"
             style={{ gridArea: "o" }}
@@ -668,7 +675,8 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               {feedback.totalCompletedFeedback}
             </p>
           </DashboardBox>
-          {showTotalContainer && (
+          }
+          {access && showTotalContainer && (
             <DashboardBox
               title={"Total Feedbacks: " + totalFeedback}
               style={{ gridArea: "p" }}
@@ -682,7 +690,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             </DashboardBox>
           )}
 
-          <DashboardBox
+          {access && <DashboardBox
             id="draft-license-box"
             title="Draft Licenses"
             style={{ gridArea: "q" }}
@@ -693,7 +701,8 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               {totalDraftLicense}
             </p>
           </DashboardBox>
-          <DashboardBox
+          }
+          {access && <DashboardBox
             id="acquired-license-box"
             title="Acquired Licenses"
             style={{ gridArea: "r" }}
@@ -704,13 +713,15 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               {totalAcquiredLicense}
             </p>
           </DashboardBox>
-          <DashboardBox
+          }
+          {access && <DashboardBox
             id=""
             title=""
             style={{ gridArea: "s" }}
             onClick={handleDashboardClick}
           ></DashboardBox>
-          {showTotalContainer && (
+          }
+          {access && showTotalContainer && (
             <DashboardBox
               title={"Total Licenses: " + totalLicense}
               style={{ gridArea: "t" }}

@@ -139,7 +139,8 @@ export default function NavBar() {
                 )}
               {data &&
                 (data.role_id === Role.Admin ||
-                  data.role_id === Role.Manager) && (
+                  data.role_id === Role.Manager ||
+                  data.role_id === Role.Engineer) && (
                   <NavDropdownLink href="/Schedule/Manage">
                     Manage Schedules
                   </NavDropdownLink>
@@ -207,16 +208,20 @@ export default function NavBar() {
                 </NavDropdown>
               )}
 
-            <NavDropdown
-              name="Activity Log"
-              path="/Activity"
-              navOpen={navDisplay}
-              icon={<AiOutlineHistory size={21} />}
-            >
-              <NavDropdownLink href="/Activity/Account_log">
-                Account Activity Log
-              </NavDropdownLink>
-            </NavDropdown>
+            {data && 
+              (data.role_id === Role.Admin ||
+              data.role_id === Role.Manager) && 
+              <NavDropdown
+                name="Activity Log"
+                path="/Activity"
+                navOpen={navDisplay}
+                icon={<AiOutlineHistory size={21} />}
+              >
+                <NavDropdownLink href="/Activity/Account_log">
+                  Account Activity Log
+                </NavDropdownLink>
+              </NavDropdown>
+            }
           </div>
         </div>
       </div>
