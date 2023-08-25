@@ -26,7 +26,7 @@ const connectDB = () => {
 };
 
 const createFeedbacks = async () => {
-  const { FEEDBACK_USERNAME, FEEDBACK_HOSTNAME, FEEDBACK_CSVPATH } = process.env;
+  const { FEEDBACK_USERNAME, FEEDBACK_HOSTNAME, FEEDBACK_CSVPATH, API_BASE_URL } = process.env;
   const client = connectDB();
 
   const yesterdayDate = moment().subtract(1, "days").format("YYYY-MM-DD");
@@ -73,6 +73,39 @@ const createFeedbacks = async () => {
               console.error("Error reading file:", err);
               return;
             }
+            // Process data from the file
+            let columnData = {};
+            const lines = data.split('\n');
+
+            lines.forEach((line, lineIndex) => {
+              const columns = line.split(','); // Split line into columns based on comma (CSV)
+
+              if (lineIndex === 0) {
+                headers = columns.map(header => header.trim());
+              } else {
+                columns.forEach((column, columnIndex) => {
+                  const header = headers[columnIndex];
+                  let value = column.trim();
+                  if (!columnData[header]) {
+                    columnData[header] = "";
+                  }
+
+                  value = value.replaceAll("^", ",");
+
+                  columnData[header] = JSON.parse(value);
+                });
+                // Create feedback for each feedback csv retrieved
+                axios.post(`${API_BASE_URL}/api/feedback`, columnData).then((res) => {
+                  console.log("Feedback created for " + filePath);
+                  return res;
+                }).catch((err) => {
+                  console.log(err);
+                  console.log("Unable to create feedback");
+                });
+
+                return;
+              }
+            });
           });
         });
         console.log("Files with date format YYYY-MM-DD:", filteredFiles);
@@ -97,7 +130,7 @@ const updatePublicServerStore = async (client) => {
       plant_location: plantLocationResult.rows,
       plant_master: plantMasterResult.rows
     };
-    //console.log(postData);
+    console.log(postData);
     
     // Post request to the Public Feedback Server to update the store
     const res = await axios
@@ -108,9 +141,10 @@ const updatePublicServerStore = async (client) => {
                 }
               })
               .catch((err) => {
-                console.log(err.response);
+                console.log(err);
                 console.log("Unable to send updated data");
               });
+    return res;
     }catch(err){
       console.error("Error updating Public Server store:", err);
     }
@@ -120,10 +154,14 @@ const main = async () => {
     const client = connectDB();
     // Cron Job for retrieving feedback from the store
     const feedbacks = await createFeedbacks();
-    console.log("System Generated Feedbacks Created.");
-
+    if(feedbacks){
+      console.log("System Generated Feedbacks Created.");
+    }
+    // Also update the public server store for plant_location and plant_master at the same time
     const updatePublicServer = await updatePublicServerStore(client);
-    console.log("Public Store Updated. ");
+    if(updatePublicServer){
+      console.log("Public Store Updated. ");
+    }
     client.end();
   } catch (err) {
     console.log(err);
