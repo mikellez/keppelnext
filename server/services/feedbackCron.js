@@ -82,12 +82,48 @@ const createFeedbacks = async () => {
     console.error("Error while fetching and saving files:", err);
   }
 };
+const updatePublicServerStore = async (client) => {
+  const { FEEDBACK_SERVER_HTTP, FEEDBACK_SERVER, FEEDBACK_SERVER_PORT } = process.env;
+  try{
+    
+    // Query for plant_location and plant_master data
+    const plantLocationResult = await client.query(`SELECT loc_id as id, plant_id, concat(concat(loc_floor, ' Floor - '), loc_room) as location
+    FROM keppel.plant_location`);
+    const plantMasterResult = await client.query(`SELECT plant_id, plant_name, plant_description FROM keppel.plant_master
+    ORDER BY plant_id ASC`);
 
+    // Merge the 2 data jsons to craft the post body
+    const postData = {
+      plant_location: plantLocationResult.rows,
+      plant_master: plantMasterResult.rows
+    };
+    //console.log(postData);
+    
+    // Post request to the Public Feedback Server to update the store
+    const res = await axios
+              .post(`${FEEDBACK_SERVER_HTTP}://${FEEDBACK_SERVER}:${FEEDBACK_SERVER_PORT}/api/plantLocation/updateStore/`,JSON.stringify(postData)
+              ,{
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              })
+              .catch((err) => {
+                console.log(err.response);
+                console.log("Unable to send updated data");
+              });
+    }catch(err){
+      console.error("Error updating Public Server store:", err);
+    }
+}
 const main = async () => {
   try {
     const client = connectDB();
+    // Cron Job for retrieving feedback from the store
     const feedbacks = await createFeedbacks();
     console.log("System Generated Feedbacks Created.");
+
+    const updatePublicServer = await updatePublicServerStore(client);
+    console.log("Public Store Updated. ");
     client.end();
   } catch (err) {
     console.log(err);
@@ -105,7 +141,7 @@ const runMainManually = async () => {
 };
 
 const start = async () => {
-  module.exports = cron.schedule("0 0 7 * * *", () => {
+  module.exports = cron.schedule("*/30 * * * * *", () => {
     main();
   });
 };
