@@ -2,10 +2,16 @@
  * Feedback Cron:
  *
  * Guest Feedbacks will be saved under folder : feedbackCSV/{date}
- * These feedbacks in the folder will be stored in a external server and will be
+ * These feedbacks in the folder will be stored in a external feedback server and will be
  * queried every morning at 0700 hrs into the internal server with the function :
  * - createFeedback
  *
+ * 
+ * External Server requires plant_location and plant_master data from the internal database. Hence, 
+ * the external server needs to store these data locally in plant_location.json and plant_master.json.
+ * At the same time interval as above, the data will be queried from the internal db to update the data
+ * in these 2 files on the external server with the function
+ * - updatePublicServerStore
  */
 
 require("dotenv").config();
