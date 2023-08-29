@@ -99,7 +99,7 @@ function QRAssetImg({
       {isFeedback ? (
         <SVG
           text={
-            feedbackApiBaseUrl +
+            window.location.origin +
             "/Guest/Asset/feedback/" +
             plant +
             "/" +
@@ -285,7 +285,7 @@ function QRCode(props: NewAssetProps) {
         id={id}
       >
         <SVG
-          text={ + "/Guest/Feedback/" + loc_id}
+          text={ feedbackApiBaseUrl + "/Guest/Feedback/" + loc_id}
           options={{
             level: "H",
             margin: 0,
