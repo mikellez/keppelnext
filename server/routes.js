@@ -2628,27 +2628,33 @@ router.get(
   controllers.license.fetchLicenseImages
 );
 /**
- * @api {get} /license/:id
+ * @api {get} /license/expired/:plant/:datetype/:date/:days
  * @apiDescription fetchExpiredLicensesInDays
- * @apiName fetchSingleLicense
+ * @apiName fetchExpiredLicenseInDays
  * @apiGroup License
  *
- * @apiParams {Number} id Unique ID of the license
+ * @apiParams {Number} plant_id specific plant
+ * @apiParams {String} date_type usually in date
+ * @apiParams {String} date For the specific date, or "all"
+ * @apiParams {String} days Number of days expired "30","60","90"
  *
  *
- * @apiSuccess {CMMSLicenseForm} -
- * @apiSuccess {String} -.license_id ID of license
- * @apiSuccess {String} -.license_name Name of license
- * @apiSuccess {String} -.license_provider Provider of license
- * @apiSuccess {Number} -.license_type_id type of license
- * @apiSuccess {String} -.license_details description of license
- * @apiSuccess {Number} -.plant_id plant id of asset that license if for
- * @apiSuccess {Number} -.plant_loc_id location id of asset license
- * @apiSuccess {Number} -.linked_asset_id id of linked asset
- * @apiSuccess {Number} -.assigned_user_id assigned user
- * @apiSuccess {Date} -.acquisition_date Aquired license Date
- * @apiSuccess {Date} -.expiry_date License Expiry Date
- * @apiSuccess {Number} -.status_id status of license
+ * @apiSuccess {JSON} - Json Object returned
+ * @apiSuccess {CMMSLicense[]} -.rows All expired license in an array
+ * @apiSuccess {Number} -.total Total number of Pages required
+ * @apiSuccess {Number} -.count Total number of license returned
+ * @apiSuccess {String} -.row.license_id ID of license
+ * @apiSuccess {String} -.row.license_name Name of license
+ * @apiSuccess {String} -.row.license_provider Provider of license
+ * @apiSuccess {Number} -.row.license_type_id type of license
+ * @apiSuccess {String} -.row.license_details description of license
+ * @apiSuccess {Number} -.row.plant_id plant id of asset that license if for
+ * @apiSuccess {Number} -.row.plant_loc_id location id of asset license
+ * @apiSuccess {Number} -.row.linked_asset_id id of linked asset
+ * @apiSuccess {Number} -.row.assigned_user_id assigned user
+ * @apiSuccess {Date} -.row.acquisition_date Aquired license Date
+ * @apiSuccess {Date} -.row.expiry_date License Expiry Date
+ * @apiSuccess {Number} -.row.status_id status of license
  *
  * @apiError (Error 500) {Object} Error Fetching license
  *
