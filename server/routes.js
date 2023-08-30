@@ -2609,7 +2609,7 @@ router.patch(
 );
 
 /**
- * @api /license/images/:id
+ * @api {get} /license/images/:id
  * @apiDescription fetch license images
  * @apiName fetchLicenseImages
  * @apiGroup License
@@ -2627,7 +2627,32 @@ router.get(
   checkIfLoggedInAPI,
   controllers.license.fetchLicenseImages
 );
-
+/**
+ * @api {get} /license/:id
+ * @apiDescription fetchExpiredLicensesInDays
+ * @apiName fetchSingleLicense
+ * @apiGroup License
+ *
+ * @apiParams {Number} id Unique ID of the license
+ *
+ *
+ * @apiSuccess {CMMSLicenseForm} -
+ * @apiSuccess {String} -.license_id ID of license
+ * @apiSuccess {String} -.license_name Name of license
+ * @apiSuccess {String} -.license_provider Provider of license
+ * @apiSuccess {Number} -.license_type_id type of license
+ * @apiSuccess {String} -.license_details description of license
+ * @apiSuccess {Number} -.plant_id plant id of asset that license if for
+ * @apiSuccess {Number} -.plant_loc_id location id of asset license
+ * @apiSuccess {Number} -.linked_asset_id id of linked asset
+ * @apiSuccess {Number} -.assigned_user_id assigned user
+ * @apiSuccess {Date} -.acquisition_date Aquired license Date
+ * @apiSuccess {Date} -.expiry_date License Expiry Date
+ * @apiSuccess {Number} -.status_id status of license
+ *
+ * @apiError (Error 500) {Object} Error Fetching license
+ *
+ */
 router.get(
   "/license/expired/:plant/:datetype/:date/:days",
   checkIfLoggedInAPI,
