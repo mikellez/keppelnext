@@ -1,13 +1,13 @@
 import React from "react";
-import { ModuleContent, ModuleDivider } from "../";
-import AssetSelect from "./AssetSelect";
-import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
-import PlantSelect from "../PlantSelect";
-import RequiredIcon from "../RequiredIcon";
 import { SingleValue } from "react-select";
+import { ModuleContent, ModuleDivider } from "../";
 import formStyles from "../../styles/formStyles.module.css";
 import { CMMSChecklist } from "../../types/common/interfaces";
+import PlantSelect from "../PlantSelect";
+import RequiredIcon from "../RequiredIcon";
+import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
 import TooltipBtn from "../TooltipBtn";
+import AssetSelect from "./AssetSelect";
 
 interface ChecklistCreationFormProps {
   checklistData: CMMSChecklist;
@@ -32,6 +32,8 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
       };
     });
   };
+  console.log("c" + props.checklistData.plant_name)
+  console.log("a" + props.checklistData.overdue)
 
   const updateChecklistField = (
     value: number | string | null,
@@ -121,8 +123,36 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
               }
             />
           </div>
+
+          <div className="form-group">
+            <label className="form-label">
+              <RequiredIcon /> Overdue
+            </label>
+            <select
+              className="form-select"
+              name="overdue"
+              onChange={updateChecklist}
+              value={
+                props.checklistData.overdue
+                  ? props.checklistData.overdue
+                  : ""
+              }
+            >
+              <option disabled hidden selected
+              >
+              -- Select Overdue Option --
+              </option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="half yearly">Half Yearly</option>
+              <option value="annually">Annually</option>
+            </select>
+          </div>
         </div>
       </div>
+
       <ModuleDivider />
       <div className="row">
         <div className={`col-6 ${formStyles.halfContainer}`}>
