@@ -33,16 +33,21 @@ const handleOverdueRequests = async (id) => {
     .where('request_id', id)
     .update({
       status_id: 7 
+    }).catch(error => {
+      console.log("Unable to update request status_id: " + error);
+    })
+    .finally(() => {
+      client.destroy();
     });
-    console.log(result);
-    client.end();
+    //console.log(result);
+    return result;
   };
 const main = async () => {
     try {
       const requests = await fetchNewlyOverdueRequests();
-      console.log(requests);
+      //console.log(requests);
       for (let rq of requests) {
-        console.log(rq.request_id);
+        //console.log(rq.request_id);
         await handleOverdueRequests(rq.request_id);
       }
       
