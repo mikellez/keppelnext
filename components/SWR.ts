@@ -17,7 +17,7 @@ import instance from "../types/common/axios.config";
 import { FeedbackFormProps } from "../pages/Feedback";
 
 function useRequest(
-  request_type: "pending" | "assigned" | "review" | "approved",
+  request_type: "pending" | "assigned" | "review" | "approved" | "overdue",
   page: number,
   search: string = "",
   fields: string[]
