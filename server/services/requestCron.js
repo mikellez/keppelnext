@@ -1,7 +1,5 @@
 const cron = require("node-cron");
 const { knex } = require("knex");
-const moment = require("moment");
-const exp = require("constants");
 const knexJSON = require("../db/db.knexConfig.json");
 
 const connectDB = () => {
@@ -44,8 +42,11 @@ const handleOverdueRequests = async (id) => {
   };
 const main = async () => {
     try {
+      // Get the requests that have just been overdue
       const requests = await fetchNewlyOverdueRequests();
       //console.log(requests);
+      
+      // Set the status of every request to be overdue (status_id = 7)
       for (let rq of requests) {
         //console.log(rq.request_id);
         await handleOverdueRequests(rq.request_id);
