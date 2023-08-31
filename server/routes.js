@@ -201,6 +201,25 @@ router.get(
   controllers.request.fetchAssignedRequests
 );
 
+
+/**
+ * @api {get} /request/assigned Get Overdue Requests
+ * @apiDescription Gets all requests with status of `OVERDUE`.
+ *
+ * For operation specialists, only relevant overdue requests will be returned.
+ *
+ * Returns the same output schema as `/request/overdue`
+ * @apiName GetOverdueRequests
+ * @apiGroup Request
+ *
+ */
+router.get(
+  "/request/overdue",
+  checkIfLoggedInAPI,
+  controllers.request.fetchOverdueRequests
+);
+
+
 /**
  * @api {get} /request/review Get For Review Requests
  * @apiDescription Gets all requests with status of `COMPLETED`, `REJECTED`, `CANCELLED`.
