@@ -22,6 +22,7 @@
  */
 
 import React, { useEffect, useState } from "react";
+import ReactTooltip from "react-tooltip";
 import instance from "../../../types/common/axios.config";
 import {
   Table,
@@ -64,6 +65,7 @@ import { getSchedules } from "../Timeline/[id]";
 import ApproveSchedulePreviewModal from "../../../components/Schedule/ApproveSchedulePreviewModal";
 import Tooltip from "rc-tooltip";
 import Pagination from "../../../components/Pagination";
+import "rc-tooltip/assets/bootstrap_white.css";
 
 // 3 : Draft, 1 : approved
 const indexedColumn: (3 | 4)[] = [3, 4];
@@ -247,30 +249,48 @@ export default function Pending() {
                       };
                       return (
                         <Row key={item.id} item={key}>
-                          <Cell>{item.id}</Cell>
-                          <Cell>{item.name}</Cell>
                           <Cell>
-                            {/* <Tooltip
+                            <Tooltip
+                              overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              placement="bottom"
+                              trigger={["hover"]}
+                              overlay={<span>{item.id}</span>}
+                            >
+                              {<div>{item.id}</div>}
+                            </Tooltip>
+                          </Cell>
+                          <Cell>
+                            <Tooltip
+                              overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              placement="bottom"
+                              trigger={["hover"]}
+                              overlay={<span>{item.name}</span>}
+                            >
+                              {<div>{item.name}</div>}
+                            </Tooltip>
+                          </Cell>
+                          <Cell>
+                            <Tooltip
                               overlayInnerStyle={{ fontSize: "0.7rem" }}
                               placement="bottom"
                               trigger={["hover"]}
                               overlay={<span>{item.plantName}</span>}
-                            > */}
-                            <div>{item.plantName}</div>
-                            {/* </Tooltip> */}
+                            >
+                              <span>{item.plantName}</span>
+                            </Tooltip>
                           </Cell>
                           <Cell>
-                            {/* <Tooltip
+                            <Tooltip
                               overlayInnerStyle={{ fontSize: "0.7rem" }}
                               placement="bottom"
                               trigger={["hover"]}
                               overlay={<span>{item.description}</span>}
-                            > */}
-                            <div>{item.description}</div>
-                            {/* </Tooltip> */}
+                            >
+                              <div>{item.description}</div>
+                            </Tooltip>
                           </Cell>
                           <Cell>
-                            {/* <Tooltip
+                            <Tooltip
                               overlayInnerStyle={{ fontSize: "0.7rem" }}
                               placement="bottom"
                               trigger={["hover"]}
@@ -283,65 +303,72 @@ export default function Pending() {
                                     : null}
                                 </span>
                               }
-                            > */}
-                            <div>
-                              {item.created_date
-                                ? moment(new Date(item.created_date)).format(
-                                    "MMMM Do YYYY, h:mm:ss a"
-                                  )
-                                : null}
-                            </div>
-                            {/* </Tooltip> */}
+                            >
+                              <div>
+                                {item.created_date
+                                  ? moment(new Date(item.created_date)).format(
+                                      "MMMM Do YYYY, h:mm:ss a"
+                                    )
+                                  : null}
+                              </div>
+                            </Tooltip>
                           </Cell>
 
                           <Cell>
                             {activeTabIndex == 0 ? (
-                              // <Tooltip
-                              //   overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              //   placement="bottom"
-                              //   trigger={["hover"]}
-                              //   overlay={<span>{"Approve"}</span>}
-                              // >
-                              <AiOutlineEdit
-                                color="#C70F2B"
-                                size={22}
-                                title="Edit"
-                                onClick={() => {
-                                  setSelectedTimeline(item.id);
-                                  setSubmitModal(true);
-                                }}
-                                style={{ cursor: "pointer" }}
-                              />
+                              <Tooltip
+                                overlayInnerStyle={{ fontSize: "0.7rem" }}
+                                placement="bottom"
+                                trigger={["hover"]}
+                                overlay={<span>{"Approve"}</span>}
+                              >
+                                <AiOutlineEdit
+                                  color="#C70F2B"
+                                  size={22}
+                                  title="Edit"
+                                  onClick={() => {
+                                    setSelectedTimeline(item.id);
+                                    setSubmitModal(true);
+                                  }}
+                                  style={{ cursor: "pointer" }}
+                                />
+                              </Tooltip>
                             ) : activeTabIndex == 1 ? (
-                              // {/* </Tooltip> */}
-                              // <Tooltip
-                              //   overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              //   placement="bottom"
-                              //   trigger={["hover"]}
-                              //   overlay={<span>{"Manage"}</span>}
-                              // >
-                              <BiCommentCheck
-                                color="#C70F2B"
-                                size={22}
-                                title="Approve"
-                                onClick={() => {
-                                  setApproveModal(true);
-                                  setSelectedTimeline(item.id);
-                                }}
-                                style={{ cursor: "pointer" }}
-                              />
+                              <Tooltip
+                                overlayInnerStyle={{ fontSize: "0.7rem" }}
+                                placement="bottom"
+                                trigger={["hover"]}
+                                overlay={<span>{"Manage"}</span>}
+                              >
+                                <BiCommentCheck
+                                  color="#C70F2B"
+                                  size={22}
+                                  title="Approve"
+                                  onClick={() => {
+                                    setApproveModal(true);
+                                    setSelectedTimeline(item.id);
+                                  }}
+                                  style={{ cursor: "pointer" }}
+                                />
+                              </Tooltip>
                             ) : (
-                              // {/* </Tooltip> */}
-                              <AiOutlineFolderView
-                                color="#C70F2B"
-                                size={22}
-                                title="View"
-                                onClick={() => {
-                                  setApproveModal(true);
-                                  setSelectedTimeline(item.id);
-                                }}
-                                style={{ cursor: "pointer" }}
-                              />
+                              <Tooltip
+                                overlayInnerStyle={{ fontSize: "0.7rem" }}
+                                placement="bottom"
+                                trigger={["hover"]}
+                                overlay={<span>{"View"}</span>}
+                              >
+                                <AiOutlineFolderView
+                                  color="#C70F2B"
+                                  size={22}
+                                  title="View"
+                                  onClick={() => {
+                                    setApproveModal(true);
+                                    setSelectedTimeline(item.id);
+                                  }}
+                                  style={{ cursor: "pointer" }}
+                                />
+                              </Tooltip>
                             )}
                           </Cell>
                         </Row>
