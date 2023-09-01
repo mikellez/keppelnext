@@ -476,25 +476,27 @@ const getScheduleDrafts = async (req, res) => {
 const getApprovedTimelines = async (req, res) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
-
   let query = `
     SELECT 
-      ST.timeline_id as id,
-      ST.timeline_name as name,
+      ST.timeline_id as id, 
+      ST.timeline_name as name, 
       ST.description, 
       ST.plant_id as "plantId", 
       PM.plant_name as "plantName", 
       ST.status, 
       ST.created_date
-    FROM keppel.schedule_timelines ST 
-    JOIN keppel.plant_master PM ON ST.plant_id = PM.plant_id
+    FROM 
+      keppel.users u
+      JOIN keppel.user_access ua ON u.user_id = ua.user_id
+      JOIN keppel.schedule_timelines ST ON ua.allocatedplantids LIKE concat(concat('%',ST.plant_id::text), '%')
+      JOIN keppel.plant_master PM ON ST.plant_id = PM.plant_id
     WHERE 
       status = 1
-      AND created_by = $1
+      AND ua.user_id = $1
       AND active = 1
-    ORDER BY ST.created_date DESC
-  `
+    ORDER BY ST.activity_log -> (jsonb_array_length(ST.activity_log) -1) ->> 'date' DESC
 
+  `
   const pageQuery = `SELECT COUNT(*) AS row_count FROM (` +
     query +
   `) subquery`;
@@ -509,8 +511,7 @@ const getApprovedTimelines = async (req, res) => {
     console.log(err);
     res.status(500).send(err);
   }
-
-}
+} 
 
 const getPendingTimelines = async (req, res) => {
   const page = req.query.page || 1;
