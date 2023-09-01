@@ -1642,6 +1642,11 @@ router.get(
   checkIfLoggedInAPI,
   controllers.schedule.getPendingTimelines
 );
+router.get(
+  "/timeline_approved",
+  checkIfLoggedInAPI,
+  controllers.schedule.getApprovedTimelines
+);
 
 router.get(
   "/timeline_completed",

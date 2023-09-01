@@ -51,6 +51,7 @@ import {
   AiOutlineFileDone,
   AiOutlineFolderView,
   AiOutlineHistory,
+  AiOutlineDelete
 } from "react-icons/ai";
 import { BiCommentCheck } from "react-icons/bi";
 
@@ -64,6 +65,13 @@ import { getSchedules } from "../Timeline/[id]";
 import ApproveSchedulePreviewModal from "../../../components/Schedule/ApproveSchedulePreviewModal";
 import Tooltip from "rc-tooltip";
 import Pagination from "../../../components/Pagination";
+import { BsTrashFill } from "react-icons/bs";
+import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
+import router from "next/router";
+import { Role } from "../../../types/common/enums";
+import {
+  changeTimelineStatus
+} from "../../../pages/Schedule/Manage";
 
 // 3 : Draft, 1 : approved
 const indexedColumn: (3 | 4)[] = [3, 4];
@@ -77,6 +85,10 @@ const checkManager = (role: number | undefined) => {
 };
 
 export default function Pending() {
+  const user = useCurrentUser();
+  const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
+  const [confirmDeleteApproval, setConfirmDeleteApproval] = useState<boolean>(false);
+  const [deleteTimeline, setDeleteTimeline] = useState<number>();
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [isReady, setReady] = useState<boolean>(false);
@@ -94,12 +106,13 @@ export default function Pending() {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns: 5em 20em 10em 25em 15em 5em;",
+        "--data-table-library_grid-template-columns: 5em 15em 10em 20em 15em 10em 5em;",
     },
   ]);
 
   const { data } = useCurrentUser();
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
+  const [triggerTab, setTriggerTab] = useState<boolean>(false);
 
   const handleOptions = (activeTab: number) => {
     if (activeTab == 0) {
@@ -108,6 +121,29 @@ export default function Pending() {
       return ScheduleCreateOptions.Approved;
     }
   };
+
+  const handleDelete = () => {
+    instance
+      .delete(`/api/timeline/${deleteTimeline}`)
+      .then((res) => {
+        // console.log(res);
+        router.push("/Schedule/View/Pending");
+        setTriggerTab(true);
+        setConfirmDelete(false);
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const handleDeleteApproval = () => {
+    changeTimelineStatus(6, deleteTimeline as number)
+      .then((result) => {
+        // Close and clear modal fields
+        router.push("/Schedule/View/Pending");
+        setTriggerTab(true);
+        setConfirmDeleteApproval(false);
+      })
+
+  }
 
   useEffect(() => {
     if (data?.role_id) {
@@ -122,8 +158,11 @@ export default function Pending() {
           url = `/api/timeline_pending?page=${page}`;
           break;
         case 2:
-          url = `/api/timeline_completed?page=${page}`;
+          url = `/api/timeline_approved?page=${page}`;
           break;
+        /*case 3:
+          url = `/api/timeline_completed?page=${page}`;
+          break;*/
       }
 
       instance
@@ -140,7 +179,7 @@ export default function Pending() {
 
       setReady(true);
     }
-  }, [activeTabIndex, data, page]);
+  }, [activeTabIndex, data, page, triggerTab]);
 
   const switchColumns = (index: number) => {
     if (isReady) {
@@ -172,7 +211,7 @@ export default function Pending() {
             ? "Schedule Drafts"
             : activeTabIndex === 1
             ? "Pending Schedules"
-            : "Completed Schedules"
+            : "Approved Schedules"
         }
       />
       <ModuleContent>
@@ -206,7 +245,7 @@ export default function Pending() {
                     "nav-link" + (activeTabIndex === 2 ? " active" : "")
                   }
                 >
-                  <span style={{ all: "unset" }}>Completed</span>
+                  <span style={{ all: "unset" }}>Approved</span>
                 </li>
               </>
             )}
@@ -236,6 +275,7 @@ export default function Pending() {
                       <HeaderCell resize>Plant Name</HeaderCell>
                       <HeaderCell resize>Description</HeaderCell>
                       <HeaderCell resize>Date Created</HeaderCell>
+                      <HeaderCell resize>Cancelation</HeaderCell>
                       <HeaderCell resize>Actions</HeaderCell>
                     </HeaderRow>
                   </Header>
@@ -295,6 +335,10 @@ export default function Pending() {
                           </Cell>
 
                           <Cell>
+                            {item.status == 6 ? <div>Yes</div> : <div>-</div>}
+                          </Cell>
+
+                          <Cell>
                             {activeTabIndex == 0 ? (
                               // <Tooltip
                               //   overlayInnerStyle={{ fontSize: "0.7rem" }}
@@ -332,6 +376,7 @@ export default function Pending() {
                               />
                             ) : (
                               // {/* </Tooltip> */}
+                              <>
                               <AiOutlineFolderView
                                 color="#C70F2B"
                                 size={22}
@@ -342,6 +387,18 @@ export default function Pending() {
                                 }}
                                 style={{ cursor: "pointer" }}
                               />
+                              {activeTabIndex == 2 &&
+                                <AiOutlineDelete
+                                  color="#C70F2B"
+                                  size={22}
+                                  title="Delete"
+                                  onClick={() => {
+                                    user.data?.role_id === Role.Engineer ? setConfirmDeleteApproval(true) : setConfirmDelete(true);
+                                    setDeleteTimeline(item.id);
+                                  }}
+                                  style={{ cursor: "pointer" }}
+                                />}
+                              </>
                             )}
                           </Cell>
                         </Row>
@@ -401,6 +458,58 @@ export default function Pending() {
           timelineId={selectedTimeline!}
           closeOnBlur
         />
+        {user.data?.role_id === Role.Engineer ? 
+        <ModuleSimplePopup
+          setModalOpenState={setConfirmDeleteApproval}
+          modalOpenState={confirmDeleteApproval}
+          title="Are you sure?"
+          text="This action will be submitted for approval"
+          icon={SimpleIcon.Exclaim}
+          shouldCloseOnOverlayClick={true}
+          buttons={[
+            <button
+              key="deleteConfirm"
+              onClick={handleDeleteApproval}
+              className="btn btn-primary"
+            >
+              Submit
+            </button>,
+            <button
+              key="deleteCancel"
+              onClick={() => setConfirmDeleteApproval(false)}
+              className="btn btn-secondary"
+            >
+              Cancel
+            </button>,
+          ]}
+        />
+        :
+        <ModuleSimplePopup
+          setModalOpenState={setConfirmDelete}
+          modalOpenState={confirmDelete}
+          title="Are you sure?"
+          text="This action cannot be undone"
+          icon={SimpleIcon.Exclaim}
+          shouldCloseOnOverlayClick={true}
+          buttons={[
+            <button
+              key="deleteConfirm"
+              onClick={handleDelete}
+              className="btn btn-primary"
+            >
+              Delete
+            </button>,
+            <button
+              key="deleteCancel"
+              onClick={() => setConfirmDelete(false)}
+              className="btn btn-secondary"
+            >
+              Cancel
+            </button>,
+          ]}
+        />
+
+        }
       </ModuleContent>
     </ModuleMain>
   );

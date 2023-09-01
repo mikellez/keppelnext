@@ -41,6 +41,7 @@ const fetchDueSchedules = async () => {
         WHERE
             ST.TIMELINE_ID = SC.TIMELINE_ID AND
             ST.STATUS = 1 AND
+            ST.ACTIVE = 1 AND
             SC.PLANT_ID = PM.PLANT_ID AND 
             CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
             (
