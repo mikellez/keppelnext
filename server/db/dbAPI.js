@@ -41,11 +41,11 @@ const dbConnection = async (req, res, next) => {
 
 const connectDB = async (dbName) => {
   const dbConfig = dbJSON[dbName];
-  console.log(dbConfig);
+  //console.log(dbConfig);
   const pool = new Pool(dbConfig);
   global.db = pool;
   const knexInstance = await require('knex')(knexJSON[dbName]);
-  console.log(knexInstance);
+  //console.log(knexInstance);
   global.knex = knexInstance;
 };
 

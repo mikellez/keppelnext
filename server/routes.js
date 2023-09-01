@@ -201,6 +201,25 @@ router.get(
   controllers.request.fetchAssignedRequests
 );
 
+
+/**
+ * @api {get} /request/assigned Get Overdue Requests
+ * @apiDescription Gets all requests with status of `OVERDUE`.
+ *
+ * For operation specialists, only relevant overdue requests will be returned.
+ *
+ * Returns the same output schema as `/request/overdue`
+ * @apiName GetOverdueRequests
+ * @apiGroup Request
+ *
+ */
+router.get(
+  "/request/overdue",
+  checkIfLoggedInAPI,
+  controllers.request.fetchOverdueRequests
+);
+
+
 /**
  * @api {get} /request/review Get For Review Requests
  * @apiDescription Gets all requests with status of `COMPLETED`, `REJECTED`, `CANCELLED`.
@@ -513,7 +532,7 @@ router.get("/request/asset/:psa_id", controllers.request.fetchAssetRequest);
  * @apiSuccess {Number} -.status_id Template Status (currently deprecated)
  * @apiUse ChecklistDataJSON
  *
- * @apiError (Error 500) {String} InternalServerError "No checklist template found"
+ * @apiError (Error 500) {Object} InternalServerError "No checklist template found"
  */
 
 /**
@@ -2420,6 +2439,29 @@ router.get(
   controllers.license.fetchAcquiredLicenses
 );
 
+/**
+ * @api {get} /license/acquired?page=&expand=&plantId=&search= Get Acquired License
+ * @apiDescription Acquired License
+ * @apiName fetchAcquiredLicense
+ * @apiGroup License
+ *
+ * @apiParams {Number} plant_id ID of the plant if all plants put 0
+ * @apiParams {Number} dataetype Type of date either in "days","months","year"
+ * @apiParams {String} date Actual date in instring
+ *
+ * @apiQuery {Number} page Page of Acquired License shown
+ * @apiQuery {String[]} expand Types of parameters needed in the query
+ * @apiQuery {Number} plantId To filter by plants, 0 by default
+ * @apiQuery {String} Search To search for specifics in the DB (Not implemented yet)
+ *
+ *
+ * @apiSuccess {JSON} - Data of Acquired License and total page
+ * @apiSuccess {CMMSLicense[]} -.rows Array of Acquired License
+ * @apiSuccess {Number} -.total Total number of pages of Acquired License in the DB
+ *
+ * @apiError (Error 500) {Object} Internal Server Error {msg : error}
+ */
+
 router.get(
   "/license/acquired/:plant/:datetype/:date",
   checkIfLoggedInAPI,
@@ -2532,7 +2574,7 @@ router.get(
  *
  * @apiSuccess {String} Successfully deleted License
  *
- * @apiError {String} Error occurred deleting license
+ * @apiError {Object} Error occurred deleting license
  */
 router
   .route("/license/:id", checkIfLoggedInAPI)
@@ -2561,7 +2603,6 @@ router
  *
  * @apiSuccess {String} Successfully editing license
  *
- * @apiError {String} Error editing license
  */
 router.patch(
   "/license/:id",
@@ -2583,7 +2624,7 @@ router.patch(
  *
  * @apiSuccess {String} Successfully acquired license
  *
- * @apiError {String} Error editing license
+ *
  *
  */
 router.patch(
@@ -2604,7 +2645,6 @@ router.patch(
  *
  * @apiSuccess {String} Successfully renew license
  *
- * @apiError {String} Error renewing license in the server
  *
  */
 router.patch(
@@ -2624,7 +2664,6 @@ router.patch(
  * @apiSuccess {Object} - Image Datas
  * @apiSuccess {File[]} -.images Data of the Images
  *
- * @apiError {String} Error fetching license images
  */
 
 router.get(
@@ -2661,7 +2700,6 @@ router.get(
  * @apiSuccess {Date} -.row.expiry_date License Expiry Date
  * @apiSuccess {Number} -.row.status_id status of license
  *
- * @apiError (Error 500) {Object} Error Fetching license
  *
  */
 router.get(
