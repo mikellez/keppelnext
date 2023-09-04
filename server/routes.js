@@ -1892,7 +1892,7 @@ router.get(
 router.get(
   "/feedback/pending/:plant/:datetype/:date",
   checkIfLoggedInAPI,
-  controllers.feedbackKnex.fetchPendingFeedback
+  controllers.feedback.fetchPendingFeedback
 );
 
 /**

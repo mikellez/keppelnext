@@ -7,7 +7,8 @@
             "database": "cmms_dev",
             "user": "postgres",
             "password": "123Az!!!"
-        }
+        },
+        "pool": { "min": 0, "max": 7 }
     },
     "internal_test_db": {
         "client": "pg",
