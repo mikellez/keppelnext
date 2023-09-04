@@ -40,9 +40,49 @@ interface ApproveSchedulePreviewModalProps {
   closeOnBlur?: boolean;
 }
 
+const ContentHeader = (props: { tabIndex: number; setRemarks: (arg0: string) => void; scheduleInfo: { status: number; }[]; handleClick: (arg0: number) => void; }) => {
+  return props.tabIndex == 1 ? (
+    <div className="d-flex align-items-center justify-content-around py-3">
+      <div style={{ flex: "4" }}>
+        <label>
+          <p>Remarks</p>
+        </label>
+        <textarea
+          className="form-control"
+          rows={5}
+          maxLength={50}
+          style={{
+            resize: "none",
+            width: "80%",
+          }}
+          onChange={(e)=>props.setRemarks(e.target.value)}
+        />
+      </div>
+      <TooltipBtn
+        toolTip={false}
+        style={{ backgroundColor: "green", borderColor: "green" }}
+        onClick={() => props.scheduleInfo[0].status === 6 ? props.handleClick(7) : props.handleClick(1)}
+      >
+        Approve
+      </TooltipBtn>
+      <TooltipBtn
+        toolTip={false}
+        onClick={() => props.scheduleInfo[0].status === 6 ? props.handleClick(8) : props.handleClick(3)}
+        style={{ marginLeft: "10px" }}
+      >
+        {" "}
+        Reject{" "}
+      </TooltipBtn>{" "}
+    </div>
+  ) : (
+    <div></div>
+  );
+};
+
 export default function ApproveSchedulePreviewModal(
   props: ApproveSchedulePreviewModalProps
 ) {
+  const [isPopup, setIsPopup] = useState<boolean>(false);
   const [confirmModal, setConfirmModal] = useState<boolean>(false);
   // const [remarksModal, setRemarksModal] = useState<boolean>(false);
   const [outcomeModal, setOutcomeModal] = useState<boolean>(false);
@@ -58,9 +98,10 @@ export default function ApproveSchedulePreviewModal(
   }, [props.tabIndex]);
 
   function handleClick(newStatus: number) {
-    if (remarks === "" && newStatus != 1) {
+    if (remarks === "" && ![1, 7].includes(newStatus)) {
       //Prompt for remarks
       // setRemarksModal(true);
+      setIsPopup(true);
     } else {
       // Prompt for confirm
       setConfirmModal(true);
@@ -68,11 +109,12 @@ export default function ApproveSchedulePreviewModal(
     }
   }
   function handleManage(newStatus: number) {
-    if (remarks === "" && newStatus != 1) {
+    if (remarks === "" && ![1, 7].includes(newStatus)) {
       //Prompt for remarks
       // setRemarksModal(true);
+      setIsPopup(true);
     } else {
-      changeTimelineStatus(newStatus, props.timelineId as number)
+      changeTimelineStatus(newStatus, props.timelineId as number, remarks)
         .then((result) => {
           // Close and clear modal fields
           setOutcomeModal(true);
@@ -87,44 +129,6 @@ export default function ApproveSchedulePreviewModal(
     }
   }
 
-  const ContentHeader = () => {
-    return props.tabIndex == 1 ? (
-      <div className="d-flex align-items-center justify-content-around py-3">
-        <div style={{ flex: "4" }}>
-          <label>
-            <p>Remarks</p>
-          </label>
-          <textarea
-            className="form-control"
-            rows={5}
-            maxLength={50}
-            style={{
-              resize: "none",
-              width: "80%",
-            }}
-            onChange={(e) => setRemarks(e.target.value)}
-          />
-        </div>
-        <TooltipBtn
-          toolTip={false}
-          style={{ backgroundColor: "green", borderColor: "green" }}
-          onClick={() => handleClick(1)}
-        >
-          Approve
-        </TooltipBtn>
-        <TooltipBtn
-          toolTip={false}
-          onClick={() => handleClick(3)}
-          style={{ marginLeft: "10px" }}
-        >
-          {" "}
-          Reject{" "}
-        </TooltipBtn>{" "}
-      </div>
-    ) : (
-      <div></div>
-    );
-  };
 
   return (
     <>
@@ -140,7 +144,7 @@ export default function ApproveSchedulePreviewModal(
           title="Schedule Preview"
           header="Schedule Preview"
           schedules={props.scheduleInfo}
-          contentHeader={<ContentHeader />}
+          contentHeader={<ContentHeader tabIndex={props.tabIndex} scheduleInfo={props.scheduleInfo} handleClick={handleClick} setRemarks={setRemarks}/>}
         />
       </ModuleModal>
 
@@ -160,16 +164,24 @@ export default function ApproveSchedulePreviewModal(
       <ModuleSimplePopup
         modalOpenState={outcomeModal}
         setModalOpenState={setOutcomeModal}
-        title={status === 1 ? "Approved" : status === 3 ? "Rejected" : ""}
+        title={[1, 7].includes(status) ? "Approved" : [3, 8].includes(status) ? "Rejected" : ""}
         shouldCloseOnOverlayClick={true}
         text={
-          status === 1
+          [1, 7].includes(status)
             ? "Schedule has been successfully approved."
-            : status === 3
+            : [3, 8].includes(status)
             ? "Schedule has been rejected."
             : ""
         }
         icon={SimpleIcon.Check}
+      />
+      <ModuleSimplePopup
+        modalOpenState={isPopup}
+        setModalOpenState={setIsPopup}
+        title="Missing Remarks"
+        text="Please write some remarks so that the engineers know why the schedule is rejected."
+        icon={SimpleIcon.Exclaim}
+        shouldCloseOnOverlayClick={true}
       />
     </>
   );

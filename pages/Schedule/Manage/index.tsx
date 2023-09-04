@@ -25,10 +25,18 @@ import { useRouter } from "next/router";
 // Function to change the status of a timeline
 export async function changeTimelineStatus(
   newStatus: number,
-  timelineId: number
+  timelineId: number,
+  remarks?: string
 ) {
+  const requestBody: { remarks?: string } = {};
+
+  // Conditionally add the remarks parameter if it's provided
+  if (remarks !== undefined) {
+    requestBody.remarks = remarks;
+  }
+
   return await instance
-    .patch(`/api/timeline/status/${newStatus}/${timelineId}`)
+    .patch(`/api/timeline/status/${newStatus}/${timelineId}`, requestBody)
     .then((res) => {
       return res.data;
     })
@@ -89,7 +97,7 @@ export default function ManageSchedule() {
       //Prompt for remarks
       setIsPopup(true);
     } else if (!eventMode) {
-      changeTimelineStatus(newStatus, timelineId as number).then((result) => {
+      changeTimelineStatus(newStatus, timelineId as number, remarks).then((result) => {
         // Close and clear modal fields
         setManageModal(false);
         setTimelineId(0);

@@ -51,10 +51,12 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     totalPendingRequest: number;
     totalOutstandingRequest: number;
     totalClosedRequest: number;
+    totalOverdueRequest: number;
   }>({
     totalPendingRequest: 0,
     totalOutstandingRequest: 0,
     totalClosedRequest: 0,
+    totalOverdueRequest: 0,
   });
   const [checklist, setChecklist] = useState<{
     totalPendingChecklist: number;
@@ -138,6 +140,13 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
         totalClosedRequest:
           result
             ?.filter((data) => [3, 4, 5, 6].includes(data.id))
+            ?.reduce(
+              (accumulator, currentValue) => accumulator + currentValue.value,
+              0
+            ) || 0,
+        totalOverdueRequest:
+          result
+            ?.filter((data) => [7].includes(data.id))
             ?.reduce(
               (accumulator, currentValue) => accumulator + currentValue.value,
               0
@@ -452,7 +461,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
 
   const { date, datetype } = pickerwithtype;
 
-  const { totalPendingRequest, totalOutstandingRequest, totalClosedRequest } =
+  const { totalPendingRequest, totalOutstandingRequest, totalClosedRequest, totalOverdueRequest } =
     request;
   const {
     totalPendingChecklist,
@@ -540,6 +549,18 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               {totalClosedRequest}
             </p>
           </DashboardBox>
+          <DashboardBox
+            id="overdue-requests-box"
+            title="Overdue Requests"
+            style={{ gridArea: "u" }}
+            onClick={handleDashboardClick}
+            className={active === "overdue-requests-box" ? styles.active : ""}
+          >
+            <p className={styles.dashboardOverdueNumber}>
+              {totalOverdueRequest}
+            </p>
+          </DashboardBox>
+
           {showTotalContainer && (
             <DashboardBox
               title={"Total Requests: " + totalRequest}

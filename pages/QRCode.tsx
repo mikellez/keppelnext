@@ -20,6 +20,10 @@ import formStyles from "../styles/formStyles.module.css";
 import styles from "../styles/QRCode.module.css";
 
 import React, { useState, useRef, useEffect } from "react";
+import getConfig  from "next/config";
+
+const { publicRuntimeConfig } = getConfig();
+const { feedbackApiBaseUrl } = publicRuntimeConfig;
 
 import {
   ModuleMain,
@@ -281,7 +285,7 @@ function QRCode(props: NewAssetProps) {
         id={id}
       >
         <SVG
-          text={window.location.origin + "/Guest/Feedback/" + loc_id}
+          text={ feedbackApiBaseUrl + "/Guest/Feedback/" + loc_id}
           options={{
             level: "H",
             margin: 0,
