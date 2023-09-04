@@ -422,6 +422,7 @@ const createRequest = async (req, res, next) => {
     `;
     const updateQuery = `
     UPDATE keppel.request SET status_id = 3,
+    overdue = false,
 		requesthistory = concat(requesthistory, $2::text),
     activity_log = activity_log || 
         jsonb_build_object(
@@ -852,6 +853,7 @@ const approveRequest = async (req, res, next) => {
   const sql = `
 	UPDATE keppel.request SET 
 	status_id = 4,
+  overdue = false,
   activity_log = activity_log || 
         jsonb_build_object(
           'date', $1::text,
@@ -892,6 +894,7 @@ const completeRequest = async (req, res, next) => {
 		completion_file = $2,
 		completedfilemimetype = $3,
 		status_id = 3,
+    overdue = false,
 		requesthistory = concat(requesthistory, $4::text),
     activity_log = activity_log || 
         jsonb_build_object(
