@@ -146,7 +146,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             ) || 0,
         totalOverdueRequest:
           result
-            ?.filter((data) => [7].includes(data.id))
+            ?.filter((data) => data.overdue === true)
             ?.reduce(
               (accumulator, currentValue) => accumulator + currentValue.value,
               0

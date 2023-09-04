@@ -172,6 +172,7 @@ interface CMMSRequest {
   }[];
   total?: number;
   associatedrequestid?: number;
+  overdue: boolean;
 }
 
 
@@ -378,6 +379,7 @@ interface CMMSDashboardData {
   name: string;
   value: number;
   fill: string;
+  overdue?: boolean;
 }
 
 interface CMMSChangeOfParts {

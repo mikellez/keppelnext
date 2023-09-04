@@ -67,6 +67,7 @@ async function fetchRequestQuery(
     status_id: "r.status_id",
     psa_id: "r.psa_id",
     fault_id: "r.fault_id",
+    overdue: "r.overdue",
   };
 
   if (expand) {
@@ -225,7 +226,7 @@ const fetchOverdueRequests = async (req, res, next) => {
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
-    "AND sc.status_id = 7", // Overdue
+    "AND r.overdue = true", // Overdue
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
@@ -570,19 +571,19 @@ const fetchRequestCounts = async (req, res, next) => {
     case "status":
       sql =
         req.params.plant != 0
-          ? `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
+          ? `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, R.OVERDUE AS OVERDUE, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
 				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
 				WHERE R.PLANT_ID = ${req.params.plant}
         ${userRoleCond}
 				${dateCond}	
-				GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (name)`
-          : `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
+				GROUP BY(R.STATUS_ID, S.STATUS, R.OVERDUE) ORDER BY (name)`
+          : `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, R.OVERDUE AS OVERDUE, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
 				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
 				WHERE 1 = 1 
         ${userRoleCond}
 				${dateCond}
 
-				GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (name)`;
+				GROUP BY(R.STATUS_ID, S.STATUS, R.OVERDUE) ORDER BY (name)`;
       break;
     case "fault":
       sql =
