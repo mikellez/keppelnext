@@ -17,7 +17,7 @@ const fetchNewlyOverdueRequests = async () => {
       builder.where('status_id', 1).orWhere('status_id', 2); // Status of req is Assigned or Pending
     })
     .andWhere(builder =>{
-      builder.whereNot('overdue', true) // Retrieve those that have not yet been set to overdue:
+      builder.whereNot('overdue_status', true) // Retrieve those that have not yet been set to overdue:
     })
     .catch(error => {
       console.log("Unable to retrieve newly overdue requests: " + error);
@@ -33,7 +33,7 @@ const handleOverdueRequests = async (id) => {
     const result = await client("keppel.request")
     .where('request_id', id)
     .update({
-      overdue: true // set overdue status
+      overdue_status: true // set overdue status
     }).catch(error => {
       console.log("Unable to update request status_id: " + error);
     })

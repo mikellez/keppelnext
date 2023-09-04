@@ -123,7 +123,7 @@ export interface RequestItem {
   completion_file?: any;
   activity_log: { [key: string]: string }[];
   associatedrequestid?: number;
-  overdue?: boolean;
+  overdue_status?: boolean;
 }
 
 export interface RequestProps {
@@ -258,7 +258,7 @@ export default function Request(props: RequestProps) {
       "status_id",
       "associatedrequestid",
       "activity_log",
-      "overdue",
+      "overdue_status",
     ]
   );
 
@@ -540,11 +540,11 @@ export default function Request(props: RequestProps) {
                             {(activeTabIndex === 0 || activeTabIndex === 1) && 
                               (<Cell
                                 style={{
-                                  color: getColor(item.overdue? "OVERDUE" : "VALID"),
+                                  color: getColor(item.overdue_status? "OVERDUE" : "VALID"),
                                   fontWeight: "bold",
                                 }}
                               >
-                                {item.overdue? "OVERDUE" : "VALID"}
+                                {item.overdue_status? "OVERDUE" : "VALID"}
                               </Cell>)}
                             <Cell>
                               <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
