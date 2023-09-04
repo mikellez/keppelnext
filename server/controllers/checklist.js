@@ -39,7 +39,8 @@ SELECT
     cl.signoff_user_id,
     cl.assigned_user_id,
     st.status,
-    cl.overdue
+    cl.overdue,
+    cl.overdue_status
 FROM 
     keppel.users u
     JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -110,6 +111,7 @@ const getAllChecklistQuery = (expand, search) => {
     assigned_user_id: "cl.assigned_user_id",
     status: "st.status",
     overdue: "cl.overdue",
+    overdue_status: "cl.overdue_status",
   };
 
   if (expand) {
@@ -619,16 +621,16 @@ const fetchChecklistCounts = (req, res, next) => {
     case "status":
       sql =
         req.params.plant != 0
-          ? `SELECT S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
+          ? `SELECT S.STATUS AS NAME, CM.STATUS_ID AS ID, CM.OVERDUE_STATUS AS OVERDUE_STATUS, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
 				JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
 				WHERE CM.PLANT_ID = ${req.params.plant}
                 ${dateCond}
-				GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)`
-          : `SELECT  S.STATUS AS NAME, CM.STATUS_ID AS ID, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
+				GROUP BY(CM.STATUS_ID, S.STATUS, CM.OVERDUE_STATUS) ORDER BY (status)`
+          : `SELECT S.STATUS AS NAME, CM.STATUS_ID AS ID, CM.OVERDUE_STATUS, COUNT(CM.STATUS_ID) AS VALUE FROM KEPPEL.CHECKLIST_MASTER CM
 				JOIN KEPPEL.STATUS_CM S ON S.STATUS_ID = CM.STATUS_ID
                 WHERE 1 = 1
                 ${dateCond}
-				GROUP BY(CM.STATUS_ID, S.STATUS) ORDER BY (status)`;
+				GROUP BY(CM.STATUS_ID, S.STATUS, CM.OVERDUE_STATUS) ORDER BY (status)`;
       break;
     default:
       return res
@@ -692,6 +694,7 @@ const completeChecklist = async (req, res, next) => {
         SET 
             datajson = $1,
             status_id = 4,
+            overdue_status = false,
             history = concat(history,'${updatehistory}'),
             activity_log = activity_log || 
         jsonb_build_object(
@@ -874,6 +877,7 @@ const approveChecklist = async (req, res, next) => {
             keppel.checklist_master
         SET 
             status_id = 5,
+            overdue_status = false,
             history = concat(history,'${updatehistory}'),
             activity_log = activity_log || $1
         WHERE 
@@ -944,6 +948,7 @@ const rejectChecklist = async (req, res, next) => {
             keppel.checklist_master
         SET 
             status_id = 6,
+            overdue_status = false,
             history = concat(history,'${updatehistory}'),
             activity_log = activity_log || $1
         WHERE 
@@ -1013,6 +1018,7 @@ const cancelChecklist = async (req, res, next) => {
             keppel.checklist_master
         SET 
             status_id = 7,
+            overdue_status = false,
             history = concat(history,'${updatehistory}')
             activity_log = activity_log || $1
         WHERE 

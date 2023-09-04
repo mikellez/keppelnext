@@ -342,6 +342,7 @@ interface CMMSChecklist {
   status: string;
   datajson?: any;
   activity_log: { [key: string]: string }[];
+  overdue_status: boolean;
 }
 
 interface CMMSActivitylog {

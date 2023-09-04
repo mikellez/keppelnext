@@ -62,10 +62,12 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     totalPendingChecklist: number;
     totalOutstandingChecklist: number;
     totalClosedChecklist: number;
+    totalOverdueChecklist: number;
   }>({
     totalPendingChecklist: 0,
     totalOutstandingChecklist: 0,
     totalClosedChecklist: 0,
+    totalOverdueChecklist: 0,
   });
   const [cop, setCOP] = useState<{
     totalScheduledCOP: number;
@@ -182,6 +184,13 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
           totalClosedChecklist:
             result
               ?.filter((data) => [3, 4, 5, 6].includes(data.id))
+              ?.reduce(
+                (accumulator, currentValue) => accumulator + currentValue.value,
+                0
+              ) || 0,
+          totalOverdueChecklist:
+            result
+              ?.filter((data) => data.overdue_status === true)
               ?.reduce(
                 (accumulator, currentValue) => accumulator + currentValue.value,
                 0
@@ -467,6 +476,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     totalPendingChecklist,
     totalOutstandingChecklist,
     totalClosedChecklist,
+    totalOverdueChecklist,
   } = checklist;
   const { totalScheduledCOP, totalCompletedCOP } = cop;
   const {
@@ -620,6 +630,19 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
           >
             <p className={styles.dashboardCompletedNumber}>
               {totalClosedChecklist}
+            </p>
+          </DashboardBox>
+          <DashboardBox
+            id="overdue-checklists-box"
+            title="Overdue Checklists"
+            style={{ gridArea: "v" }}
+            onClick={handleDashboardClick}
+            className={
+              active === "overdue-checklists-box" ? styles.active : ""
+            }
+          >
+            <p className={styles.dashboardOverdueNumber}>
+              {totalOverdueChecklist}
             </p>
           </DashboardBox>
           {showTotalContainer && (

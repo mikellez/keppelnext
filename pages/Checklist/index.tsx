@@ -118,6 +118,7 @@ export interface ChecklistItem {
   history: string;
   status: string;
   activity_log: { [key: string]: string }[];
+  overdue_status?: boolean;
 }
 
 export interface ChecklistProps {
@@ -172,11 +173,18 @@ export default function Checklist(props: ChecklistProps) {
     ? filteredData
     : columnData;
 
+  // Used for adding the overdue column into the template when the assigned/pending tab is selected
+  const tableFormat = (activeTabIndex === 0 || activeTabIndex === 1) ? 
+  `--data-table-library_grid-template-columns:  5em 25em 7em 15em 10em 8em 8em 8em 6em;
+      
+  `: `--data-table-library_grid-template-columns:  5em 25em 7em 15em 8em 8em 8em 6em;
+      
+  `;
+
   const theme = useTheme([
     getTheme(),
     {
-      Table:
-        "--data-table-library_grid-template-columns:  5em 25em 7em 14em 8em 8em 8em 6em;",
+      Table: tableFormat,
     },
   ]);
 
@@ -227,6 +235,7 @@ export default function Checklist(props: ChecklistProps) {
         "plant_name",
         "status",
         "activity_log",
+        "overdue_status",
       ];
       const fieldsString = fields.join(",");
       instance
@@ -338,6 +347,8 @@ export default function Checklist(props: ChecklistProps) {
                           ? "Approved Date"
                           : "Created On"}
                       </HeaderCell>
+                      {/*Only show the Overdue column for the pending and assigned tabs*/}
+                      {(activeTabIndex === 0 || activeTabIndex === 1) && (<HeaderCell resize>Overdue Status</HeaderCell>)}
                       <HeaderCell resize>Assigned To</HeaderCell>
                       <HeaderCell resize>Signed Off By</HeaderCell>
                       <HeaderCell resize>Created By</HeaderCell>
@@ -435,6 +446,16 @@ export default function Checklist(props: ChecklistProps) {
                                 </Tooltip>
                             
                           </Cell>
+                          {/*Only show the Overdue column for the pending and assigned tabs*/}
+                          {(activeTabIndex === 0 || activeTabIndex === 1) && 
+                              (<Cell
+                                style={{
+                                  color: getColor(item.overdue_status? "OVERDUE" : "VALID"),
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {item.overdue_status? "OVERDUE" : "VALID"}
+                              </Cell>)}
                           <Cell>
                             <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
                                 placement="bottom" 

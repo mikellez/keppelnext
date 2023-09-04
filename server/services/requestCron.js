@@ -49,7 +49,7 @@ const main = async () => {
       const requests = await fetchNewlyOverdueRequests();
       //console.log(requests);
       
-      // Set the status of every request to be overdue (status_id = 7)
+      // Set the status of every request to be overdue (overdue_status = true)
       for (let rq of requests) {
         //console.log(rq.request_id);
         await handleOverdueRequests(rq.request_id);
