@@ -1,30 +1,27 @@
-import React, { useState, useEffect } from "react";
+import type { DatePickerProps } from "antd";
+import { Select } from "antd";
+import moment from "moment";
+import { useEffect, useState } from "react";
+import { fetchData } from ".";
 import {
   ModuleContent,
-  ModuleFooter,
   ModuleHeader,
-  ModuleMain,
+  ModuleMain
 } from "../../components";
-import styles from "../../styles/Dashboard.module.scss";
 import DashboardBox from "../../components/Dashboard/DashboardBox";
-import PlantSelect, { getPlants } from "../../components/PlantSelect";
-import { CMMSDashboardData, CMMSFeedback } from "../../types/common/interfaces";
 import PChart from "../../components/Dashboard/PChart";
-import { fetchData } from ".";
-import { ThreeDots } from "react-loading-icons";
 import LoadingHourglass from "../../components/LoadingHourglass";
-import type { DatePickerProps, TimePickerProps } from "antd";
-import { Select } from "antd";
 import PickerWithType from "../../components/PickerWithType";
-import moment from "moment";
-import Request from "../Request/index";
-import Checklist from "../Checklist";
-import ChangeOfPartsPage from "../ChangeOfParts";
-import Feedback from "../Feedback";
-import { set } from "nprogress";
+import PlantSelect, { getPlants } from "../../components/PlantSelect";
+import { useCurrentUser } from "../../components/SWR";
+import styles from "../../styles/Dashboard.module.scss";
 import instance from "../../types/common/axios.config";
 import { Role } from "../../types/common/enums";
-import { useCurrentUser } from "../../components/SWR";
+import { CMMSDashboardData } from "../../types/common/interfaces";
+import ChangeOfPartsPage from "../ChangeOfParts";
+import Checklist from "../Checklist";
+import Feedback from "../Feedback";
+import Request from "../Request/index";
 
 const { Option } = Select;
 
@@ -45,7 +42,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
   const [plant, setPlant] = useState<number>(0);
   const [field, setField] = useState<string>("status");
   const [expiredLicenseInDays, setExpiredLicencesInDays] =
-    useState<string>("status");
+    useState<string>("expiry");
   const [pickerwithtype, setPickerWithType] = useState<{
     date: string;
     datetype: PickerType;
@@ -86,7 +83,16 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
   const [license, setLicense] = useState<{
     totalDraftLicense: number;
     totalAcquiredLicense: number;
-  }>({ totalDraftLicense: 0, totalAcquiredLicense: 0 });
+    totalLicenseExpiredIn30: number;
+    totalLicenseExpiredIn60: number;
+    totalLicenseExpiredIn90: number;
+  }>({ 
+    totalDraftLicense: 0, 
+    totalAcquiredLicense: 0, 
+    totalLicenseExpiredIn30: 0, 
+    totalLicenseExpiredIn60: 0, 
+    totalLicenseExpiredIn90: 0 
+  });
   const [checklistData, setChecklistData] = useState<CMMSDashboardData[]>();
   const [requestData, setRequestData] = useState<CMMSDashboardData[]>();
   const [copData, setCOPData] = useState<CMMSDashboardData[]>();
@@ -140,7 +146,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             ) || 0,
         totalOverdueRequest:
           result
-            ?.filter((data) => [7].includes(data.id))
+            ?.filter((data) => data.overdue_status === true)
             ?.reduce(
               (accumulator, currentValue) => accumulator + currentValue.value,
               0
@@ -374,6 +380,9 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     setLicense({
       totalDraftLicense: draftLicense?.length || 0,
       totalAcquiredLicense: acquiredLicense?.length || 0,
+      totalLicenseExpiredIn30: licenseExpiredIn30?.length || 0,
+      totalLicenseExpiredIn60: licenseExpiredIn60?.length || 0,
+      totalLicenseExpiredIn90: licenseExpiredIn90?.length || 0,
     });
 
     setTimeout(() => {
@@ -465,7 +474,13 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     totalOutstandingFeedback,
     totalCompletedFeedback,
   } = feedback;
-  const { totalDraftLicense, totalAcquiredLicense } = license;
+  const { 
+    totalDraftLicense, 
+    totalAcquiredLicense, 
+    totalLicenseExpiredIn30, 
+    totalLicenseExpiredIn60, 
+    totalLicenseExpiredIn90 
+  } = license;
 
   const access = user.data!.role_id === Role.Admin || user.data!.role_id === Role.Manager || user.data!.role_id === Role.Engineer;
 
@@ -712,35 +727,40 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
           )}
 
           {access && <DashboardBox
-            id="draft-license-box"
-            title="Draft Licenses"
+            id="30-expiry-license-box"
+            title="Licenses Expiring in 30 Days"
             style={{ gridArea: "q" }}
             onClick={handleDashboardClick}
-            className={active === "draft-license-box" ? styles.active : ""}
+            className={active === "30-expiry-license-box" ? styles.active : ""}
           >
             <p className={styles.dashboardPendingdNumber}>
-              {totalDraftLicense}
+              {totalLicenseExpiredIn30}
             </p>
           </DashboardBox>
           }
           {access && <DashboardBox
-            id="acquired-license-box"
-            title="Acquired Licenses"
+            id="60-expiry-license-box"
+            title="Licenses Expiring in 60 Days"
             style={{ gridArea: "r" }}
             onClick={handleDashboardClick}
-            className={active === "acquired-license-box" ? styles.active : ""}
+            className={active === "60-expiry-license-box" ? styles.active : ""}
           >
             <p className={styles.dashboardOutstandingNumber}>
-              {totalAcquiredLicense}
+              {totalLicenseExpiredIn60}
             </p>
           </DashboardBox>
           }
           {access && <DashboardBox
-            id=""
-            title=""
+            id="90-expiry-license-box"
+            title="Licenses Expiring in 90 Days"
             style={{ gridArea: "s" }}
             onClick={handleDashboardClick}
-          ></DashboardBox>
+            className={active === "90-expiry-license-box" ? styles.active : ""}
+          >
+            <p className={styles.dashboardCompletedNumber}>
+              {totalLicenseExpiredIn90}
+            </p>
+          </DashboardBox>
           }
           {access && showTotalContainer && (
             <DashboardBox
@@ -754,7 +774,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
                     // console.log(event.target.value);
                   }}
                 >
-                  <option value="status">Status</option>
+                  {/* <option value="status">Status</option> */}
                   <option value="expiry">Expiry</option>
                 </select>
               }

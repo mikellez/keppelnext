@@ -67,6 +67,7 @@ async function fetchRequestQuery(
     status_id: "r.status_id",
     psa_id: "r.psa_id",
     fault_id: "r.fault_id",
+    overdue_status: "r.overdue_status",
   };
 
   if (expand) {
@@ -225,7 +226,7 @@ const fetchOverdueRequests = async (req, res, next) => {
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
-    "AND sc.status_id = 7", // Overdue
+    "AND r.overdue_status = true", // Overdue
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
@@ -421,6 +422,7 @@ const createRequest = async (req, res, next) => {
     `;
     const updateQuery = `
     UPDATE keppel.request SET status_id = 3,
+    overdue_status = false,
 		requesthistory = concat(requesthistory, $2::text),
     activity_log = activity_log || 
         jsonb_build_object(
@@ -570,19 +572,19 @@ const fetchRequestCounts = async (req, res, next) => {
     case "status":
       sql =
         req.params.plant != 0
-          ? `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
+          ? `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, R.OVERDUE_STATUS AS OVERDUE_STATUS, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
 				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
 				WHERE R.PLANT_ID = ${req.params.plant}
         ${userRoleCond}
 				${dateCond}	
-				GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (name)`
-          : `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
+				GROUP BY(R.STATUS_ID, S.STATUS, R.OVERDUE_STATUS) ORDER BY (name)`
+          : `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, R.OVERDUE_STATUS AS OVERDUE_STATUS, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
 				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
 				WHERE 1 = 1 
         ${userRoleCond}
 				${dateCond}
 
-				GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (name)`;
+				GROUP BY(R.STATUS_ID, S.STATUS, R.OVERDUE_STATUS) ORDER BY (name)`;
       break;
     case "fault":
       sql =
@@ -851,6 +853,7 @@ const approveRequest = async (req, res, next) => {
   const sql = `
 	UPDATE keppel.request SET 
 	status_id = 4,
+  overdue_status = false,
   activity_log = activity_log || 
         jsonb_build_object(
           'date', $1::text,
@@ -891,6 +894,7 @@ const completeRequest = async (req, res, next) => {
 		completion_file = $2,
 		completedfilemimetype = $3,
 		status_id = 3,
+    overdue_status = false,
 		requesthistory = concat(requesthistory, $4::text),
     activity_log = activity_log || 
         jsonb_build_object(

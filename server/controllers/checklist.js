@@ -38,7 +38,8 @@ SELECT
     cl.datajson,
     cl.signoff_user_id,
     cl.assigned_user_id,
-    st.status
+    st.status,
+    cl.overdue
 FROM 
     keppel.users u
     JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -108,6 +109,7 @@ const getAllChecklistQuery = (expand, search) => {
     signoff_user_id: "cl.signoff_user_id",
     assigned_user_id: "cl.assigned_user_id",
     status: "st.status",
+    overdue: "cl.overdue",
   };
 
   if (expand) {
@@ -374,7 +376,8 @@ const fetchSpecificChecklistTemplate = async (req, res, next) => {
             ct.plant_id,
             ct.signoff_user_id,
             ct.status_id,
-            ct.linkedassetids
+            ct.linkedassetids,
+            ct.overdue
         FROM
             keppel.checklist_templates ct
         WHERE 
@@ -426,9 +429,12 @@ const submitNewChecklistTemplate = async (req, res, next) => {
 };
 
 const createNewChecklistRecord = async (req, res, next) => {
+  // console.log("REQ: " , req.body);
   const { checklist } = req.body;
+  // console.log("checklist" , JSON.stringify(checklist));
 
   const statusId = req.body.checklist.assigned_user_id ? 2 : 1;
+
   sql = `INSERT INTO
         keppel.checklist_master
         (
@@ -443,9 +449,10 @@ const createNewChecklistRecord = async (req, res, next) => {
             created_date,
             created_user_id,
             status_id,
-            activity_log
+            activity_log,
+            overdue
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)    
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)    
         RETURNING checklist_id    
     `;
 
@@ -474,6 +481,7 @@ const createNewChecklistRecord = async (req, res, next) => {
       req.user.id,
       statusId,
       JSON.stringify(activity_log),
+      checklist.overdue,
     ]);
 
     if (statusId === 2) {
@@ -500,6 +508,7 @@ const createNewChecklistRecord = async (req, res, next) => {
           signoff: signoff_user_email,
           createdBy: creator_email,
           status: status,
+          overdue: checklist.overdue,
         },
         "",
         [creator_email]
@@ -530,9 +539,10 @@ const createNewChecklistTemplate = async (req, res, next) => {
             created_user_id,
             history,
             status_id,
-            linkedassetids
+            linkedassetids,
+            overdue
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`;
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`;
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
@@ -552,6 +562,7 @@ const createNewChecklistTemplate = async (req, res, next) => {
       history,
       1,
       checklist.linkedassetids,
+      checklist.overdue,
     ],
     (err) => {
       if (err) {
@@ -709,6 +720,7 @@ const completeChecklist = async (req, res, next) => {
       name,
       description,
       created_date,
+      overdue,
     } = await fetchEmailDetailsForSpecificChecklist(req.params.checklist_id);
 
     const mail = new CompleteChecklistMail(
@@ -724,6 +736,7 @@ const completeChecklist = async (req, res, next) => {
         signoff: signoff_user_email,
         createdBy: creator_email,
         status: status,
+        overdue: overdue
       },
       "",
       [creator_email]
@@ -778,7 +791,8 @@ const editChecklistRecord = async (req, res, next) => {
             signoff_user_id = $6,
             linkedassetids = $7,
             plant_id = $8,
-            activity_log = activity_log || $9
+            activity_log = activity_log || $9,
+            overdue = $11
         WHERE 
             checklist_id = $10
     `;
@@ -795,6 +809,7 @@ const editChecklistRecord = async (req, res, next) => {
       data.plant_id,
       JSON.stringify(activity_log),
       req.params.checklist_id,
+      data.overdue,
     ]);
 
     if (statusId === 2) {
@@ -807,6 +822,7 @@ const editChecklistRecord = async (req, res, next) => {
         status,
         name,
         description,
+        overdue,
       } = await fetchEmailDetailsForSpecificChecklist(req.params.checklist_id);
 
       const mail = new CreateChecklistMail(
@@ -822,6 +838,7 @@ const editChecklistRecord = async (req, res, next) => {
           signoff: signoff_user_email,
           createdBy: creator_email,
           status: status,
+          overdue: overdue,
         },
         "",
         [creator_email]
@@ -879,6 +896,7 @@ const approveChecklist = async (req, res, next) => {
       name,
       description,
       created_date,
+      overdue,
     } = await fetchEmailDetailsForSpecificChecklist(req.params.checklist_id);
 
     const mail = new ApproveChecklistMail(
@@ -894,6 +912,7 @@ const approveChecklist = async (req, res, next) => {
         signoff: signoff_user_email,
         createdBy: creator_email,
         status: status,
+        overdue: overdue,
       },
       "",
       [creator_email]
@@ -1149,7 +1168,8 @@ const fetchEmailDetailsForSpecificChecklist = async (checklist_id) => {
             s.status,
             cm.chl_name as name,
             cm.description,
-            cm.created_date
+            cm.created_date,
+            cm.overdue
             
         FROM 
             keppel.checklist_master cm 
