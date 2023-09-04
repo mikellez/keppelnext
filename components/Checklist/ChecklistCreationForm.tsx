@@ -32,8 +32,6 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
       };
     });
   };
-  console.log("c" + props.checklistData.plant_name)
-  console.log("a" + props.checklistData.overdue)
 
   const updateChecklistField = (
     value: number | string | null,
@@ -138,16 +136,16 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
                   : ""
               }
             >
-              <option disabled hidden selected
+              <option hidden selected
               >
               -- Select Overdue Option --
               </option>
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="quarterly">Quarterly</option>
-              <option value="half yearly">Half Yearly</option>
-              <option value="annually">Annually</option>
+              <option>Daily</option>
+              <option>Weekly</option>
+              <option>Monthly</option>
+              <option>Quarterly</option>
+              <option>Half Yearly</option>
+              <option>Annually</option>
             </select>
           </div>
         </div>
