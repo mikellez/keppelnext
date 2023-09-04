@@ -6,7 +6,8 @@ const nextConfig = {
     ignoreBuildErrors: true
   },
    publicRuntimeConfig: {
-    apiBaseUrl: process.env.API_BASE_URL
+    apiBaseUrl: process.env.API_BASE_URL,
+    feedbackApiBaseUrl: process.env.FEEDBACK_API_BASE_URL
   },
 }
 

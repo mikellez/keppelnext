@@ -219,6 +219,27 @@ const fetchAssignedRequests = async (req, res, next) => {
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
 
+const fetchOverdueRequests = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
+
+  const { sql, totalPages } = await fetchRequestQuery(
+    "AND sc.status_id = 7", // Overdue
+    ` ORDER BY r.created_date DESC`,
+    req.user.role_id,
+    req.user.id,
+    page,
+    expand,
+    search
+  );
+
+  const result = await global.db.query(sql);
+
+  res.status(200).send({ rows: result.rows, total: totalPages });
+};
+
+
 const fetchReviewRequests = async (req, res, next) => {
   const page = req.query.page || 1;
   const expand = req.query.expand || false;
@@ -1077,6 +1098,7 @@ const fetchAssetRequest = async (req, res, next) => {
 module.exports = {
   fetchPendingRequests,
   fetchAssignedRequests,
+  fetchOverdueRequests,
   fetchReviewRequests,
   fetchApprovedRequests,
   createRequest,

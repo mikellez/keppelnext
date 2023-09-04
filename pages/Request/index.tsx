@@ -90,11 +90,12 @@ import animationStyles from "../../styles/animations.module.css";
   prop: T;
 };*/
 
-const indexedColumn: ("pending" | "assigned" | "review" | "approved")[] = [
+const indexedColumn: ("pending" | "assigned" | "review" | "approved" | "overdue")[] = [
   "pending",
   "assigned",
   "review",
   "approved",
+  "overdue",
 ];
 
 export interface RequestItem {
@@ -151,6 +152,7 @@ export const getColor = (status: string) => {
     case "LOW":
       return "#03C988";
     case "REJECTED":
+    case "OVERDUE":
     case "CANCELLED":
       return "red";
     case "REASSIGNED":
@@ -295,7 +297,7 @@ export default function Request(props: RequestProps) {
       if (requestData?.rows?.length > 0) {
         setRequestItems(
           requestData.rows.map((row: CMMSRequest, total: number) => {
-            // console.log(requestData);
+            console.log(requestData);
 
             return {
               id: row.request_id,
@@ -376,6 +378,14 @@ export default function Request(props: RequestProps) {
               className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
             >
               <span style={{ all: "unset" }}>Approved</span>
+            </li>
+            <li
+              onClick={() => {
+                activeTabIndex !== 4 && switchColumns(4);
+              }}
+              className={"nav-link" + (activeTabIndex === 4 ? " active" : "")}
+            >
+              <span style={{ all: "unset" }}>Overdue</span>
             </li>
           </ul>
         )}

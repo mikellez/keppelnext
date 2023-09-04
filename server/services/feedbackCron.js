@@ -38,6 +38,7 @@ const createFeedbacks = async () => {
   const yesterdayDate = moment().subtract(1, "days").format("YYYY-MM-DD");
   const localDirectoryPath = "./server/feedbackCSV2/" + yesterdayDate + "/"; // Replace with the actual directory path
   const remoteDirectoryPath = `${FEEDBACK_USERNAME}@${FEEDBACK_HOSTNAME}:${FEEDBACK_CSVPATH}${yesterdayDate}/`; // // Replace with the actual directory path on public remote server
+  console.log(remoteDirectoryPath)
 
   // Constructing the rsync command - https://www.npmjs.com/package/rsync
   var rsync = new Rsync()
