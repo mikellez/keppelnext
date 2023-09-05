@@ -124,7 +124,7 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
 
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon /> Overdue
+              <RequiredIcon /> Checklist Overdue Tracking
             </label>
             <select
               className="form-select"
@@ -138,14 +138,14 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
             >
               <option hidden selected
               >
-              -- Select Overdue Option --
+              -- Select Overdue Time Period Category --
               </option>
-              <option>Daily</option>
-              <option>Weekly</option>
-              <option>Monthly</option>
-              <option>Quarterly</option>
-              <option>Half Yearly</option>
-              <option>Annually</option>
+              <option value="daily">Daily (Overdue if exceeds 1 day)</option>
+              <option value="weekly">Weekly (Overdue if exceeds 7 days)</option>
+              <option value="monthly">Monthly (Overdue if exceeds 30 days)</option>
+              <option value="quarterly">Quarterly (Overdue if exceeds 3 months)</option>
+              <option value="half yearly">Half Yearly (Overdue if exceeds 6 months)</option>
+              <option value="annually">Annually (Overdue if excees 1 year)</option>
             </select>
           </div>
         </div>
