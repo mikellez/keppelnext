@@ -34,9 +34,9 @@ async function fetchRequestQuery(
   let expandCond = "";
   let SELECT_ARR = [];
 
-  if (role_id == 3) {
-    userCond = `AND u.user_id = ${user_id}`;
-  }
+  if (role_id === 4 ) {
+    userCond = `AND (r.assigned_user_id = ${user_id} OR r.user_id = ${user_id})`;
+  } 
 
   const SELECT = {
     request_id: "r.request_id",
@@ -67,6 +67,7 @@ async function fetchRequestQuery(
     status_id: "r.status_id",
     psa_id: "r.psa_id",
     fault_id: "r.fault_id",
+    overdue_status: "r.overdue_status",
   };
 
   if (expand) {
@@ -87,105 +88,99 @@ async function fetchRequestQuery(
   expandCond = SELECT_ARR.join(", ");
 
   let sql;
-  if (role_id === 1 || role_id === 2 || role_id === 3) {
-    sql = `SELECT 
-      ${expandCond}
-    FROM    
-		  keppel.users u
-		  JOIN keppel.user_access ua ON u.user_id = ua.user_id
-		  JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
-		  left JOIN keppel.users req_u ON r.user_id = req_u.user_id
-		  left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
-		  left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
-		  left JOIN keppel.request_type rt ON rt.req_id = r.req_id
-		  left JOIN keppel.priority pri ON pri.p_id = r.priority_id
-		  left JOIN keppel.role ro ON ro.role_id = r.role_id
-		  left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
-		  left JOIN keppel.users au ON au.user_id = r.assigned_user_id
-		  left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
-			  from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
-			  WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
-    WHERE 1 = 1 
-    ${searchCondition(search)}
-	  ${status_query}
-    ${userCond}
-	  GROUP BY (
-		  r.request_id,
-		  ft.fault_type,
-		  pm.plant_name,
-		  pm.plant_id,
-		  rt.request,
-		  ro.role_name,
-		  sc.status,
-		  pri.priority,
-		  req_u.first_name,
-		  tmp1.asset_name,
-		  req_u.last_name,
-		  au.first_name,
-		  au.last_name
-	  ) ${order_query}`;
-  } else {
-    sql = `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
-	  ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
-	  pri.priority, 
-	  CASE 
-		  WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
-		  ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-	  END AS created_by,
-	  r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
-	  r.complete_comments,
-	  concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-	  , r.activity_log, r.rejection_comments, r.status_id, r.psa_id, r.fault_id
-	  FROM    
-		  keppel.users u
-		  JOIN keppel.user_access ua ON u.user_id = ua.user_id
-		  JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
-		  left JOIN keppel.users req_u ON r.user_id = req_u.user_id
-		  left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
-		  left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
-		  left JOIN keppel.request_type rt ON rt.req_id = r.req_id
-		  left JOIN keppel.priority pri ON pri.p_id = r.priority_id
-		  left JOIN keppel.role ro ON ro.role_id = r.role_id
-		  left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
-		  left JOIN keppel.users au ON au.user_id = r.assigned_user_id
-		  left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
-			  from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
-			  WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
-	  WHERE (r.assigned_user_id = ${user_id} OR r.user_id = ${user_id})
-    ${searchCondition(search)}
-	  ${status_query}
-	  GROUP BY (
-		  r.request_id,
-		  ft.fault_type,
-		  pm.plant_name,
-		  pm.plant_id,
-		  rt.request,
-		  ro.role_name,
-		  sc.status,
-		  pri.priority,
-		  req_u.first_name,
-		  tmp1.asset_name,
-		  req_u.last_name,
-		  au.first_name,
-		  au.last_name
-	  ) ${order_query}`;
-  }
+  sql = `SELECT 
+    ${expandCond}
+  FROM    
+    keppel.users u
+    JOIN keppel.user_access ua ON u.user_id = ua.user_id
+    JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
+    left JOIN keppel.users req_u ON r.user_id = req_u.user_id
+    left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
+    left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
+    left JOIN keppel.request_type rt ON rt.req_id = r.req_id
+    left JOIN keppel.priority pri ON pri.p_id = r.priority_id
+    left JOIN keppel.role ro ON ro.role_id = r.role_id
+    left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
+    left JOIN keppel.users au ON au.user_id = r.assigned_user_id
+    left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
+      from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
+      WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
+  WHERE 1 = 1 
+  AND ua.user_id = ${user_id}
+  ${searchCondition(search)}
+  ${status_query}
+  ${userCond}
+  GROUP BY (
+    r.request_id,
+    ft.fault_type,
+    pm.plant_name,
+    pm.plant_id,
+    rt.request,
+    ro.role_name,
+    sc.status,
+    pri.priority,
+    req_u.first_name,
+    tmp1.asset_name,
+    req_u.last_name,
+    au.first_name,
+    au.last_name
+  ) ${order_query}`;
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);
 
-  sql += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems};`;
+  if(page != 0) sql += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems};`;
 
   return { sql, totalPages };
 }
 
 const fetchPendingRequests = async (req, res, next) => {
-  const page = req.query.page || 1;
+  const page = req.query.page || 0;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND sc.status_id = 1", //PENDING
+    ` ORDER BY r.created_date DESC`,
+    req.user.role_id,
+    req.user.id,
+    page,
+    expand,
+    search
+  );
+
+  const result = await global.db.query(sql);
+
+  res.status(200).send({ rows: result.rows, total: totalPages });
+};
+
+const fetchOutstandingRequests = async (req, res, next) => {
+  const page = req.query.page || 0;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
+
+  const { sql, totalPages } = await fetchRequestQuery(
+    "AND (sc.status_id = 2 or sc.status_id = 3)", //PENDING
+    ` ORDER BY r.created_date DESC`,
+    req.user.role_id,
+    req.user.id,
+    page,
+    expand,
+    search
+  );
+
+  const result = await global.db.query(sql);
+
+  res.status(200).send({ rows: result.rows, total: totalPages });
+};
+
+const fetchCompletedRequests = async (req, res, next) => {
+  const page = req.query.page || 0;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
+
+  const { sql, totalPages } = await fetchRequestQuery(
+    "AND sc.status_id = 4", 
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
@@ -225,7 +220,7 @@ const fetchOverdueRequests = async (req, res, next) => {
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
-    "AND sc.status_id = 7", // Overdue
+    "AND r.overdue_status = true", // Overdue
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
@@ -421,6 +416,7 @@ const createRequest = async (req, res, next) => {
     `;
     const updateQuery = `
     UPDATE keppel.request SET status_id = 3,
+    overdue_status = false,
 		requesthistory = concat(requesthistory, $2::text),
     activity_log = activity_log || 
         jsonb_build_object(
@@ -570,19 +566,19 @@ const fetchRequestCounts = async (req, res, next) => {
     case "status":
       sql =
         req.params.plant != 0
-          ? `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
+          ? `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, R.OVERDUE_STATUS AS OVERDUE_STATUS, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
 				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
 				WHERE R.PLANT_ID = ${req.params.plant}
         ${userRoleCond}
 				${dateCond}	
-				GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (name)`
-          : `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
+				GROUP BY(R.STATUS_ID, S.STATUS, R.OVERDUE_STATUS) ORDER BY (name)`
+          : `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, R.OVERDUE_STATUS AS OVERDUE_STATUS, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
 				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
 				WHERE 1 = 1 
         ${userRoleCond}
 				${dateCond}
 
-				GROUP BY(R.STATUS_ID, S.STATUS) ORDER BY (name)`;
+				GROUP BY(R.STATUS_ID, S.STATUS, R.OVERDUE_STATUS) ORDER BY (name)`;
       break;
     case "fault":
       sql =
@@ -851,6 +847,7 @@ const approveRequest = async (req, res, next) => {
   const sql = `
 	UPDATE keppel.request SET 
 	status_id = 4,
+  overdue_status = false,
   activity_log = activity_log || 
         jsonb_build_object(
           'date', $1::text,
@@ -891,6 +888,7 @@ const completeRequest = async (req, res, next) => {
 		completion_file = $2,
 		completedfilemimetype = $3,
 		status_id = 3,
+    overdue_status = false,
 		requesthistory = concat(requesthistory, $4::text),
     activity_log = activity_log || 
         jsonb_build_object(
@@ -1116,4 +1114,6 @@ module.exports = {
   fetchRequestUploadedFile,
   fetchPlantRequest,
   fetchAssetRequest,
+  fetchOutstandingRequests,
+  fetchCompletedRequests
 };

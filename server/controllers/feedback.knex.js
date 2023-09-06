@@ -208,10 +208,14 @@ const fetchPendingFeedback = async (req, res, next) => {
   };
   try {
     const results = await specificFeedbackQuery(req, options);
-    res.status(200).json({ rows: results });
+    return res.status(200).json({ rows: results });
   } catch (err) {
     console.log(err);
-    next(err);
+    //next(err);
+    return res.status(500).json({ msg: err });
+  } finally {
+    // Release the pool here
+    //global.knex.destroy();
   }
 };
 
@@ -222,10 +226,14 @@ const fetchAssignedFeedback = async (req, res, next) => {
 
   try {
     const results = await specificFeedbackQuery(req, options);
-    res.status(200).json({ rows: results });
+    return res.status(200).json({ rows: results });
   } catch (err) {
     console.log(err);
-    next(err);
+    //next(err);
+    return res.status(500).json({ msg: err });
+  } finally {
+    // Release the pool here
+    //global.knex.destroy();
   }
 };
 
@@ -236,10 +244,14 @@ const fetchOutstandingFeedback = async (req, res, next) => {
 
   try {
     const results = await specificFeedbackQuery(req, options);
-    res.status(200).json({ rows: results });
+    return res.status(200).json({ rows: results });
   } catch (err) {
     console.log(err);
-    next(err);
+    //next(err);
+    return res.status(500).json({ msg: err });
+  } finally {
+    // Release the pool here
+    //global.knex.destroy();
   }
 };
 
@@ -250,10 +262,14 @@ const fetchCompletedFeedback = async (req, res, next) => {
 
   try {
     const results = await specificFeedbackQuery(req, options);
-    res.status(200).json({ rows: results });
+    return res.status(200).json({ rows: results });
   } catch (err) {
     console.log(err);
-    next(err);
+    //next(err);
+    return res.status(500).json({ msg: err });
+  } finally {
+    // Release the pool here
+    //global.knex.destroy();
   }
 };
 
@@ -271,7 +287,11 @@ const fetchSingleFeedback = async (req, res, next) => {
     }
   } catch (err) {
     console.log(err);
-    next(err);
+    //next(err);
+    return res.status(500).json({ msg: err });
+  } finally {
+    // Release the pool here
+    //global.knex.destroy();
   }
 };
 
@@ -327,7 +347,7 @@ const createFeedback = async (req, res, next) => {
     });
 
     await mail.send();
-    res.status(200).send("Feedback successfully created");
+    return res.status(200).send("Feedback successfully created");
   } catch (err) {
     console.log(err);
     return res.status(500).send("Failure to create feedback");
@@ -376,7 +396,7 @@ const assignFeedback = async (req, res, next) => {
 
     await mail.send();
 
-    res.status(200).send("Feedback successfully assigned");
+    return res.status(200).send("Feedback successfully assigned");
   } catch (err) {
     console.log(err);
     return res.status(500).send("Failure to assign feedback");
@@ -434,7 +454,7 @@ const completeFeedback = async (req, res, next) => {
 
     await mail.send();
 
-    res.status(200).send("Feedback successfully completed");
+    return res.status(200).send("Feedback successfully completed");
   } catch (err) {
     console.log(err);
     return res.status(500).send("Failure to complete feedback");

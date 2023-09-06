@@ -117,6 +117,7 @@ export interface ChecklistItem {
   history: string;
   status: string;
   activity_log: { [key: string]: string }[];
+  overdue_status?: boolean;
 }
 
 export interface ChecklistProps {
@@ -126,6 +127,7 @@ export interface ChecklistProps {
   date: string;
   datetype: string;
   isReady: boolean;
+  viewType?: string;
 }
 
 const downloadCSV = async (type: string, activeTabIndex: number) => {
@@ -159,11 +161,26 @@ export default function Checklist(props: ChecklistProps) {
   >(undefined);
   const searchRef = useRef({ value: "" });
   const [assignedUserHistory, setAssignedUserHistory] = useState<string>("");
-  const filteredData = useChecklistFilter(props, page);
+  const fields = [
+    "checklist_id",
+    "chl_name",
+    "description",
+    "status_id",
+    "created_date",
+    "createdbyuser",
+    "assigneduser",
+    "signoffuser",
+    "plant_name",
+    "status",
+    "activity_log",
+    "overdue_status",
+  ];
+  const filteredData = useChecklistFilter(props, page, fields);
   const columnData = useChecklist(
     indexedColumn[activeTabIndex],
     page,
-    searchRef.current.value
+    searchRef.current.value,
+    fields
   );
   const router = useRouter();
 
@@ -171,11 +188,20 @@ export default function Checklist(props: ChecklistProps) {
     ? filteredData
     : columnData;
 
+  // Used for adding the overdue column into the template when the assigned/pending tab is selected
+  const tableFormat =
+    activeTabIndex === 0 || activeTabIndex === 1
+      ? `--data-table-library_grid-template-columns:  5em 25em 7em 15em 10em 8em 8em 8em 6em;
+      
+  `
+      : `--data-table-library_grid-template-columns:  5em 25em 7em 15em 8em 8em 8em 6em;
+      
+  `;
+
   const theme = useTheme([
     getTheme(),
     {
-      Table:
-        "--data-table-library_grid-template-columns:  5em 25em 7em 14em 8em 8em 7em 7em;",
+      Table: tableFormat,
     },
   ]);
 
@@ -226,6 +252,7 @@ export default function Checklist(props: ChecklistProps) {
         "plant_name",
         "status",
         "activity_log",
+        "overdue_status",
       ];
       const fieldsString = fields.join(",");
       instance
@@ -337,6 +364,10 @@ export default function Checklist(props: ChecklistProps) {
                           ? "Approved Date"
                           : "Created On"}
                       </HeaderCell>
+                      {/*Only show the Overdue column for the pending and assigned tabs*/}
+                      {(activeTabIndex === 0 || activeTabIndex === 1) && (
+                        <HeaderCell resize>Overdue Status</HeaderCell>
+                      )}
                       <HeaderCell resize>Assigned To</HeaderCell>
                       <HeaderCell resize>Signed Off By</HeaderCell>
                       <HeaderCell resize>Created By</HeaderCell>
@@ -437,6 +468,19 @@ export default function Checklist(props: ChecklistProps) {
                               </div>
                             </Tooltip>
                           </Cell>
+                          {/*Only show the Overdue column for the pending and assigned tabs*/}
+                          {(activeTabIndex === 0 || activeTabIndex === 1) && (
+                            <Cell
+                              style={{
+                                color: getColor(
+                                  item.overdue_status ? "OVERDUE" : "VALID"
+                                ),
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {item.overdue_status ? "OVERDUE" : "VALID"}
+                            </Cell>
+                          )}
                           <Cell>
                             <Tooltip
                               overlayInnerStyle={{ fontSize: "0.7rem" }}

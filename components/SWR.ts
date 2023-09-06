@@ -17,7 +17,7 @@ import instance from "../types/common/axios.config";
 import { FeedbackFormProps } from "../pages/Feedback";
 
 function useRequest(
-  request_type: "pending" | "assigned" | "review" | "approved" | "overdue",
+  request_type: "pending" | "assigned" | "review" | "approved",
   page: number,
   search: string = "",
   fields: string[]
@@ -63,7 +63,11 @@ function useSpecificRequest(request_id: number) {
   );
 }
 
-function useRequestFilter(props: RequestProps, page: number) {
+function useRequestFilter(
+  props: RequestProps, 
+  page: number,
+  fields: string[]
+) {
   const requestFetcher = (url: string) =>
     instance
       .get<{ rows: CMMSRequest[]; total: number }>(url)
@@ -80,9 +84,9 @@ function useRequestFilter(props: RequestProps, page: number) {
       });
 
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
-    `/api/request/filter/${props?.status || 0}/${props?.plant || 0}/${
+    `/api/request/${props.viewType}/${props?.plant || 0}/${
       props.datetype || "all"
-    }/${props?.date || "all"}/${page}`,
+    }/${props?.date || "all"}?page=${page}&expand=${fields.join(",")}`,
     requestFetcher,
     { revalidateOnFocus: false }
   );
@@ -155,7 +159,8 @@ function useAsset(plant_id: number | null) {
 function useChecklist(
   checklist_type: "pending" | "assigned" | "record" | "approved",
   page: number,
-  search: string = ""
+  search: string = "",
+  fields: string[]
 ) {
   const checklistFetcher = (url: string) =>
     instance
@@ -166,13 +171,17 @@ function useChecklist(
       });
 
   return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
-    [`/api/checklist/${checklist_type}?page=${page}&search=${search}`],
+    [`/api/checklist/${checklist_type}?page=${page}&search=${search}&expand=${fields.join(",")}`],
     checklistFetcher,
     { revalidateOnFocus: false }
   );
 }
 
-function useChecklistFilter(props: ChecklistProps, page: number) {
+function useChecklistFilter(
+  props: ChecklistProps, 
+  page: number,
+  fields: string[]
+) {
   const checklistFetcher = (url: string) =>
     instance
       .get<{ rows: CMMSChecklist[]; total: number }>(url)
@@ -182,9 +191,9 @@ function useChecklistFilter(props: ChecklistProps, page: number) {
       });
 
   return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
-    `/api/checklist/filter/${props?.status || 0}/${props?.plant || 0}/${
+    `/api/checklist/${props.viewType}/${props?.plant || 0}/${
       props?.datetype || "all"
-    }/${props?.date || "all"}/${page}`,
+    }/${props?.date || "all"}?page=${page}&expand=${fields.join(",")}`,
     checklistFetcher,
     { revalidateOnFocus: false }
   );

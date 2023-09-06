@@ -16,8 +16,11 @@ const fetchNewlyOverdueRequests = async () => {
     .andWhere(builder =>{
       builder.where('status_id', 1).orWhere('status_id', 2); // Status of req is Assigned or Pending
     })
+    .andWhere(builder =>{
+      builder.whereNot('overdue_status', true) // Retrieve those that have not yet been set to overdue:
+    })
     .catch(error => {
-      console.log("Unable to retrieve expired requests: " + error);
+      console.log("Unable to retrieve newly overdue requests: " + error);
     })
     .finally(() => {
       client.destroy();
@@ -30,7 +33,7 @@ const handleOverdueRequests = async (id) => {
     const result = await client("keppel.request")
     .where('request_id', id)
     .update({
-      status_id: 7 
+      overdue_status: true // set overdue status
     }).catch(error => {
       console.log("Unable to update request status_id: " + error);
     })
@@ -46,7 +49,7 @@ const main = async () => {
       const requests = await fetchNewlyOverdueRequests();
       //console.log(requests);
       
-      // Set the status of every request to be overdue (status_id = 7)
+      // Set the status of every request to be overdue (overdue_status = true)
       for (let rq of requests) {
         //console.log(rq.request_id);
         await handleOverdueRequests(rq.request_id);

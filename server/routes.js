@@ -437,6 +437,30 @@ router.get(
   checkIfLoggedInAPI,
   controllers.request.fetchFilteredRequests
 );
+
+router.get(
+  "/request/pending/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.request.fetchPendingRequests
+);
+
+router.get(
+  "/request/outstanding/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.request.fetchOutstandingRequests
+);
+
+router.get(
+  "/request/completed/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.request.fetchCompletedRequests
+);
+
+router.get(
+  "/request/overdue/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.request.fetchOverdueRequests
+);
 /**
  * @api {get} /request/plant/:plant_id Get Plant Details
  * @apiDescription Fetches the pd and name of a specific plant.
@@ -842,6 +866,30 @@ router.get(
   "/checklist/counts/:field/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.checklist.fetchChecklistCounts
+);
+
+router.get(
+  "/checklist/pending/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchPendingChecklists
+);
+
+router.get(
+  "/checklist/outstanding/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchOutstandingChecklists
+);
+
+router.get(
+  "/checklist/completed/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchCompletedChecklists
+);
+
+router.get(
+  "/checklist/overdue/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchOverdueChecklists
 );
 
 /**
@@ -1664,6 +1712,11 @@ router.get(
   checkIfLoggedInAPI,
   controllers.schedule.getPendingTimelines
 );
+router.get(
+  "/timeline_approved",
+  checkIfLoggedInAPI,
+  controllers.schedule.getApprovedTimelines
+);
 
 router.get(
   "/timeline_completed",
@@ -1890,7 +1943,7 @@ router.get(
 router.get(
   "/feedback/pending/:plant/:datetype/:date",
   checkIfLoggedInAPI,
-  controllers.feedbackKnex.fetchPendingFeedback
+  controllers.feedback.fetchPendingFeedback
 );
 
 /**

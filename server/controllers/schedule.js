@@ -322,7 +322,8 @@ const getTimeline = async (req, res, next) => {
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
-    WHERE timeline_id = $1`,
+    WHERE timeline_id = $1 
+    AND active = 1`,
     [req.params.id],
     (err, found) => {
       if (err) throw err;
@@ -451,6 +452,7 @@ const getScheduleDrafts = async (req, res) => {
     WHERE 
       status = 3
       AND created_by = $1
+      AND active = 1
     ORDER BY ST.created_date DESC
   `
 
@@ -471,6 +473,46 @@ const getScheduleDrafts = async (req, res) => {
 
 }
 
+const getApprovedTimelines = async (req, res) => {
+  const page = req.query.page || 1;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  let query = `
+    SELECT 
+      ST.timeline_id as id, 
+      ST.timeline_name as name, 
+      ST.description, 
+      ST.plant_id as "plantId", 
+      PM.plant_name as "plantName", 
+      ST.status, 
+      ST.created_date
+    FROM 
+      keppel.users u
+      JOIN keppel.user_access ua ON u.user_id = ua.user_id
+      JOIN keppel.schedule_timelines ST ON ua.allocatedplantids LIKE concat(concat('%',ST.plant_id::text), '%')
+      JOIN keppel.plant_master PM ON ST.plant_id = PM.plant_id
+    WHERE 
+      status = 1
+      AND ua.user_id = $1
+      AND active = 1
+    ORDER BY ST.activity_log -> (jsonb_array_length(ST.activity_log) -1) ->> 'date' DESC
+
+  `
+  const pageQuery = `SELECT COUNT(*) AS row_count FROM (` +
+    query +
+  `) subquery`;
+  try {
+    const tmp = await global.db.query(pageQuery, [req.user.id]);
+    const totalRows = tmp.rows[0].row_count;
+    const totalPages = Math.ceil(+totalRows / ITEMS_PER_PAGE);
+    query += `LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`
+    const result = await global.db.query(query, [req.user.id]);
+    res.status(200).send({rows: result.rows, totalPages: totalPages});
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+} 
+
 const getPendingTimelines = async (req, res) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
@@ -490,8 +532,9 @@ const getPendingTimelines = async (req, res) => {
       JOIN keppel.schedule_timelines ST ON ua.allocatedplantids LIKE concat(concat('%',ST.plant_id::text), '%')
       JOIN keppel.plant_master PM ON ST.plant_id = PM.plant_id
     WHERE 
-      status = 4 
+      (status = 4 OR status = 6)
       AND ua.user_id = $1
+      AND active = 1
       ORDER BY COALESCE(TO_TIMESTAMP((ST.activity_log->>-1)::jsonb->>'date', 'YYYY-MM-DD HH24:MI:SS'), '1970-01-01'::timestamp) DESC
   `
   const pageQuery = `SELECT COUNT(*) AS row_count FROM (` +
@@ -530,6 +573,7 @@ const getCompletedTimelines = async (req, res) => {
     WHERE 
       status = 5
       AND ua.user_id = $1
+      AND active = 1
     ORDER BY ST.activity_log -> (jsonb_array_length(ST.activity_log) -1) ->> 'date' DESC
 
   `
@@ -590,12 +634,16 @@ const editTimeline = (req, res, next) => {
 
 // Change the status of timeline (Approve/Reject) Note that reject becomes draft
 const changeTimelineStatus = (req, res, next) => {
+  console.log(req.body)
   const status = +req.params.status;
+  let { remarks } = req.body || {};
+  remarks = remarks !== undefined ? remarks : "";
   const today = moment().format("YYYY-MM-DD HH:mm:ss");
   const name = req.user.name;
   const role_name = req.user.role_name;
   let activity = '';
   let activityType = '';
+  let queryS = '';
 
   if(status === 1) {
     activity = `Approved Timeline Case ID-${req.params.id}`;
@@ -606,11 +654,21 @@ const changeTimelineStatus = (req, res, next) => {
   } else if(status === 4) {
     activity = `Pending Timeline Case ID-${req.params.id}`;
     activityType = 'PENDING';
+  } else if(status === 6) {
+    activity = `Canceled Timeline Case ID-${req.params.id}`;
+    activityType = 'Canceled';
+  } else if(status === 7) {
+    activity = `Approved Cancelation Timeline Case ID-${req.params.id}`;
+    activityType = 'Approved canceled';
+  } else if(status === 8) {
+    activity = `Rejected Cancelation Timeline Case ID-${req.params.id}`;
+    activityType = 'Rejected canceled';
   }
 
-  const queryS =
-    status === 1
-      ? `
+  console.log(status)
+
+  if(status === 1 ) {
+    queryS = `
       /*UPDATE keppel.schedule_checklist
       SET start_date = NULL, end_date = NULL
       WHERE timeline_id = (SELECT timeline_id FROM keppel.schedule_timelines 
@@ -645,6 +703,7 @@ const changeTimelineStatus = (req, res, next) => {
       
       UPDATE keppel.schedule_timelines 
       SET status = 1,
+      remarks = '${remarks}'::text,
       activity_log = activity_log || 
         jsonb_build_object(
           'date', '${today}'::text,
@@ -666,31 +725,64 @@ const changeTimelineStatus = (req, res, next) => {
           'activity_type', '${activityType}'::text
         )
        WHERE timeline_id = ${req.params.id};
+    `; 
+  } else if([7,8].includes(status)) {
+    queryS = `
+      UPDATE keppel.schedule_checklist 
+      SET status = ${req.params.status},
+      active = 0,
+        activity_log = activity_log || 
+          jsonb_build_object(
+            'date', '${today}'::text,
+            'name', '${name}'::text,
+            'role', '${role_name}'::text,
+            'activity', '${activity}'::text,
+            'activity_type', '${activityType}'::text
+          )
+      WHERE timeline_id = ${req.params.id};
+      UPDATE keppel.schedule_timelines 
+      SET status = ${req.params.status},
+      active = 0,
+      remarks = '${remarks}'::text,
+        activity_log = activity_log || 
+          jsonb_build_object(
+            'date', '${today}'::text,
+            'name', '${name}'::text,
+            'role', '${role_name}'::text,
+            'activity', '${activity}'::text,
+            'activity_type', '${activityType}'::text
+          )
+      WHERE timeline_id = ${req.params.id} RETURNING *;
     `
-      : `
-    UPDATE keppel.schedule_checklist 
-    SET status = ${req.params.status},
-      activity_log = activity_log || 
-        jsonb_build_object(
-          'date', '${today}'::text,
-          'name', '${name}'::text,
-          'role', '${role_name}'::text,
-          'activity', '${activity}'::text,
-          'activity_type', '${activityType}'::text
-        )
-    WHERE timeline_id = ${req.params.id};
-    UPDATE keppel.schedule_timelines 
-    SET status = ${req.params.status},
-      activity_log = activity_log || 
-        jsonb_build_object(
-          'date', '${today}'::text,
-          'name', '${name}'::text,
-          'role', '${role_name}'::text,
-          'activity', '${activity}'::text,
-          'activity_type', '${activityType}'::text
-        )
-    WHERE timeline_id = ${req.params.id} RETURNING *;
+  } else {
+    queryS = `
+      UPDATE keppel.schedule_checklist 
+      SET status = ${req.params.status},
+        activity_log = activity_log || 
+          jsonb_build_object(
+            'date', '${today}'::text,
+            'name', '${name}'::text,
+            'role', '${role_name}'::text,
+            'activity', '${activity}'::text,
+            'activity_type', '${activityType}'::text
+          )
+      WHERE timeline_id = ${req.params.id};
+      UPDATE keppel.schedule_timelines 
+      SET status = ${req.params.status},
+      remarks = '${remarks}'::text,
+        activity_log = activity_log || 
+          jsonb_build_object(
+            'date', '${today}'::text,
+            'name', '${name}'::text,
+            'role', '${role_name}'::text,
+            'activity', '${activity}'::text,
+            'activity_type', '${activityType}'::text
+          )
+      WHERE timeline_id = ${req.params.id} RETURNING *;
     `;
+  }
+  console.log(queryS)
+
   global.db.query(queryS, (err, found) => {
     if (err) throw err;
     if (found) return res.status(200).json(req.params.id);
@@ -698,7 +790,7 @@ const changeTimelineStatus = (req, res, next) => {
 };
 
 // Delete a timeline in draft
-const deleteTimeline = async (req, res, next) => {
+/*const deleteTimeline = async (req, res, next) => {
   global.db.query(
     `DELETE FROM keppel.schedule_checklist WHERE timeline_id = $1;`,
     [req.params.id],
@@ -717,6 +809,43 @@ const deleteTimeline = async (req, res, next) => {
     }
   );
 };
+*/
+const deleteTimeline = async (req, res, next) => {
+  const today = moment().format("YYYY-MM-DD HH:mm:ss");
+  const name = req.user.name;
+  const role_name = req.user.role_name;
+  const activity = "Deleted Timeline";
+  const activityType = "Deleted";
+
+  global.db.query(
+    `UPDATE keppel.schedule_checklist SET active = 0 WHERE timeline_id = $1;`,
+    [req.params.id],
+    (err) => {
+      if (err) throw err;
+      else {
+        global.db.query(
+          `UPDATE keppel.schedule_timelines 
+            SET active = 0,
+            activity_log = activity_log || 
+                jsonb_build_object(
+                  'date', '${today}'::text,
+                  'name', '${name}'::text,
+                  'role', '${role_name}'::text,
+                  'activity', '${activity}'::text,
+                  'activity_type', '${activityType}'::text
+                )
+          WHERE timeline_id = $1;`,
+          [req.params.id],
+          (err) => {
+            if (err) throw err;
+          }
+        );
+      }
+      return res.status(200).send("Schedule successfully deleted");
+    }
+  );
+};
+
 
 // Delete a schedule in a timeline
 const deleteSchedule = async (req, res, next) => {
@@ -1197,6 +1326,7 @@ module.exports = {
   createSingleEvent,
   getPendingSingleEvents,
   getPendingTimelines,
+  getApprovedTimelines,
   getCompletedTimelines,
   getScheduleDrafts,
   getScheduleById,

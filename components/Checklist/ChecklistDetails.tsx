@@ -1,9 +1,8 @@
-import React, { ReactNode, useCallback } from "react";
-import { CMMSChecklist } from "../../types/common/interfaces";
+import moment from "moment";
+import { ReactNode, useCallback } from "react";
 import { ChecklistPageProps } from "../../pages/Checklist/Form";
 import styles from "../../styles/Checklist.module.scss";
-import { dateFormat } from "../Schedule/ScheduleTemplate";
-import moment from "moment";
+import { CMMSChecklist } from "../../types/common/interfaces";
 
 const ChecklistDetails = (props: ChecklistPageProps) => {
   // console.log(props.checklist);
@@ -148,6 +147,12 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
         <div>
           <p className={styles.checklistDetailsHeading}>Linked Assets</p>
           {assetHTMLElements.length > 0 ? assetHTMLElements : "NIL"}
+        </div>
+        <div>
+          <p className={styles.checklistDetailsHeading}>Overdue</p>
+          <p className={styles.checklistDetailsContent}>
+            {props.checklist?.overdue}
+          </p>
         </div>
         {actionDateElement()}
         {rejectionComments()}
