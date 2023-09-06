@@ -119,7 +119,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     setActive(id);
   };
 
-  const fetchRequests = () => {
+  /*const fetchRequests = () => {
     const { datetype, date } = pickerwithtype;
 
     setIsRequestReady(false);
@@ -161,8 +161,9 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
       setIsRequestReady(true);
     });
   };
+  */
 
-  const fetchChecklists = () => {
+  /*const fetchChecklists = () => {
     const { datetype, date } = pickerwithtype;
 
     setIsChecklistReady(false);
@@ -198,6 +199,133 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
         });
       }
     });
+  };*/
+  const fetchRequests = async () => {
+    const { datetype, date } = pickerwithtype;
+    const PARAMS = ["id"];
+
+    console.log(`/api/request/pending/${plant}/${datetype}/${date}`);
+    const getPendingRequest = instance.get(
+      `/api/request/pending/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
+    const getOustandingRequest = instance.get(
+      `/api/request/outstanding/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
+    const getCompletedRequest = instance.get(
+      `/api/request/completed/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
+
+    const getAllRequest = await Promise.all([
+      getPendingRequest,
+      getOustandingRequest,
+      getCompletedRequest,
+    ]);
+    // console.log(getAllFeedback);
+
+    const pendingRequest = getAllRequest[0].data?.rows;
+    const outstandingRequest = getAllRequest[1].data?.rows;
+    const completedRequest = getAllRequest[2].data?.rows;
+
+    console.log(getAllRequest);
+
+    setRequestData([
+      {
+        name: "Pending",
+        value: pendingRequest?.length || 0,
+        fill: "#C74B50",
+        id: 1,
+      },
+      {
+        name: "Outstanding",
+        value: outstandingRequest?.length || 0,
+        fill: "#810CA8",
+        id: 2,
+      },
+      {
+        name: "Completed",
+        value: completedRequest?.length || 0,
+        fill: "#03C988",
+        id: 3,
+      },
+    ]);
+
+    setRequest({
+      totalPendingRequest: pendingRequest?.length || 0,
+      totalOutstandingRequest: outstandingRequest?.length || 0,
+      totalOverdueRequest: 0,
+      totalClosedRequest: completedRequest?.length || 0
+    });
+
+    // console.log(feedbackData)
+
+    setTimeout(() => {
+      setIsReady(true);
+    }, 500);
+    setIsChecklistReady(true);
+  };
+
+  const fetchChecklists = async () => {
+    const { datetype, date } = pickerwithtype;
+    const PARAMS = ["id"];
+
+    console.log(`/api/checklist/pending/${plant}/${datetype}/${date}`);
+    const getPendingChecklist = instance.get(
+      `/api/checklist/pending/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
+    const getOustandingChecklist = instance.get(
+      `/api/checklist/outstanding/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
+    const getCompletedChecklist = instance.get(
+      `/api/checklist/completed/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
+
+    const getAllChecklist = await Promise.all([
+      getPendingChecklist,
+      getOustandingChecklist,
+      getCompletedChecklist,
+    ]);
+    // console.log(getAllFeedback);
+
+    const pendingChecklist = getAllChecklist[0].data?.rows;
+    const outstandingChecklist = getAllChecklist[1].data?.rows;
+    const completedChecklist = getAllChecklist[2].data?.rows;
+
+    console.log(getAllChecklist);
+
+    setChecklistData([
+      {
+        name: "Pending",
+        value: pendingChecklist?.length || 0,
+        fill: "#C74B50",
+        id: 1,
+      },
+      {
+        name: "Outstanding",
+        value: outstandingChecklist?.length || 0,
+        fill: "#810CA8",
+        id: 2,
+      },
+      {
+        name: "Completed",
+        value: completedChecklist?.length || 0,
+        fill: "#03C988",
+        id: 3,
+      },
+    ]);
+
+    setChecklist({
+      totalPendingChecklist: pendingChecklist?.length || 0,
+      totalOutstandingChecklist: outstandingChecklist?.length || 0,
+      totalOverdueChecklist: 0,
+      totalClosedChecklist: completedChecklist?.length || 0
+    });
+
+    // console.log(feedbackData)
+
+    setTimeout(() => {
+      setIsReady(true);
+    }, 500);
+    setIsChecklistReady(true);
   };
 
   const fetchCOPs = async () => {
@@ -697,7 +825,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               )}
             </DashboardBox>
           )}
-          {access && <DashboardBox
+          {<DashboardBox
             id="pending-feedback-box"
             title="Pending Feedbacks"
             style={{ gridArea: "m" }}
@@ -709,7 +837,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             </p>
           </DashboardBox>
           }
-          {access && <DashboardBox
+          {<DashboardBox
             id="outstanding-feedback-box"
             title="Outstanding Feedbacks"
             style={{ gridArea: "n" }}
@@ -723,7 +851,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             </p>
           </DashboardBox>
           }
-          {access && <DashboardBox
+          {<DashboardBox
             id="completed-feedback-box"
             title="Completed Feedbacks"
             style={{ gridArea: "o" }}
@@ -735,7 +863,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             </p>
           </DashboardBox>
           }
-          {access && showTotalContainer && (
+          {showTotalContainer && (
             <DashboardBox
               title={"Total Feedbacks: " + totalFeedback}
               style={{ gridArea: "p" }}
@@ -820,6 +948,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             date={date}
             datetype={datetype}
             plant={plant as number}
+            viewType="pending"
           />
         )}
         {showDiv === "outstanding-requests-box" && (
@@ -830,6 +959,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             date={date}
             datetype={datetype}
             plant={plant as number}
+            viewType="outstanding"
           />
         )}
         {showDiv === "closed-requests-box" && (
@@ -840,6 +970,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             date={date}
             datetype={datetype}
             plant={plant as number}
+            viewType="completed"
           />
         )}
         {showDiv === "pending-checklists-box" && (
@@ -850,6 +981,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             date={date}
             datetype={datetype}
             plant={plant as number}
+            viewType="pending"
           />
         )}
         {showDiv === "outstanding-checklists-box" && (
@@ -860,6 +992,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             date={date}
             datetype={datetype}
             plant={plant as number}
+            viewType="outstanding"
           />
         )}
         {showDiv === "completed-checklists-box" && (
@@ -870,6 +1003,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             date={date}
             datetype={datetype}
             plant={plant as number}
+            viewType="completed"
           />
         )}
         {showDiv === "scheduled-cop-box" && (

@@ -128,6 +128,7 @@ export interface ChecklistProps {
   date: string;
   datetype: string;
   isReady: boolean;
+  viewType?: string;
 }
 
 const downloadCSV = async (type: string, activeTabIndex: number) => {
@@ -161,11 +162,26 @@ export default function Checklist(props: ChecklistProps) {
   >(undefined);
   const searchRef = useRef({ value: "" });
   const [assignedUserHistory, setAssignedUserHistory] = useState<string>("");
-  const filteredData = useChecklistFilter(props, page);
+  const fields = [
+    "checklist_id",
+    "chl_name",
+    "description",
+    "status_id",
+    "created_date",
+    "createdbyuser",
+    "assigneduser",
+    "signoffuser",
+    "plant_name",
+    "status",
+    "activity_log",
+    "overdue_status"
+  ]
+  const filteredData = useChecklistFilter(props, page, fields);
   const columnData = useChecklist(
     indexedColumn[activeTabIndex],
     page,
-    searchRef.current.value
+    searchRef.current.value,
+    fields
   );
   const router = useRouter();
 

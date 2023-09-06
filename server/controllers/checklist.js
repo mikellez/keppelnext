@@ -194,6 +194,32 @@ const getPendingChecklistsQuery = (expand, search) => {
   );
 };
 
+const getOutstandingChecklistsQuery = (expand, search) => {
+  return (
+    getAllChecklistQuery(expand, search) +
+    `
+    WHERE
+        ua.user_id = $1 AND
+        (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6)
+    ${searchCondition(search)}
+    ORDER BY cl.checklist_id DESC
+  `
+  );
+};
+
+const getCompletedChecklistsQuery = (expand, search) => {
+  return (
+    getAllChecklistQuery(expand, search) +
+    `
+    WHERE
+        ua.user_id = $1 AND
+        (cl.status_id = 6)
+    ${searchCondition(search)}
+    ORDER BY cl.checklist_id DESC
+  `
+  );
+};
+
 const getForReviewChecklistsQuery = (expand, search) => {
   return (
     getAllChecklistQuery(expand, search) +
@@ -271,7 +297,61 @@ const fetchPendingChecklists = async (req, res, next) => {
 
   const query =
     getPendingChecklistsQuery(expand, search) +
-    ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
+    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : '');
+
+  try {
+    const result = await global.db.query(query, [req.user.id]);
+    //if (result.rows.length == 0)
+    //return res.status(204).json({ msg: "No checklist" });
+
+    return res.status(200).json({ rows: result.rows, total: totalPages });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+};
+
+const fetchOutstandingChecklists = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
+
+  const totalRows = await global.db.query(
+    getOutstandingChecklistsQuery(expand, search),
+    [req.user.id]
+  );
+  const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+
+  const query =
+    getOutstandingChecklistsQuery(expand, search) +
+    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : '');
+
+  try {
+    const result = await global.db.query(query, [req.user.id]);
+    //if (result.rows.length == 0)
+    //return res.status(204).json({ msg: "No checklist" });
+
+    return res.status(200).json({ rows: result.rows, total: totalPages });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+};
+
+const fetchCompletedChecklists = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
+
+  const totalRows = await global.db.query(
+    getCompletedChecklistsQuery(expand, search),
+    [req.user.id]
+  );
+  const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+
+  const query =
+    getCompletedChecklistsQuery(expand, search) +
+    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : '');
 
   try {
     const result = await global.db.query(query, [req.user.id]);
@@ -1090,7 +1170,7 @@ const fetchFilteredChecklists = async (req, res, next) => {
   }
 
   if (![1, 2, 3].includes(req.user.role_id)) {
-    userRoleCond = `AND (ua.user_id = ${req.user.id} OR cl.assigned_user_id = ${req.user.id})`;
+    userRoleCond = `AND cl.assigned_user_id = ${req.user.id}`;
   }
 
   if (plant && plant != 0) {
@@ -1141,7 +1221,6 @@ const fetchFilteredChecklists = async (req, res, next) => {
     fetchAllChecklistQuery +
     `
     WHERE 1 = 1
-        AND ua.user_id = ${req.user.id} 
         ${plantCond}
         ${statusCond}
         ${dateCond}
@@ -1223,5 +1302,7 @@ module.exports = {
   deleteChecklistTemplate,
   fetchFilteredChecklists,
   fetchPendingChecklists,
+  fetchOutstandingChecklists,
+  fetchCompletedChecklists,
   editChecklistRecord,
 };

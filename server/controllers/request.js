@@ -175,18 +175,58 @@ async function fetchRequestQuery(
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);
 
-  sql += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems};`;
+  if(page != 0) sql += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems};`;
 
   return { sql, totalPages };
 }
 
 const fetchPendingRequests = async (req, res, next) => {
-  const page = req.query.page || 1;
+  const page = req.query.page || 0;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND sc.status_id = 1", //PENDING
+    ` ORDER BY r.created_date DESC`,
+    req.user.role_id,
+    req.user.id,
+    page,
+    expand,
+    search
+  );
+
+  const result = await global.db.query(sql);
+
+  res.status(200).send({ rows: result.rows, total: totalPages });
+};
+
+const fetchOutstandingRequests = async (req, res, next) => {
+  const page = req.query.page || 0;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
+
+  const { sql, totalPages } = await fetchRequestQuery(
+    "AND (sc.status_id = 2 or sc.status_id = 3)", //PENDING
+    ` ORDER BY r.created_date DESC`,
+    req.user.role_id,
+    req.user.id,
+    page,
+    expand,
+    search
+  );
+
+  const result = await global.db.query(sql);
+
+  res.status(200).send({ rows: result.rows, total: totalPages });
+};
+
+const fetchCompletedRequests = async (req, res, next) => {
+  const page = req.query.page || 0;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
+
+  const { sql, totalPages } = await fetchRequestQuery(
+    "AND sc.status_id = 4", 
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
@@ -1120,4 +1160,6 @@ module.exports = {
   fetchRequestUploadedFile,
   fetchPlantRequest,
   fetchAssetRequest,
+  fetchOutstandingRequests,
+  fetchCompletedRequests
 };

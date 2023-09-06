@@ -439,6 +439,24 @@ router.get(
   checkIfLoggedInAPI,
   controllers.request.fetchFilteredRequests
 );
+
+router.get(
+  "/request/pending/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.request.fetchPendingRequests
+);
+
+router.get(
+  "/request/outstanding/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.request.fetchOutstandingRequests
+);
+
+router.get(
+  "/request/completed/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.request.fetchCompletedRequests
+);
 /**
  * @api {get} /request/plant/:plant_id Get Plant Details
  * @apiDescription Fetches the pd and name of a specific plant.
@@ -844,6 +862,24 @@ router.get(
   "/checklist/counts/:field/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.checklist.fetchChecklistCounts
+);
+
+router.get(
+  "/checklist/pending/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchPendingChecklists
+);
+
+router.get(
+  "/checklist/outstanding/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchOutstandingChecklists
+);
+
+router.get(
+  "/checklist/completed/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchCompletedChecklists
 );
 
 /**

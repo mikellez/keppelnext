@@ -133,6 +133,7 @@ export interface RequestProps {
   date: string;
   datetype: string;
   isReady?: boolean;
+  viewType?: string;
 }
 
 export const getColor = (status: string) => {
@@ -241,11 +242,7 @@ export default function Request(props: RequestProps) {
     }
   };
 
-  const filteredRequest = useRequestFilter(props, page);
-  const allRequest = useRequest(
-    indexedColumn[activeTabIndex],
-    page,
-    searchRef.current.value,
+  const fields = 
     [
       "request_id",
       "fault_name",
@@ -259,7 +256,13 @@ export default function Request(props: RequestProps) {
       "associatedrequestid",
       "activity_log",
       "overdue_status",
-    ]
+    ];
+  const filteredRequest = useRequestFilter(props, page, fields);
+  const allRequest = useRequest(
+    indexedColumn[activeTabIndex],
+    page,
+    searchRef.current.value,
+    fields
   );
 
   const {
