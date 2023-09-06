@@ -457,6 +457,12 @@ router.get(
   checkIfLoggedInAPI,
   controllers.request.fetchCompletedRequests
 );
+
+router.get(
+  "/request/overdue/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.request.fetchOverdueRequests
+);
 /**
  * @api {get} /request/plant/:plant_id Get Plant Details
  * @apiDescription Fetches the pd and name of a specific plant.
@@ -880,6 +886,12 @@ router.get(
   "/checklist/completed/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.checklist.fetchCompletedChecklists
+);
+
+router.get(
+  "/checklist/overdue/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchOverdueChecklists
 );
 
 /**

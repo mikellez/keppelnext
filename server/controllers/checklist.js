@@ -235,6 +235,20 @@ const getCompletedChecklistsQuery = (req) => {
   );
 };
 
+const getOverdueChecklistsQuery = (req) => {
+  const search = req.query.search || "";
+  return (
+    getAllChecklistQuery(req) +
+    `
+    WHERE
+        ua.user_id = $1 AND
+        cl.overdue_status = true
+    ${searchCondition(search)}
+    ORDER BY cl.checklist_id DESC
+  `
+  );
+};
+
 const getForReviewChecklistsQuery = (req) => {
   const search = req.query.search || "";
   return (
@@ -369,6 +383,33 @@ const fetchCompletedChecklists = async (req, res, next) => {
 
   const query =
     getCompletedChecklistsQuery(req) +
+    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : '');
+
+  try {
+    const result = await global.db.query(query, [req.user.id]);
+    //if (result.rows.length == 0)
+    //return res.status(204).json({ msg: "No checklist" });
+
+    return res.status(200).json({ rows: result.rows, total: totalPages });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+};
+
+const fetchOverdueChecklists = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
+
+  const totalRows = await global.db.query(
+    getOverdueChecklistsQuery(req),
+    [req.user.id]
+  );
+  const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
+
+  const query =
+    getOverdueChecklistsQuery(req) +
     (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : '');
 
   try {
@@ -1323,4 +1364,5 @@ module.exports = {
   fetchOutstandingChecklists,
   fetchCompletedChecklists,
   editChecklistRecord,
+  fetchOverdueChecklists
 };

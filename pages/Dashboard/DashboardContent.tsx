@@ -214,17 +214,22 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     const getCompletedRequest = instance.get(
       `/api/request/completed/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
     );
+    const getOverdueRequest = instance.get(
+      `/api/request/overdue/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
 
     const getAllRequest = await Promise.all([
       getPendingRequest,
       getOustandingRequest,
       getCompletedRequest,
+      getOverdueRequest
     ]);
     // console.log(getAllFeedback);
 
     const pendingRequest = getAllRequest[0].data?.rows;
     const outstandingRequest = getAllRequest[1].data?.rows;
     const completedRequest = getAllRequest[2].data?.rows;
+    const overdueRequest = getAllRequest[3].data?.rows;
 
     console.log(getAllRequest);
 
@@ -247,12 +252,18 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
         fill: "#03C988",
         id: 3,
       },
+      {
+        name: "Overdue",
+        value: overdueRequest?.length || 0,
+        fill: "#C74B50",
+        id: 1,
+      },
     ]);
 
     setRequest({
       totalPendingRequest: pendingRequest?.length || 0,
       totalOutstandingRequest: outstandingRequest?.length || 0,
-      totalOverdueRequest: 0,
+      totalOverdueRequest: overdueRequest?.length || 0,
       totalClosedRequest: completedRequest?.length || 0
     });
 
@@ -261,7 +272,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     setTimeout(() => {
       setIsReady(true);
     }, 500);
-    setIsChecklistReady(true);
+    setIsRequestReady(true);
   };
 
   const fetchChecklists = async () => {
@@ -278,17 +289,22 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     const getCompletedChecklist = instance.get(
       `/api/checklist/completed/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
     );
+    const getOverdueChecklist = instance.get(
+      `/api/checklist/overdue/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
 
     const getAllChecklist = await Promise.all([
       getPendingChecklist,
       getOustandingChecklist,
       getCompletedChecklist,
+      getOverdueChecklist
     ]);
     // console.log(getAllFeedback);
 
     const pendingChecklist = getAllChecklist[0].data?.rows;
     const outstandingChecklist = getAllChecklist[1].data?.rows;
     const completedChecklist = getAllChecklist[2].data?.rows;
+    const overdueChecklist = getAllChecklist[3].data?.rows;
 
     console.log(getAllChecklist);
 
@@ -311,12 +327,18 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
         fill: "#03C988",
         id: 3,
       },
+      {
+        name: "Overdue",
+        value: overdueChecklist?.length || 0,
+        fill: "#C74B50",
+        id: 1,
+      },
     ]);
 
     setChecklist({
       totalPendingChecklist: pendingChecklist?.length || 0,
       totalOutstandingChecklist: outstandingChecklist?.length || 0,
-      totalOverdueChecklist: 0,
+      totalOverdueChecklist: overdueChecklist?.length || 0,
       totalClosedChecklist: completedChecklist?.length || 0
     });
 
