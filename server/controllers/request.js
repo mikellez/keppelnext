@@ -34,9 +34,9 @@ async function fetchRequestQuery(
   let expandCond = "";
   let SELECT_ARR = [];
 
-  if (role_id == 3) {
-    userCond = `AND u.user_id = ${user_id}`;
-  }
+  if (role_id === 4 ) {
+    userCond = `AND (r.assigned_user_id = ${user_id} OR r.user_id = ${user_id})`;
+  } 
 
   const SELECT = {
     request_id: "r.request_id",
@@ -88,89 +88,43 @@ async function fetchRequestQuery(
   expandCond = SELECT_ARR.join(", ");
 
   let sql;
-  if (role_id === 1 || role_id === 2 || role_id === 3) {
-    sql = `SELECT 
-      ${expandCond}
-    FROM    
-		  keppel.users u
-		  JOIN keppel.user_access ua ON u.user_id = ua.user_id
-		  JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
-		  left JOIN keppel.users req_u ON r.user_id = req_u.user_id
-		  left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
-		  left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
-		  left JOIN keppel.request_type rt ON rt.req_id = r.req_id
-		  left JOIN keppel.priority pri ON pri.p_id = r.priority_id
-		  left JOIN keppel.role ro ON ro.role_id = r.role_id
-		  left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
-		  left JOIN keppel.users au ON au.user_id = r.assigned_user_id
-		  left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
-			  from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
-			  WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
-    WHERE 1 = 1 
-    ${searchCondition(search)}
-	  ${status_query}
-    ${userCond}
-	  GROUP BY (
-		  r.request_id,
-		  ft.fault_type,
-		  pm.plant_name,
-		  pm.plant_id,
-		  rt.request,
-		  ro.role_name,
-		  sc.status,
-		  pri.priority,
-		  req_u.first_name,
-		  tmp1.asset_name,
-		  req_u.last_name,
-		  au.first_name,
-		  au.last_name
-	  ) ${order_query}`;
-  } else {
-    sql = `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
-	  ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
-	  pri.priority, 
-	  CASE 
-		  WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
-		  ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-	  END AS created_by,
-	  r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
-	  r.complete_comments,
-	  concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-	  , r.activity_log, r.rejection_comments, r.status_id, r.psa_id, r.fault_id
-	  FROM    
-		  keppel.users u
-		  JOIN keppel.user_access ua ON u.user_id = ua.user_id
-		  JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
-		  left JOIN keppel.users req_u ON r.user_id = req_u.user_id
-		  left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
-		  left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
-		  left JOIN keppel.request_type rt ON rt.req_id = r.req_id
-		  left JOIN keppel.priority pri ON pri.p_id = r.priority_id
-		  left JOIN keppel.role ro ON ro.role_id = r.role_id
-		  left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
-		  left JOIN keppel.users au ON au.user_id = r.assigned_user_id
-		  left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
-			  from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
-			  WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
-	  WHERE (r.assigned_user_id = ${user_id} OR r.user_id = ${user_id})
-    ${searchCondition(search)}
-	  ${status_query}
-	  GROUP BY (
-		  r.request_id,
-		  ft.fault_type,
-		  pm.plant_name,
-		  pm.plant_id,
-		  rt.request,
-		  ro.role_name,
-		  sc.status,
-		  pri.priority,
-		  req_u.first_name,
-		  tmp1.asset_name,
-		  req_u.last_name,
-		  au.first_name,
-		  au.last_name
-	  ) ${order_query}`;
-  }
+  sql = `SELECT 
+    ${expandCond}
+  FROM    
+    keppel.users u
+    JOIN keppel.user_access ua ON u.user_id = ua.user_id
+    JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
+    left JOIN keppel.users req_u ON r.user_id = req_u.user_id
+    left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
+    left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
+    left JOIN keppel.request_type rt ON rt.req_id = r.req_id
+    left JOIN keppel.priority pri ON pri.p_id = r.priority_id
+    left JOIN keppel.role ro ON ro.role_id = r.role_id
+    left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
+    left JOIN keppel.users au ON au.user_id = r.assigned_user_id
+    left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
+      from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
+      WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
+  WHERE 1 = 1 
+  AND ua.user_id = ${user_id}
+  ${searchCondition(search)}
+  ${status_query}
+  ${userCond}
+  GROUP BY (
+    r.request_id,
+    ft.fault_type,
+    pm.plant_name,
+    pm.plant_id,
+    rt.request,
+    ro.role_name,
+    sc.status,
+    pri.priority,
+    req_u.first_name,
+    tmp1.asset_name,
+    req_u.last_name,
+    au.first_name,
+    au.last_name
+  ) ${order_query}`;
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);
