@@ -37,7 +37,6 @@
 
 */
 
-
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import {
@@ -80,8 +79,8 @@ import {
   AiOutlineHistory,
 } from "react-icons/ai";
 
-import Tooltip from 'rc-tooltip';
-import 'rc-tooltip/assets/bootstrap_white.css';
+import Tooltip from "rc-tooltip";
+import "rc-tooltip/assets/bootstrap_white.css";
 
 import PageButton from "../../components/PageButton";
 import styles from "../../styles/Request.module.scss";
@@ -176,7 +175,7 @@ export default function Checklist(props: ChecklistProps) {
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns:  5em 25em 7em 14em 8em 8em 8em 6em;",
+        "--data-table-library_grid-template-columns:  5em 25em 7em 14em 8em 8em 7em 7em;",
     },
   ]);
 
@@ -264,13 +263,13 @@ export default function Checklist(props: ChecklistProps) {
         />
         {(user.data?.role_id === Role.Admin ||
           user.data?.role_id === Role.Manager ||
-          user.data?.role_id === Role.Engineer) &&
-        <Link href="/Checklist/Form?action=New">
-          <TooltipBtn text="New Checklist">
-            <BsFileEarmarkPlus size={20} />
-          </TooltipBtn>
-        </Link>
-        }
+          user.data?.role_id === Role.Engineer) && (
+          <Link href="/Checklist/Form?action=New">
+            <TooltipBtn text="New Checklist">
+              <BsFileEarmarkPlus size={20} />
+            </TooltipBtn>
+          </Link>
+        )}
         <TooltipBtn
           onClick={() => downloadCSV("checklist", activeTabIndex)}
           text="Export CSV"
@@ -351,12 +350,14 @@ export default function Checklist(props: ChecklistProps) {
                         <Row key={item.id} item={item}>
                           <Cell>{item.id}</Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{item.description}</span>}>
-                                  <div>{item.description}</div>
-                              </Tooltip>
+                            <Tooltip
+                              overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              placement="bottom"
+                              trigger={["hover"]}
+                              overlay={<span>{item.description}</span>}
+                            >
+                              <div>{item.description}</div>
+                            </Tooltip>
                           </Cell>
                           <Cell>
                             <span
@@ -369,12 +370,44 @@ export default function Checklist(props: ChecklistProps) {
                             </span>
                           </Cell>
                           <Cell>
-                          <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={
+                            <Tooltip
+                              overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              placement="bottom"
+                              trigger={["hover"]}
+                              overlay={
                                 <span>
                                   {activeTabIndex === 2
+                                    ? `${moment(
+                                        new Date(
+                                          item.activity_log
+                                            .reverse()
+                                            .find(
+                                              (activity) =>
+                                                activity["activity_type"] ==
+                                                "WORK DONE"
+                                            )!.date
+                                        )
+                                      ).format("MMMM Do YYYY, h:mm:ss a")}`
+                                    : activeTabIndex === 3
+                                    ? `${moment(
+                                        new Date(
+                                          item.activity_log
+                                            .reverse()
+                                            .find(
+                                              (activity) =>
+                                                activity["activity_type"] ==
+                                                "APPROVED"
+                                            )!.date
+                                        )
+                                      ).format("MMMM Do YYYY, h:mm:ss a")}`
+                                    : `${moment(
+                                        new Date(item.created_date)
+                                      ).format("MMMM Do YYYY, h:mm:ss a")}`}
+                                </span>
+                              }
+                            >
+                              <div>
+                                {activeTabIndex === 2
                                   ? `${moment(
                                       new Date(
                                         item.activity_log
@@ -398,71 +431,51 @@ export default function Checklist(props: ChecklistProps) {
                                           )!.date
                                       )
                                     ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                  : `${moment(new Date(item.created_date)).format(
-                                      "MMMM Do YYYY, h:mm:ss a"
-                                    )}`}
-                                </span>}>
-
-                                <div>
-                                  {activeTabIndex === 2
-                                  ? `${moment(
-                                    new Date(
-                                      item.activity_log
-                                        .reverse()
-                                        .find(
-                                          (activity) =>
-                                            activity["activity_type"] ==
-                                            "WORK DONE"
-                                        )!.date
-                                    )
-                                  ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                : activeTabIndex === 3
-                                ? `${moment(
-                                    new Date(
-                                      item.activity_log
-                                        .reverse()
-                                        .find(
-                                          (activity) =>
-                                            activity["activity_type"] ==
-                                            "APPROVED"
-                                        )!.date
-                                    )
-                                  ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                : `${moment(new Date(item.created_date)).format(
-                                    "MMMM Do YYYY, h:mm:ss a"
-                                  )}`}
-                                </div>
-                                </Tooltip>
-                            
+                                  : `${moment(
+                                      new Date(item.created_date)
+                                    ).format("MMMM Do YYYY, h:mm:ss a")}`}
+                              </div>
+                            </Tooltip>
                           </Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{item.assigneduser}</span>}>
-                                  <div>{item.assigneduser}</div>
-                              </Tooltip>
-                            </Cell>
+                            <Tooltip
+                              overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              placement="bottom"
+                              trigger={["hover"]}
+                              overlay={<span>{item.assigneduser}</span>}
+                            >
+                              <div>{item.assigneduser}</div>
+                            </Tooltip>
+                          </Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{item.signoffuser}</span>}>
-                                  <div>{item.signoffuser}</div>
-                              </Tooltip>
-                            </Cell>
+                            <Tooltip
+                              overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              placement="bottom"
+                              trigger={["hover"]}
+                              overlay={<span>{item.signoffuser}</span>}
+                            >
+                              <div>{item.signoffuser}</div>
+                            </Tooltip>
+                          </Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={
+                            <Tooltip
+                              overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              placement="bottom"
+                              trigger={["hover"]}
+                              overlay={
                                 <span>
-                                  {item.createdbyuser != " " ? item.createdbyuser : "System Generated"}
-                                </span>}>
-                                <div>
-                                  {item.createdbyuser != " " ? item.createdbyuser : "System Generated"}
-                                </div>
-                              </Tooltip>
+                                  {item.createdbyuser != " "
+                                    ? item.createdbyuser
+                                    : "System Generated"}
+                                </span>
+                              }
+                            >
+                              <div>
+                                {item.createdbyuser != " "
+                                  ? item.createdbyuser
+                                  : "System Generated"}
+                              </div>
+                            </Tooltip>
                           </Cell>
                           <Cell>
                             {(user.data!.role_id === Role.Admin ||
@@ -491,7 +504,8 @@ export default function Checklist(props: ChecklistProps) {
                                   <AiOutlineEdit size={22} title={"Edit"} />
                                 </Link>
                               </>
-                            ) : item.status_id === 1 && user.data?.role_id !== Role.Specialist ? (
+                            ) : item.status_id === 1 &&
+                              user.data?.role_id !== Role.Specialist ? (
                               <Link
                                 href={`/Checklist/Form/?action=Edit&id=${item.id}`}
                               >
@@ -511,6 +525,9 @@ export default function Checklist(props: ChecklistProps) {
                               size={22}
                               title={"View History"}
                             />
+                            <Link href={`/Checklist/View/${item.id}`}>
+                              <AiOutlineFolderView size={22} title={"View"} />
+                            </Link>
                           </Cell>
                         </Row>
                       );
