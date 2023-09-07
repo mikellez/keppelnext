@@ -6,8 +6,13 @@ import { GetServerSideProps } from "next";
 import ChecklistPreview from "../../../components/Checklist/ChecklistPreview";
 import Link from "next/link";
 import TooltipBtn from "../../../components/TooltipBtn";
+<<<<<<< HEAD
 import { HiBan, HiOutlineDownload } from "react-icons/hi";
+=======
+import { HiOutlineDownload, HiBan } from "react-icons/hi";
+>>>>>>> 022c146d96bc8f410f1e4371d600f8fb13f6b3cf
 import instance from "../../../types/common/axios.config";
+
 import { useRouter } from "next/router";
 import styles from "../../../styles/Checklist.module.scss";
 import { useCurrentUser } from "../../../components/SWR";
@@ -39,9 +44,17 @@ const downloadChecklistPDF = async (checklistId: number) => {
   }
 };
 
+<<<<<<< HEAD
 const sendCancelChecklist = async (remarks: string, id: number) => {
   return await instance
     .patch("/api/checklist/cancel/" + id, remarks)
+=======
+const sendCancelChecklist = async (id: number) => {
+  const remarks = "";
+  // console.log(id);
+  return await instance
+    .patch(`/api/checklist/cancel/${id}`, { remarks: remarks })
+>>>>>>> 022c146d96bc8f410f1e4371d600f8fb13f6b3cf
     .then((res) => {
       return res.data;
     })
@@ -70,6 +83,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
         >
           <HiOutlineDownload size={24} />
         </TooltipBtn>
+<<<<<<< HEAD
         {user.data?.role_id == 4 ? (
           <TooltipBtn
             text="Cancel"
@@ -89,6 +103,14 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
             <HiBan size={24} />
           </TooltipBtn>
         )}
+=======
+        <TooltipBtn
+          text="Cancel"
+          onClick={() => sendCancelChecklist(props.checklist!.checklist_id)}
+        >
+          <HiBan size={24} />
+        </TooltipBtn>
+>>>>>>> 022c146d96bc8f410f1e4371d600f8fb13f6b3cf
         <button
           className={"btn btn-secondary"}
           type="button"

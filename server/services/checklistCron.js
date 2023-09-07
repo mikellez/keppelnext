@@ -8,7 +8,7 @@ const connectDB = () => {
   return client;
 };
 
-// Only do it for checklist records, NOT the template (based on my own understanding)
+// Only do it for checklist records
 const fetchNewlyOverdueChecklists = async () => {
     const client = connectDB();
     const result = await client("keppel.checklist_master")

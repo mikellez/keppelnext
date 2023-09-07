@@ -1045,6 +1045,16 @@ router.patch(
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("reject")
 );
+router.patch(
+  "/checklist/cancel/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("cancel")
+);
+router.patch(
+  "/checklist/reassign/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("reassign")
+);
 
 router.patch(
   "/checklist/cancel/:checklist_id",

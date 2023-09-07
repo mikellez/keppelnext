@@ -190,7 +190,7 @@ export default function Checklist(props: ChecklistProps) {
 
   // Used for adding the overdue column into the template when the assigned/pending tab is selected
   const tableFormat =
-    activeTabIndex === 0 || activeTabIndex === 1
+    activeTabIndex === 0 || activeTabIndex === 1 || activeTabIndex === 2
       ? `--data-table-library_grid-template-columns:  5em 25em 7em 15em 10em 8em 8em 8em 6em;
       
   `
@@ -365,7 +365,9 @@ export default function Checklist(props: ChecklistProps) {
                           : "Created On"}
                       </HeaderCell>
                       {/*Only show the Overdue column for the pending and assigned tabs*/}
-                      {(activeTabIndex === 0 || activeTabIndex === 1) && (
+                      {(activeTabIndex === 0 ||
+                        activeTabIndex === 1 ||
+                        activeTabIndex === 2) && (
                         <HeaderCell resize>Overdue Status</HeaderCell>
                       )}
                       <HeaderCell resize>Assigned To</HeaderCell>
@@ -407,69 +409,92 @@ export default function Checklist(props: ChecklistProps) {
                               trigger={["hover"]}
                               overlay={
                                 <span>
-                                  {activeTabIndex === 2
-                                    ? `${moment(
-                                        new Date(
-                                          item.activity_log
-                                            .reverse()
-                                            .find(
-                                              (activity) =>
-                                                activity["activity_type"] ==
-                                                "WORK DONE"
-                                            )!.date
-                                        )
-                                      ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                    : activeTabIndex === 3
-                                    ? `${moment(
-                                        new Date(
-                                          item.activity_log
-                                            .reverse()
-                                            .find(
-                                              (activity) =>
-                                                activity["activity_type"] ==
-                                                "APPROVED"
-                                            )!.date
-                                        )
-                                      ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                    : `${moment(
-                                        new Date(item.created_date)
-                                      ).format("MMMM Do YYYY, h:mm:ss a")}`}
+                                  {(() => {
+                                    try {
+                                      let dateToDisplay;
+
+                                      if (activeTabIndex === 2) {
+                                        dateToDisplay = item.activity_log
+                                          .reverse()
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ===
+                                              "WORK DONE"
+                                          )?.date;
+                                      } else if (activeTabIndex === 3) {
+                                        dateToDisplay = item.activity_log
+                                          .reverse()
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ===
+                                              "APPROVED"
+                                          )?.date;
+                                      } else {
+                                        dateToDisplay = item.created_date;
+                                      }
+
+                                      if (dateToDisplay) {
+                                        return moment(
+                                          new Date(dateToDisplay)
+                                        ).format("MMMM Do YYYY, h:mm:ss a");
+                                      } else {
+                                        return "Date not found";
+                                      }
+                                    } catch (error) {
+                                      console.error(
+                                        "An error occurred:",
+                                        error
+                                      );
+                                      return "Error occurred";
+                                    }
+                                  })()}
                                 </span>
                               }
                             >
                               <div>
-                                {activeTabIndex === 2
-                                  ? `${moment(
-                                      new Date(
-                                        item.activity_log
-                                          .reverse()
-                                          .find(
-                                            (activity) =>
-                                              activity["activity_type"] ==
-                                              "WORK DONE"
-                                          )!.date
-                                      )
-                                    ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                  : activeTabIndex === 3
-                                  ? `${moment(
-                                      new Date(
-                                        item.activity_log
-                                          .reverse()
-                                          .find(
-                                            (activity) =>
-                                              activity["activity_type"] ==
-                                              "APPROVED"
-                                          )!.date
-                                      )
-                                    ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                  : `${moment(
-                                      new Date(item.created_date)
-                                    ).format("MMMM Do YYYY, h:mm:ss a")}`}
+                                {(() => {
+                                  try {
+                                    let dateToDisplay;
+
+                                    if (activeTabIndex === 2) {
+                                      dateToDisplay = item.activity_log
+                                        .reverse()
+                                        .find(
+                                          (activity) =>
+                                            activity["activity_type"] ===
+                                            "WORK DONE"
+                                        )?.date;
+                                    } else if (activeTabIndex === 3) {
+                                      dateToDisplay = item.activity_log
+                                        .reverse()
+                                        .find(
+                                          (activity) =>
+                                            activity["activity_type"] ===
+                                            "APPROVED"
+                                        )?.date;
+                                    } else {
+                                      dateToDisplay = item.created_date;
+                                    }
+
+                                    if (dateToDisplay) {
+                                      return moment(
+                                        new Date(dateToDisplay)
+                                      ).format("MMMM Do YYYY, h:mm:ss a");
+                                    } else {
+                                      return "Date not found";
+                                    }
+                                  } catch (error) {
+                                    console.error("An error occurred:", error);
+                                    return "Error occurred";
+                                  }
+                                })()}
                               </div>
                             </Tooltip>
                           </Cell>
-                          {/*Only show the Overdue column for the pending and assigned tabs*/}
-                          {(activeTabIndex === 0 || activeTabIndex === 1) && (
+                          {/*Only show the Overdue column for the pending, assigned and work done tabs*/}
+                          {(activeTabIndex === 0 ||
+                            activeTabIndex === 1 ||
+                            activeTabIndex === 2) && (
                             <Cell
                               style={{
                                 color: getColor(

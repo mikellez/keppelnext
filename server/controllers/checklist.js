@@ -826,7 +826,6 @@ const completeChecklist = async (req, res, next) => {
         SET 
             datajson = $1,
             status_id = 4,
-            overdue_status = false,
             history = concat(history,'${updatehistory}'),
             activity_log = activity_log || 
         jsonb_build_object(
@@ -1244,11 +1243,11 @@ const approveCancelChecklist = async (req, res, next) => {
         // console.log(err);
         return res
           .status(500)
-          .json("Failure to update checklist request cancellation");
+          .json("Failure to update checklist approve cancellation");
       }
       return res
         .status(200)
-        .json("Checklist successfully request cancellation");
+        .json("Checklist successfully approve cancellation");
     }
   );
 };
@@ -1285,13 +1284,72 @@ const rejectCancelChecklist = async (req, res, next) => {
         // console.log(err);
         return res
           .status(500)
-          .json("Failure to update checklist request cancellation");
+          .json("Failure to update checklist reject cancellation");
       }
-      return res
-        .status(200)
-        .json("Checklist successfully request cancellation");
+      return res.status(200).json("Checklist successfully reject cancellation");
     }
   );
+};
+
+const reassignRequestChecklist = async (req, res, next) => {
+  // Sets status of the checklist to "Reassignment Request" / status_id = 8
+
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
+  try {
+    const checklist_id = parseInt(req.params.checklist_id);
+    const reassignReqComments = ""; // todo add reassign comment here
+
+    // Update activity log entry in the record
+    const updatehistory = `,Updated Record_REASSIGNED_${today}_${req.user.name}_${reassignReqComments}`;
+    const activity_log = {
+      date: today,
+      name: req.user.name,
+      activity: "REASSIGNMENT REQUEST",
+      activity_type: "Updated Record",
+      comments: reassignReqComments,
+    };
+
+    const sql = `
+          UPDATE
+              keppel.checklist_master
+          SET 
+              status_id = 8,
+              history = concat(history,'${updatehistory}'),
+              activity_log = activity_log || $1
+          WHERE 
+              checklist_id = $2
+      `;
+
+    global.db.query(
+      sql,
+      [JSON.stringify(activity_log), checklist_id],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          return res
+            .status(500)
+            .json("Failure to update checklist reassignment request");
+        }
+        console.log(result.rows);
+        if (result.rowCount == 0) {
+          return res
+            .status(404)
+            .json("Checklist ID: " + checklist_id + " does not exist");
+        }
+        return res
+          .status(200)
+          .json(
+            "Reassignment Request for Checklist ID: " +
+              checklist_id +
+              " Successfully Created"
+          );
+      }
+    );
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json("Invalid Checklist ID:");
+  }
 };
 
 function updateChecklist(updateType) {
@@ -1310,6 +1368,8 @@ function updateChecklist(updateType) {
       return approveCancelChecklist;
     case "rejectCancel":
       return rejectCancelChecklist;
+    case "reassign":
+      return reassignRequestChecklist;
     default:
       return console.log("update checklist type error");
   }
