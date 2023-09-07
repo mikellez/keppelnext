@@ -1,11 +1,11 @@
 .dashboardMain {
   display: grid;
   grid-template-areas:
-    "a b c d"
-    "e f g h"
-    "i j k l"
-    "m n o p"
-    "q r s t";
+    "a b c u d"
+    "e f g v h"
+    "i j k v l"
+    "m n o v p"
+    "q r s v t";
   gap: 10px;
 }
 
@@ -64,6 +64,11 @@
 .dashboardCompletedNumber {
   @extend .dashboardNumber;
   color: #367e18;
+}
+
+.dashboardOverdueNumber {
+  @extend .dashboardNumber;
+  color: #c21010;
 }
 
 .dashboardNoChart {

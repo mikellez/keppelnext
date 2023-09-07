@@ -1,13 +1,13 @@
 import React from "react";
-import { ModuleContent, ModuleDivider } from "../";
-import AssetSelect from "./AssetSelect";
-import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
-import PlantSelect from "../PlantSelect";
-import RequiredIcon from "../RequiredIcon";
 import { SingleValue } from "react-select";
+import { ModuleContent, ModuleDivider } from "../";
 import formStyles from "../../styles/formStyles.module.css";
 import { CMMSChecklist } from "../../types/common/interfaces";
+import PlantSelect from "../PlantSelect";
+import RequiredIcon from "../RequiredIcon";
+import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
 import TooltipBtn from "../TooltipBtn";
+import AssetSelect from "./AssetSelect";
 
 interface ChecklistCreationFormProps {
   checklistData: CMMSChecklist;
@@ -121,8 +121,36 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
               }
             />
           </div>
+
+          <div className="form-group">
+            <label className="form-label">
+              <RequiredIcon /> Checklist Overdue Tracking
+            </label>
+            <select
+              className="form-select"
+              name="overdue"
+              onChange={updateChecklist}
+              value={
+                props.checklistData.overdue
+                  ? props.checklistData.overdue
+                  : ""
+              }
+            >
+              <option hidden selected
+              >
+              -- Select Overdue Time Period Category --
+              </option>
+              <option value="daily">Daily (Overdue if exceeds 1 day)</option>
+              <option value="weekly">Weekly (Overdue if exceeds 7 days)</option>
+              <option value="monthly">Monthly (Overdue if exceeds 30 days)</option>
+              <option value="quarterly">Quarterly (Overdue if exceeds 3 months)</option>
+              <option value="half yearly">Half Yearly (Overdue if exceeds 6 months)</option>
+              <option value="annually">Annually (Overdue if excees 1 year)</option>
+            </select>
+          </div>
         </div>
       </div>
+
       <ModuleDivider />
       <div className="row">
         <div className={`col-6 ${formStyles.halfContainer}`}>

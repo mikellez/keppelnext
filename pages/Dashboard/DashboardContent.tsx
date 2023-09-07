@@ -1,30 +1,27 @@
-import React, { useState, useEffect } from "react";
+import type { DatePickerProps } from "antd";
+import { Select } from "antd";
+import moment from "moment";
+import { useEffect, useState } from "react";
+import { fetchData } from ".";
 import {
   ModuleContent,
-  ModuleFooter,
   ModuleHeader,
-  ModuleMain,
+  ModuleMain
 } from "../../components";
-import styles from "../../styles/Dashboard.module.scss";
 import DashboardBox from "../../components/Dashboard/DashboardBox";
-import PlantSelect, { getPlants } from "../../components/PlantSelect";
-import { CMMSDashboardData, CMMSFeedback } from "../../types/common/interfaces";
 import PChart from "../../components/Dashboard/PChart";
-import { fetchData } from ".";
-import { ThreeDots } from "react-loading-icons";
 import LoadingHourglass from "../../components/LoadingHourglass";
-import type { DatePickerProps, TimePickerProps } from "antd";
-import { Select } from "antd";
 import PickerWithType from "../../components/PickerWithType";
-import moment from "moment";
-import Request from "../Request/index";
-import Checklist from "../Checklist";
-import ChangeOfPartsPage from "../ChangeOfParts";
-import Feedback from "../Feedback";
-import { set } from "nprogress";
+import PlantSelect, { getPlants } from "../../components/PlantSelect";
+import { useCurrentUser } from "../../components/SWR";
+import styles from "../../styles/Dashboard.module.scss";
 import instance from "../../types/common/axios.config";
 import { Role } from "../../types/common/enums";
-import { useCurrentUser } from "../../components/SWR";
+import { CMMSDashboardData } from "../../types/common/interfaces";
+import ChangeOfPartsPage from "../ChangeOfParts";
+import Checklist from "../Checklist";
+import Feedback from "../Feedback";
+import Request from "../Request/index";
 
 const { Option } = Select;
 
@@ -45,7 +42,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
   const [plant, setPlant] = useState<number>(0);
   const [field, setField] = useState<string>("status");
   const [expiredLicenseInDays, setExpiredLicencesInDays] =
-    useState<string>("status");
+    useState<string>("expiry");
   const [pickerwithtype, setPickerWithType] = useState<{
     date: string;
     datetype: PickerType;
@@ -54,19 +51,23 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     totalPendingRequest: number;
     totalOutstandingRequest: number;
     totalClosedRequest: number;
+    totalOverdueRequest: number;
   }>({
     totalPendingRequest: 0,
     totalOutstandingRequest: 0,
     totalClosedRequest: 0,
+    totalOverdueRequest: 0,
   });
   const [checklist, setChecklist] = useState<{
     totalPendingChecklist: number;
     totalOutstandingChecklist: number;
     totalClosedChecklist: number;
+    totalOverdueChecklist: number;
   }>({
     totalPendingChecklist: 0,
     totalOutstandingChecklist: 0,
     totalClosedChecklist: 0,
+    totalOverdueChecklist: 0,
   });
   const [cop, setCOP] = useState<{
     totalScheduledCOP: number;
@@ -84,7 +85,16 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
   const [license, setLicense] = useState<{
     totalDraftLicense: number;
     totalAcquiredLicense: number;
-  }>({ totalDraftLicense: 0, totalAcquiredLicense: 0 });
+    totalLicenseExpiredIn30: number;
+    totalLicenseExpiredIn60: number;
+    totalLicenseExpiredIn90: number;
+  }>({ 
+    totalDraftLicense: 0, 
+    totalAcquiredLicense: 0, 
+    totalLicenseExpiredIn30: 0, 
+    totalLicenseExpiredIn60: 0, 
+    totalLicenseExpiredIn90: 0 
+  });
   const [checklistData, setChecklistData] = useState<CMMSDashboardData[]>();
   const [requestData, setRequestData] = useState<CMMSDashboardData[]>();
   const [copData, setCOPData] = useState<CMMSDashboardData[]>();
@@ -109,7 +119,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     setActive(id);
   };
 
-  const fetchRequests = () => {
+  /*const fetchRequests = () => {
     const { datetype, date } = pickerwithtype;
 
     setIsRequestReady(false);
@@ -136,6 +146,13 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               (accumulator, currentValue) => accumulator + currentValue.value,
               0
             ) || 0,
+        totalOverdueRequest:
+          result
+            ?.filter((data) => data.overdue_status === true)
+            ?.reduce(
+              (accumulator, currentValue) => accumulator + currentValue.value,
+              0
+            ) || 0,
       });
 
       setTimeout(() => {
@@ -144,8 +161,9 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
       setIsRequestReady(true);
     });
   };
+  */
 
-  const fetchChecklists = () => {
+  /*const fetchChecklists = () => {
     const { datetype, date } = pickerwithtype;
 
     setIsChecklistReady(false);
@@ -171,9 +189,165 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
                 (accumulator, currentValue) => accumulator + currentValue.value,
                 0
               ) || 0,
+          totalOverdueChecklist:
+            result
+              ?.filter((data) => data.overdue_status === true)
+              ?.reduce(
+                (accumulator, currentValue) => accumulator + currentValue.value,
+                0
+              ) || 0,
         });
       }
     });
+  };*/
+  const fetchRequests = async () => {
+    const { datetype, date } = pickerwithtype;
+    const PARAMS = ["id"];
+
+    console.log(`/api/request/pending/${plant}/${datetype}/${date}`);
+    const getPendingRequest = instance.get(
+      `/api/request/pending/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
+    const getOustandingRequest = instance.get(
+      `/api/request/outstanding/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
+    const getCompletedRequest = instance.get(
+      `/api/request/completed/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
+    const getOverdueRequest = instance.get(
+      `/api/request/overdue/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
+
+    const getAllRequest = await Promise.all([
+      getPendingRequest,
+      getOustandingRequest,
+      getCompletedRequest,
+      getOverdueRequest
+    ]);
+    // console.log(getAllFeedback);
+
+    const pendingRequest = getAllRequest[0].data?.rows;
+    const outstandingRequest = getAllRequest[1].data?.rows;
+    const completedRequest = getAllRequest[2].data?.rows;
+    const overdueRequest = getAllRequest[3].data?.rows;
+
+    console.log(getAllRequest);
+
+    setRequestData([
+      {
+        name: "Pending",
+        value: pendingRequest?.length || 0,
+        fill: "#C74B50",
+        id: 1,
+      },
+      {
+        name: "Outstanding",
+        value: outstandingRequest?.length || 0,
+        fill: "#810CA8",
+        id: 2,
+      },
+      {
+        name: "Completed",
+        value: completedRequest?.length || 0,
+        fill: "#03C988",
+        id: 3,
+      },
+      {
+        name: "Overdue",
+        value: overdueRequest?.length || 0,
+        fill: "#C74B50",
+        id: 1,
+      },
+    ]);
+
+    setRequest({
+      totalPendingRequest: pendingRequest?.length || 0,
+      totalOutstandingRequest: outstandingRequest?.length || 0,
+      totalOverdueRequest: overdueRequest?.length || 0,
+      totalClosedRequest: completedRequest?.length || 0
+    });
+
+    // console.log(feedbackData)
+
+    setTimeout(() => {
+      setIsReady(true);
+    }, 500);
+    setIsRequestReady(true);
+  };
+
+  const fetchChecklists = async () => {
+    const { datetype, date } = pickerwithtype;
+    const PARAMS = ["id"];
+
+    console.log(`/api/checklist/pending/${plant}/${datetype}/${date}`);
+    const getPendingChecklist = instance.get(
+      `/api/checklist/pending/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
+    const getOustandingChecklist = instance.get(
+      `/api/checklist/outstanding/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
+    const getCompletedChecklist = instance.get(
+      `/api/checklist/completed/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
+    const getOverdueChecklist = instance.get(
+      `/api/checklist/overdue/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
+    );
+
+    const getAllChecklist = await Promise.all([
+      getPendingChecklist,
+      getOustandingChecklist,
+      getCompletedChecklist,
+      getOverdueChecklist
+    ]);
+    // console.log(getAllFeedback);
+
+    const pendingChecklist = getAllChecklist[0].data?.rows;
+    const outstandingChecklist = getAllChecklist[1].data?.rows;
+    const completedChecklist = getAllChecklist[2].data?.rows;
+    const overdueChecklist = getAllChecklist[3].data?.rows;
+
+    console.log(getAllChecklist);
+
+    setChecklistData([
+      {
+        name: "Pending",
+        value: pendingChecklist?.length || 0,
+        fill: "#C74B50",
+        id: 1,
+      },
+      {
+        name: "Outstanding",
+        value: outstandingChecklist?.length || 0,
+        fill: "#810CA8",
+        id: 2,
+      },
+      {
+        name: "Completed",
+        value: completedChecklist?.length || 0,
+        fill: "#03C988",
+        id: 3,
+      },
+      {
+        name: "Overdue",
+        value: overdueChecklist?.length || 0,
+        fill: "#C74B50",
+        id: 1,
+      },
+    ]);
+
+    setChecklist({
+      totalPendingChecklist: pendingChecklist?.length || 0,
+      totalOutstandingChecklist: outstandingChecklist?.length || 0,
+      totalOverdueChecklist: overdueChecklist?.length || 0,
+      totalClosedChecklist: completedChecklist?.length || 0
+    });
+
+    // console.log(feedbackData)
+
+    setTimeout(() => {
+      setIsReady(true);
+    }, 500);
+    setIsChecklistReady(true);
   };
 
   const fetchCOPs = async () => {
@@ -365,6 +539,9 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     setLicense({
       totalDraftLicense: draftLicense?.length || 0,
       totalAcquiredLicense: acquiredLicense?.length || 0,
+      totalLicenseExpiredIn30: licenseExpiredIn30?.length || 0,
+      totalLicenseExpiredIn60: licenseExpiredIn60?.length || 0,
+      totalLicenseExpiredIn90: licenseExpiredIn90?.length || 0,
     });
 
     setTimeout(() => {
@@ -443,12 +620,13 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
 
   const { date, datetype } = pickerwithtype;
 
-  const { totalPendingRequest, totalOutstandingRequest, totalClosedRequest } =
+  const { totalPendingRequest, totalOutstandingRequest, totalClosedRequest, totalOverdueRequest } =
     request;
   const {
     totalPendingChecklist,
     totalOutstandingChecklist,
     totalClosedChecklist,
+    totalOverdueChecklist,
   } = checklist;
   const { totalScheduledCOP, totalCompletedCOP } = cop;
   const {
@@ -456,7 +634,13 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     totalOutstandingFeedback,
     totalCompletedFeedback,
   } = feedback;
-  const { totalDraftLicense, totalAcquiredLicense } = license;
+  const { 
+    totalDraftLicense, 
+    totalAcquiredLicense, 
+    totalLicenseExpiredIn30, 
+    totalLicenseExpiredIn60, 
+    totalLicenseExpiredIn90 
+  } = license;
 
   const access = user.data!.role_id === Role.Admin || user.data!.role_id === Role.Manager || user.data!.role_id === Role.Engineer;
 
@@ -525,6 +709,18 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               {totalClosedRequest}
             </p>
           </DashboardBox>
+          <DashboardBox
+            id="overdue-requests-box"
+            title="Overdue Requests"
+            style={{ gridArea: "u" }}
+            onClick={handleDashboardClick}
+            className={active === "overdue-requests-box" ? styles.active : ""}
+          >
+            <p className={styles.dashboardOverdueNumber}>
+              {totalOverdueRequest}
+            </p>
+          </DashboardBox>
+
           {showTotalContainer && (
             <DashboardBox
               title={"Total Requests: " + totalRequest}
@@ -586,6 +782,19 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               {totalClosedChecklist}
             </p>
           </DashboardBox>
+          <DashboardBox
+            id="overdue-checklists-box"
+            title="Overdue Checklists"
+            style={{ gridArea: "v" }}
+            onClick={handleDashboardClick}
+            className={
+              active === "overdue-checklists-box" ? styles.active : ""
+            }
+          >
+            <p className={styles.dashboardOverdueNumber}>
+              {totalOverdueChecklist}
+            </p>
+          </DashboardBox>
           {showTotalContainer && (
             <DashboardBox
               title={"Total Checklists: " + totalChecklist}
@@ -638,7 +847,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               )}
             </DashboardBox>
           )}
-          {access && <DashboardBox
+          {<DashboardBox
             id="pending-feedback-box"
             title="Pending Feedbacks"
             style={{ gridArea: "m" }}
@@ -650,7 +859,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             </p>
           </DashboardBox>
           }
-          {access && <DashboardBox
+          {<DashboardBox
             id="outstanding-feedback-box"
             title="Outstanding Feedbacks"
             style={{ gridArea: "n" }}
@@ -664,7 +873,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             </p>
           </DashboardBox>
           }
-          {access && <DashboardBox
+          {<DashboardBox
             id="completed-feedback-box"
             title="Completed Feedbacks"
             style={{ gridArea: "o" }}
@@ -676,7 +885,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             </p>
           </DashboardBox>
           }
-          {access && showTotalContainer && (
+          {showTotalContainer && (
             <DashboardBox
               title={"Total Feedbacks: " + totalFeedback}
               style={{ gridArea: "p" }}
@@ -691,35 +900,40 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
           )}
 
           {access && <DashboardBox
-            id="draft-license-box"
-            title="Draft Licenses"
+            id="30-expiry-license-box"
+            title="Licenses Expiring in 30 Days"
             style={{ gridArea: "q" }}
             onClick={handleDashboardClick}
-            className={active === "draft-license-box" ? styles.active : ""}
+            className={active === "30-expiry-license-box" ? styles.active : ""}
           >
             <p className={styles.dashboardPendingdNumber}>
-              {totalDraftLicense}
+              {totalLicenseExpiredIn30}
             </p>
           </DashboardBox>
           }
           {access && <DashboardBox
-            id="acquired-license-box"
-            title="Acquired Licenses"
+            id="60-expiry-license-box"
+            title="Licenses Expiring in 60 Days"
             style={{ gridArea: "r" }}
             onClick={handleDashboardClick}
-            className={active === "acquired-license-box" ? styles.active : ""}
+            className={active === "60-expiry-license-box" ? styles.active : ""}
           >
             <p className={styles.dashboardOutstandingNumber}>
-              {totalAcquiredLicense}
+              {totalLicenseExpiredIn60}
             </p>
           </DashboardBox>
           }
           {access && <DashboardBox
-            id=""
-            title=""
+            id="90-expiry-license-box"
+            title="Licenses Expiring in 90 Days"
             style={{ gridArea: "s" }}
             onClick={handleDashboardClick}
-          ></DashboardBox>
+            className={active === "90-expiry-license-box" ? styles.active : ""}
+          >
+            <p className={styles.dashboardCompletedNumber}>
+              {totalLicenseExpiredIn90}
+            </p>
+          </DashboardBox>
           }
           {access && showTotalContainer && (
             <DashboardBox
@@ -733,7 +947,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
                     // console.log(event.target.value);
                   }}
                 >
-                  <option value="status">Status</option>
+                  {/* <option value="status">Status</option> */}
                   <option value="expiry">Expiry</option>
                 </select>
               }
@@ -756,6 +970,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             date={date}
             datetype={datetype}
             plant={plant as number}
+            viewType="pending"
           />
         )}
         {showDiv === "outstanding-requests-box" && (
@@ -766,6 +981,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             date={date}
             datetype={datetype}
             plant={plant as number}
+            viewType="outstanding"
           />
         )}
         {showDiv === "closed-requests-box" && (
@@ -776,6 +992,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             date={date}
             datetype={datetype}
             plant={plant as number}
+            viewType="completed"
           />
         )}
         {showDiv === "pending-checklists-box" && (
@@ -786,6 +1003,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             date={date}
             datetype={datetype}
             plant={plant as number}
+            viewType="pending"
           />
         )}
         {showDiv === "outstanding-checklists-box" && (
@@ -796,6 +1014,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             date={date}
             datetype={datetype}
             plant={plant as number}
+            viewType="outstanding"
           />
         )}
         {showDiv === "completed-checklists-box" && (
@@ -806,6 +1025,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             date={date}
             datetype={datetype}
             plant={plant as number}
+            viewType="completed"
           />
         )}
         {showDiv === "scheduled-cop-box" && (

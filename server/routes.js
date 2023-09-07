@@ -202,6 +202,23 @@ router.get(
 );
 
 /**
+ * @api {get} /request/assigned Get Overdue Requests
+ * @apiDescription Gets all requests with status of `OVERDUE`.
+ *
+ * For operation specialists, only relevant overdue requests will be returned.
+ *
+ * Returns the same output schema as `/request/overdue`
+ * @apiName GetOverdueRequests
+ * @apiGroup Request
+ *
+ */
+router.get(
+  "/request/overdue",
+  checkIfLoggedInAPI,
+  controllers.request.fetchOverdueRequests
+);
+
+/**
  * @api {get} /request/review Get For Review Requests
  * @apiDescription Gets all requests with status of `COMPLETED`, `REJECTED`, `CANCELLED`.
  *
@@ -420,6 +437,30 @@ router.get(
   checkIfLoggedInAPI,
   controllers.request.fetchFilteredRequests
 );
+
+router.get(
+  "/request/pending/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.request.fetchPendingRequests
+);
+
+router.get(
+  "/request/outstanding/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.request.fetchOutstandingRequests
+);
+
+router.get(
+  "/request/completed/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.request.fetchCompletedRequests
+);
+
+router.get(
+  "/request/overdue/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.request.fetchOverdueRequests
+);
 /**
  * @api {get} /request/plant/:plant_id Get Plant Details
  * @apiDescription Fetches the pd and name of a specific plant.
@@ -513,7 +554,7 @@ router.get("/request/asset/:psa_id", controllers.request.fetchAssetRequest);
  * @apiSuccess {Number} -.status_id Template Status (currently deprecated)
  * @apiUse ChecklistDataJSON
  *
- * @apiError (Error 500) {String} InternalServerError "No checklist template found"
+ * @apiError (Error 500) {Object} InternalServerError "No checklist template found"
  */
 
 /**
@@ -827,6 +868,30 @@ router.get(
   controllers.checklist.fetchChecklistCounts
 );
 
+router.get(
+  "/checklist/pending/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchPendingChecklists
+);
+
+router.get(
+  "/checklist/outstanding/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchOutstandingChecklists
+);
+
+router.get(
+  "/checklist/completed/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchCompletedChecklists
+);
+
+router.get(
+  "/checklist/overdue/:plant/:datetype/:date",
+  checkIfLoggedInAPI,
+  controllers.checklist.fetchOverdueChecklists
+);
+
 /**
  * @api {patch} /checklist/complete/:checklist_id Complete an existing checklist
  * @apiDescription Complete an existing checklist
@@ -979,6 +1044,22 @@ router.patch(
   "/checklist/reject/:checklist_id",
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("reject")
+);
+router.patch(
+  "/checklist/cancel/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("cancel")
+);
+router.patch(
+  "/checklist/reassign/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("reassign")
+);
+
+router.patch(
+  "/checklist/cancel/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("cancel")
 );
 
 /**
@@ -1642,6 +1723,11 @@ router.get(
   checkIfLoggedInAPI,
   controllers.schedule.getPendingTimelines
 );
+router.get(
+  "/timeline_approved",
+  checkIfLoggedInAPI,
+  controllers.schedule.getApprovedTimelines
+);
 
 router.get(
   "/timeline_completed",
@@ -1868,7 +1954,7 @@ router.get(
 router.get(
   "/feedback/pending/:plant/:datetype/:date",
   checkIfLoggedInAPI,
-  controllers.feedbackKnex.fetchPendingFeedback
+  controllers.feedback.fetchPendingFeedback
 );
 
 /**
@@ -2415,6 +2501,29 @@ router.get(
   controllers.license.fetchAcquiredLicenses
 );
 
+/**
+ * @api {get} /license/acquired?page=&expand=&plantId=&search= Get Acquired License
+ * @apiDescription Acquired License
+ * @apiName fetchAcquiredLicense
+ * @apiGroup License
+ *
+ * @apiParams {Number} plant_id ID of the plant if all plants put 0
+ * @apiParams {Number} dataetype Type of date either in "days","months","year"
+ * @apiParams {String} date Actual date in instring
+ *
+ * @apiQuery {Number} page Page of Acquired License shown
+ * @apiQuery {String[]} expand Types of parameters needed in the query
+ * @apiQuery {Number} plantId To filter by plants, 0 by default
+ * @apiQuery {String} Search To search for specifics in the DB (Not implemented yet)
+ *
+ *
+ * @apiSuccess {JSON} - Data of Acquired License and total page
+ * @apiSuccess {CMMSLicense[]} -.rows Array of Acquired License
+ * @apiSuccess {Number} -.total Total number of pages of Acquired License in the DB
+ *
+ * @apiError (Error 500) {Object} Internal Server Error {msg : error}
+ */
+
 router.get(
   "/license/acquired/:plant/:datetype/:date",
   checkIfLoggedInAPI,
@@ -2527,7 +2636,7 @@ router.get(
  *
  * @apiSuccess {String} Successfully deleted License
  *
- * @apiError {String} Error occurred deleting license
+ * @apiError {Object} Error occurred deleting license
  */
 router
   .route("/license/:id", checkIfLoggedInAPI)
@@ -2556,7 +2665,6 @@ router
  *
  * @apiSuccess {String} Successfully editing license
  *
- * @apiError {String} Error editing license
  */
 router.patch(
   "/license/:id",
@@ -2578,7 +2686,7 @@ router.patch(
  *
  * @apiSuccess {String} Successfully acquired license
  *
- * @apiError {String} Error editing license
+ *
  *
  */
 router.patch(
@@ -2599,7 +2707,6 @@ router.patch(
  *
  * @apiSuccess {String} Successfully renew license
  *
- * @apiError {String} Error renewing license in the server
  *
  */
 router.patch(
@@ -2609,7 +2716,7 @@ router.patch(
 );
 
 /**
- * @api /license/images/:id
+ * @api {get} /license/images/:id
  * @apiDescription fetch license images
  * @apiName fetchLicenseImages
  * @apiGroup License
@@ -2619,7 +2726,6 @@ router.patch(
  * @apiSuccess {Object} - Image Datas
  * @apiSuccess {File[]} -.images Data of the Images
  *
- * @apiError {String} Error fetching license images
  */
 
 router.get(
@@ -2627,7 +2733,37 @@ router.get(
   checkIfLoggedInAPI,
   controllers.license.fetchLicenseImages
 );
-
+/**
+ * @api {get} /license/expired/:plant/:datetype/:date/:days
+ * @apiDescription fetchExpiredLicensesInDays
+ * @apiName fetchExpiredLicenseInDays
+ * @apiGroup License
+ *
+ * @apiParams {Number} plant_id specific plant
+ * @apiParams {String} date_type usually in date
+ * @apiParams {String} date For the specific date, or "all"
+ * @apiParams {String} days Number of days expired "30","60","90"
+ *
+ *
+ * @apiSuccess {JSON} - Json Object returned
+ * @apiSuccess {CMMSLicense[]} -.rows All expired license in an array
+ * @apiSuccess {Number} -.total Total number of Pages required
+ * @apiSuccess {Number} -.count Total number of license returned
+ * @apiSuccess {String} -.row.license_id ID of license
+ * @apiSuccess {String} -.row.license_name Name of license
+ * @apiSuccess {String} -.row.license_provider Provider of license
+ * @apiSuccess {Number} -.row.license_type_id type of license
+ * @apiSuccess {String} -.row.license_details description of license
+ * @apiSuccess {Number} -.row.plant_id plant id of asset that license if for
+ * @apiSuccess {Number} -.row.plant_loc_id location id of asset license
+ * @apiSuccess {Number} -.row.linked_asset_id id of linked asset
+ * @apiSuccess {Number} -.row.assigned_user_id assigned user
+ * @apiSuccess {Date} -.row.acquisition_date Aquired license Date
+ * @apiSuccess {Date} -.row.expiry_date License Expiry Date
+ * @apiSuccess {Number} -.row.status_id status of license
+ *
+ *
+ */
 router.get(
   "/license/expired/:plant/:datetype/:date/:days",
   checkIfLoggedInAPI,

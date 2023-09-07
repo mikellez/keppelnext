@@ -172,6 +172,7 @@ interface CMMSRequest {
   }[];
   total?: number;
   associatedrequestid?: number;
+  overdue_status: boolean;
 }
 
 
@@ -233,8 +234,9 @@ interface CMMSTimeline {
   plantId: number;
   plantName?: string;
   description: string;
-  status?: number;
+  status?: string;
   created_date? : Date;
+  remarks?: string;
 }
 
 interface CMMSSchedule {
@@ -321,6 +323,7 @@ interface CMMSChecklist {
   chl_name: string;
   description: string;
   status_id: number;
+  overdue: string;
   createdbyuser: string;
   created_by_user_id: string | null;
   created_by_user_email: string | null;
@@ -340,6 +343,7 @@ interface CMMSChecklist {
   status: string;
   datajson?: any;
   activity_log: { [key: string]: string }[];
+  overdue_status: boolean;
 }
 
 interface CMMSActivitylog {
@@ -377,6 +381,7 @@ interface CMMSDashboardData {
   name: string;
   value: number;
   fill: string;
+  overdue_status?: boolean;
 }
 
 interface CMMSChangeOfParts {
@@ -555,46 +560,10 @@ interface CMMSLicenseForm {
 }
 
 export {
-  CMMSBaseType,
-  CMMSUser,
-  CMMSEmployee,
-  CMMSRequest,
-  CMMSRequestTypes,
-  CMMSFaultTypes,
-  CMMSPlant,
-  CMMSScheduleEvent,
-  CMMSTimeline,
-  CMMSSchedule,
-  CMMSAsset,
-  CMMSAssetDetails,
-  CMMSAssetHistory,
-  CMMSAssetRequestHistory,
-  CMMSAssetChecklistHistory,
-  CMMSChecklist,
-  CMMSMasterSubmission,
-  CMMSMasterField,
-  CMMSMasterTables,
-  CMMSActivitylog,
-  CMMSDashboardData,
-  CMMSSystem,
-  CMMSSystemAsset,
-  CMMSAssetType,
-  CMMSSystemAssetName,
-  CMMSAssetDetailsState,
-  postData,
-  CMMSSubComponent1Name,
-  CMMSChangeOfParts,
-  CMMSAddUser,
-  CMMSChangeOfPartsEvent,
-  CMMSEvent,
-  CMMSUserSettings,
-  CMMSUserInfo,
-  CMMSChangePassword,
-  CMMSWorkflow,
-  CMMSFeedback,
-  CMMSPlantLoc,
-  CMMSPlantLocation,
-  CMMSLicense,
-  CMMSLicenseType,
-  CMMSLicenseForm
+  CMMSActivitylog, CMMSAddUser, CMMSAsset, CMMSAssetChecklistHistory, CMMSAssetDetails, CMMSAssetDetailsState, CMMSAssetHistory,
+  CMMSAssetRequestHistory, CMMSAssetType, CMMSBaseType, CMMSChangeOfParts, CMMSChangeOfPartsEvent, CMMSChangePassword, CMMSChecklist, CMMSDashboardData, CMMSEmployee, CMMSEvent, CMMSFaultTypes, CMMSFeedback, CMMSLicense, CMMSLicenseForm, CMMSLicenseType, CMMSMasterField, CMMSMasterSubmission, CMMSMasterTables, CMMSPlant, CMMSPlantLoc,
+  CMMSPlantLocation, CMMSRequest,
+  CMMSRequestTypes, CMMSSchedule, CMMSScheduleEvent, CMMSSubComponent1Name, CMMSSystem,
+  CMMSSystemAsset, CMMSSystemAssetName, CMMSTimeline, CMMSUser, CMMSUserInfo, CMMSUserSettings, CMMSWorkflow, postData
 };
+
