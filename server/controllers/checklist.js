@@ -9,12 +9,42 @@ const {
 } = require("../mailer/ChecklistMail");
 
 const ITEMS_PER_PAGE = 10;
+
 const searchCondition = (search) => {
-  return `
-    AND (
-      cl.chl_name LIKE '%${search}%' OR
-      cl.description LIKE '%${search}%'
+  //fields to search by: checklist_id, description, status, assigneduser, signoffuser, createdbyuser
+  let searchInt = parseInt(search);
+
+  if (search === "") {
+    //handling empty search
+    return ``;
+  } else if (!isNaN(search)) {
+    //handling integer input
+    return `AND (
+      cl.checklist_id = ${searchInt} OR
+      cl.signoff_user_id = ${searchInt} OR
+      cl.assigned_user_id = ${searchInt} 
     )`;
+  } else if (typeof search === "string" && search !== "") {
+    //handling text input
+    return `
+    AND (
+      cl.chl_name ILIKE '%${search}%' OR
+      description ILIKE '%${search}%' OR
+      status ILIKE '%${search}%' OR
+      
+      cl.checklist_id IN (
+        SELECT cm.checklist_id
+        FROM keppel.checklist_master cm
+        INNER JOIN keppel.users assigned_users ON cm.assigned_user_id = assigned_users.user_id
+        INNER JOIN keppel.users sign_off_users ON cm.signoff_user_id = sign_off_users.user_id
+        INNER JOIN keppel.users created_users ON cm.created_user_id = created_users.user_id
+        WHERE assigned_users.user_name ILIKE '%${search}%' 
+        OR assigned_users.first_name || ' ' || assigned_users.last_name ILIKE '%${search}%'
+        OR sign_off_users.first_name || ' ' || sign_off_users.last_name ILIKE '%${search}%'
+        OR created_users.first_name || ' ' || created_users.last_name ILIKE '%${search}%'
+      )  
+    )`;
+  }
 };
 
 const fetchAllChecklistQuery = `
@@ -298,6 +328,7 @@ const fetchAssignedChecklists = async (req, res, next) => {
     //return res.status(204).json({ msg: "No checklist" });
     // console.log(result.rows);
     // console.log(totalPages);
+
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {
     return res.status(500).json({ msg: error });

@@ -10,13 +10,43 @@ const moment = require("moment");
 const ITEMS_PER_PAGE = 10;
 
 const searchCondition = (search) => {
-  return ` AND (
-    ft.fault_type LIKE '%${search}%' OR
-    pm.plant_name LIKE '%${search}%' OR
-    rt.request LIKE '%${search}%' OR
-    pri.priority LIKE '%${search}%' OR
-    tmp1.asset_name LIKE '%${search}%'
-  ) `;
+  //fields: request_id,fault_id(join),fault_description,priority_id(join),plant_id(join via ),created_date,
+  let searchInt = parseInt(search);
+  if (search === "") {
+    //handling empty search
+    return ``;
+  } else if (!isNaN(search)) {
+    //handling integer input
+    return `AND (
+      r.request_id = ${searchInt}
+    )`;
+  } else if (typeof search === "string" && search !== "") {
+    //handling text input
+    return ` AND(
+  
+      r.request_id IN (
+        SELECT r.request_id
+        FROM keppel.request as r
+        INNER JOIN keppel.plant_master AS pm ON r.plant_id = pm.plant_id
+        INNER JOIN keppel.fault_types AS ft ON r.fault_id = ft.fault_id 
+        INNER JOIN keppel.plant_location AS pl ON r.plant_id = pl.plant_id
+        INNER JOIN keppel.priority AS p ON r.priority_id = p.p_id
+        INNER JOIN keppel.plant_system_assets AS psa ON r.psa_id = psa.psa_id
+        INNER JOIN keppel.plant_system_assets AS pl2 ON r.plant_id = pl2.plant_id
+        INNER JOIN keppel.users AS requested_by_users ON r.user_id = requested_by_users.user_id
+        WHERE pm.plant_name ILIKE '%${search}%'
+        OR r.fault_description ILIKE '%${search}%'
+        OR ft.fault_type ILIKE '%${search}%'
+        OR p.priority ILIKE '${search}'
+        OR psa.asset_description ILIKE '%${search}%'
+        OR psa.asset_type ILIKE '%${search}%'
+        OR psa.parent_asset ILIKE '%${search}%'
+	      OR psa.asset_location ILIKE '%${search}%'
+	      OR requested_by_users.first_name || ' ' || requested_by_users.last_name ILIKE '%${search}%'
+        OR pl2.asset_location ILIKE '%${search}%'
+      )
+    )`;
+  }
 };
 
 async function fetchRequestQuery(
@@ -643,7 +673,7 @@ const fetchRequestPriority = async (req, res, next) => {
 };
 
 const fetchSpecificRequest = async (req, res, next) => {
-  // console.log(req.params.request_id)
+  console.log(req.params.request_id);
   const sql = `SELECT 
   r.request_id,
   rt.request as request_name, 
