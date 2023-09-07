@@ -229,6 +229,7 @@ export default function Checklist(props: ChecklistProps) {
         "activity_log",
       ];
       const fieldsString = fields.join(",");
+
       instance
         .get(
           `/api/checklist/${indexedColumn[activeTabIndex]}?page=${page}&expand=${fieldsString}&search=${searchRef.current.value}`
