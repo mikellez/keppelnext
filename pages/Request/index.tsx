@@ -52,8 +52,8 @@ import {
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 
-import Tooltip from 'rc-tooltip';
-import 'rc-tooltip/assets/bootstrap_white.css';
+import Tooltip from "rc-tooltip";
+import "rc-tooltip/assets/bootstrap_white.css";
 import {
   useRequest,
   useRequestFilter,
@@ -169,6 +169,12 @@ export const getColor = (status: string) => {
       return "#ff8b3d";
     case "EXPIRED":
       return "#B71375";
+    case "APPROVED CANCELLATION":
+      return "red";
+    case "REJECTED CANCELLATION":
+      return "#101D6B";
+    case "PENDING CANCELLATION":
+      return "#FBBD04";
     default:
       return "#757575";
   }
@@ -246,21 +252,20 @@ export default function Request(props: RequestProps) {
     }
   };
 
-  const fields = 
-    [
-      "request_id",
-      "fault_name",
-      "plant_name",
-      "priority",
-      "status",
-      "created_date",
-      "asset_name",
-      "created_by",
-      "status_id",
-      "associatedrequestid",
-      "activity_log",
-      "overdue_status",
-    ];
+  const fields = [
+    "request_id",
+    "fault_name",
+    "plant_name",
+    "priority",
+    "status",
+    "created_date",
+    "asset_name",
+    "created_by",
+    "status_id",
+    "associatedrequestid",
+    "activity_log",
+    "overdue_status",
+  ];
   const filteredRequest = useRequestFilter(props, page, fields);
   const allRequest = useRequest(
     indexedColumn[activeTabIndex],
@@ -277,10 +282,12 @@ export default function Request(props: RequestProps) {
   } = props?.filter ? filteredRequest : allRequest;
 
   // Used for adding the overdue column into the template when the assigned/pending tab is selected
-  const tableFormat = (activeTabIndex === 0 || activeTabIndex === 1) ? 
-  `--data-table-library_grid-template-columns:  5em 13em 8em 6em 6em 14em 10em 15em 8em 6em;
+  const tableFormat =
+    activeTabIndex === 0 || activeTabIndex === 1
+      ? `--data-table-library_grid-template-columns:  5em 13em 8em 6em 6em 14em 10em 15em 8em 6em;
       
-  `: `--data-table-library_grid-template-columns:  5em 13em 8em 6em 6em 14em 15em 8em 6em;
+  `
+      : `--data-table-library_grid-template-columns:  5em 13em 8em 6em 6em 14em 15em 8em 6em;
       
   `;
 
@@ -434,7 +441,9 @@ export default function Request(props: RequestProps) {
                           : "Created On"}
                       </HeaderCell>
                       {/*Only show the Overdue column for the pending and assigned tabs*/}
-                      {(activeTabIndex === 0 || activeTabIndex === 1) && (<HeaderCell resize>Overdue Status</HeaderCell>)}
+                      {(activeTabIndex === 0 || activeTabIndex === 1) && (
+                        <HeaderCell resize>Overdue Status</HeaderCell>
+                      )}
                       <HeaderCell resize>Asset Name</HeaderCell>
                       <HeaderCell resize>Requested By</HeaderCell>
                       <HeaderCell resize>Action</HeaderCell>
@@ -447,20 +456,24 @@ export default function Request(props: RequestProps) {
                           <Row item={item} onClick={handleExpand}>
                             <Cell>{item.id}</Cell>
                             <Cell>
-                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{item.fault_name}</span>}>
-                                  <div>{item.fault_name}</div>
-                                </Tooltip>
+                              <Tooltip
+                                overlayInnerStyle={{ fontSize: "0.7rem" }}
+                                placement="bottom"
+                                trigger={["hover"]}
+                                overlay={<span>{item.fault_name}</span>}
+                              >
+                                <div>{item.fault_name}</div>
+                              </Tooltip>
                             </Cell>
                             <Cell>
-                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{item.plant_name}</span>}>
-                                  <div>{item.plant_name}</div>
-                                </Tooltip>
+                              <Tooltip
+                                overlayInnerStyle={{ fontSize: "0.7rem" }}
+                                placement="bottom"
+                                trigger={["hover"]}
+                                overlay={<span>{item.plant_name}</span>}
+                              >
+                                <div>{item.plant_name}</div>
+                              </Tooltip>
                             </Cell>
                             <Cell
                               style={{
@@ -479,95 +492,105 @@ export default function Request(props: RequestProps) {
                               {item.status}
                             </Cell>
                             <Cell>
-                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >
-                                  {activeTabIndex === 2
-                                ? `${moment(
-                                    new Date(
-                                      item.activity_log
-                                        .reverse()
-                                        .find(
-                                          (activity) =>
-                                            activity["activity_type"] ==
-                                            "COMPLETED"
-                                        )!.date
-                                    )
-                                  ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                : activeTabIndex === 3
-                                ? `${moment(
-                                    new Date(
-                                      item.activity_log
-                                        .reverse()
-                                        .find(
-                                          (activity) =>
-                                            activity["activity_type"] ==
-                                            "APPROVED"
-                                        )!.date
-                                    )
-                                  ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                : `${moment(new Date(item.created_date)).format(
-                                    "MMMM Do YYYY, h:mm:ss a"
-                                  )}`}
-                                </span>}>
-
+                              <Tooltip
+                                overlayInnerStyle={{ fontSize: "0.7rem" }}
+                                placement="bottom"
+                                trigger={["hover"]}
+                                overlay={
+                                  <span>
+                                    {activeTabIndex === 2
+                                      ? `${moment(
+                                          new Date(
+                                            item.activity_log
+                                              .reverse()
+                                              .find(
+                                                (activity) =>
+                                                  activity["activity_type"] ==
+                                                  "COMPLETED"
+                                              )!.date
+                                          )
+                                        ).format("MMMM Do YYYY, h:mm:ss a")}`
+                                      : activeTabIndex === 3
+                                      ? `${moment(
+                                          new Date(
+                                            item.activity_log
+                                              .reverse()
+                                              .find(
+                                                (activity) =>
+                                                  activity["activity_type"] ==
+                                                  "APPROVED"
+                                              )!.date
+                                          )
+                                        ).format("MMMM Do YYYY, h:mm:ss a")}`
+                                      : `${moment(
+                                          new Date(item.created_date)
+                                        ).format("MMMM Do YYYY, h:mm:ss a")}`}
+                                  </span>
+                                }
+                              >
                                 <div>
                                   {activeTabIndex === 2
-                                  ? `${moment(
-                                      new Date(
-                                        item.activity_log
-                                          .reverse()
-                                          .find(
-                                            (activity) =>
-                                              activity["activity_type"] ==
-                                              "COMPLETED"
-                                          )!.date
-                                      )
-                                    ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                  : activeTabIndex === 3
-                                  ? `${moment(
-                                      new Date(
-                                        item.activity_log
-                                          .reverse()
-                                          .find(
-                                            (activity) =>
-                                              activity["activity_type"] ==
-                                              "APPROVED"
-                                          )!.date
-                                      )
-                                    ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                  : `${moment(new Date(item.created_date)).format(
-                                      "MMMM Do YYYY, h:mm:ss a"
-                                    )}`}
+                                    ? `${moment(
+                                        new Date(
+                                          item.activity_log
+                                            .reverse()
+                                            .find(
+                                              (activity) =>
+                                                activity["activity_type"] ==
+                                                "COMPLETED"
+                                            )!.date
+                                        )
+                                      ).format("MMMM Do YYYY, h:mm:ss a")}`
+                                    : activeTabIndex === 3
+                                    ? `${moment(
+                                        new Date(
+                                          item.activity_log
+                                            .reverse()
+                                            .find(
+                                              (activity) =>
+                                                activity["activity_type"] ==
+                                                "APPROVED"
+                                            )!.date
+                                        )
+                                      ).format("MMMM Do YYYY, h:mm:ss a")}`
+                                    : `${moment(
+                                        new Date(item.created_date)
+                                      ).format("MMMM Do YYYY, h:mm:ss a")}`}
                                 </div>
-                                </Tooltip>
+                              </Tooltip>
                             </Cell>
                             {/*Only show the Overdue column for the pending and assigned tabs*/}
-                            {(activeTabIndex === 0 || activeTabIndex === 1) && 
-                              (<Cell
+                            {(activeTabIndex === 0 || activeTabIndex === 1) && (
+                              <Cell
                                 style={{
-                                  color: getColor(item.overdue_status? "OVERDUE" : "VALID"),
+                                  color: getColor(
+                                    item.overdue_status ? "OVERDUE" : "VALID"
+                                  ),
                                   fontWeight: "bold",
                                 }}
                               >
-                                {item.overdue_status? "OVERDUE" : "VALID"}
-                              </Cell>)}
-                            <Cell>
-                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{item.asset_name}</span>}>
-                                  <div>{item.asset_name}</div>
-                                </Tooltip>
+                                {item.overdue_status ? "OVERDUE" : "VALID"}
                               </Cell>
+                            )}
                             <Cell>
-                              <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{item.created_by}</span>}>
-                                  <div>{item.created_by}</div>
-                                </Tooltip>
+                              <Tooltip
+                                overlayInnerStyle={{ fontSize: "0.7rem" }}
+                                placement="bottom"
+                                trigger={["hover"]}
+                                overlay={<span>{item.asset_name}</span>}
+                              >
+                                <div>{item.asset_name}</div>
+                              </Tooltip>
+                            </Cell>
+                            <Cell>
+                              <Tooltip
+                                overlayInnerStyle={{ fontSize: "0.7rem" }}
+                                placement="bottom"
+                                trigger={["hover"]}
+                                overlay={<span>{item.created_by}</span>}
+                              >
+                                <div>{item.created_by}</div>
+                              </Tooltip>
                             </Cell>
                             <Cell>
                               <div className={styles.iconsDiv}>
@@ -771,8 +794,8 @@ export default function Request(props: RequestProps) {
                                         >
                                           <strong>Manage</strong>
                                         </Link>
-                                      ) : (item.status_id === 2 ||
-                                          item.status_id === 5) ? (
+                                      ) : item.status_id === 2 ||
+                                        item.status_id === 5 ? (
                                         <Link
                                           href={`/Request/Complete/${item.id}`}
                                         >

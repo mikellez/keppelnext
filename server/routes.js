@@ -1066,7 +1066,22 @@ router.patch(
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("rejectReassign")
 );
+router.patch(
+  "/checklist/requestCancel/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("requestCancel")
+);
 
+router.patch(
+  "/checklist/approveCancel/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("approveCancel")
+);
+router.patch(
+  "/checklist/rejectCancel/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("rejectCancel")
+);
 /**
  * @api {get} /checklist/pdf/:checklist_id Get a specific Checklist Record PDF
  * @apiDescription Get Checklist Record PDF
