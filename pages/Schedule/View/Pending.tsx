@@ -114,6 +114,7 @@ export default function Pending() {
   const { data } = useCurrentUser();
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
   const [triggerTab, setTriggerTab] = useState<boolean>(false);
+  const [remarks, setRemarks] = useState<string>("");
 
   const handleOptions = (activeTab: number) => {
     if (activeTab == 0) {
@@ -276,7 +277,7 @@ export default function Pending() {
                       <HeaderCell resize>Plant Name</HeaderCell>
                       <HeaderCell resize>Description</HeaderCell>
                       <HeaderCell resize>Date Created</HeaderCell>
-                      <HeaderCell resize>Cancelation</HeaderCell>
+                      <HeaderCell resize>Status</HeaderCell>
                       <HeaderCell resize>Actions</HeaderCell>
                     </HeaderRow>
                   </Header>
@@ -354,7 +355,14 @@ export default function Pending() {
                           </Cell>
 
                           <Cell>
-                            {item.status == 6 ? <div>Yes</div> : <div>-</div>}
+                            <span
+                              style={{
+                                color: getColor(item.status),
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {item.status}
+                            </span>
                           </Cell>
 
                           <Cell>
@@ -390,6 +398,7 @@ export default function Pending() {
                                   onClick={() => {
                                     setApproveModal(true);
                                     setSelectedTimeline(item.id);
+                                    setRemarks(item.remarks);
                                   }}
                                   style={{ cursor: "pointer" }}
                                 />
@@ -407,7 +416,7 @@ export default function Pending() {
                                 }}
                                 style={{ cursor: "pointer" }}
                               />
-                              {activeTabIndex == 2 &&
+                              {activeTabIndex == 2 && item.status !== 'CANCELLED' &&
                                 <AiOutlineDelete
                                   color="#C70F2B"
                                   size={22}
@@ -477,6 +486,7 @@ export default function Pending() {
           scheduleInfo={selectedTimelineItem!}
           timelineId={selectedTimeline!}
           closeOnBlur
+          remarks={remarks}
         />
         {user.data?.role_id === Role.Engineer ? 
         <ModuleSimplePopup

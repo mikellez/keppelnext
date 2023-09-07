@@ -234,8 +234,9 @@ interface CMMSTimeline {
   plantId: number;
   plantName?: string;
   description: string;
-  status?: number;
+  status?: string;
   created_date? : Date;
+  remarks?: string;
 }
 
 interface CMMSSchedule {
