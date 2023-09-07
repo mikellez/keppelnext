@@ -65,7 +65,7 @@ import {
 import { CMMSChecklist } from "../../types/common/interfaces";
 import { ThreeDots } from "react-loading-icons";
 import { getColor } from "../Request";
-import { HiOutlineDownload } from "react-icons/hi";
+import { HiBan, HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../components/TooltipBtn";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import LoadingHourglass from "../../components/LoadingHourglass";
@@ -559,7 +559,8 @@ export default function Checklist(props: ChecklistProps) {
                               </Link>
                             ) : item.status_id === 2 ||
                               item.status_id === 3 ||
-                              item.status_id === 6 ? (
+                              item.status_id === 6 ||
+                              item.status_id === 10 ? (
                               <>
                                 <Link href={`/Checklist/Complete/${item.id}`}>
                                   <AiOutlineFileDone
@@ -580,10 +581,14 @@ export default function Checklist(props: ChecklistProps) {
                               >
                                 <AiOutlineEdit size={22} title={"Assign"} />
                               </Link>
-                            ) : (
-                              <Link href={`/Checklist/View/${item.id}`}>
-                                <AiOutlineFolderView size={22} title={"View"} />
+                            ) : item.status_id === 9 ? (
+                              <Link
+                                href={`/Checklist/Cancellation/?id=${item.id}`}
+                              >
+                                <HiBan size={22} title={"Cancel"} />
                               </Link>
+                            ) : (
+                              <div></div>
                             )}
                             <AiOutlineHistory
                               color={"#C70F2B"}

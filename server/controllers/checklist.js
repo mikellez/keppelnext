@@ -167,7 +167,7 @@ const getAssignedChecklistsQuery = (req) => {
   return (
     getAllChecklistQuery(req) +
     `
-    WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6) AND
+    WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6 or cl.status_id = 10) AND
         (CASE
             WHEN (SELECT ua.role_id
                 FROM
@@ -214,7 +214,7 @@ const getOutstandingChecklistsQuery = (req) => {
     WHERE
         ua.user_id = $1
         ${userRoleCond} AND
-        (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6)
+        (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
     ${searchCondition(search)}
     ORDER BY cl.checklist_id DESC
   `
@@ -228,7 +228,7 @@ const getCompletedChecklistsQuery = (req) => {
     `
     WHERE
         ua.user_id = $1 AND
-        (cl.status_id = 6)
+        (cl.status_id = 6 OR cl.status_id = 11)
     ${searchCondition(search)}
     ORDER BY cl.checklist_id DESC
   `
@@ -256,7 +256,7 @@ const getForReviewChecklistsQuery = (req) => {
     `
     WHERE
         ua.user_id = $1 AND
-        (cl.status_id = 4)
+        (cl.status_id = 4 or cl.status_id = 9)
     ${searchCondition(search)}
     ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' DESC
   `
@@ -270,7 +270,7 @@ const getApprovedChecklistsQuery = (req) => {
     `
     WHERE
         ua.user_id = $1 AND
-        (cl.status_id = 5 OR cl.status_id = 7)
+        (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
     ${searchCondition(search)}
     ORDER BY cl.checklist_id DESC
   `
@@ -423,7 +423,7 @@ const fetchForReviewChecklistsQuery =
   `				
 WHERE 
     ua.user_id = $1 AND 
-    (cl.status_id = 4 OR cl.status_id = 6)
+    (cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9)
     ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' desc
 `;
 
@@ -458,7 +458,7 @@ const fetchApprovedChecklistsQuery =
   `
 WHERE 
     ua.user_id = $1 AND 
-    (cl.status_id = 5 OR cl.status_id = 7)
+    (cl.status_id = 5 OR cl.status_id = 7 OR cl.status.id = 11)
 ORDER BY cl.checklist_id DESC
 `;
 const fetchApprovedChecklists = async (req, res, next) => {
@@ -1133,7 +1133,7 @@ const rejectChecklist = async (req, res, next) => {
 
 const cancelChecklist = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  const cancelledComments = ""; // todo add cancelled comment here
+  const cancelledComments = req.body.remarks ? req.body.remarks : "";
 
   const updatehistory = `,Updated Record_CANCELLED_${today}_${req.user.name}_${cancelledComments}`;
   const activity_log = {
@@ -1151,7 +1151,8 @@ const cancelChecklist = async (req, res, next) => {
             status_id = 7,
             overdue_status = false,
             history = concat(history,'${updatehistory}'),
-            activity_log = activity_log || $1
+            activity_log = activity_log || $1,
+            completeremarks_req = '${cancelledComments}'
         WHERE 
             checklist_id = $2
     `;
@@ -1161,7 +1162,7 @@ const cancelChecklist = async (req, res, next) => {
     [JSON.stringify(activity_log), req.params.checklist_id],
     (err) => {
       if (err) {
-        // console.log(err);
+        console.log(err);
         return res.status(500).json("Failure to update checklist cancellation");
       }
       return res.status(200).json("Checklist successfully cancelled");
@@ -1171,7 +1172,7 @@ const cancelChecklist = async (req, res, next) => {
 
 const requestCancelChecklist = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  const cancelledComments = ""; // todo add cancelled comment here
+  const cancelledComments = req.body.remarks ? req.body.remarks : "";
 
   const updatehistory = `,Updated Record_REQUEST_CANCELLATION_${today}_${req.user.name}_${cancelledComments}`;
   const activity_log = {
@@ -1189,7 +1190,8 @@ const requestCancelChecklist = async (req, res, next) => {
             status_id = 9,
             overdue_status = false,
             history = concat(history,'${updatehistory}'),
-            activity_log = activity_log || $1
+            activity_log = activity_log || $1,
+            completeremarks_req = '${cancelledComments}'
         WHERE 
             checklist_id = $2
     `;
@@ -1212,7 +1214,7 @@ const requestCancelChecklist = async (req, res, next) => {
 };
 const approveCancelChecklist = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  const cancelledComments = ""; // todo add cancelled comment here
+  const cancelledComments = req.body.remarks ? req.body.remarks : "";
 
   const updatehistory = `,Updated Record_APPROVE_CANCELLATION_${today}_${req.user.name}_${cancelledComments}`;
   const activity_log = {
@@ -1230,7 +1232,8 @@ const approveCancelChecklist = async (req, res, next) => {
             status_id = 11,
             overdue_status = false,
             history = concat(history,'${updatehistory}'),
-            activity_log = activity_log || $1
+            activity_log = activity_log || $1,
+            completeremarks_req = '${cancelledComments}'
         WHERE 
             checklist_id = $2
     `;
@@ -1253,7 +1256,7 @@ const approveCancelChecklist = async (req, res, next) => {
 };
 const rejectCancelChecklist = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  const cancelledComments = ""; // todo add cancelled comment here
+  const cancelledComments = req.body.remarks ? req.body.remarks : "";
 
   const updatehistory = `,Updated Record_REJECT_CANCELLATION_${today}_${req.user.name}_${cancelledComments}`;
   const activity_log = {
@@ -1268,10 +1271,12 @@ const rejectCancelChecklist = async (req, res, next) => {
         UPDATE
             keppel.checklist_master
         SET 
-            status_id = 11,
+            status_id = 10,
             overdue_status = false,
             history = concat(history,'${updatehistory}'),
-            activity_log = activity_log || $1
+            activity_log = activity_log || $1,
+            completeremarks_req = '${cancelledComments}'
+
         WHERE 
             checklist_id = $2
     `;
