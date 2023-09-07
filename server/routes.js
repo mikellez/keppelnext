@@ -1050,6 +1050,11 @@ router.patch(
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("cancel")
 );
+router.patch(
+  "/checklist/reassign/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("reassign")
+);
 
 /**
  * @api {get} /checklist/pdf/:checklist_id Get a specific Checklist Record PDF
