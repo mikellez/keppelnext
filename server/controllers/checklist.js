@@ -10,37 +10,15 @@ const {
 
 const ITEMS_PER_PAGE = 10;
 
-// old searchCondition code
-// const searchCondition = (search) => {
-//   return `
-//     AND (
-//       cl.chl_name LIKE '${search}%' OR
-//       cl.description LIKE '${search}%'
-// ID, Details, Status, Created On, Assigned To status LIKE '${search}%' OR
-// description LIKE ${search}%' OR
-// created_date LIKE ${search}%' OR
-// assigneduser LIKE ${search}%'
-//     )`;
-
-// checklist_id LIKE '${search}%' OR
-//       cl.status LIKE '${search}%' OR
-//       description LIKE '${search}%' OR
-//       created_date LIKE '${search}%' OR
-//       assigneduser LIKE '${search}%' OR
-
-// };
-
 const searchCondition = (search) => {
   //fields to search by: checklist_id, description, status, assigneduser, signoffuser, createdbyuser
   let searchInt = parseInt(search);
 
   if (search === "") {
     //handling empty search
-    console.log("case 1: empty");
     return ``;
   } else if (!isNaN(search)) {
     //handling integer input
-    console.log("case 2: integer");
     return `AND (
       cl.checklist_id = ${searchInt} OR
       cl.signoff_user_id = ${searchInt} OR
@@ -48,7 +26,6 @@ const searchCondition = (search) => {
     )`;
   } else if (typeof search === "string" && search !== "") {
     //handling text input
-    console.log("case 3: string");
     return `
     AND (
       cl.chl_name ILIKE '%${search}%' OR
@@ -351,7 +328,7 @@ const fetchAssignedChecklists = async (req, res, next) => {
     //return res.status(204).json({ msg: "No checklist" });
     // console.log(result.rows);
     // console.log(totalPages);
-    console.log("RESULT: ", result);
+
     return res.status(200).json({ rows: result.rows, total: totalPages });
   } catch (error) {
     return res.status(500).json({ msg: error });

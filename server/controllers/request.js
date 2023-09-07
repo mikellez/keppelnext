@@ -14,17 +14,14 @@ const searchCondition = (search) => {
   let searchInt = parseInt(search);
   if (search === "") {
     //handling empty search
-    console.log("case 1: empty");
     return ``;
   } else if (!isNaN(search)) {
     //handling integer input
-    console.log("case 2: integer");
     return `AND (
       r.request_id = ${searchInt}
     )`;
   } else if (typeof search === "string" && search !== "") {
     //handling text input
-    console.log("case 3: string");
     return ` AND(
   
       r.request_id IN (
@@ -50,16 +47,6 @@ const searchCondition = (search) => {
       )
     )`;
   }
-
-  // old searchCondition code
-  // return ` AND (
-  //   ft.fault_type LIKE '%${search}%' OR
-  //   pm.plant_name LIKE '%${search}%' OR
-  //   rt.request LIKE '%${search}%' OR
-  //   pri.priority LIKE '%${search}%' OR
-  //   tmp1.asset_name LIKE '%${search}%'OR
-
-  // ) `;
 };
 
 async function fetchRequestQuery(
