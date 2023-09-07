@@ -1050,16 +1050,21 @@ router.patch(
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("cancel")
 );
-router.patch(
-  "/checklist/reassign/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("reassign")
-);
 
 router.patch(
-  "/checklist/cancel/:checklist_id",
+  "/checklist/reassignReq/:checklist_id",
   checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("cancel")
+  controllers.checklist.updateChecklist("requestReassign")
+);
+router.patch(
+  "/checklist/reassignApprove/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("approveReassign")
+);
+router.patch(
+  "/checklist/reassignReject/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("rejectReassign")
 );
 
 /**
