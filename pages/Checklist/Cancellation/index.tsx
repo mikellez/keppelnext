@@ -144,7 +144,7 @@ export default function ChecklistCancel(props: ChecklistPageProps) {
                 rows={2}
                 maxLength={100}
                 style={{ resize: "none" }}
-              ></textarea>
+              />
             </ModuleContent>
 
             <ModuleFooter>

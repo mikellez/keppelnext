@@ -22,6 +22,11 @@ export enum SimpleIcon {
   Loading,
 }
 
+interface InputProps {
+  setInput: React.Dispatch<React.SetStateAction<string>>;
+  value: string;
+  title: string;
+}
 interface ModuleSimplePopupProps {
   modalOpenState: boolean;
   setModalOpenState: React.Dispatch<React.SetStateAction<boolean>>;
@@ -31,6 +36,8 @@ interface ModuleSimplePopupProps {
   buttons?: React.ReactNode | React.ReactNode[];
   onRequestClose?: Function;
   shouldCloseOnOverlayClick?: boolean;
+  inputField?: boolean;
+  inputVar?: InputProps;
 }
 
 export default function ModuleSimplePopup(props: ModuleSimplePopupProps) {
@@ -52,10 +59,9 @@ export default function ModuleSimplePopup(props: ModuleSimplePopupProps) {
     if (props.icon === SimpleIcon.Question)
       return <BsQuestionCircle size={122} color="#CD0404" />;
 
-    if (props.icon === SimpleIcon.Info) 
+    if (props.icon === SimpleIcon.Info)
       return <BsInfoCircle size={108} color="#009EFF" />;
-    if (props.icon === SimpleIcon.Loading)
-      return <LoadingHourglass/>;
+    if (props.icon === SimpleIcon.Loading) return <LoadingHourglass />;
   };
 
   return (
@@ -85,6 +91,19 @@ export default function ModuleSimplePopup(props: ModuleSimplePopupProps) {
         <div style={{ height: "7.5em" }}>{getIcon()} </div>
         <h2>{props.title}</h2>
         <p className={styles.modalText}>{props.text}</p>
+        {props.inputField && (
+          <>
+            <label>{props.inputVar?.title}</label>
+            <textarea
+              className="form-control"
+              value={props.inputVar?.value}
+              onChange={(e) => props.inputVar!.setInput(e.target.value)}
+              rows={2}
+              maxLength={100}
+              style={{ resize: "none" }}
+            />
+          </>
+        )}
         <div className={styles.footerButtons}>{props.buttons}</div>
       </div>
     </Modal>

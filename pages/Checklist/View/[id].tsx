@@ -140,6 +140,8 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
             Confirm
           </TooltipBtn>
         }
+        inputField={true}
+        inputVar={{ setInput: setRemarks, value: remarks, title: "Remarks" }}
       />
     </ModuleMain>
   );
