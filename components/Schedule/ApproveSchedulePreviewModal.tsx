@@ -38,10 +38,11 @@ interface ApproveSchedulePreviewModalProps {
   timelineId: number;
   scheduleInfo: ScheduleInfo[];
   closeOnBlur?: boolean;
+  remarks?: string;
 }
 
-const ContentHeader = (props: { tabIndex: number; setRemarks: (arg0: string) => void; scheduleInfo: { status: number; }[]; handleClick: (arg0: number) => void; }) => {
-  return props.tabIndex == 1 ? (
+const ContentHeader = (props: { tabIndex: number; setRemarks: (arg0: string) => void; scheduleInfo: { status: number; }[]; handleClick: (arg0: number) => void; remarks: string }) => {
+  return (props.tabIndex == 1 || props.tabIndex == 2) ? (
     <div className="d-flex align-items-center justify-content-around py-3">
       <div style={{ flex: "4" }}>
         <label>
@@ -51,13 +52,17 @@ const ContentHeader = (props: { tabIndex: number; setRemarks: (arg0: string) => 
           className="form-control"
           rows={5}
           maxLength={50}
+          disabled={props.tabIndex === 2}
           style={{
             resize: "none",
             width: "80%",
           }}
           onChange={(e)=>props.setRemarks(e.target.value)}
+          value={props.remarks}
         />
       </div>
+      {props.tabIndex !== 2 && 
+      <>
       <TooltipBtn
         toolTip={false}
         style={{ backgroundColor: "green", borderColor: "green" }}
@@ -73,6 +78,8 @@ const ContentHeader = (props: { tabIndex: number; setRemarks: (arg0: string) => 
         {" "}
         Reject{" "}
       </TooltipBtn>{" "}
+      </>
+      }
     </div>
   ) : (
     <div></div>
@@ -144,7 +151,7 @@ export default function ApproveSchedulePreviewModal(
           title="Schedule Preview"
           header="Schedule Preview"
           schedules={props.scheduleInfo}
-          contentHeader={<ContentHeader tabIndex={props.tabIndex} scheduleInfo={props.scheduleInfo} handleClick={handleClick} setRemarks={setRemarks}/>}
+          contentHeader={<ContentHeader tabIndex={props.tabIndex} scheduleInfo={props.scheduleInfo} handleClick={handleClick} setRemarks={setRemarks} remarks={props.remarks}/>}
         />
       </ModuleModal>
 

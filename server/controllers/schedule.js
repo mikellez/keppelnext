@@ -445,12 +445,14 @@ const getScheduleDrafts = async (req, res) => {
       ST.description, 
       ST.plant_id as "plantId", 
       PM.plant_name as "plantName", 
-      ST.status, 
-      ST.created_date
+      SM.status, 
+      ST.created_date,
+      ST.remarks
     FROM keppel.schedule_timelines ST 
     JOIN keppel.plant_master PM ON ST.plant_id = PM.plant_id
+    JOIN keppel.status_sm SM on ST.status = SM.status_id
     WHERE 
-      status = 3
+      ST.status = 3
       AND created_by = $1
       AND active = 1
     ORDER BY ST.created_date DESC
@@ -483,17 +485,18 @@ const getApprovedTimelines = async (req, res) => {
       ST.description, 
       ST.plant_id as "plantId", 
       PM.plant_name as "plantName", 
-      ST.status, 
-      ST.created_date
+      SM.status, 
+      ST.created_date,
+      ST.remarks
     FROM 
       keppel.users u
       JOIN keppel.user_access ua ON u.user_id = ua.user_id
       JOIN keppel.schedule_timelines ST ON ua.allocatedplantids LIKE concat(concat('%',ST.plant_id::text), '%')
       JOIN keppel.plant_master PM ON ST.plant_id = PM.plant_id
+      JOIN keppel.status_sm SM on ST.status = SM.status_id
     WHERE 
-      status = 1
+      (ST.status = 1 OR ST.status = 7 OR ST.status = 8)
       AND ua.user_id = $1
-      AND active = 1
     ORDER BY ST.activity_log -> (jsonb_array_length(ST.activity_log) -1) ->> 'date' DESC
 
   `
@@ -523,16 +526,18 @@ const getPendingTimelines = async (req, res) => {
       ST.description, 
       ST.plant_id as "plantId", 
       PM.plant_name as "plantName", 
-      ST.status, 
+      SM.status, 
       ST.created_date,
-      ST.activity_log
+      ST.activity_log,
+      ST.remarks
     FROM 
       keppel.users u
       JOIN keppel.user_access ua ON u.user_id = ua.user_id
       JOIN keppel.schedule_timelines ST ON ua.allocatedplantids LIKE concat(concat('%',ST.plant_id::text), '%')
       JOIN keppel.plant_master PM ON ST.plant_id = PM.plant_id
+      JOIN keppel.status_sm SM on ST.status = SM.status_id
     WHERE 
-      (status = 4 OR status = 6)
+      (ST.status = 4 OR ST.status = 6)
       AND ua.user_id = $1
       AND active = 1
       ORDER BY COALESCE(TO_TIMESTAMP((ST.activity_log->>-1)::jsonb->>'date', 'YYYY-MM-DD HH24:MI:SS'), '1970-01-01'::timestamp) DESC
@@ -563,15 +568,17 @@ const getCompletedTimelines = async (req, res) => {
       ST.description, 
       ST.plant_id as "plantId", 
       PM.plant_name as "plantName", 
-      ST.status, 
-      ST.created_date
+      SM.status, 
+      ST.created_date,
+      ST.remarks
     FROM 
       keppel.users u
       JOIN keppel.user_access ua ON u.user_id = ua.user_id
       JOIN keppel.schedule_timelines ST ON ua.allocatedplantids LIKE concat(concat('%',ST.plant_id::text), '%')
       JOIN keppel.plant_master PM ON ST.plant_id = PM.plant_id
+      JOIN keppel.status_sm SM on ST.status = SM.status_id
     WHERE 
-      status = 5
+      ST.status = 5
       AND ua.user_id = $1
       AND active = 1
     ORDER BY ST.activity_log -> (jsonb_array_length(ST.activity_log) -1) ->> 'date' DESC
@@ -726,7 +733,7 @@ const changeTimelineStatus = (req, res, next) => {
         )
        WHERE timeline_id = ${req.params.id};
     `; 
-  } else if([7,8].includes(status)) {
+  } else if([7].includes(status)) {
     queryS = `
       UPDATE keppel.schedule_checklist 
       SET status = ${req.params.status},
@@ -743,6 +750,34 @@ const changeTimelineStatus = (req, res, next) => {
       UPDATE keppel.schedule_timelines 
       SET status = ${req.params.status},
       active = 0,
+      remarks = '${remarks}'::text,
+        activity_log = activity_log || 
+          jsonb_build_object(
+            'date', '${today}'::text,
+            'name', '${name}'::text,
+            'role', '${role_name}'::text,
+            'activity', '${activity}'::text,
+            'activity_type', '${activityType}'::text
+          )
+      WHERE timeline_id = ${req.params.id} RETURNING *;
+    `
+  } else if([8].includes(status)) {
+    queryS = `
+      UPDATE keppel.schedule_checklist 
+      SET status = ${req.params.status},
+      active = 1,
+        activity_log = activity_log || 
+          jsonb_build_object(
+            'date', '${today}'::text,
+            'name', '${name}'::text,
+            'role', '${role_name}'::text,
+            'activity', '${activity}'::text,
+            'activity_type', '${activityType}'::text
+          )
+      WHERE timeline_id = ${req.params.id};
+      UPDATE keppel.schedule_timelines 
+      SET status = ${req.params.status},
+      active = 1,
       remarks = '${remarks}'::text,
         activity_log = activity_log || 
           jsonb_build_object(
@@ -818,7 +853,10 @@ const deleteTimeline = async (req, res, next) => {
   const activityType = "Deleted";
 
   global.db.query(
-    `UPDATE keppel.schedule_checklist SET active = 0 WHERE timeline_id = $1;`,
+    `UPDATE keppel.schedule_checklist 
+    SET active = 0,
+    status = 7
+    WHERE timeline_id = $1;`,
     [req.params.id],
     (err) => {
       if (err) throw err;
@@ -826,6 +864,7 @@ const deleteTimeline = async (req, res, next) => {
         global.db.query(
           `UPDATE keppel.schedule_timelines 
             SET active = 0,
+            status = 7,
             activity_log = activity_log || 
                 jsonb_build_object(
                   'date', '${today}'::text,

@@ -157,6 +157,10 @@ export const getColor = (status: string) => {
     case "OVERDUE":
     case "CANCELLED":
       return "red";
+    case "PENDING CANCELLED":
+      return "#b306ec";
+    case "REJECTED CANCELLED":
+      return "red";
     case "REASSIGNED":
       return "#B71375";
     case "ACQUIRED":
