@@ -173,6 +173,7 @@ export const getColor = (status: string) => {
       return "red";
     case "REJECTED CANCELLATION":
       return "#101D6B";
+    case "REASSIGNMENT REQUEST":
     case "PENDING CANCELLATION":
       return "#FBBD04";
     default:

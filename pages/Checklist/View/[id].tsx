@@ -11,7 +11,7 @@ import { GetServerSideProps } from "next";
 import ChecklistPreview from "../../../components/Checklist/ChecklistPreview";
 import Link from "next/link";
 import TooltipBtn from "../../../components/TooltipBtn";
-import { HiBan, HiOutlineDownload } from "react-icons/hi";
+import { HiBan, HiOutlineDownload, HiUsers } from "react-icons/hi";
 import instance from "../../../types/common/axios.config";
 
 import { useRouter } from "next/router";
@@ -67,9 +67,20 @@ const sendRequestCancelChecklist = async (remarks: string, id: number) => {
     .catch(console.log);
 };
 
+const sendReassignReqChecklist = async (remarks: string, id: number) => {
+  // console.log(id);
+  return await instance
+    .patch(`/api/checklist/reassignReq/${id}`, { remarks: remarks })
+    .then((res) => {
+      return res.data;
+    })
+    .catch(console.log);
+};
+
 const ManageChecklistPage = (props: ChecklistPageProps) => {
   const [remarks, setRemarks] = useState<string>("");
   const [cancelModal, setCancelModal] = useState<boolean>(false);
+  const [reassignModal, setReassignModal] = useState<boolean>(false);
   const router = useRouter();
   const user = useCurrentUser();
 
@@ -97,6 +108,14 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
           }}
         >
           <HiBan size={24} />
+        </TooltipBtn>
+        <TooltipBtn
+          text="Request to Reassign"
+          onClick={() => {
+            setReassignModal(true);
+          }}
+        >
+          <HiUsers size={24} />
         </TooltipBtn>
         <button
           className={"btn btn-secondary"}
@@ -134,6 +153,27 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
                     props.checklist!.checklist_id
                   )
                 : sendCancelChecklist(remarks, props.checklist!.checklist_id);
+              router.push("/Checklist");
+            }}
+          >
+            Confirm
+          </TooltipBtn>
+        }
+        inputField={true}
+        inputVar={{ setInput: setRemarks, value: remarks, title: "Remarks" }}
+      />
+      <ModuleSimplePopup
+        modalOpenState={reassignModal}
+        setModalOpenState={setReassignModal}
+        title="Confirm Request for Reassignment?"
+        text="Are you sure? This action cannot be undone."
+        icon={SimpleIcon.Info}
+        shouldCloseOnOverlayClick={true}
+        buttons={
+          <TooltipBtn
+            toolTip={false}
+            onClick={() => {
+              sendReassignReqChecklist(remarks, props.checklist!.checklist_id);
               router.push("/Checklist");
             }}
           >

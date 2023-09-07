@@ -286,7 +286,7 @@ const getForReviewChecklistsQuery = (req) => {
     `
     WHERE
         ua.user_id = $1 AND
-        (cl.status_id = 4 or cl.status_id = 9)
+        (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
     ${searchCondition(search)}
     ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' DESC
   `
@@ -1333,7 +1333,7 @@ const requestReassignChecklist = async (req, res, next) => {
 
   try {
     const checklist_id = parseInt(req.params.checklist_id);
-    const reassignReqComments = req.body.completeremarks_req; // todo add reassign comment here
+    const reassignReqComments = req.body.remarks; // todo add reassign comment here
 
     // Update activity log entry in the record
     const updatehistory = `,Updated Record_REASSIGNED_${today}_${req.user.name}_${reassignReqComments}`;
@@ -1350,15 +1350,16 @@ const requestReassignChecklist = async (req, res, next) => {
               keppel.checklist_master
           SET 
               status_id = 8,
+              completeremarks_req = $1,
               history = concat(history,'${updatehistory}'),
-              activity_log = activity_log || $1
+              activity_log = activity_log || $2
           WHERE 
-              checklist_id = $2
+              checklist_id = $3
       `;
 
     global.db.query(
       sql,
-      [JSON.stringify(activity_log), checklist_id],
+      [reassignReqComments, JSON.stringify(activity_log), checklist_id],
       (err, result) => {
         if (err) {
           console.log(err);
