@@ -400,64 +400,61 @@ export default function Checklist(props: ChecklistProps) {
                                 placement="bottom" 
                                 trigger={["hover"]} 
                                 overlay={
-                                <span>
-                                  {activeTabIndex === 2
-                                  ? `${moment(
-                                      new Date(
-                                        item.activity_log
+                                  (() => {
+                                    try {
+                                      let dateToDisplay;
+
+                                      if (activeTabIndex === 2) {
+                                        dateToDisplay = item.activity_log
                                           .reverse()
-                                          .find(
-                                            (activity) =>
-                                              activity["activity_type"] ==
-                                              "WORK DONE"
-                                          )!.date
-                                      )
-                                    ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                  : activeTabIndex === 3
-                                  ? `${moment(
-                                      new Date(
-                                        item.activity_log
+                                          .find((activity) => activity["activity_type"] === "WORK DONE")?.date;
+                                      } else if (activeTabIndex === 3) {
+                                        dateToDisplay = item.activity_log
                                           .reverse()
-                                          .find(
-                                            (activity) =>
-                                              activity["activity_type"] ==
-                                              "APPROVED"
-                                          )!.date
-                                      )
-                                    ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                  : `${moment(new Date(item.created_date)).format(
-                                      "MMMM Do YYYY, h:mm:ss a"
-                                    )}`}
-                                </span>}>
+                                          .find((activity) => activity["activity_type"] === "APPROVED")?.date;
+                                      } else {
+                                        dateToDisplay = item.created_date;
+                                      }
+
+                                      if (dateToDisplay) {
+                                        return moment(new Date(dateToDisplay)).format("MMMM Do YYYY, h:mm:ss a");
+                                      } else {
+                                        return "Date not found";
+                                      }
+                                    } catch (error) {
+                                      console.error("An error occurred:", error);
+                                      return "Error occurred";
+                                    }
+                                  })()
+                                }>
 
                                 <div>
-                                  {activeTabIndex === 2
-                                  ? `${moment(
-                                    new Date(
-                                      item.activity_log
-                                        .reverse()
-                                        .find(
-                                          (activity) =>
-                                            activity["activity_type"] ==
-                                            "WORK DONE"
-                                        )!.date
-                                    )
-                                  ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                : activeTabIndex === 3
-                                ? `${moment(
-                                    new Date(
-                                      item.activity_log
-                                        .reverse()
-                                        .find(
-                                          (activity) =>
-                                            activity["activity_type"] ==
-                                            "APPROVED"
-                                        )!.date
-                                    )
-                                  ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                : `${moment(new Date(item.created_date)).format(
-                                    "MMMM Do YYYY, h:mm:ss a"
-                                  )}`}
+                                  {(() => {
+                                    try {
+                                      let dateToDisplay;
+
+                                      if (activeTabIndex === 2) {
+                                        dateToDisplay = item.activity_log
+                                          .reverse()
+                                          .find((activity) => activity["activity_type"] === "WORK DONE")?.date;
+                                      } else if (activeTabIndex === 3) {
+                                        dateToDisplay = item.activity_log
+                                          .reverse()
+                                          .find((activity) => activity["activity_type"] === "APPROVED")?.date;
+                                      } else {
+                                        dateToDisplay = item.created_date;
+                                      }
+
+                                      if (dateToDisplay) {
+                                        return moment(new Date(dateToDisplay)).format("MMMM Do YYYY, h:mm:ss a");
+                                      } else {
+                                        return "Date not found";
+                                      }
+                                    } catch (error) {
+                                      console.error("An error occurred:", error);
+                                      return "Error occurred";
+                                    }
+                                  })()}
                                 </div>
                                 </Tooltip>
                             
