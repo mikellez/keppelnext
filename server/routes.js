@@ -201,6 +201,7 @@ router.get(
   controllers.request.fetchAssignedRequests
 );
 
+
 /**
  * @api {get} /request/assigned Get Overdue Requests
  * @apiDescription Gets all requests with status of `OVERDUE`.
@@ -217,6 +218,7 @@ router.get(
   checkIfLoggedInAPI,
   controllers.request.fetchOverdueRequests
 );
+
 
 /**
  * @api {get} /request/review Get For Review Requests
@@ -1044,12 +1046,6 @@ router.patch(
   "/checklist/reject/:checklist_id",
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("reject")
-);
-
-router.patch(
-  "/checklist/cancel/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("cancel")
 );
 
 /**

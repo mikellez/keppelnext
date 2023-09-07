@@ -204,9 +204,9 @@ const getOutstandingChecklistsQuery = (req) => {
   const role_id = req.user.role_id;
   let userRoleCond = "";
 
-  if (role_id === 4) {
-    userRoleCond = "AND (createdU.user_id = $1 OR assignU.user_id = $1)";
-  }
+  if(role_id === 4) {
+    userRoleCond = "AND (createdU.user_id = $1 OR assignU.user_id = $1)"
+  } 
 
   return (
     getAllChecklistQuery(req) +
@@ -283,9 +283,10 @@ const fetchAssignedChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(getAssignedChecklistsQuery(req), [
-    req.user.id,
-  ]);
+  const totalRows = await global.db.query(
+    getAssignedChecklistsQuery(req),
+    [req.user.id]
+  );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -319,14 +320,15 @@ const fetchPendingChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(getPendingChecklistsQuery(req), [
-    req.user.id,
-  ]);
+  const totalRows = await global.db.query(
+    getPendingChecklistsQuery(req),
+    [req.user.id]
+  );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
     getPendingChecklistsQuery(req) +
-    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : "");
+    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : '');
 
   try {
     const result = await global.db.query(query, [req.user.id]);
@@ -345,15 +347,16 @@ const fetchOutstandingChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(getOutstandingChecklistsQuery(req), [
-    req.user.id,
-  ]);
+  const totalRows = await global.db.query(
+    getOutstandingChecklistsQuery(req),
+    [req.user.id]
+  );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
     getOutstandingChecklistsQuery(req) +
-    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : "");
-  console.log(query);
+    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : '');
+    console.log(query)
 
   try {
     const result = await global.db.query(query, [req.user.id]);
@@ -372,14 +375,15 @@ const fetchCompletedChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(getCompletedChecklistsQuery(req), [
-    req.user.id,
-  ]);
+  const totalRows = await global.db.query(
+    getCompletedChecklistsQuery(req),
+    [req.user.id]
+  );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
     getCompletedChecklistsQuery(req) +
-    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : "");
+    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : '');
 
   try {
     const result = await global.db.query(query, [req.user.id]);
@@ -398,14 +402,15 @@ const fetchOverdueChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(getOverdueChecklistsQuery(req), [
-    req.user.id,
-  ]);
+  const totalRows = await global.db.query(
+    getOverdueChecklistsQuery(req),
+    [req.user.id]
+  );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
     getOverdueChecklistsQuery(req) +
-    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : "");
+    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : '');
 
   try {
     const result = await global.db.query(query, [req.user.id]);
@@ -433,9 +438,10 @@ const fetchForReviewChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(getForReviewChecklistsQuery(req), [
-    req.user.id,
-  ]);
+  const totalRows = await global.db.query(
+    getForReviewChecklistsQuery(req),
+    [req.user.id]
+  );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -467,9 +473,10 @@ const fetchApprovedChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(getApprovedChecklistsQuery(req), [
-    req.user.id,
-  ]);
+  const totalRows = await global.db.query(
+    getApprovedChecklistsQuery(req),
+    [req.user.id]
+  );
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -871,7 +878,7 @@ const completeChecklist = async (req, res, next) => {
         signoff: signoff_user_email,
         createdBy: creator_email,
         status: status,
-        overdue: overdue,
+        overdue: overdue
       },
       "",
       [creator_email]
@@ -1151,7 +1158,7 @@ const cancelChecklist = async (req, res, next) => {
         SET 
             status_id = 7,
             overdue_status = false,
-            history = concat(history,'${updatehistory}'),
+            history = concat(history,'${updatehistory}')
             activity_log = activity_log || $1
         WHERE 
             checklist_id = $2
@@ -1357,6 +1364,5 @@ module.exports = {
   fetchOutstandingChecklists,
   fetchCompletedChecklists,
   editChecklistRecord,
-  fetchOverdueChecklists,
-  cancelChecklist,
+  fetchOverdueChecklists
 };
