@@ -365,7 +365,9 @@ export default function Checklist(props: ChecklistProps) {
                           : "Created On"}
                       </HeaderCell>
                       {/*Only show the Overdue column for the pending and assigned tabs*/}
-                      {(activeTabIndex === 0 || activeTabIndex === 1 || activeTabIndex === 2) && (
+                      {(activeTabIndex === 0 ||
+                        activeTabIndex === 1 ||
+                        activeTabIndex === 2) && (
                         <HeaderCell resize>Overdue Status</HeaderCell>
                       )}
                       <HeaderCell resize>Assigned To</HeaderCell>
@@ -414,22 +416,35 @@ export default function Checklist(props: ChecklistProps) {
                                       if (activeTabIndex === 2) {
                                         dateToDisplay = item.activity_log
                                           .reverse()
-                                          .find((activity) => activity["activity_type"] === "WORK DONE")?.date;
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ===
+                                              "WORK DONE"
+                                          )?.date;
                                       } else if (activeTabIndex === 3) {
                                         dateToDisplay = item.activity_log
                                           .reverse()
-                                          .find((activity) => activity["activity_type"] === "APPROVED")?.date;
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ===
+                                              "APPROVED"
+                                          )?.date;
                                       } else {
                                         dateToDisplay = item.created_date;
                                       }
 
                                       if (dateToDisplay) {
-                                        return moment(new Date(dateToDisplay)).format("MMMM Do YYYY, h:mm:ss a");
+                                        return moment(
+                                          new Date(dateToDisplay)
+                                        ).format("MMMM Do YYYY, h:mm:ss a");
                                       } else {
                                         return "Date not found";
                                       }
                                     } catch (error) {
-                                      console.error("An error occurred:", error);
+                                      console.error(
+                                        "An error occurred:",
+                                        error
+                                      );
                                       return "Error occurred";
                                     }
                                   })()}
@@ -444,17 +459,27 @@ export default function Checklist(props: ChecklistProps) {
                                     if (activeTabIndex === 2) {
                                       dateToDisplay = item.activity_log
                                         .reverse()
-                                        .find((activity) => activity["activity_type"] === "WORK DONE")?.date;
+                                        .find(
+                                          (activity) =>
+                                            activity["activity_type"] ===
+                                            "WORK DONE"
+                                        )?.date;
                                     } else if (activeTabIndex === 3) {
                                       dateToDisplay = item.activity_log
                                         .reverse()
-                                        .find((activity) => activity["activity_type"] === "APPROVED")?.date;
+                                        .find(
+                                          (activity) =>
+                                            activity["activity_type"] ===
+                                            "APPROVED"
+                                        )?.date;
                                     } else {
                                       dateToDisplay = item.created_date;
                                     }
 
                                     if (dateToDisplay) {
-                                      return moment(new Date(dateToDisplay)).format("MMMM Do YYYY, h:mm:ss a");
+                                      return moment(
+                                        new Date(dateToDisplay)
+                                      ).format("MMMM Do YYYY, h:mm:ss a");
                                     } else {
                                       return "Date not found";
                                     }
@@ -467,7 +492,9 @@ export default function Checklist(props: ChecklistProps) {
                             </Tooltip>
                           </Cell>
                           {/*Only show the Overdue column for the pending, assigned and work done tabs*/}
-                          {(activeTabIndex === 0 || activeTabIndex === 1 || activeTabIndex === 2) && (
+                          {(activeTabIndex === 0 ||
+                            activeTabIndex === 1 ||
+                            activeTabIndex === 2) && (
                             <Cell
                               style={{
                                 color: getColor(

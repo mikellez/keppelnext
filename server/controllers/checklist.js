@@ -204,9 +204,9 @@ const getOutstandingChecklistsQuery = (req) => {
   const role_id = req.user.role_id;
   let userRoleCond = "";
 
-  if(role_id === 4) {
-    userRoleCond = "AND (createdU.user_id = $1 OR assignU.user_id = $1)"
-  } 
+  if (role_id === 4) {
+    userRoleCond = "AND (createdU.user_id = $1 OR assignU.user_id = $1)";
+  }
 
   return (
     getAllChecklistQuery(req) +
@@ -283,10 +283,9 @@ const fetchAssignedChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(
-    getAssignedChecklistsQuery(req),
-    [req.user.id]
-  );
+  const totalRows = await global.db.query(getAssignedChecklistsQuery(req), [
+    req.user.id,
+  ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -320,15 +319,14 @@ const fetchPendingChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(
-    getPendingChecklistsQuery(req),
-    [req.user.id]
-  );
+  const totalRows = await global.db.query(getPendingChecklistsQuery(req), [
+    req.user.id,
+  ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
     getPendingChecklistsQuery(req) +
-    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : '');
+    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : "");
 
   try {
     const result = await global.db.query(query, [req.user.id]);
@@ -347,16 +345,15 @@ const fetchOutstandingChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(
-    getOutstandingChecklistsQuery(req),
-    [req.user.id]
-  );
+  const totalRows = await global.db.query(getOutstandingChecklistsQuery(req), [
+    req.user.id,
+  ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
     getOutstandingChecklistsQuery(req) +
-    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : '');
-    console.log(query)
+    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : "");
+  console.log(query);
 
   try {
     const result = await global.db.query(query, [req.user.id]);
@@ -375,15 +372,14 @@ const fetchCompletedChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(
-    getCompletedChecklistsQuery(req),
-    [req.user.id]
-  );
+  const totalRows = await global.db.query(getCompletedChecklistsQuery(req), [
+    req.user.id,
+  ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
     getCompletedChecklistsQuery(req) +
-    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : '');
+    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : "");
 
   try {
     const result = await global.db.query(query, [req.user.id]);
@@ -402,15 +398,14 @@ const fetchOverdueChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(
-    getOverdueChecklistsQuery(req),
-    [req.user.id]
-  );
+  const totalRows = await global.db.query(getOverdueChecklistsQuery(req), [
+    req.user.id,
+  ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
     getOverdueChecklistsQuery(req) +
-    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : '');
+    (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : "");
 
   try {
     const result = await global.db.query(query, [req.user.id]);
@@ -438,10 +433,9 @@ const fetchForReviewChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(
-    getForReviewChecklistsQuery(req),
-    [req.user.id]
-  );
+  const totalRows = await global.db.query(getForReviewChecklistsQuery(req), [
+    req.user.id,
+  ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -473,10 +467,9 @@ const fetchApprovedChecklists = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
-  const totalRows = await global.db.query(
-    getApprovedChecklistsQuery(req),
-    [req.user.id]
-  );
+  const totalRows = await global.db.query(getApprovedChecklistsQuery(req), [
+    req.user.id,
+  ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
 
   const query =
@@ -877,7 +870,7 @@ const completeChecklist = async (req, res, next) => {
         signoff: signoff_user_email,
         createdBy: creator_email,
         status: status,
-        overdue: overdue
+        overdue: overdue,
       },
       "",
       [creator_email]
@@ -1157,7 +1150,7 @@ const cancelChecklist = async (req, res, next) => {
         SET 
             status_id = 7,
             overdue_status = false,
-            history = concat(history,'${updatehistory}')
+            history = concat(history,'${updatehistory}'),
             activity_log = activity_log || $1
         WHERE 
             checklist_id = $2
@@ -1176,12 +1169,134 @@ const cancelChecklist = async (req, res, next) => {
   );
 };
 
+const requestCancelChecklist = async (req, res, next) => {
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const cancelledComments = ""; // todo add cancelled comment here
+
+  const updatehistory = `,Updated Record_REQUEST_CANCELLATION_${today}_${req.user.name}_${cancelledComments}`;
+  const activity_log = {
+    date: today,
+    name: req.user.name,
+    activity: "REQUEST_CANCELLATION",
+    activity_type: "Updated Record",
+    comments: cancelledComments,
+  };
+
+  const sql = `
+        UPDATE
+            keppel.checklist_master
+        SET 
+            status_id = 9,
+            overdue_status = false,
+            history = concat(history,'${updatehistory}'),
+            activity_log = activity_log || $1
+        WHERE 
+            checklist_id = $2
+    `;
+
+  global.db.query(
+    sql,
+    [JSON.stringify(activity_log), req.params.checklist_id],
+    (err) => {
+      if (err) {
+        // console.log(err);
+        return res
+          .status(500)
+          .json("Failure to update checklist request cancellation");
+      }
+      return res
+        .status(200)
+        .json("Checklist successfully request cancellation");
+    }
+  );
+};
+const approveCancelChecklist = async (req, res, next) => {
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const cancelledComments = ""; // todo add cancelled comment here
+
+  const updatehistory = `,Updated Record_APPROVE_CANCELLATION_${today}_${req.user.name}_${cancelledComments}`;
+  const activity_log = {
+    date: today,
+    name: req.user.name,
+    activity: "APPROVE_CANCELLATION",
+    activity_type: "Updated Record",
+    comments: cancelledComments,
+  };
+
+  const sql = `
+        UPDATE
+            keppel.checklist_master
+        SET 
+            status_id = 11,
+            overdue_status = false,
+            history = concat(history,'${updatehistory}'),
+            activity_log = activity_log || $1
+        WHERE 
+            checklist_id = $2
+    `;
+
+  global.db.query(
+    sql,
+    [JSON.stringify(activity_log), req.params.checklist_id],
+    (err) => {
+      if (err) {
+        // console.log(err);
+        return res
+          .status(500)
+          .json("Failure to update checklist approve cancellation");
+      }
+      return res
+        .status(200)
+        .json("Checklist successfully approve cancellation");
+    }
+  );
+};
+const rejectCancelChecklist = async (req, res, next) => {
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const cancelledComments = ""; // todo add cancelled comment here
+
+  const updatehistory = `,Updated Record_REJECT_CANCELLATION_${today}_${req.user.name}_${cancelledComments}`;
+  const activity_log = {
+    date: today,
+    name: req.user.name,
+    activity: "REJECT_CANCELLATION",
+    activity_type: "Updated Record",
+    comments: cancelledComments,
+  };
+
+  const sql = `
+        UPDATE
+            keppel.checklist_master
+        SET 
+            status_id = 11,
+            overdue_status = false,
+            history = concat(history,'${updatehistory}'),
+            activity_log = activity_log || $1
+        WHERE 
+            checklist_id = $2
+    `;
+
+  global.db.query(
+    sql,
+    [JSON.stringify(activity_log), req.params.checklist_id],
+    (err) => {
+      if (err) {
+        // console.log(err);
+        return res
+          .status(500)
+          .json("Failure to update checklist reject cancellation");
+      }
+      return res.status(200).json("Checklist successfully reject cancellation");
+    }
+  );
+};
+
 const reassignRequestChecklist = async (req, res, next) => {
   // Sets status of the checklist to "Reassignment Request" / status_id = 8
 
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
 
-  try{
+  try {
     const checklist_id = parseInt(req.params.checklist_id);
     const reassignReqComments = ""; // todo add reassign comment here
 
@@ -1212,17 +1327,26 @@ const reassignRequestChecklist = async (req, res, next) => {
       (err, result) => {
         if (err) {
           console.log(err);
-          return res.status(500).json("Failure to update checklist reassignment request");
+          return res
+            .status(500)
+            .json("Failure to update checklist reassignment request");
         }
         console.log(result.rows);
-        if (result.rowCount == 0){
-          return res.status(404).json("Checklist ID: " + checklist_id + " does not exist");
+        if (result.rowCount == 0) {
+          return res
+            .status(404)
+            .json("Checklist ID: " + checklist_id + " does not exist");
         }
-        return res.status(200).json("Reassignment Request for Checklist ID: " + checklist_id  +" Successfully Created");
+        return res
+          .status(200)
+          .json(
+            "Reassignment Request for Checklist ID: " +
+              checklist_id +
+              " Successfully Created"
+          );
       }
     );
-  }
-  catch(err){
+  } catch (err) {
     console.log(err);
     return res.status(403).json("Invalid Checklist ID:");
   }
@@ -1238,6 +1362,12 @@ function updateChecklist(updateType) {
       return rejectChecklist;
     case "cancel":
       return cancelChecklist;
+    case "requestCancel":
+      return requestCancelChecklist;
+    case "approveCancel":
+      return approveCancelChecklist;
+    case "rejectCancel":
+      return rejectCancelChecklist;
     case "reassign":
       return reassignRequestChecklist;
     default:
@@ -1417,5 +1547,5 @@ module.exports = {
   fetchOutstandingChecklists,
   fetchCompletedChecklists,
   editChecklistRecord,
-  fetchOverdueChecklists
+  fetchOverdueChecklists,
 };
