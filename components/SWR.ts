@@ -237,6 +237,7 @@ function useCurrentUser() {
     email: string;
     username: string;
     employee_id: string;
+    permissions: string[];
   }
 
   const userFetcher = (url: string) =>
@@ -247,10 +248,21 @@ function useCurrentUser() {
         throw new Error(e);
       });
 
-  return useSWR<CMMSCurrentUser, Error>("/api/user", userFetcher, {
+  const { data, error } = useSWR<CMMSCurrentUser, Error>("/api/user", userFetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
+
+  const userPermission = (permission: string) => {
+    if (!data) return false;
+    return data.permissions.includes(permission);
+  };
+
+  return {
+    data,
+    error,
+    userPermission
+  }
 }
 
 function useSystemAsset(system_id: number | null) {

@@ -216,7 +216,7 @@ export default function Request(props: RequestProps) {
   const currentDate = moment().format("YYYY-MM-DD");
   const filename = `${currentDate} Request History.csv`;
   const router = useRouter();
-  const { data } = useCurrentUser();
+  const { data, userPermission } = useCurrentUser();
 
   const switchColumns = (index: number) => {
     setReady(false);
@@ -600,9 +600,7 @@ export default function Request(props: RequestProps) {
                                     className={styles.editIcon}
                                     style={{
                                       display:
-                                        data?.role_id == Role.Admin ||
-                                        data?.role_id == Role.Manager ||
-                                        data?.role_id == Role.Engineer
+                                        userPermission('canAssignRequestTicket')
                                           ? "block"
                                           : "none",
                                       // visibility:
@@ -624,8 +622,7 @@ export default function Request(props: RequestProps) {
                                     className={styles.editIcon}
                                     style={{
                                       display:
-                                        data?.role_id == Role.Admin ||
-                                        data?.role_id == Role.Manager
+                                          userPermission('canManageRequestTicket')
                                           ? "block"
                                           : "none",
                                       // visibility: item.status_id === 3 ? "visible" : "hidden",
@@ -645,6 +642,13 @@ export default function Request(props: RequestProps) {
                                   item.status_id != 4 && (
                                     <div
                                       className={styles.editIcon}
+                                      style={{
+                                        display:
+                                            userPermission('canCreateCorrectiveRequestTicket')
+                                            ? "block"
+                                            : "none",
+                                        // visibility: item.status_id === 3 ? "visible" : "hidden",
+                                      }}
                                       onClick={() => {
                                         router.push(
                                           `/Request/CorrectiveRequest/${item.id}`
@@ -660,6 +664,13 @@ export default function Request(props: RequestProps) {
                                   )}
                                 <div
                                   className={styles.editIcon}
+                                  style={{
+                                    display:
+                                        userPermission('canViewRequestHistory')
+                                        ? "block"
+                                        : "none",
+                                    // visibility: item.status_id === 3 ? "visible" : "hidden",
+                                  }}
                                   onClick={() => {
                                     // console.log(item.status_id, item.associatedrequestid)
                                     setCurrentHistory(item.activity_log);
@@ -785,27 +796,32 @@ export default function Request(props: RequestProps) {
                                     <li
                                       className={styles.tableDropdownListItem}
                                     >
-                                      {(data?.role_id === Role.Admin ||
-                                        data?.role_id === Role.Manager ||
-                                        data?.role_id === Role.Engineer) &&
-                                      item.status_id === 3 ? (
-                                        <Link
-                                          href={`/Request/Manage/${item.id}`}
-                                        >
-                                          <strong>Manage</strong>
-                                        </Link>
-                                      ) : item.status_id === 2 ||
-                                        item.status_id === 5 ? (
-                                        <Link
-                                          href={`/Request/Complete/${item.id}`}
-                                        >
-                                          <strong>Complete</strong>
-                                        </Link>
-                                      ) : (
-                                        <Link href={`/Request/View/${item.id}`}>
-                                          <strong>View</strong>
-                                        </Link>
-                                      )}
+                                      {(() => {
+                                        try {
+                                          if ( userPermission('canManageRequestTicket') && item.status_id === 3) {
+                                            return (
+                                              <Link href={`/Request/Manage/${item.id}`}>
+                                                <strong>Manage</strong>
+                                              </Link>
+                                            );
+                                          } else if ( userPermission('canCompleteRequestTicket') && (item.status_id === 2 || item.status_id === 5)) {
+                                            return (
+                                              <Link href={`/Request/Complete/${item.id}`}>
+                                                <strong>Complete</strong>
+                                              </Link>
+                                            );
+                                          } else if( userPermission('canViewRequestTicket') ) {
+                                            return (
+                                              <Link href={`/Request/View/${item.id}`}>
+                                                <strong>View</strong>
+                                              </Link>
+                                            );
+                                          }
+                                        } catch (error) {
+                                          console.error('Error:', error);
+                                          return <div>Error: Unable to render content</div>;
+                                        }
+                                      })()}                                      
                                     </li>
                                   </ul>
                                 </td>

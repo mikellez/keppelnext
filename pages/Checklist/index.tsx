@@ -86,7 +86,7 @@ import PageButton from "../../components/PageButton";
 import styles from "../../styles/Request.module.scss";
 import { Role } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
-import { GetServerSidePropsContext } from "next";
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 import moment from "moment";
 import { useRouter } from "next/router";
@@ -648,3 +648,16 @@ export default function Checklist(props: ChecklistProps) {
     </ModuleMain>
   );
 }
+
+const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+
+  return {
+    props: {
+      user: context.req?.user
+    },
+  };
+};
+
+export { getServerSideProps };

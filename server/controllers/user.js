@@ -48,6 +48,13 @@ const addUser = async (req, res, next) => {
   //   console.log(req.body);
   var salt = bcrypt.genSaltSync(10);
   let hash = bcrypt.hashSync(req.body.password, salt);
+  const role = {
+    1: 'manager',
+    2: 'engineer',
+    3: 'specialist',
+    4: 'admin'
+  }
+
   q = `DO $$ 
   DECLARE
      new_user_id INTEGER;
@@ -77,6 +84,11 @@ const addUser = async (req, res, next) => {
     (user_id,role_parent_id)
     VALUES
     (new_user_id,'${req.body.roleType}');
+
+    Insert INTO keppel.auth_assignment
+    (user_id,item_name)
+    VALUES
+    (new_user_id,'${role[req.body.roleType]}');
      `;
 
   plants = ``;

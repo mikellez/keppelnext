@@ -139,6 +139,7 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
     username: req.user.username,
     first_name: req.user.first_name,
     last_name: req.user.last_name,
+    permissions: req.user.permissions
   });
 });
 
@@ -201,6 +202,7 @@ router.get(
   controllers.request.fetchAssignedRequests
 );
 
+
 /**
  * @api {get} /request/assigned Get Overdue Requests
  * @apiDescription Gets all requests with status of `OVERDUE`.
@@ -217,6 +219,7 @@ router.get(
   checkIfLoggedInAPI,
   controllers.request.fetchOverdueRequests
 );
+
 
 /**
  * @api {get} /request/review Get For Review Requests
@@ -1045,33 +1048,7 @@ router.patch(
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("reject")
 );
-router.patch(
-  "/checklist/cancel/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("cancel")
-);
-router.patch(
-  "/checklist/reassign/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("reassign")
-);
 
-router.patch(
-  "/checklist/requestCancel/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("requestCancel")
-);
-
-router.patch(
-  "/checklist/approveCancel/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("approveCancel")
-);
-router.patch(
-  "/checklist/rejectCancel/:checklist_id",
-  checkIfLoggedInAPI,
-  controllers.checklist.updateChecklist("rejectCancel")
-);
 /**
  * @api {get} /checklist/pdf/:checklist_id Get a specific Checklist Record PDF
  * @apiDescription Get Checklist Record PDF

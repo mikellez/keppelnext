@@ -44,20 +44,51 @@ module.exports = (server) => {
     });
 
     passport.deserializeUser((id, cb) => {
-        global.db.query(`SELECT 
-                user_name,
-                user_email,
-                employee_id,
-                user_id,
-                first_name,
-                last_name,
-                role_id,
-                role_name,
-                STRING_TO_ARRAY(allocatedplantids, ', ') as allocated_plants
-            FROM 
-                keppel.user_access 
-            WHERE 
-                user_id = $1::integer`, [id], (err, result) => {
+        global.db.query(`
+            WITH RECURSIVE EmployeeHierarchy AS (
+                SELECT 
+                            ua.user_name,
+                            ua.user_email,
+                            ua.employee_id,
+                            ua.user_id,
+                            ua.first_name,
+                            ua.last_name,
+                            ua.role_id,
+                            ua.role_name,
+                            STRING_TO_ARRAY(ua.allocatedplantids, ', ') as allocated_plants,
+                            aic.parent,
+                            aic.child
+                        FROM 
+                            keppel.user_access ua
+                        JOIN 
+                            keppel.auth_assignment aa on aa.user_id = ua.user_id
+                        JOIN 
+                            keppel.auth_item_child aic on aic.parent = aa.item_name
+                        WHERE
+                            ua.user_id = $1 
+                
+                UNION ALL
+                
+                    SELECT 
+                    ''::character varying(100) as user_name,
+                    ''::character varying(100) as user_email,
+                    ''::character varying(100) as employee_id,
+                    0 as user_id,
+                    ''::character varying(100) as first_name,
+                    ''::character varying(100) as last_name,
+                    0 as role_id,
+                    ''::character varying(225) as role_name,
+                    STRING_TO_ARRAY('[]', ', ') as allocated_plants,
+                    aic.parent,
+                    aic.child
+                FROM
+                    keppel.auth_item_child aic
+                JOIN
+                    EmployeeHierarchy eh on aic.parent = eh.child 
+                        
+            )
+            SELECT * FROM EmployeeHierarchy; 
+        `, [id], (err, result) => {
             if (err) return cb(err);
             
             const data = result.rows[0];
@@ -71,10 +102,11 @@ module.exports = (server) => {
                 email: data.user_email,
                 username: data.user_name,
                 first_name: data.first_name,
-                last_name: data.last_name
+                last_name: data.last_name,
+                permissions: result.rows.map(row => row.child)
 
             };
-            // console.log(userInfo)
+
             cb(null, userInfo);
         })
     })
