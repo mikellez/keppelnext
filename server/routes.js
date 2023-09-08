@@ -139,6 +139,7 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
     username: req.user.username,
     first_name: req.user.first_name,
     last_name: req.user.last_name,
+    permissions: req.user.permissions
   });
 });
 
@@ -201,6 +202,7 @@ router.get(
   controllers.request.fetchAssignedRequests
 );
 
+
 /**
  * @api {get} /request/assigned Get Overdue Requests
  * @apiDescription Gets all requests with status of `OVERDUE`.
@@ -217,6 +219,7 @@ router.get(
   checkIfLoggedInAPI,
   controllers.request.fetchOverdueRequests
 );
+
 
 /**
  * @api {get} /request/review Get For Review Requests

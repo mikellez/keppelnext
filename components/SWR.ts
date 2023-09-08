@@ -84,7 +84,7 @@ function useRequestFilter(
       });
 
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
-    `/api/request/${props.viewType}/${props?.plant || 0}/${
+    `/api/request/${props.viewType ?? 'pending'}/${props?.plant || 0}/${
       props.datetype || "all"
     }/${props?.date || "all"}?page=${page}&expand=${fields.join(",")}`,
     requestFetcher,
@@ -191,7 +191,7 @@ function useChecklistFilter(
       });
 
   return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
-    `/api/checklist/${props.viewType}/${props?.plant || 0}/${
+    `/api/checklist/${props.viewType ?? 'pending'}/${props?.plant || 0}/${
       props?.datetype || "all"
     }/${props?.date || "all"}?page=${page}&expand=${fields.join(",")}`,
     checklistFetcher,
@@ -237,6 +237,7 @@ function useCurrentUser() {
     email: string;
     username: string;
     employee_id: string;
+    permissions: string[];
   }
 
   const userFetcher = (url: string) =>
@@ -247,10 +248,21 @@ function useCurrentUser() {
         throw new Error(e);
       });
 
-  return useSWR<CMMSCurrentUser, Error>("/api/user", userFetcher, {
+  const { data, error } = useSWR<CMMSCurrentUser, Error>("/api/user", userFetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
+
+  const userPermission = (permission: string) => {
+    if (!data) return false;
+    return data.permissions.includes(permission);
+  };
+
+  return {
+    data,
+    error,
+    userPermission
+  }
 }
 
 function useSystemAsset(system_id: number | null) {

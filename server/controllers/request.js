@@ -190,7 +190,7 @@ const fetchOutstandingRequests = async (req, res, next) => {
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
-    "AND (sc.status_id = 2 or sc.status_id = 3)", //PENDING
+    "AND (sc.status_id = 2 or sc.status_id = 3 or sc.status_id = 5)", //PENDING
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
@@ -210,7 +210,7 @@ const fetchCompletedRequests = async (req, res, next) => {
   const search = req.query.search || "";
 
   const { sql, totalPages } = await fetchRequestQuery(
-    "AND sc.status_id = 4", 
+    "AND (sc.status_id = 4 or sc.status_id = 6)", 
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
