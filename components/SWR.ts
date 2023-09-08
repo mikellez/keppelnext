@@ -84,7 +84,7 @@ function useRequestFilter(
       });
 
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
-    `/api/request/${props.viewType}/${props?.plant || 0}/${
+    `/api/request/${props.viewType ?? 'pending'}/${props?.plant || 0}/${
       props.datetype || "all"
     }/${props?.date || "all"}?page=${page}&expand=${fields.join(",")}`,
     requestFetcher,
@@ -191,7 +191,7 @@ function useChecklistFilter(
       });
 
   return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
-    `/api/checklist/${props.viewType}/${props?.plant || 0}/${
+    `/api/checklist/${props.viewType ?? 'pending'}/${props?.plant || 0}/${
       props?.datetype || "all"
     }/${props?.date || "all"}?page=${page}&expand=${fields.join(",")}`,
     checklistFetcher,
