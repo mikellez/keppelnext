@@ -89,6 +89,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
 
   const rejectionComments = useCallback((): ReactNode | null => {
     const { activity_log, status_id } = props.checklist as CMMSChecklist;
+    // console.log(props.checklist);
     const rejectionActivity = activity_log
       .reverse()
       .find((activity) => activity["activity_type"] == "REJECTED");
