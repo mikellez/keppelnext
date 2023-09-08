@@ -3,6 +3,7 @@ import { ReactNode, useCallback } from "react";
 import { ChecklistPageProps } from "../../pages/Checklist/Form";
 import styles from "../../styles/Checklist.module.scss";
 import { CMMSChecklist } from "../../types/common/interfaces";
+import { Checklist_Status } from "../../types/common/enums";
 
 const ChecklistDetails = (props: ChecklistPageProps) => {
   // console.log(props.checklist);
@@ -25,7 +26,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
   const actionDateElement = useCallback((): ReactNode | null => {
     const { activity_log, status_id } = props.checklist as CMMSChecklist;
     if (!Array.isArray(activity_log)) return;
-    if (status_id == 4) {
+    if (status_id == Checklist_Status.Work_Done) {
       const completionLog = activity_log
         .reverse()
         .find((activity) => activity["activity_type"] == "WORK DONE");
@@ -39,7 +40,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
           </p>
         </div>
       );
-    } else if (status_id == 5) {
+    } else if (status_id == Checklist_Status.Approved) {
       const completionLog = activity_log
         .reverse()
         .find((activity) => activity["activity_type"] == "WORK DONE");
@@ -66,7 +67,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
           </div>
         </div>
       );
-    } else if (status_id == 3 || status_id == 6) {
+    } else if (status_id == Checklist_Status.Reassigned || status_id == Checklist_Status.Rejected) {
       const rejectedLog = activity_log
         .reverse()
         .find((activity) => activity["activity_type"] == "REJECTED");
@@ -155,6 +156,18 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
             {props.checklist?.overdue}
           </p>
         </div>
+        {props.checklist?.status_id === Checklist_Status.Reassignment_Request && (<div>
+          <p className={styles.checklistDetailsHeading}>Request Remarks</p>
+          <p className={styles.checklistDetailsContent}>
+            {props.checklist?.completeremarks_req}
+          </p>
+        </div>)}
+        {props.checklist?.status_id === Checklist_Status.Assigned && props.checklist?.completeremarks_req && (<div>
+          <p className={styles.checklistDetailsHeading}>Request Status Remarks</p>
+          <p className={styles.checklistDetailsContent}>
+            {props.checklist?.completeremarks_req}
+          </p>
+        </div>)}
         {actionDateElement()}
         {rejectionComments()}
       </div>

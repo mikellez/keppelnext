@@ -144,6 +144,7 @@ const getAllChecklistQuery = (req) => {
     status: "st.status",
     overdue: "cl.overdue",
     overdue_status: "cl.overdue_status",
+    completeremarks_req: "cl.completeremarks_req",
   };
 
   if (expand) {
@@ -1392,9 +1393,8 @@ const approveReassignChecklist = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   try {
     const checklist_id = parseInt(req.params.checklist_id);
-    const reassignedUserId = parseInt(req.body.assigned_user_id);  // todo get user to reassign to
-    const approvalComments = req.body.completeremarks_req; //todo add approval comments here
-
+    const reassignedUserId = parseInt(req.body.assigned_user_id);  
+    const approvalComments = req.body.remarks; 
     const updatehistory = `,Updated Record_APPROVE_REASSIGNMENT_REQUEST_${today}_${req.user.name}_${approvalComments}`;
     const activity_log = {
       date: today,
@@ -1447,7 +1447,7 @@ const rejectReassignChecklist = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   try{
     const checklist_id = parseInt(req.params.checklist_id);
-    const rejectionComments = req.body.completeremarks_req; // todo add rejected comment here
+    const rejectionComments = req.body.remarks; // todo add rejected comment here
     const updatehistory = `,Updated Record_REJECT_REASSIGNMENT_REQUEST_${today}_${req.user.name}_${rejectionComments}`;
     const activity_log = {
       date: today,
