@@ -15,6 +15,7 @@ import { HiBan, HiOutlineDownload, HiUsers } from "react-icons/hi";
 import instance from "../../../types/common/axios.config";
 
 import { useRouter } from "next/router";
+import { Role, Checklist_Status } from "../../../types/common/enums";
 import styles from "../../../styles/Checklist.module.scss";
 import { useCurrentUser } from "../../../components/SWR";
 import ModuleSimplePopup, {
@@ -80,12 +81,12 @@ const sendReassignReqChecklist = async (remarks: string, id: number) => {
 const ManageChecklistPage = (props: ChecklistPageProps) => {
   const [remarks, setRemarks] = useState<string>("");
   const [cancelModal, setCancelModal] = useState<boolean>(false);
-  const [reassignModal, setReassignModal] = useState<boolean>(false);
+  const [reassignReqModal, setReassignReqModal] = useState<boolean>(false);
   const router = useRouter();
   const user = useCurrentUser();
 
   useEffect(() => {
-    if (props.checklist?.status_id == 5) {
+    if (props.checklist?.status_id == Checklist_Status.Approved) {
       setRemarks(props.checklist?.activity_log.at(-1)!.remarks as string);
     }
   }, [props.checklist]);
@@ -109,14 +110,16 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
         >
           <HiBan size={24} />
         </TooltipBtn>
+        {/*only show if Status ID is assigned */}
+        {props.checklist?.status_id === Checklist_Status.Assigned && (
         <TooltipBtn
           text="Request to Reassign"
           onClick={() => {
-            setReassignModal(true);
+            setReassignReqModal(true);
           }}
         >
           <HiUsers size={24} />
-        </TooltipBtn>
+        </TooltipBtn>)}
         <button
           className={"btn btn-secondary"}
           type="button"
@@ -147,7 +150,7 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
           <TooltipBtn
             toolTip={false}
             onClick={() => {
-              user.data?.role_id == 4
+              user.data?.role_id == Role.Specialist
                 ? sendRequestCancelChecklist(
                     remarks,
                     props.checklist!.checklist_id
@@ -163,8 +166,8 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
         inputVar={{ setInput: setRemarks, value: remarks, title: "Remarks" }}
       />
       <ModuleSimplePopup
-        modalOpenState={reassignModal}
-        setModalOpenState={setReassignModal}
+        modalOpenState={reassignReqModal}
+        setModalOpenState={setReassignReqModal}
         title="Confirm Request for Reassignment?"
         text="Are you sure? This action cannot be undone."
         icon={SimpleIcon.Info}

@@ -42,7 +42,7 @@ import { downloadChecklistPDF } from "../View/[id]";
 import { Action } from "../../../types/common/enums";
 import { useCurrentUser } from "../../../components/SWR";
 import LoadingHourglass from "../../../components/LoadingHourglass";
-import { Role } from "../../../types/common/enums";
+import { Role, Checklist_Status } from "../../../types/common/enums";
 
 const manageChecklist = async (id: number, action: string, remarks: string) => {
   try {
@@ -188,7 +188,8 @@ const ManageChecklistPage = (props: ChecklistPageProps) => {
 };
 
 export default ManageChecklistPage;
+// Essentially the allowed statuses that can access the Manage Checklist Page
 const getServerSideProps: GetServerSideProps =
-  createChecklistGetServerSideProps([4]);
+  createChecklistGetServerSideProps([Checklist_Status.Work_Done,Checklist_Status.Reassignment_Request]);
 
 export { getServerSideProps };

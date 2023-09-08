@@ -84,7 +84,7 @@ import "rc-tooltip/assets/bootstrap_white.css";
 
 import PageButton from "../../components/PageButton";
 import styles from "../../styles/Request.module.scss";
-import { Role } from "../../types/common/enums";
+import { Role, Checklist_Status } from "../../types/common/enums";
 import Pagination from "../../components/Pagination";
 import { GetServerSidePropsContext } from "next";
 import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
@@ -551,17 +551,17 @@ export default function Checklist(props: ChecklistProps) {
                             {(user.data!.role_id === Role.Admin ||
                               user.data!.role_id === Role.Manager ||
                               user.data!.role_id === Role.Engineer) &&
-                            item.status_id === 4 ? (
+                            (item.status_id === Checklist_Status.Work_Done || item.status_id === Checklist_Status.Reassignment_Request)? (
                               <Link href={`/Checklist/Manage/${item.id}`}>
                                 <AiOutlineFileProtect
                                   size={22}
                                   title={"Manage"}
                                 />
                               </Link>
-                            ) : item.status_id === 2 ||
-                              item.status_id === 3 ||
-                              item.status_id === 6 ||
-                              item.status_id === 10 ? (
+                            ) : item.status_id === Checklist_Status.Assigned ||
+                              item.status_id === Checklist_Status.Reassigned ||
+                              item.status_id === Checklist_Status.Rejected ||
+                              item.status_id === Checklist_Status.Rejected_Cancellation ? (
                               <>
                                 <Link href={`/Checklist/Complete/${item.id}`}>
                                   <AiOutlineFileDone
@@ -575,14 +575,14 @@ export default function Checklist(props: ChecklistProps) {
                                   <AiOutlineEdit size={22} title={"Edit"} />
                                 </Link>
                               </>
-                            ) : item.status_id === 1 &&
+                            ) : item.status_id === Checklist_Status.Pending &&
                               user.data?.role_id !== Role.Specialist ? (
                               <Link
                                 href={`/Checklist/Form/?action=Edit&id=${item.id}`}
                               >
                                 <AiOutlineEdit size={22} title={"Assign"} />
                               </Link>
-                            ) : item.status_id === 9 ? (
+                            ) : item.status_id === Checklist_Status.Pending_Cancellation ? (
                               <Link
                                 href={`/Checklist/Cancellation/?id=${item.id}`}
                               >
