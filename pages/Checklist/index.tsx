@@ -557,7 +557,8 @@ export default function Checklist(props: ChecklistProps) {
                             ) : item.status_id === Checklist_Status.Assigned ||
                               item.status_id === Checklist_Status.Reassigned ||
                               item.status_id === Checklist_Status.Rejected ||
-                              item.status_id === Checklist_Status.Rejected_Cancellation ? (
+                              item.status_id ===
+                                Checklist_Status.Rejected_Cancellation ? (
                               <>
                                 <Link href={`/Checklist/Complete/${item.id}`}>
                                   <AiOutlineFileDone
@@ -578,11 +579,16 @@ export default function Checklist(props: ChecklistProps) {
                               >
                                 <AiOutlineEdit size={22} title={"Assign"} />
                               </Link>
-                            ) : item.status_id === Checklist_Status.Pending_Cancellation ? (
+                            ) : item.status_id ===
+                                Checklist_Status.Pending_Cancellation &&
+                              user.data?.role_id !== Role.Specialist ? (
                               <Link
                                 href={`/Checklist/Cancellation/?id=${item.id}`}
                               >
-                                <HiBan size={22} title={"Cancel"} />
+                                <AiOutlineFileProtect
+                                  size={22}
+                                  title={"Manage"}
+                                />
                               </Link>
                             ) : (
                               <div></div>
