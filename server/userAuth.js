@@ -92,6 +92,11 @@ module.exports = (server) => {
             if (err) return cb(err);
             
             const data = result.rows[0];
+            
+            // Need to add the parent itself to the permissions array
+            let permissionsArray = result.rows.map(row => row.child)
+            permissionsArray.unshift(data.parent);
+
             const userInfo = {
                 employee_id: data.employee_id,
                 id: data.user_id,
@@ -103,8 +108,7 @@ module.exports = (server) => {
                 username: data.user_name,
                 first_name: data.first_name,
                 last_name: data.last_name,
-                permissions: result.rows.map(row => row.child)
-
+                permissions: permissionsArray
             };
 
             cb(null, userInfo);
