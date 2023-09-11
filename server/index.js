@@ -86,13 +86,12 @@ app.prepare().then(() => {
   const restrictManager = ["/Dashboard/Engineer", "/Dashboard/Specialist"];
   function accessControl(req, res, next) {
     if (req.user) {
-      if (
-        req.user.role_id == 3 &&
+      if (req.user.permissions.includes("engineer") &&
         (restrictEng.includes(req.path) || req.path.startsWith("/User/Edit"))
       ) {
         res.redirect("/403");
       } else if (
-        req.user.role_id == 4 &&
+        req.user.permissions.includes("specialist") &&
         (restrictOps.includes(req.path) ||
           req.path.startsWith("/Schedule/Timeline") ||
           req.path.startsWith("/Asset/Edit") ||
@@ -102,7 +101,7 @@ app.prepare().then(() => {
           req.path.startsWith("/User/Edit"))
       ) {
         res.redirect("/403");
-      } else if ((req.user.role_id = 2 && restrictManager.includes(req.path))) {
+      } else if ((req.user.permissions.includes("manager") && restrictManager.includes(req.path))) {
         res.redirect("/403");
       }
     }

@@ -2,20 +2,20 @@ const { checklist } = require(".");
 const db = require("../../db");
 
 // Dashboard path
-function homepage(role_id) {
-    switch (role_id) {
-        case 1: 
-        case 2:
+function homepage(permissions) {
+    switch (permissions) {
+        case "admin": 
+        case "manager":
             return "/Dashboard/Manager";
-        case 3: 
+        case "engineer": 
             return "/Dashboard/Engineer";
-        case 4:
+        case "specialist":
             return "/Dashboard/Specialist";
     }
 } 
 
 const getDashboardPath = async (req, res, next) => {
-    res.status(200).json({homepage: homepage(req.user.role_id)});
+    res.status(200).json({homepage: homepage(req.user.permissions)});
 };
 
 module.exports = { 
