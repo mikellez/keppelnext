@@ -153,7 +153,7 @@ export default function Checklist(props: ChecklistProps) {
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const [isReady, setReady] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const user = useCurrentUser();
+  const { userPermission } = useCurrentUser();
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [history, setHistory] = useState<
@@ -289,9 +289,7 @@ export default function Checklist(props: ChecklistProps) {
             setChecklistItems([]);
           }}
         />
-        {(user.data?.role_id === Role.Admin ||
-          user.data?.role_id === Role.Manager ||
-          user.data?.role_id === Role.Engineer) && (
+        {userPermission('canCreateChecklist') && (
           <Link href="/Checklist/Form?action=New">
             <TooltipBtn text="New Checklist">
               <BsFileEarmarkPlus size={20} />
@@ -548,9 +546,7 @@ export default function Checklist(props: ChecklistProps) {
                             </Tooltip>
                           </Cell>
                           <Cell>
-                            {(user.data!.role_id === Role.Admin ||
-                              user.data!.role_id === Role.Manager ||
-                              user.data!.role_id === Role.Engineer) &&
+                            { userPermission('canManageChecklist') &&
                             (item.status_id === Checklist_Status.Work_Done || item.status_id === Checklist_Status.Reassignment_Request)? (
                               <Link href={`/Checklist/Manage/${item.id}`}>
                                 <AiOutlineFileProtect
@@ -575,8 +571,8 @@ export default function Checklist(props: ChecklistProps) {
                                   <AiOutlineEdit size={22} title={"Edit"} />
                                 </Link>
                               </>
-                            ) : item.status_id === Checklist_Status.Pending &&
-                              user.data?.role_id !== Role.Specialist ? (
+                            ) : userPermission('canAssignChecklist') && item.status_id === Checklist_Status.Pending 
+                               ? (
                               <Link
                                 href={`/Checklist/Form/?action=Edit&id=${item.id}`}
                               >
@@ -648,16 +644,3 @@ export default function Checklist(props: ChecklistProps) {
     </ModuleMain>
   );
 }
-
-const getServerSideProps: GetServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-
-  return {
-    props: {
-      user: context.req?.user
-    },
-  };
-};
-
-export { getServerSideProps };
