@@ -552,30 +552,59 @@ export default function DashboardContent({ permissions }: { permissions: string[
 
   useEffect(() => {
     const { datetype, date } = pickerwithtype;
+    if(data) {
+      if (!userPermission(PermissionsRoles.manager)) {
+        // engineer, specialist
+        getPlants("/api/getUserPlants").then((result) => {
+          if (result) {
+            setPlant(result[0].plant_id);
+            fetchRequests();
+            fetchChecklists();
+            fetchCOPs();
+            fetchFeedbacks();
+            fetchLicenses();
+          }
+        });
 
-    if (userPermission(PermissionsRoles.engineer) || userPermission(PermissionsRoles.specialist)) {
-      // engineer, specialist
-      getPlants("/api/getUserPlants").then((result) => {
-        if (result) {
-          setPlant(result[0].plant_id);
-          fetchRequests();
-          fetchChecklists();
-          fetchCOPs();
-          fetchFeedbacks();
-          fetchLicenses();
+        // Those below engineer have no access (aka specialists and below)
+        if (!userPermission(PermissionsRoles.engineer)) {
+          setShowTotalContainer(false);
         }
-      });
-
-      if (userPermission(PermissionsRoles.specialist)) {
-        setShowTotalContainer(false);
+      } else {
+        fetchRequests();
+        fetchChecklists();
+        fetchCOPs();
+        fetchFeedbacks();
+        fetchLicenses();
       }
-    } else {
-      fetchRequests();
-      fetchChecklists();
-      fetchCOPs();
-      fetchFeedbacks();
-      fetchLicenses();
     }
+    else{
+      if (!permissions.includes(PermissionsRoles.manager)) {
+        // engineer, specialist
+        getPlants("/api/getUserPlants").then((result) => {
+          if (result) {
+            setPlant(result[0].plant_id);
+            fetchRequests();
+            fetchChecklists();
+            fetchCOPs();
+            fetchFeedbacks();
+            fetchLicenses();
+          }
+        });
+
+        // Those below engineer have no access (aka specialists and below)
+        if (!permissions.includes(PermissionsRoles.engineer)) {
+          setShowTotalContainer(false);
+        }
+      } else {
+        fetchRequests();
+        fetchChecklists();
+        fetchCOPs();
+        fetchFeedbacks();
+        fetchLicenses();
+      }
+    }
+    
   }, [plant, field, pickerwithtype, active, expiredLicenseInDays]);
 
   // useEffect(() => {
@@ -642,9 +671,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
     totalLicenseExpiredIn90 
   } = license;
 
-  const access = userPermission(PermissionsRoles.admin) 
-  || userPermission(PermissionsRoles.manager) 
-  || userPermission(PermissionsRoles.engineer);
+  const access = userPermission(PermissionsRoles.engineer);
   //console.log(access)
 
   return (
@@ -662,7 +689,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
           onChange={handleDateChange}
         />
 
-        {(userPermission(PermissionsRoles.engineer) || (userPermission(PermissionsRoles.specialist))) ? (
+        {!(userPermission(PermissionsRoles.manager)) ? (
           <PlantSelect
             onChange={(e) => setPlant(parseInt(e.target.value))}
             accessControl
