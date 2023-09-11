@@ -551,7 +551,9 @@ export default function Checklist(props: ChecklistProps) {
                             {(user.data!.role_id === Role.Admin ||
                               user.data!.role_id === Role.Manager ||
                               user.data!.role_id === Role.Engineer) &&
-                            (item.status_id === Checklist_Status.Work_Done || item.status_id === Checklist_Status.Reassignment_Request)? (
+                            (item.status_id === Checklist_Status.Work_Done ||
+                              item.status_id ===
+                                Checklist_Status.Reassignment_Request) ? (
                               <Link href={`/Checklist/Manage/${item.id}`}>
                                 <AiOutlineFileProtect
                                   size={22}
@@ -561,7 +563,8 @@ export default function Checklist(props: ChecklistProps) {
                             ) : item.status_id === Checklist_Status.Assigned ||
                               item.status_id === Checklist_Status.Reassigned ||
                               item.status_id === Checklist_Status.Rejected ||
-                              item.status_id === Checklist_Status.Rejected_Cancellation ? (
+                              item.status_id ===
+                                Checklist_Status.Rejected_Cancellation ? (
                               <>
                                 <Link href={`/Checklist/Complete/${item.id}`}>
                                   <AiOutlineFileDone
@@ -582,11 +585,15 @@ export default function Checklist(props: ChecklistProps) {
                               >
                                 <AiOutlineEdit size={22} title={"Assign"} />
                               </Link>
-                            ) : item.status_id === Checklist_Status.Pending_Cancellation ? (
+                            ) : item.status_id ===
+                              Checklist_Status.Pending_Cancellation ? (
                               <Link
                                 href={`/Checklist/Cancellation/?id=${item.id}`}
                               >
-                                <HiBan size={22} title={"Cancel"} />
+                                <AiOutlineFileProtect
+                                  size={22}
+                                  title={"Manage"}
+                                />
                               </Link>
                             ) : (
                               <div></div>
@@ -652,10 +659,9 @@ export default function Checklist(props: ChecklistProps) {
 const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-
   return {
     props: {
-      user: context.req?.user
+      user: context.req?.user,
     },
   };
 };
