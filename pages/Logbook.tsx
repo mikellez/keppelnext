@@ -65,6 +65,7 @@ const Logbook = ({
   }>({ first: null, second: null });
 
   const user = useCurrentUser();
+  const { userPermission } = useCurrentUser();
 
   const theme = useTheme([
     getTheme(),
@@ -282,11 +283,11 @@ const Logbook = ({
                 style={{ resize: "none", overflow: "auto", width: "100%" }}
               />
             </div>
-            <div className="d-flex justify-content-end">
+            { userPermission('canCreateLogbookEntry') && <div className="d-flex justify-content-end">
               <button type="submit" className="ms-auto btn btn-primary">
                 Log Entry
               </button>
-            </div>
+            </div> }
           </form>
 
           <ModuleSimplePopup

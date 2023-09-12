@@ -27,7 +27,7 @@ export default function NavBar() {
   const [navDisplay, setNavDisplay] = useState<boolean>(false);
   const [isTransitioning, setTransitioning] = useState<boolean>(false);
 
-  const { data, error } = useCurrentUser();
+  const { data, error, userPermission } = useCurrentUser();
 
   const router = useRouter();
 
@@ -107,16 +107,16 @@ export default function NavBar() {
               path="/Dashboard"
               icon={<AiOutlineDashboard size={21} />}
             />
-            <NavLink
+            { userPermission('canViewRequestTicket') && <NavLink
               name="Request"
               path="/Request"
               icon={<AiOutlinePhone size={21} />}
-            />
-            <NavLink
+            />}
+            { userPermission('canViewAsset') && <NavLink
               name="Asset"
               path="/Asset"
               icon={<BsHouseDoor size={21} />}
-            />
+            />}
             <NavLink
               name="Change of Parts"
               path="/ChangeOfParts"
@@ -152,26 +152,26 @@ export default function NavBar() {
                 View Pending Schedules
               </NavDropdownLink>)}
             </NavDropdown>
-            <NavLink
+            { userPermission('canViewChecklist') && <NavLink
               name="Checklist"
               path="/Checklist"
               icon={<TbChecklist size={21} />}
-            />
-            <NavLink
+            />}
+            { userPermission('canViewLogbookEntry') && <NavLink
               name="E-Logbook"
               path="/Logbook"
               icon={<VscBook size={21} />}
-            />
+            />}
             <NavLink
               name="Generate QR Codes"
               path="/QRCode"
               icon={<AiOutlineQrcode size={21} />}
             />
-            <NavLink
+            { userPermission('canViewFeedback') && <NavLink
               name="Feedback"
               path="/Feedback"
               icon={<AiOutlineForm size={21} />}
-            />
+            />}
             <NavLink
               name="License"
               path="/License"

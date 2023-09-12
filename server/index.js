@@ -84,9 +84,44 @@ app.prepare().then(() => {
     "/User/Add",
   ];
   const restrictManager = ["/Dashboard/Engineer", "/Dashboard/Specialist"];
+
   function accessControl(req, res, next) {
+
+    const paths = [
+      // Request
+      { path: "/Request/View", permission: "canViewRequestTicket" },
+      { path: "/Request/New", permission: "canCreateRequestTicket" },
+      { path: "/Request/Assign", permission: "canAssignRequestTicket" },
+      { path: "/Request/Manage", permission: "canManageRequestTicket" },
+      { path: "/Request/CorrectiveRequest", permission: "canCreateCorrectiveRequestTicket" },
+      { path: "/Request/Complete", permission: "canCompleteRequestTicket" },
+      // Checklist
+      { path: "/Checklist/View", permission: "canViewChecklist" },
+      { path: "/Checklist/Manage", permission: "canManageChecklist" },
+      { path: "/Checklist/Form", permission: "canAssignChecklist" },
+      { path: "/Checklist/Complete", permission: "canCompleteChecklist" },
+      // Asset
+      { path: "/Asset/New", permission: "canCreateAsset" },
+      { path: "/Asset/Edit", permission: "canEditAsset" },
+      { path: "/Asset/Details", permission: "canViewAsset" },
+      //Logbook
+      { path: "/Logbook", permission: "canViewLogbook" },
+      //Feedback
+      { path: "/Feedback", permission: "canViewFeedback" },
+      { path: "/Feedback/View", permission: "canViewFeedback" },
+      { path: "/Feedback/Assign", permission: "canAssignFeedback"}
+
+    ];
+
     if (req.user) {
-      if (
+      for (const path of paths) {
+        if (req.path.startsWith(path.path)) {
+          if (!req.user.permissions[path.permission]) {
+            return res.redirect("/403");
+          }
+        }
+      }
+      /*if (
         req.user.role_id == 3 &&
         (restrictEng.includes(req.path) || req.path.startsWith("/User/Edit"))
       ) {
@@ -104,7 +139,7 @@ app.prepare().then(() => {
         res.redirect("/403");
       } else if ((req.user.role_id = 2 && restrictManager.includes(req.path))) {
         res.redirect("/403");
-      }
+      }*/
     }
     next();
   }

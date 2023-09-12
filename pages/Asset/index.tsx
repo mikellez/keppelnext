@@ -63,7 +63,7 @@ const getAssets = async () => {
 };
 
 const Asset = () => {
-    const user = useCurrentUser();
+    const { userPermission } = useCurrentUser();
     const [rowData, setRowData] = useState(); // Set rowData to Array of Objects, one Object per Row
     // Store gridApi as a state, this is very useful
     const [gridApi, setGridApi] = useState<GridApi>();
@@ -273,7 +273,7 @@ const Asset = () => {
                     />
                     <AiOutlineSearch size={20} color="#3C4048" />
                 </div>
-                {(user.data?.role_id === Role.Admin || user.data?.role_id === Role.Engineer || user.data?.role_id == Role.Manager) &&
+                {userPermission('canCreateAsset') &&
                     <Link href="/Asset/New">
                         <TooltipBtn text="Create new asset">
                             <RiFileAddLine size={20} />

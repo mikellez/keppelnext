@@ -43,6 +43,8 @@ const getAsset = async (id: number) => {
 };
 
 export default function EditAsset(props: EditAssetProps) {
+  const { userPermission } = useCurrentUser();
+
   const [assetDetail, setAssetDetail] = useState<CMMSAssetDetails>(
     {} as CMMSAssetDetails
   );
@@ -644,9 +646,9 @@ export default function EditAsset(props: EditAssetProps) {
         />
       </ModuleContent>
       <ModuleFooter>
-        <button className="btn btn-primary" onClick={handledeleteModal}>
+        { userPermission('canDeleteAsset') && <button className="btn btn-primary" onClick={handledeleteModal}>
           Delete
-        </button>
+        </button>}
         <Link href={{ pathname: "/Asset/Details/[id]", query: { id: psa_id } }}>
           <button
             className="btn"

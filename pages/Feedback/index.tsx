@@ -114,6 +114,7 @@ export default function Feedback(props: FeedbackPageProps) {
     props?.filter ? props?.activeTabIndex : 0
   );
   const user = useCurrentUser();
+  const { userPermission } = useCurrentUser();
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [history, setHistory] = useState<
@@ -319,9 +320,7 @@ export default function Feedback(props: FeedbackPageProps) {
                                   />
                                 </Link>
                               </>
-                            ) : (user.data!.role_id === Role.Admin ||
-                                user.data!.role_id === Role.Manager ||
-                                user.data!.role_id === Role.Engineer) &&
+                            ) : userPermission("canAssignFeedback") &&
                               item.status_id === 1 ? (
                               <Link href={`/Feedback/Assign/${item.id}`}>
                                 <AiOutlineUserAdd size={22} title={"Assign"} />
@@ -331,12 +330,12 @@ export default function Feedback(props: FeedbackPageProps) {
                                 <AiOutlineFolderView size={22} title={"View"} />
                               </Link>
                             )}
-                            <AiOutlineHistory
+                            { userPermission("canViewFeedbackHistory") && <AiOutlineHistory
                               color={"#C70F2B"}
                               onClick={() => setHistory(item.activity_log)}
                               size={22}
                               title={"View History"}
-                            />
+                            />}
                           </Cell>
                         </Row>
                       );

@@ -29,6 +29,7 @@ import { HiOutlinePencilAlt } from "react-icons/hi";
 import { TbExchange } from "react-icons/tb";
 import COPTable from "../../../components/ChangeOfParts/COPTable";
 import AssetHistoryModalContainer from "../../../components/Asset/AssetHistory/AssetHistoryModalContainer";
+import { useCurrentUser } from "../../../components/SWR";
 
 // Get asset detail by psa id
 const getAsset = async (id: number) => {
@@ -75,6 +76,7 @@ export default function AssetDetails(props: {
   COPHistory: [CMMSChangeOfParts];
   id: number;
 }) {
+  const { userPermission } = useCurrentUser();
   const [assetDetail, setAssetDetail] = useState<CMMSAssetDetails>(
     {} as CMMSAssetDetails
   );
@@ -176,11 +178,12 @@ export default function AssetDetails(props: {
   return (
     <ModuleMain>
       <ModuleHeader header="Asset Details">
-        <Link href={`/Asset/Edit/${psa_id}`}>
+        { userPermission('canEditAsset') && <Link href={`/Asset/Edit/${psa_id}`}>
           <TooltipBtn text="Edit Asset">
             <HiOutlinePencilAlt size={20} />
           </TooltipBtn>
         </Link>
+        }
         <TooltipBtn
           text="View Change of Parts Details"
           onClick={() => setCOPHistoryModal(true)}
