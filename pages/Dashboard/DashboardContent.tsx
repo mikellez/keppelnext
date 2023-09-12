@@ -16,7 +16,7 @@ import PlantSelect, { getPlants } from "../../components/PlantSelect";
 import { useCurrentUser } from "../../components/SWR";
 import styles from "../../styles/Dashboard.module.scss";
 import instance from "../../types/common/axios.config";
-import { Role } from "../../types/common/enums";
+import { PermissionsRoles } from "../../types/common/enums";
 import { CMMSDashboardData } from "../../types/common/interfaces";
 import ChangeOfPartsPage from "../ChangeOfParts";
 import Checklist from "../Checklist";
@@ -27,8 +27,8 @@ const { Option } = Select;
 
 type PickerType = "date";
 
-export default function DashboardContent({ role_id }: { role_id: number }) {
-  const user = useCurrentUser();
+export default function DashboardContent({ permissions }: { permissions: string[] }) {
+  const {data, userPermission} = useCurrentUser();
   const [showTotalContainer, setShowTotalContainer] = useState<boolean>(true);
   const [page, setPage] = useState(1);
   const [showDiv, setShowDiv] = useState<string>();
@@ -204,7 +204,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     const { datetype, date } = pickerwithtype;
     const PARAMS = ["id"];
 
-    console.log(`/api/request/pending/${plant}/${datetype}/${date}`);
+    //console.log(`/api/request/pending/${plant}/${datetype}/${date}`);
     const getPendingRequest = instance.get(
       `/api/request/pending/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
     );
@@ -231,7 +231,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     const completedRequest = getAllRequest[2].data?.rows;
     const overdueRequest = getAllRequest[3].data?.rows;
 
-    console.log(getAllRequest);
+    //console.log(getAllRequest);
 
     setRequestData([
       {
@@ -279,7 +279,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     const { datetype, date } = pickerwithtype;
     const PARAMS = ["id"];
 
-    console.log(`/api/checklist/pending/${plant}/${datetype}/${date}`);
+    //console.log(`/api/checklist/pending/${plant}/${datetype}/${date}`);
     const getPendingChecklist = instance.get(
       `/api/checklist/pending/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
     );
@@ -306,7 +306,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     const completedChecklist = getAllChecklist[2].data?.rows;
     const overdueChecklist = getAllChecklist[3].data?.rows;
 
-    console.log(getAllChecklist);
+    //console.log(getAllChecklist);
 
     setChecklistData([
       {
@@ -394,7 +394,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     const { datetype, date } = pickerwithtype;
     const PARAMS = ["id"];
 
-    console.log(`/api/feedback/pending/${plant}/${datetype}/${date}`);
+    //console.log(`/api/feedback/pending/${plant}/${datetype}/${date}`);
     const getPendingFeedback = instance.get(
       `/api/feedback/pending/${plant}/${datetype}/${date}?expand=${PARAMS.join(',')}`
     );
@@ -416,7 +416,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     const outstandingFeedback = getAllFeedback[1].data?.rows;
     const completedFeedback = getAllFeedback[2].data?.rows;
 
-    console.log(getAllFeedback);
+    //console.log(getAllFeedback);
 
     setFeedbackData([
       {
@@ -552,30 +552,59 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
 
   useEffect(() => {
     const { datetype, date } = pickerwithtype;
+    if(data) {
+      if (!userPermission(PermissionsRoles.manager)) {
+        // engineer, specialist
+        getPlants("/api/getUserPlants").then((result) => {
+          if (result) {
+            setPlant(result[0].plant_id);
+            fetchRequests();
+            fetchChecklists();
+            fetchCOPs();
+            fetchFeedbacks();
+            fetchLicenses();
+          }
+        });
 
-    if ([3, 4].includes(role_id)) {
-      // engineer, specialist
-      getPlants("/api/getUserPlants").then((result) => {
-        if (result) {
-          setPlant(result[0].plant_id);
-          fetchRequests();
-          fetchChecklists();
-          fetchCOPs();
-          fetchFeedbacks();
-          fetchLicenses();
+        // Those below engineer have no access (aka specialists and below)
+        if (!userPermission(PermissionsRoles.engineer)) {
+          setShowTotalContainer(false);
         }
-      });
-
-      if (role_id == 4) {
-        setShowTotalContainer(false);
+      } else {
+        fetchRequests();
+        fetchChecklists();
+        fetchCOPs();
+        fetchFeedbacks();
+        fetchLicenses();
       }
-    } else {
-      fetchRequests();
-      fetchChecklists();
-      fetchCOPs();
-      fetchFeedbacks();
-      fetchLicenses();
     }
+    else{
+      if (!permissions.includes(PermissionsRoles.manager)) {
+        // engineer, specialist
+        getPlants("/api/getUserPlants").then((result) => {
+          if (result) {
+            setPlant(result[0].plant_id);
+            fetchRequests();
+            fetchChecklists();
+            fetchCOPs();
+            fetchFeedbacks();
+            fetchLicenses();
+          }
+        });
+
+        // Those below engineer have no access (aka specialists and below)
+        if (!permissions.includes(PermissionsRoles.engineer)) {
+          setShowTotalContainer(false);
+        }
+      } else {
+        fetchRequests();
+        fetchChecklists();
+        fetchCOPs();
+        fetchFeedbacks();
+        fetchLicenses();
+      }
+    }
+    
   }, [plant, field, pickerwithtype, active, expiredLicenseInDays]);
 
   // useEffect(() => {
@@ -600,7 +629,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
   }, 0);
 
   useEffect(() => {
-    console.log(feedbackData);
+   // console.log(feedbackData);
   }, [feedbackData]);
 
   if (!isReady) {
@@ -642,7 +671,8 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
     totalLicenseExpiredIn90 
   } = license;
 
-  const access = user.data!.role_id === Role.Admin || user.data!.role_id === Role.Manager || user.data!.role_id === Role.Engineer;
+  const access = userPermission(PermissionsRoles.engineer);
+  //console.log(access)
 
   return (
     <ModuleMain>
@@ -659,7 +689,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
           onChange={handleDateChange}
         />
 
-        {[3, 4].includes(role_id) ? (
+        {!(userPermission(PermissionsRoles.manager)) ? (
           <PlantSelect
             onChange={(e) => setPlant(parseInt(e.target.value))}
             accessControl
@@ -807,6 +837,7 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               )}
             </DashboardBox>
           )}
+          {access && (
           <DashboardBox
             id="scheduled-cop-box"
             title="Scheduled Change of Parts"
@@ -817,7 +848,8 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             <p className={styles.dashboardPendingdNumber}>
               {totalScheduledCOP}
             </p>
-          </DashboardBox>
+          </DashboardBox>)}
+          {access && (
           <DashboardBox
             id="completed-cop-box"
             title="Completed Change of Parts"
@@ -828,14 +860,14 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
             <p className={styles.dashboardCompletedNumber}>
               {totalCompletedCOP}
             </p>
-          </DashboardBox>
-          <DashboardBox
+          </DashboardBox>)}
+          {access && (<DashboardBox
             id=""
             title=""
             style={{ gridArea: "k" }}
             onClick={handleDashboardClick}
-          ></DashboardBox>
-          {showTotalContainer && (
+          ></DashboardBox>)}
+          {showTotalContainer && access && (
             <DashboardBox
               title={"Total Change of Parts: " + totalCOP}
               style={{ gridArea: "l" }}
@@ -961,6 +993,24 @@ export default function DashboardContent({ role_id }: { role_id: number }) {
               )}
             </DashboardBox>
           )}
+          {access && (<DashboardBox
+            id=""
+            title=""
+            style={{ gridArea: "w" }}
+            onClick={handleDashboardClick}
+          ></DashboardBox>)}
+          {(<DashboardBox
+            id=""
+            title=""
+            style={{ gridArea: "x" }}
+            onClick={handleDashboardClick}
+          ></DashboardBox>)}
+          {access && (<DashboardBox
+            id=""
+            title=""
+            style={{ gridArea: "y" }}
+            onClick={handleDashboardClick}
+          ></DashboardBox>)}
         </div>
         {showDiv === "pending-requests-box" && (
           <Request

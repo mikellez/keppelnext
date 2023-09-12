@@ -5,7 +5,7 @@ import instance from "../../types/common/axios.config";
 import ManagerDashboad from "./Manager";
 import EngineerDashboad from "./Engineer";
 import SpecialistDashboad from "./Specialist";
-import { CMMSDashboardData } from "../../types/common/interfaces";
+import { CMMSDashboardData, CMMSUserInfo } from "../../types/common/interfaces";
 import DashboardContent from "./DashboardContent";
 
 export async function fetchData(
@@ -43,13 +43,13 @@ export async function fetchData(
     .catch((err) => console.log(err));
 }
 
-export default function Dashboad({ role_id }: { role_id: number }) {
+export default function Dashboad({ permissions }: { permissions: string[] }) {
   /*if (role_id === 1 || role_id === 2) return <ManagerDashboad />;
 
   if (role_id === 3) return <EngineerDashboad />;
 
   return <SpecialistDashboad />;*/
-  return <DashboardContent role_id={role_id} />;
+  return <DashboardContent permissions={permissions} />;
 }
 
 export const getServerSideProps: GetServerSideProps = async (
@@ -63,12 +63,12 @@ export const getServerSideProps: GetServerSideProps = async (
     },
   };
 
-  const userInfo = await instance.get<any>("/api/user", headers);
+  const userInfo = await instance.get<CMMSUserInfo>("/api/user", headers);
   // console.log(userInfo.data);
   if (userInfo.status === 400) return { notFound: true };
 
   let props = {
-    role_id: userInfo.data.role_id,
+    permissions: userInfo.data.permissions,
   };
 
   return {

@@ -27,9 +27,29 @@ enum Checklist_Status {
     Approved_Cancellation = 11,
 };
 
+enum PermissionsRoles {
+    admin = 'admin',
+    manager = 'manager',
+    engineer = 'engineer',
+    specialist = 'specialist',
+    canAssignRequestTicket = 'canAssignRequestTicket',
+    canManageRequestTicket = 'canManageRequestTicket',
+    createChecklist = 'createChecklist',
+    assignChecklist = 'assignChecklist',
+    manageChecklist = 'manageChecklist',
+    canCreateRequestTicket = 'canCreateRequestTicket',
+    canViewRequestTicket = 'canViewRequestTicket',
+    canCompleteRequestTicket = 'canCompleteRequestTicket',
+    canViewRequestHistory = 'canViewRequestHistory',
+    canCreateCorrectiveRequestTicket = 'canCreateCorrectiveRequestTicket',
+    viewChecklist = 'viewChecklist',
+    completeChecklist = 'completeChecklist',
+    viewChecklistHistory = 'viewChecklistHistory',
+  };
 
 export {
     Role,
     Action,
-    Checklist_Status
+    Checklist_Status,
+    PermissionsRoles
 }
