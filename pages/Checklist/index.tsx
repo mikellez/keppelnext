@@ -161,6 +161,16 @@ export default function Checklist(props: ChecklistProps) {
   >(undefined);
   const searchRef = useRef({ value: "" });
   const [assignedUserHistory, setAssignedUserHistory] = useState<string>("");
+  const [IdHeader, setIdHeader] = useState("ID");
+  const [blockReset, setBlockReset] = useState<Boolean>(false);
+  const [detailsHeader, setDetailsHeader] = useState<string>("Details");
+  const [statusHeader, setStatusHeader] = useState<string>("Status");
+  const [overdueStatusHeader, setOverdueStatusHeader] = useState<string>("Overdue");
+  const [dateArrow, setDateArrow] = useState("");
+  const [assignedToHeader, setAssignedToHeader] = useState("Assigned To");
+  const [signOffHeader, setSignOffHeader] = useState("Signed Off By");
+  const [createdByHeader, setCreatedByHeader] = useState("Created By");
+
   const fields = [
     "checklist_id",
     "chl_name",
@@ -261,15 +271,16 @@ export default function Checklist(props: ChecklistProps) {
           `/api/checklist/${indexedColumn[activeTabIndex]}?page=${page}&expand=${fieldsString}&search=${searchRef.current.value}`
         )
         .then((response) => {
-          setChecklistItems(
-            response.data.rows.map((row: CMMSChecklist) => {
-              return {
-                id: row.checklist_id,
-                ...row,
-              };
-            })
-          );
-
+          if (!blockReset) {
+            setChecklistItems(
+              response.data.rows.map((row: CMMSChecklist) => {
+                return {
+                  id: row.checklist_id,
+                  ...row,
+                };
+              })
+            );
+          }
           setTotalPages(response.data.total);
           setReady(true);
         })
@@ -278,6 +289,236 @@ export default function Checklist(props: ChecklistProps) {
         });
     }
   }, [activeTabIndex, page, isReady]);
+
+  const updateTable = (foo: Function) => {
+    setReady(false);
+    foo().then((res: any) => {
+      setReady(true);
+    });
+  };
+
+  async function sortId() {
+    setBlockReset(true);
+    if (IdHeader === "ID" || IdHeader === "ID ▲") {
+      setIdHeader("ID ▼");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.id < b.id ? 1 : -1));
+        return newState;
+      });
+    } else if (IdHeader === "ID ▼") {
+      setIdHeader("ID ▲");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.id > b.id ? 1 : -1));
+        return newState;
+      });
+    }
+  }
+
+  async function sortDetails() {
+    setBlockReset(true);
+    if (detailsHeader === "Details" || detailsHeader === "Details ▲") {
+      setDetailsHeader("Details ▼");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.description < b.description ? 1 : -1));
+        return newState;
+      });
+    } else if (detailsHeader === "Details ▼") {
+      setDetailsHeader("Details ▲");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.description > b.description ? 1 : -1));
+        return newState;
+      });
+    }
+  }
+
+  const customSortStatus = (a: any, b: any) => {
+    const statusOrder = { ASSIGNED: 0, REJECTED: 1, null: 2 };
+    const statusA = statusOrder[a];
+    const statusB = statusOrder[b];
+
+    if (statusHeader === "Status" || statusHeader === "Status ▲") {
+      return statusA - statusB;
+    } else if (statusHeader === "Status ▼") {
+      return statusB - statusA;
+    }
+  };
+
+  async function sortStatus() {
+    setBlockReset(true);
+    if (statusHeader === "Status" || statusHeader === "Status ▲") {
+      setStatusHeader("Status ▼");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => a.status_id - b.status_id);
+        return newState;
+      });
+    } else if (statusHeader === "Status ▼") {
+      setStatusHeader("Status ▲");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => b.status_id - a.status_id);
+        return newState;
+      });
+    }
+  }
+
+  const customSortOverdue = (a: any, b: any) => {
+    const overdueOrder = { true: 0, false: 1, null: 2 };
+    const overdueStatusA = overdueOrder[a];
+    const overdueStatusB = overdueOrder[b];
+    console.log(overdueStatusA)
+
+    if (
+      overdueStatusHeader === "Overdue" ||
+      overdueStatusHeader === "Overdue ▲"
+    ) {
+      return overdueStatusA - overdueStatusB;
+    } else if (overdueStatusHeader === "Overdue ▼") {
+      return overdueStatusB - overdueStatusA;
+    }
+  };
+
+  async function sortOverdueStatus() {
+    setBlockReset(true);
+    if (
+      overdueStatusHeader === "Overdue" ||
+      overdueStatusHeader === "Overdue ▲"
+    ) {
+      setOverdueStatusHeader("Overdue ▼");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort(customSortOverdue);
+        return newState;
+      });
+    } else if (overdueStatusHeader === "Overdue ▼") {
+      setOverdueStatusHeader("Overdue ▲");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort(customSortOverdue);
+        return newState;
+      });
+    }
+  }
+
+  async function sortDate(activeTabIndex: any) {
+    setBlockReset(true);
+    let dateType =
+      activeTabIndex === 2
+        ? "Completed Date"
+        : activeTabIndex === 3
+        ? "Approved Date"
+        : "Created On";
+    if (dateArrow == "" || dateArrow == " ▲") {
+      setDateArrow(" ▼");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        if (dateType == "Created On") {
+          newState.sort((a, b) =>
+            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
+          );
+        } else if (dateType == "Completed Date") {
+          newState.sort((a, b) =>
+            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
+          );
+        } else if (dateType == "Approved Date") {
+          newState.sort((a, b) =>
+            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
+          );
+        }
+        return newState;
+      });
+    } else if (dateArrow == " ▼") {
+      setDateArrow(" ▲");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        if (dateType == "Created On") {
+          newState.sort((a, b) =>
+            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
+          );
+        } else if (dateType == "Completed Date") {
+          newState.sort((a, b) =>
+            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
+          );
+        } else if (dateType == "Approved Date") {
+          newState.sort((a, b) =>
+            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
+          );
+        }
+
+        return newState;
+      });
+    }
+  }
+
+  async function sortAssignedTo() {
+    setBlockReset(true);
+    if (
+      assignedToHeader === "Assigned To" ||
+      assignedToHeader === "Assigned To ▲"
+    ) {
+      setAssignedToHeader("Assigned To ▼");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.assigneduser < b.assigneduser ? 1 : -1));
+        return newState;
+      });
+    } else if (assignedToHeader === "Assigned To ▼") {
+      setAssignedToHeader("Assigned To ▲");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.assigneduser > b.assigneduser ? 1 : -1));
+        return newState;
+      });
+    }
+  }
+
+  async function sortSignOffBy() {
+    setBlockReset(true);
+    if (
+      signOffHeader === "Signed Off By" ||
+      signOffHeader === "Signed Off By ▲"
+    ) {
+      setSignOffHeader("Signed Off By ▼");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.signoffuser < b.signoffuser ? 1 : -1));
+        return newState;
+      });
+    } else if (signOffHeader === "Signed Off By ▼") {
+      setSignOffHeader("Signed Off By ▲");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.signoffuser > b.signoffuser ? 1 : -1));
+        return newState;
+      });
+    }
+  }
+
+  async function sortCreatedBy() {
+    setBlockReset(true);
+    if (
+      createdByHeader === "Created By" ||
+      createdByHeader === "Created By ▲"
+    ) {
+      setCreatedByHeader("Created By ▼");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.createdbyuser > b.createdbyuser ? 1 : -1));
+        return newState;
+      });
+    } else if (createdByHeader === "Created By ▼") {
+      setCreatedByHeader("Created By ▲");
+      setChecklistItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.createdbyuser < b.createdbyuser ? 1 : -1));
+        return newState;
+      });
+    }
+  }
 
   return (
     <ModuleMain>
@@ -353,25 +594,74 @@ export default function Checklist(props: ChecklistProps) {
                 <>
                   <Header>
                     <HeaderRow>
-                      <HeaderCell resize>ID</HeaderCell>
-                      <HeaderCell resize>Details</HeaderCell>
-                      <HeaderCell resize>Status</HeaderCell>
-                      <HeaderCell resize>
+                      <HeaderCell
+                        resize
+                        onClick={() => updateTable(sortId)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {IdHeader}
+                      </HeaderCell>
+                      <HeaderCell
+                        resize
+                        onClick={() => updateTable(sortDetails)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {detailsHeader}
+                      </HeaderCell>
+                      <HeaderCell
+                        resize
+                        onClick={() => updateTable(sortStatus)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {statusHeader}
+                      </HeaderCell>
+                      <HeaderCell
+                        resize
+                        onClick={() =>
+                          updateTable(() => sortDate(activeTabIndex))
+                        }
+                        style={{ cursor: "pointer" }}
+                      >
                         {activeTabIndex === 2
                           ? "Completed Date"
                           : activeTabIndex === 3
                           ? "Approved Date"
                           : "Created On"}
+                        {dateArrow}
                       </HeaderCell>
                       {/*Only show the Overdue column for the pending and assigned tabs*/}
                       {(activeTabIndex === 0 ||
                         activeTabIndex === 1 ||
                         activeTabIndex === 2) && (
-                        <HeaderCell resize>Overdue Status</HeaderCell>
+                        <HeaderCell
+                          resize
+                          onClick={() => updateTable(sortOverdueStatus)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          {overdueStatusHeader}
+                        </HeaderCell>
                       )}
-                      <HeaderCell resize>Assigned To</HeaderCell>
-                      <HeaderCell resize>Signed Off By</HeaderCell>
-                      <HeaderCell resize>Created By</HeaderCell>
+                      <HeaderCell
+                        resize
+                        onClick={() => updateTable(sortAssignedTo)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {assignedToHeader}
+                      </HeaderCell>
+                      <HeaderCell
+                        resize
+                        onClick={() => updateTable(sortSignOffBy)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {signOffHeader}
+                      </HeaderCell>
+                      <HeaderCell
+                        resize
+                        onClick={() => updateTable(sortCreatedBy)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {createdByHeader}
+                      </HeaderCell>
                       <HeaderCell resize>Action</HeaderCell>
                     </HeaderRow>
                   </Header>
