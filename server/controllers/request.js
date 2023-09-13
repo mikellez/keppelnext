@@ -23,28 +23,12 @@ const searchCondition = (search) => {
   } else if (typeof search === "string" && search !== "") {
     //handling text input
     return ` AND(
-  
-      r.request_id IN (
-        SELECT r.request_id
-        FROM keppel.request as r
-        INNER JOIN keppel.plant_master AS pm ON r.plant_id = pm.plant_id
-        INNER JOIN keppel.fault_types AS ft ON r.fault_id = ft.fault_id 
-        INNER JOIN keppel.plant_location AS pl ON r.plant_id = pl.plant_id
-        INNER JOIN keppel.priority AS p ON r.priority_id = p.p_id
-        INNER JOIN keppel.plant_system_assets AS psa ON r.psa_id = psa.psa_id
-        INNER JOIN keppel.plant_system_assets AS pl2 ON r.plant_id = pl2.plant_id
-        INNER JOIN keppel.users AS requested_by_users ON r.user_id = requested_by_users.user_id
-        WHERE pm.plant_name ILIKE '%${search}%'
+        pm.plant_name ILIKE '%${search}%'
         OR r.fault_description ILIKE '%${search}%'
         OR ft.fault_type ILIKE '%${search}%'
-        OR p.priority ILIKE '${search}'
-        OR psa.asset_description ILIKE '%${search}%'
-        OR psa.asset_type ILIKE '%${search}%'
-        OR psa.parent_asset ILIKE '%${search}%'
-	      OR psa.asset_location ILIKE '%${search}%'
-	      OR requested_by_users.first_name || ' ' || requested_by_users.last_name ILIKE '%${search}%'
-        OR pl2.asset_location ILIKE '%${search}%'
-      )
+        OR pri.priority ILIKE '${search}'
+	      OR req_u.first_name || ' ' || req_u.last_name ILIKE '%${search}%'
+        OR tmp1.asset_name ILIKE '%${search}%'  
     )`;
   }
 };
@@ -116,7 +100,7 @@ async function fetchRequestQuery(
   }
 
   expandCond = SELECT_ARR.join(", ");
-
+    
   let sql;
   sql = `SELECT 
     ${expandCond}
@@ -135,6 +119,7 @@ async function fetchRequestQuery(
     left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
       from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
       WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
+      
   WHERE 1 = 1 
   AND ua.user_id = ${user_id}
   ${searchCondition(search)}

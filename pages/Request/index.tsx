@@ -83,6 +83,10 @@ import moment from "moment";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import { request } from "http";
 import animationStyles from "../../styles/animations.module.css";
+import { AnyAaaaRecord } from "dns";
+import { StringOptions } from "sass";
+import { GrReturn } from "react-icons/gr";
+
 
 /*export type TableNode<T> = {
   id: string;
@@ -217,6 +221,14 @@ export default function Request(props: RequestProps) {
   const filename = `${currentDate} Request History.csv`;
   const router = useRouter();
   const { data } = useCurrentUser();
+  const [IdHeader, setIdHeader] = useState("ID");
+  const [blockReset, setBlockReset] = useState<Boolean>(false);
+  const [faultTypeHeader, setFaultTypeHeader] = useState<string>("Fault Type");
+  const [priorityHeader, setPriorityHeader] = useState<string>("Priority");
+  const [locationHeader, setLocationHeader] = useState<string>("Location");
+  const [dateArrow, setDateArrow] = useState("");
+  const [assetNameHeader, setAssetNameHeader] = useState("Asset Name");
+  const [requestedByHeader, setRequestedByHeader] = useState("Requested By");
 
   const switchColumns = (index: number) => {
     setReady(false);
@@ -266,6 +278,7 @@ export default function Request(props: RequestProps) {
     "activity_log",
     "overdue_status",
   ];
+
   const filteredRequest = useRequestFilter(props, page, fields);
   const allRequest = useRequest(
     indexedColumn[activeTabIndex],
@@ -317,17 +330,21 @@ export default function Request(props: RequestProps) {
   useEffect(() => {
     if (requestData && !requestIsFetchValidating) {
       if (requestData?.rows?.length > 0) {
-        setRequestItems(
-          requestData.rows.map((row: CMMSRequest, total: number) => {
-            //console.log(requestData);
+        //to not reset reordered requestData after sorting
+        if (!blockReset) {
+          setRequestItems(
+            requestData.rows.map((row: CMMSRequest, total: number) => {
+              //console.log(requestData);
 
-            return {
-              id: row.request_id,
-              ...row,
-              created_date: new Date(row.created_date),
-            };
-          })
-        );
+              return {
+                id: row.request_id,
+                ...row,
+                created_date: new Date(row.created_date),
+              };
+            })
+          );
+        }
+
         setReady(true);
         setTotalPages(requestData.total);
       }
@@ -339,6 +356,204 @@ export default function Request(props: RequestProps) {
     }
   }, [requestData, requestIsFetchValidating, isReady, page, props?.isReady]);
 
+  const updateTable = (foo: Function) => {
+    setReady(false);
+    foo().then((res: any) => {
+      setReady(true);
+    });
+  };
+
+  async function sortId() {
+    if (IdHeader === "ID" || IdHeader === "ID ▲") {
+      setIdHeader("ID ▼");
+      setBlockReset(true);
+      console.log("setting ID to Desc");
+      setRequestItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.id < b.id ? 1 : -1));
+        return newState;
+      });
+    } else if (IdHeader === "ID ▼") {
+      setIdHeader("ID ▲");
+      setBlockReset(true);
+      console.log("setting ID to Asc");
+      setRequestItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.id > b.id ? 1 : -1));
+        return newState;
+      });
+    }
+  }
+
+  async function sortFaultType() {
+    if (
+      faultTypeHeader === "Fault Type" ||
+      faultTypeHeader === "Fault Type ▲"
+    ) {
+      setFaultTypeHeader("Fault Type ▼");
+      setBlockReset(true);
+      console.log("setting FaultOrder to Desc");
+      setRequestItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.fault_name < b.fault_name ? 1 : -1));
+        return newState;
+      });
+    } else if (faultTypeHeader === "Fault Type ▼") {
+      setFaultTypeHeader("Fault Type ▲");
+      setBlockReset(true);
+      console.log("setting FaultOrder to Asc");
+      setRequestItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.fault_name > b.fault_name ? 1 : -1));
+        return newState;
+      });
+    }
+  }
+
+  const customSortByPriority = (a: any, b: any) => {
+    const priorityOrder = { "LOW": 1, "MEDIUM": 2, "HIGH": 3, null: 0 };
+    const priorityA = priorityOrder[a.priority];
+    const priorityB = priorityOrder[b.priority];
+
+    if (priorityHeader === "Priority" || priorityHeader === "Priority ▲")
+      return priorityB - priorityA;
+    else if (priorityHeader === "Priority ▼") {
+      return priorityA - priorityB;
+    }
+  };
+
+  async function sortPriority() {
+    if (priorityHeader === "Priority" || priorityHeader === "Priority ▲") {
+      setPriorityHeader("Priority ▼");
+      setBlockReset(true);
+      console.log("setting Priority order to Desc");
+      setRequestItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort(customSortByPriority);
+        return newState;
+      });
+    } else if (priorityHeader === "Priority ▼") {
+      setPriorityHeader("Priority ▲");
+      setBlockReset(true);
+      setRequestItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort(customSortByPriority);
+        return newState;
+      });
+    }
+  }
+
+  async function sortLocation() {
+    setBlockReset(true);
+    if (locationHeader === "Location" || locationHeader === "Location ▲") {
+      setLocationHeader("Location ▼");
+      setRequestItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.plant_name < b.plant_name ? 1 : -1));
+        return newState;
+      });
+    } else if (locationHeader === "Location ▼") {
+      setLocationHeader("Location ▲");
+      setRequestItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.plant_name > b.plant_name ? 1 : -1));
+        return newState;
+      });
+    }
+  }
+
+  async function sortDate(activeTabIndex: any) {
+    setBlockReset(true);
+    let dateType = activeTabIndex === 2
+      ? "Completed Date"
+      : activeTabIndex === 3
+      ? "Approved Date"
+      : "Created On"
+    if (dateArrow == "" || dateArrow == " ▲") {
+      setDateArrow(" ▼");
+      setRequestItems((prevState) => {
+        const newState = [...prevState];
+        if (dateType == "Created On") {
+          newState.sort((a, b) =>
+            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
+          );
+        } else if (dateType == "Completed Date") {
+          newState.sort((a, b) =>
+          new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
+        );
+        } else if (dateType == "Approved Date") {
+          newState.sort((a, b) =>
+          new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
+        );
+        }
+        return newState;
+      });
+    } else if (dateArrow == " ▼") {
+      setDateArrow(" ▲");
+      setRequestItems((prevState) => {
+        const newState = [...prevState];
+        if (dateType == "Created On") {
+          newState.sort((a, b) =>
+            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
+          );
+        } else if (dateType == "Completed Date") {
+          newState.sort((a, b) =>
+          new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
+        );
+        } else if (dateType == "Approved Date") {
+          newState.sort((a, b) =>
+          new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
+        );
+        }
+
+        return newState;
+      });
+    }
+  }
+
+  async function sortAssetName() {
+    setBlockReset(true);
+    if (assetNameHeader === "Asset Name" || assetNameHeader === "Asset Name ▲") {
+      setAssetNameHeader("Asset Name ▼");
+      setRequestItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.asset_name > b.asset_name ? 1 : -1));
+        return newState;
+      });
+    } else if (assetNameHeader === "Asset Name ▼") {
+      setAssetNameHeader("Asset Name ▲");
+      setRequestItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.asset_name < b.asset_name ? 1 : -1));
+        return newState;
+      });
+    }
+  }
+
+  // const customSortRequestedBy = (a,b) => {
+  //   const usernameA = 
+  // }
+
+  async function sortRequestedBy() {
+    //linked to user_id, related to user_name in users table
+    setBlockReset(true);
+    if (requestedByHeader === "Requested By" || requestedByHeader === "Requested By ▲") {
+      setRequestedByHeader("Requested By ▼");
+      setRequestItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.created_by > b.created_by ? 1 : -1));
+        return newState;
+      });
+    } else if (requestedByHeader === "Requested By ▼") {
+      setRequestedByHeader("Requested By ▲");
+      setRequestItems((prevState) => {
+        const newState = [...prevState];
+        newState.sort((a, b) => (a.created_by < b.created_by ? 1 : -1));
+        return newState;
+      });
+    }
+  }
+3434
   return (
     <ModuleMain>
       <ModuleHeader title="Request" header="Request">
@@ -371,6 +586,7 @@ export default function Request(props: RequestProps) {
           <ul className="nav nav-tabs">
             <li
               onClick={() => {
+                setBlockReset(false);
                 activeTabIndex !== 0 && switchColumns(0);
               }}
               className={"nav-link" + (activeTabIndex === 0 ? " active" : "")}
@@ -379,6 +595,7 @@ export default function Request(props: RequestProps) {
             </li>
             <li
               onClick={() => {
+                setBlockReset(false);
                 activeTabIndex !== 1 && switchColumns(1);
               }}
               className={"nav-link" + (activeTabIndex === 1 ? " active" : "")}
@@ -387,6 +604,7 @@ export default function Request(props: RequestProps) {
             </li>
             <li
               onClick={() => {
+                setBlockReset(false);
                 activeTabIndex !== 2 && switchColumns(2);
               }}
               className={"nav-link" + (activeTabIndex === 2 ? " active" : "")}
@@ -395,6 +613,7 @@ export default function Request(props: RequestProps) {
             </li>
             <li
               onClick={() => {
+                setBlockReset(false);
                 activeTabIndex !== 3 && switchColumns(3);
               }}
               className={"nav-link" + (activeTabIndex === 3 ? " active" : "")}
@@ -428,24 +647,64 @@ export default function Request(props: RequestProps) {
                 <>
                   <Header>
                     <HeaderRow>
-                      <HeaderCell resize>ID</HeaderCell>
-                      <HeaderCell resize>Fault Type</HeaderCell>
-                      <HeaderCell resize>Location</HeaderCell>
-                      <HeaderCell resize>Priority</HeaderCell>
+                      <HeaderCell
+                        resize
+                        onClick={() => updateTable(sortId)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {IdHeader}
+                      </HeaderCell>
+                      <HeaderCell
+                        resize
+                        onClick={() => updateTable(sortFaultType)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {faultTypeHeader}
+                      </HeaderCell>
+                      <HeaderCell
+                        resize
+                        onClick={() => updateTable(sortLocation)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {locationHeader}
+                      </HeaderCell>
+                      <HeaderCell
+                        resize
+                        onClick={() => updateTable(sortPriority)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {priorityHeader}
+                      </HeaderCell>
                       <HeaderCell resize>Status</HeaderCell>
-                      <HeaderCell resize>
+                      <HeaderCell
+                        resize
+                        onClick={() => updateTable(() => sortDate(activeTabIndex))}
+                        style={{ cursor: "pointer" }}
+                      >
                         {activeTabIndex === 2
                           ? "Completed Date"
                           : activeTabIndex === 3
                           ? "Approved Date"
                           : "Created On"}
+                        {dateArrow}
                       </HeaderCell>
                       {/*Only show the Overdue column for the pending and assigned tabs*/}
                       {(activeTabIndex === 0 || activeTabIndex === 1) && (
                         <HeaderCell resize>Overdue Status</HeaderCell>
                       )}
-                      <HeaderCell resize>Asset Name</HeaderCell>
-                      <HeaderCell resize>Requested By</HeaderCell>
+                      <HeaderCell 
+                        resize
+                        onClick={() => updateTable(sortAssetName)}
+                        style={{ cursor: "pointer" }}
+                      >
+                          {assetNameHeader}
+                      </HeaderCell>
+                      <HeaderCell 
+                        resize
+                        onClick={() => updateTable(sortRequestedBy)}
+                        style={{ cursor: "pointer" }}>
+                          {requestedByHeader}
+                      </HeaderCell>
                       <HeaderCell resize>Action</HeaderCell>
                     </HeaderRow>
                   </Header>
