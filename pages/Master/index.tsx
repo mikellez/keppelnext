@@ -24,6 +24,9 @@ import LoadingIcon from "../../components/LoadingIcon";
 import TooltipBtn from "../../components/TooltipBtn";
 import { FiRefreshCw } from "react-icons/fi";
 import info from "../../public/master.json";
+import { useCurrentUser } from "../../components/SWR"
+
+const { userPermission } = useCurrentUser();
 
 interface CMMSMaster {
   idName: string;
@@ -86,16 +89,18 @@ function MasterActions({
         marginLeft: "10%",
       }}
     >
+      { userPermission('canDeleteMaster') && 
       <button
         onClick={onClickDelete}
         name={"" + id}
         style={{ all: "unset", cursor: "pointer" }}
       >
         <BsTrashFill />
-      </button>
+      </button>}
+      { userPermission('canEditMaster') && 
       <Link href={editHref} style={{ all: "unset", cursor: "pointer" }}>
         <BsPencilSquare />
-      </Link>
+      </Link>}
     </div>
   );
 }

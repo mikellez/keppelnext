@@ -26,6 +26,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Pagination from "../../components/Pagination";
 import LoadingHourglass from "../../components/LoadingHourglass";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import { useCurrentUser } from "../../components/SWR";
 
 
 const downloadCSV = async () => {
@@ -77,6 +78,7 @@ const checkAdmin = async () => {
 }
 
 export default function User() {
+  const { userPermission } = useCurrentUser();
 
   const { isAdmin, setIsAdminHandler } = useAdminContext();
   // Tracks the current page
@@ -235,7 +237,7 @@ export default function User() {
                         // marginLeft: "10%",
                       }}
                     >
-                      <button
+                      { userPermission('canDeleteUserManagement') && <button
                         onClick={onDeleteClick}
                         name={"" + item.user_id}
                         style={{
@@ -245,14 +247,14 @@ export default function User() {
                         }}
                       >
                         <BsTrashFill />
-                      </button>
-                      <Link
+                      </button>}
+                      { userPermission('canEditUserManagement') && <Link
                         href={`/User/Edit/${item.user_id}`}
                         style={{ all: "unset", cursor: "pointer" }}
                       >
                         <BsPencilSquare />
-                      </Link>
-                      {isAdmin && (
+                      </Link>}
+                      { userPermission('canImpersonateUser') && (
                         <button
                           onClick={onImpersonateClick}
                           name={"" + item.user_id}
@@ -264,6 +266,7 @@ export default function User() {
                         >
                           <BsPersonBadge />
                         </button>)}
+                      
                     </Cell>
                   </Row>
                 ))}

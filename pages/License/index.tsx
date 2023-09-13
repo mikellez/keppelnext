@@ -82,6 +82,7 @@ const License = () => {
   const [calendarView, setCalendarView] = useState<boolean>(false);
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
   const user = useCurrentUser();
+  const { userPermission } = useCurrentUser();
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [selectedPlant, setSelectedPlant] = useState<number>(0);
@@ -194,7 +195,7 @@ const License = () => {
         }
       >
         <PlantSelect onChange={changePlant} allPlants={true} />
-        {access &&<Link href="/License/New">
+        { userPermission('canCreateLicense') &&<Link href="/License/New">
           <TooltipBtn text="New License">
             <MdPostAdd size={20} />
           </TooltipBtn>
@@ -390,7 +391,7 @@ const License = () => {
                               </span>
                             </Cell>
                             <Cell>
-                              {access && item.status_id === 2 && (
+                              { userPermission('canAcquireLicense') && item.status_id === 2 && (
                                 <>
                                   <Link href={`/License/Acquire/${item.id}`}>
                                     <AiOutlineFileDone
@@ -408,12 +409,12 @@ const License = () => {
                                 //     <AiOutlineUserAdd size={22} title={"Assign"} />
                                 //   </Link>
                                 //  */}
-                              {access && item.status_id === 3 && (
+                              { userPermission('canRenewLicense') && item.status_id === 3 && (
                                 <Link href={`/License/Renew/${item.id}`}>
                                   <BiRefresh size={22} title={"Renew"} />
                                 </Link>
                               )}
-                              {access &&
+                              { userPermission('canEditLicense') &&
                                 <Link href={`/License/Edit/${item.id}`}>
                                   <AiOutlineEdit size={22} title={"Edit"} />
                                 </Link>
@@ -421,7 +422,7 @@ const License = () => {
                               <Link href={`/License/View/${item.id}`}>
                                 <AiOutlineFolderView size={22} title={"View"} />
                               </Link>
-                              {access && <AiOutlineHistory
+                              { userPermission('canViewLicenseHistory') && <AiOutlineHistory
                                 color={"#C70F2B"}
                                 onClick={() => setHistory(item.activity_log)}
                                 size={22}

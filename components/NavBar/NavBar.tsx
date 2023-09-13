@@ -117,11 +117,11 @@ export default function NavBar() {
               path="/Asset"
               icon={<BsHouseDoor size={21} />}
             />}
-            <NavLink
+            { userPermission('canViewChangeOfParts') && <NavLink
               name="Change of Parts"
               path="/ChangeOfParts"
               icon={<TbExchange size={21} />}
-            />
+            />}
             <NavDropdown
               name="Schedule"
               path="/Schedule"
@@ -172,25 +172,24 @@ export default function NavBar() {
               path="/Feedback"
               icon={<AiOutlineForm size={21} />}
             />}
-            <NavLink
+            { userPermission('canViewLicense') && <NavLink
               name="License"
               path="/License"
               icon={<TbLicense size={21} />}
-            />
-            <NavLink
+            />}
+            { userPermission('canViewWorkflow') && <NavLink
               name="Workflow"
               path="/Workflow"
               icon={<MdWorkOutline size={21} />}
-            />
-            <NavLink
+            />}
+            { userPermission('canViewMaster') && <NavLink
               name="Master"
               path="/Master"
               icon={<AiOutlineControl size={21} />}
-            />
+            />}
 
-            {data &&
-              (data.role_id === Role.Admin ||
-                data.role_id === Role.Manager) && (
+            {data && userPermission('canViewUserManagement')
+               && (
                 <NavDropdown
                   name="User Management"
                   path="/User"
@@ -208,9 +207,8 @@ export default function NavBar() {
                 </NavDropdown>
               )}
 
-            {data && 
-              (data.role_id === Role.Admin ||
-              data.role_id === Role.Manager) && 
+            {data && userPermission('canViewActivityLog')
+               && 
               <NavDropdown
                 name="Activity Log"
                 path="/Activity"

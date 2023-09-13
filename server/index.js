@@ -106,10 +106,27 @@ app.prepare().then(() => {
       { path: "/Asset/Details", permission: "canViewAsset" },
       //Logbook
       { path: "/Logbook", permission: "canViewLogbook" },
-      //Feedback
+      // Feedback
       { path: "/Feedback", permission: "canViewFeedback" },
       { path: "/Feedback/View", permission: "canViewFeedback" },
-      { path: "/Feedback/Assign", permission: "canAssignFeedback"}
+      { path: "/Feedback/Assign", permission: "canAssignFeedback"},
+      { path: "/Feedback/Complete", permission: "canCompleteFeedback"},
+      // License
+      { path: "/License/New", permission: "canCreateLicense"},
+      { path: "/License/Acquire", permission: "canAcquireLicense"},
+      { path: "/License/Edit", permission: "canEditLicense"},
+      { path: "/License/Renew", permission: "canRenewLicense"},
+      { path: "/License/View", permission: "canViewLicense"},
+      // Workflow
+      { path: "/Workflow/New", permission: "canCreateWorkflow"},
+      // Master
+      { path: "/Master/New", permission: "canCreateMaster"},
+      { path: "/Master/Edit", permission: "canEditMaster"},
+      { path: "/Master", permission: "canViewMaster"},
+      // User
+      { path: "/User/Add", permission: "canCreateUserManagement"},
+      { path: "/User/Edit", permission: "canEditUserManagement"},
+      { path: "/User/Management", permission: "canViewUserManagement"},
 
     ];
 

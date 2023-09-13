@@ -311,7 +311,7 @@ export default function Feedback(props: FeedbackPageProps) {
                               </Tooltip>
                             </Cell>
                           <Cell>
-                            {item.status_id === 2 || item.status_id === 3 ? (
+                            { userPermission('canCompleteFeedback') && (item.status_id === 2 || item.status_id === 3) ? (
                               <>
                                 <Link href={`/Feedback/Complete/${item.id}`}>
                                   <AiOutlineFileDone

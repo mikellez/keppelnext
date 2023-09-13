@@ -37,6 +37,7 @@ const COPTable = (props: COPTableProps) => {
   const [tableData, setTableData] = useState<COPTableData[]>([]);
   const [isReady, setIsReady] = useState<boolean>(false);
   const user = useCurrentUser();
+  const { userPermission } = useCurrentUser();
   const router = useRouter();
 
   const theme = useTheme([
@@ -152,7 +153,7 @@ const COPTable = (props: COPTableProps) => {
                       <Cell>
                         {item.changedDate ? (
                           dateFormat(new Date(item.changedDate))
-                        ) : user.data?.id === item.assignedUserId ? (
+                        ) : userPermission('canCompleteChangeOfParts') && user.data?.id === item.assignedUserId ? (
                           <TooltipBtn
                             toolTip={false}
                             onClick={() => handleCompleteClick(item.copId)}

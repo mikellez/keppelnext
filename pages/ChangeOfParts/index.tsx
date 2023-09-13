@@ -39,6 +39,7 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
   const PAGE_LIMIT = 10;
   const router = useRouter();
   const user = useCurrentUser();
+  const { userPermission } = useCurrentUser();
 
   const updatePlant = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setIsReady(false);
@@ -89,14 +90,14 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
   return (
     <ModuleMain>
       <ModuleHeader header="Change of Parts">
-        <TooltipBtn
+        { userPermission('canCreateChangeOfParts') && <TooltipBtn
           text="Create new"
           onClick={() => router.push("/ChangeOfParts/New")}
         >
           <VscNewFile size={22} />
-        </TooltipBtn>
+        </TooltipBtn>}
 
-        {(user.data?.role_id == Role.Admin || user.data?.role_id == Role.Manager || user.data?.role_id == Role.Engineer) &&
+        { userPermission('canEditChangeOfParts') &&
         <TooltipBtn
           text="Edit"
           disabled={(!selectedCOP.copId || selectedCOP.changedDate) as boolean}
