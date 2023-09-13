@@ -139,7 +139,7 @@ router.get("/user", checkIfLoggedInAPI, (req, res) => {
     username: req.user.username,
     first_name: req.user.first_name,
     last_name: req.user.last_name,
-    permissions: req.user.permissions
+    permissions: req.user.permissions,
   });
 });
 
@@ -202,7 +202,6 @@ router.get(
   controllers.request.fetchAssignedRequests
 );
 
-
 /**
  * @api {get} /request/assigned Get Overdue Requests
  * @apiDescription Gets all requests with status of `OVERDUE`.
@@ -219,7 +218,6 @@ router.get(
   checkIfLoggedInAPI,
   controllers.request.fetchOverdueRequests
 );
-
 
 /**
  * @api {get} /request/review Get For Review Requests
@@ -1048,6 +1046,22 @@ router.patch(
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("reject")
 );
+
+/**
+ * @api {patch} /checklist/approve/:checklist_id cancel an
+ * @apiDescription Reject an existing checklist
+ * Checklist will go into "Cancelled" if successful
+ * @apiName CancelChecklist
+ * @apiGroup Checklist
+ *
+ * @apiParam {String} checklist_id The ID of the "Work Done" checklist record
+ *
+ * @apiBody {String} remarks Cancel Remarks
+ *
+ * @apiSuccess {String} Success "Checklist successfully cancelled"
+ *
+ * @apiError (Error 500) {String} InternalServerError "Failure to update checklist cancellation"
+ */
 router.patch(
   "/checklist/cancel/:checklist_id",
   checkIfLoggedInAPI,
@@ -1069,17 +1083,62 @@ router.patch(
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("rejectReassign")
 );
+/**
+ * @api {patch} /checklist/approve/:checklist_id Request to cancel a checklist
+ * @apiDescription request to cancel an existing checklist
+ * Checklist will go into "request cancellation" if successful
+ * @apiName RequestCancel
+ * @apiGroup Checklist
+ *
+ * @apiParam {String} checklist_id The ID of the "Work Done" checklist record
+ *
+ * @apiBody {String} remarks request cancellation Remarks
+ *
+ * @apiSuccess {String} Success "Checklist successfullyr equest cancellation"
+ *
+ * @apiError (Error 500) {String} InternalServerError "Failure to update checklist request cancellation"
+ */
 router.patch(
   "/checklist/requestCancel/:checklist_id",
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("requestCancel")
 );
-
+/**
+ * @api {patch} /checklist/approve/:checklist_id approve cancellation of a checklist
+ * @apiDescription approve cancellation for an existing checklist
+ * Checklist will go into "approve cancellation" if successful
+ * @apiName RequestCancel
+ * @apiGroup Checklist
+ *
+ * @apiParam {String} checklist_id The ID of the "Work Done" checklist record
+ *
+ * @apiBody {String} remarks approve cancellation Remarks
+ *
+ * @apiSuccess {String} Success "Checklist successfully approve cancellation"
+ *
+ * @apiError (Error 500) {String} InternalServerError "Failure to update checklist approve cancellation"
+ */
 router.patch(
   "/checklist/approveCancel/:checklist_id",
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("approveCancel")
 );
+
+/**
+ * @api {patch} /checklist/approve/:checklist_id reject cancellation of a checklist
+ * @apiDescription approve cancellation for an existing checklist
+ * Checklist will go into "reject cancellation" if successful
+ * @apiName RequestCancel
+ * @apiGroup Checklist
+ *
+ * @apiParam {String} checklist_id The ID of the "Work Done" checklist record
+ *
+ * @apiBody {String} remarks recject cancellation Remarks
+ *
+ * @apiSuccess {String} Success "Checklist successfully reject cancellation"
+ *
+ * @apiError (Error 500) {String} InternalServerError "Failure to update checklist reject cancellation"
+ */
 router.patch(
   "/checklist/rejectCancel/:checklist_id",
   checkIfLoggedInAPI,
