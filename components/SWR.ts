@@ -255,7 +255,13 @@ function useCurrentUser() {
 
   const userPermission = (permission: string) => {
     if (!data) return false;
-    return data.permissions.includes(permission);
+
+    const excludePermission = permission.replace("can", "exclude");
+    const ableAccess = data.permissions.includes(permission);
+
+    if(ableAccess && data.permissions.includes(excludePermission)) return false;
+
+    return ableAccess;
   };
 
   return {

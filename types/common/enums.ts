@@ -12,6 +12,15 @@ enum Action {
     RejectReassign = "reassignReject",
 };
 
+enum Request_Status {
+    Pending = 1,
+    Assigned = 2,
+    Completed = 3,
+    Approved = 4,
+    Rejected = 5,
+    Cancelled = 6
+}
+
 enum Checklist_Status {
     Closed = 0,
     Pending = 1,
@@ -91,5 +100,6 @@ export {
     Role,
     Action,
     Checklist_Status,
+    Request_Status,
     PermissionsRoles
 }

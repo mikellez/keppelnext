@@ -56,6 +56,7 @@ module.exports = (server) => {
                             ua.role_id,
                             ua.role_name,
                             STRING_TO_ARRAY(ua.allocatedplantids, ', ') as allocated_plants,
+							aa.item_name,
                             aic.parent,
                             aic.child
                         FROM 
@@ -65,29 +66,35 @@ module.exports = (server) => {
                         JOIN 
                             keppel.auth_item_child aic on aic.parent = aa.item_name
                         WHERE
-                            ua.user_id = $1 
+                            ua.user_id = $1
                 
                 UNION ALL
                 
                     SELECT 
-                    ''::character varying(100) as user_name,
-                    ''::character varying(100) as user_email,
-                    ''::character varying(100) as employee_id,
-                    0 as user_id,
-                    ''::character varying(100) as first_name,
-                    ''::character varying(100) as last_name,
-                    0 as role_id,
-                    ''::character varying(225) as role_name,
-                    STRING_TO_ARRAY('[]', ', ') as allocated_plants,
-                    aic.parent,
-                    aic.child
+                            ua.user_name,
+                            ua.user_email,
+                            ua.employee_id,
+                            ua.user_id,
+                            ua.first_name,
+                            ua.last_name,
+                            ua.role_id,
+                            ua.role_name,
+                            STRING_TO_ARRAY(ua.allocatedplantids, ', ') as allocated_plants,
+							aa.item_name,
+                            aic.parent,
+                            aic.child
                 FROM
                     keppel.auth_item_child aic
                 JOIN
                     EmployeeHierarchy eh on aic.parent = eh.child 
+				JOIN 
+					keppel.user_access ua on ua.user_id = $1
+				 JOIN 
+                    keppel.auth_assignment aa on aa.user_id = ua.user_id
+				
                         
             )
-            SELECT * FROM EmployeeHierarchy; 
+            SELECT * FROM EmployeeHierarchy WHERE CASE WHEN SUBSTRING(child FROM 1 FOR 7) = 'exclude' AND item_name <> parent then false else true end;
         `, [id], (err, result) => {
             if (err) return cb(err);
             

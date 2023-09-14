@@ -837,18 +837,23 @@ export default function Checklist(props: ChecklistProps) {
                           </Cell>
                           <Cell>
                             { userPermission('canManageChecklist') &&
-                            (item.status_id === Checklist_Status.Work_Done || item.status_id === Checklist_Status.Reassignment_Request)? (
+                            [ 
+                              Checklist_Status.Work_Done, 
+                              Checklist_Status.Reassignment_Request 
+                            ].includes(item.status_id) ? (
                               <Link href={`/Checklist/Manage/${item.id}`}>
                                 <AiOutlineFileProtect
                                   size={22}
                                   title={"Manage"}
                                 />
                               </Link>
-                            ) : item.status_id === Checklist_Status.Assigned ||
-                              item.status_id === Checklist_Status.Reassigned ||
-                              item.status_id === Checklist_Status.Rejected ||
-                              item.status_id ===
-                                Checklist_Status.Rejected_Cancellation ? (
+                            ) : userPermission('canCompleteChecklist') && 
+                            [
+                              Checklist_Status.Assigned, 
+                              Checklist_Status.Reassigned, 
+                              Checklist_Status.Rejected, 
+                              Checklist_Status.Rejected_Cancellation
+                            ].includes(item.status_id) ? (
                               <>
                                 <Link href={`/Checklist/Complete/${item.id}`}>
                                   <AiOutlineFileDone

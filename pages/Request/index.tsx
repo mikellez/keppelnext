@@ -86,6 +86,7 @@ import animationStyles from "../../styles/animations.module.css";
 import { AnyAaaaRecord } from "dns";
 import { StringOptions } from "sass";
 import { GrReturn } from "react-icons/gr";
+import { Request_Status } from "../../types/common/enums";
 
 
 /*export type TableNode<T> = {
@@ -1058,13 +1059,13 @@ export default function Request(props: RequestProps) {
                                     >
                                       {(() => {
                                         try {
-                                          if ( userPermission('canManageRequestTicket') && item.status_id === 3) {
+                                          if ( userPermission('canManageRequestTicket') && item.status_id === Request_Status.Completed) {
                                             return (
                                               <Link href={`/Request/Manage/${item.id}`}>
                                                 <strong>Manage</strong>
                                               </Link>
                                             );
-                                          } else if ( userPermission('canCompleteRequestTicket') && (item.status_id === 2 || item.status_id === 5)) {
+                                          } else if ( userPermission('canCompleteRequestTicket') && [Request_Status.Assigned, Request_Status.Rejected].includes(item.status_id)) {
                                             return (
                                               <Link href={`/Request/Complete/${item.id}`}>
                                                 <strong>Complete</strong>
