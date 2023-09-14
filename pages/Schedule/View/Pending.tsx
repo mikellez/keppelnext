@@ -6,9 +6,9 @@
  * - CreateScheduleModal
  * - ApproveSchedulePreviewModal
  *
- * The page will show different data depending on the user role_id from useCurrentUser
- * Drafts will be shown when the role_ids are 3 4 while pending drafts will be shown when
- * role_id is 1 or 2.
+ * The page will show different data depending on the userpermissions from useCurrentUser
+ * Drafts will be shown when the user does not have the "CanManageSchedules" permission while pending drafts will be shown when
+ * the user has the permission.
  *
  *
  * For each entry there will be a action button at the end.
@@ -69,24 +69,16 @@ import Pagination from "../../../components/Pagination";
 import { BsTrashFill } from "react-icons/bs";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import router from "next/router";
-import { Role } from "../../../types/common/enums";
+import { PermissionsRoles } from "../../../types/common/enums";
 import {
   changeTimelineStatus
 } from "../../../pages/Schedule/Manage";
 
 // 3 : Draft, 1 : approved
 const indexedColumn: (3 | 4)[] = [3, 4];
-const checkManager = (role: number | undefined) => {
-  if (!role) return false;
-  if (role == 1 || role == 2 || role == 3) {
-    return true;
-  } else if (role == 4) {
-    return false;
-  }
-};
 
 export default function Pending() {
-  const user = useCurrentUser();
+  const {data, userPermission} = useCurrentUser();
   const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
   const [confirmDeleteApproval, setConfirmDeleteApproval] = useState<boolean>(false);
   const [deleteTimeline, setDeleteTimeline] = useState<number>();
@@ -111,7 +103,6 @@ export default function Pending() {
     },
   ]);
 
-  const { data } = useCurrentUser();
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
   const [triggerTab, setTriggerTab] = useState<boolean>(false);
   const [remarks, setRemarks] = useState<string>("");
@@ -148,7 +139,7 @@ export default function Pending() {
   }
 
   useEffect(() => {
-    if (data?.role_id) {
+    if (data?.permissions) {
       let url = "";
       let itemURL = "";
       switch (activeTabIndex) {
@@ -227,7 +218,7 @@ export default function Pending() {
             >
               <span style={{ all: "unset" }}>Drafts</span>
             </li>
-            {checkManager(data?.role_id) && (
+            {userPermission(PermissionsRoles.CanManageChecklist) && (
               <>
                 <li
                   onClick={() => {
@@ -422,7 +413,7 @@ export default function Pending() {
                                   size={22}
                                   title="Delete"
                                   onClick={() => {
-                                    user.data?.role_id === Role.Engineer ? setConfirmDeleteApproval(true) : setConfirmDelete(true);
+                                    userPermission(PermissionsRoles.CanManageSchedule) ? setConfirmDeleteApproval(true) : setConfirmDelete(true);
                                     setDeleteTimeline(item.id);
                                   }}
                                   style={{ cursor: "pointer" }}
@@ -488,7 +479,7 @@ export default function Pending() {
           closeOnBlur
           remarks={remarks}
         />
-        {user.data?.role_id === Role.Engineer ? 
+        {userPermission(PermissionsRoles.CanManageSchedule) ? 
         <ModuleSimplePopup
           setModalOpenState={setConfirmDeleteApproval}
           modalOpenState={confirmDeleteApproval}

@@ -21,7 +21,7 @@ import NavDropdown, { NavDropdownLink } from "./NavDropdown";
 import NavLink, { NavLinkInfo } from "./NavLink";
 import { useCurrentUser } from "../SWR";
 import { useRouter } from "next/router";
-import { Role } from "../../types/common/enums";
+import { PermissionsRoles } from "../../types/common/enums";
 
 export default function NavBar() {
   const [navDisplay, setNavDisplay] = useState<boolean>(false);
@@ -107,17 +107,17 @@ export default function NavBar() {
               path="/Dashboard"
               icon={<AiOutlineDashboard size={21} />}
             />
-            { userPermission('canViewRequestTicket') && <NavLink
+            { userPermission(PermissionsRoles.CanViewRequestTicket) && <NavLink
               name="Request"
               path="/Request"
               icon={<AiOutlinePhone size={21} />}
             />}
-            { userPermission('canViewAsset') && <NavLink
+            { userPermission(PermissionsRoles.CanViewAsset) && <NavLink
               name="Asset"
               path="/Asset"
               icon={<BsHouseDoor size={21} />}
             />}
-            { userPermission('canViewChangeOfParts') && <NavLink
+            { userPermission(PermissionsRoles.CanViewChangeOfParts) && <NavLink
               name="Change of Parts"
               path="/ChangeOfParts"
               icon={<TbExchange size={21} />}
@@ -129,35 +129,29 @@ export default function NavBar() {
               icon={<AiOutlineSchedule size={21} />}
             >
               <NavDropdownLink href="/Schedule">View Schedules</NavDropdownLink>
-              {data &&
-                (data.role_id === Role.Admin ||
-                  data.role_id === Role.Manager ||
-                  data.role_id === Role.Engineer) && (
+              {userPermission(PermissionsRoles.CanCreateSchedule) && (
                   <NavDropdownLink href="/Schedule/Create">
                     Create Schedule
                   </NavDropdownLink>
                 )}
-              {data &&
-                (data.role_id === Role.Admin ||
-                  data.role_id === Role.Manager ||
-                  data.role_id === Role.Engineer) && (
+              {userPermission(PermissionsRoles.CanManageSchedule) && (
                   <NavDropdownLink href="/Schedule/Manage">
                     Manage Schedules
                   </NavDropdownLink>
                 )}
-              {(data?.role_id == Role.Admin || data?.role_id == Role.Manager || data?.role_id == Role.Engineer) &&
+              {userPermission(PermissionsRoles.CanManageSchedule) &&
               (<NavDropdownLink
                 href="/Schedule/View/Pending"
               >
                 View Pending Schedules
               </NavDropdownLink>)}
             </NavDropdown>
-            { userPermission('canViewChecklist') && <NavLink
+            { userPermission(PermissionsRoles.CanViewChecklist) && <NavLink
               name="Checklist"
               path="/Checklist"
               icon={<TbChecklist size={21} />}
             />}
-            { userPermission('canViewLogbookEntry') && <NavLink
+            { userPermission(PermissionsRoles.CanViewLogbookEntry) && <NavLink
               name="E-Logbook"
               path="/Logbook"
               icon={<VscBook size={21} />}
@@ -167,28 +161,28 @@ export default function NavBar() {
               path="/QRCode"
               icon={<AiOutlineQrcode size={21} />}
             />
-            { userPermission('canViewFeedback') && <NavLink
+            { userPermission(PermissionsRoles.CanViewFeedback) && <NavLink
               name="Feedback"
               path="/Feedback"
               icon={<AiOutlineForm size={21} />}
             />}
-            { userPermission('canViewLicense') && <NavLink
+            { userPermission(PermissionsRoles.CanViewLicense) && <NavLink
               name="License"
               path="/License"
               icon={<TbLicense size={21} />}
             />}
-            { userPermission('canViewWorkflow') && <NavLink
+            { userPermission(PermissionsRoles.CanViewWorkflow) && <NavLink
               name="Workflow"
               path="/Workflow"
               icon={<MdWorkOutline size={21} />}
             />}
-            { userPermission('canViewMaster') && <NavLink
+            { userPermission(PermissionsRoles.CanViewMaster) && <NavLink
               name="Master"
               path="/Master"
               icon={<AiOutlineControl size={21} />}
             />}
 
-            {data && userPermission('canViewUserManagement')
+            {data && userPermission(PermissionsRoles.CanViewUserManagement)
                && (
                 <NavDropdown
                   name="User Management"
@@ -207,7 +201,7 @@ export default function NavBar() {
                 </NavDropdown>
               )}
 
-            {data && userPermission('canViewActivityLog')
+            {data && userPermission(PermissionsRoles.CanViewActivityLog)
                && 
               <NavDropdown
                 name="Activity Log"
