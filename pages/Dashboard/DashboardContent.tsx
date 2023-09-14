@@ -553,7 +553,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
   useEffect(() => {
     const { datetype, date } = pickerwithtype;
     if(data) {
-      if (!userPermission(PermissionsRoles.manager)) {
+      if (!userPermission(PermissionsRoles.Manager)) {
         // engineer, specialist
         getPlants("/api/getUserPlants").then((result) => {
           if (result) {
@@ -567,7 +567,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
         });
 
         // Those below engineer have no access (aka specialists and below)
-        if (!userPermission(PermissionsRoles.engineer)) {
+        if (!userPermission(PermissionsRoles.Engineer)) {
           setShowTotalContainer(false);
         }
       } else {
@@ -579,7 +579,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
       }
     }
     else{
-      if (!permissions.includes(PermissionsRoles.manager)) {
+      if (!permissions.includes(PermissionsRoles.Manager)) {
         // engineer, specialist
         getPlants("/api/getUserPlants").then((result) => {
           if (result) {
@@ -593,7 +593,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
         });
 
         // Those below engineer have no access (aka specialists and below)
-        if (!permissions.includes(PermissionsRoles.engineer)) {
+        if (!permissions.includes(PermissionsRoles.Engineer)) {
           setShowTotalContainer(false);
         }
       } else {
@@ -671,7 +671,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
     totalLicenseExpiredIn90 
   } = license;
 
-  const access = userPermission(PermissionsRoles.engineer);
+  const access = userPermission(PermissionsRoles.Engineer);
   //console.log(access)
 
   return (
@@ -689,7 +689,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
           onChange={handleDateChange}
         />
 
-        {!(userPermission(PermissionsRoles.manager)) ? (
+        {!(userPermission(PermissionsRoles.Manager)) ? (
           <PlantSelect
             onChange={(e) => setPlant(parseInt(e.target.value))}
             accessControl
