@@ -91,6 +91,7 @@ import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 import moment from "moment";
 import { useRouter } from "next/router";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import { count } from "console";
 
 const indexedColumn: ("pending" | "assigned" | "record" | "approved")[] = [
   "pending",
@@ -165,11 +166,14 @@ export default function Checklist(props: ChecklistProps) {
   const [blockReset, setBlockReset] = useState<Boolean>(false);
   const [detailsHeader, setDetailsHeader] = useState<string>("Details");
   const [statusHeader, setStatusHeader] = useState<string>("Status");
-  const [overdueStatusHeader, setOverdueStatusHeader] = useState<string>("Overdue");
+  const [overdueStatusHeader, setOverdueStatusHeader] =
+    useState<string>("Overdue");
   const [dateArrow, setDateArrow] = useState("");
   const [assignedToHeader, setAssignedToHeader] = useState("Assigned To");
   const [signOffHeader, setSignOffHeader] = useState("Signed Off By");
   const [createdByHeader, setCreatedByHeader] = useState("Created By");
+  const [sortField, setSortField] = useState<string>("id");
+const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const fields = [
     "checklist_id",
@@ -201,10 +205,10 @@ export default function Checklist(props: ChecklistProps) {
   // Used for adding the overdue column into the template when the assigned/pending tab is selected
   const tableFormat =
     activeTabIndex === 0 || activeTabIndex === 1 || activeTabIndex === 2
-      ? `--data-table-library_grid-template-columns:  5em 25em 7em 15em 10em 8em 8em 8em 6em;
+      ? `--data-table-library_grid-template-columns:  7em 4em 13em 7em 15em 10em 8em 8em 8em;
       
   `
-      : `--data-table-library_grid-template-columns:  5em 25em 7em 15em 8em 8em 8em 6em;
+      : `--data-table-library_grid-template-columns:  7em 4em 13em 7em 15em 8em 8em 8em;
       
   `;
 
@@ -266,12 +270,15 @@ export default function Checklist(props: ChecklistProps) {
       ];
       const fieldsString = fields.join(",");
 
+
       instance
         .get(
           `/api/checklist/${indexedColumn[activeTabIndex]}?page=${page}&expand=${fieldsString}&search=${searchRef.current.value}`
         )
         .then((response) => {
+
           if (!blockReset) {
+  
             setChecklistItems(
               response.data.rows.map((row: CMMSChecklist) => {
                 return {
@@ -299,6 +306,7 @@ export default function Checklist(props: ChecklistProps) {
 
   async function sortId() {
     setBlockReset(true);
+
     if (IdHeader === "ID" || IdHeader === "ID ▲") {
       setIdHeader("ID ▼");
       setChecklistItems((prevState) => {
@@ -370,7 +378,7 @@ export default function Checklist(props: ChecklistProps) {
     const overdueOrder = { true: 0, false: 1, null: 2 };
     const overdueStatusA = overdueOrder[a];
     const overdueStatusB = overdueOrder[b];
-    console.log(overdueStatusA)
+    console.log(overdueStatusA);
 
     if (
       overdueStatusHeader === "Overdue" ||
@@ -530,7 +538,7 @@ export default function Checklist(props: ChecklistProps) {
             setChecklistItems([]);
           }}
         />
-        {userPermission('canCreateChecklist') && (
+        {userPermission("canCreateChecklist") && (
           <Link href="/Checklist/Form?action=New">
             <TooltipBtn text="New Checklist">
               <BsFileEarmarkPlus size={20} />
@@ -594,6 +602,7 @@ export default function Checklist(props: ChecklistProps) {
                 <>
                   <Header>
                     <HeaderRow>
+                      <HeaderCell resize>Action</HeaderCell>
                       <HeaderCell
                         resize
                         onClick={() => updateTable(sortId)}
@@ -662,7 +671,6 @@ export default function Checklist(props: ChecklistProps) {
                       >
                         {createdByHeader}
                       </HeaderCell>
-                      <HeaderCell resize>Action</HeaderCell>
                     </HeaderRow>
                   </Header>
 
@@ -670,6 +678,70 @@ export default function Checklist(props: ChecklistProps) {
                     {tableList.map((item) => {
                       return (
                         <Row key={item.id} item={item}>
+                          <Cell>
+                            {userPermission("canManageChecklist") &&
+                            (item.status_id === Checklist_Status.Work_Done ||
+                              item.status_id ===
+                                Checklist_Status.Reassignment_Request) ? (
+                              <Link href={`/Checklist/Manage/${item.id}`}>
+                                <AiOutlineFileProtect
+                                  size={22}
+                                  title={"Manage"}
+                                />
+                              </Link>
+                            ) : item.status_id === Checklist_Status.Assigned ||
+                              item.status_id === Checklist_Status.Reassigned ||
+                              item.status_id === Checklist_Status.Rejected ||
+                              item.status_id ===
+                                Checklist_Status.Rejected_Cancellation ? (
+                              <>
+                                <Link href={`/Checklist/Complete/${item.id}`}>
+                                  <AiOutlineFileDone
+                                    size={22}
+                                    title={"Complete"}
+                                  />
+                                </Link>
+                                <Link
+                                  href={`/Checklist/Form/?action=Edit&id=${item.id}`}
+                                >
+                                  <AiOutlineEdit size={22} title={"Edit"} />
+                                </Link>
+                              </>
+                            ) : userPermission("canAssignChecklist") &&
+                              item.status_id === Checklist_Status.Pending ? (
+                              <Link
+                                href={`/Checklist/Form/?action=Edit&id=${item.id}`}
+                              >
+                                <AiOutlineEdit size={22} title={"Assign"} />
+                              </Link>
+                            ) : item.status_id ===
+                                Checklist_Status.Pending_Cancellation &&
+                              user.data?.role_id !== Role.Specialist ? (
+                              <Link
+                                href={`/Checklist/Cancellation/?id=${item.id}`}
+                              >
+                                <AiOutlineFileProtect
+                                  size={22}
+                                  title={"Manage"}
+                                />
+                              </Link>
+                            ) : (
+                              <div></div>
+                            )}
+                            <AiOutlineHistory
+                              color={"#C70F2B"}
+                              onClick={() => {
+                                setHistory(item.activity_log);
+                                setAssignedUserHistory(item.assigneduser);
+                              }}
+                              size={22}
+                              title={"View History"}
+                            />
+                            <Link href={`/Checklist/View/${item.id}`}>
+                              <AiOutlineFolderView size={22} title={"View"} />
+                            </Link>
+                          </Cell>
+
                           <Cell>{item.id}</Cell>
                           <Cell>
                             <Tooltip
