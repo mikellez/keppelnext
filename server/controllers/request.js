@@ -33,6 +33,57 @@ const searchCondition = (search) => {
   }
 };
 
+const filterCondition = (status, plant, date, datetype) => {
+  let plantCond = ``;
+  let dateCond = ``;
+  let statusCond = ``;
+
+  if (status != "" && status != 0) {
+    if (status.includes(",")) {
+      statusCond = `AND r.status_id IN (${status})`;
+    } else {
+      statusCond = `AND r.status_id = '${status}'`;
+    }
+  }
+
+  if (plant && plant != 0) {
+    plantCond = `AND r.plant_id = '${plant}'`;
+  }
+
+  if (date !== "all") {
+    switch (datetype) {
+      case "week":
+        dateCond = `
+                  AND DATE_PART('week', R.CREATED_DATE::DATE) = DATE_PART('week', '${date}'::DATE) 
+                  AND DATE_PART('year', R.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+
+      case "month":
+        dateCond = `
+                  AND DATE_PART('month', R.CREATED_DATE::DATE) = DATE_PART('month', '${date}'::DATE) 
+                  AND DATE_PART('year', R.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+
+      case "year":
+        dateCond = `AND DATE_PART('year', R.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+
+      case "quarter":
+        dateCond = `
+                  AND DATE_PART('quarter', R.CREATED_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) 
+                  AND DATE_PART('year', R.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+      default:
+        dateCond = `AND R.CREATED_DATE::DATE = '${date}'::DATE`;
+    }
+  }
+  return `${statusCond} ${plantCond} ${dateCond}`;
+}
+
 async function fetchRequestQuery(
   status_query,
   order_query,
@@ -153,9 +204,15 @@ const fetchPendingRequests = async (req, res, next) => {
   const page = req.query.page || 0;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
+  
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
+
+  const filterCond = filterCondition("", plant, date, datetype);
 
   const { sql, totalPages } = await fetchRequestQuery(
-    "AND sc.status_id = 1", //PENDING
+    `AND sc.status_id = 1 ${filterCond}`, //PENDING
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
@@ -174,8 +231,14 @@ const fetchOutstandingRequests = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
+
+  const filterCond = filterCondition("", plant, date, datetype);
+
   const { sql, totalPages } = await fetchRequestQuery(
-    "AND (sc.status_id = 2 or sc.status_id = 3 or sc.status_id = 5)", //PENDING
+    `AND (sc.status_id = 2 or sc.status_id = 3 or sc.status_id = 5) ${filterCond}`, //PENDING
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
@@ -194,8 +257,14 @@ const fetchCompletedRequests = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
+
+  const filterCond = filterCondition("", plant, date, datetype);
+
   const { sql, totalPages } = await fetchRequestQuery(
-    "AND (sc.status_id = 4 or sc.status_id = 6)", 
+    `AND (sc.status_id = 4 or sc.status_id = 6) ${filterCond}`, 
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
@@ -234,8 +303,14 @@ const fetchOverdueRequests = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
+
+  const filterCond = filterCondition("", plant, date, datetype);
+
   const { sql, totalPages } = await fetchRequestQuery(
-    "AND r.overdue_status = true", // Overdue
+    `AND r.overdue_status = true ${filterCond}`, // Overdue
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,

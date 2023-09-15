@@ -51,6 +51,8 @@ enum PermissionsRoles {
     CanEditMaster = 'canEditMaster',
     CanViewUserManagement = 'canViewUserManagement',
     CanDeleteMaster = 'canDeleteMaster',
+    ExcludeCompleteRequestTicket = 'excludeCompleteRequestTicket',
+    CanAccessAllPlants = 'canAccessAllPlants',
     Specialist = 'specialist',
     CanAssignRequestTicket = 'canAssignRequestTicket',
     CanManageRequestTicket = 'canManageRequestTicket',
@@ -73,6 +75,10 @@ enum PermissionsRoles {
     CanCreateSchedule = 'canCreateSchedule',
     CanManageSchedule = 'canManageSchedule',
     CanViewScheduleHistory = 'canViewScheduleHistory',
+    CanViewDashboardTotal = 'canViewDashboardTotal',
+    CanViewDashboardLicense = 'canViewDashboardLicense',
+    CanViewDashboardFeedback = 'canViewDashboardFeedback',
+    CanViewDashboardChangeOfParts = 'canViewDashboardChangeOfParts',
     CanCreateRequestTicket = 'canCreateRequestTicket',
     CanViewRequestTicket = 'canViewRequestTicket',
     CanCompleteRequestTicket = 'canCompleteRequestTicket',
@@ -94,6 +100,8 @@ enum PermissionsRoles {
     CanCompleteChangeOfParts = 'canCompleteChangeOfParts',
     CanViewSchedule = 'canViewSchedule',
     CanViewChangeOfParts = 'canViewChangeOfParts',
+    CanViewDashboardRequestTicket = 'canViewDashboardRequestTicket',
+    CanViewDashboardChecklist = 'canViewDashboardChecklist',
   };
 
 export {

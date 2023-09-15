@@ -29,7 +29,7 @@ type PickerType = "date";
 
 export default function DashboardContent({ permissions }: { permissions: string[] }) {
   const {data, userPermission} = useCurrentUser();
-  const [showTotalContainer, setShowTotalContainer] = useState<boolean>(true);
+  const [showTotalContainer, setShowTotalContainer] = useState<boolean>(false);
   const [page, setPage] = useState(1);
   const [showDiv, setShowDiv] = useState<string>();
   const [active, setActive] = useState("");
@@ -101,6 +101,13 @@ export default function DashboardContent({ permissions }: { permissions: string[
   const [feedbackData, setFeedbackData] = useState<CMMSDashboardData[]>();
   const [licenseData, setLicenseData] = useState<CMMSDashboardData[]>();
 
+  const [requestAccess, setRequestAccess] = useState<boolean>(permissions.includes(PermissionsRoles.CanViewDashboardRequestTicket));
+  const [checklistAccess, setChecklistAccess] = useState<boolean>(permissions.includes(PermissionsRoles.CanViewDashboardChecklist));
+  const [changeOfPartsAccess, setChangeOfPartsAccess] = useState<boolean>(permissions.includes(PermissionsRoles.CanViewDashboardChangeOfParts));
+  const [feedbackAccess, setFeedbackAccess] = useState<boolean>(permissions.includes(PermissionsRoles.CanViewDashboardFeedback));
+  const [licenseAccess, setLicenseAccess] = useState<boolean>(permissions.includes(PermissionsRoles.CanViewDashboardLicense));
+  const [allPlantAccess, setAllPlantAccess] = useState<boolean>(permissions.includes(PermissionsRoles.CanAccessAllPlants));
+
   const handleDateChange: DatePickerProps["onChange"] = (date, dateString) => {
     setPickerWithType({
       date: dateString ? moment(date?.toDate()).format("YYYY-MM-DD") : "all",
@@ -119,87 +126,6 @@ export default function DashboardContent({ permissions }: { permissions: string[
     setActive(id);
   };
 
-  /*const fetchRequests = () => {
-    const { datetype, date } = pickerwithtype;
-
-    setIsRequestReady(false);
-
-    fetchData("request", plant, field, datetype, date).then((result) => {
-      if (result) setRequestData(result);
-    });
-
-    fetchData("request", plant, "status", datetype, date).then((result) => {
-      setRequest({
-        totalPendingRequest:
-          result?.filter((data) => data.id === 1)[0]?.value || 0,
-        totalOutstandingRequest:
-          result
-            ?.filter((data) => [2].includes(data.id))
-            ?.reduce(
-              (accumulator, currentValue) => accumulator + currentValue.value,
-              0
-            ) || 0,
-        totalClosedRequest:
-          result
-            ?.filter((data) => [3, 4, 5, 6].includes(data.id))
-            ?.reduce(
-              (accumulator, currentValue) => accumulator + currentValue.value,
-              0
-            ) || 0,
-        totalOverdueRequest:
-          result
-            ?.filter((data) => data.overdue_status === true)
-            ?.reduce(
-              (accumulator, currentValue) => accumulator + currentValue.value,
-              0
-            ) || 0,
-      });
-
-      setTimeout(() => {
-        setIsReady(true);
-      }, 500);
-      setIsRequestReady(true);
-    });
-  };
-  */
-
-  /*const fetchChecklists = () => {
-    const { datetype, date } = pickerwithtype;
-
-    setIsChecklistReady(false);
-
-    fetchData("checklist", plant, "status", datetype, date).then((result) => {
-      if (result) {
-        setChecklistData(result);
-        setIsChecklistReady(true);
-        setChecklist({
-          totalPendingChecklist:
-            result?.filter((data) => data.id === 1)[0]?.value || 0,
-          totalOutstandingChecklist:
-            result
-              ?.filter((data) => [2].includes(data.id))
-              ?.reduce(
-                (accumulator, currentValue) => accumulator + currentValue.value,
-                0
-              ) || 0,
-          totalClosedChecklist:
-            result
-              ?.filter((data) => [3, 4, 5, 6].includes(data.id))
-              ?.reduce(
-                (accumulator, currentValue) => accumulator + currentValue.value,
-                0
-              ) || 0,
-          totalOverdueChecklist:
-            result
-              ?.filter((data) => data.overdue_status === true)
-              ?.reduce(
-                (accumulator, currentValue) => accumulator + currentValue.value,
-                0
-              ) || 0,
-        });
-      }
-    });
-  };*/
   const fetchRequests = async () => {
     const { datetype, date } = pickerwithtype;
     const PARAMS = ["id"];
@@ -233,32 +159,34 @@ export default function DashboardContent({ permissions }: { permissions: string[
 
     //console.log(getAllRequest);
 
-    setRequestData([
-      {
-        name: "Pending",
-        value: pendingRequest?.length || 0,
-        fill: "#C74B50",
-        id: 1,
-      },
-      {
-        name: "Outstanding",
-        value: outstandingRequest?.length || 0,
-        fill: "#810CA8",
-        id: 2,
-      },
-      {
-        name: "Completed",
-        value: completedRequest?.length || 0,
-        fill: "#03C988",
-        id: 3,
-      },
-      {
-        name: "Overdue",
-        value: overdueRequest?.length || 0,
-        fill: "#C74B50",
-        id: 1,
-      },
-    ]);
+    // Don't include overdue requests in total number of requests
+    if(field != "status"){
+      fetchData("request", plant, field, datetype, date).then((result) => {
+        if (result) setRequestData(result);
+      });
+    }
+    else{
+      setRequestData([
+        {
+          name: "Pending",
+          value: pendingRequest?.length || 0,
+          fill: "#C74B50",
+          id: 1,
+        },
+        {
+          name: "Outstanding",
+          value: outstandingRequest?.length || 0,
+          fill: "#810CA8",
+          id: 2,
+        },
+        {
+          name: "Completed",
+          value: completedRequest?.length || 0,
+          fill: "#03C988",
+          id: 3,
+        },
+      ]);
+    }
 
     setRequest({
       totalPendingRequest: pendingRequest?.length || 0,
@@ -326,12 +254,6 @@ export default function DashboardContent({ permissions }: { permissions: string[
         value: completedChecklist?.length || 0,
         fill: "#03C988",
         id: 3,
-      },
-      {
-        name: "Overdue",
-        value: overdueChecklist?.length || 0,
-        fill: "#C74B50",
-        id: 1,
       },
     ]);
 
@@ -551,61 +473,65 @@ export default function DashboardContent({ permissions }: { permissions: string[
   };
 
   useEffect(() => {
+      requestAccess ? fetchRequests() : null;
+      checklistAccess ? fetchChecklists() : null;
+      changeOfPartsAccess ? fetchCOPs() : null;
+      feedbackAccess ? fetchFeedbacks() : null;
+      licenseAccess ? fetchLicenses() : null;
+  }, [field, plant, pickerwithtype]);
+
+  useEffect(() => {
+    const RequestAccess = data ? userPermission(PermissionsRoles.CanViewDashboardRequestTicket) : permissions.includes(PermissionsRoles.CanViewDashboardRequestTicket);
+    const ChecklistAccess = data ? userPermission(PermissionsRoles.CanViewDashboardChecklist) : permissions.includes(PermissionsRoles.CanViewDashboardChecklist);
+    const ChangeOfPartsAccess = data ? userPermission(PermissionsRoles.CanViewDashboardChangeOfParts) : permissions.includes(PermissionsRoles.CanViewDashboardChangeOfParts);
+    const FeedbackAccess = data ? userPermission(PermissionsRoles.CanViewDashboardFeedback) : permissions.includes(PermissionsRoles.CanViewDashboardFeedback);
+    const LicenseAccess = data ? userPermission(PermissionsRoles.CanViewDashboardLicense) : permissions.includes(PermissionsRoles.CanViewDashboardLicense);
+    const AllPlantAccess = data ? userPermission(PermissionsRoles.CanAccessAllPlants) : permissions.includes(PermissionsRoles.CanAccessAllPlants);
+
+    setRequestAccess(RequestAccess);
+    setChecklistAccess(ChecklistAccess);
+    setChangeOfPartsAccess(ChangeOfPartsAccess);
+    setFeedbackAccess(FeedbackAccess);
+    setLicenseAccess(LicenseAccess);
+    setAllPlantAccess(AllPlantAccess);
+
+  }, [data])
+
+  useEffect(() => {
     const { datetype, date } = pickerwithtype;
-    if(data) {
-      if (!userPermission(PermissionsRoles.Manager)) {
-        // engineer, specialist
-        getPlants("/api/getUserPlants").then((result) => {
-          if (result) {
-            setPlant(result[0].plant_id);
-            fetchRequests();
-            fetchChecklists();
-            fetchCOPs();
-            fetchFeedbacks();
-            fetchLicenses();
-          }
-        });
-
-        // Those below engineer have no access (aka specialists and below)
-        if (!userPermission(PermissionsRoles.Engineer)) {
-          setShowTotalContainer(false);
+    const DashboardTotalAccess = data ? userPermission(PermissionsRoles.CanViewDashboardTotal) : permissions.includes(PermissionsRoles.CanViewDashboardTotal);
+    if (!allPlantAccess) {
+      // engineer, specialist
+      getPlants("/api/getUserPlants").then((result) => {
+        if (result) {
+          setPlant(result[0].plant_id);
         }
-      } else {
-        fetchRequests();
-        fetchChecklists();
-        fetchCOPs();
-        fetchFeedbacks();
-        fetchLicenses();
-      }
+      });
+
+    } else {
+      getPlants("/api/getPlants").then((result) => {
+        if (result) {
+          if(result.length < 4){
+            setPlant(result[0].plant_id);
+          }
+          else{
+            setPlant(0);
+          }
+        }
+      });
+      requestAccess ? fetchRequests() : null;
+      checklistAccess ? fetchChecklists() : null;
+      changeOfPartsAccess ? fetchCOPs() : null;
+      feedbackAccess ? fetchFeedbacks() : null;
+      licenseAccess ? fetchLicenses() : null;
     }
-    else{
-      if (!permissions.includes(PermissionsRoles.Manager)) {
-        // engineer, specialist
-        getPlants("/api/getUserPlants").then((result) => {
-          if (result) {
-            setPlant(result[0].plant_id);
-            fetchRequests();
-            fetchChecklists();
-            fetchCOPs();
-            fetchFeedbacks();
-            fetchLicenses();
-          }
-        });
-
-        // Those below engineer have no access (aka specialists and below)
-        if (!permissions.includes(PermissionsRoles.Engineer)) {
-          setShowTotalContainer(false);
-        }
-      } else {
-        fetchRequests();
-        fetchChecklists();
-        fetchCOPs();
-        fetchFeedbacks();
-        fetchLicenses();
-      }
+    // Permission for dashboard access:
+    if (DashboardTotalAccess) {
+      setShowTotalContainer(true);
     }
     
-  }, [plant, field, pickerwithtype, active, expiredLicenseInDays]);
+  }, [requestAccess, checklistAccess, changeOfPartsAccess, feedbackAccess, licenseAccess, allPlantAccess, 
+    active, expiredLicenseInDays]);
 
   // useEffect(() => {
   //   console.log(licenseData);
@@ -627,10 +553,6 @@ export default function DashboardContent({ permissions }: { permissions: string[
     // console.log(accumulator);
     return +accumulator + +currentValue.value;
   }, 0);
-
-  useEffect(() => {
-   // console.log(feedbackData);
-  }, [feedbackData]);
 
   if (!isReady) {
     return (
@@ -671,8 +593,6 @@ export default function DashboardContent({ permissions }: { permissions: string[
     totalLicenseExpiredIn90 
   } = license;
 
-  const access = userPermission(PermissionsRoles.Engineer);
-  //console.log(access)
 
   return (
     <ModuleMain>
@@ -689,7 +609,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
           onChange={handleDateChange}
         />
 
-        {!(userPermission(PermissionsRoles.Manager)) ? (
+        {!allPlantAccess ? (
           <PlantSelect
             onChange={(e) => setPlant(parseInt(e.target.value))}
             accessControl
@@ -704,7 +624,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
       </ModuleHeader>
       <ModuleContent>
         <div className={styles.dashboardMain}>
-          <DashboardBox
+          {requestAccess && (<DashboardBox
             id="pending-requests-box"
             title="Pending Requests"
             style={{ gridArea: "a" }}
@@ -714,8 +634,8 @@ export default function DashboardContent({ permissions }: { permissions: string[
             <p className={styles.dashboardPendingdNumber}>
               {totalPendingRequest}
             </p>
-          </DashboardBox>
-          <DashboardBox
+          </DashboardBox>)}
+          {requestAccess && (<DashboardBox
             id="outstanding-requests-box"
             title="Outstanding Requests"
             style={{ gridArea: "b" }}
@@ -727,8 +647,8 @@ export default function DashboardContent({ permissions }: { permissions: string[
             <p className={styles.dashboardOutstandingNumber}>
               {totalOutstandingRequest}
             </p>
-          </DashboardBox>
-          <DashboardBox
+          </DashboardBox>)}
+          {requestAccess && (<DashboardBox
             id="closed-requests-box"
             title="Completed Requests"
             style={{ gridArea: "c" }}
@@ -738,8 +658,8 @@ export default function DashboardContent({ permissions }: { permissions: string[
             <p className={styles.dashboardCompletedNumber}>
               {totalClosedRequest}
             </p>
-          </DashboardBox>
-          <DashboardBox
+          </DashboardBox>)}
+          {requestAccess && (<DashboardBox
             id="overdue-requests-box"
             title="Overdue Requests"
             style={{ gridArea: "u" }}
@@ -749,9 +669,9 @@ export default function DashboardContent({ permissions }: { permissions: string[
             <p className={styles.dashboardOverdueNumber}>
               {totalOverdueRequest}
             </p>
-          </DashboardBox>
+          </DashboardBox>)}
 
-          {showTotalContainer && (
+          {showTotalContainer && requestAccess && (
             <DashboardBox
               title={"Total Requests: " + totalRequest}
               filter={
@@ -775,7 +695,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
               )}
             </DashboardBox>
           )}
-          <DashboardBox
+          {checklistAccess && (<DashboardBox
             id="pending-checklists-box"
             title="Pending Checklists"
             style={{ gridArea: "e" }}
@@ -785,8 +705,8 @@ export default function DashboardContent({ permissions }: { permissions: string[
             <p className={styles.dashboardPendingdNumber}>
               {totalPendingChecklist}
             </p>
-          </DashboardBox>
-          <DashboardBox
+          </DashboardBox>)}
+          {checklistAccess && (<DashboardBox
             id="outstanding-checklists-box"
             title="Outstanding Checklists"
             style={{ gridArea: "f" }}
@@ -798,8 +718,8 @@ export default function DashboardContent({ permissions }: { permissions: string[
             <p className={styles.dashboardOutstandingNumber}>
               {totalOutstandingChecklist}
             </p>
-          </DashboardBox>
-          <DashboardBox
+          </DashboardBox>)}
+          {checklistAccess && (<DashboardBox
             id="completed-checklists-box"
             title="Completed Checklists"
             style={{ gridArea: "g" }}
@@ -811,8 +731,8 @@ export default function DashboardContent({ permissions }: { permissions: string[
             <p className={styles.dashboardCompletedNumber}>
               {totalClosedChecklist}
             </p>
-          </DashboardBox>
-          <DashboardBox
+          </DashboardBox>)}
+          {checklistAccess && (<DashboardBox
             id="overdue-checklists-box"
             title="Overdue Checklists"
             style={{ gridArea: "v" }}
@@ -824,8 +744,8 @@ export default function DashboardContent({ permissions }: { permissions: string[
             <p className={styles.dashboardOverdueNumber}>
               {totalOverdueChecklist}
             </p>
-          </DashboardBox>
-          {showTotalContainer && (
+          </DashboardBox>)}
+          {showTotalContainer && checklistAccess && (
             <DashboardBox
               title={"Total Checklists: " + totalChecklist}
               style={{ gridArea: "h" }}
@@ -833,11 +753,11 @@ export default function DashboardContent({ permissions }: { permissions: string[
               {checklistData && checklistData.length > 0 ? (
                 <PChart data={checklistData} />
               ) : (
-                <p className={styles.dashboardNoChart}>No requests</p>
+                <p className={styles.dashboardNoChart}>No Checklists</p>
               )}
             </DashboardBox>
           )}
-          {access && (
+          {changeOfPartsAccess && (
           <DashboardBox
             id="scheduled-cop-box"
             title="Scheduled Change of Parts"
@@ -849,7 +769,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
               {totalScheduledCOP}
             </p>
           </DashboardBox>)}
-          {access && (
+          {changeOfPartsAccess && (
           <DashboardBox
             id="completed-cop-box"
             title="Completed Change of Parts"
@@ -861,13 +781,13 @@ export default function DashboardContent({ permissions }: { permissions: string[
               {totalCompletedCOP}
             </p>
           </DashboardBox>)}
-          {access && (<DashboardBox
+          {changeOfPartsAccess && (<DashboardBox
             id=""
             title=""
             style={{ gridArea: "k" }}
             onClick={handleDashboardClick}
           ></DashboardBox>)}
-          {showTotalContainer && access && (
+          {showTotalContainer && changeOfPartsAccess && (
             <DashboardBox
               title={"Total Change of Parts: " + totalCOP}
               style={{ gridArea: "l" }}
@@ -879,7 +799,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
               )}
             </DashboardBox>
           )}
-          {<DashboardBox
+          {feedbackAccess && (<DashboardBox
             id="pending-feedback-box"
             title="Pending Feedbacks"
             style={{ gridArea: "m" }}
@@ -887,11 +807,11 @@ export default function DashboardContent({ permissions }: { permissions: string[
             className={active === "pending-feedback-box" ? styles.active : ""}
           >
             <p className={styles.dashboardPendingdNumber}>
-              {feedback.totalPendingFeedback}
+              {totalPendingFeedback}
             </p>
-          </DashboardBox>
+          </DashboardBox>)
           }
-          {<DashboardBox
+          {feedbackAccess && (<DashboardBox
             id="outstanding-feedback-box"
             title="Outstanding Feedbacks"
             style={{ gridArea: "n" }}
@@ -901,11 +821,11 @@ export default function DashboardContent({ permissions }: { permissions: string[
             }
           >
             <p className={styles.dashboardOutstandingNumber}>
-              {feedback.totalOutstandingFeedback}
+              {totalOutstandingFeedback}
             </p>
           </DashboardBox>
-          }
-          {<DashboardBox
+          )}
+          {feedbackAccess && (<DashboardBox
             id="completed-feedback-box"
             title="Completed Feedbacks"
             style={{ gridArea: "o" }}
@@ -913,11 +833,11 @@ export default function DashboardContent({ permissions }: { permissions: string[
             className={active === "completed-feedback-box" ? styles.active : ""}
           >
             <p className={styles.dashboardCompletedNumber}>
-              {feedback.totalCompletedFeedback}
+              {totalCompletedFeedback}
             </p>
           </DashboardBox>
-          }
-          {showTotalContainer && (
+          )}
+          {showTotalContainer && feedbackAccess && (
             <DashboardBox
               title={"Total Feedbacks: " + totalFeedback}
               style={{ gridArea: "p" }}
@@ -931,7 +851,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
             </DashboardBox>
           )}
 
-          {access && <DashboardBox
+          {licenseAccess && <DashboardBox
             id="30-expiry-license-box"
             title="Licenses Expiring in 30 Days"
             style={{ gridArea: "q" }}
@@ -943,7 +863,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
             </p>
           </DashboardBox>
           }
-          {access && <DashboardBox
+          {licenseAccess && <DashboardBox
             id="60-expiry-license-box"
             title="Licenses Expiring in 60 Days"
             style={{ gridArea: "r" }}
@@ -955,7 +875,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
             </p>
           </DashboardBox>
           }
-          {access && <DashboardBox
+          {licenseAccess && <DashboardBox
             id="90-expiry-license-box"
             title="Licenses Expiring in 90 Days"
             style={{ gridArea: "s" }}
@@ -967,7 +887,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
             </p>
           </DashboardBox>
           }
-          {access && showTotalContainer && (
+          {licenseAccess && showTotalContainer && (
             <DashboardBox
               title={"Total Licenses: " + totalLicense}
               style={{ gridArea: "t" }}
@@ -993,19 +913,21 @@ export default function DashboardContent({ permissions }: { permissions: string[
               )}
             </DashboardBox>
           )}
-          {access && (<DashboardBox
+          {changeOfPartsAccess && (<DashboardBox
             id=""
             title=""
             style={{ gridArea: "w" }}
             onClick={handleDashboardClick}
           ></DashboardBox>)}
-          {(<DashboardBox
+
+          {feedbackAccess && (<DashboardBox
             id=""
             title=""
             style={{ gridArea: "x" }}
             onClick={handleDashboardClick}
           ></DashboardBox>)}
-          {access && (<DashboardBox
+
+          {licenseAccess && (<DashboardBox
             id=""
             title=""
             style={{ gridArea: "y" }}

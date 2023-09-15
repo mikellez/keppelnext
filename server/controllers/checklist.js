@@ -47,6 +47,57 @@ const searchCondition = (search) => {
   }
 };
 
+const filterCondition = (status, plant, date, datetype) => {
+  let plantCond = ``;
+  let dateCond = ``;
+  let statusCond = ``;
+
+  if (status != "" && status != 0) {
+    if (status.includes(",")) {
+      statusCond = `AND cl.status_id IN (${status})`;
+    } else {
+      statusCond = `AND cl.status_id = '${status}'`;
+    }
+  }
+
+  if (plant && plant != 0) {
+    plantCond = `AND cl.plant_id = '${plant}'`;
+  }
+
+  if (date !== "all") {
+    switch (datetype) {
+      case "week":
+        dateCond = `
+                  AND DATE_PART('week', CL.CREATED_DATE::DATE) = DATE_PART('week', '${date}'::DATE) 
+                  AND DATE_PART('year', CL.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+
+      case "month":
+        dateCond = `
+                  AND DATE_PART('month', CL.CREATED_DATE::DATE) = DATE_PART('month', '${date}'::DATE) 
+                  AND DATE_PART('year', CL.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+
+      case "year":
+        dateCond = `AND DATE_PART('year', CL.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+
+      case "quarter":
+        dateCond = `
+                  AND DATE_PART('quarter', CL.CREATED_DATE::DATE) = DATE_PART('quarter', '${date}'::DATE) 
+                  AND DATE_PART('year', CL.CREATED_DATE::DATE) = DATE_PART('year', '${date}'::DATE)`;
+
+        break;
+      default:
+        dateCond = `AND CL.CREATED_DATE::DATE = '${date}'::DATE`;
+    }
+  }
+  return `${statusCond} ${plantCond} ${dateCond}`;
+}
+
 const fetchAllChecklistQuery = `
 SELECT 
     cl.checklist_id, 
@@ -217,6 +268,9 @@ const getAssignedChecklistsQuery = (req) => {
 
 const getPendingChecklistsQuery = (req) => {
   const search = req.query.search || "";
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
 
   return (
     getAllChecklistQuery(req) +
@@ -224,6 +278,7 @@ const getPendingChecklistsQuery = (req) => {
     WHERE
         ua.user_id = $1 AND
         (cl.status_id = 1)
+    ${filterCondition("", plant, date, datetype)}
     ${searchCondition(search)}
     ORDER BY cl.checklist_id DESC
   `
@@ -233,6 +288,10 @@ const getPendingChecklistsQuery = (req) => {
 const getOutstandingChecklistsQuery = (req) => {
   const search = req.query.search || "";
   const role_id = req.user.role_id;
+  
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
   let userRoleCond = "";
 
   if (role_id === 4) {
@@ -246,6 +305,7 @@ const getOutstandingChecklistsQuery = (req) => {
         ua.user_id = $1
         ${userRoleCond} AND
         (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
+    ${filterCondition("", plant, date, datetype)}
     ${searchCondition(search)}
     ORDER BY cl.checklist_id DESC
   `
@@ -254,12 +314,17 @@ const getOutstandingChecklistsQuery = (req) => {
 
 const getCompletedChecklistsQuery = (req) => {
   const search = req.query.search || "";
+
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
   return (
     getAllChecklistQuery(req) +
     `
     WHERE
         ua.user_id = $1 AND
         (cl.status_id = 6 OR cl.status_id = 11)
+    ${filterCondition("", plant, date, datetype)}
     ${searchCondition(search)}
     ORDER BY cl.checklist_id DESC
   `
@@ -268,12 +333,17 @@ const getCompletedChecklistsQuery = (req) => {
 
 const getOverdueChecklistsQuery = (req) => {
   const search = req.query.search || "";
+
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
   return (
     getAllChecklistQuery(req) +
     `
     WHERE
         ua.user_id = $1 AND
         cl.overdue_status = true
+    ${filterCondition("", plant, date, datetype)}
     ${searchCondition(search)}
     ORDER BY cl.checklist_id DESC
   `
