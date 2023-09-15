@@ -1,6 +1,6 @@
 import React from "react";
-import RequiredIcon from "../RequiredIcon";
 import { CMMSPlantLocation } from "../../types/common/interfaces";
+import RequiredIcon from "../RequiredIcon";
 
 interface PlantLocSelectProps {
   optionsData: CMMSPlantLocation[];
@@ -11,6 +11,9 @@ interface PlantLocSelectProps {
 }
 
 const PlantLocSelect = (props: PlantLocSelectProps) => {
+  const sortedOptionsData = props.optionsData.sort((a, b) => 
+    a.plant_name.localeCompare(b.plant_name)
+  );
   return (
     <div className="mb-3">
       <label className="form-label">
@@ -27,7 +30,7 @@ const PlantLocSelect = (props: PlantLocSelectProps) => {
         <option value={-1} disabled>
           -- Select Plant --{" "}
         </option>
-        {props.optionsData.map((loc, index) => (
+        {sortedOptionsData.map((loc, index) => (
           <option key={index} value={`${loc.plant_id}`}>
             {`${loc.plant_name}`}
           </option>

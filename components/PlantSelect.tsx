@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { CMMSPlant } from "../types/common/interfaces";
+import React, { useEffect, useState } from "react";
 import instance from "../types/common/axios.config";
+import { CMMSPlant } from "../types/common/interfaces";
 
 interface PlantSelectProps {
     onChange: React.ChangeEventHandler<HTMLSelectElement>;
@@ -42,8 +42,12 @@ export default function PlantSelect(props: PlantSelectProps) {
         });
     }
 
+    const sortedPlants = plantList.sort((a, b) => 
+        a.plant_name.localeCompare(b.plant_name)
+    );
+
     // Plant dropdown options
-    const plantOptions = plantList.map((plant, index) => {
+    const plantOptions = sortedPlants.map((plant, index) => {
         // if (props.default) {
         //     return (
         //         <option key={plant.plant_id} value={plant.plant_id} selected={index == 0}>

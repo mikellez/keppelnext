@@ -1,6 +1,5 @@
-import formStyles from "../../styles/formStyles.module.css";
-import instance from "../../types/common/axios.config";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import {
   ModuleContent,
@@ -8,25 +7,26 @@ import {
   ModuleHeader,
   ModuleMain,
 } from "../../components";
-import AssetFormTemplate from "../../components/Asset/AssetFormTemplate";
-import RequiredIcon from "../../components/RequiredIcon";
-import {
-  useSystemAsset,
-  useSystemAssetName,
-  useSubComponent1Name,
-  useCurrentUser,
-} from "../../components/SWR";
-import {
-  CMMSPlant,
-  CMMSSystem,
-  CMMSAssetType,
-  CMMSAssetDetailsState,
-} from "../../types/common/interfaces";
 import ModuleSimplePopup, {
   SimpleIcon,
 } from "../../components/ModuleLayout/ModuleSimplePopup";
-import Link from "next/link";
-import { useRouter } from "next/router";
+import PlantSelect from "../../components/PlantSelect";
+import RequiredIcon from "../../components/RequiredIcon";
+import {
+  useCurrentUser,
+  useSubComponent1Name,
+  useSystemAsset,
+  useSystemAssetName,
+} from "../../components/SWR";
+import formStyles from "../../styles/formStyles.module.css";
+import instance from "../../types/common/axios.config";
+import {
+  CMMSAssetDetailsState,
+  CMMSAssetType,
+  CMMSPlant,
+  CMMSSystem,
+} from "../../types/common/interfaces";
+
 
 interface NewAssetProps {
   plants: CMMSPlant[];
@@ -263,6 +263,25 @@ export default function NewAsset(props: NewAssetProps) {
     }
   }
 
+  const sortedSystems = (props.systems || []).sort((a, b) => 
+    a.system_name.trim().localeCompare(b.system_name.trim())
+  );
+
+  const sortedSystemAssets = (systemAssetData || []).sort((a, b) => 
+    a.system_asset.trim().localeCompare(b.system_asset.trim())
+  );
+
+  const sortedAssetTypes = (props.assetTypes || []).sort((a, b) => 
+    a.asset_type.trim().localeCompare(b.asset_type.trim())
+  );
+
+  const sortedSystemAssetName = (systemAssetNameData || []).sort((a, b) => 
+    a.system_asset_lvl6.trim().localeCompare(b.system_asset_lvl6.trim())
+  );
+
+  const sortedSubComponent1NameData = (subComponent1NameData || []).sort((a, b) => 
+    a.system_asset_lvl7.trim().localeCompare(b.system_asset_lvl7.trim())
+  );
   // const updateData = (
   // 	e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   //   ) => {
@@ -328,6 +347,13 @@ export default function NewAsset(props: NewAssetProps) {
 					<div>Remarks Form: {form.remarks}</div> */}
 
             <label className="form-label">
+              <RequiredIcon /> Plant
+            </label>
+            <PlantSelect
+              onChange={handleForm}
+              name="plant_id"
+            />
+            {/* <label className="form-label">
               Plant
               <RequiredIcon />
             </label>
@@ -344,12 +370,11 @@ export default function NewAsset(props: NewAssetProps) {
                   {plant.plant_name}
                 </option>
               ))}
-            </select>
+            </select> */}
           </div>
           <div className="form-group">
             <label className="form-label">
-              System
-              <RequiredIcon />
+            <RequiredIcon /> System
             </label>
             <div className="input-group">
               <select
@@ -361,7 +386,7 @@ export default function NewAsset(props: NewAssetProps) {
                 <option value="0" disabled hidden selected>
                   -- Select System --
                 </option>
-                {props.systems.map((system) => (
+                {sortedSystems.map((system) => (
                   <option key={system.system_id} value={system.system_id}>
                     {system.system_name}
                   </option>
@@ -371,8 +396,7 @@ export default function NewAsset(props: NewAssetProps) {
           </div>
           <div className="form-group">
             <label className="form-label">
-              System Asset
-              <RequiredIcon />
+              <RequiredIcon /> System Asset
             </label>
             <div className="input-group">
               <select
@@ -386,7 +410,7 @@ export default function NewAsset(props: NewAssetProps) {
                   -- Select System Asset --
                 </option>
                 {systemAssetData !== undefined &&
-                  systemAssetData.map((systemAsset) => (
+                  sortedSystemAssets.map((systemAsset) => (
                     <option
                       key={systemAsset.system_asset_id}
                       value={systemAsset.system_asset_id}
@@ -399,8 +423,7 @@ export default function NewAsset(props: NewAssetProps) {
           </div>
           <div className="form-group">
             <label className="form-label">
-              Asset Type
-              <RequiredIcon />
+            <RequiredIcon /> Asset Type
             </label>
             <div className="input-group">
               <select
@@ -414,7 +437,7 @@ export default function NewAsset(props: NewAssetProps) {
                   -- Select Asset Type--
                 </option>
                 <option value={"NA"}>NA</option>
-                {props.assetTypes.map((assetType) => (
+                {sortedAssetTypes.map((assetType) => (
                   <option
                     key={assetType.asset_type}
                     value={assetType.asset_type}
@@ -428,8 +451,7 @@ export default function NewAsset(props: NewAssetProps) {
           <div className="form-group">
             <label className="form-label">
               {" "}
-              System Asset Name
-              <RequiredIcon />
+              <RequiredIcon /> System Asset Name
             </label>
             <div className="input-group">
               <select
@@ -445,7 +467,7 @@ export default function NewAsset(props: NewAssetProps) {
                   -- Select System Asset Name--
                 </option>
                 {systemAssetNameData !== undefined &&
-                  systemAssetNameData.map((systemAsset) => (
+                  sortedSystemAssetName.map((systemAsset) => (
                     <option
                       key={systemAsset.system_asset_lvl6}
                       value={systemAsset.system_asset_lvl6}
@@ -483,7 +505,7 @@ export default function NewAsset(props: NewAssetProps) {
                   -- Select Sub-Components 1--
                 </option>
                 {subComponent1NameData !== undefined &&
-                  subComponent1NameData.map((systemAsset) => (
+                  sortedSubComponent1NameData.map((systemAsset) => (
                     <option
                       key={systemAsset.system_asset_lvl7}
                       value={systemAsset.system_asset_lvl7}
