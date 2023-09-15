@@ -125,6 +125,8 @@ async function fetchRequestQuery(
   ${searchCondition(search)}
   ${status_query}
   ${userCond}
+  
+
   GROUP BY (
     r.request_id,
     ft.fault_type,
@@ -139,7 +141,8 @@ async function fetchRequestQuery(
     req_u.last_name,
     au.first_name,
     au.last_name
-  ) ${order_query}`;
+  ) ${order_query}`
+  ;
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);

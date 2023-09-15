@@ -345,7 +345,7 @@ export default function RequestContainer(props: RequestContainerProps) {
         <div className={formStyles.halfContainer}>
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon /> Request Type
+              <RequiredIcon /> Requested Form
             </label>
             <select
               className="form-control"
@@ -354,7 +354,7 @@ export default function RequestContainer(props: RequestContainerProps) {
               disabled={props.assignRequestData ? true : false}
             >
               <option hidden key={0} value={""}>
-                Select request type
+                Select Requesting Entity
               </option>
               {!props.assignRequestData &&
                 requestTypes.map((rType: CMMSRequestTypes) => {
@@ -554,7 +554,7 @@ export default function RequestContainer(props: RequestContainerProps) {
           {!props.assignRequestData && (
             <div className="form-group">
               <div>
-                <label className="form-label">Fault Image</label>
+                <label className="form-label"><RequiredIcon /> Fault Image</label>
                 <input
                   className="form-control"
                   type="file"
