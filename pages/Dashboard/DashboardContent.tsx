@@ -107,6 +107,8 @@ export default function DashboardContent({ permissions }: { permissions: string[
   const [feedbackAccess, setFeedbackAccess] = useState<boolean>(permissions.includes(PermissionsRoles.CanViewDashboardFeedback));
   const [licenseAccess, setLicenseAccess] = useState<boolean>(permissions.includes(PermissionsRoles.CanViewDashboardLicense));
   const [allPlantAccess, setAllPlantAccess] = useState<boolean>(permissions.includes(PermissionsRoles.CanAccessAllPlants));
+  const [manageRequestAccess, setManageRequestAccess] = useState<boolean>(permissions.includes(PermissionsRoles.CanManageRequestTicket));
+  const [manageChecklistAccess, setManageChecklistAccess] = useState<boolean>(permissions.includes(PermissionsRoles.CanManageChecklist));
 
   const handleDateChange: DatePickerProps["onChange"] = (date, dateString) => {
     setPickerWithType({
@@ -487,6 +489,8 @@ export default function DashboardContent({ permissions }: { permissions: string[
     const FeedbackAccess = data ? userPermission(PermissionsRoles.CanViewDashboardFeedback) : permissions.includes(PermissionsRoles.CanViewDashboardFeedback);
     const LicenseAccess = data ? userPermission(PermissionsRoles.CanViewDashboardLicense) : permissions.includes(PermissionsRoles.CanViewDashboardLicense);
     const AllPlantAccess = data ? userPermission(PermissionsRoles.CanAccessAllPlants) : permissions.includes(PermissionsRoles.CanAccessAllPlants);
+    const ManageRequestAccess = data ? userPermission(PermissionsRoles.CanManageRequestTicket) : permissions.includes(PermissionsRoles.CanManageRequestTicket);
+    const ManageChecklistAccess = data ? userPermission(PermissionsRoles.CanManageChecklist) : permissions.includes(PermissionsRoles.CanManageChecklist);
 
     setRequestAccess(RequestAccess);
     setChecklistAccess(ChecklistAccess);
@@ -494,6 +498,8 @@ export default function DashboardContent({ permissions }: { permissions: string[
     setFeedbackAccess(FeedbackAccess);
     setLicenseAccess(LicenseAccess);
     setAllPlantAccess(AllPlantAccess);
+    setManageRequestAccess(ManageRequestAccess);
+    setManageChecklistAccess(ManageChecklistAccess);
 
   }, [data])
 
@@ -624,7 +630,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
       </ModuleHeader>
       <ModuleContent>
         <div className={styles.dashboardMain}>
-          {requestAccess && (<DashboardBox
+          {requestAccess && manageRequestAccess && (<DashboardBox
             id="pending-requests-box"
             title="Pending Requests"
             style={{ gridArea: "a" }}
@@ -695,7 +701,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
               )}
             </DashboardBox>
           )}
-          {checklistAccess && (<DashboardBox
+          {checklistAccess && manageChecklistAccess && (<DashboardBox
             id="pending-checklists-box"
             title="Pending Checklists"
             style={{ gridArea: "e" }}
