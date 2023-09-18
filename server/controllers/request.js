@@ -50,7 +50,7 @@ const filterCondition = (status, plant, date, datetype) => {
     plantCond = `AND r.plant_id = '${plant}'`;
   }
 
-  if (date !== "all") {
+  if (date && date !== "all") {
     switch (datetype) {
       case "week":
         dateCond = `
@@ -213,6 +213,7 @@ const fetchPendingRequests = async (req, res, next) => {
   const datetype = req.params.datetype;
 
   const filterCond = filterCondition("", plant, date, datetype);
+  console.log(filterCond)
 
   const { sql, totalPages } = await fetchRequestQuery(
     `AND sc.status_id = 1 ${filterCond}`, //PENDING
@@ -223,6 +224,8 @@ const fetchPendingRequests = async (req, res, next) => {
     expand,
     search
   );
+
+  console.log(sql)
 
   const result = await global.db.query(sql);
 

@@ -863,65 +863,78 @@ export default function Request(props: RequestProps) {
                                 placement="bottom"
                                 trigger={["hover"]}
                                 overlay={
-                                  <span>
-                                    {activeTabIndex === 2
-                                      ? `${moment(
-                                          new Date(
-                                            item.activity_log
-                                              .reverse()
-                                              .find(
-                                                (activity) =>
-                                                  activity["activity_type"] ==
-                                                  "COMPLETED"
-                                              )!.date
-                                          )
-                                        ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                      : activeTabIndex === 3
-                                      ? `${moment(
-                                          new Date(
-                                            item.activity_log
-                                              .reverse()
-                                              .find(
-                                                (activity) =>
-                                                  activity["activity_type"] ==
-                                                  "APPROVED"
-                                              )!.date
-                                          )
-                                        ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                      : `${moment(
-                                          new Date(item.created_date)
-                                        ).format("MMMM Do YYYY, h:mm:ss a")}`}
-                                  </span>
-                                }
+                                  (() => {
+                                    try {
+                                      if (activeTabIndex === 2) {
+                                        const completedActivity = item.activity_log.reverse().find(
+                                          (activity) => activity["activity_type"] === "COMPLETED"
+                                        );
+                                        if (completedActivity) {
+                                          return moment(new Date(completedActivity.date)).format(
+                                            "MMMM Do YYYY, h:mm:ss a"
+                                          );
+                                        }
+                                      } else if (activeTabIndex === 3) {
+                                        const approvedActivity = item.activity_log.reverse().find(
+                                          (activity) => activity["activity_type"] === "APPROVED"
+                                        );
+                                        if (approvedActivity) {
+                                          return moment(new Date(approvedActivity.date)).format(
+                                            "MMMM Do YYYY, h:mm:ss a"
+                                          );
+                                        }
+                                      }
+
+                                      return moment(new Date(item.created_date)).format(
+                                        "MMMM Do YYYY, h:mm:ss a"
+                                      );
+                                    } catch (error) {
+                                      // Handle any parsing or formatting errors here
+                                      console.error("Date formatting error:", error);
+                                      return "Invalid Date"; // Or another error message or fallback
+                                    }
+                                  })()}
+                                
                               >
                                 <div>
-                                  {activeTabIndex === 2
-                                    ? `${moment(
-                                        new Date(
-                                          item.activity_log
-                                            .reverse()
-                                            .find(
-                                              (activity) =>
-                                                activity["activity_type"] ==
-                                                "COMPLETED"
-                                            )!.date
-                                        )
-                                      ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                    : activeTabIndex === 3
-                                    ? `${moment(
-                                        new Date(
-                                          item.activity_log
-                                            .reverse()
-                                            .find(
-                                              (activity) =>
-                                                activity["activity_type"] ==
-                                                "APPROVED"
-                                            )!.date
-                                        )
-                                      ).format("MMMM Do YYYY, h:mm:ss a")}`
-                                    : `${moment(
-                                        new Date(item.created_date)
-                                      ).format("MMMM Do YYYY, h:mm:ss a")}`}
+                                  {(() => {
+                                    try {
+                                      if (activeTabIndex === 2) {
+                                        const completedActivity = item.activity_log
+                                          .reverse()
+                                          .find((activity) => activity["activity_type"] === "COMPLETED");
+
+                                        if (completedActivity && completedActivity.date) {
+                                          return moment(new Date(completedActivity.date)).format(
+                                            "MMMM Do YYYY, h:mm:ss a"
+                                          );
+                                        }
+                                      } else if (activeTabIndex === 3) {
+                                        const approvedActivity = item.activity_log
+                                          .reverse()
+                                          .find((activity) => activity["activity_type"] === "APPROVED");
+
+                                        if (approvedActivity && approvedActivity.date) {
+                                          return moment(new Date(approvedActivity.date)).format(
+                                            "MMMM Do YYYY, h:mm:ss a"
+                                          );
+                                        }
+                                      }
+
+                                      if (item.created_date) {
+                                        return moment(new Date(item.created_date)).format(
+                                          "MMMM Do YYYY, h:mm:ss a"
+                                        );
+                                      }
+
+                                      // Handle case where date information is missing
+                                      return "Date Missing";
+                                    } catch (error) {
+                                      // Handle any parsing or formatting errors here
+                                      console.error("Date formatting error:", error);
+                                      return "Invalid Date"; // Or another error message or fallback
+                                    }
+                                  })()}
                                 </div>
                               </Tooltip>
                             </Cell>
