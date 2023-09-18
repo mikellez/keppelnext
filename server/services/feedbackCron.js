@@ -31,13 +31,47 @@ const connectDB = () => {
   return client;
 };
 
-const createFeedbacks = async () => {
+const createFeedbacks = async (date) => {
   const { FEEDBACK_USERNAME, FEEDBACK_HOSTNAME, FEEDBACK_CSVPATH, API_BASE_URL } = process.env;
   const client = connectDB();
 
-  const yesterdayDate = moment().subtract(1, "days").format("YYYY-MM-DD");
-  const localDirectoryPath = "./server/feedbackCSV2/" + yesterdayDate + "/"; // Replace with the actual directory path
-  const remoteDirectoryPath = `${FEEDBACK_USERNAME}@${FEEDBACK_HOSTNAME}:${FEEDBACK_CSVPATH}${yesterdayDate}/`; // // Replace with the actual directory path on public remote server
+  let folderDate = moment().subtract(1, "days").format("YYYY-MM-DD"); // yesterdays date
+  let lastSyncDate = folderDate;
+  let syncDate = moment().format("YYYY-MM-DD"); // todays date
+
+  // Check if date is specified for lastSyncDate
+  const lastSyncDatefolderPath = `./server/feedbackCSV/`; // Change this to the path you want to check/create
+  const lastSyncDatefileName = 'feedback_date_sync.txt';
+
+  if(date !== ''){
+    folderDate = moment(date).format('YYYY-MM-DD');
+    // Define the file name and content
+    syncDate = date;
+
+
+    fs.readFile(lastSyncDatefolderPath + lastSyncDatefileName, 'utf8', (err, data) => {
+      if (err) {
+        console.error('Error reading the file:', err);
+      } else {
+        console.log('File contents:', data);
+        lastSyncDate = data;
+      }
+    });
+
+    // Check if the folder exists
+    if (!fs.existsSync(lastSyncDatefolderPath)) {
+      // If it doesn't exist, create it
+      fs.mkdirSync(lastSyncDatefolderPath);
+      console.log(`Folder '${lastSyncDatefolderPath}' created.`);
+
+    } else {
+      console.log(`Folder '${lastSyncDatefolderPath}' already exists.`);
+    }
+
+  }
+
+  const localDirectoryPath = "./server/feedbackCSV2/" + folderDate + "/"; // Replace with the actual directory path
+  const remoteDirectoryPath = `${FEEDBACK_USERNAME}@${FEEDBACK_HOSTNAME}:${FEEDBACK_CSVPATH}${folderDate}/`; // // Replace with the actual directory path on public remote server
   console.log(remoteDirectoryPath)
 
   // Constructing the rsync command - https://www.npmjs.com/package/rsync
@@ -69,9 +103,34 @@ const createFeedbacks = async () => {
         }
 
         // Getting the files with the required date and extracting their content
-        const filteredFiles = files.filter((file) =>
-          file.startsWith(yesterdayDate)
-        );
+        const filteredFiles = files.filter((file) => {
+          //file.startsWith(folderDate)
+          // Split the file name into parts eg, sample: 2023-08-17_17-47-33-a87f188d52ff41a9d80f653d413d6366.csv
+          const parts = file.split('_')
+
+          // Extract date and time components
+          const year = parts[0].split('-')[0];
+          const month = parts[0].split('-')[1];
+          const day = parts[0].split('-')[2]; // Extract the day and remove the trailing part
+
+          const hours = parts[1].split("-")[0];
+          const minutes = parts[1].split("-")[1];
+          const seconds = parts[1].split("-")[2];
+
+          // Create a Date object with the extracted components
+          const fileDateStr = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
+          const fileDate = new Date(fileDateStr);
+
+          const startDate = new Date(lastSyncDate);
+          const endDate = new Date(syncDate);
+
+          // Check if the file's date is within the specified range
+          console.log('startDate', startDate, 'endDate', endDate, fileDate >= startDate && fileDate <= endDate);
+
+          // Check if the file's date is within the specified range
+          return fileDate >= startDate && fileDate <= endDate;
+        });
 
         filteredFiles.forEach((file) => {
           const filePath = path.join(localDirectoryPath, file);
@@ -116,6 +175,16 @@ const createFeedbacks = async () => {
           });
         });
         console.log("Files with date format YYYY-MM-DD:", filteredFiles);
+
+        // Create the file
+        fs.writeFile(lastSyncDatefolderPath + lastSyncDatefileName, lastSyncDate, (err) => {
+          if (err) {
+            console.error('Error creating the file:', err);
+          } else {
+            console.log(`File "${lastSyncDatefileName}" has been created.`);
+          }
+        });
+
       });
     });
   } catch (err) {
@@ -156,11 +225,11 @@ const updatePublicServerStore = async (client) => {
       console.error("Error updating Public Server store:", err);
     }
 }
-const main = async () => {
+const main = async (date = '') => {
   try {
     const client = connectDB();
     // Cron Job for retrieving feedback from the store
-    const feedbacks = await createFeedbacks();
+    const feedbacks = await createFeedbacks(date);
     if(feedbacks){
       console.log("System Generated Feedbacks Created.");
     }
@@ -175,10 +244,10 @@ const main = async () => {
   }
 };
 
-const runMainManually = async () => {
+const runMainManually = async (date) => {
   try {
     console.log("Manually triggering main...");
-    await main();
+    await main(date);
     console.log("Manual execution of main completed.");
   } catch (err) {
     console.log(err);
@@ -196,7 +265,14 @@ module.exports = { start };
 // Check if the script is being run directly
 if (require.main === module) {
   if (process.argv[2] === "manual") {
-    runMainManually(); // Run the main function manually
+    let date = '';
+    if(process.argv[3] && typeof process.argv[3] !== 'undefined'){
+      date = process.argv[3];
+    }
+
+    console.log(date)
+
+    runMainManually(date); // Run the main function manually
   } else {
     // Schedule the cron job
     start();

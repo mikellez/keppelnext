@@ -26,7 +26,6 @@ import { FiRefreshCw } from "react-icons/fi";
 import info from "../../public/master.json";
 import { useCurrentUser } from "../../components/SWR"
 
-const { userPermission } = useCurrentUser();
 
 interface CMMSMaster {
   idName: string;
@@ -79,6 +78,8 @@ function MasterActions({
   onClickEdit?: React.MouseEventHandler<HTMLButtonElement>;
   editHref: string;
 }) {
+  const { userPermission } = useCurrentUser();
+
   return (
     <div
       style={{
@@ -106,6 +107,7 @@ function MasterActions({
 }
 
 export default function Master() {
+  const { userPermission } = useCurrentUser();
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
   const [masterItems, setMasterItems] = useState<CMMSMasterData[]>([]);
   const [columnSizes, setColumnSizes] = useState<string>(

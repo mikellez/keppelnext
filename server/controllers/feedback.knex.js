@@ -3,7 +3,7 @@
  * used on the frontend
  */
 
-const moment = require("moment");
+const moment = require("moment-timezone");
 const fs = require("fs");
 const path = require('path');
 const { generateCSV } = require("../csvGenerator");
@@ -14,6 +14,7 @@ const {
 } = require("../mailer/FeedbackMail");
 const md5 = require("blueimp-md5");
 const { json } = require("stream/consumers");
+const { exec } = require('child_process');
 
 const ITEMS_PER_PAGE = 10;
 
@@ -528,6 +529,28 @@ const createFeedbackCSV = async (req, res, next) => {
   });
 };
 
+const triggerSyncAndCreateFeedback = async (req, res, next) => {
+  const scriptPath = './server/services/feedbackCron.js manual';
+  const timeZone = 'Asia/Singapore';
+  const now = moment.tz(timeZone);
+
+  const today = now.format("YYYY-MM-DD HH:mm:ss");
+  console.log(`node ${scriptPath} '${today}'`)
+
+  exec(`node ${scriptPath} "${today}"`, (error, stdout, stderr) => {
+    console.log('test2')
+    if (error) {
+      console.error(`Error executing the script: ${error}`);
+      return;
+    }
+
+    console.log(`Script output: ${stdout}`);
+  });
+
+  return res.status(200).send("success");
+
+}
+
 module.exports = {
   fetchPendingFeedback,
   fetchAssignedFeedback,
@@ -538,4 +561,5 @@ module.exports = {
   completeFeedback,
   fetchSingleFeedback,
   createFeedbackCSV,
+  triggerSyncAndCreateFeedback
 };

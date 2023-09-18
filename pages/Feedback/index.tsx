@@ -51,6 +51,7 @@ import { CMMSFeedback } from "../../types/common/interfaces";
 import { ThreeDots } from "react-loading-icons";
 import { getColor } from "../Request";
 import { HiOutlineDownload } from "react-icons/hi";
+import { AiOutlineCloudSync } from "react-icons/ai";
 import TooltipBtn from "../../components/TooltipBtn";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import LoadingHourglass from "../../components/LoadingHourglass";
@@ -106,6 +107,17 @@ export interface FeedbackPageProps {
 //     console.log(e);
 //   }
 // };
+const syncList = async () => {
+  try {
+    const response = await instance({
+      url: `/api/feedback/sync`,
+      method: "post",
+    });
+    console.log(response);
+  } catch (e) {
+    console.log(e);
+  }
+}
 
 export default function Feedback(props: FeedbackPageProps) {
   const [feedbackItems, setFeedbackItems] = useState<CMMSFeedback[]>([]);
@@ -189,6 +201,12 @@ export default function Feedback(props: FeedbackPageProps) {
         >
           <HiOutlineDownload size={20} />
         </TooltipBtn> */}
+        <TooltipBtn
+          onClick={() => syncList()}
+          text="Sync List"
+        >
+          <AiOutlineCloudSync size={20} />
+        </TooltipBtn>
       </ModuleHeader>
 
       <ModuleContent>
