@@ -2325,7 +2325,7 @@ router.patch(
 
 router.post("/feedback/csv", controllers.feedbackKnex.createFeedbackCSV);
 
-router.post("/feedback/sync", controllers.feedbackKnex.triggerSyncAndCreateFeedback);
+router.post("/feedback/sync", checkIfLoggedInAPI, controllers.feedbackKnex.triggerSyncAndCreateFeedback);
 
 router.get(
   "/activity/account_log",
