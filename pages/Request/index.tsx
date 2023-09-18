@@ -86,7 +86,6 @@ import animationStyles from "../../styles/animations.module.css";
 import { AnyAaaaRecord } from "dns";
 import { StringOptions } from "sass";
 import { GrReturn } from "react-icons/gr";
-import { Request_Status } from "../../types/common/enums";
 
 
 /*export type TableNode<T> = {
@@ -299,10 +298,10 @@ export default function Request(props: RequestProps) {
   // Used for adding the overdue column into the template when the assigned/pending tab is selected
   const tableFormat =
     activeTabIndex === 0 || activeTabIndex === 1
-      ? `--data-table-library_grid-template-columns:  5em 13em 8em 6em 6em 14em 10em 15em 8em 6em;
+      ? `--data-table-library_grid-template-columns:  6em 4em 13em 8em 6em 6em 14em 10em 15em 8em;
       
   `
-      : `--data-table-library_grid-template-columns:  5em 13em 8em 6em 6em 14em 15em 8em 6em;
+      : `--data-table-library_grid-template-columns:  6em 4em 13em 8em 6em 6em 14em 15em 8em;
       
   `;
 
@@ -413,7 +412,7 @@ export default function Request(props: RequestProps) {
   }
 
   const customSortByPriority = (a: any, b: any) => {
-    const priorityOrder = { "LOW": 1, "MEDIUM": 2, "HIGH": 3, null: 0 };
+    const priorityOrder = { LOW: 1, MEDIUM: 2, HIGH: 3, null: 0 };
     const priorityA = priorityOrder[a.priority];
     const priorityB = priorityOrder[b.priority];
 
@@ -466,11 +465,12 @@ export default function Request(props: RequestProps) {
 
   async function sortDate(activeTabIndex: any) {
     setBlockReset(true);
-    let dateType = activeTabIndex === 2
-      ? "Completed Date"
-      : activeTabIndex === 3
-      ? "Approved Date"
-      : "Created On"
+    let dateType =
+      activeTabIndex === 2
+        ? "Completed Date"
+        : activeTabIndex === 3
+        ? "Approved Date"
+        : "Created On";
     if (dateArrow == "" || dateArrow == " ▲") {
       setDateArrow(" ▼");
       setRequestItems((prevState) => {
@@ -481,12 +481,12 @@ export default function Request(props: RequestProps) {
           );
         } else if (dateType == "Completed Date") {
           newState.sort((a, b) =>
-          new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
-        );
+            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
+          );
         } else if (dateType == "Approved Date") {
           newState.sort((a, b) =>
-          new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
-        );
+            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
+          );
         }
         return newState;
       });
@@ -500,12 +500,12 @@ export default function Request(props: RequestProps) {
           );
         } else if (dateType == "Completed Date") {
           newState.sort((a, b) =>
-          new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
-        );
+            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
+          );
         } else if (dateType == "Approved Date") {
           newState.sort((a, b) =>
-          new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
-        );
+            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
+          );
         }
 
         return newState;
@@ -515,7 +515,10 @@ export default function Request(props: RequestProps) {
 
   async function sortAssetName() {
     setBlockReset(true);
-    if (assetNameHeader === "Asset Name" || assetNameHeader === "Asset Name ▲") {
+    if (
+      assetNameHeader === "Asset Name" ||
+      assetNameHeader === "Asset Name ▲"
+    ) {
       setAssetNameHeader("Asset Name ▼");
       setRequestItems((prevState) => {
         const newState = [...prevState];
@@ -533,13 +536,16 @@ export default function Request(props: RequestProps) {
   }
 
   // const customSortRequestedBy = (a,b) => {
-  //   const usernameA = 
+  //   const usernameA =
   // }
 
   async function sortRequestedBy() {
     //linked to user_id, related to user_name in users table
     setBlockReset(true);
-    if (requestedByHeader === "Requested By" || requestedByHeader === "Requested By ▲") {
+    if (
+      requestedByHeader === "Requested By" ||
+      requestedByHeader === "Requested By ▲"
+    ) {
       setRequestedByHeader("Requested By ▼");
       setRequestItems((prevState) => {
         const newState = [...prevState];
@@ -555,7 +561,7 @@ export default function Request(props: RequestProps) {
       });
     }
   }
-3434
+  3434;
   return (
     <ModuleMain>
       <ModuleHeader title="Request" header="Request">
@@ -649,6 +655,7 @@ export default function Request(props: RequestProps) {
                 <>
                   <Header>
                     <HeaderRow>
+                      <HeaderCell resize>Action</HeaderCell>
                       <HeaderCell
                         resize
                         onClick={() => updateTable(sortId)}
@@ -680,7 +687,9 @@ export default function Request(props: RequestProps) {
                       <HeaderCell resize>Status</HeaderCell>
                       <HeaderCell
                         resize
-                        onClick={() => updateTable(() => sortDate(activeTabIndex))}
+                        onClick={() =>
+                          updateTable(() => sortDate(activeTabIndex))
+                        }
                         style={{ cursor: "pointer" }}
                       >
                         {activeTabIndex === 2
@@ -694,20 +703,20 @@ export default function Request(props: RequestProps) {
                       {(activeTabIndex === 0 || activeTabIndex === 1) && (
                         <HeaderCell resize>Overdue Status</HeaderCell>
                       )}
-                      <HeaderCell 
+                      <HeaderCell
                         resize
                         onClick={() => updateTable(sortAssetName)}
                         style={{ cursor: "pointer" }}
                       >
-                          {assetNameHeader}
+                        {assetNameHeader}
                       </HeaderCell>
-                      <HeaderCell 
+                      <HeaderCell
                         resize
                         onClick={() => updateTable(sortRequestedBy)}
-                        style={{ cursor: "pointer" }}>
-                          {requestedByHeader}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {requestedByHeader}
                       </HeaderCell>
-                      <HeaderCell resize>Action</HeaderCell>
                     </HeaderRow>
                   </Header>
                   <Body>
@@ -715,6 +724,102 @@ export default function Request(props: RequestProps) {
                       return (
                         <React.Fragment key={item.id}>
                           <Row item={item} onClick={handleExpand}>
+                            <Cell>
+                              <div className={styles.iconsDiv}>
+                                {(item.status_id === 1 ||
+                                  item.status_id === 2) && (
+                                  <div
+                                    className={styles.editIcon}
+                                    style={{
+                                      display: userPermission(
+                                        "canAssignRequestTicket"
+                                      )
+                                        ? "block"
+                                        : "none",
+                                      // visibility:
+                                      //     item.status_id === 1 || item.status_id === 2 ? "visible" : "hidden",
+                                    }}
+                                    onClick={() => {
+                                      router.push(`/Request/Assign/${item.id}`);
+                                      setReady(false);
+                                    }}
+                                  >
+                                    <AiOutlineUserAdd
+                                      size={18}
+                                      title={"Assign"}
+                                    />
+                                  </div>
+                                )}
+                                {item.status_id === 3 && (
+                                  <div
+                                    className={styles.editIcon}
+                                    style={{
+                                      display: userPermission(
+                                        "canManageRequestTicket"
+                                      )
+                                        ? "block"
+                                        : "none",
+                                      // visibility: item.status_id === 3 ? "visible" : "hidden",
+                                    }}
+                                    onClick={() => {
+                                      router.push(`/Request/Manage/${item.id}`);
+                                      setReady(false);
+                                    }}
+                                  >
+                                    <BiCommentCheck
+                                      size={18}
+                                      title={"Manage"}
+                                    />
+                                  </div>
+                                )}
+                                {!item.associatedrequestid &&
+                                  item.status_id != 4 && (
+                                    <div
+                                      className={styles.editIcon}
+                                      style={{
+                                        display: userPermission(
+                                          "canCreateCorrectiveRequestTicket"
+                                        )
+                                          ? "block"
+                                          : "none",
+                                        // visibility: item.status_id === 3 ? "visible" : "hidden",
+                                      }}
+                                      onClick={() => {
+                                        router.push(
+                                          `/Request/CorrectiveRequest/${item.id}`
+                                        );
+                                        setReady(false);
+                                      }}
+                                    >
+                                      <HiOutlineLink
+                                        size={18}
+                                        title={"Create Corrective Request"}
+                                      />
+                                    </div>
+                                  )}
+                                <div
+                                  className={styles.editIcon}
+                                  style={{
+                                    display: userPermission(
+                                      "canViewRequestHistory"
+                                    )
+                                      ? "block"
+                                      : "none",
+                                    // visibility: item.status_id === 3 ? "visible" : "hidden",
+                                  }}
+                                  onClick={() => {
+                                    // console.log(item.status_id, item.associatedrequestid)
+                                    setCurrentHistory(item.activity_log);
+                                  }}
+                                >
+                                  <AiOutlineHistory
+                                    size={18}
+                                    title={"View History"}
+                                  />
+                                </div>
+                              </div>
+                            </Cell>
+
                             <Cell>{item.id}</Cell>
                             <Cell>
                               <Tooltip
@@ -853,97 +958,6 @@ export default function Request(props: RequestProps) {
                                 <div>{item.created_by}</div>
                               </Tooltip>
                             </Cell>
-                            <Cell>
-                              <div className={styles.iconsDiv}>
-                                {(item.status_id === 1 ||
-                                  item.status_id === 2) && (
-                                  <div
-                                    className={styles.editIcon}
-                                    style={{
-                                      display:
-                                        userPermission('canAssignRequestTicket')
-                                          ? "block"
-                                          : "none",
-                                      // visibility:
-                                      //     item.status_id === 1 || item.status_id === 2 ? "visible" : "hidden",
-                                    }}
-                                    onClick={() => {
-                                      router.push(`/Request/Assign/${item.id}`);
-                                      setReady(false);
-                                    }}
-                                  >
-                                    <AiOutlineUserAdd
-                                      size={18}
-                                      title={"Assign"}
-                                    />
-                                  </div>
-                                )}
-                                {item.status_id === 3 && (
-                                  <div
-                                    className={styles.editIcon}
-                                    style={{
-                                      display:
-                                          userPermission('canManageRequestTicket')
-                                          ? "block"
-                                          : "none",
-                                      // visibility: item.status_id === 3 ? "visible" : "hidden",
-                                    }}
-                                    onClick={() => {
-                                      router.push(`/Request/Manage/${item.id}`);
-                                      setReady(false);
-                                    }}
-                                  >
-                                    <BiCommentCheck
-                                      size={18}
-                                      title={"Manage"}
-                                    />
-                                  </div>
-                                )}
-                                {!item.associatedrequestid &&
-                                  item.status_id != 4 && (
-                                    <div
-                                      className={styles.editIcon}
-                                      style={{
-                                        display:
-                                            userPermission('canCreateCorrectiveRequestTicket')
-                                            ? "block"
-                                            : "none",
-                                        // visibility: item.status_id === 3 ? "visible" : "hidden",
-                                      }}
-                                      onClick={() => {
-                                        router.push(
-                                          `/Request/CorrectiveRequest/${item.id}`
-                                        );
-                                        setReady(false);
-                                      }}
-                                    >
-                                      <HiOutlineLink
-                                        size={18}
-                                        title={"Create Corrective Request"}
-                                      />
-                                    </div>
-                                  )}
-                                <div
-                                  className={styles.editIcon}
-                                  style={{
-                                    display:
-                                        userPermission('canViewRequestHistory')
-                                        ? "block"
-                                        : "none",
-                                    // visibility: item.status_id === 3 ? "visible" : "hidden",
-                                  }}
-                                  onClick={() => {
-                                    // console.log(item.status_id, item.associatedrequestid)
-                                    setCurrentHistory(item.activity_log);
-                                  }}
-                                >
-                                  <AiOutlineHistory
-                                    size={18}
-                                    title={"View History"}
-                                  />
-                                </div>
-                              </div>
-                            </Cell>
                           </Row>
 
                           {ids.includes(item.id) &&
@@ -1059,30 +1073,44 @@ export default function Request(props: RequestProps) {
                                     >
                                       {(() => {
                                         try {
-                                          if ( userPermission('canManageRequestTicket') && item.status_id === Request_Status.Completed) {
+                                          if ( userPermission('canManageRequestTicket') && item.status_id === 3) {
                                             return (
-                                              <Link href={`/Request/Manage/${item.id}`}>
+                                              <Link
+                                                href={`/Request/Manage/${item.id}`}
+                                              >
                                                 <strong>Manage</strong>
                                               </Link>
                                             );
-                                          } else if ( userPermission('canCompleteRequestTicket') && [Request_Status.Assigned, Request_Status.Rejected].includes(item.status_id)) {
+                                          } else if ( userPermission('canCompleteRequestTicket') && (item.status_id === 2 || item.status_id === 5)) {
                                             return (
-                                              <Link href={`/Request/Complete/${item.id}`}>
+                                              <Link
+                                                href={`/Request/Complete/${item.id}`}
+                                              >
                                                 <strong>Complete</strong>
                                               </Link>
                                             );
-                                          } else if( userPermission('canViewRequestTicket') ) {
+                                          } else if (
+                                            userPermission(
+                                              "canViewRequestTicket"
+                                            )
+                                          ) {
                                             return (
-                                              <Link href={`/Request/View/${item.id}`}>
+                                              <Link
+                                                href={`/Request/View/${item.id}`}
+                                              >
                                                 <strong>View</strong>
                                               </Link>
                                             );
                                           }
                                         } catch (error) {
-                                          console.error('Error:', error);
-                                          return <div>Error: Unable to render content</div>;
+                                          console.error("Error:", error);
+                                          return (
+                                            <div>
+                                              Error: Unable to render content
+                                            </div>
+                                          );
                                         }
-                                      })()}                                      
+                                      })()}
                                     </li>
                                   </ul>
                                 </td>

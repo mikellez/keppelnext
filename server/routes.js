@@ -1378,9 +1378,11 @@ router.get(
   checkIfLoggedInAPI,
   controllers.asset.fetchSystemAssets
 );
+
 /**
  * @api {get} /fetchSystemAssetNames Gets all system asset names(lvl 6) for the asset table
  * @apiDescription Gets all the system asset names to display on the asset table
+ * 
  * @apiName fetchSystemAssetName
  * @apiGroup Asset
  * @apiSuccess {string} -.system_asset_lvl6 System Asset Names
@@ -2036,7 +2038,7 @@ router.get(
 router.get(
   "/feedback/pending/:plant/:datetype/:date",
   checkIfLoggedInAPI,
-  controllers.feedback.fetchPendingFeedback
+  controllers.feedbackKnex.fetchPendingFeedback
 );
 
 /**
@@ -2318,7 +2320,7 @@ router.patch(
  *
  *
  * @apiSuccess {String} staus 200 ""
- * @apiError (Error 500) {String}
+ * @apiError (Error 500) {String} Error file not Created
  */
 
 router.post("/feedback/csv", controllers.feedbackKnex.createFeedbackCSV);
