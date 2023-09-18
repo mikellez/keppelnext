@@ -130,6 +130,15 @@ const createFeedbacks = async (date) => {
 
           // Check if the file's date is within the specified range
           return fileDate >= startDate && fileDate <= endDate;
+        }); 
+        // Create the file
+        console.log(lastSyncDatefolderPath + lastSyncDatefileName, syncDate)
+        fs.writeFile(lastSyncDatefolderPath + lastSyncDatefileName, syncDate, (err) => {
+          if (err) {
+            console.error('Error creating the file:', err);
+          } else {
+            console.log(`File "${lastSyncDatefileName}" has been created.`);
+          }
         });
 
         filteredFiles.forEach((file) => {
@@ -169,21 +178,13 @@ const createFeedbacks = async (date) => {
                   console.log("Unable to create feedback");
                 });
 
-                return;
               }
             });
           });
         });
         console.log("Files with date format YYYY-MM-DD:", filteredFiles);
 
-        // Create the file
-        fs.writeFile(lastSyncDatefolderPath + lastSyncDatefileName, lastSyncDate, (err) => {
-          if (err) {
-            console.error('Error creating the file:', err);
-          } else {
-            console.log(`File "${lastSyncDatefileName}" has been created.`);
-          }
-        });
+       
 
       });
     });
