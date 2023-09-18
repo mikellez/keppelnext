@@ -96,7 +96,7 @@ const createFeedbacks = async (date) => {
         return;
       }
       console.log("Command execution complete:", cmd);
-      fs.readdir(localDirectoryPath, (err, files) => {
+      fs.readdir(localDirectoryPath, async (err, files) => {
         if (err) {
           console.error("Error reading directory:", err);
           return;
@@ -131,60 +131,84 @@ const createFeedbacks = async (date) => {
           // Check if the file's date is within the specified range
           return fileDate >= startDate && fileDate <= endDate;
         }); 
-        // Create the file
+
+        // Create the file and write the syncDate to it, if there are files to process, else exit
         console.log(lastSyncDatefolderPath + lastSyncDatefileName, syncDate)
         fs.writeFile(lastSyncDatefolderPath + lastSyncDatefileName, syncDate, (err) => {
           if (err) {
             console.error('Error creating the file:', err);
           } else {
             console.log(`File "${lastSyncDatefileName}" has been created.`);
+            if(filteredFiles.length === 0){
+              console.log("No files to process");
+              process.exit(0);
+            }
           }
         });
 
-        filteredFiles.forEach((file) => {
+        const postPromises = filteredFiles.map((file) => {
           const filePath = path.join(localDirectoryPath, file);
-          fs.readFile(filePath, "utf8", (err, data) => {
-            if (err) {
-              console.error("Error reading file:", err);
-              return;
-            }
-            // Process data from the file
-            let columnData = {};
-            const lines = data.split('\n');
 
-            lines.forEach((line, lineIndex) => {
-              const columns = line.split(','); // Split line into columns based on comma (CSV)
+          return new Promise((resolve, reject) => {
 
-              if (lineIndex === 0) {
-                headers = columns.map(header => header.trim());
-              } else {
-                columns.forEach((column, columnIndex) => {
-                  const header = headers[columnIndex];
-                  let value = column.trim();
-                  if (!columnData[header]) {
-                    columnData[header] = "";
-                  }
-
-                  value = value.replaceAll("^", ",");
-
-                  columnData[header] = JSON.parse(value);
-                });
-                // Create feedback for each feedback csv retrieved
-                axios.post(`${API_BASE_URL}/api/feedback`, columnData).then((res) => {
-                  console.log("Feedback created for " + filePath);
-                  return res;
-                }).catch((err) => {
-                  console.log(err);
-                  console.log("Unable to create feedback");
-                });
-
+            fs.readFile(filePath, "utf8", (err, data) => {
+              if (err) {
+                console.error("Error reading file:", err);
+                reject(err);
+                return;
               }
+              // Process data from the file
+              let columnData = {};
+              const lines = data.split('\n');
+
+              lines.forEach((line, lineIndex) => {
+                const columns = line.split(','); // Split line into columns based on comma (CSV)
+
+                if (lineIndex === 0) {
+                  headers = columns.map(header => header.trim());
+                } else {
+                  columns.forEach((column, columnIndex) => {
+                    const header = headers[columnIndex];
+                    let value = column.trim();
+                    if (!columnData[header]) {
+                      columnData[header] = "";
+                    }
+
+                    value = value.replaceAll("^", ",");
+
+                    columnData[header] = JSON.parse(value);
+                  });
+                  // Create feedback for each feedback csv retrieved
+                  axios.post(`${API_BASE_URL}/api/feedback`, columnData).then((res) => {
+                    console.log("Feedback created for " + filePath);
+                    resolve(res);
+                    return res;
+                  }).catch((err) => {
+                    console.log(err);
+                    console.log("Unable to create feedback");
+                  });
+
+                }
+              });
             });
+
           });
         });
-        console.log("Files with date format YYYY-MM-DD:", filteredFiles);
 
-       
+        console.log(postPromises)
+        // Wait for all the promises to be resolved
+        Promise.all(postPromises)
+        .then((results) => {
+          console.log('All feedbacks created.');
+          console.log('Response:', results);
+          process.exit(0);
+        })
+        .catch((err) => {
+          console.error(err);
+          console.log('Unable to create feedbacks');
+          process.exit(1);
+        });
+        console.log("Files with date format YYYY-MM-DD:", filteredFiles);
 
       });
     });

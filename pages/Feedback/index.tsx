@@ -23,6 +23,7 @@
 */
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import Link from "next/link";
 import {
   ModuleContent,
@@ -107,19 +108,10 @@ export interface FeedbackPageProps {
 //     console.log(e);
 //   }
 // };
-const syncList = async () => {
-  try {
-    const response = await instance({
-      url: `/api/feedback/sync`,
-      method: "post",
-    });
-    console.log(response);
-  } catch (e) {
-    console.log(e);
-  }
-}
 
 export default function Feedback(props: FeedbackPageProps) {
+  const router = useRouter();
+  const [isLoading, setLoading] = useState<boolean>(false);
   const [feedbackItems, setFeedbackItems] = useState<CMMSFeedback[]>([]);
   const [isReady, setReady] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(
@@ -187,6 +179,22 @@ export default function Feedback(props: FeedbackPageProps) {
       });
   }, [activeTabIndex, page]);
   // console.log(isReady);
+
+  const syncList = async () => {
+    setLoading(true);
+    try {
+      const response = await instance({
+        url: `/api/feedback/sync`,
+        method: "post",
+      });
+      console.log(response);
+      setLoading(false);
+      router.push("/Feedback");
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   return (
     <ModuleMain>
       <ModuleHeader title="Feedback" header="Feedback">
@@ -392,6 +400,16 @@ export default function Feedback(props: FeedbackPageProps) {
             <FeedbackHistory history={history!} />
           </ModuleModal>
         )}
+        <ModuleModal
+          isOpen={!!isLoading}
+          closeModal={() => setLoading(false)}
+          closeOnOverlayClick={true}
+        >
+          <LoadingHourglass />
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: "1rem" }}>
+            Syncing... Please wait while it syncs...
+          </div>
+        </ModuleModal>
       </ModuleContent>
     </ModuleMain>
   );

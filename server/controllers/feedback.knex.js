@@ -14,7 +14,7 @@ const {
 } = require("../mailer/FeedbackMail");
 const md5 = require("blueimp-md5");
 const { json } = require("stream/consumers");
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 
 const ITEMS_PER_PAGE = 10;
 
@@ -530,14 +530,17 @@ const createFeedbackCSV = async (req, res, next) => {
 };
 
 const triggerSyncAndCreateFeedback = async (req, res, next) => {
-  const scriptPath = './server/services/feedbackCron.js manual';
+  const scriptPath = './server/services/feedbackCron.js';
   const timeZone = 'Asia/Singapore';
   const now = moment.tz(timeZone);
 
   const today = now.format("YYYY-MM-DD HH:mm:ss");
+  const arg1 = 'manual';
+  const arg2 = today;
+
   console.log(`node ${scriptPath} '${today}'`)
 
-  exec(`node ${scriptPath} "${today}"`, (error, stdout, stderr) => {
+  /*exec(`node ${scriptPath} ${arg1} "${arg2}"`, (error, stdout, stderr) => {
     console.log('test2')
     if (error) {
       console.error(`Error executing the script: ${error}`);
@@ -545,9 +548,27 @@ const triggerSyncAndCreateFeedback = async (req, res, next) => {
     }
 
     console.log(`Script output: ${stdout}`);
+    return res.status(200).send("success");
+  });*/
+  const scriptProcess = spawn('node', [scriptPath, arg1, arg2]);
+
+  scriptProcess.stdout.on('data', (data) => {
+    console.log(`Script output: ${data}`);
+    if(data == 'success'){
+      return res.status(200).send("success");
+    }
   });
 
-  return res.status(200).send("success");
+  scriptProcess.stderr.on('data', (data) => {
+    console.error(`Script error output: ${data}`);
+    return res.status(500).send("error");
+  });
+
+  scriptProcess.on('close', (code) => {
+    console.log(`Script exited with code ${code}`);
+    return res.status(200).send("success");
+  });
+
 
 }
 
