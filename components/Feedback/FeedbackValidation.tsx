@@ -20,7 +20,7 @@ export default function FeedbackValidation(value: any, label: any) {
     return (
       <div>
         <label className="form-label">
-          <RequiredIcon /> {label}
+          {label} <RequiredIcon />
         </label>
         <input type="text" className="form-control" disabled value={value} />
       </div>

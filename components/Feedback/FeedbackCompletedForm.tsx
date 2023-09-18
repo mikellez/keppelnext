@@ -153,7 +153,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
         <div className={formStyles.halfContainer}>
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon /> Assigned to
+              Assigned to <RequiredIcon />
             </label>
             <input
               type="text"
@@ -162,7 +162,14 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
               value={props.feedbackData.assigned_user_name}
             />
           </div>
-          {props.feedbackData.image != "" && (
+          <div className="form-group">
+            <label className="form-label">
+              Feedback Image
+            </label>
+
+            <ImagePreview previewObjURL={props.feedbackData.image} />
+          </div>
+          {/*props.feedbackData.image != "" && (
             <div
               className={`${formStyles.imageClick} form-group`}
               onClick={() => setFeedbackImage(true)}
@@ -175,7 +182,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
                 </label>
               </div>
             </div>
-          )}
+          )*/}
         </div>
       </ModuleContent>
       <ModuleDivider />
@@ -184,7 +191,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
         <div className={formStyles.halfContainer}>
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon /> Name
+              Feedback Name <RequiredIcon /> 
             </label>
             <input
               type="text"
@@ -201,7 +208,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
             {props.feedbackData.created_user_id != "55" ? (
               <>
                 <label className="form-label">
-                  <RequiredIcon /> Email
+                  Feedback Email <RequiredIcon />
                 </label>
                 <input
                   type="text"
@@ -221,13 +228,13 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
                 <div className="form-group">
                   {FeedbackValidation(
                     props.feedbackData.contact.number,
-                    "Contact"
+                    "Feedback Contact"
                   )}
                 </div>
                 <div className="form-group">
                   {FeedbackValidation(
                     props.feedbackData.contact.email,
-                    "Email"
+                    "Feedback Email"
                   )}
                 </div>
               </div>
@@ -235,7 +242,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
           </div>
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon /> Created Date
+              Created Date <RequiredIcon />
             </label>
             <input
               type="text"
@@ -248,7 +255,7 @@ const FeedbackCompletedForm = (props: FeedbackFormProps) => {
           </div>
         </div>
         <div className="form-group ms-3">
-          <label className="form-label">Remarks</label>
+          <label className="form-label">Feedback Remarks</label>
           <textarea
             className="form-control"
             name="description"

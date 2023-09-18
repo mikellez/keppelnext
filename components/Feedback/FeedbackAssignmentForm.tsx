@@ -42,6 +42,7 @@ import { FeedbackFormProps } from "../../pages/Feedback";
 import { ModuleModal } from "../ModuleLayout/ModuleModal";
 import FeedbackValidation from "./FeedbackValidation";
 import { FullWidth } from "ag-grid-community/dist/lib/components/framework/componentTypes";
+import { BsCameraFill } from "react-icons/bs";
 
 const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
   const user = useCurrentUser();
@@ -165,18 +166,6 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
               defaultIds={f.assigned_user_id ? [f.assigned_user_id] : []}
             />
           </div>
-          {f.image != "" && (
-            <div
-              className={`${formStyles.imageClick} form-group`}
-              onClick={() => setImage(true)}
-            >
-              <div>
-                <label className="form-label">
-                  <p style={{ textDecoration: "underline" }}>
-                    View Feedback Image
-                  </p>
-                </label>
-              </div>
               {/* <ImagePreview previewObjURL={f.image} /> */}
               {/* <div style={{...previewContent, backgroundImage: 'url("' + f.image + '")'}}> */}
               {/* <img src={f.image} width="100%" height="100%" alt="" /> */}
@@ -187,8 +176,25 @@ const FeedbackAssignmentForm = (props: FeedbackFormProps) => {
               No Image
             </div>
           </div> */}
-            </div>
-          )}
+            {/*<div
+              className={`${formStyles.imageClick} form-group`}
+              onClick={() => setImage(true)}
+            >
+              <div>
+                <label className="form-label">
+                  <p style={{ textDecoration: "underline" }}>
+                    View Feedback Image
+                  </p>
+                </label>
+              </div>
+        </div>*/}
+          <div className="form-group">
+            <label className="form-label">
+              Feedback Image
+            </label>
+
+            <ImagePreview previewObjURL={f.image} />
+          </div>
         </div>
       </ModuleContent>
       <ModuleDivider />

@@ -130,7 +130,14 @@ const FeedbackViewForm = (props: FeedbackFormProps) => {
               value={props.feedbackData.assigned_user_name}
             />
           </div>
-          {props.feedbackData.image != "" && (
+          <div className="form-group">
+            <label className="form-label">
+              Feedback Image
+            </label>
+
+            <ImagePreview previewObjURL={props.feedbackData.image} />
+          </div>
+          {/*props.feedbackData.image != "" && (
             <div
               className={`${formStyles.imageClick} form-group`}
               onClick={() => setFeedbackImage(true)}
@@ -143,7 +150,7 @@ const FeedbackViewForm = (props: FeedbackFormProps) => {
                 </label>
               </div>
             </div>
-          )}
+          )*/}
         </div>
       </ModuleContent>
       <ModuleDivider />
@@ -226,7 +233,13 @@ const FeedbackViewForm = (props: FeedbackFormProps) => {
             value={props.feedbackData.remarks ? props.feedbackData.remarks : ""}
           ></textarea>
           <div className="form-group">
-            {props.feedbackData.completed_img != "" && (
+            <label className="form-label">
+              Completed Feedback Image
+            </label>
+
+            <ImagePreview previewObjURL={props.feedbackData.completed_img} />
+          </div>
+          {/*props.feedbackData.completed_img != "" && (<div className="form-group">
               <div
                 className={`${formStyles.imageClick} form-group mt-3`}
                 onClick={() => setCompleteImage(true)}
@@ -239,8 +252,8 @@ const FeedbackViewForm = (props: FeedbackFormProps) => {
                   </label>
                 </div>
               </div>
-            )}
-          </div>
+            )
+              </div>*/}
           {/* <div className="form-group">
           <label className="form-label">
             <RequiredIcon />

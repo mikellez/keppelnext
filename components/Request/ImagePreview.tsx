@@ -4,7 +4,7 @@ import { BsCameraFill } from "react-icons/bs";
 const greyFill = "rgba(0,0,0,0.05)";
 
 const previewContainer: CSSProperties = {
-  marginTop: "1em",
+  /*marginTop: "1em",*/
   marginBottom: "1em",
   padding: "1em",
   border: "6px solid " + greyFill,
@@ -17,9 +17,9 @@ const previewContainer: CSSProperties = {
 
 const centerTransform: CSSProperties = {
   position: "relative",
-  left: "50%",
+  /*left: "50%",
   top: "50%",
-  transform: "translate(-50%, -50%)",
+  transform: "translate(-50%, -50%)",*/
 };
 
 const previewContent: CSSProperties = {
@@ -47,6 +47,7 @@ export default function ImagePreview(props: ImagePreviewProps) {
     : previewContent;
 
     const [isPortrait, setIsPortrait] = useState(false);
+    console.log(isPortrait)
 
   useEffect(() => {
     const img = new Image();
@@ -61,7 +62,7 @@ export default function ImagePreview(props: ImagePreviewProps) {
     <div style={previewContainer}>
       {/* <div style={previewContentFinal}> */}
         {props.previewObjURL ? <img width={isPortrait ? "50%" : "100%"} height={isPortrait ? "50%" : "100%"} src={props.previewObjURL} alt="" /> :(
-          <div style={centerTransform}>
+          <div style={previewContent}>
             <BsCameraFill size={104} fill={greyFill} />
             <div style={{ color: "rgba(0,0,0,0.1)" }}>No Image</div>
           </div>

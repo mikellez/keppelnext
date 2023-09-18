@@ -107,8 +107,6 @@ app.prepare().then(() => {
       //Logbook
       { path: "/Logbook", permission: "canViewLogbook" },
       // Feedback
-      { path: "/Feedback/Assign", permission: "canAssignFeedback"},
-      { path: "/Feedback/Complete", permission: "canCompleteFeedback"},
       // License
       { path: "/License/New", permission: "canCreateLicense"},
       { path: "/License/Acquire", permission: "canAcquireLicense"},
