@@ -64,7 +64,7 @@ const filterCondition = (status, plant, date, datetype) => {
     plantCond = `AND cl.plant_id = '${plant}'`;
   }
 
-  if (date !== "all") {
+  if (date && date !== "all") {
     switch (datetype) {
       case "week":
         dateCond = `
