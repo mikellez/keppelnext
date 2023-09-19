@@ -2,7 +2,6 @@ import type { DatePickerProps } from "antd";
 import { Select } from "antd";
 import moment from "moment";
 import { useEffect, useState } from "react";
-import { fetchData } from ".";
 import {
   ModuleContent,
   ModuleHeader,
@@ -807,7 +806,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
           )}
           {feedbackAccess && (<DashboardBox
             id="pending-feedback-box"
-            title="Pending Feedbacks"
+            title="Pending Public Feedbacks"
             style={{ gridArea: "m" }}
             onClick={handleDashboardClick}
             className={active === "pending-feedback-box" ? styles.active : ""}
@@ -819,7 +818,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
           }
           {feedbackAccess && (<DashboardBox
             id="outstanding-feedback-box"
-            title="Outstanding Feedbacks"
+            title="Outstanding Public Feedbacks"
             style={{ gridArea: "n" }}
             onClick={handleDashboardClick}
             className={
@@ -833,7 +832,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
           )}
           {feedbackAccess && (<DashboardBox
             id="completed-feedback-box"
-            title="Completed Feedbacks"
+            title="Completed Public Feedbacks"
             style={{ gridArea: "o" }}
             onClick={handleDashboardClick}
             className={active === "completed-feedback-box" ? styles.active : ""}
@@ -845,7 +844,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
           )}
           {showTotalContainer && feedbackAccess && (
             <DashboardBox
-              title={"Total Feedbacks: " + totalFeedback}
+              title={"Total Public Feedbacks: " + totalFeedback}
               style={{ gridArea: "p" }}
             >
               {feedbackData && feedbackData.length > 0 ? (

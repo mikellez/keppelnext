@@ -19,28 +19,29 @@
 import formStyles from "../styles/formStyles.module.css";
 import styles from "../styles/QRCode.module.css";
 
-import React, { useState, useRef, useEffect } from "react";
-import getConfig  from "next/config";
+import getConfig from "next/config";
+import React, { useEffect, useRef, useState } from "react";
 
 const { publicRuntimeConfig } = getConfig();
 const { feedbackApiBaseUrl } = publicRuntimeConfig;
 
-import {
-  ModuleMain,
-  ModuleHeader,
-  ModuleContent,
-  ModuleFooter,
-  ModuleDivider,
-} from "../components/";
-import { useAsset } from "../components/SWR";
-import { useQRCode } from "next-qrcode";
-import { CMMSAsset, CMMSPlant, CMMSPlantLoc } from "../types/common/interfaces";
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import instance from "../axios.config";
-import { set } from "nprogress";
-import AssetSearchBar from "../components/SearchBar/AssetsSearchBar";
 import downloadjs from "downloadjs";
 import html2canvas from "html2canvas";
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import { useQRCode } from "next-qrcode";
+import instance from "../axios.config";
+import {
+  ModuleContent,
+  ModuleHeader,
+  ModuleMain
+} from "../components/";
+import PlantSelect from "../components/PlantSelect";
+import RequiredIcon from "../components/RequiredIcon";
+import AssetSearchBar from "../components/SearchBar/AssetsSearchBar";
+import { useAsset } from "../components/SWR";
+import { CMMSAsset, CMMSPlant, CMMSPlantLoc } from "../types/common/interfaces";
+
+
 
 async function handleCaptureClick(name: string, id: string) {
   // console.log(document.getElementById("qr"));
@@ -325,7 +326,19 @@ function QRCode(props: NewAssetProps) {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Plant:</label>
+            <label className="form-label">
+              <RequiredIcon /> Plant:
+            </label>
+            <PlantSelect
+              onChange={(e) => {
+                // console.log(e.target.value);
+                setSelectedPlant(parseInt(e.target.value));
+                setInitialLoad(true);
+                // console.log(selectedPlant);}
+              }}
+              name="plant_id"
+            />
+            {/* <label className="form-label">Plant:</label>
             <select
               className="form-select"
               required
@@ -344,7 +357,7 @@ function QRCode(props: NewAssetProps) {
                   {plant.plant_name}
                 </option>
               ))}
-            </select>
+            </select> */}
           </div>
 
           {feedback && selectedPlant && (

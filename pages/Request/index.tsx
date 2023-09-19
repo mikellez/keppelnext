@@ -21,11 +21,9 @@
 */
 
 import React, {
-  useState,
   useEffect,
   useRef,
-  CSSProperties,
-  MouseEventHandler,
+  useState
 } from "react";
 import {
   ModuleContent,
@@ -35,57 +33,42 @@ import {
 } from "../../components";
 
 import {
-  Column,
-  CompactTable,
-  RowOptions,
-} from "@table-library/react-table-library/compact";
-import {
-  Table,
-  Header,
-  HeaderRow,
-  HeaderCell,
   Body,
-  Row,
   Cell,
-  OnClick,
+  Header,
+  HeaderCell,
+  HeaderRow,
+  Row,
+  Table
 } from "@table-library/react-table-library";
-import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
+import { useTheme } from "@table-library/react-table-library/theme";
 
-import Tooltip from "rc-tooltip";
-import "rc-tooltip/assets/bootstrap_white.css";
-import {
-  useRequest,
-  useRequestFilter,
-  useSpecificRequest,
-} from "../../components/SWR";
-import { CMMSRequest } from "../../types/common/interfaces";
+import moment from "moment";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import styles from "../../styles/Request.module.scss";
-import instance from "../../axios.config.js";
-import TooltipBtn from "../../components/TooltipBtn";
-import { FiChevronsLeft, FiChevronsRight, FiRefreshCw } from "react-icons/fi";
-import { HiOutlineDownload, HiOutlineLink } from "react-icons/hi";
-import { BsFileEarmarkPlus } from "react-icons/bs";
-import { AiOutlineHistory } from "react-icons/ai";
-import { AiOutlineUserAdd } from "react-icons/ai";
+import Tooltip from "rc-tooltip";
+import "rc-tooltip/assets/bootstrap_white.css";
+import { AiOutlineHistory, AiOutlineUserAdd } from "react-icons/ai";
 import { BiCommentCheck } from "react-icons/bi";
-import Image from "next/image";
-import { useCurrentUser } from "../../components/SWR";
-import RequestHistory from "../../components/Request/RequestHistory";
+import { BsFileEarmarkPlus } from "react-icons/bs";
+import { FiRefreshCw } from "react-icons/fi";
+import { HiOutlineDownload, HiOutlineLink } from "react-icons/hi";
+import instance from "../../axios.config.js";
 import LoadingHourglass from "../../components/LoadingHourglass";
-import PageButton from "../../components/PageButton";
-import { Role } from "../../types/common/enums";
-import { GetServerSidePropsContext } from "next";
 import Pagination from "../../components/Pagination";
-import moment from "moment";
+import RequestHistory from "../../components/Request/RequestHistory";
+import {
+  useCurrentUser,
+  useRequest,
+  useRequestFilter
+} from "../../components/SWR";
 import SearchBar from "../../components/SearchBar/SearchBar";
-import { request } from "http";
+import TooltipBtn from "../../components/TooltipBtn";
+import styles from "../../styles/Request.module.scss";
 import animationStyles from "../../styles/animations.module.css";
-import { AnyAaaaRecord } from "dns";
-import { StringOptions } from "sass";
-import { GrReturn } from "react-icons/gr";
+import { CMMSRequest } from "../../types/common/interfaces";
 
 
 /*export type TableNode<T> = {
@@ -128,6 +111,7 @@ export interface RequestItem {
   activity_log: { [key: string]: string }[];
   associatedrequestid?: number;
   overdue_status?: boolean;
+  description_other?: string;
 }
 
 export interface RequestProps {
@@ -247,7 +231,7 @@ export default function Request(props: RequestProps) {
       setIds(ids.concat(item.id));
       instance.get(`/api/request/${item.id}`).then((res: any) => {
         const request = res.data;
-        // console.log(request.associatedrequestid);
+        // console.log(request);
         // update with further details
         setRequestItems((prev) =>
           prev.map((req) =>
@@ -335,7 +319,7 @@ export default function Request(props: RequestProps) {
         if (!blockReset) {
           setRequestItems(
             requestData.rows.map((row: CMMSRequest, total: number) => {
-              //console.log(requestData);
+              // console.log(requestData);
 
               return {
                 id: row.request_id,
@@ -983,6 +967,17 @@ export default function Request(props: RequestProps) {
                               >
                                 <td style={{ flex: "1" }}>
                                   <ul className={styles.tableUL}>
+                                  {
+                                    item.fault_name === 'OTHERS' && 
+                                    <li
+                                      className={styles.tableDropdownListItem}
+                                    >
+                                      <p>
+                                        <strong>Fault Specification</strong>
+                                      </p>
+                                      <p>{item.description_other}</p>
+                                    </li>
+                                  }
                                     <li
                                       className={styles.tableDropdownListItem}
                                     >
@@ -991,6 +986,7 @@ export default function Request(props: RequestProps) {
                                       </p>
                                       <p>{item.fault_description}</p>
                                     </li>
+                                  
                                     <li
                                       className={styles.tableDropdownListItem}
                                     >
@@ -1081,8 +1077,10 @@ export default function Request(props: RequestProps) {
                                         <p>No File</p>
                                       )}
                                     </li>
-                                    <li
-                                      className={styles.tableDropdownListItem}
+                                    
+                                  </ul>
+                                  <li
+                                      className={styles.tableUL}
                                     >
                                       {(() => {
                                         try {
@@ -1125,7 +1123,6 @@ export default function Request(props: RequestProps) {
                                         }
                                       })()}
                                     </li>
-                                  </ul>
                                 </td>
                               </tr>
                             ) : (

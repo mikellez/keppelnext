@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { CMMSTimeline } from "../../types/common/interfaces";
+import React, { useEffect, useState } from "react";
 import instance from "../../types/common/axios.config";
+import { CMMSTimeline } from "../../types/common/interfaces";
 
 interface TimelineSelectProps {
   onChange: React.ChangeEventHandler<HTMLSelectElement>;
@@ -69,8 +69,12 @@ export default function TimelineSelect(props: TimelineSelectProps) {
         });
   }, [props.status, props.userCreated]);
 
+  const sortedTimelineList = timelineList.sort((a, b) => 
+    a.name.localeCompare(b.name)
+  );
+
   // Timeline dropdown options
-  const timelineOptions = timelineList.map((timeline) => (
+  const timelineOptions = sortedTimelineList.map((timeline) => (
     <option key={timeline.id} value={timeline.id}>
       {`${timeline.name} (${timeline.plantName})`}
     </option>

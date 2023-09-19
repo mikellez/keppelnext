@@ -25,38 +25,33 @@ import instance from "../../types/common/axios.config";
 
 import {
   ModuleContent,
-  ModuleDivider,
-  ModuleFooter,
-  ModuleModal,
+  ModuleFooter
 } from "../../components";
 import ImagePreview from "../../components/Request/ImagePreview";
 
+import moment from "moment";
+import { useRouter } from "next/router";
+import { PropsWithChildren } from "preact/compat";
 import { useForm } from "react-hook-form";
 import { SubmitHandler } from "react-hook-form/dist/types";
-import {
-  CMMSBaseType,
-  CMMSRequestTypes,
-  CMMSFaultTypes,
-  CMMSUser,
-  CMMSPlant,
-  CMMSAsset,
-  CMMSRequest,
-} from "../../types/common/interfaces";
-import RequiredIcon from "../../components/RequiredIcon";
-import PlantSelect from "../PlantSelect";
-import { PropsWithChildren } from "preact/compat";
-import { useRouter } from "next/router";
-import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
-import Select, { ActionMeta, MultiValue, StylesConfig } from "react-select";
-import Image from "next/image";
-import moment from "moment";
 import { TbSquareRoundedArrowRightFilled } from "react-icons/tb";
-import Link from "next/link";
+import Select from "react-select";
+import RequiredIcon from "../../components/RequiredIcon";
+import {
+  CMMSAsset,
+  CMMSFaultTypes,
+  CMMSRequest,
+  CMMSRequestTypes,
+  CMMSUser
+} from "../../types/common/interfaces";
+import PlantSelect from "../PlantSelect";
+import AssignToSelect, { AssignedUserOption } from "../Schedule/AssignToSelect";
 import SelectWithTooltip from "../SelectWithTooltip";
 
 type FormValues = {
   requestTypeID: number;
   faultTypeID: number;
+  description_other: string;
   description: string;
   // plantLocationID: number;
   taggedAssetID: number;
@@ -88,7 +83,8 @@ async function createRequest(
   formData.append("plantLocationID", plantId.toString());
   formData.append("requestTypeID", data.requestTypeID.toString());
   formData.append("taggedAssetID", data.taggedAssetID.toString());
-  // console.log(data);
+  formData.append("description_other", data.description_other);
+  // console.log("data", data);
   if (data.image.length > 0) formData.append("image", data.image[0]);
   if (linkedRequestId) formData.append("linkedRequestId", linkedRequestId);
 
@@ -176,6 +172,7 @@ export default function RequestContainer(props: RequestContainerProps) {
         faultTypeID: props.linkedRequestData.fault_id,
         description:
           "[Corrective Request] " + props.linkedRequestData.fault_description,
+        description_other: props.linkedRequestData.description_other,
       }
     : {};
 
@@ -188,6 +185,7 @@ export default function RequestContainer(props: RequestContainerProps) {
   const [isReady, setIsReady] = useState<boolean>();
   const [assignNotFilled, setAssignNotFilled] = useState<boolean>(false);
   const [url, setUrl] = useState("");
+  const [selectedValue, setSelectedValue] = useState('');
 
   const { isSubmitting, errors } = formState;
 
@@ -332,13 +330,33 @@ export default function RequestContainer(props: RequestContainerProps) {
     });
   };
   const sortedAssets = availableAssets.sort((a, b) =>
-    a.asset_name.localeCompare(b.asset_name)
+    a.asset_name.trim().localeCompare(b.asset_name.trim())
   );
   const plantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPlantId(parseInt(e.target.value));
     updateAssetLists(parseInt(e.target.value));
     resetField("taggedAssetID");
   };
+
+  const sortedRequests = (requestTypes || []).sort((a, b) => 
+    a.request.localeCompare(b.request)
+  );
+
+  const sortedFaults = (faultTypes || []).sort((a, b) => {
+    if (a.fault_type === "OTHERS") {
+      return 1; 
+    } else if (b.fault_type === "OTHERS") {
+      return -1; 
+    } else {
+      return a.fault_type.localeCompare(b.fault_type);
+    }
+  });
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    console.log("event", e.target.options[e.target.selectedIndex]);
+    setSelectedValue(e.target.options[e.target.selectedIndex].text);
+  };
+
   return (
     <form onSubmit={handleSubmit(formSubmit)}>
       <ModuleContent includeGreyContainer grid>
@@ -357,7 +375,7 @@ export default function RequestContainer(props: RequestContainerProps) {
                 Select Requesting Entity
               </option>
               {!props.assignRequestData &&
-                requestTypes.map((rType: CMMSRequestTypes) => {
+                sortedRequests.map((rType: CMMSRequestTypes) => {
                   return (
                     <option key={rType.req_id} value={rType.req_id}>
                       {rType.request}
@@ -381,12 +399,13 @@ export default function RequestContainer(props: RequestContainerProps) {
               id="formControlTypeFault"
               {...register("faultTypeID", { required: true })}
               disabled={props.assignRequestData ? true : false}
+              onChange = {handleSelectChange}
             >
               <option hidden key={0} value={""}>
                 Select fault type
               </option>
               {!props.assignRequestData &&
-                faultTypes.map((fType: CMMSFaultTypes) => {
+                sortedFaults.map((fType: CMMSFaultTypes) => {
                   return (
                     <option key={fType.fault_id} value={fType.fault_id}>
                       {fType.fault_type}
@@ -401,6 +420,27 @@ export default function RequestContainer(props: RequestContainerProps) {
             </select>
           </div>
 
+          { 
+            ( selectedValue === 'OTHERS' 
+            || props.linkedRequestData?.fault_name === 'OTHERS' 
+            || assignRequestData.fault_name === 'OTHERS' 
+            ) && (
+              <div className="form-group">
+                <label className="form-label">Specify Fault Type</label>
+                <textarea
+                  className="form-control"
+                  id="formControlDescriptionOther"
+                  rows={2}
+                  {...register("description_other")}
+                  disabled={props.assignRequestData ? true : false}
+                  defaultValue={
+                    props.assignRequestData
+                      ? assignRequestData.description_other
+                      : ""
+                  }
+                ></textarea>
+              </div> )
+          }
           <div className="form-group">
             <label className="form-label">Description</label>
             <textarea

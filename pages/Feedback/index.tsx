@@ -22,57 +22,43 @@
 
 */
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import {
+  Body,
+  Cell,
+  Header,
+  HeaderCell,
+  HeaderRow,
+  Row,
+  Table
+} from "@table-library/react-table-library";
+import { getTheme } from "@table-library/react-table-library/baseline";
+import { useTheme } from "@table-library/react-table-library/theme";
+import moment from "moment";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import Tooltip from 'rc-tooltip';
+import 'rc-tooltip/assets/bootstrap_white.css';
+import React, { useEffect, useState } from "react";
+import {
+  AiOutlineCloudSync, AiOutlineFileDone, AiOutlineFolderView, AiOutlineHistory,
+  AiOutlineUserAdd
+} from "react-icons/ai";
 import {
   ModuleContent,
   ModuleHeader,
   ModuleMain,
   ModuleModal,
 } from "../../components";
-import { useTheme } from "@table-library/react-table-library/theme";
-import { getTheme } from "@table-library/react-table-library/baseline";
-import {
-  Table,
-  Header,
-  HeaderRow,
-  HeaderCell,
-  Body,
-  Row,
-  Cell,
-  OnClick,
-} from "@table-library/react-table-library";
-import {
-  useCurrentUser,
-  useFeedbackFilter,
-  useFeedback,
-} from "../../components/SWR";
-import { CMMSFeedback } from "../../types/common/interfaces";
-import { ThreeDots } from "react-loading-icons";
-import { getColor } from "../Request";
-import { HiOutlineDownload } from "react-icons/hi";
-import { AiOutlineCloudSync } from "react-icons/ai";
-import TooltipBtn from "../../components/TooltipBtn";
-import { BsFileEarmarkPlus } from "react-icons/bs";
-import LoadingHourglass from "../../components/LoadingHourglass";
-import instance from "../../types/common/axios.config";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import {
-  AiOutlineFolderView,
-  AiOutlineFileDone,
-  AiOutlineFileProtect,
-  AiOutlineHistory,
-  AiOutlineUserAdd,
-} from "react-icons/ai";
-import Tooltip from 'rc-tooltip';
-import 'rc-tooltip/assets/bootstrap_white.css';
-import PageButton from "../../components/PageButton";
-import styles from "../../styles/Request.module.scss";
-import { Role } from "../../types/common/enums";
-import Pagination from "../../components/Pagination";
 import FeedbackHistory from "../../components/Feedback/FeedbackHistory";
-import moment from "moment";
+import LoadingHourglass from "../../components/LoadingHourglass";
+import Pagination from "../../components/Pagination";
+import {
+  useCurrentUser
+} from "../../components/SWR";
+import TooltipBtn from "../../components/TooltipBtn";
+import instance from "../../types/common/axios.config";
+import { CMMSFeedback } from "../../types/common/interfaces";
+import { getColor } from "../Request";
 
 const indexedColumn: ("pending" | "assigned" | "completed")[] = [
   "pending",
@@ -197,7 +183,7 @@ export default function Feedback(props: FeedbackPageProps) {
 
   return (
     <ModuleMain>
-      <ModuleHeader title="Feedback" header="Feedback">
+      <ModuleHeader title="Public Feedback" header="Public Feedback">
         {/* <Link href="/feedback/Form?action=New"> */}
         {/* <TooltipBtn text="New feedback">
             <BsFileEarmarkPlus size={20} />

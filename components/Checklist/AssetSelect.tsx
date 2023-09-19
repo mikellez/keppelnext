@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useCallback, forwardRef } from "react";
-import instance from "../../types/common/axios.config";
+import React, { forwardRef, useCallback, useEffect, useState } from "react";
 import Select, {
   ActionMeta,
   MultiValue,
-  StylesConfig,
-  SingleValue,
+  SingleValue
 } from "react-select";
 import { CMMSAsset } from "../../types/common/interfaces";
 import { useAsset } from "../SWR";
@@ -45,10 +43,14 @@ const AssetSelect = forwardRef((props: AssetSelectProps, ref: any) => {
     [props.defaultIds]
   );
 
+  const sortedData  = (data || []).sort((a, b) => 
+    a.asset_name.localeCompare(b.asset_name)
+  );
+
   useEffect(() => {
     if (data) {
       setOptions(
-        data.map((asset) => {
+        sortedData.map((asset) => {
           return {
             value: asset.psa_id,
             label: asset.asset_name,

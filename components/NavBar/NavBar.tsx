@@ -1,27 +1,25 @@
-import React, { useEffect, useState, useTransition } from "react";
-import styles from "../../styles/Nav.module.scss";
-import { GrClose } from "react-icons/gr";
-import { BsList, BsHouseDoor } from "react-icons/bs";
-import { TbChecklist, TbLicense } from "react-icons/tb";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import {
-  AiOutlineQrcode,
   AiOutlineControl,
-  AiOutlineUser,
-  AiOutlineSchedule,
-  AiOutlinePhone,
-  AiOutlineHistory,
   AiOutlineDashboard,
   AiOutlineForm,
+  AiOutlineHistory,
+  AiOutlinePhone,
+  AiOutlineQrcode,
+  AiOutlineSchedule,
+  AiOutlineUser,
 } from "react-icons/ai";
-import { FcFeedback } from "react-icons/fc";
+import { BsHouseDoor, BsList } from "react-icons/bs";
+import { GrClose } from "react-icons/gr";
 import { MdWorkOutline } from "react-icons/md";
+import { TbChecklist, TbExchange, TbLicense } from "react-icons/tb";
 import { VscBook } from "react-icons/vsc";
-import { TbExchange } from "react-icons/tb";
-import NavDropdown, { NavDropdownLink } from "./NavDropdown";
-import NavLink, { NavLinkInfo } from "./NavLink";
-import { useCurrentUser } from "../SWR";
-import { useRouter } from "next/router";
+import styles from "../../styles/Nav.module.scss";
 import { PermissionsRoles } from "../../types/common/enums";
+import { useCurrentUser } from "../SWR";
+import NavDropdown, { NavDropdownLink } from "./NavDropdown";
+import NavLink from "./NavLink";
 
 export default function NavBar() {
   const [navDisplay, setNavDisplay] = useState<boolean>(false);
@@ -162,7 +160,7 @@ export default function NavBar() {
               icon={<AiOutlineQrcode size={21} />}
             />
             { userPermission(PermissionsRoles.CanViewFeedback) && <NavLink
-              name="Feedback"
+              name="Public Feedback"
               path="/Feedback"
               icon={<AiOutlineForm size={21} />}
             />}
