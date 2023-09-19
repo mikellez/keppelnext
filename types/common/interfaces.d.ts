@@ -173,6 +173,7 @@ interface CMMSRequest {
   total?: number;
   associatedrequestid?: number;
   overdue_status: boolean;
+  description_other?: string;
 }
 
 

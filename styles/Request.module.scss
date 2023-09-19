@@ -10,8 +10,9 @@
 
 @media only screen and (max-width: 1440px) {
   .tableUL {
-    grid-template-columns: 20rem 12rem 7rem 7rem;
+    grid-template-columns: 15rem 15rem 10rem 10rem;
     gap: 2rem;
+    margin-bottom: 1rem;
   }
 }
 

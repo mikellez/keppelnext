@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { CMMSRequest } from "../../types/common/interfaces";
-import Image from "next/image";
-import styles from "../../styles/Request.module.scss";
-import { ModuleModal } from "../ModuleLayout/ModuleModal";
 import moment from "moment";
-import { AiOutlineDownload } from "react-icons/ai";
-import { BiDownload } from "react-icons/bi";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import { FaDownload } from "react-icons/fa";
 import { TbSquareRoundedArrowRightFilled } from "react-icons/tb";
-import { useRouter } from "next/router";
+import styles from "../../styles/Request.module.scss";
+import { CMMSRequest } from "../../types/common/interfaces";
+import { ModuleModal } from "../ModuleLayout/ModuleModal";
 
 export enum RequestAction {
   manage = 1,
@@ -96,6 +94,13 @@ export default function RequestPreview(props: RequestPreviewProps) {
             <th>Fault Type</th>
             <td>{props.request.fault_name}</td>
           </tr>
+          { 
+            props.request.fault_name === "OTHERS" &&
+            <tr>
+              <th>Fault Specification</th>
+                <td>{props.request.description_other}</td>
+            </tr>
+          }
           <tr>
             <th>Fault Description</th>
             <td>{props.request.fault_description || "N.A"}</td>

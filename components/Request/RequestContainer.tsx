@@ -51,6 +51,7 @@ import SelectWithTooltip from "../SelectWithTooltip";
 type FormValues = {
   requestTypeID: number;
   faultTypeID: number;
+  description_other: string;
   description: string;
   // plantLocationID: number;
   taggedAssetID: number;
@@ -82,7 +83,8 @@ async function createRequest(
   formData.append("plantLocationID", plantId.toString());
   formData.append("requestTypeID", data.requestTypeID.toString());
   formData.append("taggedAssetID", data.taggedAssetID.toString());
-  // console.log(data);
+  formData.append("description_other", data.description_other);
+  // console.log("data", data);
   if (data.image.length > 0) formData.append("image", data.image[0]);
   if (linkedRequestId) formData.append("linkedRequestId", linkedRequestId);
 
@@ -170,6 +172,7 @@ export default function RequestContainer(props: RequestContainerProps) {
         faultTypeID: props.linkedRequestData.fault_id,
         description:
           "[Corrective Request] " + props.linkedRequestData.fault_description,
+        description_other: props.linkedRequestData.description_other,
       }
     : {};
 
@@ -182,6 +185,7 @@ export default function RequestContainer(props: RequestContainerProps) {
   const [isReady, setIsReady] = useState<boolean>();
   const [assignNotFilled, setAssignNotFilled] = useState<boolean>(false);
   const [url, setUrl] = useState("");
+  const [selectedValue, setSelectedValue] = useState('');
 
   const { isSubmitting, errors } = formState;
 
@@ -348,6 +352,11 @@ export default function RequestContainer(props: RequestContainerProps) {
     }
   });
 
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    console.log("event", e.target.options[e.target.selectedIndex]);
+    setSelectedValue(e.target.options[e.target.selectedIndex].text);
+  };
+
   return (
     <form onSubmit={handleSubmit(formSubmit)}>
       <ModuleContent includeGreyContainer grid>
@@ -390,6 +399,7 @@ export default function RequestContainer(props: RequestContainerProps) {
               id="formControlTypeFault"
               {...register("faultTypeID", { required: true })}
               disabled={props.assignRequestData ? true : false}
+              onChange = {handleSelectChange}
             >
               <option hidden key={0} value={""}>
                 Select fault type
@@ -410,6 +420,27 @@ export default function RequestContainer(props: RequestContainerProps) {
             </select>
           </div>
 
+          { 
+            ( selectedValue === 'OTHERS' 
+            || props.linkedRequestData?.fault_name === 'OTHERS' 
+            || assignRequestData.fault_name === 'OTHERS' 
+            ) && (
+              <div className="form-group">
+                <label className="form-label">Specify Fault Type</label>
+                <textarea
+                  className="form-control"
+                  id="formControlDescriptionOther"
+                  rows={2}
+                  {...register("description_other")}
+                  disabled={props.assignRequestData ? true : false}
+                  defaultValue={
+                    props.assignRequestData
+                      ? assignRequestData.description_other
+                      : ""
+                  }
+                ></textarea>
+              </div> )
+          }
           <div className="form-group">
             <label className="form-label">Description</label>
             <textarea

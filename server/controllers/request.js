@@ -29,6 +29,7 @@ const searchCondition = (search) => {
         OR pri.priority ILIKE '${search}'
 	      OR req_u.first_name || ' ' || req_u.last_name ILIKE '%${search}%'
         OR tmp1.asset_name ILIKE '%${search}%'  
+        OR r.description_other ILIKE '%${search}%'
     )`;
   }
 };
@@ -82,6 +83,7 @@ async function fetchRequestQuery(
     psa_id: "r.psa_id",
     fault_id: "r.fault_id",
     overdue_status: "r.overdue_status",
+    description_other: "r.description_other",
   };
 
   if (expand) {
@@ -319,16 +321,17 @@ const createWorkflow = (requestID, faultTypeID, plantLocationID) => {
 };
 
 const createRequest = async (req, res, next) => {
-  // console.log(req.body);
-  // console.log(req.file)
+  // console.log("body", req.body);
+  // console.log("file", req.file)
   const {
     requestTypeID,
     faultTypeID,
     description,
     plantLocationID,
     taggedAssetID,
+    description_other,
   } = req.body;
-  // console.log(req.body.linkedRequestId);
+  // console.log("json body", JSON.stringify(req.body));
   // console.log("^&*")
   const fileBuffer = req.file === undefined ? null : req.file.buffer;
   const fileType = req.file === undefined ? null : req.file.mimetype;
@@ -353,7 +356,6 @@ const createRequest = async (req, res, next) => {
       role_name = req.user.role_name;
       name = req.user.name;
     }
-
     history = `PENDING_Request Created_${today}_${role_name}_${name}`;
     activity_log = [
       {
@@ -383,9 +385,9 @@ const createRequest = async (req, res, next) => {
   }
   if (!req.body.linkedRequestId) {
     const q = `INSERT INTO keppel.request(
-      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log, description_other
     ) VALUES (
-      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13
+      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13,$14
     ) RETURNING request_id;`;
 
     db.query(
@@ -404,6 +406,7 @@ const createRequest = async (req, res, next) => {
         history,
         null,
         JSON.stringify(activity_log),
+        description_other,
       ],
       (err, result) => {
         if (err) return res.status(500).json({ errormsg: err });
@@ -424,9 +427,9 @@ const createRequest = async (req, res, next) => {
     ];
     const insertQuery = `
       INSERT INTO keppel.request(
-        fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log
+        fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log, description_other
       ) VALUES (
-        $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12
+        $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12,$13
       ) RETURNING request_id;
     `;
     const updateQuery = `
@@ -458,6 +461,7 @@ const createRequest = async (req, res, next) => {
         history,
         req.body.linkedRequestId,
         JSON.stringify(activity_log),
+        description_other,
       ],
       (err, result) => {
         if (err) {
@@ -682,6 +686,7 @@ const fetchSpecificRequest = async (req, res, next) => {
   r.complete_comments,
   r.associatedrequestid,
   r.activity_log,
+  r.description_other,
   concat( concat(u.first_name,' '), u.last_name) AS assigned_user_name,
   CASE WHEN u1.first_name IS NULL THEN r.guestfullname ELSE CONCAT(CONCAT(u1.first_name, ' '), u1.last_name) END AS created_by,
   r.guestfullname,
@@ -712,7 +717,7 @@ const createRequestCSV = (req, res, next) => {
   const sql =
     req.user.role_id === 1 || req.user.role_id === 2 || req.user.role_id === 3
       ? `SELECT r.request_id , ft.fault_type, pm.plant_name,
-	rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
+	rt.request, ro.role_name, sc.status,r.fault_description, r.description_other, rt.request AS request_type,
 	pri.priority, 
 	CASE 
 		WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
@@ -755,7 +760,7 @@ const createRequestCSV = (req, res, next) => {
 	)
 	ORDER BY r.created_date DESC, r.status_id DESC;`
       : `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
-	rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
+	rt.request, ro.role_name, sc.status,r.fault_description, r.description_other, rt.request AS request_type,
 	pri.priority, 
 	CASE 
 		WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
@@ -999,7 +1004,7 @@ const fetchFilteredRequests = async (req, res, next) => {
   }
 
   const sql = `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
-		rt.request, ro.role_name, sc.status,r.fault_description, rt.request AS request_type,
+		rt.request, ro.role_name, sc.status,r.fault_description, r.description_other, rt.request AS request_type,
 		pri.priority, 
 		CASE 
 			WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
