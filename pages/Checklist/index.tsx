@@ -874,9 +874,8 @@ export default function Checklist(props: ChecklistProps) {
                               >
                                 <AiOutlineEdit size={22} title={"Assign"} />
                               </Link>
-                            ) : item.status_id ===
-                                Checklist_Status.Pending_Cancellation &&
-                              user.data?.role_id !== Role.Specialist ? (
+                            ) : userPermission('canManageChecklist') && item.status_id ===
+                                Checklist_Status.Pending_Cancellation  ? (
                               <Link
                                 href={`/Checklist/Cancellation/?id=${item.id}`}
                               >
