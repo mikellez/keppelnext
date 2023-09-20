@@ -257,9 +257,9 @@ function useCurrentUser() {
     if (!data) return false;
 
     const excludePermission = permission.replace("can", "exclude");
-    const ableAccess = data.permissions.includes(permission);
+    const ableAccess = data.permissions.includes(permission.trim());
 
-    if(ableAccess && data.permissions.includes(excludePermission)) return false;
+    if(permission.substring(3) === 'can' && ableAccess && data.permissions.includes(excludePermission)) return false;
 
     return ableAccess;
   };
