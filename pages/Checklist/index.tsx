@@ -37,60 +37,55 @@
 
 */
 
-import React, { useEffect, useState, useRef } from "react";
+import {
+  Body,
+  Cell,
+  Header,
+  HeaderCell,
+  HeaderRow,
+  OnClick,
+  Row,
+  Table,
+} from "@table-library/react-table-library";
+import { getTheme } from "@table-library/react-table-library/baseline";
+import { useTheme } from "@table-library/react-table-library/theme";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import {
+  AiOutlineEdit,
+  AiOutlineFileDone,
+  AiOutlineFileProtect,
+  AiOutlineFolderView,
+  AiOutlineHistory,
+} from "react-icons/ai";
+import { BsFileEarmarkPlus } from "react-icons/bs";
+import { HiOutlineDownload } from "react-icons/hi";
 import {
   ModuleContent,
   ModuleHeader,
   ModuleMain,
   ModuleModal,
 } from "../../components";
-import { useTheme } from "@table-library/react-table-library/theme";
-import { getTheme } from "@table-library/react-table-library/baseline";
-import {
-  Table,
-  Header,
-  HeaderRow,
-  HeaderCell,
-  Body,
-  Row,
-  Cell,
-  OnClick,
-} from "@table-library/react-table-library";
+import LoadingHourglass from "../../components/LoadingHourglass";
 import {
   useChecklist,
-  useCurrentUser,
   useChecklistFilter,
+  useCurrentUser,
 } from "../../components/SWR";
-import { CMMSChecklist } from "../../types/common/interfaces";
-import { ThreeDots } from "react-loading-icons";
-import { getColor } from "../Request";
-import { HiBan, HiOutlineDownload } from "react-icons/hi";
 import TooltipBtn from "../../components/TooltipBtn";
-import { BsFileEarmarkPlus } from "react-icons/bs";
-import LoadingHourglass from "../../components/LoadingHourglass";
 import instance from "../../types/common/axios.config";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import {
-  AiOutlineEdit,
-  AiOutlineFolderView,
-  AiOutlineFileDone,
-  AiOutlineFileProtect,
-  AiOutlineHistory,
-} from "react-icons/ai";
+import { CMMSChecklist } from "../../types/common/interfaces";
+import { getColor } from "../Request";
 
 import Tooltip from "rc-tooltip";
 import "rc-tooltip/assets/bootstrap_white.css";
 
-import PageButton from "../../components/PageButton";
-import styles from "../../styles/Request.module.scss";
-import { Role, Checklist_Status } from "../../types/common/enums";
-import Pagination from "../../components/Pagination";
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 import moment from "moment";
 import { useRouter } from "next/router";
+import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
+import Pagination from "../../components/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import { Checklist_Status } from "../../types/common/enums";
 
 const indexedColumn: ("pending" | "assigned" | "record" | "approved")[] = [
   "pending",
@@ -152,8 +147,10 @@ const downloadCSV = async (type: string, activeTabIndex: number) => {
 export default function Checklist(props: ChecklistProps) {
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const [isReady, setReady] = useState(false);
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
   const { userPermission } = useCurrentUser();
+  const [activeTabIndex, setActiveTabIndex] = useState(
+    userPermission("canManageChecklist") ? 0 : 1   // Specialists directed to "assigned tab" upon entering
+  );
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [history, setHistory] = useState<
@@ -201,7 +198,7 @@ export default function Checklist(props: ChecklistProps) {
   // Used for adding the overdue column into the template when the assigned/pending tab is selected
   const tableFormat =
     activeTabIndex === 0 || activeTabIndex === 1 || activeTabIndex === 2
-      ? `--data-table-library_grid-template-columns:  5em 25em 7em 15em 10em 8em 8em 8em 6em;
+      ? `--data-table-library_grid-template-columns:  5em 25em 7em 15em 10em 8em 8em 8em 8em;
       
   `
       : `--data-table-library_grid-template-columns:  5em 25em 7em 15em 8em 8em 8em 6em;

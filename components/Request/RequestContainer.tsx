@@ -176,6 +176,9 @@ export default function RequestContainer(props: RequestContainerProps) {
       }
     : {};
 
+  // console.log("assigenReqData", assignRequestData);
+  // console.log("linkedReqData", props.linkedRequestData);
+  // console.log(props.requestData);
   const { register, handleSubmit, formState, control, resetField, setValue } =
     useForm<FormValues>({ defaultValues });
 
@@ -423,7 +426,7 @@ export default function RequestContainer(props: RequestContainerProps) {
           { 
             ( selectedValue === 'OTHERS' 
             || props.linkedRequestData?.fault_name === 'OTHERS' 
-            || assignRequestData.fault_name === 'OTHERS' 
+            || assignRequestData?.fault_name === 'OTHERS' 
             ) && (
               <div className="form-group">
                 <label className="form-label">Specify Fault Type</label>

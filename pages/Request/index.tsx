@@ -198,14 +198,18 @@ export default function Request(props: RequestProps) {
   const [currentHistory, setCurrentHistory] = useState<
     { [key: string]: string }[] | undefined
   >();
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const { data, userPermission } = useCurrentUser();
+  const [activeTabIndex, setActiveTabIndex] = useState(
+    userPermission("canManageRequestTicket") ? 0 : 1   // Specialists directed to "assigned tab" upon entering
+  );
+  console.log(userPermission("engineer"));
+  console.log(data?.role_name, activeTabIndex);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const searchRef = useRef({ value: "" });
   const currentDate = moment().format("YYYY-MM-DD");
   const filename = `${currentDate} Request History.csv`;
   const router = useRouter();
-  const { data, userPermission } = useCurrentUser();
   const [IdHeader, setIdHeader] = useState("ID");
   const [blockReset, setBlockReset] = useState<Boolean>(false);
   const [faultTypeHeader, setFaultTypeHeader] = useState<string>("Fault Type");
