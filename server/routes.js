@@ -2359,11 +2359,19 @@ router
   .get(controllers.changeOfParts.fetchScheduleChangeOfParts);
 
 router
+  .route("/changeOfParts/scheduled/:plant", checkIfLoggedInAPI)
+  .get(controllers.changeOfParts.fetchScheduleChangeOfParts);
+
+router
   .route("/changeOfParts/scheduled/:plant/:datetype/:date", checkIfLoggedInAPI)
   .get(controllers.changeOfParts.fetchScheduleChangeOfParts);
 
 router
   .route("/changeOfParts/completed", checkIfLoggedInAPI)
+  .get(controllers.changeOfParts.fetchCompletedChangeOfParts);
+
+router
+  .route("/changeOfParts/completed/:plant", checkIfLoggedInAPI)
   .get(controllers.changeOfParts.fetchCompletedChangeOfParts);
 
 router

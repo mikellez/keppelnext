@@ -360,22 +360,30 @@ function useChangeOfParts(
   
 ) {
   const changeOfPartsFetcher = async (url: string) => {
-    let apiURL = copId ? `${url}/${copId}` : url;
-    apiURL += "&"
+    let apiURL = url;
     if (options) {
-      if (options.plant_id && options.type)
-        apiURL += `plant_id=${options.plant_id}&type=${options.type}`;
-      else if (options.plant_id) {
-        apiURL += `plant_id=${options.plant_id}`
+      if (options.type){
+        // Add either completed or scheduled
+        apiURL += `/${options.type}`;
+        if(options.plant_id){
+          // if have particular plant selected
+          apiURL += `/${options.plant_id}`
+        }
       }
-      else if (options.type) {
-        apiURL += `type=${options.type}`
+      else{
+        // If type null, replace type with 'all'
+        apiURL += `/all`;
+        // If copId specified, then add it in
+        if(copId){
+          apiURL += `/${copId}`;
+        }
       }
-      else if (options.psa_id && copId === null){
-        apiURL += `psa_id=${options.psa_id}`;
-
-      }
-    } 
+    }
+    let psa_id = options?.psa_id ? options.psa_id : "";
+    if((limit && page) || (psa_id && copId === null)){
+      apiURL += `?limit=${limit}&offset=${(page - 1) * limit}&psa_id=${psa_id}`;
+    }
+    //console.log("Final URL:" + apiURL); 
 
     return await instance
       .get<CMMSChangeOfParts[]>(apiURL)
@@ -389,8 +397,7 @@ function useChangeOfParts(
   };
 
   return useSWR<CMMSChangeOfParts[], Error>(
-    [`/api/changeOfParts/${options?.type}?limit=${limit}&offset=${
-      (page - 1) * limit}`, copId, options],
+    [`/api/changeOfParts`, copId, options, page],
     changeOfPartsFetcher,
     { revalidateOnFocus: false }
   );

@@ -27,7 +27,7 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
   const [COPData, setCOPData] = useState<CMMSChangeOfParts[]>(
     props.changeOfParts
   );
-  const [selectedPlant, setSelectedPlant] = useState<number>();
+  const [selectedPlant, setSelectedPlant] = useState<number>(0);
   const [selectedCOP, setSelectedCOP] = useState<CMMSChangeOfParts>(
     {} as CMMSChangeOfParts
   );
@@ -64,17 +64,19 @@ const ChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
 
   useEffect(() => {
     const currTab = activeCOPType == 0 ? "scheduled" : "completed";
-    instance.get(`/api/changeOfParts/${currTab}`).then((ele) => {
+
+    instance.get(`/api/changeOfParts/${currTab}/${selectedPlant}`).then((ele) => {
       const size = Math.ceil(ele.data.length / PAGE_LIMIT);
       setTotalPage(size);
+      setPage(1);
     });
-  }, [activeCOPType]);
+  }, [activeCOPType, selectedPlant]);
 
   useEffect(() => {
     if (!isReady && data && !isValidating) {
       if (data.length > 0) {
         setCOPData(data);
-        // console.log(data);
+         // console.log(data);
       } else {
         setCOPData([]);
       }
