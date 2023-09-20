@@ -149,7 +149,7 @@ export default function Checklist(props: ChecklistProps) {
   const [isReady, setReady] = useState(false);
   const { userPermission } = useCurrentUser();
   const [activeTabIndex, setActiveTabIndex] = useState(
-    userPermission("canManageChecklist") ? 0 : 1   // Specialists directed to "assigned tab" upon entering
+    userPermission("engineer") ? 0 : 1   // Specialists directed to "assigned tab" upon entering
   );
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);

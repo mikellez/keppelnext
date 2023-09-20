@@ -200,10 +200,8 @@ export default function Request(props: RequestProps) {
   >();
   const { data, userPermission } = useCurrentUser();
   const [activeTabIndex, setActiveTabIndex] = useState(
-    userPermission("canManageRequestTicket") ? 0 : 1   // Specialists directed to "assigned tab" upon entering
+    userPermission("engineer") ? 0 : 1   // Specialists directed to "assigned tab" upon entering
   );
-  console.log(userPermission("engineer"));
-  console.log(data?.role_name, activeTabIndex);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const searchRef = useRef({ value: "" });
