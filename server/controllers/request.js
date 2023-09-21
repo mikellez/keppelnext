@@ -82,7 +82,7 @@ const filterCondition = (status, plant, date, datetype) => {
     }
   }
   return `${statusCond} ${plantCond} ${dateCond}`;
-}
+};
 
 async function fetchRequestQuery(
   status_query,
@@ -91,17 +91,29 @@ async function fetchRequestQuery(
   user_id,
   page,
   expand,
-  search = ""
+  search = "",
+  sortField,
+  sortOrder
 ) {
+  //if sort states are specified, replace order query
+  // const sortField = req.query.sortField;
+  // const sortOrder = req.query.sortOrder;
+  console.log(sortField, sortOrder);
+  if (sortField && sortOrder) {
+    console.log("Replacing order_query");
+    const new_order_query = `ORDER BY ${sortField} ${sortOrder}`;
+    order_query = new_order_query;
+  }
+  console.log("replaced order query: " + order_query);
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
   // console.log(role_id)
   let userCond = "";
   let expandCond = "";
   let SELECT_ARR = [];
 
-  if (role_id === 4 ) {
+  if (role_id === 4) {
     userCond = `AND (r.assigned_user_id = ${user_id} OR r.user_id = ${user_id})`;
-  } 
+  }
 
   const SELECT = {
     request_id: "r.request_id",
@@ -151,7 +163,7 @@ async function fetchRequestQuery(
   }
 
   expandCond = SELECT_ARR.join(", ");
-    
+
   let sql;
   sql = `SELECT 
     ${expandCond}
@@ -192,13 +204,12 @@ async function fetchRequestQuery(
     req_u.last_name,
     au.first_name,
     au.last_name
-  ) ${order_query}`
-  ;
+  ) ${order_query}`;
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);
 
-  if(page != 0) sql += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems};`;
+  if (page != 0) sql += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems};`;
 
   return { sql, totalPages };
 }
@@ -207,13 +218,15 @@ const fetchPendingRequests = async (req, res, next) => {
   const page = req.query.page || 0;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
-  
+
   const plant = req.params.plant;
   const date = req.params.date;
   const datetype = req.params.datetype;
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
 
   const filterCond = filterCondition("", plant, date, datetype);
-  console.log(filterCond)
+  console.log(filterCond);
 
   const { sql, totalPages } = await fetchRequestQuery(
     `AND sc.status_id = 1 ${filterCond}`, //PENDING
@@ -222,10 +235,12 @@ const fetchPendingRequests = async (req, res, next) => {
     req.user.id,
     page,
     expand,
-    search
+    search,
+    sortField,
+    sortOrder
   );
 
-  console.log(sql)
+  // console.log(sql)
 
   const result = await global.db.query(sql);
 
@@ -270,7 +285,7 @@ const fetchCompletedRequests = async (req, res, next) => {
   const filterCond = filterCondition("", plant, date, datetype);
 
   const { sql, totalPages } = await fetchRequestQuery(
-    `AND (sc.status_id = 4 or sc.status_id = 6) ${filterCond}`, 
+    `AND (sc.status_id = 4 or sc.status_id = 6) ${filterCond}`,
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
@@ -288,6 +303,8 @@ const fetchAssignedRequests = async (req, res, next) => {
   const page = req.query.page || 1;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND (sc.status_id = 2 OR sc.status_id = 5)", //ASSIGNED, REJECTED
@@ -296,7 +313,9 @@ const fetchAssignedRequests = async (req, res, next) => {
     req.user.id,
     page,
     expand,
-    search
+    search,
+    sortField,
+    sortOrder
   );
 
   const result = await global.db.query(sql);
@@ -315,6 +334,9 @@ const fetchOverdueRequests = async (req, res, next) => {
 
   const filterCond = filterCondition("", plant, date, datetype);
 
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
+
   const { sql, totalPages } = await fetchRequestQuery(
     `AND r.overdue_status = true ${filterCond}`, // Overdue
     ` ORDER BY r.created_date DESC`,
@@ -322,7 +344,9 @@ const fetchOverdueRequests = async (req, res, next) => {
     req.user.id,
     page,
     expand,
-    search
+    search,
+    sortField,
+    sortOrder
   );
 
   const result = await global.db.query(sql);
@@ -330,20 +354,24 @@ const fetchOverdueRequests = async (req, res, next) => {
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
 
-
 const fetchReviewRequests = async (req, res, next) => {
   const page = req.query.page || 1;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
+
   const { sql, totalPages } = await fetchRequestQuery(
     "AND (sc.status_id = 3 OR sc.status_id = 6)", //COMPLETED, CANCELLED
-    ` ORDER BY r.activity_log -> (jsonb_array_length(r.activity_log) -1) ->> 'date' DESC`,
+    ` ORDER BY ${sortField} ${sortOrder}`,
     req.user.role_id,
     req.user.id,
     page,
     expand,
-    search
+    search,
+    sortField,
+    sortOrder
   );
 
   const result = await global.db.query(sql);
@@ -356,6 +384,11 @@ const fetchApprovedRequests = async (req, res, next) => {
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
+  console.log(sortField, sortOrder);
+  // order_query = `ORDER BY ${sortField} ${sortOrder}}`
+
   const { sql, totalPages } = await fetchRequestQuery(
     "AND sc.status_id = 4", //APPROVED
     ` ORDER BY r.activity_log -> (jsonb_array_length(r.activity_log) -1) ->> 'date' DESC`,
@@ -363,7 +396,9 @@ const fetchApprovedRequests = async (req, res, next) => {
     req.user.id,
     page,
     expand,
-    search
+    search,
+    sortField,
+    sortOrder
   );
 
   const result = await global.db.query(sql);
@@ -1211,5 +1246,5 @@ module.exports = {
   fetchPlantRequest,
   fetchAssetRequest,
   fetchOutstandingRequests,
-  fetchCompletedRequests
+  fetchCompletedRequests,
 };
