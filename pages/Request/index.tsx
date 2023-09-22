@@ -116,7 +116,7 @@ export interface RequestItem {
 
 export interface RequestProps {
   filter?: boolean;
-  status: number | string;
+  status?: number | string;
   plant: number;
   date: string;
   datetype: string;
@@ -265,8 +265,8 @@ export default function Request(props: RequestProps) {
     "activity_log",
     "overdue_status",
   ];
-
-  const filteredRequest = useRequestFilter(props, page, fields);
+  
+  const filteredRequest = useRequestFilter(props, page, searchRef.current.value, fields);
   const allRequest = useRequest(
     indexedColumn[activeTabIndex],
     page,

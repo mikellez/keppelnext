@@ -117,7 +117,7 @@ export interface ChecklistItem {
 
 export interface ChecklistProps {
   filter?: boolean;
-  status: number | string;
+  status?: number | string;
   plant: number;
   date: string;
   datetype: string;
@@ -182,7 +182,7 @@ export default function Checklist(props: ChecklistProps) {
     "activity_log",
     "overdue_status",
   ];
-  const filteredData = useChecklistFilter(props, page, fields);
+  const filteredData = useChecklistFilter(props, page, searchRef.current.value, fields);
   const columnData = useChecklist(
     indexedColumn[activeTabIndex],
     page,

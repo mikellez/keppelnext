@@ -1,20 +1,20 @@
 import useSWR from "swr";
+import { ChecklistProps } from "../pages/Checklist";
+import { FeedbackFormProps } from "../pages/Feedback";
+import { RequestProps } from "../pages/Request";
+import instance from "../types/common/axios.config";
 import {
-  CMMSAsset,
-  CMMSRequest,
-  CMMSChecklist,
   CMMSActivitylog,
+  CMMSAsset,
+  CMMSChangeOfParts,
+  CMMSChecklist,
+  CMMSFeedback,
+  CMMSRequest,
+  CMMSSubComponent1Name,
   CMMSSystemAsset,
   CMMSSystemAssetName,
-  CMMSSubComponent1Name,
-  CMMSChangeOfParts,
   CMMSWorkflow,
-  CMMSFeedback,
 } from "../types/common/interfaces";
-import { RequestProps } from "../pages/Request";
-import { ChecklistProps } from "../pages/Checklist";
-import instance from "../types/common/axios.config";
-import { FeedbackFormProps } from "../pages/Feedback";
 
 function useRequest(
   request_type: "pending" | "assigned" | "review" | "approved",
@@ -66,6 +66,7 @@ function useSpecificRequest(request_id: number) {
 function useRequestFilter(
   props: RequestProps, 
   page: number,
+  search: string = "",
   fields: string[]
 ) {
   const requestFetcher = (url: string) =>
@@ -86,7 +87,7 @@ function useRequestFilter(
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
     `/api/request/${props.viewType ?? 'pending'}/${props?.plant || 0}/${
       props.datetype || "all"
-    }/${props?.date || "all"}?page=${page}&expand=${fields.join(",")}`,
+    }/${props?.date || "all"}?page=${page}&search=${search}&expand=${fields.join(",")}`,
     requestFetcher,
     { revalidateOnFocus: false }
   );
@@ -180,6 +181,7 @@ function useChecklist(
 function useChecklistFilter(
   props: ChecklistProps, 
   page: number,
+  search: string = "",
   fields: string[]
 ) {
   const checklistFetcher = (url: string) =>
@@ -193,7 +195,7 @@ function useChecklistFilter(
   return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
     `/api/checklist/${props.viewType ?? 'pending'}/${props?.plant || 0}/${
       props?.datetype || "all"
-    }/${props?.date || "all"}?page=${page}&expand=${fields.join(",")}`,
+    }/${props?.date || "all"}?page=${page}&search=${search}&expand=${fields.join(",")}`,
     checklistFetcher,
     { revalidateOnFocus: false }
   );
@@ -418,19 +420,20 @@ function useWorkflow(page: number) {
 }
 
 export {
-  useRequest,
-  useAsset,
-  useChecklist,
-  useCurrentUser,
   useAccountlog,
-  useSystemAsset,
-  useSystemAssetName,
-  useSubComponent1Name,
+  useAsset,
   useChangeOfParts,
+  useChecklist,
   useChecklistFilter,
-  useRequestFilter,
-  useWorkflow,
+  useCurrentUser,
   useFeedback,
   useFeedbackFilter,
+  useRequest,
+  useRequestFilter,
   useSpecificRequest,
+  useSubComponent1Name,
+  useSystemAsset,
+  useSystemAssetName,
+  useWorkflow
 };
+
