@@ -1,39 +1,37 @@
-import React, { useState, FormEvent, useEffect } from "react";
-import Layout from "../components/Layout";
-import {
-  ModuleContent,
-  ModuleHeader,
-  ModuleMain,
-  ModuleModal,
-} from "../components";
 import {
   Body,
+  Cell,
   Header,
   HeaderCell,
   HeaderRow,
   Row,
   Table,
-  Cell,
 } from "@table-library/react-table-library";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import { useTheme } from "@table-library/react-table-library/theme";
+import moment from "moment";
+import { GetServerSidePropsContext } from "next";
 import Tooltip from 'rc-tooltip';
 import 'rc-tooltip/assets/bootstrap_white.css';
-import instance from "../axios.config.js";
-import { GetServerSidePropsContext } from "next";
-import styles from "../styles/Logbook.module.css";
+import React, { FormEvent, useEffect, useState } from "react";
+import { FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
 import { SlLock, SlLockOpen } from "react-icons/sl";
-import AssignToSelect from "../components/Schedule/AssignToSelect";
+import instance from "../axios.config.js";
+import {
+  ModuleContent,
+  ModuleHeader,
+  ModuleMain
+} from "../components";
 import LoadingHourglass from "../components/LoadingHourglass";
 import ModuleSimplePopup, {
   SimpleIcon,
 } from "../components/ModuleLayout/ModuleSimplePopup";
 import PageButton from "../components/PageButton";
-import styles2 from "../styles/Request.module.scss";
-import { FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
 import { useCurrentUser } from "../components/SWR";
+import AssignToSelect from "../components/Schedule/AssignToSelect";
+import styles from "../styles/Logbook.module.css";
+import styles2 from "../styles/Request.module.scss";
 import { CMMSPlant } from "../types/common/interfaces";
-import moment from "moment";
 
 export interface logbookData {
   [key: string]: string | number;
@@ -221,7 +219,7 @@ const Logbook = ({
                 plantId={user.data?.allocated_plants}
                 isSingle
                 style={{
-                  width: "25rem",
+                  width: "20rem",
                   zIndex: 10,
                   marginRight: "0.5rem",
                   marginLeft: "0.5rem",
@@ -239,9 +237,9 @@ const Logbook = ({
                 plantId={user.data?.allocated_plants}
                 isSingle
                 style={{
-                  width: "25rem",
+                  width: "20rem",
                   zIndex: 10,
-                  marginRight: "0.5rem",
+                  marginRight: "1rem",
                   marginLeft: "0.5rem",
                 }}
                 defaultIds={staff.second ? [staff.second] : undefined}
