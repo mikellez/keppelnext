@@ -68,6 +68,7 @@ const fetchAllOfChangeOfPartsQuery = (req) => {
         cop.scheduled_date,
         cop.description,
         cop.assigned_user_id,
+        cop.remarks,
         psa.plant_asset_instrument,
         psa.plant_id,
         pm.plant_name,
@@ -121,6 +122,7 @@ const toCMMSChangeOfParts = (row) => {
     asset: row.plant_asset_instrument,
     psaId: row.psa_id,
     copId: row.cop_id,
+    remarks: row.remarks,
   };
 };
 
@@ -226,9 +228,10 @@ const createNewChangeOfParts = async (req, res, next) => {
             psa_id,
             scheduled_date,
             description,
-            assigned_user_id
+            assigned_user_id,
+            remarks
         )
-        VALUES ($1, $2, $3, $4)`;
+        VALUES ($1, $2, $3, $4, $5)`;
 
   global.db.query(
     sql,
@@ -237,6 +240,7 @@ const createNewChangeOfParts = async (req, res, next) => {
       moment(req.body.formData.scheduledDate).format("YYYY-MM-DD HH:mm:ss"),
       req.body.formData.description,
       req.body.formData.assignedUserId,
+      req.body.formData.remarks,
     ],
     (err) => {
       if (err) {
@@ -257,9 +261,10 @@ const editChangeOfParts = async (req, res, next) => {
         scheduled_date = $2,
         description = $3,
         assigned_user_id = $4,
-        changed_date = $5
+        changed_date = $5,
+        remarks = $6
     WHERE 
-        cop_id = $6
+        cop_id = $7
     `;
 
   global.db.query(
@@ -270,6 +275,7 @@ const editChangeOfParts = async (req, res, next) => {
       req.body.formData.description,
       req.body.formData.assignedUserId,
       req.body.formData.changedDate,
+      req.body.formData.remarks,
       req.body.formData.copId,
     ],
     (err) => {

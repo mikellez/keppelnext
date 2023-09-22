@@ -44,7 +44,7 @@ const COPTable = (props: COPTableProps) => {
     getTheme(),
     {
       Table: `
-                --data-table-library_grid-template-columns: 5% 15% 35% 15% 15% 15%;
+                --data-table-library_grid-template-columns: 5% 15% 15% 35% 15% 15% 15% 20%;
             `,
 
       Row: `
@@ -135,17 +135,20 @@ const COPTable = (props: COPTableProps) => {
                 <Header>
                   <HeaderRow>
                     <HeaderCell>ID</HeaderCell>
+                    <HeaderCell>Plant</HeaderCell>
                     <HeaderCell>Asset</HeaderCell>
                     <HeaderCell>Description</HeaderCell>
                     <HeaderCell>Scheduled Date</HeaderCell>
                     <HeaderCell>Completion Date</HeaderCell>
                     <HeaderCell>Assigned To</HeaderCell>
+                    <HeaderCell>Remarks</HeaderCell>
                   </HeaderRow>
                 </Header>
                 <Body>
                   {tableList.map((item) => (
                     <Row key={item.id} item={item}>
                       <Cell>{item.copId}</Cell>
+                      <Cell>{item.plant}</Cell>
                       <Cell>{item.asset}</Cell>
                       <Cell>{item.description}</Cell>
 
@@ -165,6 +168,7 @@ const COPTable = (props: COPTableProps) => {
                         )}
                       </Cell>
                       <Cell>{item.assignedUser}</Cell>
+                      <Cell>{item.remarks}</Cell>
                     </Row>
                   ))}
                 </Body>

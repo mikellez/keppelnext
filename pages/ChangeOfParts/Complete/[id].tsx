@@ -19,6 +19,7 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
     const [successModal, setSuccessModal] = useState<boolean>(false);
     const [confirmModal, setConfirmModal] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
+    const [remarks, setRemarks] = useState<string>("");
     const router = useRouter();
     const user = useCurrentUser();
 
@@ -36,10 +37,20 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
     };
 
     const handleConfirmClick = () => {
+        //console.log(formData);
         editChangeOfParts(formData).then((result) => {
             setSuccessModal(true);
         });
     };
+
+    useEffect(() => {
+        setFormData((prev) => {
+            return {
+                ...prev,
+                remarks: remarks,
+            };
+        });
+    }, [remarks]);
 
     useEffect(() => {
         setIsReady(false);
@@ -103,6 +114,8 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                 text="Please confirm that you have completed the change of part"
                 icon={SimpleIcon.Info}
                 shouldCloseOnOverlayClick={true}
+                inputField={true}
+                inputVar={{ setInput: setRemarks, value: remarks, title: "Remarks" }}
             />
 
             <ModuleSimplePopup
