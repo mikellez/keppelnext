@@ -307,7 +307,7 @@ const fetchAssignedRequests = async (req, res, next) => {
 };
 
 const fetchOverdueRequests = async (req, res, next) => {
-  const page = req.query.page || 1;
+  const page = req.query.page || 0;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
 
