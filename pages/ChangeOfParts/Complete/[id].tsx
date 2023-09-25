@@ -17,6 +17,7 @@ import { AxiosResponse } from "axios";
 const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
     const [formData, setFormData] = useState<CMMSChangeOfParts>(props.changeOfParts[0]);
     const [successModal, setSuccessModal] = useState<boolean>(false);
+    const [cOPAssetDirectModal, setCOPAssetDirectModal] = useState<boolean>(false);
     const [confirmModal, setConfirmModal] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
     const [remarks, setRemarks] = useState<string>("");
@@ -36,10 +37,10 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
         setConfirmModal(true);
     };
 
-    const handleConfirmClick = () => {
+    const handleCOPConfirmClick = () => {
         //console.log(formData);
         editChangeOfParts(formData).then((result) => {
-            setSuccessModal(true);
+            setCOPAssetDirectModal(true);
         });
     };
 
@@ -106,7 +107,7 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                 modalOpenState={confirmModal}
                 setModalOpenState={setConfirmModal}
                 buttons={
-                    <TooltipBtn toolTip={false} onClick={handleConfirmClick}>
+                    <TooltipBtn toolTip={false} onClick={handleCOPConfirmClick}>
                         Confirm
                     </TooltipBtn>
                 }
@@ -116,6 +117,35 @@ const CompleteChangeOfPartsPage = (props: ChangeOfPartsPageProps) => {
                 shouldCloseOnOverlayClick={true}
                 inputField={true}
                 inputVar={{ setInput: setRemarks, value: remarks, title: "Remarks" }}
+            />
+
+            <ModuleSimplePopup
+                modalOpenState={cOPAssetDirectModal}
+                setModalOpenState={setCOPAssetDirectModal}
+                title="Success"
+                text={"Change of part request completed. You have also tagged " + formData.asset + " asset for a change of part. Would you also like to make the part changes in asset management?"}
+                shouldCloseOnOverlayClick={true}
+                buttons={[
+                    <TooltipBtn
+                        key={1}
+                        toolTip={false}
+                        onClick={() => {
+                            setSuccessModal(true);
+                            setCOPAssetDirectModal(false);
+                        }}
+                    >
+                        No
+                    </TooltipBtn>,
+                    <TooltipBtn
+                        key={2}
+                        toolTip={false}
+                        onClick={() => router.push("/Asset/Edit/" + formData.psaId)}
+                        style={{ backgroundColor: "#367E18", borderColor: "#367E18" }}
+                    >
+                        Yes
+                    </TooltipBtn>,
+                ]}
+                icon={SimpleIcon.Check}
             />
 
             <ModuleSimplePopup
