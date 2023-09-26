@@ -10,6 +10,11 @@ const {
 
 const ITEMS_PER_PAGE = 10;
 
+var dateSelectClause = '';
+  var dateWhereClause = '';
+  var dateJoinClause = '';
+  var dateOrderByClause = '';
+
 const searchCondition = (search) => {
   //fields to search by: checklist_id, description, status, assigneduser, signoffuser, createdbyuser
   let searchInt = parseInt(search);
@@ -218,8 +223,33 @@ const getAllChecklistQuery = (req) => {
 
   expandCond = SELECT_ARR.join(", ");
 
+  // for approved date and completed date sorting
+  
+  if (sortField){
+    if (sortField=='approved_date') {
+    dateSelectClause = `DISTINCT ON (cl.checklist_id)
+    (SELECT  jsonb_agg(activity ORDER BY idx DESC)
+      FROM jsonb_array_elements(cl.activity_log) WITH ORDINALITY AS t(activity, idx)
+      WHERE activity->>'activity_type' = 'APPROVED'
+      LIMIT 1) AS approved_activity,`
+      dateWhereClause = `AND al.elem->>'activity_type' = 'APPROVED'`;
+      dateJoinClause = `
+      JOIN keppel.request r1 ON u.user_id = r1.user_id 
+      CROSS JOIN LATERAL
+          jsonb_array_elements(r1.activity_log) AS al(elem)`;
+  
+      dateOrderByClause = `ORDER BY cl.checklist_id, (SELECT (activity->>'date')::timestamp
+          FROM jsonb_array_elements(cl.activity_log) AS t(activity)
+          WHERE activity->>'activity_type' = 'APPROVED'
+          AND activity->>'date' IS NOT NULL
+          LIMIT 1) ${sortOrder}`
+
+    } 
+  }
+
   query = `
     SELECT 
+      ${dateSelectClause}
       ${expandCond}
     FROM 
         keppel.users u
@@ -242,7 +272,9 @@ const getAllChecklistQuery = (req) => {
         LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
         LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id
         JOIN keppel.status_cm st ON st.status_id = cl.status_id	
-  `;
+        ${dateJoinClause}
+        
+    `
   return query;
 };
 
@@ -454,6 +486,9 @@ const getApprovedChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
+  var order_query = `ORDER BY ${sortField} ${sortOrder}`
+  
+
   if (sortField == undefined || sortOrder == undefined) {
     return (
       getAllChecklistQuery(req) +
@@ -466,14 +501,29 @@ const getApprovedChecklistsQuery = (req) => {
     `
     );
   } else {
+
+    if (sortField == 'approved_date'){
+      order_query = dateOrderByClause;
+    }
+
+    console.log("finalQuery: ",getAllChecklistQuery(req) +
+    `
+    WHERE
+        ua.user_id = $1 AND
+        (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
+        ${dateWhereClause}
+    ${searchCondition(search)}
+    ${dateOrderByClause}
+  `)
     return (
       getAllChecklistQuery(req) +
       `
       WHERE
           ua.user_id = $1 AND
           (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
+          ${dateWhereClause}
       ${searchCondition(search)}
-      ORDER BY ${sortField} ${sortOrder}
+      ${order_query}
     `
     );
   }

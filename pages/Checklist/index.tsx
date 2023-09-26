@@ -394,11 +394,8 @@ export default function Checklist(props: ChecklistProps) {
     }
     setDataChanged(true);
   }
-
   async function sortDate(activeTabIndex: any) {
-
     setBlockReset(true);
-    
     let dateType =
       activeTabIndex === 2
         ? "Completed Date"
@@ -407,19 +404,19 @@ export default function Checklist(props: ChecklistProps) {
         : "Created On";
 
     if (dateType == "Created On") {
-      setSortField('cl.checklist_id'); //sorts by id since it is aligned with date
+      setSortField("r.created_date");
     } else if (dateType == "Completed Date") {
-      setSortField('cl.checklist_id'); //sorts by id since it is aligned with date
+      setSortField("completed_date");
     } else if (dateType == "Approved Date") {
-      setSortField('cl.checklist_id'); //sorts by id since it is aligned with date
+      setSortField("approved_date");
     }
 
     if (dateArrow == "" || dateArrow == " ▲") {
       setDateArrow(" ▼");
-      setSortOrder('desc');
+      setSortOrder("desc");
     } else if (dateArrow == " ▼") {
       setDateArrow(" ▲");
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
     setDataChanged(true);
   }

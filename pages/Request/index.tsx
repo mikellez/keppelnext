@@ -357,7 +357,6 @@ export default function Request(props: RequestProps) {
       setTotalPages(1);
     }
 
-
     if (dataChanged && requestData) {
       setRequestItems(
         requestData.rows.map((row: CMMSRequest, total: number) => {
@@ -367,9 +366,15 @@ export default function Request(props: RequestProps) {
             created_date: new Date(row.created_date),
           };
         })
-      )
+      );
     }
-  }, [dataChanged, requestData, requestIsFetchValidating, page, props?.isReady]); //removed isReady from dependencies
+  }, [
+    dataChanged,
+    requestData,
+    requestIsFetchValidating,
+    page,
+    props?.isReady,
+  ]); //removed isReady from dependencies
 
   const updateTable = (foo: Function) => {
     setReady(false);
@@ -393,16 +398,16 @@ export default function Request(props: RequestProps) {
 
   async function sortFaultType() {
     setBlockReset(true);
-    setSortField('ft.fault_type');
+    setSortField("ft.fault_type");
     if (
       faultTypeHeader === "Fault Type" ||
       faultTypeHeader === "Fault Type ▲"
     ) {
       setFaultTypeHeader("Fault Type ▼");
-      setSortOrder('desc');
+      setSortOrder("desc");
     } else if (faultTypeHeader === "Fault Type ▼") {
       setFaultTypeHeader("Fault Type ▲");
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
     setDataChanged(true);
   }
@@ -421,7 +426,7 @@ export default function Request(props: RequestProps) {
 
   async function sortPriority() {
     setBlockReset(true);
-    setSortField('r.priority_id');
+    setSortField("r.priority_id");
     if (priorityHeader === "Priority" || priorityHeader === "Priority ▲") {
       setPriorityHeader("Priority ▼");
       setSortOrder("desc");
@@ -434,21 +439,19 @@ export default function Request(props: RequestProps) {
 
   async function sortLocation() {
     setBlockReset(true);
-    setSortField('pm.plant_name')
+    setSortField("pm.plant_name");
     if (locationHeader === "Location" || locationHeader === "Location ▲") {
       setLocationHeader("Location ▼");
-      setSortOrder('desc');
+      setSortOrder("desc");
     } else if (locationHeader === "Location ▼") {
       setLocationHeader("Location ▲");
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
     setDataChanged(true);
   }
 
   async function sortDate(activeTabIndex: any) {
-
     setBlockReset(true);
-    
     let dateType =
       activeTabIndex === 2
         ? "Completed Date"
@@ -457,69 +460,57 @@ export default function Request(props: RequestProps) {
         : "Created On";
 
     if (dateType == "Created On") {
-      setSortField('r.created_date');
+      setSortField("r.created_date");
     } else if (dateType == "Completed Date") {
-      // const completedActivity =
-      //   item.activity_log
-      //     .reverse()
-      //     .find(
-      //       (activity) =>
-      //         activity["activity_type"] ===
-      //         "COMPLETED"
-      //     );
-      // if (completedActivity) {
-      //   return moment(
-      //     new Date(completedActivity.date)
-      //   ).format("MMMM Do YYYY, h:mm:ss a");
-      // }
-      setSortField('r.request_id');
+      setSortField("completed_date");
     } else if (dateType == "Approved Date") {
-      setSortField('r.request_id');
+      setSortField("approved_date");
     }
 
-    if (dateArrow == "" || dateArrow == " ▲") {
-      setDateArrow(" ▼");
-      setSortOrder('desc');
-    } else if (dateArrow == " ▼") {
+    if (dateArrow == "" || dateArrow == " ▼") {
       setDateArrow(" ▲");
-      setSortOrder('asc');
-    }
+      setSortOrder("asc");
+      
+    } else if (dateArrow == " ▲") {
+      setDateArrow(" ▼");
+      setSortOrder("desc");
+    } 
+    setDataChanged(true);
   }
 
   async function sortAssetName() {
     setBlockReset(true);
-    setSortField('tmp1.asset_name')
+    setSortField("tmp1.asset_name");
     if (
       assetNameHeader === "Asset Name" ||
       assetNameHeader === "Asset Name ▲"
     ) {
       setAssetNameHeader("Asset Name ▼");
-      setSortOrder('desc');
+      setSortOrder("desc");
     } else if (assetNameHeader === "Asset Name ▼") {
       setAssetNameHeader("Asset Name ▲");
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
     setDataChanged(true);
   }
 
   async function sortRequestedBy() {
-    
     //linked to user_id, related to user_name in users table
     setBlockReset(true);
-    setSortField('created_by')
+    setSortField("created_by");
     if (
       requestedByHeader === "Requested By" ||
       requestedByHeader === "Requested By ▲"
     ) {
       setRequestedByHeader("Requested By ▼");
-      setSortOrder('desc');
+      setSortOrder("desc");
     } else if (requestedByHeader === "Requested By ▼") {
       setRequestedByHeader("Requested By ▲");
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
     setDataChanged(true);
   }
-  
+
   return (
     <ModuleMain>
       <ModuleHeader title="Request" header="Request">
