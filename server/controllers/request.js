@@ -187,7 +187,8 @@ async function fetchRequestQuery(
           AND activity->>'date' IS NOT NULL
           LIMIT 1) ${sortOrder}`
 
-    } else if (sortField == 'approved_date'){
+    } 
+    else if (sortField == 'approved_date'){
       dateSelectClause = `(SELECT jsonb_agg(activity ORDER BY idx DESC)
     FROM jsonb_array_elements(r.activity_log) WITH ORDINALITY AS t(activity, idx)
     WHERE activity->>'activity_type' = 'APPROVED'

@@ -404,11 +404,11 @@ export default function Checklist(props: ChecklistProps) {
         : "Created On";
 
     if (dateType == "Created On") {
-      setSortField("r.created_date");
+      setSortField("cl.created_date");
     } else if (dateType == "Completed Date") {
-      setSortField("completed_date");
+      setSortField("cl.checklist_id");
     } else if (dateType == "Approved Date") {
-      setSortField("approved_date");
+      setSortField("cl.checklist_id");
     }
 
     if (dateArrow == "" || dateArrow == " ▲") {
