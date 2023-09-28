@@ -1,6 +1,7 @@
 const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
+const {fuzzySearchSelectQuery, fuzzySearchWhereQuery, fuzzySearchOrderByQuery} = require("../common/fuzzySearchQuery");
 
 /** Express router providing user related routes
  * @module controllers/request
@@ -153,10 +154,19 @@ async function fetchRequestQuery(
   }
 
   expandCond = SELECT_ARR.join(", ");
-    
+  let searchColumns = ["pm.plant_name", 
+  "r.fault_description", "ft.fault_type", "pri.priority", "req_u.first_name", "tmp1.asset_name",
+  "r.description_other"
+];
+
+  const fuzzySelect = fuzzySearchSelectQuery(searchColumns, search);
+  const fuzzyWhere = fuzzySearchWhereQuery(searchColumns, search);
+  const fuzzyOrder = fuzzySearchOrderByQuery(search);
+
   let sql;
   sql = `SELECT 
     ${expandCond}
+    ${fuzzySelect? (expandCond ? `,` + fuzzySelect: fuzzySelect) : fuzzySelect }
   FROM    
     keppel.users u
     JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -175,7 +185,7 @@ async function fetchRequestQuery(
       
   WHERE 1 = 1 
   AND ua.user_id = ${user_id}
-  ${searchCondition(search)}
+  ${fuzzyWhere}
   ${status_query}
   ${userCond}
   
@@ -194,8 +204,9 @@ async function fetchRequestQuery(
     req_u.last_name,
     au.first_name,
     au.last_name
-  ) ${order_query}`
+  ) ${search === ""? order_query : fuzzyOrder}`
   ;
+  console.log(sql);
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);
