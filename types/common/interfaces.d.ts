@@ -398,6 +398,7 @@ interface CMMSChangeOfParts {
   description: string;
   assignedUserId: number;
   assignedUser: string;
+  remarks?: string;
 }
 
 interface CMMSAddUser {

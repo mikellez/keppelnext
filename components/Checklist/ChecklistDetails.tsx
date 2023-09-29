@@ -2,8 +2,8 @@ import moment from "moment";
 import { ReactNode, useCallback } from "react";
 import { ChecklistPageProps } from "../../pages/Checklist/Form";
 import styles from "../../styles/Checklist.module.scss";
-import { CMMSChecklist } from "../../types/common/interfaces";
 import { Checklist_Status } from "../../types/common/enums";
+import { CMMSChecklist } from "../../types/common/interfaces";
 
 const ChecklistDetails = (props: ChecklistPageProps) => {
   // console.log(props.checklist);
@@ -153,7 +153,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
         <div>
           <p className={styles.checklistDetailsHeading}>Overdue</p>
           <p className={styles.checklistDetailsContent}>
-            {props.checklist?.overdue}
+            {props.checklist?.overdue_status ? 'OVERDUE' : "VALID"}
           </p>
         </div>
         {props.checklist?.status_id === Checklist_Status.Reassignment_Request && (<div>

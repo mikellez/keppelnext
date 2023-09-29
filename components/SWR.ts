@@ -1,26 +1,28 @@
 import useSWR from "swr";
+import { ChecklistProps } from "../pages/Checklist";
+import { FeedbackFormProps } from "../pages/Feedback";
+import { RequestProps } from "../pages/Request";
+import instance from "../types/common/axios.config";
 import {
-  CMMSAsset,
-  CMMSRequest,
-  CMMSChecklist,
   CMMSActivitylog,
+  CMMSAsset,
+  CMMSChangeOfParts,
+  CMMSChecklist,
+  CMMSFeedback,
+  CMMSRequest,
+  CMMSSubComponent1Name,
   CMMSSystemAsset,
   CMMSSystemAssetName,
-  CMMSSubComponent1Name,
-  CMMSChangeOfParts,
   CMMSWorkflow,
-  CMMSFeedback,
 } from "../types/common/interfaces";
-import { RequestProps } from "../pages/Request";
-import { ChecklistProps } from "../pages/Checklist";
-import instance from "../types/common/axios.config";
-import { FeedbackFormProps } from "../pages/Feedback";
 
 function useRequest(
   request_type: "pending" | "assigned" | "review" | "approved",
   page: number,
   search: string = "",
-  fields: string[]
+  fields: string[],
+  sortField: string,
+  sortOrder: string,
 ) {
   const requestFetcher = (url: string) =>
     instance
@@ -38,7 +40,7 @@ function useRequest(
 
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
     [
-      `/api/request/${request_type}?page=${page}&search=${search}&expand=${fieldsString}`,
+      `/api/request/${request_type}?page=${page}&search=${search}&expand=${fieldsString}&sortField=${sortField}&sortOrder=${sortOrder}`,
     ],
     requestFetcher,
     { revalidateOnFocus: false }
@@ -66,6 +68,7 @@ function useSpecificRequest(request_id: number) {
 function useRequestFilter(
   props: RequestProps, 
   page: number,
+  search: string = "",
   fields: string[]
 ) {
   const requestFetcher = (url: string) =>
@@ -86,7 +89,7 @@ function useRequestFilter(
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
     `/api/request/${props.viewType ?? 'pending'}/${props?.plant || 0}/${
       props.datetype || "all"
-    }/${props?.date || "all"}?page=${page}&expand=${fields.join(",")}`,
+    }/${props?.date || "all"}?page=${page}&search=${search}&expand=${fields.join(",")}`,
     requestFetcher,
     { revalidateOnFocus: false }
   );
@@ -160,18 +163,28 @@ function useChecklist(
   checklist_type: "pending" | "assigned" | "record" | "approved",
   page: number,
   search: string = "",
-  fields: string[]
+  fields: string[],
+  sortField: string,
+  sortOrder: string,
 ) {
+  let responseResult;
   const checklistFetcher = (url: string) =>
     instance
       .get<{ rows: CMMSChecklist[]; total: number }>(url)
-      .then((response) => response.data)
+      // .then((response) => response.data)
+      .then((response) => {
+        // console.log("Response:", response.data); // Log the response here
+        responseResult = response.data;
+        return response.data;
+      })
+     
       .catch((e) => {
         throw new Error(e);
       });
-
+  
+  let swrResult;
   return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
-    [`/api/checklist/${checklist_type}?page=${page}&search=${search}&expand=${fields.join(",")}`],
+    [`/api/checklist/${checklist_type}?page=${page}&search=${search}&expand=${fields.join(",")}&sortField=${sortField}&sortOrder=${sortOrder}`],
     checklistFetcher,
     { revalidateOnFocus: false }
   );
@@ -180,6 +193,7 @@ function useChecklist(
 function useChecklistFilter(
   props: ChecklistProps, 
   page: number,
+  search: string = "",
   fields: string[]
 ) {
   const checklistFetcher = (url: string) =>
@@ -193,7 +207,7 @@ function useChecklistFilter(
   return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
     `/api/checklist/${props.viewType ?? 'pending'}/${props?.plant || 0}/${
       props?.datetype || "all"
-    }/${props?.date || "all"}?page=${page}&expand=${fields.join(",")}`,
+    }/${props?.date || "all"}?page=${page}&search=${search}&expand=${fields.join(",")}`,
     checklistFetcher,
     { revalidateOnFocus: false }
   );
@@ -360,22 +374,30 @@ function useChangeOfParts(
   
 ) {
   const changeOfPartsFetcher = async (url: string) => {
-    let apiURL = copId ? `${url}/${copId}` : url;
-    apiURL += "&"
+    let apiURL = url;
     if (options) {
-      if (options.plant_id && options.type)
-        apiURL += `plant_id=${options.plant_id}&type=${options.type}`;
-      else if (options.plant_id) {
-        apiURL += `plant_id=${options.plant_id}`
+      if (options.type){
+        // Add either completed or scheduled
+        apiURL += `/${options.type}`;
+        if(options.plant_id){
+          // if have particular plant selected
+          apiURL += `/${options.plant_id}`
+        }
       }
-      else if (options.type) {
-        apiURL += `type=${options.type}`
+      else{
+        // If type null, replace type with 'all'
+        apiURL += `/all`;
+        // If copId specified, then add it in
+        if(copId){
+          apiURL += `/${copId}`;
+        }
       }
-      else if (options.psa_id && copId === null){
-        apiURL += `psa_id=${options.psa_id}`;
-
-      }
-    } 
+    }
+    let psa_id = options?.psa_id ? options.psa_id : "";
+    if((limit && page) || (psa_id && copId === null)){
+      apiURL += `?limit=${limit}&offset=${(page - 1) * limit}&psa_id=${psa_id}`;
+    }
+    //console.log("Final URL:" + apiURL); 
 
     return await instance
       .get<CMMSChangeOfParts[]>(apiURL)
@@ -389,8 +411,7 @@ function useChangeOfParts(
   };
 
   return useSWR<CMMSChangeOfParts[], Error>(
-    [`/api/changeOfParts/${options?.type}?limit=${limit}&offset=${
-      (page - 1) * limit}`, copId, options],
+    [`/api/changeOfParts`, copId, options, page],
     changeOfPartsFetcher,
     { revalidateOnFocus: false }
   );
@@ -418,19 +439,20 @@ function useWorkflow(page: number) {
 }
 
 export {
-  useRequest,
-  useAsset,
-  useChecklist,
-  useCurrentUser,
   useAccountlog,
-  useSystemAsset,
-  useSystemAssetName,
-  useSubComponent1Name,
+  useAsset,
   useChangeOfParts,
+  useChecklist,
   useChecklistFilter,
-  useRequestFilter,
-  useWorkflow,
+  useCurrentUser,
   useFeedback,
   useFeedbackFilter,
+  useRequest,
+  useRequestFilter,
   useSpecificRequest,
+  useSubComponent1Name,
+  useSystemAsset,
+  useSystemAssetName,
+  useWorkflow
 };
+

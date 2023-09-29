@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import {
   ModuleContent,
   ModuleHeader,
-  ModuleMain
+  ModuleMain,
+  ModuleModal
 } from "../../components";
 import DashboardBox from "../../components/Dashboard/DashboardBox";
 import PChart from "../../components/Dashboard/PChart";
@@ -40,6 +41,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
   const [isLicenseReady, setIsLicenseReady] = useState<boolean>(false);
   const [plant, setPlant] = useState<number>(0);
   const [field, setField] = useState<string>("status");
+  const [displayModal, setDisplayModal] = useState<boolean>(false);
   const [expiredLicenseInDays, setExpiredLicencesInDays] =
     useState<string>("expiry");
   const [pickerwithtype, setPickerWithType] = useState<{
@@ -125,6 +127,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
     const { id } = e.currentTarget;
     setShowDiv(id);
     setActive(id);
+    setDisplayModal(true);
   };
 
   const fetchRequests = async () => {
@@ -939,95 +942,121 @@ export default function DashboardContent({ permissions }: { permissions: string[
             onClick={handleDashboardClick}
           ></DashboardBox>)}
         </div>
-        {showDiv === "pending-requests-box" && (
-          <Request
-            isReady={isRequestReady}
-            filter={true}
-            status={1}
-            date={date}
-            datetype={datetype}
-            plant={plant as number}
-            viewType="pending"
-          />
-        )}
-        {showDiv === "outstanding-requests-box" && (
-          <Request
-            isReady={isRequestReady}
-            filter={true}
-            status={"2"}
-            date={date}
-            datetype={datetype}
-            plant={plant as number}
-            viewType="outstanding"
-          />
-        )}
-        {showDiv === "closed-requests-box" && (
-          <Request
-            isReady={isRequestReady}
-            filter={true}
-            status={"3,4,5,6"}
-            date={date}
-            datetype={datetype}
-            plant={plant as number}
-            viewType="completed"
-          />
-        )}
-        {showDiv === "pending-checklists-box" && (
-          <Checklist
-            isReady={isChecklistReady}
-            filter={true}
-            status={1}
-            date={date}
-            datetype={datetype}
-            plant={plant as number}
-            viewType="pending"
-          />
-        )}
-        {showDiv === "outstanding-checklists-box" && (
-          <Checklist
-            isReady={isChecklistReady}
-            filter={true}
-            status={2}
-            date={date}
-            datetype={datetype}
-            plant={plant as number}
-            viewType="outstanding"
-          />
-        )}
-        {showDiv === "completed-checklists-box" && (
-          <Checklist
-            isReady={isChecklistReady}
-            filter={true}
-            status={"3,4,5,6"}
-            date={date}
-            datetype={datetype}
-            plant={plant as number}
-            viewType="completed"
-          />
-        )}
-        {showDiv === "scheduled-cop-box" && (
-          <ChangeOfPartsPage
-            changeOfParts={[]}
-            activeCOPType={0}
-            filter={true}
-          />
-        )}
-        {showDiv === "completed-cop-box" && (
-          <ChangeOfPartsPage
-            changeOfParts={[]}
-            activeCOPType={1}
-            filter={true}
-          />
-        )}
-        {showDiv === "pending-feedback-box" && (
-          <Feedback filter={true} activeTabIndex={0} />
-        )}
-        {showDiv === "outstanding-feedback-box" && (
-          <Feedback filter={true} activeTabIndex={1} />
-        )}
-        {showDiv === "completed-feedback-box" && (
-          <Feedback filter={true} activeTabIndex={2} />
-        )}
+        <ModuleModal 
+          isOpen={displayModal} 
+          closeModal={() => setDisplayModal(false)}  
+          large
+        >
+          {showDiv === "pending-requests-box" && (
+            <Request
+              isReady={isRequestReady}
+              filter={true}
+              status={1}
+              date={date}
+              datetype={datetype}
+              plant={plant as number}
+              viewType="pending"
+            />
+          )}
+          {showDiv === "outstanding-requests-box" && (
+            <Request
+              isReady={isRequestReady}
+              filter={true}
+              status={"2"}
+              date={date}
+              datetype={datetype}
+              plant={plant as number}
+              viewType="outstanding"
+            />
+          )}
+          {showDiv === "closed-requests-box" && (
+            <Request
+              isReady={isRequestReady}
+              filter={true}
+              status={"3,4,5,6"}
+              date={date}
+              datetype={datetype}
+              plant={plant as number}
+              viewType="completed"
+            />
+          )}
+          {showDiv === "overdue-requests-box" && (
+            <Request
+              isReady={isRequestReady}
+              filter={true}
+              date={date}
+              datetype={datetype}
+              plant={plant as number}
+              viewType="overdue"
+            />
+          )}
+          {showDiv === "pending-checklists-box" && (
+            <Checklist
+              isReady={isChecklistReady}
+              filter={true}
+              status={1}
+              date={date}
+              datetype={datetype}
+              plant={plant as number}
+              viewType="pending"
+            />
+          )}
+          {showDiv === "outstanding-checklists-box" && (
+            <Checklist
+              isReady={isChecklistReady}
+              filter={true}
+              status={2}
+              date={date}
+              datetype={datetype}
+              plant={plant as number}
+              viewType="outstanding"
+            />
+          )}
+          {showDiv === "completed-checklists-box" && (
+            <Checklist
+              isReady={isChecklistReady}
+              filter={true}
+              status={"3,4,5,6"}
+              date={date}
+              datetype={datetype}
+              plant={plant as number}
+              viewType="completed"
+            />
+          )}
+          {showDiv === "overdue-checklists-box" && (
+            <Checklist
+              isReady={isChecklistReady}
+              filter={true}
+              date={date}
+              datetype={datetype}
+              plant={plant as number}
+              viewType="overdue"
+            />
+          )}
+          {showDiv === "scheduled-cop-box" && (
+            <ChangeOfPartsPage
+              changeOfParts={[]}
+              activeCOPType={0}
+              filter={true}
+            />
+          )}
+          {showDiv === "completed-cop-box" && (
+            <ChangeOfPartsPage
+              changeOfParts={[]}
+              activeCOPType={1}
+              filter={true}
+            />
+          )}
+          {showDiv === "pending-feedback-box" && (
+            <Feedback filter={true} activeTabIndex={0} />
+          )}
+          {showDiv === "outstanding-feedback-box" && (
+            <Feedback filter={true} activeTabIndex={1} />
+          )}
+          {showDiv === "completed-feedback-box" && (
+            <Feedback filter={true} activeTabIndex={2} />
+          )}
+        </ModuleModal>
       </ModuleContent>
     </ModuleMain>
   );

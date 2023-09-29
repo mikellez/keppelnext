@@ -117,7 +117,7 @@ export interface ChecklistItem {
 
 export interface ChecklistProps {
   filter?: boolean;
-  status: number | string;
+  status?: number | string;
   plant: number;
   date: string;
   datetype: string;
@@ -149,7 +149,7 @@ export default function Checklist(props: ChecklistProps) {
   const [isReady, setReady] = useState(false);
   const { userPermission } = useCurrentUser();
   const [activeTabIndex, setActiveTabIndex] = useState(
-    userPermission("canManageChecklist") ? 0 : 1   // Specialists directed to "assigned tab" upon entering
+    userPermission("engineer") ? 0 : 1   // Specialists directed to "assigned tab" upon entering
   );
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -167,6 +167,9 @@ export default function Checklist(props: ChecklistProps) {
   const [assignedToHeader, setAssignedToHeader] = useState("Assigned To");
   const [signOffHeader, setSignOffHeader] = useState("Signed Off By");
   const [createdByHeader, setCreatedByHeader] = useState("Created By");
+  const [sortField, setSortField] = useState("cl.checklist_id");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [dataChanged, setDataChanged] = useState(false);
 
   const fields = [
     "checklist_id",
@@ -182,19 +185,23 @@ export default function Checklist(props: ChecklistProps) {
     "activity_log",
     "overdue_status",
   ];
-  const filteredData = useChecklistFilter(props, page, fields);
-  const columnData = useChecklist(
+
+  const filteredData = useChecklistFilter(props, page, searchRef.current.value, fields);
+  let columnData = useChecklist(
+
     indexedColumn[activeTabIndex],
     page,
     searchRef.current.value,
-    fields
+    fields,
+    sortField,
+    sortOrder
   );
   const router = useRouter();
-
+  
   const { data, error, isValidating, mutate } = props.filter
     ? filteredData
     : columnData;
-
+  
   // Used for adding the overdue column into the template when the assigned/pending tab is selected
   const tableFormat =
     activeTabIndex === 0 || activeTabIndex === 1 || activeTabIndex === 2
@@ -225,7 +232,6 @@ export default function Checklist(props: ChecklistProps) {
   };
 
   useEffect(() => {
-    // console.log(props);
     if (data && !isValidating) {
       if (props?.filter) {
         if (data?.rows?.length > 0) {
@@ -237,13 +243,12 @@ export default function Checklist(props: ChecklistProps) {
               };
             })
           );
-
           setReady(true);
           setTotalPages(data.total);
         }
       }
     }
-  }, [data, isValidating, isReady, page, props?.isReady]);
+  }, [dataChanged, data, isValidating, isReady, page, props?.isReady]);
 
   useEffect(() => {
     if (!props?.filter) {
@@ -278,6 +283,17 @@ export default function Checklist(props: ChecklistProps) {
               })
             );
           }
+
+          if (dataChanged && data){
+            setChecklistItems(
+              data.rows.map((row: CMMSChecklist) => {
+                return {
+                  id: row.checklist_id,
+                  ...row,
+                };
+              })
+            );
+          }
           setTotalPages(response.data.total);
           setReady(true);
         })
@@ -285,7 +301,7 @@ export default function Checklist(props: ChecklistProps) {
           setChecklistItems([]);
         });
     }
-  }, [activeTabIndex, page, isReady]);
+  }, [data, dataChanged, activeTabIndex, page, isReady]);
 
   const updateTable = (foo: Function) => {
     setReady(false);
@@ -296,111 +312,87 @@ export default function Checklist(props: ChecklistProps) {
 
   async function sortId() {
     setBlockReset(true);
+    setSortField('cl.checklist_id');
+
     if (IdHeader === "ID" || IdHeader === "ID ▲") {
       setIdHeader("ID ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.id < b.id ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('desc')
     } else if (IdHeader === "ID ▼") {
       setIdHeader("ID ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.id > b.id ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('asc');
     }
+    setDataChanged(true);
   }
 
   async function sortDetails() {
     setBlockReset(true);
+    setSortField("cl.description")
     if (detailsHeader === "Details" || detailsHeader === "Details ▲") {
       setDetailsHeader("Details ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.description < b.description ? 1 : -1));
-        return newState;
-      });
+      setSortOrder("desc");
     } else if (detailsHeader === "Details ▼") {
       setDetailsHeader("Details ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.description > b.description ? 1 : -1));
-        return newState;
-      });
+      setSortOrder("asc");
     }
+    setDataChanged(true);
   }
 
-  const customSortStatus = (a: any, b: any) => {
-    const statusOrder = { ASSIGNED: 0, REJECTED: 1, null: 2 };
-    const statusA = statusOrder[a];
-    const statusB = statusOrder[b];
+  // const customSortStatus = (a: any, b: any) => {
+  //   const statusOrder = { ASSIGNED: 0, REJECTED: 1, null: 2 };
+  //   const statusA = statusOrder[a];
+  //   const statusB = statusOrder[b];
 
-    if (statusHeader === "Status" || statusHeader === "Status ▲") {
-      return statusA - statusB;
-    } else if (statusHeader === "Status ▼") {
-      return statusB - statusA;
-    }
-  };
+  //   if (statusHeader === "Status" || statusHeader === "Status ▲") {
+  //     return statusA - statusB;
+  //   } else if (statusHeader === "Status ▼") {
+  //     return statusB - statusA;
+  //   }
+  // };
 
   async function sortStatus() {
     setBlockReset(true);
+    setSortField('st.status')
     if (statusHeader === "Status" || statusHeader === "Status ▲") {
       setStatusHeader("Status ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => a.status_id - b.status_id);
-        return newState;
-      });
+      setSortOrder('desc');
     } else if (statusHeader === "Status ▼") {
       setStatusHeader("Status ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => b.status_id - a.status_id);
-        return newState;
-      });
+      setSortOrder('asc');
     }
+    setDataChanged(true);
   }
 
-  const customSortOverdue = (a: any, b: any) => {
-    const overdueOrder = { true: 0, false: 1, null: 2 };
-    const overdueStatusA = overdueOrder[a];
-    const overdueStatusB = overdueOrder[b];
-    console.log(overdueStatusA)
+  // const customSortOverdue = (a: any, b: any) => {
+  //   const overdueOrder = { true: 0, false: 1, null: 2 };
+  //   const overdueStatusA = overdueOrder[a];
+  //   const overdueStatusB = overdueOrder[b];
+  //   console.log(overdueStatusA)
 
-    if (
-      overdueStatusHeader === "Overdue" ||
-      overdueStatusHeader === "Overdue ▲"
-    ) {
-      return overdueStatusA - overdueStatusB;
-    } else if (overdueStatusHeader === "Overdue ▼") {
-      return overdueStatusB - overdueStatusA;
-    }
-  };
+  //   if (
+  //     overdueStatusHeader === "Overdue" ||
+  //     overdueStatusHeader === "Overdue ▲"
+  //   ) {
+  //     return overdueStatusA - overdueStatusB;
+  //   } else if (overdueStatusHeader === "Overdue ▼") {
+  //     return overdueStatusB - overdueStatusA;
+  //   }
+  // };
 
   async function sortOverdueStatus() {
     setBlockReset(true);
+    setSortField('cl.overdue_status');
     if (
       overdueStatusHeader === "Overdue" ||
       overdueStatusHeader === "Overdue ▲"
     ) {
       setOverdueStatusHeader("Overdue ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort(customSortOverdue);
-        return newState;
-      });
+      setSortOrder('desc');
     } else if (overdueStatusHeader === "Overdue ▼") {
       setOverdueStatusHeader("Overdue ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort(customSortOverdue);
-        return newState;
-      });
+      setSortOrder('asc');
     }
+    setDataChanged(true);
   }
-
   async function sortDate(activeTabIndex: any) {
     setBlockReset(true);
     let dateType =
@@ -409,112 +401,71 @@ export default function Checklist(props: ChecklistProps) {
         : activeTabIndex === 3
         ? "Approved Date"
         : "Created On";
+
+    if (dateType == "Created On") {
+      setSortField("cl.created_date");
+    } else if (dateType == "Completed Date") {
+      setSortField("cl.checklist_id");
+    } else if (dateType == "Approved Date") {
+      setSortField("cl.checklist_id");
+    }
+
     if (dateArrow == "" || dateArrow == " ▲") {
       setDateArrow(" ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        if (dateType == "Created On") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
-          );
-        } else if (dateType == "Completed Date") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
-          );
-        } else if (dateType == "Approved Date") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
-          );
-        }
-        return newState;
-      });
+      setSortOrder("desc");
     } else if (dateArrow == " ▼") {
       setDateArrow(" ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        if (dateType == "Created On") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
-          );
-        } else if (dateType == "Completed Date") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
-          );
-        } else if (dateType == "Approved Date") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
-          );
-        }
-
-        return newState;
-      });
+      setSortOrder("asc");
     }
+    setDataChanged(true);
   }
 
   async function sortAssignedTo() {
     setBlockReset(true);
+    setSortField('assigneduser')
     if (
       assignedToHeader === "Assigned To" ||
       assignedToHeader === "Assigned To ▲"
     ) {
       setAssignedToHeader("Assigned To ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.assigneduser < b.assigneduser ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('desc');
     } else if (assignedToHeader === "Assigned To ▼") {
       setAssignedToHeader("Assigned To ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.assigneduser > b.assigneduser ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('asc');
     }
+    setDataChanged(true);
   }
 
   async function sortSignOffBy() {
     setBlockReset(true);
+    setSortField('signoffuser')
     if (
       signOffHeader === "Signed Off By" ||
       signOffHeader === "Signed Off By ▲"
     ) {
       setSignOffHeader("Signed Off By ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.signoffuser < b.signoffuser ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('desc');
     } else if (signOffHeader === "Signed Off By ▼") {
       setSignOffHeader("Signed Off By ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.signoffuser > b.signoffuser ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('asc');
     }
+    setDataChanged(true);
   }
 
   async function sortCreatedBy() {
     setBlockReset(true);
+    setSortField('createdbyuser');
     if (
       createdByHeader === "Created By" ||
       createdByHeader === "Created By ▲"
     ) {
       setCreatedByHeader("Created By ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.createdbyuser > b.createdbyuser ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('desc');
     } else if (createdByHeader === "Created By ▼") {
       setCreatedByHeader("Created By ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.createdbyuser < b.createdbyuser ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('asc');
     }
+    setDataChanged(true);
   }
 
   return (
