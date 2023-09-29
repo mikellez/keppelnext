@@ -20,7 +20,9 @@ function useRequest(
   request_type: "pending" | "assigned" | "review" | "approved",
   page: number,
   search: string = "",
-  fields: string[]
+  fields: string[],
+  sortField: string,
+  sortOrder: string,
 ) {
   const requestFetcher = (url: string) =>
     instance
@@ -38,7 +40,7 @@ function useRequest(
 
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
     [
-      `/api/request/${request_type}?page=${page}&search=${search}&expand=${fieldsString}`,
+      `/api/request/${request_type}?page=${page}&search=${search}&expand=${fieldsString}&sortField=${sortField}&sortOrder=${sortOrder}`,
     ],
     requestFetcher,
     { revalidateOnFocus: false }
@@ -161,18 +163,28 @@ function useChecklist(
   checklist_type: "pending" | "assigned" | "record" | "approved",
   page: number,
   search: string = "",
-  fields: string[]
+  fields: string[],
+  sortField: string,
+  sortOrder: string,
 ) {
+  let responseResult;
   const checklistFetcher = (url: string) =>
     instance
       .get<{ rows: CMMSChecklist[]; total: number }>(url)
-      .then((response) => response.data)
+      // .then((response) => response.data)
+      .then((response) => {
+        // console.log("Response:", response.data); // Log the response here
+        responseResult = response.data;
+        return response.data;
+      })
+     
       .catch((e) => {
         throw new Error(e);
       });
-
+  
+  let swrResult;
   return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
-    [`/api/checklist/${checklist_type}?page=${page}&search=${search}&expand=${fields.join(",")}`],
+    [`/api/checklist/${checklist_type}?page=${page}&search=${search}&expand=${fields.join(",")}&sortField=${sortField}&sortOrder=${sortOrder}`],
     checklistFetcher,
     { revalidateOnFocus: false }
   );

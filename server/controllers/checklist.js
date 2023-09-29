@@ -10,6 +10,11 @@ const {
 
 const ITEMS_PER_PAGE = 10;
 
+var dateSelectClause = '';
+  var dateWhereClause = '';
+  var dateJoinClause = '';
+  var dateOrderByClause = '';
+
 const searchCondition = (search) => {
   //fields to search by: checklist_id, description, status, assigneduser, signoffuser, createdbyuser
   let searchInt = parseInt(search);
@@ -96,7 +101,7 @@ const filterCondition = (status, plant, date, datetype) => {
     }
   }
   return `${statusCond} ${plantCond} ${dateCond}`;
-}
+};
 
 const fetchAllChecklistQuery = `
 SELECT 
@@ -165,9 +170,12 @@ const fetchAssignedChecklistsQuery =
 
 const getAllChecklistQuery = (req) => {
   const expand = req.query.expand || false;
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
 
   let expandCond = "";
   let SELECT_ARR = [];
+  let query;
 
   const SELECT = {
     checklist_id: "cl.checklist_id",
@@ -215,8 +223,33 @@ const getAllChecklistQuery = (req) => {
 
   expandCond = SELECT_ARR.join(", ");
 
-  const query = `
+  // for approved date and completed date sorting
+  
+  if (sortField){
+    if (sortField=='approved_date') {
+    dateSelectClause = `DISTINCT ON (cl.checklist_id)
+    (SELECT  jsonb_agg(activity ORDER BY idx DESC)
+      FROM jsonb_array_elements(cl.activity_log) WITH ORDINALITY AS t(activity, idx)
+      WHERE activity->>'activity_type' = 'APPROVED'
+      LIMIT 1) AS approved_activity,`
+      dateWhereClause = `AND al.elem->>'activity_type' = 'APPROVED'`;
+      dateJoinClause = `
+      JOIN keppel.request r1 ON u.user_id = r1.user_id 
+      CROSS JOIN LATERAL
+          jsonb_array_elements(r1.activity_log) AS al(elem)`;
+  
+      dateOrderByClause = `ORDER BY cl.checklist_id, (SELECT (activity->>'date')::timestamp
+          FROM jsonb_array_elements(cl.activity_log) AS t(activity)
+          WHERE activity->>'activity_type' = 'APPROVED'
+          AND activity->>'date' IS NOT NULL
+          LIMIT 1) ${sortOrder}`
+
+    } 
+  }
+
+  query = `
     SELECT 
+      ${dateSelectClause}
       ${expandCond}
     FROM 
         keppel.users u
@@ -239,31 +272,62 @@ const getAllChecklistQuery = (req) => {
         LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
         LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id
         JOIN keppel.status_cm st ON st.status_id = cl.status_id	
-  `;
-
+        ${dateJoinClause}
+        
+    `
   return query;
 };
 
 const getAssignedChecklistsQuery = (req) => {
   const search = req.query.search || "";
-  return (
-    getAllChecklistQuery(req) +
+
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
+
+  if (sortField == undefined || sortOrder == undefined) {
+    
+    console.log("Checklist Assigned: default sorting");
+    console.log(sortField, sortOrder);
+    return (
+      getAllChecklistQuery(req) +
+      `
+      WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6 or cl.status_id = 10) AND
+          (CASE
+              WHEN (SELECT ua.role_id
+                  FROM
+                      keppel.user_access ua
+                  WHERE
+                      ua.user_id = $1) = 4
+              THEN assignU.user_id = $1
+              ELSE True
+              END) AND
+              ua.user_id = $1
+      ${searchCondition(search)}
+      ORDER BY cl.checklist_id ASC
     `
-    WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6 or cl.status_id = 10) AND
-        (CASE
-            WHEN (SELECT ua.role_id
-                FROM
-                    keppel.user_access ua
-                WHERE
-                    ua.user_id = $1) = 4
-            THEN assignU.user_id = $1
-            ELSE True
-            END) AND
-            ua.user_id = $1
-    ${searchCondition(search)}
-    ORDER BY cl.checklist_id DESC
-  `
-  );
+    );
+  } else {
+    console.log("Checklist Assigned: custom sorting");
+    console.log(sortField, sortOrder);
+    return (
+      getAllChecklistQuery(req) +
+      `
+      WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6 or cl.status_id = 10) AND
+          (CASE
+              WHEN (SELECT ua.role_id
+                  FROM
+                      keppel.user_access ua
+                  WHERE
+                      ua.user_id = $1) = 4
+              THEN assignU.user_id = $1
+              ELSE True
+              END) AND
+              ua.user_id = $1
+      ${searchCondition(search)}
+      ORDER BY ${sortField} ${sortOrder}
+    `
+    );
+  }
 };
 
 const getPendingChecklistsQuery = (req) => {
@@ -271,45 +335,79 @@ const getPendingChecklistsQuery = (req) => {
   const plant = req.params.plant;
   const date = req.params.date;
   const datetype = req.params.datetype;
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
 
-  return (
-    getAllChecklistQuery(req) +
+  if (sortField == undefined || sortOrder == undefined) {
+    return (
+      getAllChecklistQuery(req) +
+      `
+      WHERE
+          ua.user_id = $1 AND
+          (cl.status_id = 1)
+      ${filterCondition("", plant, date, datetype)}
+      ${searchCondition(search)}
+      ORDER BY cl.checklist_id DESC
     `
-    WHERE
-        ua.user_id = $1 AND
-        (cl.status_id = 1)
-    ${filterCondition("", plant, date, datetype)}
-    ${searchCondition(search)}
-    ORDER BY cl.checklist_id DESC
-  `
-  );
+    );
+  } else {
+    return (
+      getAllChecklistQuery(req) +
+      `
+      WHERE
+          ua.user_id = $1 AND
+          (cl.status_id = 1)
+      ${filterCondition("", plant, date, datetype)}
+      ${searchCondition(search)}
+      ORDER BY ${sortField} ${sortOrder}
+      `
+    );
+  }
 };
 
 const getOutstandingChecklistsQuery = (req) => {
   const search = req.query.search || "";
   const role_id = req.user.role_id;
-  
+
   const plant = req.params.plant;
   const date = req.params.date;
   const datetype = req.params.datetype;
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
+
   let userRoleCond = "";
 
   if (role_id === 4) {
     userRoleCond = "AND (createdU.user_id = $1 OR assignU.user_id = $1)";
   }
 
-  return (
-    getAllChecklistQuery(req) +
+  if (sortField == undefined || sortOrder == undefined) {
+    return (
+      getAllChecklistQuery(req) +
+      `
+      WHERE
+          ua.user_id = $1
+          ${userRoleCond} AND
+          (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
+      ${filterCondition("", plant, date, datetype)}
+      ${searchCondition(search)}
+      ORDER BY cl.checklist_id DESC
     `
-    WHERE
-        ua.user_id = $1
-        ${userRoleCond} AND
-        (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
-    ${filterCondition("", plant, date, datetype)}
-    ${searchCondition(search)}
-    ORDER BY cl.checklist_id DESC
-  `
-  );
+    );
+  } else {
+    return (
+      getAllChecklistQuery(req) +
+      `
+      WHERE
+          ua.user_id = $1
+          ${userRoleCond} AND
+          (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
+      ${filterCondition("", plant, date, datetype)}
+      ${searchCondition(search)}
+      ORDER BY ${sortField} ${sortOrder}
+    `
+    );
+  }
 };
 
 const getCompletedChecklistsQuery = (req) => {
@@ -318,6 +416,9 @@ const getCompletedChecklistsQuery = (req) => {
   const plant = req.params.plant;
   const date = req.params.date;
   const datetype = req.params.datetype;
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
+
   return (
     getAllChecklistQuery(req) +
     `
@@ -352,30 +453,80 @@ const getOverdueChecklistsQuery = (req) => {
 
 const getForReviewChecklistsQuery = (req) => {
   const search = req.query.search || "";
-  return (
-    getAllChecklistQuery(req) +
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
+
+  if (sortField == undefined || sortOrder == undefined){
+    return (
+      getAllChecklistQuery(req) +
+      `
+      WHERE
+          ua.user_id = $1 AND
+          (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
+      ${searchCondition(search)}
+      ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' DESC
     `
-    WHERE
-        ua.user_id = $1 AND
-        (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
-    ${searchCondition(search)}
-    ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' DESC
-  `
-  );
+    );
+  } else {
+    return (
+      getAllChecklistQuery(req) +
+      `
+      WHERE
+          ua.user_id = $1 AND
+          (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
+      ${searchCondition(search)}
+      ORDER BY ${sortField} ${sortOrder}
+    `
+    );
+  }
 };
 
 const getApprovedChecklistsQuery = (req) => {
   const search = req.query.search || "";
-  return (
-    getAllChecklistQuery(req) +
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
+
+  var order_query = `ORDER BY ${sortField} ${sortOrder}`
+  
+
+  if (sortField == undefined || sortOrder == undefined) {
+    return (
+      getAllChecklistQuery(req) +
+      `
+      WHERE
+          ua.user_id = $1 AND
+          (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
+      ${searchCondition(search)}
+      ORDER BY cl.checklist_id DESC
+    `
+    );
+  } else {
+
+    if (sortField == 'approved_date'){
+      order_query = dateOrderByClause;
+    }
+
+    console.log("finalQuery: ",getAllChecklistQuery(req) +
     `
     WHERE
         ua.user_id = $1 AND
         (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
+        ${dateWhereClause}
     ${searchCondition(search)}
-    ORDER BY cl.checklist_id DESC
-  `
-  );
+    ${dateOrderByClause}
+  `)
+    return (
+      getAllChecklistQuery(req) +
+      `
+      WHERE
+          ua.user_id = $1 AND
+          (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
+          ${dateWhereClause}
+      ${searchCondition(search)}
+      ${order_query}
+    `
+    );
+  }
 };
 
 const fetchAssignedChecklists = async (req, res, next) => {
@@ -383,12 +534,13 @@ const fetchAssignedChecklists = async (req, res, next) => {
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
 
   const totalRows = await global.db.query(getAssignedChecklistsQuery(req), [
     req.user.id,
   ]);
   const totalPages = Math.ceil(+totalRows.rowCount / ITEMS_PER_PAGE);
-
   const query =
     getAssignedChecklistsQuery(req) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
@@ -420,6 +572,8 @@ const fetchPendingChecklists = async (req, res, next) => {
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
 
   const totalRows = await global.db.query(getPendingChecklistsQuery(req), [
     req.user.id,
@@ -1463,8 +1617,8 @@ const approveReassignChecklist = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   try {
     const checklist_id = parseInt(req.params.checklist_id);
-    const reassignedUserId = parseInt(req.body.assigned_user_id);  
-    const approvalComments = req.body.remarks; 
+    const reassignedUserId = parseInt(req.body.assigned_user_id);
+    const approvalComments = req.body.remarks;
     const updatehistory = `,Updated Record_APPROVE_REASSIGNMENT_REQUEST_${today}_${req.user.name}_${approvalComments}`;
     const activity_log = {
       date: today,
@@ -1489,25 +1643,36 @@ const approveReassignChecklist = async (req, res, next) => {
 
     global.db.query(
       sql,
-      [reassignedUserId, approvalComments, JSON.stringify(activity_log), req.params.checklist_id],
+      [
+        reassignedUserId,
+        approvalComments,
+        JSON.stringify(activity_log),
+        req.params.checklist_id,
+      ],
       (err, result) => {
         if (err) {
           console.log(err);
           return res
             .status(500)
-            .json("Failure to update checklist approval of reassignment request");
+            .json(
+              "Failure to update checklist approval of reassignment request"
+            );
         }
         if (result.rowCount == 0) {
           return res
             .status(404)
-            .json("Checklist ID: " + checklist_id + " of Reassignment Request status does not exist");
+            .json(
+              "Checklist ID: " +
+                checklist_id +
+                " of Reassignment Request status does not exist"
+            );
         }
         return res
           .status(200)
           .json("Checklist successfully approved for reassignment request");
       }
     );
-  }catch(err){
+  } catch (err) {
     console.log(err);
     return res.status(403).json("Invalid Input IDs");
   }
@@ -1515,7 +1680,7 @@ const approveReassignChecklist = async (req, res, next) => {
 
 const rejectReassignChecklist = async (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-  try{
+  try {
     const checklist_id = parseInt(req.params.checklist_id);
     const rejectionComments = req.body.remarks; // todo add rejected comment here
     const updatehistory = `,Updated Record_REJECT_REASSIGNMENT_REQUEST_${today}_${req.user.name}_${rejectionComments}`;
@@ -1540,23 +1705,35 @@ const rejectReassignChecklist = async (req, res, next) => {
       `; // Only
     global.db.query(
       sql,
-      [rejectionComments, JSON.stringify(activity_log), req.params.checklist_id],
+      [
+        rejectionComments,
+        JSON.stringify(activity_log),
+        req.params.checklist_id,
+      ],
       (err, result) => {
         if (err) {
           console.log(err);
           return res
             .status(500)
-            .json("Failure to update checklist rejection of reassignment request");
+            .json(
+              "Failure to update checklist rejection of reassignment request"
+            );
         }
         if (result.rowCount == 0) {
           return res
             .status(404)
-            .json("Checklist ID: " + checklist_id + " of Reassignment Request status does not exist");
+            .json(
+              "Checklist ID: " +
+                checklist_id +
+                " of Reassignment Request status does not exist"
+            );
         }
-        return res.status(200).json("Checklist successfully reject reassignment request");
+        return res
+          .status(200)
+          .json("Checklist successfully reject reassignment request");
       }
     );
-  }catch(err){
+  } catch (err) {
     console.log(err);
     return res.status(403).json("Invalid Input IDs");
   }
