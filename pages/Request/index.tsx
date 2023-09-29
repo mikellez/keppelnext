@@ -1099,7 +1099,7 @@ export default function Request(props: RequestProps) {
                                               <Link
                                                 href={`/Request/Complete/${item.id}`}
                                               >
-                                                <strong>Complete</strong>
+                                                <strong>Start Work</strong>
                                               </Link>
                                             );
                                           } else if (
