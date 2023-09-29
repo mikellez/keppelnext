@@ -257,6 +257,8 @@ async function fetchRequestQuery(
     au.last_name
   ) 
   ${order_query}`;
+  console.log(sql)
+  console.log(expandCond)
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);

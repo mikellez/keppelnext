@@ -113,6 +113,7 @@ export interface ChecklistItem {
   status: string;
   activity_log: { [key: string]: string }[];
   overdue_status?: boolean;
+  checklist_status?: string;
 }
 
 export interface ChecklistProps {
@@ -184,6 +185,7 @@ export default function Checklist(props: ChecklistProps) {
     "status",
     "activity_log",
     "overdue_status",
+    "checklist_status"
   ];
 
   const filteredData = useChecklistFilter(props, page, searchRef.current.value, fields);
@@ -265,6 +267,7 @@ export default function Checklist(props: ChecklistProps) {
         "status",
         "activity_log",
         "overdue_status",
+        "checklist_status"
       ];
       const fieldsString = fields.join(",");
 
@@ -651,21 +654,29 @@ export default function Checklist(props: ChecklistProps) {
                                       let dateToDisplay;
 
                                       if (activeTabIndex === 2) {
-                                        dateToDisplay = item.activity_log
+                                        const statusArr = item?.checklist_status?.split(",");
+                                        const status = statusArr?.filter(element => element.includes('WORK DONE'))[0];
+                                        const statusDate = status && status.substring(-status?.indexOf(":"));
+                                        dateToDisplay = statusDate;
+                                        /*dateToDisplay = item.activity_log
                                           .reverse()
                                           .find(
                                             (activity) =>
                                               activity["activity_type"] ===
                                               "WORK DONE"
-                                          )?.date;
+                                          )?.date;*/
                                       } else if (activeTabIndex === 3) {
+                                        const statusArr = item?.checklist_status?.split(",");
+                                        const status = statusArr?.filter(element => element.includes('APPROVED'))[0];
+                                        const statusDate = status && status.substring(-status?.indexOf(":"));
+                                        /*dateToDisplay = statusDate;
                                         dateToDisplay = item.activity_log
                                           .reverse()
                                           .find(
                                             (activity) =>
                                               activity["activity_type"] ===
                                               "APPROVED"
-                                          )?.date;
+                                          )?.date;*/
                                       } else {
                                         dateToDisplay = item.created_date;
                                       }

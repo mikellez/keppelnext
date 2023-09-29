@@ -112,6 +112,7 @@ export interface RequestItem {
   associatedrequestid?: number;
   overdue_status?: boolean;
   description_other?: string;
+  request_status?: string;
 }
 
 export interface RequestProps {
@@ -267,6 +268,7 @@ export default function Request(props: RequestProps) {
     "associatedrequestid",
     "activity_log",
     "overdue_status",
+    "request_status"
   ];
   
   const filteredRequest = useRequestFilter(props, page, searchRef.current.value, fields);
@@ -846,8 +848,16 @@ export default function Request(props: RequestProps) {
                                 <div>
                                   {(() => {
                                     try {
+                                      let dateToDisplay;
+
                                       if (activeTabIndex === 2) {
-                                        const completedActivity =
+
+                                        const statusArr = item?.request_status?.split(",");
+                                        const status = statusArr?.filter(element => element.includes('COMPLETED'))[0];
+                                        const statusDate = status && status.substring(-status?.indexOf(":"));
+                                        dateToDisplay = statusDate;
+
+                                        /*const completedActivity =
                                           item.activity_log
                                             .reverse()
                                             .find(
@@ -855,17 +865,16 @@ export default function Request(props: RequestProps) {
                                                 activity["activity_type"] ===
                                                 "COMPLETED"
                                             );
+                                            */
 
-                                        if (
-                                          completedActivity &&
-                                          completedActivity.date
-                                        ) {
-                                          return moment(
-                                            new Date(completedActivity.date)
-                                          ).format("MMMM Do YYYY, h:mm:ss a");
-                                        }
                                       } else if (activeTabIndex === 3) {
-                                        const approvedActivity =
+
+                                        const statusArr = item?.request_status?.split(",");
+                                        const status = statusArr?.filter(element => element.includes('APPROVED'))[0];
+                                        const statusDate = status && status.substring(-status?.indexOf(":"));
+                                        dateToDisplay = statusDate;
+
+                                        /*const approvedActivity =
                                           item.activity_log
                                             .reverse()
                                             .find(
@@ -873,25 +882,22 @@ export default function Request(props: RequestProps) {
                                                 activity["activity_type"] ===
                                                 "APPROVED"
                                             );
+                                            */
 
-                                        if (
-                                          approvedActivity &&
-                                          approvedActivity.date
-                                        ) {
-                                          return moment(
-                                            new Date(approvedActivity.date)
-                                          ).format("MMMM Do YYYY, h:mm:ss a");
-                                        }
+                                      } else {
+                                        dateToDisplay = item.created_date;
                                       }
 
-                                      if (item.created_date) {
-                                        return moment(
-                                          new Date(item.created_date)
-                                        ).format("MMMM Do YYYY, h:mm:ss a");
-                                      }
+                                      console.log(dateToDisplay)
 
                                       // Handle case where date information is missing
-                                      return "Date Missing";
+                                      if (dateToDisplay) {
+                                        return moment(
+                                          new Date(dateToDisplay)
+                                        ).format("MMMM Do YYYY, h:mm:ss a");
+                                      } else {
+                                        return "Date not found";
+                                      }
                                     } catch (error) {
                                       // Handle any parsing or formatting errors here
                                       console.error(

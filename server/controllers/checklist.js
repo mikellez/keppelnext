@@ -529,6 +529,7 @@ const getApprovedChecklistsQuery = (req) => {
           ua.user_id = $1 AND
           (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
       ${searchCondition(search)}
+      ${groupBYCondition()}
       ORDER BY cl.checklist_id DESC
     `
     );
