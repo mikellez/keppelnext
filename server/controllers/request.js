@@ -135,6 +135,7 @@ async function fetchRequestQuery(
     fault_id: "r.fault_id",
     overdue_status: "r.overdue_status",
     description_other: "r.description_other",
+    request_status: "STRING_AGG(rssp.status || ': ' || rs.date, ', ') AS request_status"
   };
 
   if (expand) {
@@ -172,6 +173,8 @@ async function fetchRequestQuery(
     left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
       from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
       WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
+    left JOIN keppel.request_status rs on rs.request_id = r.request_id
+	  left JOIN keppel.status_pm rssp on rs.status_id = rssp.status_id
       
   WHERE 1 = 1 
   AND ua.user_id = ${user_id}

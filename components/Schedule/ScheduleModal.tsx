@@ -17,10 +17,13 @@ import { useRouter } from "next/router";
 import { ThreeDots } from "react-loading-icons";
 import instance from "../../types/common/axios.config";
 import { SingleValue } from "react-select";
+import { ScheduleInfo } from "./ScheduleTemplate";
+import moment from "moment";
 
 interface ScheduleMaintenanceModalProps extends ModalProps {
   timeline?: CMMSTimeline; // use to add schedule in draft
   scheduleEvent?: CMMSSchedule; // used to update schedule in draft
+  schedules?: ScheduleInfo[];
 }
 
 // Makes a post request to schedule a new maintenance
@@ -77,6 +80,7 @@ export default function ScheduleMaintenanceModal(
   const [successModal, setSuccessModal] = useState<boolean>(false);
   const [successEditModal, setSuccessEditModal] = useState<boolean>(false);
   const [failureModal, setFailureModal] = useState<boolean>(false);
+  const [existingModal, setExistingModal] = useState<boolean>(false);
   const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
   const [invalidDateCheck, setInvalidDateCheck] = useState<boolean>(false);
   const [isReady, setIsReady] = useState<boolean>(false);
@@ -127,8 +131,33 @@ export default function ScheduleMaintenanceModal(
     });
   }
 
+  const scheduleValidateExistingSchedule = (callback: () => void) => () => {
+    // find existing schedules
+    const existingSchedule = props.schedules?.find((schedule) => {
+      const scheduleStartDate = moment(schedule.start_date).format("YYYY-MM-DD");
+      const scheduleEndDate = moment(schedule.end_date).format("YYYY-MM-DD");
+      const newStartDate = moment(newSchedule.startDate).format("YYYY-MM-DD");
+      const newEndDate = moment(newSchedule.endDate).format("YYYY-MM-DD");
+
+      // Check if the existing schedule falls within the new date range
+      return (
+        (scheduleStartDate >= newStartDate && scheduleStartDate <= newEndDate) ||
+        (scheduleEndDate >= newStartDate && scheduleEndDate <= newEndDate) ||
+        (scheduleStartDate <= newStartDate && scheduleEndDate >= newEndDate) 
+      );
+    });
+
+    if (existingSchedule) {
+      setExistingModal(true);
+    } else {
+      setExistingModal(false);
+      callback();
+    }
+  };
+
   // Submit the new schedule for maintenance on submit click
   function handleSubmit() {
+    return;
     // Disable submit button
     setDisableSubmit(true);
     // Check for missing entries
@@ -329,7 +358,7 @@ export default function ScheduleMaintenanceModal(
               </div>
               <TooltipBtn
                 toolTip={false}
-                onClick={handleSubmit}
+                onClick={scheduleValidateExistingSchedule(handleSubmit)}
                 disabled={disableSubmit}
               >
                 {props.timeline && <div>Create</div>}
@@ -368,6 +397,36 @@ export default function ScheduleMaintenanceModal(
         text="Please fill in the missing details for the maintenance."
         icon={SimpleIcon.Cross}
         shouldCloseOnOverlayClick={true}
+      />
+
+      <ModuleSimplePopup
+        modalOpenState={existingModal}
+        setModalOpenState={setExistingModal}
+        title="Existing Maintenance"
+        text="There is already an existing maintenance scheduled for this checklist. Do you still want to create?"
+        icon={SimpleIcon.Exclaim}
+        shouldCloseOnOverlayClick={true}
+        buttons={[
+          <TooltipBtn
+            key={1}
+            toolTip={false}
+            onClick={() => {
+              handleSubmit();
+            }}
+          >
+            Create
+          </TooltipBtn>,
+          <TooltipBtn
+            key={1}
+            toolTip={false}
+            onClick={() => {
+              setExistingModal(false);
+            }}
+          >
+            Cancel
+          </TooltipBtn>
+        ]}
+
       />
     </div>
   );

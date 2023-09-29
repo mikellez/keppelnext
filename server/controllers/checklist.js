@@ -9,6 +9,20 @@ const {
 } = require("../mailer/ChecklistMail");
 
 const ITEMS_PER_PAGE = 10;
+const groupBYCondition = () => {  
+  return `
+    GROUP BY (
+      cl.checklist_id,
+      createdu.first_name,
+      createdu.last_name,
+      assignU.first_name,
+      assignU.last_name,
+      signoff.first_name,
+      signoff.last_name,
+      pm.plant_name,
+      st.status
+    )`;
+}
 
 const searchCondition = (search) => {
   //fields to search by: checklist_id, description, status, assigneduser, signoffuser, createdbyuser
@@ -121,7 +135,10 @@ SELECT
     cl.assigned_user_id,
     st.status,
     cl.overdue,
-    cl.overdue_status
+    cl.overdue_status,
+    cl.updated_at,
+    STRING_AGG(cscm.status || ': ' || cscm.date, ', ') AS checklist_status
+    
 FROM 
     keppel.users u
     JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -143,6 +160,8 @@ FROM
     LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
     LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id
     JOIN keppel.status_cm st ON st.status_id = cl.status_id	
+    left JOIN keppel.checklist_status cs on cs.checklist_id = cl.checklist_id
+    left JOIN keppel.status_cm cscm on cscm.status_id = cl.status_id
 `;
 
 // check if user is an Opspec
@@ -196,6 +215,8 @@ const getAllChecklistQuery = (req) => {
     overdue: "cl.overdue",
     overdue_status: "cl.overdue_status",
     completeremarks_req: "cl.completeremarks_req",
+    updated_at: "cl.updated_at",
+    checklist_status: "STRING_AGG(cscm.status || ': ' || cs.date, ', ') AS checklist_status"
   };
 
   if (expand) {
@@ -239,6 +260,8 @@ const getAllChecklistQuery = (req) => {
         LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
         LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id
         JOIN keppel.status_cm st ON st.status_id = cl.status_id	
+        left JOIN keppel.checklist_status cs on cs.checklist_id = cl.checklist_id
+        left JOIN keppel.status_cm cscm on cscm.status_id = cl.status_id
   `;
 
   return query;
@@ -261,6 +284,7 @@ const getAssignedChecklistsQuery = (req) => {
             END) AND
             ua.user_id = $1
     ${searchCondition(search)}
+    ${groupBYCondition()}
     ORDER BY cl.checklist_id DESC
   `
   );
@@ -280,6 +304,7 @@ const getPendingChecklistsQuery = (req) => {
         (cl.status_id = 1)
     ${filterCondition("", plant, date, datetype)}
     ${searchCondition(search)}
+    ${groupBYCondition()}
     ORDER BY cl.checklist_id DESC
   `
   );
@@ -307,6 +332,7 @@ const getOutstandingChecklistsQuery = (req) => {
         (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
     ${filterCondition("", plant, date, datetype)}
     ${searchCondition(search)}
+    ${groupBYCondition()}
     ORDER BY cl.checklist_id DESC
   `
   );
@@ -326,6 +352,7 @@ const getCompletedChecklistsQuery = (req) => {
         (cl.status_id = 6 OR cl.status_id = 11)
     ${filterCondition("", plant, date, datetype)}
     ${searchCondition(search)}
+    ${groupBYCondition()}
     ORDER BY cl.checklist_id DESC
   `
   );
@@ -345,6 +372,7 @@ const getOverdueChecklistsQuery = (req) => {
         cl.overdue_status = true
     ${filterCondition("", plant, date, datetype)}
     ${searchCondition(search)}
+    ${groupBYCondition()}
     ORDER BY cl.checklist_id DESC
   `
   );
@@ -359,6 +387,7 @@ const getForReviewChecklistsQuery = (req) => {
         ua.user_id = $1 AND
         (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
     ${searchCondition(search)}
+    ${groupBYCondition()}
     ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' DESC
   `
   );
@@ -373,6 +402,7 @@ const getApprovedChecklistsQuery = (req) => {
         ua.user_id = $1 AND
         (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
     ${searchCondition(search)}
+    ${groupBYCondition()}
     ORDER BY cl.checklist_id DESC
   `
   );
@@ -429,6 +459,8 @@ const fetchPendingChecklists = async (req, res, next) => {
   const query =
     getPendingChecklistsQuery(req) +
     (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : "");
+
+    console.log(query)
 
   try {
     const result = await global.db.query(query, [req.user.id]);

@@ -6,6 +6,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import ChecklistEventModal from "./ChecklistEventModal";
 import { useRouter } from "next/router";
 import styles from "../../styles/Schedule.module.scss";
+import "../../styles/Schedule.module.scss";
 import { BsCalendar4Week, BsListUl } from "react-icons/bs";
 import ScheduleTable from "./ScheduleTable";
 import {
@@ -26,6 +27,8 @@ interface ScheduleTemplateInfo extends PropsWithChildren {
     timeline?: number;
     children?: ReactNode;
     contentHeader?: ReactNode;
+    eventContent?: (info: any) => JSX.Element;
+    eventClassNames?: (info: any) => string[];
 }
 
 export interface ScheduleInfo {
@@ -52,6 +55,7 @@ export interface ScheduleInfo {
     isSingle: boolean;
     index?: number;
     status?: number;
+    isNewSchedule?: boolean;
 }
 
 // Function to format Date to string
@@ -190,6 +194,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     isSingle: schedule.isSingle,
                     exclusionList: schedule.exclusionList,
                     status: schedule.status,
+                    isNewSchedule: schedule.isNewSchedule,
                 },
                 color:
                     schedule.status === 5
@@ -246,6 +251,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     exclusionList: info.event._def.extendedProps.exclusionList,
                     isSingle: info.event._def.extendedProps.isSingle,
                     status: info.event._def.extendedProps.status,
+                    isNewSchedule: info.event._def.extendedProps.isNewSchedule,
                 },
             });
             setIsChecklistModalOpen(true);
@@ -264,6 +270,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                     assignedUserId: info.event._def.extendedProps.assignedUserId,
                     description: info.event._def.extendedProps.description,
                     status: info.event._def.extendedProps.status,
+                    isNewSchedule: info.event._def.extendedProps.isNewSchedule,
                 },
             });
             setIsCOPModalOpen(true);
@@ -282,6 +289,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
 
         if (props.changeOfParts) updateCOPEvents(props.changeOfParts);
     }, [props.schedules, props.changeOfParts, updateCOPEvents, updateChecklistEvents]);
+
     return (
         <>
             <ModuleMain>
@@ -339,6 +347,8 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                                 eventClick={handleEventClick}
                                 eventMouseEnter={(info) => (document.body.style.cursor = "pointer")}
                                 eventMouseLeave={() => (document.body.style.cursor = "default")}
+                                eventContent={props.eventContent}
+                                eventClassNames={props.eventClassNames}
                             />
                             <div
                                 className={styles.calendarDisplayCheckboxContainer}
@@ -374,6 +384,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                         <ScheduleTable
                             schedules={props.schedules}
                             viewRescheduled={router.pathname === "/Schedule/Manage"}
+                            viewNewScheduled={["/Schedule/Manage", "/Schedule/Timeline/[id]"].includes(router.pathname)}
                         />
                     )}
                 </ModuleContent>

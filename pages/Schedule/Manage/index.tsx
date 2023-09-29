@@ -14,7 +14,7 @@ import styles from "../../../styles/Schedule.module.scss";
 import instance from "../../../types/common/axios.config";
 import TimelineSelect from "../../../components/Schedule/TimelineSelect";
 import EventSelect from "../../../components/Schedule/EventSelect";
-import { getSchedules } from "../Timeline/[id]";
+import { getAllSchedules, getSchedules } from "../Timeline/[id]";
 import CreateScheduleModal from "../../../components/Schedule/CreateScheduleModal";
 
 import ModuleSimplePopup, {
@@ -80,13 +80,34 @@ export default function ManageSchedule() {
   const [timelineId, setTimelineId] = useState<number>();
   const [remarks, setRemarks] = useState<string>("");
   const [eventMode, setEventMode] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedPlant, setSelectedPlant] = useState<number>(0);
 
   const router = useRouter();
+
+	function updateSchedules(id : number) {
+		getAllSchedules(id).then((schedules) => {	
+			if (schedules == null) {
+				return console.log("no schedules");	
+			}
+
+			setScheduleList(prev => [...prev.filter(item=>item.isNewSchedule), ...schedules]);
+		});
+	};
+
+  useEffect(()=> {
+    updateSchedules(selectedPlant);
+	}, [selectedPlant, isLoading]);
 
   async function setSchedules(id: number) {
     getSchedules(id).then((schedules) => {
       if (schedules) {
-        setScheduleList(schedules);
+        const updatedSchedules = schedules.map((schedule) => ({
+            ...schedule,
+            isNewSchedule: true
+        }));
+
+        setScheduleList(prev => [...prev.filter(item=>!item.isNewSchedule), ...schedules]);
       }
     });
   }
@@ -138,6 +159,13 @@ export default function ManageSchedule() {
         title="Manage Schedule"
         header="Manage Schedule"
         schedules={scheduleList}
+        eventClassNames={(args)=> {
+            if(args.event.extendedProps.isNewSchedule) {
+                return ['overlay'];
+            }
+
+            return [];
+        }}
       >
         {isHistory ? (
           <div style={{ width: "150px" }}>

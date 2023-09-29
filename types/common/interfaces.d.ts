@@ -224,6 +224,7 @@ interface CMMSScheduleEvent extends CMMSEvent {
     isSingle?: boolean;
     index?: number;
     status?: number;
+    isNewSchedule?: boolean;
   };
   color?: string;
   display?: string;
