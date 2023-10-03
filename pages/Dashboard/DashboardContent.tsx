@@ -22,6 +22,7 @@ import ChangeOfPartsPage from "../ChangeOfParts";
 import Checklist from "../Checklist";
 import Feedback from "../Feedback";
 import Request from "../Request/index";
+import { fetchData } from ".";
 
 const { Option } = Select;
 
