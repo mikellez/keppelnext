@@ -19,8 +19,10 @@ const groupBYCondition = () => {
       assignU.last_name,
       signoff.first_name,
       signoff.last_name,
+      pm.plant_id,
       pm.plant_name,
-      st.status
+      st.status,
+      tmp1.assetnames
     )`;
 }
 
@@ -142,7 +144,7 @@ SELECT
     cl.overdue,
     cl.overdue_status,
     cl.updated_at,
-    STRING_AGG(cscm.status || ': ' || cscm.date, ', ') AS checklist_status
+    STRING_AGG(cscm.status || ': ' || cs.date, ', ') AS checklist_status
     
 FROM 
     keppel.users u
@@ -184,6 +186,7 @@ const fetchAssignedChecklistsQuery =
           ELSE True
           END) AND
           ua.user_id = $1
+        ${groupBYCondition()}
   ORDER BY cl.checklist_id DESC
 `;
 
@@ -599,6 +602,7 @@ const fetchPendingChecklistsQuery =
 WHERE 
     ua.user_id = $1 AND 
     (cl.status_id = 1)
+        ${groupBYCondition()}
 ORDER BY cl.checklist_id DESC
 `;
 
@@ -717,6 +721,7 @@ const fetchForReviewChecklistsQuery =
 WHERE 
     ua.user_id = $1 AND 
     (cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9)
+        ${groupBYCondition()}
     ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' desc
 `;
 
@@ -752,6 +757,7 @@ const fetchApprovedChecklistsQuery =
 WHERE 
     ua.user_id = $1 AND 
     (cl.status_id = 5 OR cl.status_id = 7 OR cl.status.id = 11)
+        ${groupBYCondition()}
 ORDER BY cl.checklist_id DESC
 `;
 const fetchApprovedChecklists = async (req, res, next) => {
@@ -826,6 +832,8 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
     ` 
         WHERE
             cl.checklist_id = $1 and ua.user_id = $2
+        
+        ${groupBYCondition()}
     `;
 
   global.db.query(sql, [req.params.checklist_id, 17], (err, found) => {
@@ -1894,6 +1902,7 @@ const fetchFilteredChecklists = async (req, res, next) => {
         ${plantCond}
         ${statusCond}
         ${dateCond}
+        ${groupBYCondition()}
     ORDER BY cl.checklist_id DESC
     `;
 

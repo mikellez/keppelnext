@@ -96,10 +96,6 @@ app.prepare().then(() => {
       { path: "/Request/CorrectiveRequest", permission: "canCreateCorrectiveRequestTicket" },
       { path: "/Request/Complete", permission: "canCompleteRequestTicket" },
       // Checklist
-      { path: "/Checklist/View", permission: "canViewChecklist" },
-      { path: "/Checklist/Manage", permission: "canManageChecklist" },
-      { path: "/Checklist/Form", permission: "canAssignChecklist" },
-      { path: "/Checklist/Complete", permission: "canCompleteChecklist" },
       // Asset
       { path: "/Asset/New", permission: "canCreateAsset" },
       { path: "/Asset/Edit", permission: "canEditAsset" },
@@ -118,7 +114,6 @@ app.prepare().then(() => {
       // Master
       { path: "/Master/New", permission: "canCreateMaster"},
       { path: "/Master/Edit", permission: "canEditMaster"},
-      { path: "/Master", permission: "canViewMaster"},
       // User
       { path: "/User/Add", permission: "canCreateUserManagement"},
       { path: "/User/Edit", permission: "canEditUserManagement"},
