@@ -51,7 +51,7 @@ const searchCondition = (search) => {
     AND (
       cl.chl_name ILIKE '%${search}%' OR
       description ILIKE '%${search}%' OR
-      status ILIKE '%${search}%' OR
+      st.status ILIKE '%${search}%' OR
       
       cl.checklist_id IN (
         SELECT cm.checklist_id
