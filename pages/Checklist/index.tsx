@@ -207,10 +207,10 @@ export default function Checklist(props: ChecklistProps) {
   // Used for adding the overdue column into the template when the assigned/pending tab is selected
   const tableFormat =
     activeTabIndex === 0 || activeTabIndex === 1 || activeTabIndex === 2
-      ? `--data-table-library_grid-template-columns:  5em 25em 7em 15em 10em 8em 8em 8em 8em;
+      ? `--data-table-library_grid-template-columns:  8em 5em 25em 7em 15em 10em 8em 8em 8em;
       
   `
-      : `--data-table-library_grid-template-columns:  5em 25em 7em 15em 8em 8em 8em 6em;
+      : `--data-table-library_grid-template-columns:  6em 5em 25em 7em 15em 8em 8em 8em;
       
   `;
 
@@ -545,6 +545,7 @@ export default function Checklist(props: ChecklistProps) {
                 <>
                   <Header>
                     <HeaderRow>
+                      <HeaderCell resize>Action</HeaderCell>
                       <HeaderCell
                         resize
                         onClick={() => updateTable(sortId)}
@@ -613,7 +614,6 @@ export default function Checklist(props: ChecklistProps) {
                       >
                         {createdByHeader}
                       </HeaderCell>
-                      <HeaderCell resize>Action</HeaderCell>
                     </HeaderRow>
                   </Header>
 
@@ -621,6 +621,71 @@ export default function Checklist(props: ChecklistProps) {
                     {tableList.map((item) => {
                       return (
                         <Row key={item.id} item={item}>
+                          <Cell>
+                            { userPermission('canManageChecklist') &&
+                            [ 
+                              Checklist_Status.Work_Done, 
+                              Checklist_Status.Reassignment_Request 
+                            ].includes(item.status_id) ? (
+                              <Link href={`/Checklist/Manage/${item.id}`}>
+                                <AiOutlineFileProtect
+                                  size={22}
+                                  title={"Manage"}
+                                />
+                              </Link>
+                            ) : userPermission('canCompleteChecklist') && 
+                            [
+                              Checklist_Status.Assigned, 
+                              Checklist_Status.Reassigned, 
+                              Checklist_Status.Rejected, 
+                              Checklist_Status.Rejected_Cancellation
+                            ].includes(item.status_id) ? (
+                              <>
+                                <Link href={`/Checklist/Complete/${item.id}`}>
+                                  <AiOutlineFileDone
+                                    size={22}
+                                    title={"Complete"}
+                                  />
+                                </Link>
+                                <Link
+                                  href={`/Checklist/Form/?action=Edit&id=${item.id}`}
+                                >
+                                  <AiOutlineEdit size={22} title={"Edit"} />
+                                </Link>
+                              </>
+                            ) : userPermission('canAssignChecklist') && item.status_id === Checklist_Status.Pending 
+                               ? (
+                              <Link
+                                href={`/Checklist/Form/?action=Edit&id=${item.id}`}
+                              >
+                                <AiOutlineEdit size={22} title={"Assign"} />
+                              </Link>
+                            ) : userPermission('canManageChecklist') && item.status_id ===
+                                Checklist_Status.Pending_Cancellation  ? (
+                              <Link
+                                href={`/Checklist/Cancellation/?id=${item.id}`}
+                              >
+                                <AiOutlineFileProtect
+                                  size={22}
+                                  title={"Manage"}
+                                />
+                              </Link>
+                            ) : (
+                              <div></div>
+                            )}
+                            <AiOutlineHistory
+                              color={"#C70F2B"}
+                              onClick={() => {
+                                setHistory(item.activity_log);
+                                setAssignedUserHistory(item.assigneduser);
+                              }}
+                              size={22}
+                              title={"View History"}
+                            />
+                            <Link href={`/Checklist/View/${item.id}`}>
+                              <AiOutlineFolderView size={22} title={"View"} />
+                            </Link>
+                          </Cell>
                           <Cell>{item.id}</Cell>
                           <Cell>
                             <Tooltip
@@ -794,71 +859,7 @@ export default function Checklist(props: ChecklistProps) {
                               </div>
                             </Tooltip>
                           </Cell>
-                          <Cell>
-                            { userPermission('canManageChecklist') &&
-                            [ 
-                              Checklist_Status.Work_Done, 
-                              Checklist_Status.Reassignment_Request 
-                            ].includes(item.status_id) ? (
-                              <Link href={`/Checklist/Manage/${item.id}`}>
-                                <AiOutlineFileProtect
-                                  size={22}
-                                  title={"Manage"}
-                                />
-                              </Link>
-                            ) : userPermission('canCompleteChecklist') && 
-                            [
-                              Checklist_Status.Assigned, 
-                              Checklist_Status.Reassigned, 
-                              Checklist_Status.Rejected, 
-                              Checklist_Status.Rejected_Cancellation
-                            ].includes(item.status_id) ? (
-                              <>
-                                <Link href={`/Checklist/Complete/${item.id}`}>
-                                  <AiOutlineFileDone
-                                    size={22}
-                                    title={"Complete"}
-                                  />
-                                </Link>
-                                <Link
-                                  href={`/Checklist/Form/?action=Edit&id=${item.id}`}
-                                >
-                                  <AiOutlineEdit size={22} title={"Edit"} />
-                                </Link>
-                              </>
-                            ) : userPermission('canAssignChecklist') && item.status_id === Checklist_Status.Pending 
-                               ? (
-                              <Link
-                                href={`/Checklist/Form/?action=Edit&id=${item.id}`}
-                              >
-                                <AiOutlineEdit size={22} title={"Assign"} />
-                              </Link>
-                            ) : userPermission('canManageChecklist') && item.status_id ===
-                                Checklist_Status.Pending_Cancellation  ? (
-                              <Link
-                                href={`/Checklist/Cancellation/?id=${item.id}`}
-                              >
-                                <AiOutlineFileProtect
-                                  size={22}
-                                  title={"Manage"}
-                                />
-                              </Link>
-                            ) : (
-                              <div></div>
-                            )}
-                            <AiOutlineHistory
-                              color={"#C70F2B"}
-                              onClick={() => {
-                                setHistory(item.activity_log);
-                                setAssignedUserHistory(item.assigneduser);
-                              }}
-                              size={22}
-                              title={"View History"}
-                            />
-                            <Link href={`/Checklist/View/${item.id}`}>
-                              <AiOutlineFolderView size={22} title={"View"} />
-                            </Link>
-                          </Cell>
+                          
                         </Row>
                       );
                     })}
