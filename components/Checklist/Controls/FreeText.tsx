@@ -1,26 +1,28 @@
-import React, { useContext } from 'react';
-import CheckControl from '../../../types/common/CheckControl';
+import React, { useContext, useEffect, useState } from 'react';
 import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
-import { updateSpecificCheck } from '../ChecklistEditableForm';
 import styles from "../../../styles/Checklist.module.scss";
+import CheckControl from '../../../types/common/CheckControl';
+import { updateSpecificCheck } from '../ChecklistEditableForm';
 
 
 import { ImCross } from "react-icons/im";
 
-import checklistStyles from "../ChecklistTemplateCreator.module.css";
 import { ModuleDivider } from "../../ModuleLayout/ModuleDivider";
+import RequiredIcon from '../../RequiredIcon';
+import ToggleSwitch from '../../ToggleSwitch/ToggleSwitch';
+import checklistStyles from "../ChecklistTemplateCreator.module.css";
 
 export class FreeTextControl extends CheckControl {
-  constructor(question?: string, value?: string, id?: string) {
-    super(question, value, id);
+  constructor(question?: string, value?: string, required?: boolean, id?: string) {
+    super(question, value, id, required);
   }
 
   clone() {
-    return new FreeTextControl(this.question, this.value, this.id);
+    return new FreeTextControl(this.question, this.value, this.required, this.id);
   }
 
   duplicate() {
-    return new FreeTextControl(this.question, this.value);
+    return new FreeTextControl(this.question, this.value, this.required);
   }
 
   toString() {
@@ -32,6 +34,7 @@ export class FreeTextControl extends CheckControl {
       type: "FreeText",
       question: this.question,
       value: this.value,
+      required: this.required,
     };
   }
 
@@ -60,6 +63,8 @@ export function FreeText({
   onChange: Function;
   onDelete: Function;
 }) {
+  const [isRequired, setIsRequired] = useState<boolean>(false);
+
   const deleteSelf = () => {
     onDelete(freeTextObj);
   };
@@ -73,6 +78,23 @@ export function FreeText({
   const handleResponse = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     freeTextObj.value = e.target.value;
   };
+
+  const handleRequired = () => {
+    setIsRequired(!isRequired);
+  }
+
+  useEffect(() => {
+    const retrievedIsRequired = freeTextObj.required;
+    setIsRequired(retrievedIsRequired);
+  }, []);
+  
+  useEffect (() => {
+    // console.log(isRequired);
+    const o = freeTextObj.clone();
+    o.required = isRequired;
+    onChange(o);
+
+  },[isRequired])
 
   return (
     <div className={checklistStyles.controlContainer}>
@@ -99,6 +121,13 @@ export function FreeText({
 		<div className="form-group">
 			<textarea onChange={handleResponse} className="form-control" disabled></textarea>
 		</div>
+    <div style={{display: "flex", alignItems:"center", gap:"10px", justifyContent:"flex-end"}}>
+        <div>Required</div>
+        <ToggleSwitch 
+          isSelected = {isRequired}
+          onChange = {handleRequired}
+        />
+    </div>
 	</div>
   );
 };
@@ -118,7 +147,10 @@ function FreeTextEditable({ freeTextObj, rowId, sectionId, index }: {
   
 	return (
 		<div className={styles.checkViewContainer}>
-			<h6>{freeTextObj.question}</h6>
+      <h6>
+        {freeTextObj.required === true ? <RequiredIcon />: null}&nbsp;
+        { freeTextObj.question}
+      </h6>
 			<textarea 
         className="form-control" 
         onChange={handleChange}
@@ -132,7 +164,10 @@ function FreeTextEditable({ freeTextObj, rowId, sectionId, index }: {
 function FreeTextView({freeTextObj}: {freeTextObj: FreeTextControl}) {
   return (
     <div className={styles.checkViewContainer}>
-      <h6>{freeTextObj.question}</h6>
+      <h6>
+        {freeTextObj.required === true ? <RequiredIcon />: null}&nbsp;
+        { freeTextObj.question}
+      </h6>
       <p>{freeTextObj.value}</p>
     </div>
   )
