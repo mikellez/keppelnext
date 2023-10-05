@@ -1,8 +1,7 @@
 import { nanoid } from 'nanoid';
+import { FileUploadControl, FreeTextControl, MultiChoiceControl, SignatureControl, SingleChoiceControl } from '../../components/Checklist/Controls';
 import CheckControl from './CheckControl';
-import { FileUploadControl, FreeTextControl, MultiChoiceControl, SignatureControl, SingleChoice, SingleChoiceControl } from '../../components/Checklist/Controls';
 
-import React from 'react'
 
 // refer to components/Checklist/ChecklistTemplateCreator.tsx README
 
@@ -34,13 +33,14 @@ class ControlFactory {
 	static fromJSON(checkObj: any): CheckControl {
 		if( typeof checkObj.type !== "string"		||
 			typeof checkObj.question !== "string"	|| 
-			typeof checkObj.value !== "string"
+			typeof checkObj.value !== "string"		
 		)
 			throw Error("invalid json string in creating ChecklistControl")
 		
 		const question: string = checkObj.question;
 		const value: string = checkObj.value;
 		const type: string = checkObj.type;
+		const required: boolean = checkObj.required;
 
 		if(type === "SingleChoice")
 		{
@@ -52,7 +52,7 @@ class ControlFactory {
 
 			const choices: Array<string> = checkObj.choices;
 
-			return new SingleChoiceControl(question, choices, value);
+			return new SingleChoiceControl(question, choices, value, required);
 		}
 
 		if(type === "MultiChoice")
@@ -188,9 +188,10 @@ class CheckSection {
 		let result: boolean = true;
 		this.rows.forEach(row => {
 			row.checks.forEach(check => {
-				if (
-					!(check instanceof FreeTextControl || check instanceof FileUploadControl) &&
-					(!check.value || check.value.trim() === "")
+				if (check.required === true && !check.value
+					// (!(check instanceof FreeTextControl || check instanceof FileUploadControl) &&
+					// (!check.value || check.value.trim() === ""))
+					
 				) result = false;
 			})
 		})
@@ -200,4 +201,5 @@ class CheckSection {
 
 export {
 	CheckControl, CheckRow, CheckSection
-}
+};
+
