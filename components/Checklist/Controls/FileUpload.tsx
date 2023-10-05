@@ -1,26 +1,28 @@
-import React, { useContext, useState } from "react";
-import { updateSpecificCheck } from "../ChecklistEditableForm";
-import CheckControl from "../../../types/common/CheckControl";
-import { SectionsContext } from "../../../pages/Checklist/Complete/[id]";
-import { ImCross } from "react-icons/im";
-import checklistStyles from "../ChecklistTemplateCreator.module.css";
-import { ModuleDivider, ModuleModal } from "../../";
 import Image from "next/image";
+import React, { useContext, useEffect, useState } from "react";
+import { ImCross } from "react-icons/im";
+import { ModuleDivider, ModuleModal } from "../../";
+import { SectionsContext } from "../../../pages/Checklist/Complete/[id]";
 import styles from "../../../styles/Checklist.module.scss";
 import requestStyles from "../../../styles/Request.module.scss";
+import CheckControl from "../../../types/common/CheckControl";
 import ImagePreview from "../../Request/ImagePreview";
+import RequiredIcon from "../../RequiredIcon";
+import ToggleSwitch from "../../ToggleSwitch/ToggleSwitch";
+import { updateSpecificCheck } from "../ChecklistEditableForm";
+import checklistStyles from "../ChecklistTemplateCreator.module.css";
 
 export class FileUploadControl extends CheckControl {
-  constructor(question?: string, value?: string, id?: string) {
-    super(question, value, id);
+  constructor(question?: string, value?: string, required?: boolean, id?: string) {
+    super(question, value, id, required);
   }
 
   clone() {
-    return new FileUploadControl(this.question, this.value, this.id);
+    return new FileUploadControl(this.question, this.value, this.required, this.id);
   }
 
   duplicate() {
-    return new FileUploadControl(this.question, this.value);
+    return new FileUploadControl(this.question, this.value, this.required);
   }
 
   toString() {
@@ -32,6 +34,7 @@ export class FileUploadControl extends CheckControl {
       type: "FileUpload",
       question: this.question,
       value: this.value,
+      required: this.required,
     };
   }
 
@@ -73,6 +76,8 @@ export function FileUpload({
   onChange: Function;
   onDelete: Function;
 }) {
+  const [isRequired, setIsRequired] = useState<boolean>(false);
+
   const deleteSelf = () => {
     onDelete(fileControlObj);
   };
@@ -87,6 +92,23 @@ export function FileUpload({
     //TODO
     // console.log("yeah");
   };
+
+  const handleRequired = () => {
+    setIsRequired(!isRequired);
+  }
+
+  useEffect(() => {
+    const retrievedIsRequired = fileControlObj.required;
+    setIsRequired(retrievedIsRequired);
+  }, []);
+  
+  useEffect (() => {
+    // console.log(isRequired);
+    const o = fileControlObj.clone();
+    o.required = isRequired;
+    onChange(o);
+
+  },[isRequired])
 
   return (
     <div className={checklistStyles.controlContainer}>
@@ -116,6 +138,13 @@ export function FileUpload({
           onChange={handleFile}
           className="form-control"
           disabled
+        />
+      </div>
+      <div style={{display: "flex", alignItems:"center", gap:"10px", justifyContent:"flex-end"}}>
+        <div>Required</div>
+        <ToggleSwitch 
+          isSelected = {isRequired}
+          onChange = {handleRequired}
         />
       </div>
     </div>
@@ -163,7 +192,10 @@ function FileUploadEditable({
 
   return (
     <div className={styles.checkViewContainer}>
-      <h6>{fileControlObj.question}</h6>
+      <h6>
+        {fileControlObj.required === true ? <RequiredIcon />: null}&nbsp;
+        { fileControlObj.question}
+      </h6>
       <input
         type="file"
         name={fileControlObj.id}
@@ -208,7 +240,10 @@ function FileUploadView({
 
   return (
     <div className={styles.checkViewContainer}>
-      <h6>{fileControlObj.question}</h6>
+      <h6>
+        {fileControlObj.required === true ? <RequiredIcon />: null}&nbsp;
+        { fileControlObj.question}
+      </h6>
       <div>
         <ImagePreview previewObjURL={fileControlObj.value} />
       </div>

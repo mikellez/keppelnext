@@ -169,7 +169,7 @@ export function SingleChoice({
   }, []);
   
   useEffect (() => {
-    console.log(isRequired);
+    // console.log(isRequired);
     const o = singleChoiceObj.clone();
     o.required = isRequired;
     onChange(o);

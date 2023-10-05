@@ -64,17 +64,17 @@ class ControlFactory {
 				throw Error("invalid json string in creating ChecklistControl")
 			const choices: Array<string> = checkObj.choices;
 
-			return new MultiChoiceControl(question, choices, value);
+			return new MultiChoiceControl(question, choices, value, required);
 		}
 
 		if(type === "FreeText")
-			return new FreeTextControl(question, value);
+			return new FreeTextControl(question, value, required);
 
 		if(type === "FileUpload")
-			return new FileUploadControl(question, value);
+			return new FileUploadControl(question, value, required);
 
 		if(type === "Signature")
-			return new SignatureControl(question, value);
+			return new SignatureControl(question, value, required);
 
 		throw Error("invalid type") 
 	}

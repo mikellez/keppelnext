@@ -1,26 +1,27 @@
-import React, { useRef, useContext, RefObject, useState } from "react";
-import { SectionsContext } from "../../../pages/Checklist/Complete/[id]";
-import { updateSpecificCheck } from "../ChecklistEditableForm";
-import CheckControl from "../../../types/common/CheckControl";
-import { ImCross } from "react-icons/im";
-import checklistStyles from "../ChecklistTemplateCreator.module.css";
-import { ModuleDivider } from "../../";
-import SignatureCanvas from "react-signature-canvas";
-import ReactSignatureCanvas from "react-signature-canvas";
 import Image from "next/image";
+import React, { RefObject, useContext, useEffect, useRef, useState } from "react";
+import { ImCross } from "react-icons/im";
+import { default as ReactSignatureCanvas, default as SignatureCanvas } from "react-signature-canvas";
+import { ModuleDivider } from "../../";
+import { SectionsContext } from "../../../pages/Checklist/Complete/[id]";
 import styles from "../../../styles/Checklist.module.scss";
+import CheckControl from "../../../types/common/CheckControl";
+import RequiredIcon from "../../RequiredIcon";
+import ToggleSwitch from "../../ToggleSwitch/ToggleSwitch";
+import { updateSpecificCheck } from "../ChecklistEditableForm";
+import checklistStyles from "../ChecklistTemplateCreator.module.css";
 
 export class SignatureControl extends CheckControl {
-  constructor(question?: string, value?: string, id?: string) {
-    super(question, value, id);
+  constructor(question?: string, value?: string, required?: boolean, id?: string) {
+    super(question, value, id, required);
   }
 
   clone() {
-    return new SignatureControl(this.question, this.value, this.id);
+    return new SignatureControl(this.question, this.value, this.required, this.id);
   }
 
   duplicate() {
-    return new SignatureControl(this.question, this.value);
+    return new SignatureControl(this.question, this.value, this.required);
   }
 
   toString() {
@@ -32,6 +33,7 @@ export class SignatureControl extends CheckControl {
       type: "Signature",
       question: this.question,
       value: this.value,
+      required: this.required,
     };
   }
 
@@ -79,6 +81,8 @@ export function Signature({
   onChange: Function;
   onDelete: Function;
 }) {
+  const [isRequired, setIsRequired] = useState<boolean>(false);
+
   const deleteSelf = () => {
     onDelete(signatureControlObj);
   };
@@ -88,6 +92,23 @@ export function Signature({
     o.question = e.target.value;
     onChange(o);
   };
+
+  const handleRequired = () => {
+    setIsRequired(!isRequired);
+  }
+
+  useEffect(() => {
+    const retrievedIsRequired = signatureControlObj.required;
+    setIsRequired(retrievedIsRequired);
+  }, []);
+  
+  useEffect (() => {
+    // console.log(isRequired);
+    const o = signatureControlObj.clone();
+    o.required = isRequired;
+    onChange(o);
+
+  },[isRequired])
 
   return (
     <div className={checklistStyles.controlContainer}>
@@ -114,6 +135,13 @@ export function Signature({
       <div className="form-group" style={{ border: "black dashed 1px" }}>
         {/* <SignatureCanvas canvasProps={{ width: "450%", height: "140%" }} /> */}
         <div style={{}}></div>
+      </div>
+      <div style={{display: "flex", alignItems:"center", gap:"10px", justifyContent:"flex-end"}}>
+        <div>Required</div>
+        <ToggleSwitch 
+          isSelected = {isRequired}
+          onChange = {handleRequired}
+        />
       </div>
     </div>
   );
@@ -148,7 +176,10 @@ function SignatureEditable({
 
   return (
     <div className={styles.checkViewContainer}>
-      <h6>{signatureControlObj.question}</h6>
+      <h6>
+        {signatureControlObj.required === true ? <RequiredIcon />: null}&nbsp;
+        { signatureControlObj.question}
+      </h6>
       <div
         className="form-group"
         // style={{ border: "black dashed 1px" }}
@@ -172,7 +203,10 @@ function SignatureView({
 }) {
   return (
     <div className={styles.checkViewContainer}>
-      <h6>{signatureControlObj.question}</h6>
+      <h6>
+        {signatureControlObj.required === true ? <RequiredIcon />: null}&nbsp;
+        { signatureControlObj.question}
+      </h6>
       {signatureControlObj.value.trim() !== "" && (
         <Image
           src={signatureControlObj.value}
