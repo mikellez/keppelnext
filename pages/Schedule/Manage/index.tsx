@@ -56,12 +56,13 @@ export async function getScheduleById(id: number) {
 
 export async function manageSingleEvent(
   schedule: ScheduleInfo,
-  action: string
+  action: string,
+  remarks: string
 ) {
   return await instance({
     url: "/api/event/",
     method: "patch",
-    data: { schedule: schedule, action: action },
+    data: { schedule: schedule, action: action, remarks: remarks },
   })
     .then((res) => {
       return res.data;
@@ -114,6 +115,7 @@ export default function ManageSchedule() {
 
   // Called when the approve/reject buttons have been clicked
   function handleManage(newStatus: number) {
+    console.log(eventMode)
     if (remarks === "" && newStatus != 1) {
       //Prompt for remarks
       setIsPopup(true);
@@ -131,7 +133,7 @@ export default function ManageSchedule() {
     } else if (eventMode) {
       const action =
         newStatus === 1 ? "approve" : newStatus === 3 ? "reject" : "";
-      manageSingleEvent(scheduleList[0], action).then((result) => {
+      manageSingleEvent(scheduleList[0], action, remarks).then((result) => {
         setOutcomeModal(true);
         setTimeout(() => {
           // Re-direct to same page (Manage Schedule)

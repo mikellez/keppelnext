@@ -157,7 +157,6 @@ export default function ScheduleMaintenanceModal(
 
   // Submit the new schedule for maintenance on submit click
   function handleSubmit() {
-    return;
     // Disable submit button
     setDisableSubmit(true);
     // Check for missing entries

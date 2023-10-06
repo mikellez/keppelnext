@@ -168,6 +168,7 @@ export default function Timeline() {
                     header="Create Schedule"
                     schedules={scheduleList}
                     eventClassNames={(args)=> {
+                        console.log(args)
                         if(args.event.extendedProps.isNewSchedule) {
                             return ['overlay'];
                         }

@@ -985,7 +985,8 @@ const insertSchedule = async (req, res, next) => {
 const manageSingleEvent = (req, res, next) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const name = req.user.name;
-  const role_name = req.user.role;
+  const role_name = req.user.role_name;
+  const remarks = req.body.remarks || '';
 
   const activityApproved = `Approved Checklist Case ID-${req.body.schedule.schedule_id}`;
   const activityRejected = `Rejected Checklist Case ID-${req.body.schedule.schedule_id}`;
@@ -994,17 +995,17 @@ const manageSingleEvent = (req, res, next) => {
     global.db.query(
       `UPDATE KEPPEL.SCHEDULE_CHECKLIST 
         SET STATUS = 1,
+        REMARKS = $2,
         activity_log = activity_log ||
         jsonb_build_object(
           'date', '${today}'::text,
           'name', '${name}'::text,
           'role', '${role_name}'::text,
           'activity', '${activityApproved}'::text,
-          'activity_type', 'APPROVED',
-          'remarks', $5::text
+          'activity_type', 'APPROVED'
         )
        WHERE SCHEDULE_ID = $1 RETURNING INDEX, PREV_SCHEDULE_ID`,
-      [req.body.schedule.schedule_id],
+      [req.body.schedule.schedule_id, remarks],
       (err, found) => {
         if (err) throw err;
         // console.log(found.rows);
@@ -1038,17 +1039,17 @@ const manageSingleEvent = (req, res, next) => {
     global.db.query(
       `UPDATE KEPPEL.SCHEDULE_CHECKLIST 
       SET STATUS = 2, 
+      REMARKS = $2,
         activity_log = activity_log ||
         jsonb_build_object(
           'date', '${today}'::text,
           'name', '${name}'::text,
           'role', '${role_name}'::text,
           'activity', '${activityRejected}'::text,
-          'activity_type', 'REJECTED',
-          'remarks', $5::text
+          'activity_type', 'REJECTED'
         )
       WHERE SCHEDULE_ID = $1`,
-      [req.body.schedule.schedule_id],
+      [req.body.schedule.schedule_id, remarks],
       (err, found) => {
         if (err) throw err;
         return res.status(200).send("event rejected");

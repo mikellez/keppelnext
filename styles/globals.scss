@@ -61,5 +61,9 @@ body {
 }
 
 a.fc-event.fc-event-start.fc-event-end.fc-event-past.fc-daygrid-event.fc-daygrid-block-event.fc-h-event.overlay {
-    opacity: 0.5;
+  opacity: 0.5;
+}
+
+a.fc-event.fc-event-start.fc-event-end.fc-event-future.fc-daygrid-event.fc-daygrid-block-event.fc-h-event.overlay {
+  opacity: 0.5;
 }

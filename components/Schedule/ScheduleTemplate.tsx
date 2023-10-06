@@ -398,6 +398,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
                   (document.body.style.cursor = "pointer")
                 }
                 eventMouseLeave={() => (document.body.style.cursor = "default")}
+                eventClassNames={props.eventClassNames}
               />
               <div
                 className={styles.calendarDisplayCheckboxContainer}
