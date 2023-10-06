@@ -720,7 +720,7 @@ export default function Checklist(props: ChecklistProps) {
 
                                       if (activeTabIndex === 2) {
                                         const statusArr = item?.checklist_status?.split(",");
-                                        const status = statusArr?.filter(element => element.includes('WORK DONE'))[0];
+                                        const status = statusArr?.filter(element => element.includes('WORK DONE') || element.includes('REASSIGNMENT REQUESTS'))[0];
                                         const statusDate = status && status.slice(status?.indexOf(":")+2);
                                         dateToDisplay = statusDate;
                                         /*dateToDisplay = item.activity_log

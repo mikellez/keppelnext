@@ -871,7 +871,7 @@ export default function Request(props: RequestProps) {
 
                                         const statusArr = item?.request_status?.split(",");
                                         const status = statusArr?.filter(element => element.includes('APPROVED') || element.includes('CANCELLED'))[0];
-                                        const statusDate = status && status.slice(-status?.indexOf(":")+2);
+                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
                                         dateToDisplay = statusDate;
 
                                         /*const approvedActivity =
