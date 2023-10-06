@@ -721,7 +721,7 @@ export default function Checklist(props: ChecklistProps) {
                                       if (activeTabIndex === 2) {
                                         const statusArr = item?.checklist_status?.split(",");
                                         const status = statusArr?.filter(element => element.includes('WORK DONE'))[0];
-                                        const statusDate = status && status.substring(-status?.indexOf(":"));
+                                        const statusDate = status && status.substring(status?.indexOf(":")+2);
                                         dateToDisplay = statusDate;
                                         /*dateToDisplay = item.activity_log
                                           .reverse()
@@ -732,8 +732,9 @@ export default function Checklist(props: ChecklistProps) {
                                           )?.date;*/
                                       } else if (activeTabIndex === 3) {
                                         const statusArr = item?.checklist_status?.split(",");
-                                        const status = statusArr?.filter(element => element.includes('APPROVED'))[0];
-                                        const statusDate = status && status.substring(-status?.indexOf(":"));
+                                        const status = statusArr?.filter(element => element.includes('APPROVED') || element.includes('CANCELLED'))[0];
+                                        const statusDate = status && status.substring(status?.indexOf(":")+2);
+                                        dateToDisplay = statusDate;
                                         /*dateToDisplay = statusDate;
                                         dateToDisplay = item.activity_log
                                           .reverse()
@@ -765,42 +766,54 @@ export default function Checklist(props: ChecklistProps) {
                               }
                             >
                               <div>
-                                {(() => {
-                                  try {
-                                    let dateToDisplay;
+                                  {(() => {
+                                    try {
+                                      let dateToDisplay;
 
-                                    if (activeTabIndex === 2) {
-                                      dateToDisplay = item.activity_log
-                                        .reverse()
-                                        .find(
-                                          (activity) =>
-                                            activity["activity_type"] ===
-                                            "WORK DONE"
-                                        )?.date;
-                                    } else if (activeTabIndex === 3) {
-                                      dateToDisplay = item.activity_log
-                                        .reverse()
-                                        .find(
-                                          (activity) =>
-                                            activity["activity_type"] ===
-                                            "APPROVED"
-                                        )?.date;
-                                    } else {
-                                      dateToDisplay = item.created_date;
-                                    }
+                                      if (activeTabIndex === 2) {
+                                        const statusArr = item?.checklist_status?.split(",");
+                                        const status = statusArr?.filter(element => element.includes('WORK DONE'))[0];
+                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
+                                        dateToDisplay = statusDate;
+                                        /*dateToDisplay = item.activity_log
+                                          .reverse()
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ===
+                                              "WORK DONE"
+                                          )?.date;*/
+                                      } else if (activeTabIndex === 3) {
+                                        const statusArr = item?.checklist_status?.split(",");
+                                        const status = statusArr?.filter(element => element.includes('CANCELLED') || element.includes('APPROVED'))[0];
+                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
+                                        dateToDisplay = statusDate;
+                                        /*dateToDisplay = statusDate;
+                                        dateToDisplay = item.activity_log
+                                          .reverse()
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ===
+                                              "APPROVED"
+                                          )?.date;*/
+                                      } else {
+                                        dateToDisplay = item.created_date;
+                                      }
 
-                                    if (dateToDisplay) {
-                                      return moment(
-                                        new Date(dateToDisplay)
-                                      ).format("MMMM Do YYYY, h:mm:ss a");
-                                    } else {
-                                      return "Date not found";
+                                      if (dateToDisplay) {
+                                        return moment(
+                                          new Date(dateToDisplay)
+                                        ).format("MMMM Do YYYY, h:mm:ss a");
+                                      } else {
+                                        return "Date not found";
+                                      }
+                                    } catch (error) {
+                                      console.error(
+                                        "An error occurred:",
+                                        error
+                                      );
+                                      return "Error occurred";
                                     }
-                                  } catch (error) {
-                                    console.error("An error occurred:", error);
-                                    return "Error occurred";
-                                  }
-                                })()}
+                                  })()}
                               </div>
                             </Tooltip>
                           </Cell>
