@@ -1,10 +1,12 @@
-import React, { useContext, useState } from "react";
-import CheckControl from "../../../types/common/CheckControl";
-import { SectionsContext } from "../../../pages/Checklist/Complete/[id]";
+import React, { useContext, useEffect, useState } from "react";
 import { ImCross } from "react-icons/im";
-import checklistStyles from "../ChecklistTemplateCreator.module.css";
-import { ModuleDivider } from "../../ModuleLayout/ModuleDivider";
+import { SectionsContext } from "../../../pages/Checklist/Complete/[id]";
 import styles from "../../../styles/Checklist.module.scss";
+import CheckControl from "../../../types/common/CheckControl";
+import { ModuleDivider } from "../../ModuleLayout/ModuleDivider";
+import RequiredIcon from "../../RequiredIcon";
+import ToggleSwitch from "../../ToggleSwitch/ToggleSwitch";
+import checklistStyles from "../ChecklistTemplateCreator.module.css";
 
 export class MultiChoiceControl extends CheckControl {
   choices: string[];
@@ -12,9 +14,10 @@ export class MultiChoiceControl extends CheckControl {
     question?: string,
     choices?: string[],
     value?: string,
+    required?: boolean,
     id?: string
   ) {
-    super(question, value, id);
+    super(question, value, id, required);
     this.choices = choices !== undefined ? choices.slice() : [];
   }
 
@@ -23,12 +26,13 @@ export class MultiChoiceControl extends CheckControl {
       this.question,
       this.choices,
       this.value,
+      this.required,
       this.id
     );
   }
 
   duplicate() {
-    return new MultiChoiceControl(this.question, this.choices, this.value);
+    return new MultiChoiceControl(this.question, this.choices, this.value, this.required);
   }
 
   toString() {
@@ -41,6 +45,7 @@ export class MultiChoiceControl extends CheckControl {
       question: this.question,
       value: this.value,
       choices: this.choices,
+      required: this.required,
     };
   }
 
@@ -122,6 +127,7 @@ export function MultiChoice({
   onDelete: Function;
 }) {
   const [newChoice, setNewChoice] = useState<string>("");
+  const [isRequired, setIsRequired] = useState<boolean>(false);
 
   const updateChoiceInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewChoice(e.target.value);
@@ -162,6 +168,23 @@ export function MultiChoice({
     o.question = e.target.value;
     onChange(o);
   };
+
+  const handleRequired = () => {
+    setIsRequired(!isRequired);
+  }
+
+  useEffect(() => {
+    const retrievedIsRequired = multiChoiceObj.required;
+    setIsRequired(retrievedIsRequired);
+  }, []);
+  
+  useEffect (() => {
+    // console.log(isRequired);
+    const o = multiChoiceObj.clone();
+    o.required = isRequired;
+    onChange(o);
+
+  },[isRequired])
 
   return (
     <div className={checklistStyles.controlContainer}>
@@ -211,6 +234,13 @@ export function MultiChoice({
             value={newChoice}
           />
         </div>
+      </div>
+      <div style={{display: "flex", alignItems:"center", gap:"10px", justifyContent:"flex-end"}}>
+        <div>Required</div>
+        <ToggleSwitch 
+          isSelected = {isRequired}
+          onChange = {handleRequired}
+        />
       </div>
     </div>
   );
@@ -270,7 +300,10 @@ function MultiChoiceEditable({
 
   return (
     <div className={styles.checkViewContainer}>
-      <h6>{multiChoiceObj.question}</h6>
+      <h6>
+        {multiChoiceObj.required === true ? <RequiredIcon />: null}&nbsp;
+        { multiChoiceObj.question}
+      </h6>
       {multiChoiceObj.choices.map((choice) => {
         return (
           <div key={choice} className="form-check">
@@ -297,7 +330,10 @@ function MultiChoiceView({
 }) {
   return (
     <div className={styles.checkViewContainer}>
-      <h6>{multiChoiceObj.question}</h6>
+      <h6>
+        {multiChoiceObj.required === true ? <RequiredIcon />: null}&nbsp;
+        { multiChoiceObj.question}
+      </h6>
       {multiChoiceObj.choices.map((choice) => {
         return (
           <div key={choice} className="form-check">
