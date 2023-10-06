@@ -721,7 +721,7 @@ export default function Checklist(props: ChecklistProps) {
                                       if (activeTabIndex === 2) {
                                         const statusArr = item?.checklist_status?.split(",");
                                         const status = statusArr?.filter(element => element.includes('WORK DONE'))[0];
-                                        const statusDate = status && status.substring(status?.indexOf(":")+2);
+                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
                                         dateToDisplay = statusDate;
                                         /*dateToDisplay = item.activity_log
                                           .reverse()
@@ -733,7 +733,7 @@ export default function Checklist(props: ChecklistProps) {
                                       } else if (activeTabIndex === 3) {
                                         const statusArr = item?.checklist_status?.split(",");
                                         const status = statusArr?.filter(element => element.includes('APPROVED') || element.includes('CANCELLED'))[0];
-                                        const statusDate = status && status.substring(status?.indexOf(":")+2);
+                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
                                         dateToDisplay = statusDate;
                                         /*dateToDisplay = statusDate;
                                         dateToDisplay = item.activity_log

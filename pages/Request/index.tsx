@@ -854,7 +854,7 @@ export default function Request(props: RequestProps) {
 
                                         const statusArr = item?.request_status?.split(",");
                                         const status = statusArr?.filter(element => element.includes('COMPLETED'))[0];
-                                        const statusDate = status && status.substring(-status?.indexOf(":"));
+                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
                                         dateToDisplay = statusDate;
 
                                         /*const completedActivity =
@@ -870,8 +870,8 @@ export default function Request(props: RequestProps) {
                                       } else if (activeTabIndex === 3) {
 
                                         const statusArr = item?.request_status?.split(",");
-                                        const status = statusArr?.filter(element => element.includes('APPROVED'))[0];
-                                        const statusDate = status && status.substring(-status?.indexOf(":"));
+                                        const status = statusArr?.filter(element => element.includes('APPROVED') || element.includes('CANCELLED'))[0];
+                                        const statusDate = status && status.slice(-status?.indexOf(":")+2);
                                         dateToDisplay = statusDate;
 
                                         /*const approvedActivity =
