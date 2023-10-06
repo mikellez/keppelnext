@@ -9,6 +9,8 @@ import styles from "../../styles/Asset.module.scss";
 import { useRouter } from "next/router";
 import { useCurrentUser } from "../../components/SWR";
 
+import assetService from '../../services/assets';
+
 import 'react-tabulator/lib/styles.css';
 import { ReactTabulator } from 'react-tabulator'
 import 'react-tabulator/lib/css/tabulator_semanticui.min.css'; // theme - can be changed with other default themes https://tabulator.info/examples/5.5?#theming 
@@ -56,19 +58,6 @@ import 'react-tabulator/lib/css/tabulator_semanticui.min.css'; // theme - can be
 
 */
 
-
-// Get request to fetch all the assets from db
-const getAssets = async () => {
-    return await instance
-        .get("/api/asset")
-        .then((res) => {
-            return res.data;
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-};
-
 const Asset = () => {
     const { userPermission } = useCurrentUser();
     const [rowData, setRowData] = useState(); // Set rowData to Array of Objects, one Object per Row
@@ -108,7 +97,7 @@ const Asset = () => {
     };
 
     const tableEvents = {
-        // Click on row brings u to particular asset page
+        // Click on row brings you to particular asset page
         rowClick: rowClick
     }
 
@@ -161,8 +150,9 @@ const Asset = () => {
         placeholderHeaderFilter:"No Matching Data", //display message to user on empty table due to header filters
     }
 
+    // Get request to fetch all the assets from db on 1st page render
     useEffect(() => {
-        getAssets().then((data) => {
+        assetService.getAssets().then((data) => {
             setRowData(data);
         });
     }, []);
