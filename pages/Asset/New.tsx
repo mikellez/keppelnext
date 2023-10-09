@@ -280,7 +280,7 @@ export default function NewAsset(props: NewAssetProps) {
   );
 
   const sortedSubComponent1NameData = (subComponent1NameData || []).sort((a, b) => 
-    a.system_asset_lvl7.trim().localeCompare(b.system_asset_lvl7.trim())
+    a.system_asset_lvl7? a.system_asset_lvl7.trim().localeCompare(b.system_asset_lvl7.trim()): 1
   );
   // const updateData = (
   // 	e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

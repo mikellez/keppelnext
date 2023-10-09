@@ -70,22 +70,25 @@ const Asset = () => {
         {
         title:"Group",
         columns:[
-            { title: "Plant Name", field: "plant_name", visible:false, resizable:true },
-            { title: "System Name", field: "system_name", visible:false, resizable:true },
-            { title: "System Asset", field: "system_asset", visible:false, resizable:true },
-            { title: "Parent Asset", field: "parent_asset", visible:false, resizable:true },
-            { title: "Asset Type", field: "asset_type", visible:false, resizable:true },
-            ]
+            { title: "Plant Name", field: "plant_name", visible:false, resizable:false },
+            { title: "System Name", field: "system_name", visible:false , resizable:false},
+            { title: "System Asset", field: "system_asset", visible:false, resizable:false },
+            { title: "System Asset Name", field: "system_asset_lvl5", visible:false, resizable:false},
+            { title: "System Asset Name 2", field: "system_asset_lvl6", visible:false, resizable:false},
+            { title: "Sub Component 1", field: "system_asset_lvl7", visible:false, resizable:false},
+            { title: "Asset Type", field: "asset_type", visible:false, resizable:false},
+            ],
+        resizable:false,
         },
-        { title: "Tag Name", field: "plant_asset_instrument", resizable:true },
-        { title: "Description", field: "asset_description" , resizable:true},
-        { title: "Location", field: "asset_location", resizable:true },
-        { title: "Brand", field: "brand" , resizable:true},
-        { title: "Model Number", field: "model_number", resizable:true },
-        { title: "Capacity", field: "technical_specs" , resizable:true},
-        { title: "Country of Manufacture", field: "manufacture_country", resizable:true },
-        { title: "Warranty", field: "warranty", resizable:true },
-        { title: "Remarks", field: "remarks" },
+        { title: "Tag Name", field: "plant_asset_instrument", resizable:true, responsive:0 },
+        { title: "Description", field: "asset_description" , resizable:true, responsive:0},
+        { title: "Location", field: "asset_location", resizable:true, responsive:0 },
+        { title: "Brand", field: "brand" , resizable:true, responsive:0},
+        { title: "Model Number", field: "model_number", resizable:true , responsive:0},
+        { title: "Capacity", field: "technical_specs" , resizable:true, responsive:0},
+        { title: "Country of Manufacture", field: "manufacture_country", resizable:true, responsive:0 },
+        { title: "Warranty", field: "warranty", resizable:true , responsive:0},
+        { title: "Remarks", field: "remarks" , resizable:true, responsive:0 },
     ];
     const rowClick = (e: any, row: any) => {
         if (row.getData().psa_id) {
@@ -107,48 +110,130 @@ const Asset = () => {
             //data - an array of all the row data objects in this group
             //group - the group component for the group
             // group._group.field - Gets the field that the group is reading from:
-            //console.log(group._group); // Gets the field that the group is reading from:
+            console.log(group._group); // Gets the field that the group is reading from:
             
             // For all preceding groups before asset_type:
             if(group._group.field == "plant_name" || 
-            group._group.field == "system_name" || 
-            group._group.field == "system_asset"){
+            group._group.field == "system_name"
+            ){
                 return value;
             }
             /*Pending logic for how the different fields relate to each other*/
-            if(group._group.field == "parent_asset"){
-                // If parent same as system_asset:
-                if(group._group.key == group._group.parent.key){
-                    return "<span style='color:rgb(0, 0, 255); margin-left:10px;'>(" + count + " items)</span>";
+
+            // system_asset_lvl_5
+            if(group._group.field == "system_asset" || group._group.level == 2){
+                if(group._group.key == group._group.parent.key || group._group.key == ""){
+                    return "<span style='color:rgb(0, 0, 255); margin-left:10px;'>(" + group._group.getSubGroups().length + " System Assets)</span>";
                 }
-                return value;
+                else{
+                    return value;
+                }
             }
 
             // For asset_type:
-            if(group._group.field == "asset_type"){
+            if(group._group.field == "asset_type" || group._group.level == 6){
                 // If asset_type same as parent:
                 if(group._group.key == group._group.parent.key){
                     /*
-                    console.log("Same as parent")
                     console.log(group._group.getRows()); // Can get the rows
                     console.log(group._group.parent.getSubGroups()); // Can get the subgroups
                     console.log('ref table: ', ref.current); // this is the Tabulator table instance
                     */
-                    return "<span style='color:rgb(0, 0, 255); margin-left:10px;'>(" + count + " items)</span>";
+                    return "<span style='color:rgb(0, 0, 255); margin-left:10px;'>(" + count + " tag assets)</span>";
+                }
+                else if(group._group.key != 'NA'){
+                    return value + "<span style='color:#d00; margin-left:10px;'>(" + count + " tag assets)</span>";
+                }
+            }
+
+            // system_asset_lvl_5
+            if(group._group.level == 3){
+                if(group._group.key == group._group.parent.key || group._group.key == ""){
+                    return "<span style='color:rgb(0, 0, 255); margin-left:10px;'>(" + group._group.getSubGroups().length + " System Asset Names)</span>";
+                }
+                else{
+                    return value;
+                }
+            }
+
+            // system_asset_lvl_6
+            if(group._group.level == 4){
+                if(group._group.key == group._group.parent.key || group._group.key == ""){
+                    return "<span style='color:rgb(0, 0, 255); margin-left:10px;'>(" + group._group.getSubGroups().length + " System Asset Names)</span>";
+                }
+                else{
+                    return value;
+                }
+            }
+
+            // system_asset_lvl_7
+            if(group._group.level == 5){
+                if(group._group.key == group._group.parent.key || group._group.key == ""){
+                    return "<span style='color:rgb(0, 0, 255); margin-left:10px;'>(" + group._group.getSubGroups().length + " Sub Components)</span>";
+                }
+                else{
+                    return value;
                 }
             }
 
             return value + "<span style='color:#d00; margin-left:10px;'>(" + count + " items)</span>";
     }
 
+    const groupByArr = [
+        "plant_name", 
+        "system_name",
+        // For some reason these functions make the field for the group object false 
+        function(data){
+            //data - the data object for the row being grouped
+            if(data.system_asset && data.system_asset != "")
+                return data.system_asset; //groups by system_asset
+            return ""; // represents base layer of current asset lvl
+        },
+        function(data){
+            //data - the data object for the row being grouped
+            if(data.system_asset_lvl5 && data.system_asset_lvl5 != "")
+                return data.system_asset_lvl5; //groups by system_asset_lvl5
+            return ""; // represents base layer of current asset lvl
+        },
+        function(data){
+            //data - the data object for the row being grouped
+            if(data.system_asset_lvl6 && data.system_asset_lvl6 != "")
+                return data.system_asset_lvl6; //groups by system_asset_lvl6
+            return ""; // represents base layer of current asset lvl
+        },
+        function(data){
+            //data - the data object for the row being grouped
+            if(data.system_asset_lvl7 && data.system_asset_lvl7 != "")
+                return data.system_asset_lvl7; //groups by system_asset_lvl7
+            return ""; // represents base layer of current asset lvl
+        },
+        function(data){
+            //data - the data object for the row being grouped
+            if(!(data.asset_type == data.parent_asset)){
+                if(data.asset_type != 'NA'){
+                    return data.asset_type; // represents base layer of current asset lvl
+                }
+                return "";
+            }
+            else{
+                return "";
+            }
+        },
+    ]
+
     const options = {
         // Group By these columns:
-        groupBy:["plant_name", "system_name", "system_asset","parent_asset","asset_type"], 
-        groupStartOpen:[false, false, false, false, false],
+        groupBy:groupByArr, 
+        groupStartOpen:false,
         groupHeader:groupHeaderFunc,
         placeholder:"No Data Available",
         placeholderHeaderFilter:"No Matching Data", //display message to user on empty table due to header filters
-    }
+        columnDefaults:{
+            minWidth:120, //set the minWidth on all columns to 120px
+        },
+        columnHeaderVertAlign:"bottom",
+        maxHeight:500, // set fixed max height for table
+        }
 
     // Get request to fetch all the assets from db on 1st page render
     useEffect(() => {

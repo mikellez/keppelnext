@@ -13,6 +13,17 @@ body {
   box-sizing: border-box;
 }
 
+/*Global style used for overiding column resize handle for asset hierachy table - bug where span for resize
+handle always defaults to right side of table*/
+.tabulator .tabulator-col-resize-handle {
+  position: relative !important;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  display: inline-flex;
+}
+
 .nav-tabs:hover {
   cursor: pointer;
 }
