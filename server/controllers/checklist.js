@@ -22,7 +22,8 @@ const groupBYCondition = () => {
       pm.plant_id,
       pm.plant_name,
       st.status,
-      tmp1.assetnames
+      tmp1.assetnames,
+      cs.date
     )`;
 }
 
@@ -227,7 +228,9 @@ const getAllChecklistQuery = (req) => {
     overdue_status: "cl.overdue_status",
     completeremarks_req: "cl.completeremarks_req",
     updated_at: "cl.updated_at",
-    checklist_status: "STRING_AGG(cscm.status || ': ' || cs.date, ', ') AS checklist_status"
+    checklist_status: "STRING_AGG(cscm.status || ': ' || cs.date, ', ') AS checklist_status",
+    date: "cs.date"
+
   };
 
   if (expand) {
@@ -249,31 +252,30 @@ const getAllChecklistQuery = (req) => {
 
   // for approved date and completed date sorting
   
-  if (sortField){
-    if (sortField=='approved_date') {
-    dateSelectClause = `DISTINCT ON (cl.checklist_id)
-    (SELECT  jsonb_agg(activity ORDER BY idx DESC)
-      FROM jsonb_array_elements(cl.activity_log) WITH ORDINALITY AS t(activity, idx)
-      WHERE activity->>'activity_type' = 'APPROVED'
-      LIMIT 1) AS approved_activity,`
-      dateWhereClause = `AND al.elem->>'activity_type' = 'APPROVED'`;
-      dateJoinClause = `
-      JOIN keppel.request r1 ON u.user_id = r1.user_id 
-      CROSS JOIN LATERAL
-          jsonb_array_elements(r1.activity_log) AS al(elem)`;
+  // if (sortField){
+  //   if (sortField=='approved_date') {
+  //   dateSelectClause = `DISTINCT ON (cl.checklist_id)
+  //   (SELECT  jsonb_agg(activity ORDER BY idx DESC)
+  //     FROM jsonb_array_elements(cl.activity_log) WITH ORDINALITY AS t(activity, idx)
+  //     WHERE activity->>'activity_type' = 'APPROVED'
+  //     LIMIT 1) AS approved_activity,`
+  //     dateWhereClause = `AND al.elem->>'activity_type' = 'APPROVED'`;
+  //     dateJoinClause = `
+  //     JOIN keppel.request r1 ON u.user_id = r1.user_id 
+  //     CROSS JOIN LATERAL
+  //         jsonb_array_elements(r1.activity_log) AS al(elem)`;
   
-      dateOrderByClause = `ORDER BY cl.checklist_id, (SELECT (activity->>'date')::timestamp
-          FROM jsonb_array_elements(cl.activity_log) AS t(activity)
-          WHERE activity->>'activity_type' = 'APPROVED'
-          AND activity->>'date' IS NOT NULL
-          LIMIT 1) ${sortOrder}`
+  //     dateOrderByClause = `ORDER BY cl.checklist_id, (SELECT (activity->>'date')::timestamp
+  //         FROM jsonb_array_elements(cl.activity_log) AS t(activity)
+  //         WHERE activity->>'activity_type' = 'APPROVED'
+  //         AND activity->>'date' IS NOT NULL
+  //         LIMIT 1) ${sortOrder}`
 
-    } 
-  }
+  //   } 
+  // }
 
   query = `
     SELECT 
-      ${dateSelectClause}
       ${expandCond}
     FROM 
         keppel.users u
@@ -298,7 +300,6 @@ const getAllChecklistQuery = (req) => {
         JOIN keppel.status_cm st ON st.status_id = cl.status_id	
         left JOIN keppel.checklist_status cs on cs.checklist_id = cl.checklist_id
         left JOIN keppel.status_cm cscm on cscm.status_id = cl.status_id
-        ${dateJoinClause}
     `
   return query;
 };
@@ -450,18 +451,33 @@ const getCompletedChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
-  return (
-    getAllChecklistQuery(req) +
+  if (sortField == undefined || sortOrder == undefined) {
+    return (
+      getAllChecklistQuery(req) +
+      `
+      WHERE
+          ua.user_id = $1 AND
+          (cl.status_id = 6 OR cl.status_id = 11)
+      ${filterCondition("", plant, date, datetype)}
+      ${searchCondition(search)}
+      ${groupBYCondition()}
+      ORDER BY cl.checklist_id DESC
     `
-    WHERE
-        ua.user_id = $1 AND
-        (cl.status_id = 6 OR cl.status_id = 11)
-    ${filterCondition("", plant, date, datetype)}
-    ${searchCondition(search)}
-    ${groupBYCondition()}
-    ORDER BY cl.checklist_id DESC
-  `
-  );
+    );
+  } else {
+    return (
+      getAllChecklistQuery(req) +
+      `
+      WHERE
+          ua.user_id = $1 AND
+          (cl.status_id = 6 OR cl.status_id = 11)
+      ${filterCondition("", plant, date, datetype)}
+      ${searchCondition(search)}
+      ${groupBYCondition()}
+      ORDER BY ${sortField} ${sortOrder}
+    `
+    );
+  }
 };
 
 const getOverdueChecklistsQuery = (req) => {
@@ -520,8 +536,6 @@ const getApprovedChecklistsQuery = (req) => {
   const search = req.query.search || "";
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
-
-  var order_query = `ORDER BY ${sortField} ${sortOrder}`
   
 
   if (sortField == undefined || sortOrder == undefined) {
@@ -537,31 +551,15 @@ const getApprovedChecklistsQuery = (req) => {
     `
     );
   } else {
-
-    if (sortField == 'approved_date'){
-      order_query = dateOrderByClause;
-    }
-
-    console.log("finalQuery: ",getAllChecklistQuery(req) +
-    `
-    WHERE
-        ua.user_id = $1 AND
-        (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
-        ${dateWhereClause}
-    ${searchCondition(search)}
-    ${groupBYCondition()}
-    ${dateOrderByClause}
-  `)
     return (
       getAllChecklistQuery(req) +
       `
       WHERE
           ua.user_id = $1 AND
           (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
-          ${dateWhereClause}
       ${searchCondition(search)}
       ${groupBYCondition()}
-      ${order_query}
+      ORDER BY ${sortField} ${sortOrder}
     `
     );
   }
@@ -622,8 +620,6 @@ const fetchPendingChecklists = async (req, res, next) => {
   const query =
     getPendingChecklistsQuery(req) +
     (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : "");
-
-    console.log(query)
 
   try {
     const result = await global.db.query(query, [req.user.id]);
@@ -751,15 +747,14 @@ const fetchForReviewChecklists = async (req, res, next) => {
   }
 };
 
+
 const fetchApprovedChecklistsQuery =
   fetchAllChecklistQuery +
-  `
-WHERE 
-    ua.user_id = $1 AND 
-    (cl.status_id = 5 OR cl.status_id = 7 OR cl.status.id = 11)
-        ${groupBYCondition()}
-ORDER BY cl.checklist_id DESC
-`;
+    `WHERE 
+      ua.user_id = $1 AND 
+      (cl.status_id = 5 OR cl.status_id = 7 OR cl.status.id = 11)
+          ${groupBYCondition()}
+    ORDER BY cl.checklist_id desc`;
 const fetchApprovedChecklists = async (req, res, next) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
@@ -774,7 +769,7 @@ const fetchApprovedChecklists = async (req, res, next) => {
   const query =
     getApprovedChecklistsQuery(req) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
-
+    console.log("Submitted query: ", query)
   try {
     const result = await global.db.query(query, [req.user.id]);
     //if (result.rows.length == 0)

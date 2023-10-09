@@ -408,9 +408,9 @@ export default function Checklist(props: ChecklistProps) {
     if (dateType == "Created On") {
       setSortField("cl.created_date");
     } else if (dateType == "Completed Date") {
-      setSortField("cl.checklist_id");
+      setSortField("cs.date");
     } else if (dateType == "Approved Date") {
-      setSortField("cl.checklist_id");
+      setSortField("cs.date");
     }
 
     if (dateArrow == "" || dateArrow == " ▲") {
