@@ -452,9 +452,9 @@ export default function Request(props: RequestProps) {
     if (dateType == "Created On") {
       setSortField("r.created_date");
     } else if (dateType == "Completed Date") {
-      setSortField("completed_date");
+      setSortField("rs.date");
     } else if (dateType == "Approved Date") {
-      setSortField("approved_date");
+      setSortField("rs.date");
     }
 
     if (dateArrow == "" || dateArrow == " ▼") {
