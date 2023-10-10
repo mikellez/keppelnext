@@ -992,6 +992,19 @@ const manageSingleEvent = (req, res, next) => {
   const activityRejected = `Rejected Checklist Case ID-${req.body.schedule.schedule_id}`;
 
   if (req.body.action === "approve") {
+    console.log(`UPDATE KEPPEL.SCHEDULE_CHECKLIST 
+        SET STATUS = 1,
+        REMARKS = $2,
+        activity_log = activity_log ||
+        jsonb_build_object(
+          'date', '${today}'::text,
+          'name', '${name}'::text,
+          'role', '${role_name}'::text,
+          'activity', '${activityApproved}'::text,
+          'activity_type', 'APPROVED'
+        )
+       WHERE SCHEDULE_ID = $1 RETURNING INDEX, PREV_SCHEDULE_ID`);
+       console.log()
     global.db.query(
       `UPDATE KEPPEL.SCHEDULE_CHECKLIST 
         SET STATUS = 1,
@@ -1011,7 +1024,7 @@ const manageSingleEvent = (req, res, next) => {
         // console.log(found.rows);
         global.db.query(
           `UPDATE KEPPEL.SCHEDULE_CHECKLIST 
-            SET EXCLUSION_LIST = ARRAY_APPEND(EXCLUSION_LIST, ${found.rows[0].index}),
+            SET EXCLUSION_LIST = ARRAY_APPEND(EXCLUSION_LIST, ${found.rows[0].index})
             WHERE SCHEDULE_ID = ${found.rows[0].prev_schedule_id}; 
 
             SELECT SC.SCHEDULE_ID, 

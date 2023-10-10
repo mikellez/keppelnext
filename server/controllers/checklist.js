@@ -775,6 +775,8 @@ const fetchApprovedChecklists = async (req, res, next) => {
     getApprovedChecklistsQuery(req) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
 
+    console.log(query)
+
   try {
     const result = await global.db.query(query, [req.user.id]);
     //if (result.rows.length == 0)

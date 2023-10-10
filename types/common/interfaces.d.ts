@@ -255,7 +255,7 @@ interface CMMSSchedule {
   plantName?: string;
   timelineId: number;
   reminderRecurrence: number;
-  prevId?: number;
+  prevId?: number | null;
   isComplete?: boolean;
   status?: number;
   index?: number;
