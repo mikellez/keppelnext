@@ -570,8 +570,6 @@ const fetchAssignedChecklists = async (req, res, next) => {
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
   const expand = req.query.expand || false;
   const search = req.query.search || "";
-  const sortField = req.query.sortField;
-  const sortOrder = req.query.sortOrder;
 
   const totalRows = await global.db.query(getAssignedChecklistsQuery(req), [
     req.user.id,
