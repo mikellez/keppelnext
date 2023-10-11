@@ -135,6 +135,7 @@ interface CMMSEmployee extends CMMSUser {
   employee_id?: number;
   full_name: string;
   user_id: number;
+  user_name: string;
 }
 
 interface CMMSRequest {
@@ -259,6 +260,7 @@ interface CMMSSchedule {
   isComplete?: boolean;
   status?: number;
   index?: number;
+  mode?: string;
 }
 
 interface CMMSSystem {

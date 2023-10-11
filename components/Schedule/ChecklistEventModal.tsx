@@ -23,6 +23,7 @@ import ScheduleModal, {
   scheduleValidator,
 } from "./ScheduleModal";
 import { Role } from "../../types/common/enums";
+import RecurrenceSelect from "./RecurrenceSelect";
 
 interface CustomMouseEventHandler extends React.MouseEventHandler {
   (event: React.MouseEvent | void): void;
@@ -55,6 +56,8 @@ export default function ChecklistEventModal(props: ModalProps) {
   const [assignedUsers, setAssignedUsers] = useState<CMMSUser[]>([]);
   const [editDeleteModal, setEditDeleteModal] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
+  const [singleMode, setSingleMode] = useState<boolean>(false);
+  const [multipleMode, setMultipleMode] = useState<boolean>(false);
   const [newSchedule, setNewSchedule] = useState<CMMSSchedule>(
     {} as CMMSSchedule
   );
@@ -102,7 +105,8 @@ export default function ChecklistEventModal(props: ModalProps) {
 
   function submitEvent() {
     setDisableSubmit(true);
-    const schedule: CMMSSchedule = {
+
+    let schedule: CMMSSchedule = {
       checklistId: newSchedule.checklistId,
       startDate: newSchedule.date as Date,
       endDate: newSchedule.date as Date,
@@ -115,7 +119,19 @@ export default function ChecklistEventModal(props: ModalProps) {
       prevId: newSchedule.prevId,
       status: 4,
       index: newSchedule.index,
+      mode: "single"
     };
+
+    if(multipleMode) {
+      schedule = {
+        ...schedule,
+        startDate: newSchedule.startDate,
+        endDate: newSchedule.endDate,
+        mode: "multiple"
+      };
+    }
+
+    console.log(newSchedule)
 
     if (scheduleValidator(schedule)) {
       scheduleMaintenance(schedule).then((result) => {
@@ -276,6 +292,18 @@ export default function ChecklistEventModal(props: ModalProps) {
   });
   // console.log(newSchedule);
 
+  const handleEdit = (type: string) => {
+    setEditMode((prev) => !prev);
+    if(type=="single") {
+      setSingleMode(true);
+      setMultipleMode(false);
+    } else {
+      setMultipleMode(true);
+      setSingleMode(false);
+    }
+
+  }
+
     return (
         <div>
             {props.event?.extendedProps.checklistId && <div>
@@ -330,7 +358,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                                     </tr>
                                     <tr className={styles.eventModalTableRow}>
                                         <th>Date:</th>
-                                        {editMode && props.event.extendedProps.recurringPeriod > 1  ? (
+                                        {editMode && singleMode && props.event.extendedProps.recurringPeriod > 1  ? (
                                             <td>
                                                 <input
                                                     type="date"
@@ -353,29 +381,71 @@ export default function ChecklistEventModal(props: ModalProps) {
                                     </tr>
                                     <tr className={styles.eventModalTableRow}>
                                         <th>Start Date:</th>
-                                        <td>
-                                            {dateFormat(
-                                                props.event.extendedProps.startDate as Date
-                                            )}
-                                        </td>
+                                        {editMode && multipleMode && props.event.extendedProps.recurringPeriod > 1  ? (
+                                            <td>
+                                                <input
+                                                    type="date"
+                                                    className="form-control"
+                                                    value={(newSchedule?.startDate as Date)
+                                                        .toISOString()
+                                                        .slice(0, 10)}
+                                                    name="date"
+                                                    onChange={updateSchedule}
+                                                    min={lowerStr.toISOString().slice(0, 10)}
+                                                    max={upperStr.toISOString().slice(0, 10)}
+                                                    onKeyDown={(e) => e.preventDefault()}
+                                                />
+                                            </td>
+                                        ) : (
+                                            <td>
+                                                {dateFormat(props.event.extendedProps.startDate as Date)}
+                                            </td>
+                                        )}
                                     </tr>
                                     <tr className={styles.eventModalTableRow}>
                                         <th>End Date:</th>
-                                        <td>
-                                            {dateFormat(props.event.extendedProps.endDate as Date)}
-                                        </td>
+                                        {editMode && multipleMode && props.event.extendedProps.recurringPeriod > 1  ? (
+                                            <td>
+                                                <input
+                                                    type="date"
+                                                    className="form-control"
+                                                    value={(newSchedule?.endDate as Date)
+                                                        .toISOString()
+                                                        .slice(0, 10)}
+                                                    name="date"
+                                                    onChange={updateSchedule}
+                                                    min={lowerStr.toISOString().slice(0, 10)}
+                                                    max={upperStr.toISOString().slice(0, 10)}
+                                                    onKeyDown={(e) => e.preventDefault()}
+                                                />
+                                            </td>
+                                        ) : (
+                                            <td>
+                                                {dateFormat(props.event.extendedProps.endDate as Date)}
+                                            </td>
+                                        )}
                                     </tr>
                                     <tr className={styles.eventModalTableRow}>
                                         <th>Recurring Period:</th>
-                                        <td>
-                                            {toPeriodString(
-                                                props.event.extendedProps.recurringPeriod
-                                            )}
-                                        </td>
+                                        {editMode && multipleMode ? (
+                                          <RecurrenceSelect
+                                            startDate={newSchedule.startDate}
+                                            endDate={newSchedule.endDate}
+                                            name="recurringPeriod"
+                                            onChange={updateSchedule}
+                                            value={newSchedule.recurringPeriod}
+                                          />
+                                        ) : (
+                                          <td>
+                                              {toPeriodString(
+                                                  props.event.extendedProps.recurringPeriod
+                                              )}
+                                          </td>
+                                        )}
                                     </tr>
                                     <tr className={styles.eventModalTableRow}>
                                         <th>Assigned To:</th>
-                                        {editMode ? (
+                                        {editMode && (singleMode || multipleMode) ? (
                                             <td>
                                                 <AssignToSelect
                                                     plantId={
@@ -456,15 +526,28 @@ export default function ChecklistEventModal(props: ModalProps) {
                                     <div className={styles.eventModalButtonContainer}>
                                         <TooltipBtn
                                             toolTip={false}
-                                            onClick={() => setEditMode((prev) => !prev)}
+                                            onClick={() => handleEdit("single")}
                                             style={{
                                                 backgroundColor: editMode ? "#9EB23B" : "#B2B2B2",
                                                 color: "#000000",
                                                 border: "none",
                                             }}
                                         >
-                                            {editMode ? "Cancel" : "Edit"}
+                                            {editMode ? "Cancel" : "Edit Single Event"}
                                         </TooltipBtn>
+                                        {!editMode && 
+                                          <TooltipBtn
+                                              toolTip={false}
+                                              onClick={() => handleEdit("multiple")}
+                                              style={{
+                                                  backgroundColor: editMode ? "#9EB23B" : "#B2B2B2",
+                                                  color: "#000000",
+                                                  border: "none",
+                                              }}
+                                          >
+                                              Edit Event
+                                          </TooltipBtn>
+                                        }
                                         {editMode && (
                                             <TooltipBtn
                                                 toolTip={false}

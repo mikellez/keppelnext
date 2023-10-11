@@ -135,7 +135,7 @@ export default function ApproveSchedulePreviewModal(
         .catch(console.log);
     }
   }
-
+  console.log(props.scheduleInfo)
 
   return (
     <>
