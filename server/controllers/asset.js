@@ -745,15 +745,13 @@ const editAsset = async (req, res, next) => {
     },
   ];
 
-  // console.log(activity_log)
-
   await global.db.query(
     `
     UPDATE keppel.plant_system_assets
     SET activity_log = activity_log || $1::jsonb
-    WHERE psa_id = '${psa_id}';
+    WHERE psa_id = $2;
     `,
-    [JSON.stringify(activity_log)]
+    [JSON.stringify(activity_log), psa_id]
   );
 
   res.status(200).send({
