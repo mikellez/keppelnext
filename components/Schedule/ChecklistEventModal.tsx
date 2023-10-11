@@ -1,28 +1,27 @@
-import React, { useState, useEffect, PropsWithChildren } from "react";
-import Modal from "react-modal";
 import { useRouter } from "next/router";
-import { dateFormat, ScheduleInfo, toPeriodString } from "./ScheduleTemplate";
+import React, { PropsWithChildren, useEffect, useState } from "react";
+import { GrClose } from "react-icons/gr";
+import Modal from "react-modal";
+import styles from "../../styles/Schedule.module.scss";
+import instance from "../../types/common/axios.config";
+import { Role } from "../../types/common/enums";
 import {
-  CMMSScheduleEvent,
-  CMMSUser,
   CMMSSchedule,
-  CMMSTimeline,
+  CMMSScheduleEvent,
+  CMMSUser
 } from "../../types/common/interfaces";
-import EventModalUser from "./EventModalUser";
-import { useCurrentUser } from "../SWR";
-import { GrClose, GrNew } from "react-icons/gr";
-import TooltipBtn from "../TooltipBtn";
-import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
 import ModuleSimplePopup, {
   SimpleIcon,
 } from "../ModuleLayout/ModuleSimplePopup";
-import styles from "../../styles/Schedule.module.scss";
-import instance from "../../types/common/axios.config";
+import { useCurrentUser } from "../SWR";
+import TooltipBtn from "../TooltipBtn";
+import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
+import EventModalUser from "./EventModalUser";
 import ScheduleModal, {
   scheduleMaintenance,
   scheduleValidator,
 } from "./ScheduleModal";
-import { Role } from "../../types/common/enums";
+import { dateFormat, toPeriodString } from "./ScheduleTemplate";
 
 interface CustomMouseEventHandler extends React.MouseEventHandler {
   (event: React.MouseEvent | void): void;
@@ -95,7 +94,7 @@ export default function ChecklistEventModal(props: ModalProps) {
       return {
         ...prev,
         [e.target.name]:
-          e.target.name == "date" ? new Date(e.target.value) : e.target.value,
+          e.target.type == "date" ? new Date(e.target.value) : e.target.value,
       };
     });
   }
@@ -115,6 +114,7 @@ export default function ChecklistEventModal(props: ModalProps) {
       prevId: newSchedule.prevId,
       status: 4,
       index: newSchedule.index,
+      advanceSchedule: newSchedule.advanceSchedule,
     };
 
     if (scheduleValidator(schedule)) {
@@ -240,6 +240,7 @@ export default function ChecklistEventModal(props: ModalProps) {
         prevId: props.event.extendedProps.scheduleId,
         index: props.event.extendedProps.index,
         scheduleId: props.event.extendedProps.scheduleId,
+        advanceSchedule: props.event.extendedProps.advanceSchedule,
       });
 
       // setScheduleObject({
@@ -371,6 +372,14 @@ export default function ChecklistEventModal(props: ModalProps) {
                                             {toPeriodString(
                                                 props.event.extendedProps.recurringPeriod
                                             )}
+                                        </td>
+                                    </tr>
+                                    <tr className={styles.eventModalTableRow}>
+                                        <th>Advanced Schedule Period:</th>
+                                        <td>
+                                            {props.event.extendedProps.advanceSchedule 
+                                            ? `${props.event.extendedProps.advanceSchedule} Day(s)` 
+                                            : "NA"}
                                         </td>
                                     </tr>
                                     <tr className={styles.eventModalTableRow}>

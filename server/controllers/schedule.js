@@ -40,6 +40,7 @@ const makeScheduleDict = (arr) => {
       index: item["index"],
       prev_schedule_id: item["prev_schedule_id"],
       status: item["status"],
+      advance_schedule: item["advance_schedule"],
     });
   });
   return newArr;
@@ -51,7 +52,8 @@ const updateDates = async (scheduleList) => {
       const result = await global.db.query(`SELECT 
       (SC.START_DATE  + interval '8 hour' ) AS START_DATE, 
       (SC.END_DATE  + interval '8 hour' ) AS END_DATE,
-      SC.RECURRENCE_PERIOD
+      SC.RECURRENCE_PERIOD,
+      SC.ADVANCE_SCHEDULE
       FROM 
       KEPPEL.SCHEDULE_CHECKLIST SC
       WHERE 
@@ -60,6 +62,7 @@ const updateDates = async (scheduleList) => {
       scheduleList[i].start_date = result.rows[0].start_date;
       scheduleList[i].end_date = result.rows[0].end_date;
       scheduleList[i].period = result.rows[0].recurrence_period;
+      scheduleList[i].advance_schedule = result.rows[0].advance_schedule;
     }
   }
   return scheduleList;
@@ -78,7 +81,7 @@ const getViewSchedules = async (req, res, next) => {
                     STRING_AGG(UA.role_name, ' ,') AS ROLES,
                     STRING_AGG(U.first_name, ' ,') AS FNAME,
                     STRING_AGG(U.last_name, ' ,') AS LNAME,
-                    PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, SC.REMARKS, SC.TIMELINE_ID, SC.STATUS, SC.PREV_SCHEDULE_ID
+                    PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, SC.REMARKS, SC.TIMELINE_ID, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
                 FROM 
                     KEPPEL.SCHEDULE_CHECKLIST  as SC,
                     KEPPEL.USERS AS U,
@@ -104,7 +107,7 @@ const getViewSchedules = async (req, res, next) => {
                     '' AS ROLES,
                     '' AS FNAME,
                     '' AS LNAME,
-                    PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, SC.REMARKS, SC.TIMELINE_ID, SC.STATUS, SC.PREV_SCHEDULE_ID
+                    PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, SC.REMARKS, SC.TIMELINE_ID, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
                 FROM 
                     KEPPEL.SCHEDULE_CHECKLIST  as SC,
                     KEPPEL.PLANT_MASTER  AS PM,
@@ -127,7 +130,7 @@ const getViewSchedules = async (req, res, next) => {
                     STRING_AGG(UA.role_name, ' ,') AS ROLES,
                     STRING_AGG(U.first_name, ' ,') AS FNAME,
                     STRING_AGG(U.last_name, ' ,') AS LNAME,
-                    SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+                    SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
                 FROM 
                     KEPPEL.SCHEDULE_CHECKLIST  as SC,
                     KEPPEL.PLANT_MASTER  AS PM,
@@ -152,7 +155,7 @@ const getViewSchedules = async (req, res, next) => {
                     '' AS ROLES,
                     '' AS FNAME,
                     '' AS LNAME,
-                    SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+                    SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
                 FROM 
                     KEPPEL.SCHEDULE_CHECKLIST  as SC,
                     KEPPEL.PLANT_MASTER  AS PM,
@@ -174,7 +177,7 @@ const getViewSchedules = async (req, res, next) => {
                 STRING_AGG(U.first_name, ' ,') AS FNAME,
                 STRING_AGG(U.last_name, ' ,') AS LNAME,
                 PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, 
-                SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+                SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
             FROM 
                 KEPPEL.SCHEDULE_CHECKLIST  as SC,
                 KEPPEL.USERS AS U,
@@ -200,7 +203,7 @@ const getViewSchedules = async (req, res, next) => {
                 '' AS FNAME,
                 '' AS LNAME,
                 PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, 
-                SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+                SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
             FROM 
                 KEPPEL.SCHEDULE_CHECKLIST  as SC,
                 KEPPEL.PLANT_MASTER  AS PM,
@@ -351,7 +354,7 @@ const getSchedulesTimeline = async (req, res, next) => {
         STRING_AGG(UA.role_name, ' ,') AS ROLES,
         STRING_AGG(U.first_name, ' ,') AS FNAME,
         STRING_AGG(U.last_name, ' ,') AS LNAME,
-        SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+        SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
         FROM 
         KEPPEL.SCHEDULE_CHECKLIST  as SC,
         KEPPEL.PLANT_MASTER  AS PM,
@@ -374,7 +377,7 @@ const getSchedulesTimeline = async (req, res, next) => {
             '' AS ROLES,
             '' AS FNAME,
             '' AS LNAME,
-            SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+            SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
         FROM 
             KEPPEL.SCHEDULE_CHECKLIST  as SC,
             KEPPEL.PLANT_MASTER  AS PM,
@@ -956,8 +959,8 @@ const insertSchedule = async (req, res, next) => {
 
   global.db.query(
     `INSERT INTO keppel.schedule_checklist
-        (checklist_template_id, remarks, start_date, end_date, recurrence_period, reminder_recurrence, scheduler_history, user_id, scheduler_userids_for_email, plant_id, timeline_id, prev_schedule_id, status, index, activity_log) 
-        VALUES ($1, $2, $3, $4, $5, $6, CONCAT('created by',$7::varchar), $8, $9::int[], $10, $11, $12, $13, $14, $15);`,
+        (checklist_template_id, remarks, start_date, end_date, recurrence_period, reminder_recurrence, scheduler_history, user_id, scheduler_userids_for_email, plant_id, timeline_id, prev_schedule_id, status, index, activity_log, advance_schedule) 
+        VALUES ($1, $2, $3, $4, $5, $6, CONCAT('created by',$7::varchar), $8, $9::int[], $10, $11, $12, $13, $14, $15, $16);`,
     [
       req.body.schedule.checklistId,
       req.body.schedule.remarks,
@@ -974,6 +977,7 @@ const insertSchedule = async (req, res, next) => {
       req.body.schedule.status,
       req.body.schedule.index,
       JSON.stringify(activity_log),
+      req.body.schedule.advanceSchedule,
     ],
     (err, result) => {
       if (err) throw err;
@@ -1136,9 +1140,10 @@ const createSingleEvent = (req, res, next) => {
                 TIMELINE_ID,
                 STATUS,
                 INDEX,
-                ACTIVITY_LOG
+                ACTIVITY_LOG,
+                ADVANCE_SCHEDULE
             )
-            VALUES ($1, $2, $3, $4, 0, 1, $5, $6, ARRAY [${data.userIds}], $7, $8, $9, 4, $10, $11)`,
+            VALUES ($1, $2, $3, $4, 0, 1, $5, $6, ARRAY [${data.userIds}], $7, $8, $9, 4, $10, $11, $12)`,
     [
       data.checklistId,
       data.remarks,
@@ -1151,6 +1156,7 @@ const createSingleEvent = (req, res, next) => {
       data.timelineId,
       req.params.index,
       JSON.stringify(activity_log),
+      data.advance_schedule,
     ],
     (err) => {
       if (err) throw err;
@@ -1201,7 +1207,7 @@ const getScheduleById = (req, res, next) => {
             STRING_AGG(UA.role_name, ' ,') AS ROLES,
             STRING_AGG(U.first_name, ' ,') AS FNAME,
             STRING_AGG(U.last_name, ' ,') AS LNAME,
-            SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+            SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
         FROM 
             KEPPEL.SCHEDULE_CHECKLIST  as SC,
             KEPPEL.PLANT_MASTER  AS PM,
@@ -1224,7 +1230,7 @@ const getScheduleById = (req, res, next) => {
             '' AS ROLES,
             '' AS FNAME,
             '' AS LNAME,
-            SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+            SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
         FROM 
             KEPPEL.SCHEDULE_CHECKLIST  as SC,
             KEPPEL.PLANT_MASTER  AS PM,
@@ -1271,9 +1277,10 @@ const updateSchedule = async (req, res, next) => {
       plant_id = $10, 
       timeline_id = $11, 
       prev_schedule_id = $12, 
-      status = 3
+      status = 3,
+      advance_schedule = $13
     FROM keppel.schedule_checklist t
-    WHERE keppel.schedule_checklist.schedule_id = $13
+    WHERE keppel.schedule_checklist.schedule_id = $14
     AND keppel.schedule_checklist.schedule_id = t.schedule_id
     RETURNING 
       t.checklist_template_id AS checklistId,
@@ -1286,7 +1293,8 @@ const updateSchedule = async (req, res, next) => {
       t.scheduler_userids_for_email AS assignedIds,
       t.plant_id AS plantId,
       t.timeline_id AS timelineId,
-      t.prev_schedule_id AS prevId
+      t.prev_schedule_id AS prevId,
+      t.advance_schedule AS advanceSchedule
     ;`,
     [
       req.body.schedule.checklistId,
@@ -1301,6 +1309,7 @@ const updateSchedule = async (req, res, next) => {
       req.body.schedule.plantId,
       req.body.schedule.timelineId,
       req.body.schedule.prevId,
+      req.body.schedule.advanceSchedule,
       req.body.schedule.scheduleId,
     ],
     (err, result) => {
@@ -1309,6 +1318,7 @@ const updateSchedule = async (req, res, next) => {
         throw res.status(500).send("unable to update schedule");
       }
       if (result) {
+        console.log("result.rows", result.rows[0]);
         const updatedSchedule = result.rows[0];
         const fields = getFieldsDiff(updatedSchedule, req.body.schedule);
 

@@ -1,24 +1,23 @@
+import moment from "moment";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { ThreeDots } from "react-loading-icons";
+import { SingleValue } from "react-select";
+import { ModalProps, ModuleModal } from "../";
+import styles from "../../styles/Schedule.module.scss";
+import instance from "../../types/common/axios.config";
 import {
-  CMMSTimeline,
   CMMSSchedule,
-  CMMSScheduleEvent,
+  CMMSTimeline
 } from "../../types/common/interfaces";
 import ChecklistSelect from "../Checklist/ChecklistSelect";
-import RecurrenceSelect from "./RecurrenceSelect";
-import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
-import TooltipBtn from "../TooltipBtn";
-import styles from "../../styles/Schedule.module.scss";
 import ModuleSimplePopup, {
   SimpleIcon,
 } from "../ModuleLayout/ModuleSimplePopup";
-import { ModuleModal, ModalProps } from "../";
-import { useRouter } from "next/router";
-import { ThreeDots } from "react-loading-icons";
-import instance from "../../types/common/axios.config";
-import { SingleValue } from "react-select";
+import TooltipBtn from "../TooltipBtn";
+import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
+import RecurrenceSelect from "./RecurrenceSelect";
 import { ScheduleInfo } from "./ScheduleTemplate";
-import moment from "moment";
 
 interface ScheduleMaintenanceModalProps extends ModalProps {
   timeline?: CMMSTimeline; // use to add schedule in draft
@@ -100,7 +99,8 @@ export default function ScheduleMaintenanceModal(
           ? new Date(event.target.value)
           : event.target.name === "checklistId" ||
             event.target.name === "recurringPeriod" ||
-            event.target.name === "reminderRecurrence"
+            event.target.name === "reminderRecurrence" || 
+            event.target.name === "advanceSchedule"
           ? parseInt(event.target.value)
           : event.target.value;
       const tmp = { ...prev };
@@ -302,6 +302,23 @@ export default function ScheduleMaintenanceModal(
                       <option hidden>Select the Reminder Frequency</option>
                       <option value={1}>1 Day Before</option>
                       <option value={0}>No Reminders</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr className={styles.eventModalTableRow}>
+                  <th>Advanced Schedule Period:</th>
+                  <td>
+                    <select
+                      className="form-select"
+                      name="advanceSchedule"
+                      onChange={updateSchedule}
+                      value={newSchedule.advanceSchedule}
+                    >
+                      <option hidden>Select Advanced Period</option>
+                      <option value={0}>No Advanced Checklist Creation</option>
+                      <option value={1}>1 Day in Advance</option>
+                      <option value={2}>2 Days in Advance</option>
+                      <option value={3}>3 Days in Advance</option>
                     </select>
                   </td>
                 </tr>

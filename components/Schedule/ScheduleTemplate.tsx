@@ -1,29 +1,29 @@
-import React, {
-  PropsWithChildren,
-  useState,
-  useEffect,
-  ReactNode,
-  useCallback,
-} from "react";
-import { ModuleContent, ModuleHeader, ModuleMain } from "../";
-import FullCalendar from "@fullcalendar/react";
 import { EventClickArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import ChecklistEventModal from "./ChecklistEventModal";
-import { useRouter } from "next/router";
-import styles from "../../styles/Schedule.module.scss";
-import "../../styles/Schedule.module.scss";
-import { BsCalendar4Week, BsListUl } from "react-icons/bs";
-import ScheduleTable from "./ScheduleTable";
-import {
-  CMMSScheduleEvent,
-  CMMSChangeOfPartsEvent,
-  CMMSChangeOfParts,
-  CMMSEvent,
-} from "../../types/common/interfaces";
-import EventColorLegend, { EventColours } from "./EventColorLegend";
-import COPEventModal from "./COPEventModal";
+import FullCalendar from "@fullcalendar/react";
 import moment from "moment";
+import { useRouter } from "next/router";
+import {
+  PropsWithChildren,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+import { BsCalendar4Week, BsListUl } from "react-icons/bs";
+import { ModuleContent, ModuleHeader, ModuleMain } from "../";
+import "../../styles/Schedule.module.scss";
+import styles from "../../styles/Schedule.module.scss";
+import {
+  CMMSChangeOfParts,
+  CMMSChangeOfPartsEvent,
+  CMMSEvent,
+  CMMSScheduleEvent,
+} from "../../types/common/interfaces";
+import COPEventModal from "./COPEventModal";
+import ChecklistEventModal from "./ChecklistEventModal";
+import EventColorLegend, { EventColours } from "./EventColorLegend";
+import ScheduleTable from "./ScheduleTable";
 
 interface ScheduleTemplateInfo extends PropsWithChildren {
   title: string;
@@ -62,6 +62,7 @@ export interface ScheduleInfo {
   index?: number;
   status?: number;
   isNewSchedule?: boolean;
+  advance_schedule?: number;
 }
 
 // Function to format Date to string
@@ -205,6 +206,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
           exclusionList: schedule.exclusionList,
           status: schedule.status,
           isNewSchedule: schedule.isNewSchedule,
+          advanceSchedule: schedule.advance_schedule,
         },
         color:
           schedule.status === 5
@@ -261,6 +263,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
           exclusionList: info.event._def.extendedProps.exclusionList,
           isSingle: info.event._def.extendedProps.isSingle,
           status: info.event._def.extendedProps.status,
+          advanceSchedule: info.event._def.extendedProps.advanceSchedule,
         },
       });
       setIsChecklistModalOpen(true);
@@ -280,6 +283,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
           description: info.event._def.extendedProps.description,
           status: info.event._def.extendedProps.status,
           isNewSchedule: info.event._def.extendedProps.isNewSchedule,
+          advanceSchedule: info.event._def.extendedProps.advanceSchedule,
         },
       });
       setIsCOPModalOpen(true);

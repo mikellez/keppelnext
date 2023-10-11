@@ -225,6 +225,7 @@ interface CMMSScheduleEvent extends CMMSEvent {
     index?: number;
     status?: number;
     isNewSchedule?: boolean;
+    advanceSchedule?: number;
   };
   color?: string;
   display?: string;
@@ -259,6 +260,7 @@ interface CMMSSchedule {
   isComplete?: boolean;
   status?: number;
   index?: number;
+  advanceSchedule?: number;
 }
 
 interface CMMSSystem {
