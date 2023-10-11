@@ -59,6 +59,7 @@ import { useChangeOfParts } from '../../components/SWR';
 async function getSchedules(id : number) {
 	return await instance.get<ScheduleInfo[]>(`/api/schedule/${id}`)
 	.then(res => {
+		console.log('result',res.data)
 		return res.data
 	})
 	.catch(err => console.log(err.message))

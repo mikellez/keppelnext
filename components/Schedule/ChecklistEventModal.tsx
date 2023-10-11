@@ -98,7 +98,7 @@ export default function ChecklistEventModal(props: ModalProps) {
       return {
         ...prev,
         [e.target.name]:
-          e.target.name == "date" ? new Date(e.target.value) : e.target.value,
+          ["date","startDate","endDate"].includes(e.target.name) ? new Date(e.target.value) : e.target.value,
       };
     });
   }
@@ -358,7 +358,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                                     </tr>
                                     <tr className={styles.eventModalTableRow}>
                                         <th>Date:</th>
-                                        {editMode && singleMode && props.event.extendedProps.recurringPeriod > 1  ? (
+                                        {editMode && singleMode ? (
                                             <td>
                                                 <input
                                                     type="date"
@@ -381,7 +381,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                                     </tr>
                                     <tr className={styles.eventModalTableRow}>
                                         <th>Start Date:</th>
-                                        {editMode && multipleMode && props.event.extendedProps.recurringPeriod > 1  ? (
+                                        {editMode && multipleMode ? (
                                             <td>
                                                 <input
                                                     type="date"
@@ -389,7 +389,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                                                     value={(newSchedule?.startDate as Date)
                                                         .toISOString()
                                                         .slice(0, 10)}
-                                                    name="date"
+                                                    name="startDate"
                                                     onChange={updateSchedule}
                                                     min={lowerStr.toISOString().slice(0, 10)}
                                                     max={upperStr.toISOString().slice(0, 10)}
@@ -404,7 +404,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                                     </tr>
                                     <tr className={styles.eventModalTableRow}>
                                         <th>End Date:</th>
-                                        {editMode && multipleMode && props.event.extendedProps.recurringPeriod > 1  ? (
+                                        {editMode && multipleMode  ? (
                                             <td>
                                                 <input
                                                     type="date"
@@ -412,7 +412,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                                                     value={(newSchedule?.endDate as Date)
                                                         .toISOString()
                                                         .slice(0, 10)}
-                                                    name="date"
+                                                    name="endDate"
                                                     onChange={updateSchedule}
                                                     min={lowerStr.toISOString().slice(0, 10)}
                                                     max={upperStr.toISOString().slice(0, 10)}

@@ -36,7 +36,7 @@ const makeScheduleDict = (arr) => {
       assigned_emails: item["user_emails"].split(","),
       remarks: item["remarks"],
       exclusionList: item["exclusion_list"],
-      isSingle: item["index"] != null ? true : false,
+      isSingle: (item["index"] != null && item["start_date"] == item["end_date"]) ? true : false,
       index: item["index"],
       prev_schedule_id: item["prev_schedule_id"],
       status: item["status"],
