@@ -216,6 +216,7 @@ export default function User() {
               <Header>
                 <HeaderRow>
                   <HeaderCell>Employee ID</HeaderCell>
+                  <HeaderCell>Username</HeaderCell>
                   <HeaderCell>Name</HeaderCell>
                   <HeaderCell>Role</HeaderCell>
                   <HeaderCell>Actions</HeaderCell>
@@ -226,6 +227,7 @@ export default function User() {
                 {tableList.map((item) => (
                   <Row key={item.id} item={item} name={item.user_id}>
                     <Cell>{item.employee_id}</Cell>
+                    <Cell>{item.user_name}</Cell>
                     <Cell>{item.full_name}</Cell>
                     <Cell>{item.role_name}</Cell>
                     <Cell

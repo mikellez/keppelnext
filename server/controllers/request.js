@@ -147,7 +147,8 @@ async function fetchRequestQuery(
     fault_id: "r.fault_id",
     overdue_status: "r.overdue_status",
     description_other: "r.description_other",
-    request_status: "STRING_AGG(rssp.status || ': ' || rs.date, ', ') AS request_status"
+    request_status: "STRING_AGG(rssp.status || ': ' || rs.date, ', ') AS request_status",
+    date: "rs.date"
   };
 
   if (expand) {
@@ -166,53 +167,9 @@ async function fetchRequestQuery(
   }
 
   expandCond = SELECT_ARR.join(", ");
-  
-  // for approved date and completed date sorting
-  var dateSelectClause = '';
-  var dateWhereClause = '';
-  var dateJoinClause = '';
-  var dateOrderByClause = '';
-  if (sortField){
-    if (sortField=='completed_date') {
-      dateSelectClause = `(SELECT jsonb_agg(activity ORDER BY idx DESC)
-    FROM jsonb_array_elements(r.activity_log) WITH ORDINALITY AS t(activity, idx)
-    WHERE activity->>'activity_type' = 'COMPLETED'
-    LIMIT 1) AS completed_activity,`
-      dateWhereClause = `AND al.elem->>'activity_type' = 'COMPLETED'`;
-      dateJoinClause = `
-      JOIN keppel.request r1 ON u.user_id = r1.user_id 
-      CROSS JOIN LATERAL
-          jsonb_array_elements(r1.activity_log) AS al(elem)`;
-      dateOrderByClause = 'r1.request_id,';
-      order_query = `ORDER BY (SELECT (activity->>'date')::timestamp
-          FROM jsonb_array_elements(r.activity_log) AS t(activity)
-          WHERE activity->>'activity_type' = 'COMPLETED'
-          AND activity->>'date' IS NOT NULL
-          LIMIT 1) ${sortOrder}`
-
-    } 
-    else if (sortField == 'approved_date'){
-      dateSelectClause = `(SELECT jsonb_agg(activity ORDER BY idx DESC)
-    FROM jsonb_array_elements(r.activity_log) WITH ORDINALITY AS t(activity, idx)
-    WHERE activity->>'activity_type' = 'APPROVED'
-    LIMIT 1) AS approved_activity,`
-      dateWhereClause = `AND al.elem->>'activity_type' = 'APPROVED'`;
-      dateJoinClause = `
-      JOIN keppel.request r1 ON u.user_id = r1.user_id 
-      CROSS JOIN LATERAL
-          jsonb_array_elements(r1.activity_log) AS al(elem)`;
-      dateOrderByClause = 'r1.request_id,';
-      order_query = `ORDER BY (SELECT (activity->>'date')::timestamp
-          FROM jsonb_array_elements(r.activity_log) AS t(activity)
-          WHERE activity->>'activity_type' = 'APPROVED'
-          AND activity->>'date' IS NOT NULL
-          LIMIT 1) ${sortOrder}`
-    } 
-  }
 
   let sql;
   sql = `SELECT 
-  ${dateSelectClause}
   ${expandCond}
     
   FROM    
@@ -233,13 +190,11 @@ async function fetchRequestQuery(
     left JOIN keppel.request_status rs on rs.request_id = r.request_id
 	  left JOIN keppel.status_pm rssp on rs.status_id = rssp.status_id
       
-    ${dateJoinClause}
   WHERE 1 = 1 
   AND ua.user_id = ${user_id}
   ${searchCondition(search)}
   ${status_query}
   ${userCond}
-  ${dateWhereClause}
 
   GROUP BY (
     r.request_id,
@@ -254,7 +209,8 @@ async function fetchRequestQuery(
     tmp1.asset_name,
     req_u.last_name,
     au.first_name,
-    au.last_name
+    au.last_name,
+    rs.date
   ) 
   ${order_query}`;
   console.log(sql)
@@ -498,6 +454,8 @@ const createRequest = async (req, res, next) => {
     plantLocationID,
     taggedAssetID,
     description_other,
+    priority,
+    assignedUser
   } = req.body;
   // console.log("json body", JSON.stringify(req.body));
   // console.log("^&*")
@@ -553,9 +511,9 @@ const createRequest = async (req, res, next) => {
   }
   if (!req.body.linkedRequestId) {
     const q = `INSERT INTO keppel.request(
-      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log, description_other
+      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log, description_other, priority_id, assigned_user_id
     ) VALUES (
-      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13,$14
+      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13,$14,$15,$16
     ) RETURNING request_id;`;
 
     db.query(
@@ -575,6 +533,8 @@ const createRequest = async (req, res, next) => {
         null,
         JSON.stringify(activity_log),
         description_other,
+        priority || null,
+        assignedUser || null 
       ],
       (err, result) => {
         if (err) return res.status(500).json({ errormsg: err });

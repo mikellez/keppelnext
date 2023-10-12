@@ -135,6 +135,7 @@ interface CMMSEmployee extends CMMSUser {
   employee_id?: number;
   full_name: string;
   user_id: number;
+  user_name: string;
 }
 
 interface CMMSRequest {
@@ -220,6 +221,7 @@ interface CMMSScheduleEvent extends CMMSEvent {
     assignedUsernames: string[];
     assignedRoles: string[];
     remarks: string;
+    timeline_remarks: string;
     exclusionList?: number[];
     isSingle?: boolean;
     index?: number;
@@ -256,10 +258,11 @@ interface CMMSSchedule {
   plantName?: string;
   timelineId: number;
   reminderRecurrence: number;
-  prevId?: number;
+  prevId?: number | null;
   isComplete?: boolean;
   status?: number;
   index?: number;
+  mode?: string;
   advanceSchedule?: number;
 }
 

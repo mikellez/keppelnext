@@ -26,19 +26,20 @@ interface HistoryItem {
 }
 
 const renderFields = (fields: string) => {
-  if(fields === '' || !fields) return '';
+  if (fields === "" || !fields) return "";
   const items = JSON.parse(fields);
   return (
     <>
       {items.map((item) => (
         <div key={item.field}>
-          <b>{item.field}:</b>{` ${item.oldValue} => `}
+          <b>{item.field}:</b>
+          {` ${item.oldValue} => `}
           <mark>{item.newValue}</mark>
         </div>
       ))}
     </>
   );
-}
+};
 
 const COLUMNS: Column<HistoryItem>[] = [
   //   {
@@ -63,7 +64,7 @@ const COLUMNS: Column<HistoryItem>[] = [
   },
 ];
 
-export default function AssetHistory({id}: {id: number}) {
+export default function AssetHistory({ id }: { id: number }) {
   const [data, setData] = useState<HistoryItem[]>();
   const [page, setPage] = useState<number>(1);
   const [isReady, setReady] = useState<boolean>(false);
@@ -89,15 +90,14 @@ export default function AssetHistory({id}: {id: number}) {
                 & > div {
                     white-space: unset !important;
                 }
-
             `,
     },
   ]);
 
   useEffect(() => {
-    instance.get(`/api/asset/history/${id}`)
-      .then(res => {
-        setData(res.data.rows.map((row: CMMSAssetHistory) => {
+    instance.get(`/api/asset/history/${id}?page=${page}`).then((res) => {
+      setData(
+        res.data.rows.map((row: CMMSAssetHistory) => {
           return {
             id: row.history_id + row.date.toString() + row.action,
             action: row.action,
@@ -106,32 +106,29 @@ export default function AssetHistory({id}: {id: number}) {
             name: row.name,
             fields: row.fields,
           };
-        
-        }));
-        setTotalPages(res.data.total);
-        setReady(true);
-
-    })
-    
-  }, [page, isReady])
+        })
+      );
+      setTotalPages(res.data.total);
+      setReady(true);
+    });
+  }, [page, isReady]);
 
   return (
     <div>
       {/* <h4 className={styles.assetDetailsHeader}>Checklist History</h4> */}
       {isReady && data && data!.length > 0 ? (
-      <div>
-
-        <CompactTable
-          columns={COLUMNS}
-          data={{ nodes: data }}
-          theme={theme}
-          layout={{ fixedHeader: true }}
+        <div>
+          <CompactTable
+            columns={COLUMNS}
+            data={{ nodes: data }}
+            theme={theme}
+            layout={{ fixedHeader: true }}
           />
-        <Pagination
-          setPage={setPage}
-          setReady={setReady}
-          totalPages={totalPages}
-          page={page} 
+          <Pagination
+            setPage={setPage}
+            setReady={setReady}
+            totalPages={totalPages}
+            page={page}
           />
         </div>
       ) : (

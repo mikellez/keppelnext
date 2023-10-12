@@ -20,6 +20,7 @@ const getUsers = async (req, res, next) => {
     employee_id,
     CONCAT(first_name, ' ', last_name) AS full_name,
     user_id,
+    user_name,
     role_name
   FROM 
     keppel.user_access
@@ -229,6 +230,7 @@ const updateUser = async (req, res, next) => {
   if (password != "" && password != undefined && password != null) {
     var salt = bcrypt.genSaltSync(10);
     let hash = bcrypt.hashSync(password, salt);
+    console.log('hash', hash, user_id)
     query += `UPDATE keppel.users SET user_pass = '${hash}' WHERE user_id = ${user_id};`;
   }
 

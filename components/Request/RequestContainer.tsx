@@ -74,7 +74,9 @@ async function getAssets(plant_id: number) {
 async function createRequest(
   data: FormValues,
   plantId: number,
-  linkedRequestId?: string
+  linkedRequestId?: string,
+  priority?: CMMSRequestPriority,
+  assignedUser?: AssignedUserOption
 ) {
   const formData = new FormData();
 
@@ -84,6 +86,13 @@ async function createRequest(
   formData.append("requestTypeID", data.requestTypeID.toString());
   formData.append("taggedAssetID", data.taggedAssetID.toString());
   formData.append("description_other", data.description_other);
+  if(priority != undefined) {
+    formData.append("priority", priority?.p_id);
+  }
+  if(assignedUser != undefined) {
+    formData.append("assignedUser", assignedUser?.value);
+  }
+
   // console.log("data", data);
   if (data.image.length > 0) formData.append("image", data.image[0]);
   if (linkedRequestId) formData.append("linkedRequestId", linkedRequestId);
@@ -138,6 +147,7 @@ export interface RequestProps {
   user: CMMSUser;
   requestTypes: CMMSRequestTypes[];
   faultTypes: CMMSFaultTypes[];
+  priority: CMMSRequestPriority[];
 }
 
 export interface AssignRequestProps {
@@ -162,7 +172,7 @@ export default function RequestContainer(props: RequestContainerProps) {
   const [availableAssets, setAvailableAssets] = useState<CMMSAssetOption[]>([]);
   const [plantId, setPlantId] = useState<number>();
   const assignRequestData = props.assignRequestData?.requestData as CMMSRequest;
-  const priorityList = props.assignRequestData
+  const priorityList = (props.assignRequestData || props.requestData)
     ?.priority as CMMSRequestPriority[];
 
   const defaultValues = props.linkedRequestData
@@ -203,7 +213,7 @@ export default function RequestContainer(props: RequestContainerProps) {
       await createRequest(data, plantId as number, id as string);
     } else if (props.requestData) {
       // console.log("Creating new request");
-      await createRequest(data, plantId as number);
+      await createRequest(data, plantId as number, "", prioritySelected as CMMSRequestPriority, assignedUsers as AssignedUserOption);
     } else if (props.assignRequestData) {
       // console.log("Assigning request");
       // console.log(prioritySelected);
@@ -646,7 +656,7 @@ export default function RequestContainer(props: RequestContainerProps) {
             <ImagePreview previewObjURL={previewedFile} />
           )} */}
 
-          {props.assignRequestData && (
+          {(props.assignRequestData || props.requestData) && (
             <div className="form-group">
               <label className="form-label">
                 <RequiredIcon /> Assign to:
@@ -661,13 +671,13 @@ export default function RequestContainer(props: RequestContainerProps) {
                   setAssignedUsers(value as AssignedUserOption);
                 }}
                 defaultIds={[
-                  props.assignRequestData.requestData.assigned_user_id,
+                  (props.assignRequestData || props.requestData)?.requestData?.assigned_user_id,
                 ]}
               />
             </div>
           )}
 
-          {props.assignRequestData && (
+          {(props.assignRequestData || props.requestData) && (
             <div className="form-group">
               <label className="form-label">
                 <RequiredIcon /> Priority
