@@ -115,6 +115,7 @@ export default function Timeline() {
             validateTimeline(id).then((result) => {
                 if (!result) router.replace("/404");
                 else {
+                    setSelectedPlant(result.plantId);
                     setTimelineData(result);
                     getSchedules(id).then((schedules) => {
                         if (schedules) {
@@ -177,7 +178,7 @@ export default function Timeline() {
                     }}
                 >
                     <MdOutlineLocationOn size={30} />
-                    <PlantSelect onChange={changePlant} allPlants={true} />
+                    {/*<PlantSelect onChange={changePlant} allPlants={true} />*/}
 
                     <TooltipBtn
                         text="Delete this draft"

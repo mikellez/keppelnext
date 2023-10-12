@@ -55,6 +55,7 @@ export interface ScheduleInfo {
   plant: string;
   plantId: number;
   remarks: string;
+  timeline_remarks: string;
   schedule_id: number;
   timeline_id: number;
   exclusionList: number[];
@@ -200,6 +201,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
           assignedRoles: schedule.assigned_usernames,
           timelineId: schedule.timeline_id,
           remarks: schedule.remarks,
+          timeline_remarks: schedule.timeline_remarks,
           index: index,
           isSingle: schedule.isSingle,
           exclusionList: schedule.exclusionList,
@@ -257,6 +259,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
           assignedUsernames: info.event._def.extendedProps.assignedUsernames,
           assignedRoles: info.event._def.extendedProps.assignedRoles,
           remarks: info.event._def.extendedProps.remarks,
+          timeline_remarks: info.event._def.extendedProps.timeline_remarks,
           index: info.event._def.extendedProps.index,
           exclusionList: info.event._def.extendedProps.exclusionList,
           isSingle: info.event._def.extendedProps.isSingle,

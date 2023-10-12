@@ -19,6 +19,7 @@ import {
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import Link from "next/link";
 import RequestContainer, {
+  CMMSRequestPriority,
   RequestProps,
 } from "../../../components/Request/RequestContainer";
 
@@ -63,13 +64,16 @@ export const getServerSideProps: GetServerSideProps = async (
     headers
   );
 
-  const values = await Promise.all([getUser, getRequestTypes, getFaultTypes]);
+  const getPriority = instance.get(`/api/request/priority`, headers);
+
+  const values = await Promise.all([getUser, getRequestTypes, getFaultTypes, getPriority]);
 
   const u: CMMSUser = values[0].data;
   const r: CMMSRequestTypes[] = values[1].data;
   const f: CMMSFaultTypes[] = values[2].data;
+  const p: CMMSRequestPriority[] = values[3].data;
 
-  let props: RequestProps = { user: u, requestTypes: r, faultTypes: f };
+  let props: RequestProps = { user: u, requestTypes: r, faultTypes: f,  priority: p};
 
   return {
     props: props,
