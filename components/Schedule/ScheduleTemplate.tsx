@@ -264,6 +264,7 @@ export default function ScheduleTemplate(props: ScheduleTemplateInfo) {
           exclusionList: info.event._def.extendedProps.exclusionList,
           isSingle: info.event._def.extendedProps.isSingle,
           status: info.event._def.extendedProps.status,
+          isNewSchedule: info.event._def.extendedProps.isNewSchedule
         },
       });
       setIsChecklistModalOpen(true);

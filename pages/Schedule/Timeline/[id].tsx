@@ -177,8 +177,8 @@ export default function Timeline() {
                         return [];
                     }}
                 >
-                    <MdOutlineLocationOn size={30} />
-                    {/*<PlantSelect onChange={changePlant} allPlants={true} />*/}
+                    {/*<MdOutlineLocationOn size={30} />
+                    <PlantSelect onChange={changePlant} allPlants={true} />*/}
 
                     <TooltipBtn
                         text="Delete this draft"
