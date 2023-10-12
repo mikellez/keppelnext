@@ -519,7 +519,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                                     </TooltipBtn>
                                 </div>
                             )}
-                            {props.editSingle && props.event.extendedProps.isNewSchedule &&
+                            {props.editSingle &&
                                 (user?.role_id as number) != Role.Specialist &&
                                 (props.event.extendedProps.date as Date) > new Date() &&
                                  (
@@ -535,7 +535,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                                         >
                                             {editMode ? "Cancel" : "Edit Single Event"}
                                         </TooltipBtn>
-                                        {!editMode && 
+                                        {!editMode && (props.event.extendedProps.startDate as Date) > new Date() &&
                                           <TooltipBtn
                                               toolTip={false}
                                               onClick={() => handleEdit("multiple")}
