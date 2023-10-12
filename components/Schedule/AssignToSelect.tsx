@@ -26,6 +26,15 @@ interface AssignToSelectProps {
   value?: any;
 }
 
+interface ErrorMsg {
+  success: boolean;
+  msg: string;
+}
+
+function isErrorMsg(object: any): object is ErrorMsg {
+  return 'success' in object;
+}
+
 export interface AssignedUserOption {
   value: number;
   label: string;
@@ -34,9 +43,11 @@ export interface AssignedUserOption {
 // Axios call to get all assigned users based on plant_id
 async function getAssignedUsers(plantId: number | number[]) {
   return await instance
-    .get<CMMSUser[]>("/api/getAssignedUsers/" + plantId)
+    .get<CMMSUser[] | ErrorMsg>("/api/getAssignedUsers/" + plantId)
     .then((res) => {
-      return res.data;
+      if(res.data)
+        return res.data;
+      return res;
     })
     .catch((err) => console.log(err.message));
 }
@@ -81,25 +92,36 @@ const AssignToSelect = (props: AssignToSelectProps) => {
         if (users == null) {
           return console.log("no users");
         }
-        // setAssignedUsers(users);
-        setOptions(
-          users.map((user) => {
-            return { value: user.id, label: user.name + " | " + user.email };
-          })
-        );
-        if (props.defaultIds && props.defaultIds[0] != null) {
-          updateDefault(users)
-            .then((result) => {
-
-              setDefaultOptions(result);
-          
-              setIsReady(true);
-            })
-            // .then(() => {
-            // });
-        } else {
-          setIsReady(true);
+        // No users
+        if(isErrorMsg(users)){
+          if(users.success == false){
+            // Clear the assigned users list:
+            setOptions([]);
+            return;
+          }
         }
+        else{
+            // setAssignedUsers(users);
+          setOptions(
+            users.map((user) => {
+              return { value: user.id, label: user.name + " | " + user.email };
+            })
+          );
+          if (props.defaultIds && props.defaultIds[0] != null) {
+            updateDefault(users)
+              .then((result) => {
+
+                setDefaultOptions(result);
+            
+                setIsReady(true);
+              })
+              // .then(() => {
+              // });
+          } else {
+            setIsReady(true);
+          }
+        }
+        
       });
     }
   }, [props.plantId, props.defaultIds, updateDefault]);

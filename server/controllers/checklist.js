@@ -781,10 +781,11 @@ const fetchApprovedChecklists = async (req, res, next) => {
 
 // get checklist templates
 const fetchChecklistTemplateNames = async (req, res, next) => {
+  // Plant_id = 0 refers to fetching all the universal templates as well:
   const sql = req.params.id
-    ? `SELECT * from keppel.checklist_templates WHERE plant_id = ${req.params.id} 
+    ? `SELECT * from keppel.checklist_templates WHERE (plant_id = ${req.params.id} OR plant_id = 0)
           ORDER BY keppel.checklist_templates.checklist_id DESC;` // templates are plant specificed (from that plant only)
-    : `SELECT * from keppel.checklist_templates WHERE plant_id = any(ARRAY[${req.user.allocated_plants}]::int[])
+    : `SELECT * from keppel.checklist_templates WHERE (plant_id = any(ARRAY[${req.user.allocated_plants}]::int[]) OR plant_id = 0)
           ORDER BY keppel.checklist_templates.checklist_id DESC;`; // templates are plants specificed depending on user access(1 use can be assigned multiple plants)
 
   global.db.query(sql, (err, result) => {

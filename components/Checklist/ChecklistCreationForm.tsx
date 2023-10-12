@@ -86,6 +86,7 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
               onChange={updateChecklist}
               name="plant_id"
               accessControl
+              universalPlants
               defaultPlant={props.checklistData.plant_id}
             />
           </div>
