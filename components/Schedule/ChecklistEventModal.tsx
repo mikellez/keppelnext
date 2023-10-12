@@ -498,7 +498,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                             </table>
                         </div>
                         <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                            {props.deleteEditDraft && (
+                            {props.deleteEditDraft && props.event.extendedProps.isNewSchedule && (
                                 <div style={{ display: "flex" }}>
                                     <TooltipBtn
                                         toolTip={false}
@@ -535,7 +535,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                                         >
                                             {editMode ? "Cancel" : "Edit Single Event"}
                                         </TooltipBtn>
-                                        {!editMode && 
+                                        {!editMode && (props.event.extendedProps.startDate as Date) > new Date() &&
                                           <TooltipBtn
                                               toolTip={false}
                                               onClick={() => handleEdit("multiple")}

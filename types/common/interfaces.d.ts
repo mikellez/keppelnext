@@ -221,6 +221,7 @@ interface CMMSScheduleEvent extends CMMSEvent {
     assignedUsernames: string[];
     assignedRoles: string[];
     remarks: string;
+    timeline_remarks: string;
     exclusionList?: number[];
     isSingle?: boolean;
     index?: number;

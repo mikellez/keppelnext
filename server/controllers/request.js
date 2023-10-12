@@ -454,6 +454,8 @@ const createRequest = async (req, res, next) => {
     plantLocationID,
     taggedAssetID,
     description_other,
+    priority,
+    assignedUser
   } = req.body;
   // console.log("json body", JSON.stringify(req.body));
   // console.log("^&*")
@@ -509,9 +511,9 @@ const createRequest = async (req, res, next) => {
   }
   if (!req.body.linkedRequestId) {
     const q = `INSERT INTO keppel.request(
-      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log, description_other
+      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log, description_other, priority_id, assigned_user_id
     ) VALUES (
-      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13,$14
+      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13,$14,$15,$16
     ) RETURNING request_id;`;
 
     db.query(
@@ -531,6 +533,8 @@ const createRequest = async (req, res, next) => {
         null,
         JSON.stringify(activity_log),
         description_other,
+        priority || null,
+        assignedUser || null 
       ],
       (err, result) => {
         if (err) return res.status(500).json({ errormsg: err });

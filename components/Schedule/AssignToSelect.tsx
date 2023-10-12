@@ -124,7 +124,10 @@ const AssignToSelect = (props: AssignToSelectProps) => {
         
       });
     }
+    setIsReady(true);
   }, [props.plantId, props.defaultIds, updateDefault]);
+
+  console.log(options)
 
   return (
     <div>

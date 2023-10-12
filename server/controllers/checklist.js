@@ -22,7 +22,6 @@ const groupBYCondition = () => {
       pm.plant_id,
       pm.plant_name,
       st.status,
-      tmp1.assetnames,
       cs.date
     )`;
 }
@@ -215,7 +214,6 @@ const getAllChecklistQuery = (req) => {
     plant_name: "pm.plant_name",
     plant_id: "pm.plant_id",
     completeremarks_req: "completeremarks_req",
-    linkedassets: "tmp1.assetNames AS linkedassets",
     linkedassetids: "linkedassetids",
     chl_type: "cl.chl_type",
     created_date: "cl.created_date",
@@ -281,18 +279,6 @@ const getAllChecklistQuery = (req) => {
         keppel.users u
         JOIN keppel.user_access ua ON u.user_id = ua.user_id
         JOIN keppel.checklist_master cl on ua.allocatedplantids LIKE concat(concat('%',cl.plant_id::text), '%')
-        LEFT JOIN (
-            SELECT 
-                t3.checklist_id, 
-                string_agg(concat( system_asset , ' | ' , plant_asset_instrument )::text, ', '::text ORDER BY t2.psa_id ASC) AS assetNames
-            FROM  
-                keppel.system_assets AS t1,
-                keppel.plant_system_assets AS t2, 
-                keppel.checklist_master AS t3
-            WHERE 
-                t1.system_asset_id = t2.system_asset_id_lvl4 AND 
-                t3.linkedassetids LIKE concat(concat('%',t2.psa_id::text) , '%')
-            GROUP BY t3.checklist_id) tmp1 ON tmp1.checklist_id = cl.checklist_id
         LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
         LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
         LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
@@ -826,8 +812,20 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
     ` 
         WHERE
             cl.checklist_id = $1 and ua.user_id = $2
-        
-        ${groupBYCondition()}
+        GROUP BY (
+          cl.checklist_id,
+          createdu.first_name,
+          createdu.last_name,
+          assignU.first_name,
+          assignU.last_name,
+          signoff.first_name,
+          signoff.last_name,
+          pm.plant_id,
+          pm.plant_name,
+          st.status,
+          tmp1.assetNames,
+          cs.date
+        )  
     `;
 
   global.db.query(sql, [req.params.checklist_id, 17], (err, found) => {
