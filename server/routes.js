@@ -2348,6 +2348,11 @@ router
   .get(controllers.logbook.getLogbook)
   .post(controllers.logbook.addEntryToLogbook);
 
+//
+router
+  .route("/logbook_labels", checkIfLoggedInAPI)
+  .get(controllers.logbook.getAllLogbookLabels);
+
 router
   .route("/changeOfParts/all/:cop_id?", checkIfLoggedInAPI)
   .get(controllers.changeOfParts.fetchChangeOfParts)

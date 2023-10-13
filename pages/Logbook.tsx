@@ -32,6 +32,7 @@ import AssignToSelect from "../components/Schedule/AssignToSelect";
 import styles from "../styles/Logbook.module.css";
 import styles2 from "../styles/Request.module.scss";
 import { CMMSPlant } from "../types/common/interfaces";
+import LabelSelect from "../components/Logbook/LabelSelect";
 
 export interface logbookData {
   [key: string]: string | number;
@@ -50,6 +51,7 @@ const Logbook = ({
   const [logbookData, setLogbookData] = useState(data);
   const [lock, setLock] = useState(false);
   const [label, setLabel] = useState<string>("");
+  const [labelid, setLabelId] = useState<number>(0);
   const [entry, setEntry] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
@@ -96,6 +98,7 @@ const Logbook = ({
         entry: entryValue,
         staff,
         plant_id: activeTab,
+        label_id: labelid,
       });
 
       if (!lock) {
@@ -199,16 +202,17 @@ const Logbook = ({
           <form className={styles.logbookForm} onSubmit={submitHandler}>
             <div className={styles.addEntryInputs}>
               {/* <input type="text" value={formatDate(new Date().toString())} disabled name="date" /> */}
-              <input
-                type="text"
-                placeholder="Label"
-                name="label"
-                value={label}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  setLabel(event.target.value)
-                }
-                className="form-control"
-                style={{ marginLeft: 0 }}
+              <LabelSelect
+                onChange={(option: any) => {
+                  setLabelId(option.value);
+                }}
+                style={{
+                  width: "20rem",
+                  zIndex: 10,
+                  marginRight: "0.5rem",
+                  marginLeft: "0",
+                }}
+                disabled={lock}
               />
               <AssignToSelect
                 onChange={(option: any) => {
@@ -324,7 +328,7 @@ const Logbook = ({
                               "MMMM Do YYYY, h:mm:ss a"
                             )}
                           </Cell>
-                          <Cell>{row.label}</Cell>
+                          <Cell>{row.name}</Cell>
                           <Cell>
                             <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
                                 placement="bottom" 

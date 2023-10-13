@@ -197,6 +197,19 @@
 			"column_label": "License Type",
 			"column_name": "type"
 		}]
+	},
+	"logbook_labels": {
+		"internalName": "logbook_labels",
+		"name": "Logbook Labels",
+		"id": "label_id",
+		"fields": [{
+			"column_label": "Name",
+			"column_name": "name"
+		},
+		{
+			"column_label": "Description",
+			"column_name": "description"
+		}]
 	}
 	
 }
