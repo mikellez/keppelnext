@@ -268,7 +268,7 @@ const fetchOutstandingRequests = async (req, res, next) => {
   const filterCond = filterCondition("", plant, date, datetype);
 
   const { sql, totalPages } = await fetchRequestQuery(
-    `AND (sc.status_id = 2 or sc.status_id = 3 or sc.status_id = 5) ${filterCond}`, //PENDING
+    `AND (sc.status_id = 2 or sc.status_id = 5) ${filterCond}`, //ASSIGNED, REJECTED
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
@@ -294,7 +294,7 @@ const fetchCompletedRequests = async (req, res, next) => {
   const filterCond = filterCondition("", plant, date, datetype);
 
   const { sql, totalPages } = await fetchRequestQuery(
-    `AND (sc.status_id = 4 or sc.status_id = 6) ${filterCond}`,
+    `AND (sc.status_id = 3) ${filterCond}`,
     ` ORDER BY r.created_date DESC`,
     req.user.role_id,
     req.user.id,
