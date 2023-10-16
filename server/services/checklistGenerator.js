@@ -11,10 +11,27 @@ const connectDB = () => {
 };
 
 const fetchDueSchedules = async () => {
-  const client = connectDB();
-  const result = await client.query(`
+  /** 
+   * This function fetches schedules that are due for reminder notification
+   * and creation of checklists (regardless if their advanced or not). It also
+   * has logic to handle the recurrences. 
+   * 
+   * The checklists are generated on each event separately and not in bulk on 
+   * the start_date of the schedule.
+   * 
+   * 
+   * DATE_PART('days', AGE(CURRENT_dATE, START_dATE)) = -REMINDER_RECURRENCE
+   *    -> for first occurrence
+   * 
+   * MOD(CAST (DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) 
+   * AS INTEGER), RECURRENCE_PERIOD) = RECURRENCE_PERIOD - REMINDER_RECURRENCE
+   *    -> for subsequent occurrences
+   */ 
+
+    const client = connectDB();
+    const result = await client.query(`
         SELECT 
-            SC.SCHEDULE_ID, 
+            SC.SCHEDULE_ID,  
             SC.USER_ID, 
             SC.START_DATE, 
             SC.END_DATE, 
@@ -28,10 +45,11 @@ const fetchDueSchedules = async () => {
             PM.PLANT_NAME, 
             CT.CHL_NAME,
             SC.CHECKLIST_TEMPLATE_ID,
-            AGE(CURRENT_DATE, START_dATE) AS AGE,
-            DATE_PART('year', AGE(CURRENT_dATE, START_dATE)) AS years,
-            DATE_PART('month', AGE(CURRENT_dATE, START_dATE)) AS months,
-            DATE_PART('days', AGE(CURRENT_dATE, START_dATE)) AS days
+            AGE(CURRENT_DATE, START_dATE::DATE) AS AGE,
+            DATE_PART('year', AGE(CURRENT_dATE, START_dATE::DATE)) AS years,
+            DATE_PART('month', AGE(CURRENT_dATE, START_dATE::DATE)) AS months,
+            DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) AS days,
+            SC.ADVANCE_SCHEDULE
         FROM 
             KEPPEL.SCHEDULE_CHECKLIST  AS SC
             LEFT JOIN KEPPEL.USERS AS U ON U.USER_ID = ANY(SC.SCHEDULER_USERIDS_FOR_EMAIL),
@@ -47,12 +65,14 @@ const fetchDueSchedules = async () => {
             (
                 CURRENT_dATE <= END_DATE AND 
                 (
-                    DATE_PART('days', AGE(CURRENT_dATE, START_dATE)) = 0 OR
-                    DATE_PART('days', AGE(CURRENT_dATE, START_dATE)) = -REMINDER_RECURRENCE OR
-                    DATE_PART('days', AGE(CURRENT_dATE, START_dATE)) > 0 AND 
+                    DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) = 0 OR   
+                    DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) = -REMINDER_RECURRENCE OR
+                    DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) = -ADVANCE_SCHEDULE OR 
+                    DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) > 0 AND 
                     (
-                        MOD(CAST (DATE_PART('days', AGE(CURRENT_dATE, START_dATE)) AS INTEGER), RECURRENCE_PERIOD) = 0 OR
-                        MOD(CAST (DATE_PART('days', AGE(CURRENT_dATE, START_dATE)) AS INTEGER), RECURRENCE_PERIOD) = REMINDER_RECURRENCE
+                        MOD(CAST (DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) AS INTEGER), RECURRENCE_PERIOD) = 0 OR
+                        MOD(CAST (DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) AS INTEGER), RECURRENCE_PERIOD) = RECURRENCE_PERIOD - REMINDER_RECURRENCE OR
+                        MOD(CAST (DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) AS INTEGER), RECURRENCE_PERIOD) = RECURRENCE_PERIOD - ADVANCE_SCHEDULE
                     )
                 ) 
             )
@@ -90,7 +110,10 @@ const createChecklistFromTemplate = async (schedule) => {
     schedule.scheduler_userids_for_email.length > 0
       ? schedule.scheduler_userids_for_email[0]
       : null;
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment();
+  const advance_days = schedule.advance_schedule;
+  const newDate = today.add(advance_days, 'days').format("YYYY-MM-DD HH:mm:ss");
+
   const activity_log = [
     {
       date: today,
@@ -103,7 +126,7 @@ const createChecklistFromTemplate = async (schedule) => {
   const cl = await fetchChecklistTemplate(schedule.checklist_template_id);
 
   await client.query(
-    `
+      `
         INSERT INTO
         keppel.checklist_master
         (
@@ -121,21 +144,21 @@ const createChecklistFromTemplate = async (schedule) => {
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)    
         RETURNING checklist_id
-    `,
-    [
-      cl.chl_name,
-      cl.description,
-      assignedID,
-      cl.signoff_user_id,
-      cl.linkedassetids,
-      JSON.stringify(cl.datajson),
-      "Record",
-      schedule.plant_id,
-      today,
-      status,
-      JSON.stringify(activity_log),
-    ]
-  );
+      `,
+      [
+        cl.chl_name,
+        cl.description,
+        assignedID,
+        cl.signoff_user_id,
+        cl.linkedassetids,
+        JSON.stringify(cl.datajson),
+        "Record",
+        schedule.plant_id,
+        newDate,
+        status,
+        JSON.stringify(activity_log),
+      ]
+    );
   client.end();
 };
 

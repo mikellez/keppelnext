@@ -453,14 +453,6 @@ export default function ChecklistEventModal(props: ModalProps) {
                                         </td>
                                     </tr>
                                     <tr className={styles.eventModalTableRow}>
-                                        <th>Advanced Schedule Period:</th>
-                                        <td>
-                                            {props.event.extendedProps.advanceSchedule 
-                                            ? `${props.event.extendedProps.advanceSchedule} Day(s)` 
-                                            : "NA"}
-                                        </td>
-                                    </tr>
-                                    <tr className={styles.eventModalTableRow}>
                                         <th>Assigned To:</th>
                                         {editMode && (singleMode || multipleMode) ? (
                                             <td>

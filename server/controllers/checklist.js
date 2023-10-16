@@ -31,6 +31,25 @@ var dateSelectClause = '';
   var dateJoinClause = '';
   var dateOrderByClause = '';
 
+const advancedScheduleCond = (req) => {
+  // Get user role req.user.permissions
+  const user_role = req.user.permissions;
+  // Check if user if engineer or specialist - role contains "engineer" --> means engineer
+  if (user_role.includes('engineer')){
+    console.log('engineer view')
+    return ``;
+  }
+  
+  // otherwise it is specialist
+  // where condition for checking current date against created date:
+  else {
+    console.log('specialist view');
+    return `AND (
+      cl.created_date::DATE <= CURRENT_DATE
+    )`;
+  };
+}
+
 const searchCondition = (search) => {
   //fields to search by: checklist_id, description, status, assigneduser, signoffuser, createdbyuser
   let searchInt = parseInt(search);
@@ -314,6 +333,7 @@ const getAssignedChecklistsQuery = (req) => {
               ELSE True
               END) AND
               ua.user_id = $1
+      ${advancedScheduleCond(req)}
       ${searchCondition(search)}
       ${groupBYCondition()}
       ORDER BY cl.checklist_id ASC
@@ -336,6 +356,7 @@ const getAssignedChecklistsQuery = (req) => {
               ELSE True
               END) AND
               ua.user_id = $1
+      ${advancedScheduleCond(req)}
       ${searchCondition(search)}
       ${groupBYCondition()}
       ORDER BY ${sortField} ${sortOrder}
@@ -359,6 +380,7 @@ const getPendingChecklistsQuery = (req) => {
       WHERE
           ua.user_id = $1 AND
           (cl.status_id = 1)
+      ${advancedScheduleCond(req)}
       ${filterCondition("", plant, date, datetype)}
       ${searchCondition(search)}
       ${groupBYCondition()}
@@ -372,6 +394,7 @@ const getPendingChecklistsQuery = (req) => {
       WHERE
           ua.user_id = $1 AND
           (cl.status_id = 1)
+      ${advancedScheduleCond(req)}
       ${filterCondition("", plant, date, datetype)}
       ${searchCondition(search)}
       ${groupBYCondition()}
@@ -405,6 +428,7 @@ const getOutstandingChecklistsQuery = (req) => {
           ua.user_id = $1
           ${userRoleCond} AND
           (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
+      ${advancedScheduleCond(req)}
       ${filterCondition("", plant, date, datetype)}
       ${searchCondition(search)}
       ${groupBYCondition()}
@@ -419,6 +443,7 @@ const getOutstandingChecklistsQuery = (req) => {
           ua.user_id = $1
           ${userRoleCond} AND
           (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
+      ${advancedScheduleCond(req)}
       ${filterCondition("", plant, date, datetype)}
       ${searchCondition(search)}
       ${groupBYCondition()}
