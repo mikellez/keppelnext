@@ -298,8 +298,8 @@ const getAssignedChecklistsQuery = (req) => {
 
   if (sortField == undefined || sortOrder == undefined) {
     
-    console.log("Checklist Assigned: default sorting");
-    console.log(sortField, sortOrder);
+    //console.log("Checklist Assigned: default sorting");
+    //console.log(sortField, sortOrder);
     return (
       getAllChecklistQuery(req) +
       `
@@ -320,8 +320,8 @@ const getAssignedChecklistsQuery = (req) => {
     `
     );
   } else {
-    console.log("Checklist Assigned: custom sorting");
-    console.log(sortField, sortOrder);
+    //console.log("Checklist Assigned: custom sorting");
+    //console.log(sortField, sortOrder);
     return (
       getAllChecklistQuery(req) +
       `
@@ -631,7 +631,7 @@ const fetchOutstandingChecklists = async (req, res, next) => {
   const query =
     getOutstandingChecklistsQuery(req) +
     (req.query.page ? ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}` : "");
-  console.log(query);
+  //console.log(query);
 
   try {
     const result = await global.db.query(query, [req.user.id]);

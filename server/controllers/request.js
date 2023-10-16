@@ -99,13 +99,12 @@ async function fetchRequestQuery(
   //if sort states are specified, replace order query
   // const sortField = req.query.sortField;
   // const sortOrder = req.query.sortOrder;
-  console.log(sortField, sortOrder);
+  //console.log(sortField, sortOrder);
   if (sortField && sortOrder) {
-    console.log("Replacing order_query");
     const new_order_query = `ORDER BY ${sortField} ${sortOrder}`;
     order_query = new_order_query;
   }
-  console.log("replaced order query: " + order_query);
+  //console.log("replaced order query: " + order_query);
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
   // console.log(role_id)
   let userCond = "";
@@ -213,8 +212,8 @@ async function fetchRequestQuery(
     rs.request_id
   ) 
   ${order_query}`;
-  console.log(sql)
-  console.log(expandCond)
+  //console.log(sql)
+  //console.log(expandCond)
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);
@@ -236,7 +235,7 @@ const fetchPendingRequests = async (req, res, next) => {
   const sortOrder = req.query.sortOrder;
 
   const filterCond = filterCondition("", plant, date, datetype);
-  console.log(filterCond);
+  //console.log(filterCond);
 
   const { sql, totalPages } = await fetchRequestQuery(
     `AND sc.status_id = 1 ${filterCond}`, //PENDING
@@ -396,7 +395,7 @@ const fetchApprovedRequests = async (req, res, next) => {
 
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
-  console.log(sortField, sortOrder);
+  //console.log(sortField, sortOrder);
   // order_query = `ORDER BY ${sortField} ${sortOrder}}`
 
   const { sql, totalPages } = await fetchRequestQuery(
@@ -790,7 +789,7 @@ const fetchRequestPriority = async (req, res, next) => {
 };
 
 const fetchSpecificRequest = async (req, res, next) => {
-  console.log(req.params.request_id);
+  //console.log(req.params.request_id);
   const sql = `SELECT 
   r.request_id,
   rt.request as request_name, 

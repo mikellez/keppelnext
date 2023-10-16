@@ -567,11 +567,20 @@ interface CMMSLicenseForm {
   images: File[]
 }
 
+interface CMMSLogbookLabel {
+  label_id: number;
+  name: string; // Name of the label
+  description?: string; // Description of label
+  activity_log? : { [key: string]: string }[];
+  created_date? : Date;
+  allow_custom: boolean; // To allow for customization of the label description
+}
+
 export {
   CMMSActivitylog, CMMSAddUser, CMMSAsset, CMMSAssetChecklistHistory, CMMSAssetDetails, CMMSAssetDetailsState, CMMSAssetHistory,
   CMMSAssetRequestHistory, CMMSAssetType, CMMSBaseType, CMMSChangeOfParts, CMMSChangeOfPartsEvent, CMMSChangePassword, CMMSChecklist, CMMSDashboardData, CMMSEmployee, CMMSEvent, CMMSFaultTypes, CMMSFeedback, CMMSLicense, CMMSLicenseForm, CMMSLicenseType, CMMSMasterField, CMMSMasterSubmission, CMMSMasterTables, CMMSPlant, CMMSPlantLoc,
   CMMSPlantLocation, CMMSRequest,
   CMMSRequestTypes, CMMSSchedule, CMMSScheduleEvent, CMMSSubComponent1Name, CMMSSystem,
-  CMMSSystemAsset, CMMSSystemAssetName, CMMSTimeline, CMMSUser, CMMSUserInfo, CMMSUserSettings, CMMSWorkflow, postData
+  CMMSSystemAsset, CMMSSystemAssetName, CMMSTimeline, CMMSUser, CMMSUserInfo, CMMSUserSettings, CMMSWorkflow, postData, CMMSLogbookLabel
 };
 

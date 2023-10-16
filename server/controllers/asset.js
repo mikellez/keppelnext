@@ -895,7 +895,7 @@ const addNewAsset = (req, res, next) => {
     typeof req.body.system_lvl_5 === "undefined" &&
     asset_type != req.body.system_asset
   ) {
-    console.log(1);
+    //console.log(1);
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)
         VALUES ('${system_id_lvl3}', '${system_asset_id_lvl4}', '${system_asset_name}', '${asset_type}','${asset_description}','${asset_location}','${brand}','${system_asset_name_2}','${model_number}','${technical_specs}','${manufacture_country}','${warranty}','${remarks}','${system_asset_name}','','', '${uploaded_image}','${uploaded_files}','${plant_id}')`;
   }
@@ -904,24 +904,24 @@ const addNewAsset = (req, res, next) => {
     req.body.system_lvl_6 == "" &&
     typeof req.body.system_lvl_5 === "undefined"
   ) {
-    console.log(2);
+    //console.log(2);
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)
         VALUES ('${system_id_lvl3}', '${system_asset_id_lvl4}', '${system_asset_name_2}', '${system_asset_name_2}','${asset_description}','${asset_location}','${brand}','${system_asset_name_2}','${model_number}','${technical_specs}','${manufacture_country}','${warranty}','${remarks}','${system_asset_name}','${system_asset_name_2}','', '${uploaded_image}','${uploaded_files}','${plant_id}')`;
   } else if (req.body.system_lvl_5 === "" && req.body.system_lvl_6 === "") {
-    console.log(7);
+    //console.log(7);
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)
         VALUES ('${system_id_lvl3}', '${system_asset_id_lvl4}', '${asset_type}', '${asset_type}','${asset_description}','${asset_location}','${brand}','${plant_asset_instrument}','${model_number}','${technical_specs}','${manufacture_country}','${warranty}','${remarks}','${system_asset_name}','${asset_type}','', '${uploaded_image}','${uploaded_files}','${plant_id}')`;
   }
   // if only chosen up to System Asset Name and create a new Sub-Components 1 with an asset type
   else if (req.body.system_lvl_6 == "" && req.body.asset_type != "NA") {
-    console.log(3);
+    //console.log(3);
 
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)
         VALUES ('${system_id_lvl3}', '${system_asset_id_lvl4}', '${system_asset_name_2}', '${asset_type}','${asset_description}','${asset_location}','${brand}','${plant_asset_instrument}','${model_number}','${technical_specs}','${manufacture_country}','${warranty}','${remarks}','${system_asset_name}','${system_asset_name_2}','', '${uploaded_image}','${uploaded_files}','${plant_id}')`;
   }
   // if only chosen up to System Asset Name and create a new Sub-Components 1 without asset type
   else if (req.body.system_lvl_6 == "" && req.body.asset_type == "NA") {
-    console.log(4);
+    //console.log(4);
 
     var system_asset_name_2 = req.body.system_asset_name;
     sql = `INSERT INTO keppel.plant_system_assets (
@@ -969,14 +969,14 @@ const addNewAsset = (req, res, next) => {
   }
   // if all options are selected with an asset type
   else if (req.body.system_lvl_6 != "" && req.body.asset_type != "NA") {
-    console.log(5);
+    //console.log(5);
 
     var system_lvl_7 = req.body.system_lvl_5;
     var asset_type = req.body.asset_type;
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)
         VALUES ('${system_id_lvl3}', '${system_asset_id_lvl4}', '${system_asset_lvl5}', '${asset_type}','${asset_description}','${asset_location}','${brand}','${plant_asset_instrument}','${model_number}','${technical_specs}','${manufacture_country}','${warranty}','${remarks}','${system_asset_name}','${system_asset_name_2}','${system_lvl_7}', '${uploaded_image}','${uploaded_files}','${plant_id}')`;
   } else if (req.body.system_lvl_6 != "" && req.body.asset_type == "NA") {
-    console.log(6);
+    //console.log(6);
 
     var system_lvl_7 = req.body.system_lvl_5;
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)

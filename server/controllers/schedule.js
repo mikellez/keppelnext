@@ -666,7 +666,7 @@ const editTimeline = (req, res, next) => {
 
 // Change the status of timeline (Approve/Reject) Note that reject becomes draft
 const changeTimelineStatus = (req, res, next) => {
-  console.log(req.body)
+  //console.log(req.body)
   const status = +req.params.status;
   let { remarks } = req.body || {};
   remarks = remarks !== undefined ? remarks : "";
@@ -697,7 +697,7 @@ const changeTimelineStatus = (req, res, next) => {
     activityType = 'Rejected canceled';
   }
 
-  console.log(status)
+  //console.log(status)
 
   if(status === 1 ) {
     queryS = `
@@ -841,7 +841,7 @@ const changeTimelineStatus = (req, res, next) => {
       WHERE timeline_id = ${req.params.id} RETURNING *;
     `;
   }
-  console.log(queryS)
+  //console.log(queryS)
 
   global.db.query(queryS, (err, found) => {
     if (err) throw err;
@@ -1056,7 +1056,7 @@ const manageSingleEvent = (req, res, next) => {
             if (err) throw err;
             // mailer()
             if(req.body.schedule.start_date != req.body.schedule.end_date) {
-            console.log(req.body.schedule.start_date, req.body.schedule.end_date);
+            //console.log(req.body.schedule.start_date, req.body.schedule.end_date);
               await global.db.query(
                 `UPDATE KEPPEL.SCHEDULE_CHECKLIST 
                   SET active = 0 

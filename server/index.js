@@ -105,7 +105,7 @@ app.prepare().then(() => {
       { path: "/Asset/Edit", permission: "canEditAsset" },
       { path: "/Asset/Details", permission: "canViewAsset" },
       //Logbook
-      { path: "/Logbook", permission: "canViewLogbook" },
+      { path: "/Logbook", permission: "canViewLogbookEntry" },
       // Feedback
       { path: "/Feedback", permission: "canViewFeedback" },
       // License
