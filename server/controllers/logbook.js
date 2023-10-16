@@ -10,7 +10,7 @@ const getLogbook = async (req, res, next) => {
     const result = await global.db.query(
       `SELECT concat(u1.first_name, ' ', u1.last_name) AS staff1, 
       concat(u2.first_name, ' ', u2.last_name)  AS staff2, 
-      lb.date, lb.label, lb.entry, l1.name, l1.description FROM keppel.logbook lb
+      lb.date, lb.label, lb.entry, l1.name, l1.description, lb.custom_description FROM keppel.logbook lb
 
       JOIN keppel.users u1 ON lb.staff1 = u1.user_id
       JOIN keppel.users u2 ON lb.staff2 = u2.user_id
@@ -36,7 +36,7 @@ const getLogbook = async (req, res, next) => {
 };
 
 const addEntryToLogbook = async (req, res, next) => {
-  const { label, entry, staff, plant_id, label_id } = req.body;
+  const { label, entry, staff, plant_id, label_id, custom_description } = req.body;
   // console.log("hello");
   let data;
   try {
@@ -55,9 +55,9 @@ const addEntryToLogbook = async (req, res, next) => {
   let result;
   try {
     result = await global.db.query(
-      `INSERT INTO keppel.logbook (label, entry, date, staff1, staff2, plant_id, label_id)
-    VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [label, entry, now, staff.first, staff.second, plant_id, label_id]
+      `INSERT INTO keppel.logbook (label, entry, date, staff1, staff2, plant_id, label_id, custom_description)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [label, entry, now, staff.first, staff.second, plant_id, label_id, custom_description]
     );
   } catch (err) {
     // console.log(err);

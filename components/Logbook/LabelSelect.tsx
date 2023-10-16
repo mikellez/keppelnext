@@ -31,8 +31,14 @@ function isErrorMsg(object: any): object is ErrorMsg {
   return 'msg' in object;
 }
 
+export interface LabelValue {
+  label_id: number;
+  label_name: string;
+  allow_custom: boolean;
+}
+
 export interface LabelOption {
-  value: number;
+  value: LabelValue;
   name: string;
 }
 
@@ -69,8 +75,13 @@ const LabelSelect = (props: LabelSelectProps) => {
         // setAssignedUsers(users);
         setOptions(
             labels.map((logbook_label : CMMSLogbookLabel) => {
-                return { value: logbook_label.label_id, label: logbook_label.name + " | " + logbook_label.description };
+                let labelvalue : LabelValue = 
+                {label_id: logbook_label.label_id,
+                  label_name: logbook_label.name,
+                  allow_custom: logbook_label.allow_custom}
+                return { value: labelvalue, label: logbook_label.name + (logbook_label.description? " | " + logbook_label.description : "") };
             })
+            .sort((a,b) => Number(a.value.allow_custom) - Number(b.value.allow_custom))
         );
     }
     

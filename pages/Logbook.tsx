@@ -52,6 +52,8 @@ const Logbook = ({
   const [lock, setLock] = useState(false);
   const [label, setLabel] = useState<string>("");
   const [labelid, setLabelId] = useState<number>(0);
+  const [customLabelDesc, setCustomLabelDesc] = useState<string>("");
+  const [isCustomDesc, setIsCustomDesc] = useState<boolean>(false);
   const [entry, setEntry] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
@@ -71,17 +73,15 @@ const Logbook = ({
     getTheme(),
     {
       Table:
-        "--data-table-library_grid-template-columns:  15em 10em calc(90% - 36em) 11em 11em;",
+        "--data-table-library_grid-template-columns:  15em 10em calc(70% - 36em) calc(90% - 36em) 11em 11em;",
     },
   ]);
 
   const submitHandler = async (event: FormEvent) => {
     event.preventDefault();
-    const labelValue = label.trim();
     const entryValue = entry.trim();
 
     if (
-      !labelValue ||
       !entryValue ||
       !staff.first ||
       !staff.second ||
@@ -94,11 +94,12 @@ const Logbook = ({
 
     try {
       const result = await instance.post("/api/logbook", {
-        label: labelValue,
+        label: label,
         entry: entryValue,
         staff,
         plant_id: activeTab,
         label_id: labelid,
+        custom_description: customLabelDesc,
       });
 
       if (!lock) {
@@ -107,7 +108,16 @@ const Logbook = ({
 
       setLabel("");
       setEntry("");
-      setLogbookData((prevState) => [result.data, ...prevState]);
+      setCustomLabelDesc("");
+      const getLogbook = async (pageNumber: number) => {
+        const response = await instance.get(
+          `/api/logbook/${activeTab}?page=${pageNumber}`
+        );
+
+        setLogbookData(response.data.rows);
+      };
+
+      getLogbook(page).then((res) => setIsReady(true));
     } catch (error) {
       setModal(true);
     }
@@ -204,7 +214,9 @@ const Logbook = ({
               {/* <input type="text" value={formatDate(new Date().toString())} disabled name="date" /> */}
               <LabelSelect
                 onChange={(option: any) => {
-                  setLabelId(option.value);
+                  setLabelId(option.value.label_id);
+                  setLabel(option.value.label_name);
+                  setIsCustomDesc(option.value.allow_custom);
                 }}
                 style={{
                   width: "20rem",
@@ -272,6 +284,18 @@ const Logbook = ({
               )}
             </div>
             <div className={styles.entryDiv}>
+              {isCustomDesc && (<textarea
+                cols={10}
+                rows={2}
+                placeholder="Label Description"
+                name="customLabelDesc"
+                value={customLabelDesc}
+                onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  setCustomLabelDesc(event.target.value)
+                }
+                className="form-control"
+                style={{ resize: "none", overflow: "auto", width: "100%" }}
+              />)}
               <textarea
                 cols={20}
                 rows={5}
@@ -313,6 +337,7 @@ const Logbook = ({
                     <HeaderRow>
                       <HeaderCell resize>Time</HeaderCell>
                       <HeaderCell resize>Label</HeaderCell>
+                      <HeaderCell resize>Label Description</HeaderCell>
                       <HeaderCell resize>Entry</HeaderCell>
                       <HeaderCell resize>Duty Staff 1</HeaderCell>
                       <HeaderCell resize>Duty Staff 2</HeaderCell>
@@ -328,7 +353,22 @@ const Logbook = ({
                               "MMMM Do YYYY, h:mm:ss a"
                             )}
                           </Cell>
-                          <Cell>{row.name}</Cell>
+                          <Cell>
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{row.name}</span>}>
+                                  <div>{row.name}</div>
+                              </Tooltip>
+                            </Cell>
+                          <Cell>
+                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
+                                placement="bottom" 
+                                trigger={["hover"]} 
+                                overlay={<span >{row.custom_description? row.custom_description : row.description}</span>}>
+                                  <div>{row.custom_description? row.custom_description : row.description}</div>
+                              </Tooltip>
+                            </Cell>
                           <Cell>
                             <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
                                 placement="bottom" 

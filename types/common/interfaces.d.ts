@@ -569,10 +569,11 @@ interface CMMSLicenseForm {
 
 interface CMMSLogbookLabel {
   label_id: number;
-  name: string;
-  description?: string;
+  name: string; // Name of the label
+  description?: string; // Description of label
   activity_log? : { [key: string]: string }[];
   created_date? : Date;
+  allow_custom: boolean; // To allow for customization of the label description
 }
 
 export {
