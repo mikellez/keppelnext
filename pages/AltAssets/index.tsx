@@ -80,15 +80,15 @@ const Asset = () => {
             ],
         resizable:false,
         },
-        { title: "Tag Name", field: "plant_asset_instrument", resizable:true, responsive:0 },
-        { title: "Description", field: "asset_description" , resizable:true, responsive:0},
-        { title: "Location", field: "asset_location", resizable:true, responsive:0 },
-        { title: "Brand", field: "brand" , resizable:true, responsive:0},
-        { title: "Model Number", field: "model_number", resizable:true , responsive:0},
-        { title: "Capacity", field: "technical_specs" , resizable:true, responsive:0},
-        { title: "Country of Manufacture", field: "manufacture_country", resizable:true, responsive:0 },
-        { title: "Warranty", field: "warranty", resizable:true , responsive:0},
-        { title: "Remarks", field: "remarks" , resizable:true, responsive:0 },
+        { title: "Tag Name", field: "plant_asset_instrument", resizable:true},
+        { title: "Description", field: "asset_description" , resizable:true},
+        { title: "Location", field: "asset_location", resizable:true },
+        { title: "Brand", field: "brand" , resizable:true},
+        { title: "Model Number", field: "model_number", resizable:true},
+        { title: "Capacity", field: "technical_specs" , resizable:true},
+        { title: "Country of Manufacture", field: "manufacture_country", resizable:true },
+        { title: "Warranty", field: "warranty", resizable:true},
+        { title: "Remarks", field: "remarks" , resizable:true},
     ];
     const rowClick = (e: any, row: any) => {
         if (row.getData().psa_id) {
@@ -231,8 +231,9 @@ const Asset = () => {
         columnDefaults:{
             minWidth:120, //set the minWidth on all columns to 120px
         },
-        columnHeaderVertAlign:"bottom",
-        maxHeight:500, // set fixed max height for table
+        //height:"500px", // set fixed max height for table
+        // note: setting fixed max height will have a scroll bar, but the scrollbar currently
+        // has a bug (https://github.com/olifolkerd/tabulator/issues/4219) so temporarily will just leave the table as unlimited height
         }
 
     // Get request to fetch all the assets from db on 1st page render

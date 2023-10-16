@@ -51,7 +51,9 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
       <div className="d-flex row">
         <div className={`col-6 ${formStyles.halfContainer}`}>
           <div className="form-group">
-            <label className="form-label">Checklist Name</label>
+            <label className="form-label">
+              <RequiredIcon /> Checklist Name
+            </label>
             <input
               type="text"
               className="form-control"
@@ -64,7 +66,9 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Description</label>
+            <label className="form-label">
+              <RequiredIcon /> Description
+              </label>
             <input
               type="text"
               className="form-control"
@@ -86,6 +90,7 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
               onChange={updateChecklist}
               name="plant_id"
               accessControl
+              universalPlants
               defaultPlant={props.checklistData.plant_id}
             />
           </div>
@@ -97,7 +102,7 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
         >
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon /> Linked Assets
+              Linked Assets
             </label>
             <AssetSelect
               onChange={(values) => {
@@ -124,7 +129,7 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
 
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon /> Checklist Overdue Tracking
+              Checklist Overdue Tracking
             </label>
             <select
               className="form-select"
@@ -156,7 +161,7 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
         <div className={`col-6 ${formStyles.halfContainer}`}>
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon /> Assigned To
+              Assigned To
             </label>
             <AssignToSelect
               onChange={(option) => {
@@ -197,7 +202,7 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
 
           <div className="form-group">
             <label className="form-label">
-              <RequiredIcon /> Sign Off By
+              Sign Off By
             </label>
             <AssignToSelect
               onChange={(value) => {

@@ -153,7 +153,7 @@ function useAsset(plant_id: number | null) {
       });
 
   return useSWR<CMMSAsset[], Error>(
-    plant_id ? ["/api/asset/", plant_id.toString()] : null,
+    plant_id != null ? ["/api/asset/", plant_id.toString()] : null,
     assetFetcher,
     { revalidateOnFocus: false }
   );

@@ -76,6 +76,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
   const [isReady, setIsReady] = useState<boolean>(false);
   const [sections, setSections] = useState<CheckSection[]>([]);
   const [incompleteModal, setIncompleteModal] = useState<boolean>(false);
+  const [universalModal, setUniversalModal] = useState<boolean>(false);
   const [successModal, setSuccessModal] = useState<boolean>(false);
   const [changeAssigned, setChangeAssigned] = useState<boolean>(false);
 
@@ -89,7 +90,11 @@ export default function ChecklistNew(props: ChecklistPageProps) {
   const submitChecklist = (checklistType: string) => {
     if (!checkInputFields()) {
       setIncompleteModal(true);
-    } else {
+    } 
+    else if (checklistType == "record" && checklistData.plant_id == 0) {
+      setUniversalModal(true);
+    }
+    else {
       setSuccessModal(true);
       // console.log(checklistData)
       createChecklist(checklistData, checklistType);
@@ -112,12 +117,12 @@ export default function ChecklistNew(props: ChecklistPageProps) {
   };
 
   const checkInputFields = () => {
-    return (
-      checklistData.signoff_user_id &&
-      checklistData.plant_id &&
-      checklistData.linkedassetids &&
-      checklistData.linkedassetids != ""
-    );
+    // Mandatory fields are: Checklist name, description and plant_id
+    const fieldCond = checklistData.plant_id != undefined && 
+    (checklistData.chl_name && checklistData.chl_name!= "") && 
+    (checklistData.description && checklistData.description != "")
+    
+    return fieldCond;
   };
 
   useEffect(() => {
@@ -125,7 +130,7 @@ export default function ChecklistNew(props: ChecklistPageProps) {
       return {
         ...prev,
         createdbyuser: user.data?.name as string,
-        plant_id: user.data?.allocated_plants[0] as number,
+        plant_id: props.checklist?.plant_id == 0 ? props.checklist?.plant_id : user.data?.allocated_plants[0] as number,
       };
     });
 
@@ -276,6 +281,15 @@ export default function ChecklistNew(props: ChecklistPageProps) {
         modalOpenState={incompleteModal}
         title="Missing details"
         text="Please ensure that all input fields have been filled"
+        icon={SimpleIcon.Exclaim}
+        shouldCloseOnOverlayClick={true}
+      />
+
+      <ModuleSimplePopup
+        setModalOpenState={setUniversalModal}
+        modalOpenState={universalModal}
+        title="Invalid Plant Selected"
+        text="Only checklist templates can be universal and not tagged to a plant. Checklists created must be tagged to a specific plant"
         icon={SimpleIcon.Exclaim}
         shouldCloseOnOverlayClick={true}
       />

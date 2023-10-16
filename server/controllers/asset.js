@@ -197,33 +197,37 @@ const checkAssetType = async (...args) => {
 const getAssetsFromPlant = async (req, res, next) => {
   const { plant_id } = req.params;
 
+  let sqlQuery = `
+  SELECT 
+    psa_id, 
+    concat( 
+      t3.system_name, 
+      ' | ', 
+      t1.system_asset , 
+      case when t2.system_asset_lvl6 != '' then ' | ' else '' end, 
+      t2.system_asset_lvl6, case WHEN t2.system_asset_lvl7 !='' then ' | ' else '' end, 
+      t2.system_asset_lvl7, case WHEN plant_asset_instrument is not null then ' | ' else '' end,  
+      plant_asset_instrument
+    ) as "asset_name"  
+  FROM 
+    keppel.system_assets AS t1 ,
+    keppel.plant_system_assets AS t2,
+    keppel.system_master AS t3
+
+  WHERE 
+    t2.status = 1 
+    AND t1.system_asset_id = t2.system_asset_id_lvl4 
+    AND t3.system_id = t2.system_id_lvl3`
+
   if (plant_id === undefined)
     res.status(400).json({ msg: "plant id not provided" });
+  // If plant_id = 0 means get all the linked assets - for universal checklist templates
+  else if(!(plant_id == 0)){
+    sqlQuery = sqlQuery + ` AND plant_id = ` + plant_id;
+  }
 
   global.db.query(
-    `
-    SELECT 
-      psa_id, 
-      concat( 
-        t3.system_name, 
-        ' | ', 
-        t1.system_asset , 
-        case when t2.system_asset_lvl6 != '' then ' | ' else '' end, 
-        t2.system_asset_lvl6, case WHEN t2.system_asset_lvl7 !='' then ' | ' else '' end, 
-        t2.system_asset_lvl7, case WHEN plant_asset_instrument is not null then ' | ' else '' end,  
-        plant_asset_instrument
-      ) as "asset_name"  
-    FROM 
-      keppel.system_assets AS t1 ,
-      keppel.plant_system_assets AS t2,
-      keppel.system_master AS t3
-
-    WHERE 
-      t2.status = 1 
-      AND t1.system_asset_id = t2.system_asset_id_lvl4 
-      AND t3.system_id = t2.system_id_lvl3
-      AND plant_id = $1`,
-    [plant_id],
+    sqlQuery,
     (err, result) => {
       if (err) return res.status(500).json({ msg: err });
 
