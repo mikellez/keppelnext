@@ -250,6 +250,7 @@ const LicenseContainer = ({
             console.log(err);
           });
       } else if (type === "renew") {
+        licenseForm.acquisition_date = new Date();
         //renew
         instance
           .patch(`api/license/renew/${licenseForm.license_id}`, licenseForm)
