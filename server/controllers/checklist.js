@@ -31,6 +31,25 @@ var dateSelectClause = '';
   var dateJoinClause = '';
   var dateOrderByClause = '';
 
+const advancedScheduleCond = (req) => {
+  // Get user role req.user.permissions
+  const user_role = req.user.permissions;
+  // Check if user if engineer or specialist - role contains "engineer" --> means engineer
+  if (user_role.includes('engineer')){
+    console.log('engineer view')
+    return ``;
+  }
+  
+  // otherwise it is specialist
+  // where condition for checking current date against created date:
+  else {
+    console.log('specialist view');
+    return `AND (
+      cl.created_date::DATE <= CURRENT_DATE
+    )`;
+  };
+}
+
 const searchCondition = (search) => {
   //fields to search by: checklist_id, description, status, assigneduser, signoffuser, createdbyuser
   let searchInt = parseInt(search);
@@ -59,6 +78,42 @@ const searchCondition = (search) => {
         INNER JOIN keppel.users assigned_users ON cm.assigned_user_id = assigned_users.user_id
         INNER JOIN keppel.users sign_off_users ON cm.signoff_user_id = sign_off_users.user_id
         INNER JOIN keppel.users created_users ON cm.created_user_id = created_users.user_id
+        WHERE assigned_users.user_name ILIKE '%${search}%' 
+        OR assigned_users.first_name || ' ' || assigned_users.last_name ILIKE '%${search}%'
+        OR sign_off_users.first_name || ' ' || sign_off_users.last_name ILIKE '%${search}%'
+        OR created_users.first_name || ' ' || created_users.last_name ILIKE '%${search}%'
+      )  
+    )`;
+  }
+};
+
+const templateSearchCondition = (search) => {
+  //fields to search by: checklist_id, chl_name, description, assigneduser, signoffuser, createdbyuser
+  let searchInt = parseInt(search);
+
+  if (search === "") {
+    //handling empty search
+    return ``;
+  } else if (!isNaN(search)) {
+    //handling integer input
+    return `AND (
+      checklist_id = ${searchInt} OR
+      signoff_user_id = ${searchInt} OR
+      assigned_user_id = ${searchInt} 
+    )`;
+  } else if (typeof search === "string" && search !== "") {
+    //handling text input
+    return `
+    AND (
+      chl_name ILIKE '%${search}%' OR
+      description ILIKE '%${search}%' OR
+      
+      checklist_id IN (
+        SELECT ct.checklist_id
+        FROM keppel.checklist_templates ct
+        INNER JOIN keppel.users assigned_users ON ct.assigned_user_id = assigned_users.user_id
+        INNER JOIN keppel.users sign_off_users ON ct.signoff_user_id = sign_off_users.user_id
+        INNER JOIN keppel.users created_users ON ct.created_user_id = created_users.user_id
         WHERE assigned_users.user_name ILIKE '%${search}%' 
         OR assigned_users.first_name || ' ' || assigned_users.last_name ILIKE '%${search}%'
         OR sign_off_users.first_name || ' ' || sign_off_users.last_name ILIKE '%${search}%'
@@ -314,6 +369,7 @@ const getAssignedChecklistsQuery = (req) => {
               ELSE True
               END) AND
               ua.user_id = $1
+      ${advancedScheduleCond(req)}
       ${searchCondition(search)}
       ${groupBYCondition()}
       ORDER BY cl.checklist_id ASC
@@ -336,6 +392,7 @@ const getAssignedChecklistsQuery = (req) => {
               ELSE True
               END) AND
               ua.user_id = $1
+      ${advancedScheduleCond(req)}
       ${searchCondition(search)}
       ${groupBYCondition()}
       ORDER BY ${sortField} ${sortOrder}
@@ -359,6 +416,7 @@ const getPendingChecklistsQuery = (req) => {
       WHERE
           ua.user_id = $1 AND
           (cl.status_id = 1)
+      ${advancedScheduleCond(req)}
       ${filterCondition("", plant, date, datetype)}
       ${searchCondition(search)}
       ${groupBYCondition()}
@@ -372,6 +430,7 @@ const getPendingChecklistsQuery = (req) => {
       WHERE
           ua.user_id = $1 AND
           (cl.status_id = 1)
+      ${advancedScheduleCond(req)}
       ${filterCondition("", plant, date, datetype)}
       ${searchCondition(search)}
       ${groupBYCondition()}
@@ -405,6 +464,7 @@ const getOutstandingChecklistsQuery = (req) => {
           ua.user_id = $1
           ${userRoleCond} AND
           (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
+      ${advancedScheduleCond(req)}
       ${filterCondition("", plant, date, datetype)}
       ${searchCondition(search)}
       ${groupBYCondition()}
@@ -419,6 +479,7 @@ const getOutstandingChecklistsQuery = (req) => {
           ua.user_id = $1
           ${userRoleCond} AND
           (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
+      ${advancedScheduleCond(req)}
       ${filterCondition("", plant, date, datetype)}
       ${searchCondition(search)}
       ${groupBYCondition()}
@@ -767,11 +828,12 @@ const fetchApprovedChecklists = async (req, res, next) => {
 
 // get checklist templates
 const fetchChecklistTemplateNames = async (req, res, next) => {
+  const search = req.query.search || "";
   // Plant_id = 0 refers to fetching all the universal templates as well:
   const sql = req.params.id
-    ? `SELECT * from keppel.checklist_templates WHERE (plant_id = ${req.params.id} OR plant_id = 0)
+    ? `SELECT * from keppel.checklist_templates WHERE (plant_id = ${req.params.id} OR plant_id = 0) ${templateSearchCondition(search)}
           ORDER BY keppel.checklist_templates.checklist_id DESC;` // templates are plant specificed (from that plant only)
-    : `SELECT * from keppel.checklist_templates WHERE (plant_id = any(ARRAY[${req.user.allocated_plants}]::int[]) OR plant_id = 0)
+    : `SELECT * from keppel.checklist_templates WHERE (plant_id = any(ARRAY[${req.user.allocated_plants}]::int[]) OR plant_id = 0) ${templateSearchCondition(search)}
           ORDER BY keppel.checklist_templates.checklist_id DESC;`; // templates are plants specificed depending on user access(1 use can be assigned multiple plants)
 
   global.db.query(sql, (err, result) => {
