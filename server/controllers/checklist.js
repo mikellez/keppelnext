@@ -846,6 +846,29 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
   });
 };
 
+const fetchMultipleChecklistRecords = async (req, res, next) => {
+  const checklist_ids_tuple = req.params.checklist_ids
+  console.log(checklist_ids_tuple)
+  const sql =
+    fetchAllChecklistQuery +
+    ` 
+    WHERE
+      cl.checklist_id in ${checklist_ids_tuple} AND
+      ua.user_id = $1 
+        
+      ${groupBYCondition()}
+    `;
+
+  global.db.query(sql, [17], (err, found) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json("No checklist template found");
+    }
+    console.log("found.rows",found.rows);
+    res.status(200).send(found.rows);
+  });
+};
+
 const fetchChecklistRecords = async (req, res, next) => {
   if (req.params.checklist_id) {
     return fetchSpecificChecklistRecord(req, res, next);
@@ -853,6 +876,8 @@ const fetchChecklistRecords = async (req, res, next) => {
     return fetchForReviewChecklists(req, res, next);
   }
 };
+
+
 
 const submitNewChecklistTemplate = async (req, res, next) => {
   if (req.body.checklistSections === undefined)
@@ -1985,4 +2010,5 @@ module.exports = {
   fetchCompletedChecklists,
   editChecklistRecord,
   fetchOverdueChecklists,
+  fetchMultipleChecklistRecords,
 };
