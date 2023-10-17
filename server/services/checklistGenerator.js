@@ -63,16 +63,14 @@ const fetchDueSchedules = async () => {
             SC.PLANT_ID = PM.PLANT_ID AND 
             CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
             (
-                CURRENT_dATE <= END_DATE AND 
+                CURRENT_dATE + ( INTERVAL '1 days' * ADVANCE_SCHEDULE ) <= END_DATE AND 
                 (
-                    DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) = 0 OR   
-                    DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) = -REMINDER_RECURRENCE OR
-                    DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) = -ADVANCE_SCHEDULE OR 
-                    DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) > 0 AND 
+                    DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) + ADVANCE_SCHEDULE = 0 OR   
+                    DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) + ADVANCE_SCHEDULE = -REMINDER_RECURRENCE OR
+                    DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) + ADVANCE_SCHEDULE > 0 AND 
                     (
-                        MOD(CAST (DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) AS INTEGER), RECURRENCE_PERIOD) = 0 OR
-                        MOD(CAST (DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) AS INTEGER), RECURRENCE_PERIOD) = RECURRENCE_PERIOD - REMINDER_RECURRENCE OR
-                        MOD(CAST (DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) AS INTEGER), RECURRENCE_PERIOD) = RECURRENCE_PERIOD - ADVANCE_SCHEDULE
+                        MOD(CAST (DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) AS INTEGER) + ADVANCE_SCHEDULE, RECURRENCE_PERIOD) = 0 OR
+                        MOD(CAST (DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) AS INTEGER) + ADVANCE_SCHEDULE, RECURRENCE_PERIOD) = REMINDER_RECURRENCE
                     )
                 ) 
             )
