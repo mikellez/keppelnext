@@ -70,7 +70,7 @@ const fetchDueSchedules = async () => {
                     DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) + ADVANCE_SCHEDULE > 0 AND 
                     (
                         MOD(CAST (DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) AS INTEGER) + ADVANCE_SCHEDULE, RECURRENCE_PERIOD) = 0 OR
-                        MOD(CAST (DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) AS INTEGER) + ADVANCE_SCHEDULE, RECURRENCE_PERIOD) = REMINDER_RECURRENCE
+                        MOD(CAST (DATE_PART('days', AGE(CURRENT_dATE, START_dATE::DATE)) AS INTEGER) + ADVANCE_SCHEDULE, RECURRENCE_PERIOD) = RECURRENCE_PERIOD - REMINDER_RECURRENCE
                     )
                 ) 
             )
