@@ -53,7 +53,9 @@ const addUser = async (req, res, next) => {
     1: 'manager',
     2: 'engineer',
     3: 'specialist',
-    4: 'admin'
+    4: 'admin',
+    5: 'cmtEngineer',
+    6: 'cmtSpecialist'
   }
 
   q = `DO $$ 

@@ -179,6 +179,8 @@ export default function AddUser(props: AddUserProps) {
               <option value={1}>Manager</option>
               <option value={2}>Engineer</option>
               <option value={3}>Operation Specialist</option>
+              <option value={5}>CMT Engineer</option>
+              <option value={6}>CMT Specialist</option>
             </select>
           </div>
         </div>
