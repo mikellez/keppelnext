@@ -65,14 +65,16 @@ export default function RequestPreview(props: RequestPreviewProps) {
         "Approval Comments":
           activity_log[activity_log.length - 1].remarks || "N.A",
       });
-    } else {
+    } else if(activity_log[activity_log.length - 1].activity_type === "REJECTED"){
       const rejected = activity_log
         .reverse()
         .find((log) => log.activity_type === "REJECTED");
       // console.log("rejected", rejected);
       setComments({ "Rejection Comments": rejected?.remarks || "N.A" });
     }
-  }, []);
+  }, [props.request.activity_log]);
+
+  console.log(comments, props.request.activity_log[props.request.activity_log.length - 1].activity_type, props.request.activity_log.length - 1, props.request.activity_log[props.request.activity_log.length - 1].remarks)
 
   return (
     <div>
@@ -178,9 +180,7 @@ export default function RequestPreview(props: RequestPreviewProps) {
               )}
             </td>
           </tr>
-          {comments &&
-          props.request.activity_log[props.request.activity_log.length - 1]
-            .activity_type === "REJECTED" ? (
+          {comments ? (
             <>
               <tr>
                 <th>{Object.keys(comments)[0]}</th>

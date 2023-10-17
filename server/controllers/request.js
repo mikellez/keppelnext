@@ -209,7 +209,7 @@ async function fetchRequestQuery(
     req_u.last_name,
     au.first_name,
     au.last_name,
-    rs.date
+    rs.request_id
   ) 
   ${order_query}`;
   //console.log(sql)
