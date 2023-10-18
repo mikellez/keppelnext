@@ -332,9 +332,11 @@ const fetchReviewRequests = async (req, res, next) => {
   const date = req.params.date;
   const datetype = req.params.datetype;
 
+
+
   const { sql, totalPages } = await fetchRequestQuery(
     "AND (sc.status_id = 3 OR sc.status_id = 6)", //COMPLETED, CANCELLED
-    ` ORDER BY ${sortField} ${sortOrder}`,
+    ` ORDER BY r.created_date`,
     req
   );
 
