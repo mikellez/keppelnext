@@ -151,7 +151,7 @@ const downloadCSV = async (type: string, activeTabIndex: number) => {
     temp_link.click();
     temp_link.remove();
   } catch (e) {
-    // console.log(e);
+    console.log(e);
   }
 };
 
@@ -359,18 +359,6 @@ export default function Checklist(props: ChecklistProps) {
     setDataChanged(true);
   }
 
-  // const customSortStatus = (a: any, b: any) => {
-  //   const statusOrder = { ASSIGNED: 0, REJECTED: 1, null: 2 };
-  //   const statusA = statusOrder[a];
-  //   const statusB = statusOrder[b];
-
-  //   if (statusHeader === "Status" || statusHeader === "Status ▲") {
-  //     return statusA - statusB;
-  //   } else if (statusHeader === "Status ▼") {
-  //     return statusB - statusA;
-  //   }
-  // };
-
   async function sortStatus() {
     setBlockReset(true);
     setSortField("st.status");
@@ -383,22 +371,6 @@ export default function Checklist(props: ChecklistProps) {
     }
     setDataChanged(true);
   }
-
-  // const customSortOverdue = (a: any, b: any) => {
-  //   const overdueOrder = { true: 0, false: 1, null: 2 };
-  //   const overdueStatusA = overdueOrder[a];
-  //   const overdueStatusB = overdueOrder[b];
-  //   console.log(overdueStatusA)
-
-  //   if (
-  //     overdueStatusHeader === "Overdue" ||
-  //     overdueStatusHeader === "Overdue ▲"
-  //   ) {
-  //     return overdueStatusA - overdueStatusB;
-  //   } else if (overdueStatusHeader === "Overdue ▼") {
-  //     return overdueStatusB - overdueStatusA;
-  //   }
-  // };
 
   async function sortOverdueStatus() {
     setBlockReset(true);
@@ -491,35 +463,11 @@ export default function Checklist(props: ChecklistProps) {
   }
 
   const downloadMultipleChecklistPDF = () => {
-    // let filteredDataRows: CMMSChecklist[] = [];
-    // if (data) {
-    //   console.log("startDate:",startDate)
-    //   console.log("endDate",endDate)
     let checklistIdArray = [];
-    //   // const startDate = new Date('2023-08-01');
-    //   // startDate.setUTCHours(23, 0, 0, 0);
 
-    //   // const endDate = new Date('2023-08-30');
-    //   // endDate.setUTCHours(23, 0, 0, 0);
-    //   //get filtered rows rows based on chosen date range
-    //   console.log("unfiltered data.rows", data.rows)
-    //   for (const row of data.rows){
-    //     const rowCreatedDate = new Date(row.created_date);
-    //     console.log("rowcreatedDate:",rowCreatedDate)
-    //     console.log(typeof rowCreatedDate)
-    //     if (rowCreatedDate >= startDate && rowCreatedDate <= endDate) {
-    //       filteredDataRows.push(row);
-    //       console.log("pushed ",row)
-    //     }
-    //   }
-
-    //   console.log("filteredDataRows:"+filteredDataRows)
-    //add filtered rows to array to be converted into PDF format
     if (data) {
-      console.log("data rows ", checklistItems);
       for (const row in checklistItems) {
         checklistIdArray.push(data.rows[row]["checklist_id"]);
-        console.log("rows in qn:", data.rows[row]["checklist_id"]);
       }
       downloadMultipleChecklistsPDF(checklistIdArray);
     }
@@ -602,7 +550,7 @@ export default function Checklist(props: ChecklistProps) {
     let dateStart;
     let dateEnd;
     let datetype = pickerwithtype.datetype;
-    console.log("datetype: ", datetype);
+
     if (datetype == "date") {
       dateStart = new Date(dateString);
       const endOfDay = new Date(dateStart);
@@ -630,15 +578,12 @@ export default function Checklist(props: ChecklistProps) {
     if (data && dateStart && dateEnd) {
       for (const row of data.rows) {
         const rowCreatedDate = new Date(row.created_date);
-        console.log("rowcreatedDate:", rowCreatedDate);
-        console.log("dateStart:", dateStart);
-        console.log("dateEnd:", dateEnd);
+
         if (rowCreatedDate >= dateStart && rowCreatedDate <= dateEnd) {
           filteredDataRows.push(row);
         }
       }
 
-      console.log("filteredDataRows:" + filteredDataRows);
       setChecklistItems(
         filteredDataRows.map((row: CMMSChecklist) => {
           return {
@@ -647,7 +592,6 @@ export default function Checklist(props: ChecklistProps) {
           };
         })
       );
-      console.log("checklist Items: ", checklistItems);
     }
 
     setPickerWithType({
@@ -691,12 +635,12 @@ export default function Checklist(props: ChecklistProps) {
         > */}
           <TooltipBtn
             onClick={() => downloadMultipleChecklistPDF()}
-            text="Export CSV"
+            text="Download PDF"
           >
             <HiOutlineDownload size={20} />
           </TooltipBtn>
         </ModuleHeader>
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Select
             value={pickerwithtype.datetype}
             onChange={handleDateTypeChange}

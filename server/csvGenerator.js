@@ -1,15 +1,12 @@
-const { generateChecklistPDF } = require("./pdfGenerator");
-
 const fs = require("fs");
 const MemoryStream = require("memorystream");
 const getStream = require("get-stream");
 
 async function generateCSV(data) {
-  
   // if (!isArray(data) || data.length == 0) return;
   var memStream = new MemoryStream();
 
-  const datajsonHeadings = []
+  const datajsonHeadings = [];
   const datajsonNewHeadings = [
     "Plant	Question 1",
     "Single Choice Response",
@@ -25,7 +22,7 @@ async function generateCSV(data) {
     "Multi Choice Response",
     "Free Text Response",
   ];
-  const activityLogHeadings = ["","name","date"]
+  const activityLogHeadings = ["", "name", "date"];
   const activityLogNewHeadings = [
     "",
     "Approved/Completed By",
@@ -66,23 +63,16 @@ async function generateCSV(data) {
     "Approved/Completed Date": "Approved/Completed Date",
   };
 
-  const headerOrder =
-    "Created Date 	Checklist Name	Plant	Question 1	Single Choice Response	Multi Choice Response	Free Text Response	Question 2	Single Choice Response	Multi Choice Response	Free Text Response	File Upload	Question 3	Single Choice Response	Multi Choice Response	Free Text Response	….	Status	Assigned User	Assigned Date	Completed Date	Approval User	Approval Date";
-
   function replaceHeaders(dataStr, headerMap) {
     // Split the dataStr into an array of headers
-    console.log("datastring: ", dataStr);
     const headers = dataStr.split(",");
 
     // Replace each header using the headerMap
     const replacedHeaders = headers.map(
       (header) => headerMap[header] || header
     );
-
     // Join the replaced headers back into a string
-    console.log("replacedHeaders: ", replacedHeaders);
     const replacedDataStr = replacedHeaders.join(",");
-    console.log(replacedDataStr);
     return replacedDataStr;
   }
 
@@ -90,48 +80,18 @@ async function generateCSV(data) {
   dataStr = replaceHeaders(dataStr, headerMap);
 
   for (row in data) {
-    // console.log(row);
     const tmp = [];
     for (heading in data[row]) {
-      //   console.log(heading);
-      //   if (Array.isArray(data[row][heading])) {
-      //     tmp.push(JSON.stringify(data[row][heading]).replaceAll(",", " "));
-      //   } else {
-      //     tmp.push(data[row][heading]);
-      //   }
-      tmp.push(JSON.stringify(data[row][heading]).replaceAll(",", "^"));
-
-      if (heading == 'Checklist ID' || heading == 'checklist_id') {
-        console.log("Generating pdf version of checklist")
-        generateChecklistPDF(data[row][heading])
-    .then((result) => {
-      if (result === null) return res.status(400).send("No checklist found");
-
-      res.set({
-        "Content-Type": "application/pdf",
-        "Content-Length": result.len,
-      });
-
-      return res.status(200).send(result);
-    })
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).json("Error in generating PDF");
-    });
-      }
+      tmp.push(JSON.stringify(data[row][heading] || "-").replaceAll(",", "^"));
     }
 
     for (const heading of activityLogHeadings) {
-      console.log("heading: ", heading);
       tmp.push(JSON.stringify(data[row]["activity_log"][0][heading]));
-
       if (!headerKeys.includes(heading)) {
         headerKeys.push(heading);
       }
     }
-    console.log("tmp over here: ", tmp);
     dataStr += "\n" + tmp.toString().replace(/\n/g, "");
-    console.log("dataStr now: ", dataStr);
   }
   memStream.write(dataStr);
   memStream.end(); // important -- you have to end the stream before storing it as a buffer
@@ -139,6 +99,7 @@ async function generateCSV(data) {
   return buffer;
 }
 
+// old generatveCSV function
 // async function generateCSV(data) {
 //   console.log("entered function")
 //   // Debugging statements
@@ -188,56 +149,6 @@ async function generateCSV(data) {
 //   const buffer = await getStream.buffer(memStream);
 //   return buffer;
 // }
-
-//
-
-// async function generateCSV(data) {
-//   const memStream = new MemoryStream();
-//   const headerMap = {
-//     created_date: "Created Date",
-//     chl_name: "Checklist Name",
-//     plant_name: "Plant",
-//     status: "Status",
-//   };
-
-//   const headerKeys = Object.keys(headerMap);
-//   const headerRow = Object.values(headerMap);
-
-//   // Extract headers from the "activity_log" data
-//   const activityLogData = data.map(row => row.activity_log);
-//   const activityLogHeaders = Object.keys(activityLogData[0][0]);
-
-//   // Include the extracted "activity_log" headers in the header row
-//   headerRow.push(...activityLogHeaders);
-
-//   const dataStr = headerRow.join("\t");
-
-//   for (const row of data) {
-//     const tmp = [];
-
-//     for (const key of headerKeys) {
-//       if (key in row) {
-//         tmp.push(JSON.stringify(row[key]).replaceAll(",", "^"));
-//       } else {
-//         tmp.push(""); // Fill empty cell if the key is not present in the row
-//       }
-//     }
-
-//     // Extract "activity_log" values
-//     const activityLogValues = row.activity_log.map(activity => {
-//       return activityLogHeaders.map(header => JSON.stringify(activity[header]).replaceAll(",", "^"));
-//     });
-
-//     // Flatten the activityLogValues and add them to the row
-//     tmp.push(activityLogValues.join("\t"));
-
-//     dataStr += "\n" + tmp.join("\t").replace(/\n/g, "");
-//   }
-
-//   memStream.write(dataStr);
-//   memStream.end(); // Important: You have to end the stream before storing it as a buffer
-//   const buffer = await getStream.buffer(memStream);
-//   return buffer;
-// }
+// end of old generateCSV function
 
 module.exports = { generateCSV };

@@ -102,9 +102,9 @@ async function generateChecklistPDF(checklistId) {
     { title: "Checklist Name", content: cl.chl_name },
     { title: "Checklist ID", content: cl.checklist_id },
     { title: "Plant", content: cl.plant_name },
-    // { title: "Assigned To", content: cl.assigneduser.trim() },
+    { title: "Assigned To", content: cl.assigneduser.trim() || '-'},
     { title: "Created By", content: cl.createdbyuser.trim() },
-    { title: "Signoff By", content: cl.signoffuser.trim() },
+    { title: "Signoff By", content: cl.signoffuser.trim() || '-'},
     {
       title: "Created On",
       content: moment(new Date(cl.created_date)).format("lll"),
@@ -236,12 +236,10 @@ async function generateChecklistPDF(checklistId) {
 
   doc.end();
   let docData = await getStream.buffer(doc);
-  console.log("docdata: ", docData);
   return docData;
 }
 
 async function generateCompiledChecklistsPDF(checklistIdList) {
-
   const doc = new PDFDocument({ margin: 50, autoFirstPage: false });
 
   // Specify the target checklist_id for filtering
@@ -251,12 +249,10 @@ async function generateCompiledChecklistsPDF(checklistIdList) {
   const filteredChecklistIdList = checklistIdList.filter((checklistId) =>
     targetChecklistIds.includes(checklistId)
   );
-  console.log("filteredChecklistIdList", filteredChecklistIdList);
 
   const checklist_ids_tuple = `(${filteredChecklistIdList.join(", ")})`;
   const cls = await fetchMultipleChecklists(checklist_ids_tuple);
   if (!cls) {
-    console.log("null returned since cls does not exist.");
     return null;
   }
 
@@ -278,7 +274,6 @@ async function generateCompiledChecklistsPDF(checklistIdList) {
 
   for (const cl of cls) {
     cl.activity_log.forEach((row) => {
-      console.log("row: ", row);
       arr = [];
       arr.push(row.activity);
       arr.push(row.activity_type);
@@ -286,21 +281,17 @@ async function generateCompiledChecklistsPDF(checklistIdList) {
       arr.push(row.name);
       historyArr.push(arr);
     });
-    console.log("historyArr: ", historyArr);
-    console.log("checko 1");
-
-    
 
     // Add First Page
     doc.addPage();
-
+    
     const headerObj = [
       { title: "Checklist Name", content: cl.chl_name },
       { title: "Checklist ID", content: cl.checklist_id },
       { title: "Plant", content: cl.plant_name },
-      // { title: "Assigned To", content: cl.assigneduser.trim() },
+      { title: "Assigned To", content: cl.assigneduser.trim() || "-" },
       { title: "Created By", content: cl.createdbyuser.trim() },
-      { title: "Signoff By", content: cl.signoffuser.trim() },
+      { title: "Signoff By", content: cl.signoffuser.trim() || "-" },
       {
         title: "Created On",
         content: moment(new Date(cl.created_date)).format("lll"),
@@ -312,7 +303,6 @@ async function generateCompiledChecklistsPDF(checklistIdList) {
 
     doc.text("\n", marginX);
     (async function createTable() {
-      console.log("checko 2");
       // Table
       const table = {
         title: {
@@ -339,7 +329,6 @@ async function generateCompiledChecklistsPDF(checklistIdList) {
 
     // The checklist contents
     cl.datajson.forEach((sect) => {
-      console.log("checko 3");
       // Page break
       if (doc.y > 450) {
         doc.addPage({ margin: 50 });
@@ -380,8 +369,6 @@ async function generateCompiledChecklistsPDF(checklistIdList) {
                 }
               });
             } else if (check.type === "FreeText") {
-              // console.log("FreeText doc" + check.value);
-              // console.log("Doc " + doc);
               if (check.value) {
                 //   doc.font("Times-Roman").fontSize(8).text(check.question.trim());
                 const startY = doc.y;
@@ -437,21 +424,15 @@ async function generateCompiledChecklistsPDF(checklistIdList) {
         }
       });
     });
-    // }
   }
-  console.log("doc: ", doc);
-  console.log("checko 4");
   doc.end();
   let docData;
-  console.log("after doc.end()");
   try {
     docData = await getStream.buffer(doc);
-    console.log(" try catch docdata:", docData);
     return docData;
   } catch (error) {
-    console.error("Error generating:", error);
+    console.error("Error:", error);
   }
-  console.log("outside try catch docdata:", docData);
   return docData;
 }
 
@@ -526,6 +507,7 @@ async function generateRequestPDF(id) {
   //             {label: "Date", width: 148},
   //             {label: "Role", width: 50},
   //             {label: "Action By", width: 100},
+
   // The default header on every page
   doc.on("pageAdded", () => {
     doc
@@ -554,7 +536,7 @@ async function generateRequestPDF(id) {
     null,
     { title: "Asset", content: request.asset_name },
     { title: "Fault Type", content: request.fault_name },
-    // { title: "Assigned To", content: assigned },
+    { title: "Assigned To", content: assigned || '-'},
   ];
 
   const bodyObj = [{ title: "Fault Description", content: description }];
@@ -707,9 +689,8 @@ function sendChecklistPDF(req, res, next) {
 
 // Send a checklist pdf
 function sendAllChecklistsPDF(req, res, next) {
-  console.log("entered here");
+
   const checklistIdArray = req.params.checklistIds.split(",");
-  console.log("checklistIdArray: " + checklistIdArray);
   generateCompiledChecklistsPDF(checklistIdArray)
     .then((result) => {
       if (result === null) return res.status(400).send("No checklist found");
