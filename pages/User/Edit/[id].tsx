@@ -148,8 +148,8 @@ export default function EditUser() {
   function submission() {
     //if no errors, submit form
     //post data
-    const adjustedRoleId =
-      userDetails.role_id === 1 ? 4 : userDetails.role_id - 1;
+    const adjustedRoleId = userDetails.role_id;
+    //const adjustedRoleId = userDetails.role_id === 1 ? 4 : userDetails.role_id - 1;
     const url = "/api/user/updateUser/";
     instance
       .post(url, {
@@ -256,7 +256,7 @@ export default function EditUser() {
             <input
               type="text"
               className="form-control"
-              name="full_name"
+              name="first_name"
               defaultValue={userDetails.first_name}
               onChange={handleForm}
             />
@@ -266,7 +266,7 @@ export default function EditUser() {
             <input
               type="text"
               className="form-control"
-              name="full_name"
+              name="last_name"
               defaultValue={userDetails.last_name}
               onChange={handleForm}
             />
