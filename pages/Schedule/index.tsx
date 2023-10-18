@@ -83,6 +83,7 @@ export default function Schedule() {
 	}, [selectedPlant, isValidating, data]);
 
 	function updateSchedules(id : number) {
+
 		setScheduleList([]);
 		getSchedules(id).then((schedules) => {	
 			if (schedules == null) {
@@ -90,6 +91,10 @@ export default function Schedule() {
 			}
 			setScheduleList(schedules);
 		});
+
+		if (selectedPlant!=0){
+			setChangeOfParts(changeOfParts.filter(item => item.plantId === selectedPlant));
+		} 
 	};
 
 	function changePlant(e : React.ChangeEvent<HTMLSelectElement>) {
