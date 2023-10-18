@@ -29,7 +29,7 @@ async function fetchChecklist(checklistId) {
 
 async function fetchMultipleChecklists(checklistIdTuple) {
   const checklistIdsString = checklistIdTuple.toString();
-  console.log("chle", checklistIdsString);
+  
   return axios
     .get(
       `http://${process.env.SERVER}:${process.env.PORT}/api/checklist/record/compilation/${checklistIdsString}`
