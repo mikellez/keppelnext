@@ -128,7 +128,7 @@ const toCMMSChangeOfParts = (row) => {
 
 const fetchCompletedChangeOfParts = async (req, res, next) => {
   sql = fetchAllCompletedChangeOfPartsQuery(req);
-  sql += "ORDER BY cop.cop_id ";
+  sql += "ORDER BY cop.changed_date DESC ";
 
   sql =
     req.query.limit && req.query.offset
@@ -154,7 +154,7 @@ const fetchCompletedChangeOfParts = async (req, res, next) => {
 
 const fetchScheduleChangeOfParts = async (req, res, next) => {
   sql = fetchAllScheduledChangeOfPartsQuery(req);
-  sql += "ORDER BY cop.cop_id ";
+  sql += "ORDER BY cop.scheduled_date DESC ";
 
   sql =
     req.query.limit && req.query.offset
