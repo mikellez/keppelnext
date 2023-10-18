@@ -23,6 +23,7 @@ import ScheduleModal, {
   scheduleValidator,
 } from "./ScheduleModal";
 import { dateFormat, toPeriodString } from "./ScheduleTemplate";
+import { SingleValue } from "react-select";
 
 interface CustomMouseEventHandler extends React.MouseEventHandler {
   (event: React.MouseEvent | void): void;
@@ -456,7 +457,7 @@ export default function ChecklistEventModal(props: ModalProps) {
                                         <th>Assigned To:</th>
                                         {editMode && (singleMode || multipleMode) ? (
                                             <td>
-                                                <AssignToSelect
+                                                {/*<AssignToSelect
                                                     plantId={
                                                         props.event.extendedProps.plantId as number
                                                     }
@@ -480,7 +481,29 @@ export default function ChecklistEventModal(props: ModalProps) {
                                                     defaultIds={
                                                         props.event.extendedProps.assignedIds
                                                     }
-                                                />
+                                                  />*/}
+                                                <AssignToSelect
+                                                    onChange={(value, action) => {
+                                                      let newAssignedID =
+                                                        +(value as SingleValue<AssignedUserOption>)!.value;
+                                                      if (typeof newAssignedID == "number") {
+                                                        console.log('newAssignedID', newAssignedID)
+                                                        setNewSchedule((prev) => {
+                                                          return {
+                                                            ...prev,
+                                                            assignedIds: [newAssignedID],
+                                                          };
+                                                        });
+                                                      }
+                                                    }}
+                                                    plantId={
+                                                        props.event.extendedProps.plantId as number
+                                                    }
+                                                    defaultIds={
+                                                        props.event.extendedProps.assignedIds
+                                                    }
+                                                    isSingle
+                                                  />
                                             </td>
                                         ) : (
                                             <td className={styles.eventModalAssignedUsers}>

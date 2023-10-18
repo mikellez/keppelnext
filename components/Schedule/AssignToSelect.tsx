@@ -127,6 +127,14 @@ const AssignToSelect = (props: AssignToSelectProps) => {
     setIsReady(true);
   }, [props.plantId, props.defaultIds, updateDefault]);
 
+  const handleChange = (
+    value: MultiValue<AssignedUserOption> | SingleValue<AssignedUserOption>,
+    action: ActionMeta<AssignedUserOption>
+  ) => {
+    props.onChange(value, action);
+    setDefaultOptions(value as AssignedUserOption[]);
+  };
+
 
   return (
     <div>
@@ -139,7 +147,7 @@ const AssignToSelect = (props: AssignToSelectProps) => {
           components={animatedComponents}
           className={`basic-multi-select ${props.className}`}
           classNamePrefix="select"
-          onChange={props.onChange}
+          onChange={handleChange}
           styles={customStyles}
           defaultValue={props.isSingle ? defaultOptions[0] : defaultOptions}
           isDisabled={props.disabled}
