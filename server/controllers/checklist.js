@@ -22,8 +22,9 @@ const groupBYCondition = () => {
       pm.plant_id,
       pm.plant_name,
       st.status,
-      cs.checklist_id
-    )`;
+      cs.checklist_id,
+      cs.date
+      )`;
 }
 
 var dateSelectClause = '';
@@ -36,14 +37,14 @@ const advancedScheduleCond = (req) => {
   const user_role = req.user.permissions;
   // Check if user if engineer or specialist - role contains "engineer" --> means engineer
   if (user_role.includes('engineer')){
-    console.log('engineer view')
+    // console.log('engineer view')
     return ``;
   }
   
   // otherwise it is specialist
   // where condition for checking current date against created date:
   else {
-    console.log('specialist view');
+    // console.log('specialist view');
     return `AND (
       cl.created_date::DATE <= CURRENT_DATE
     )`;
@@ -199,7 +200,8 @@ SELECT
     cl.overdue,
     cl.overdue_status,
     cl.updated_at,
-    STRING_AGG(cscm.status || ': ' || cs.date, ', ') AS checklist_status
+    STRING_AGG(cscm.status || ': ' || cs.date, ', ') AS checklist_status,
+    cs.date
     
 FROM 
     keppel.users u
@@ -372,7 +374,7 @@ const getAssignedChecklistsQuery = (req) => {
       ${advancedScheduleCond(req)}
       ${searchCondition(search)}
       ${groupBYCondition()}
-      ORDER BY cl.checklist_id ASC
+      ORDER BY cl.created_date DESC
     `
     );
   } else {
@@ -558,11 +560,19 @@ const getForReviewChecklistsQuery = (req) => {
       `
       WHERE
           ua.user_id = $1 AND
-          (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
+          (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9) 
+          AND (
+            cs.date IS NULL OR
+            cs.date = (
+                SELECT MAX(cs_sub.date)
+                FROM keppel.checklist_status cs_sub
+                WHERE cl.checklist_id = cs_sub.checklist_id
+            )
+          )
       ${searchCondition(search)}
       ${groupBYCondition()}
-      ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' DESC
-    `
+      ORDER BY cs.date DESC
+      `
     );
   } else {
     return (
@@ -571,6 +581,14 @@ const getForReviewChecklistsQuery = (req) => {
       WHERE
           ua.user_id = $1 AND
           (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
+          AND (
+            cs.date IS NULL OR
+            cs.date = (
+                SELECT MAX(cs_sub.date)
+                FROM keppel.checklist_status cs_sub
+                WHERE cl.checklist_id = cs_sub.checklist_id
+            )
+          )
       ${searchCondition(search)}
       ${groupBYCondition()}
       ORDER BY ${sortField} ${sortOrder}
@@ -592,9 +610,17 @@ const getApprovedChecklistsQuery = (req) => {
       WHERE
           ua.user_id = $1 AND
           (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
+          AND (
+            cs.date IS NULL OR
+            cs.date = (
+                SELECT MAX(cs_sub.date)
+                FROM keppel.checklist_status cs_sub
+                WHERE cl.checklist_id = cs_sub.checklist_id
+            )
+          )
       ${searchCondition(search)}
       ${groupBYCondition()}
-      ORDER BY cl.checklist_id DESC
+      ORDER BY cs.date DESC
     `
     );
   } else {
@@ -604,6 +630,14 @@ const getApprovedChecklistsQuery = (req) => {
       WHERE
           ua.user_id = $1 AND
           (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
+          AND (
+            cs.date IS NULL OR
+            cs.date = (
+                SELECT MAX(cs_sub.date)
+                FROM keppel.checklist_status cs_sub
+                WHERE cl.checklist_id = cs_sub.checklist_id
+            )
+          )
       ${searchCondition(search)}
       ${groupBYCondition()}
       ORDER BY ${sortField} ${sortOrder}
