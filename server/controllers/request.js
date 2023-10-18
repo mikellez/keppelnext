@@ -1,6 +1,7 @@
 const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
+const { userPermission } = require("../global");
 
 /** Express router providing user related routes
  * @module controllers/request
@@ -88,15 +89,23 @@ const filterCondition = (status, plant, date, datetype) => {
 async function fetchRequestQuery(
   status_query,
   order_query,
-  role_id,
-  user_id,
-  page,
-  expand,
-  search = "",
-  sortField,
-  sortOrder
+  req
 ) {
+  const role_id = req.user.role_id;
+  const user_id = req.user.id;
+  const page = req.query.page || 0;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
 
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
+  //if sort states are specified, replace order query
+  // const sortField = req.query.sortField;
+  // const sortOrder = req.query.sortOrder;
+  //console.log(sortField, sortOrder);
   if (sortField && sortOrder) {
     const new_order_query = `ORDER BY ${sortField} ${sortOrder}`;
     order_query = new_order_query;
@@ -110,6 +119,10 @@ async function fetchRequestQuery(
 
   if (role_id === 4) {
     userCond = `AND (r.assigned_user_id = ${user_id} OR r.user_id = ${user_id})`;
+  }
+
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {
+    userCond = `AND aa.item_name like '%cmt%'`;
   }
 
   const SELECT = {
@@ -144,7 +157,8 @@ async function fetchRequestQuery(
     overdue_status: "r.overdue_status",
     description_other: "r.description_other",
     request_status: "STRING_AGG(rssp.status || ': ' || rs.date, ', ') AS request_status",
-    date: "rs.date"
+    date: "rs.date",
+    request_user_role: "aa.item_name",
   };
 
   if (expand) {
@@ -173,6 +187,7 @@ async function fetchRequestQuery(
     JOIN keppel.user_access ua ON u.user_id = ua.user_id
     JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
     left JOIN keppel.users req_u ON r.user_id = req_u.user_id
+    left JOIN keppel.auth_assignment aa ON req_u.user_id = aa.user_id
     left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
     left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
     left JOIN keppel.request_type rt ON rt.req_id = r.req_id
@@ -206,7 +221,8 @@ async function fetchRequestQuery(
     req_u.last_name,
     au.first_name,
     au.last_name,
-    rs.request_id
+    rs.request_id,
+    aa.item_name
   ) 
   ${order_query}`;
   console.log(sql)
@@ -221,15 +237,9 @@ async function fetchRequestQuery(
 }
 
 const fetchPendingRequests = async (req, res, next) => {
-  const page = req.query.page || 0;
-  const expand = req.query.expand || false;
-  const search = req.query.search || "";
-
   const plant = req.params.plant;
   const date = req.params.date;
   const datetype = req.params.datetype;
-  const sortField = req.query.sortField;
-  const sortOrder = req.query.sortOrder;
 
   const filterCond = filterCondition("", plant, date, datetype);
   //console.log(filterCond);
@@ -237,13 +247,7 @@ const fetchPendingRequests = async (req, res, next) => {
   const { sql, totalPages } = await fetchRequestQuery(
     `AND sc.status_id = 1 ${filterCond}`, //PENDING
     ` ORDER BY r.created_date DESC`,
-    req.user.role_id,
-    req.user.id,
-    page,
-    expand,
-    search,
-    sortField,
-    sortOrder
+    req
   );
 
   // console.log(sql)
@@ -254,10 +258,6 @@ const fetchPendingRequests = async (req, res, next) => {
 };
 
 const fetchOutstandingRequests = async (req, res, next) => {
-  const page = req.query.page || 0;
-  const expand = req.query.expand || false;
-  const search = req.query.search || "";
-
   const plant = req.params.plant;
   const date = req.params.date;
   const datetype = req.params.datetype;
@@ -267,11 +267,7 @@ const fetchOutstandingRequests = async (req, res, next) => {
   const { sql, totalPages } = await fetchRequestQuery(
     `AND (sc.status_id = 2 or sc.status_id = 3 or sc.status_id = 5) ${filterCond}`, //PENDING
     ` ORDER BY r.created_date DESC`,
-    req.user.role_id,
-    req.user.id,
-    page,
-    expand,
-    search
+    req
   );
 
   const result = await global.db.query(sql);
@@ -280,10 +276,6 @@ const fetchOutstandingRequests = async (req, res, next) => {
 };
 
 const fetchCompletedRequests = async (req, res, next) => {
-  const page = req.query.page || 0;
-  const expand = req.query.expand || false;
-  const search = req.query.search || "";
-
   const plant = req.params.plant;
   const date = req.params.date;
   const datetype = req.params.datetype;
@@ -293,11 +285,7 @@ const fetchCompletedRequests = async (req, res, next) => {
   const { sql, totalPages } = await fetchRequestQuery(
     `AND (sc.status_id = 4 or sc.status_id = 6) ${filterCond}`,
     ` ORDER BY r.created_date DESC`,
-    req.user.role_id,
-    req.user.id,
-    page,
-    expand,
-    search
+    req
   );
 
   const result = await global.db.query(sql);
@@ -306,22 +294,14 @@ const fetchCompletedRequests = async (req, res, next) => {
 };
 
 const fetchAssignedRequests = async (req, res, next) => {
-  const page = req.query.page || 1;
-  const expand = req.query.expand || false;
-  const search = req.query.search || "";
-  const sortField = req.query.sortField;
-  const sortOrder = req.query.sortOrder;
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND (sc.status_id = 2 OR sc.status_id = 5)", //ASSIGNED, REJECTED
     ` ORDER BY r.created_date DESC`,
-    req.user.role_id,
-    req.user.id,
-    page,
-    expand,
-    search,
-    sortField,
-    sortOrder
+    req
   );
 
   const result = await global.db.query(sql);
@@ -330,29 +310,16 @@ const fetchAssignedRequests = async (req, res, next) => {
 };
 
 const fetchOverdueRequests = async (req, res, next) => {
-  const page = req.query.page || 0;
-  const expand = req.query.expand || false;
-  const search = req.query.search || "";
-
   const plant = req.params.plant;
   const date = req.params.date;
   const datetype = req.params.datetype;
 
   const filterCond = filterCondition("", plant, date, datetype);
 
-  const sortField = req.query.sortField;
-  const sortOrder = req.query.sortOrder;
-
   const { sql, totalPages } = await fetchRequestQuery(
     `AND r.overdue_status = true ${filterCond}`, // Overdue
     ` ORDER BY r.created_date DESC`,
-    req.user.role_id,
-    req.user.id,
-    page,
-    expand,
-    search,
-    sortField,
-    sortOrder
+    req
   );
 
   const result = await global.db.query(sql);
@@ -361,23 +328,14 @@ const fetchOverdueRequests = async (req, res, next) => {
 };
 
 const fetchReviewRequests = async (req, res, next) => {
-  const page = req.query.page || 1;
-  const expand = req.query.expand || false;
-  const search = req.query.search || "";
-
-  const sortField = req.query.sortField;
-  const sortOrder = req.query.sortOrder;
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND (sc.status_id = 3 OR sc.status_id = 6)", //COMPLETED, CANCELLED
     ` ORDER BY ${sortField} ${sortOrder}`,
-    req.user.role_id,
-    req.user.id,
-    page,
-    expand,
-    search,
-    sortField,
-    sortOrder
+    req
   );
 
   const result = await global.db.query(sql);
@@ -386,25 +344,14 @@ const fetchReviewRequests = async (req, res, next) => {
 };
 
 const fetchApprovedRequests = async (req, res, next) => {
-  const page = req.query.page || 1;
-  const expand = req.query.expand || false;
-  const search = req.query.search || "";
-
-  const sortField = req.query.sortField;
-  const sortOrder = req.query.sortOrder;
-  //console.log(sortField, sortOrder);
-  // order_query = `ORDER BY ${sortField} ${sortOrder}}`
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND sc.status_id = 4", //APPROVED
     ` ORDER BY r.activity_log -> (jsonb_array_length(r.activity_log) -1) ->> 'date' DESC`,
-    req.user.role_id,
-    req.user.id,
-    page,
-    expand,
-    search,
-    sortField,
-    sortOrder
+    req
   );
 
   const result = await global.db.query(sql);

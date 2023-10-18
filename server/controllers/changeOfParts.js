@@ -1,5 +1,6 @@
 const db = require("../../db");
 const moment = require("moment");
+const { userPermission } = require("../global");
 
 const fetchAllOfChangeOfPartsQuery = (req) => {
 
@@ -12,6 +13,10 @@ const fetchAllOfChangeOfPartsQuery = (req) => {
 
   if(req.user.role_id === 4) {
     userRoleCond = `AND cop.assigned_user_id = ${req.user.id}`;
+  }
+
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {
+    userRoleCond = `AND aa.item_name like '%cmt%'`;
   }
 
   if (plant && plant != 0) {
@@ -79,6 +84,7 @@ const fetchAllOfChangeOfPartsQuery = (req) => {
             JOIN keppel.plant_system_assets psa ON cop.psa_id = psa.psa_id
             JOIN keppel.plant_master pm ON psa.plant_id = pm.plant_id
             JOIN keppel.users u ON cop.assigned_user_id = u.user_id
+            JOIN keppel.auth_assignment aa on aa.user_id = cop.assigned_user_id
     WHERE 
         psa.plant_id IN 
             (SELECT 

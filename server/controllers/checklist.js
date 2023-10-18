@@ -7,6 +7,7 @@ const {
   RejectChecklistMail,
   ApproveChecklistMail,
 } = require("../mailer/ChecklistMail");
+const { userPermission } = require("../global");
 
 const ITEMS_PER_PAGE = 10;
 const groupBYCondition = () => {  
@@ -24,6 +25,24 @@ const groupBYCondition = () => {
       st.status,
       cs.checklist_id
     )`;
+}
+
+const orderByCondition = (sortField, sortOrder) => {
+  if (sortField == undefined || sortOrder == undefined) {
+    return `ORDER BY cl.checklist_id DESC`;
+  } else {
+    return `ORDER BY ${sortField} ${sortOrder}`;
+  }
+}
+
+const condition = (req) => {
+  let cond = ``;
+
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {
+    cond = `AND aa.item_name like '%cmt%'`;
+  }
+
+  return cond;
 }
 
 var dateSelectClause = '';
@@ -282,7 +301,8 @@ const getAllChecklistQuery = (req) => {
     completeremarks_req: "cl.completeremarks_req",
     updated_at: "cl.updated_at",
     checklist_status: "STRING_AGG(cscm.status || ': ' || cs.date, ', ') AS checklist_status",
-    date: "cs.date"
+    date: "cs.date",
+    checklist_user_role: "aa.item_name"
 
   };
 
@@ -336,6 +356,7 @@ const getAllChecklistQuery = (req) => {
         JOIN keppel.checklist_master cl on ua.allocatedplantids LIKE concat(concat('%',cl.plant_id::text), '%')
         LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
         LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
+        LEFT JOIN keppel.auth_assignment aa ON aa.user_id = cl.created_user_id
         LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
         LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id
         JOIN keppel.status_cm st ON st.status_id = cl.status_id	
@@ -351,54 +372,29 @@ const getAssignedChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
-  if (sortField == undefined || sortOrder == undefined) {
-    
-    //console.log("Checklist Assigned: default sorting");
-    //console.log(sortField, sortOrder);
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6 or cl.status_id = 10) AND
-          (CASE
-              WHEN (SELECT ua.role_id
-                  FROM
-                      keppel.user_access ua
-                  WHERE
-                      ua.user_id = $1) = 4
-              THEN assignU.user_id = $1
-              ELSE True
-              END) AND
-              ua.user_id = $1
-      ${advancedScheduleCond(req)}
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY cl.checklist_id ASC
+  //console.log("Checklist Assigned: default sorting");
+  //console.log(sortField, sortOrder);
+  return (
+    getAllChecklistQuery(req) +
     `
-    );
-  } else {
-    //console.log("Checklist Assigned: custom sorting");
-    //console.log(sortField, sortOrder);
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6 or cl.status_id = 10) AND
-          (CASE
-              WHEN (SELECT ua.role_id
-                  FROM
-                      keppel.user_access ua
-                  WHERE
-                      ua.user_id = $1) = 4
-              THEN assignU.user_id = $1
-              ELSE True
-              END) AND
-              ua.user_id = $1
-      ${advancedScheduleCond(req)}
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY ${sortField} ${sortOrder}
-    `
-    );
-  }
+    WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6 or cl.status_id = 10) AND
+        (CASE
+            WHEN (SELECT ua.role_id
+                FROM
+                    keppel.user_access ua
+                WHERE
+                    ua.user_id = $1) = 4
+            THEN assignU.user_id = $1
+            ELSE True
+            END) AND
+            ua.user_id = $1
+    ${condition(req)}
+    ${advancedScheduleCond(req)}
+    ${searchCondition(search)}
+    ${groupBYCondition()}
+    ${orderByCondition(sortField, sortOrder)}
+  `
+  );
 };
 
 const getPendingChecklistsQuery = (req) => {
@@ -409,35 +405,20 @@ const getPendingChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
-  if (sortField == undefined || sortOrder == undefined) {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 1)
-      ${advancedScheduleCond(req)}
-      ${filterCondition("", plant, date, datetype)}
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY cl.checklist_id DESC
+  return (
+    getAllChecklistQuery(req) +
     `
-    );
-  } else {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 1)
-      ${advancedScheduleCond(req)}
-      ${filterCondition("", plant, date, datetype)}
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY ${sortField} ${sortOrder}
-      `
-    );
-  }
+    WHERE
+        ua.user_id = $1 AND
+        (cl.status_id = 1)
+    ${condition(req)}
+    ${advancedScheduleCond(req)}
+    ${filterCondition("", plant, date, datetype)}
+    ${searchCondition(search)}
+    ${groupBYCondition()}
+    ${orderByCondition(sortField, sortOrder)}
+    `
+  );
 };
 
 const getOutstandingChecklistsQuery = (req) => {
@@ -456,37 +437,21 @@ const getOutstandingChecklistsQuery = (req) => {
     userRoleCond = "AND (createdU.user_id = $1 OR assignU.user_id = $1)";
   }
 
-  if (sortField == undefined || sortOrder == undefined) {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1
-          ${userRoleCond} AND
-          (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
-      ${advancedScheduleCond(req)}
-      ${filterCondition("", plant, date, datetype)}
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY cl.checklist_id DESC
+  return (
+    getAllChecklistQuery(req) +
     `
-    );
-  } else {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1
-          ${userRoleCond} AND
-          (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
-      ${advancedScheduleCond(req)}
-      ${filterCondition("", plant, date, datetype)}
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY ${sortField} ${sortOrder}
-    `
-    );
-  }
+    WHERE
+        ua.user_id = $1
+        ${userRoleCond} AND
+        (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
+    ${condition(req)}
+    ${advancedScheduleCond(req)}
+    ${filterCondition("", plant, date, datetype)}
+    ${searchCondition(search)}
+    ${groupBYCondition()}
+    ${orderByCondition(sortField, sortOrder)}
+  `
+  );
 };
 
 const getCompletedChecklistsQuery = (req) => {
@@ -498,33 +463,19 @@ const getCompletedChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
-  if (sortField == undefined || sortOrder == undefined) {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 6 OR cl.status_id = 11)
-      ${filterCondition("", plant, date, datetype)}
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY cl.checklist_id DESC
+  return (
+    getAllChecklistQuery(req) +
     `
-    );
-  } else {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 6 OR cl.status_id = 11)
-      ${filterCondition("", plant, date, datetype)}
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY ${sortField} ${sortOrder}
-    `
-    );
-  }
+    WHERE
+        ua.user_id = $1 AND
+        (cl.status_id = 6 OR cl.status_id = 11)
+    ${condition(req)}
+    ${filterCondition("", plant, date, datetype)}
+    ${searchCondition(search)}
+    ${groupBYCondition()}
+    ${orderByCondition(sortField, sortOrder)}
+  `
+  );
 };
 
 const getOverdueChecklistsQuery = (req) => {
@@ -539,6 +490,7 @@ const getOverdueChecklistsQuery = (req) => {
     WHERE
         ua.user_id = $1 AND
         cl.overdue_status = true
+    ${condition(req)}
     ${filterCondition("", plant, date, datetype)}
     ${searchCondition(search)}
     ${groupBYCondition()}
@@ -552,31 +504,18 @@ const getForReviewChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
-  if (sortField == undefined || sortOrder == undefined){
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' DESC
+  return (
+    getAllChecklistQuery(req) +
     `
-    );
-  } else {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY ${sortField} ${sortOrder}
-    `
-    );
-  }
+    WHERE
+        ua.user_id = $1 AND
+        (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
+    ${condition(req)}
+    ${searchCondition(search)}
+    ${groupBYCondition()}
+    ${orderByCondition(sortField, sortOrder)}
+  `
+  );
 };
 
 const getApprovedChecklistsQuery = (req) => {
@@ -584,32 +523,18 @@ const getApprovedChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
   
-
-  if (sortField == undefined || sortOrder == undefined) {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY cl.checklist_id DESC
+  return (
+    getAllChecklistQuery(req) +
     `
-    );
-  } else {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY ${sortField} ${sortOrder}
-    `
-    );
-  }
+    WHERE
+        ua.user_id = $1 AND
+        (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
+    ${condition(req)}
+    ${searchCondition(search)}
+    ${groupBYCondition()}
+    ${orderByCondition(sortField, sortOrder)}
+  `
+  );
 };
 
 const fetchAssignedChecklists = async (req, res, next) => {
@@ -829,12 +754,21 @@ const fetchApprovedChecklists = async (req, res, next) => {
 
 // get checklist templates
 const fetchChecklistTemplateNames = async (req, res, next) => {
+  let userRoleCond = '';
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {
+    userRoleCond = `AND aa.item_name like '%cmt%'`;
+  }
+
   const search = req.query.search || "";
   // Plant_id = 0 refers to fetching all the universal templates as well:
   const sql = req.params.id
-    ? `SELECT * from keppel.checklist_templates WHERE (plant_id = ${req.params.id} OR plant_id = 0) ${templateSearchCondition(search)}
+    ? `SELECT * from keppel.checklist_templates 
+    JOIN keppel.auth_assignment aa ON aa.user_id = keppel.checklist_templates.created_user_id
+    WHERE (plant_id = ${req.params.id} OR plant_id = 0) ${templateSearchCondition(search)} ${userRoleCond}
           ORDER BY keppel.checklist_templates.checklist_id DESC;` // templates are plant specificed (from that plant only)
-    : `SELECT * from keppel.checklist_templates WHERE (plant_id = any(ARRAY[${req.user.allocated_plants}]::int[]) OR plant_id = 0) ${templateSearchCondition(search)}
+    : `SELECT * from keppel.checklist_templates 
+    JOIN keppel.auth_assignment aa ON aa.user_id = keppel.checklist_templates.created_user_id
+    WHERE (plant_id = any(ARRAY[${req.user.allocated_plants}]::int[]) OR plant_id = 0) ${templateSearchCondition(search)} ${userRoleCond}
           ORDER BY keppel.checklist_templates.checklist_id DESC;`; // templates are plants specificed depending on user access(1 use can be assigned multiple plants)
 
   global.db.query(sql, (err, result) => {

@@ -94,7 +94,21 @@ module.exports = (server) => {
 				
                         
             )
-            SELECT * FROM EmployeeHierarchy WHERE CASE WHEN SUBSTRING(child FROM 1 FOR 7) = 'exclude' AND item_name <> parent then false else true end;
+            SELECT * FROM EmployeeHierarchy WHERE CASE WHEN SUBSTRING(child FROM 1 FOR 7) = 'exclude' AND item_name <> parent then false else true end
+            GROUP BY (
+                user_name,
+				user_email,
+				employee_id,
+				user_id,
+				first_name,
+				last_name,
+				role_id,
+				role_name,
+				allocated_plants,
+				item_name,
+				parent, 
+				child 
+            );
         `, [id], (err, result) => {
             if (err) return cb(err);
             
