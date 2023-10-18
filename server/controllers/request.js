@@ -763,8 +763,12 @@ const fetchSpecificRequest = async (req, res, next) => {
   concat( concat(u.first_name,' '), u.last_name) AS assigned_user_name,
   CASE WHEN u1.first_name IS NULL THEN r.guestfullname ELSE CONCAT(CONCAT(u1.first_name, ' '), u1.last_name) END AS created_by,
   r.guestfullname,
-  r.created_date
+  r.created_date,
+  STRING_AGG(rssp.status || ': ' || rs.date, ', ') AS request_status
+
   FROM keppel.request AS r
+  left JOIN keppel.request_status rs on rs.request_id = r.request_id
+  left JOIN keppel.status_pm rssp on rs.status_id = rssp.status_id
   JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
   JOIN keppel.fault_types  AS ft ON ft.fault_id = r.fault_id
   JOIN keppel.plant_master AS pm ON pm.plant_id = r.plant_id
@@ -776,7 +780,22 @@ LEFT JOIN keppel.users u1 ON r.user_id = u1.user_id
   LEFT JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
   from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
   WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
-  WHERE request_id = $1`;
+  WHERE r.request_id = $1
+  GROUP BY (
+	  r.request_id,
+	  rt.request,
+	  ft.fault_type,
+	  pm.plant_name,
+	  tmp1.asset_name,
+	  pr.priority,
+	  s.status,
+	  u.user_email,
+	  u.first_name,
+	  u.last_name,
+	  u1.first_name,
+	  u1.last_name
+  )
+  `;
 
   global.db.query(sql, [req.params.request_id], (err, result) => {
     if (err) return res.status(500).send("Error in fetching request");
