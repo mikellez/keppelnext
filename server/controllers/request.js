@@ -96,15 +96,12 @@ async function fetchRequestQuery(
   sortField,
   sortOrder
 ) {
-  //if sort states are specified, replace order query
-  // const sortField = req.query.sortField;
-  // const sortOrder = req.query.sortOrder;
-  //console.log(sortField, sortOrder);
+
   if (sortField && sortOrder) {
     const new_order_query = `ORDER BY ${sortField} ${sortOrder}`;
     order_query = new_order_query;
   }
-  //console.log("replaced order query: " + order_query);
+  console.log("replaced order query: " + order_query);
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
   // console.log(role_id)
   let userCond = "";
@@ -188,7 +185,7 @@ async function fetchRequestQuery(
       WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
     left JOIN keppel.request_status rs on rs.request_id = r.request_id
 	  left JOIN keppel.status_pm rssp on rs.status_id = rssp.status_id
-      
+
   WHERE 1 = 1 
   AND ua.user_id = ${user_id}
   ${searchCondition(search)}
@@ -212,8 +209,8 @@ async function fetchRequestQuery(
     rs.request_id
   ) 
   ${order_query}`;
-  //console.log(sql)
-  //console.log(expandCond)
+  console.log(sql)
+  console.log(expandCond)
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);

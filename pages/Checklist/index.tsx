@@ -47,6 +47,9 @@ import {
   Row,
   Table,
 } from "@table-library/react-table-library";
+import PickerWithType from "../../components/PickerWithType";
+import type { DatePickerProps } from "antd";
+import { Select } from "antd";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import { useTheme } from "@table-library/react-table-library/theme";
 import Link from "next/link";
@@ -86,6 +89,13 @@ import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 import Pagination from "../../components/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import { Checklist_Status } from "../../types/common/enums";
+import {
+  downloadChecklistPDF,
+  downloadMultipleChecklistsPDF,
+} from "./View/[id]";
+
+const { Option } = Select;
+type PickerType = "date";
 
 const indexedColumn: ("pending" | "assigned" | "record" | "approved")[] = [
   "pending",
@@ -141,7 +151,7 @@ const downloadCSV = async (type: string, activeTabIndex: number) => {
     temp_link.click();
     temp_link.remove();
   } catch (e) {
-    // console.log(e);
+    console.log(e);
   }
 };
 
@@ -150,7 +160,7 @@ export default function Checklist(props: ChecklistProps) {
   const [isReady, setReady] = useState(false);
   const { userPermission } = useCurrentUser();
   const [activeTabIndex, setActiveTabIndex] = useState(
-    userPermission("engineer") ? 0 : 1   // Specialists directed to "assigned tab" upon entering
+    userPermission("engineer") ? 0 : 1 // Specialists directed to "assigned tab" upon entering
   );
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -163,7 +173,8 @@ export default function Checklist(props: ChecklistProps) {
   const [blockReset, setBlockReset] = useState<Boolean>(false);
   const [detailsHeader, setDetailsHeader] = useState<string>("Details");
   const [statusHeader, setStatusHeader] = useState<string>("Status");
-  const [overdueStatusHeader, setOverdueStatusHeader] = useState<string>("Overdue");
+  const [overdueStatusHeader, setOverdueStatusHeader] =
+    useState<string>("Overdue");
   const [dateArrow, setDateArrow] = useState("");
   const [assignedToHeader, setAssignedToHeader] = useState("Assigned To");
   const [signOffHeader, setSignOffHeader] = useState("Signed Off By");
@@ -171,6 +182,10 @@ export default function Checklist(props: ChecklistProps) {
   const [sortField, setSortField] = useState("cl.checklist_id");
   const [sortOrder, setSortOrder] = useState("desc");
   const [dataChanged, setDataChanged] = useState(false);
+  const [pickerwithtype, setPickerWithType] = useState<{
+    date: string;
+    datetype: PickerType;
+  }>({ date: "all", datetype: "date" });
 
   const fields = [
     "checklist_id",
@@ -185,12 +200,16 @@ export default function Checklist(props: ChecklistProps) {
     "status",
     "activity_log",
     "overdue_status",
-    "checklist_status"
+    "checklist_status",
   ];
 
-  const filteredData = useChecklistFilter(props, page, searchRef.current.value, fields);
+  const filteredData = useChecklistFilter(
+    props,
+    page,
+    searchRef.current.value,
+    fields
+  );
   let columnData = useChecklist(
-
     indexedColumn[activeTabIndex],
     page,
     searchRef.current.value,
@@ -199,11 +218,11 @@ export default function Checklist(props: ChecklistProps) {
     sortOrder
   );
   const router = useRouter();
-  
+
   const { data, error, isValidating, mutate } = props.filter
     ? filteredData
     : columnData;
-  
+
   // Used for adding the overdue column into the template when the assigned/pending tab is selected
   const tableFormat =
     activeTabIndex === 0 || activeTabIndex === 1 || activeTabIndex === 2
@@ -267,7 +286,7 @@ export default function Checklist(props: ChecklistProps) {
         "status",
         "activity_log",
         "overdue_status",
-        "checklist_status"
+        "checklist_status",
       ];
       const fieldsString = fields.join(",");
 
@@ -287,7 +306,7 @@ export default function Checklist(props: ChecklistProps) {
             );
           }
 
-          if (dataChanged && data){
+          if (dataChanged && data) {
             setChecklistItems(
               data.rows.map((row: CMMSChecklist) => {
                 return {
@@ -315,21 +334,21 @@ export default function Checklist(props: ChecklistProps) {
 
   async function sortId() {
     setBlockReset(true);
-    setSortField('cl.checklist_id');
+    setSortField("cl.checklist_id");
 
     if (IdHeader === "ID" || IdHeader === "ID ▲") {
       setIdHeader("ID ▼");
-      setSortOrder('desc')
+      setSortOrder("desc");
     } else if (IdHeader === "ID ▼") {
       setIdHeader("ID ▲");
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
     setDataChanged(true);
   }
 
   async function sortDetails() {
     setBlockReset(true);
-    setSortField("cl.description")
+    setSortField("cl.description");
     if (detailsHeader === "Details" || detailsHeader === "Details ▲") {
       setDetailsHeader("Details ▼");
       setSortOrder("desc");
@@ -340,59 +359,31 @@ export default function Checklist(props: ChecklistProps) {
     setDataChanged(true);
   }
 
-  // const customSortStatus = (a: any, b: any) => {
-  //   const statusOrder = { ASSIGNED: 0, REJECTED: 1, null: 2 };
-  //   const statusA = statusOrder[a];
-  //   const statusB = statusOrder[b];
-
-  //   if (statusHeader === "Status" || statusHeader === "Status ▲") {
-  //     return statusA - statusB;
-  //   } else if (statusHeader === "Status ▼") {
-  //     return statusB - statusA;
-  //   }
-  // };
-
   async function sortStatus() {
     setBlockReset(true);
-    setSortField('st.status')
+    setSortField("st.status");
     if (statusHeader === "Status" || statusHeader === "Status ▲") {
       setStatusHeader("Status ▼");
-      setSortOrder('desc');
+      setSortOrder("desc");
     } else if (statusHeader === "Status ▼") {
       setStatusHeader("Status ▲");
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
     setDataChanged(true);
   }
 
-  // const customSortOverdue = (a: any, b: any) => {
-  //   const overdueOrder = { true: 0, false: 1, null: 2 };
-  //   const overdueStatusA = overdueOrder[a];
-  //   const overdueStatusB = overdueOrder[b];
-  //   console.log(overdueStatusA)
-
-  //   if (
-  //     overdueStatusHeader === "Overdue" ||
-  //     overdueStatusHeader === "Overdue ▲"
-  //   ) {
-  //     return overdueStatusA - overdueStatusB;
-  //   } else if (overdueStatusHeader === "Overdue ▼") {
-  //     return overdueStatusB - overdueStatusA;
-  //   }
-  // };
-
   async function sortOverdueStatus() {
     setBlockReset(true);
-    setSortField('cl.overdue_status');
+    setSortField("cl.overdue_status");
     if (
       overdueStatusHeader === "Overdue" ||
       overdueStatusHeader === "Overdue ▲"
     ) {
       setOverdueStatusHeader("Overdue ▼");
-      setSortOrder('desc');
+      setSortOrder("desc");
     } else if (overdueStatusHeader === "Overdue ▼") {
       setOverdueStatusHeader("Overdue ▲");
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
     setDataChanged(true);
   }
@@ -425,77 +416,249 @@ export default function Checklist(props: ChecklistProps) {
 
   async function sortAssignedTo() {
     setBlockReset(true);
-    setSortField('assigneduser')
+    setSortField("assigneduser");
     if (
       assignedToHeader === "Assigned To" ||
       assignedToHeader === "Assigned To ▲"
     ) {
       setAssignedToHeader("Assigned To ▼");
-      setSortOrder('desc');
+      setSortOrder("desc");
     } else if (assignedToHeader === "Assigned To ▼") {
       setAssignedToHeader("Assigned To ▲");
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
     setDataChanged(true);
   }
 
   async function sortSignOffBy() {
     setBlockReset(true);
-    setSortField('signoffuser')
+    setSortField("signoffuser");
     if (
       signOffHeader === "Signed Off By" ||
       signOffHeader === "Signed Off By ▲"
     ) {
       setSignOffHeader("Signed Off By ▼");
-      setSortOrder('desc');
+      setSortOrder("desc");
     } else if (signOffHeader === "Signed Off By ▼") {
       setSignOffHeader("Signed Off By ▲");
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
     setDataChanged(true);
   }
 
   async function sortCreatedBy() {
     setBlockReset(true);
-    setSortField('createdbyuser');
+    setSortField("createdbyuser");
     if (
       createdByHeader === "Created By" ||
       createdByHeader === "Created By ▲"
     ) {
       setCreatedByHeader("Created By ▼");
-      setSortOrder('desc');
+      setSortOrder("desc");
     } else if (createdByHeader === "Created By ▼") {
       setCreatedByHeader("Created By ▲");
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
     setDataChanged(true);
   }
 
+  const downloadMultipleChecklistPDF = () => {
+    let checklistIdArray = [];
+
+    if (data) {
+      for (const row in checklistItems) {
+        checklistIdArray.push(data.rows[row]["checklist_id"]);
+      }
+      downloadMultipleChecklistsPDF(checklistIdArray);
+    }
+  };
+
+  function getEndOfMonth(date: Date) {
+    // Create a new Date object based on the input date
+    const endOfMonth = new Date(date);
+
+    // Set the day of the month to the last day of the month
+    endOfMonth.setUTCDate(1); // Move to the beginning of the month
+    endOfMonth.setUTCMonth(endOfMonth.getUTCMonth() + 1); // Move to the next month
+    endOfMonth.setUTCDate(0); // Set to the last day of the previous month
+
+    // Set the time to the end of the day
+    endOfMonth.setUTCHours(23, 59, 59, 999);
+
+    return endOfMonth;
+  }
+
+  function parseWeekString(weekString: String) {
+    const numbersDashString = weekString.slice(0, -2);
+    const numbersArray = numbersDashString.split("-");
+    const year = parseInt(numbersArray[0], 10);
+    const week = parseInt(numbersArray[1], 10);
+    const januaryFirst = new Date(year, 0, 1);
+    januaryFirst.setHours(0, 0, 0, 0);
+    const daysToAdd = (week - 1) * 7 + 1;
+    januaryFirst.setDate(januaryFirst.getDate() + daysToAdd);
+    return januaryFirst;
+  }
+
+  function getEndOfWeek(date: Date) {
+    const endOfWeek = new Date(date);
+
+    // Calculate the number of days until the end of the week (Sunday)
+    const daysUntilSunday = 7 - endOfWeek.getUTCDay();
+
+    // Add the number of days to the current date
+    endOfWeek.setUTCDate(endOfWeek.getUTCDate() + daysUntilSunday);
+
+    // Set the time to the end of the day
+    endOfWeek.setUTCHours(23, 59, 59, 999);
+
+    return endOfWeek;
+  }
+
+  function getFirstDayOfQuarter(dateString: String) {
+    const year = parseInt(dateString.slice(0, 4), 10);
+    const quarter = dateString.slice(-2);
+    let firstDayOfQuarter;
+    let lastDayOfQuarter;
+    switch (quarter) {
+      case "Q1":
+        firstDayOfQuarter = new Date(year, 0, 1);
+        lastDayOfQuarter = new Date(year, 2, 31);
+        break;
+      case "Q2":
+        firstDayOfQuarter = new Date(year, 3, 1);
+        lastDayOfQuarter = new Date(year, 5, 31);
+        break;
+      case "Q3":
+        firstDayOfQuarter = new Date(year, 6, 1);
+        lastDayOfQuarter = new Date(year, 8, 31);
+        break;
+      case "Q4":
+        firstDayOfQuarter = new Date(year, 9, 1);
+        lastDayOfQuarter = new Date(year, 11, 31);
+        break;
+    }
+    return [firstDayOfQuarter, lastDayOfQuarter];
+  }
+
+  const handleDateChange: DatePickerProps["onChange"] = (date, dateString) => {
+    //if no input display rows as per normal
+    if (dateString == null) {
+      return;
+    }
+
+    let dateStart;
+    let dateEnd;
+    let datetype = pickerwithtype.datetype;
+
+    if (datetype == "date") {
+      dateStart = new Date(dateString);
+      const endOfDay = new Date(dateStart);
+      endOfDay.setHours(23, 59, 59, 999);
+      dateEnd = endOfDay;
+    } else if (datetype == "week") {
+      const dateObjectWeek = new Date(parseWeekString(dateString));
+      const dateObjectWeekEnd = getEndOfWeek(dateObjectWeek);
+      dateStart = dateObjectWeek;
+      dateEnd = dateObjectWeekEnd;
+    } else if (datetype == "month") {
+      const dateObjectMonth = new Date(dateString);
+      const dateObjectMonthEnd = getEndOfMonth(dateObjectMonth);
+      dateStart = dateObjectMonth;
+      dateEnd = dateObjectMonthEnd;
+    } else if (datetype == "quarter") {
+      [dateStart, dateEnd] = getFirstDayOfQuarter(dateString);
+    } else if (datetype == "year") {
+      const year = parseInt(dateString.slice(0, 4), 10);
+      dateStart = new Date(year, 0, 1);
+      dateEnd = new Date(year, 11, 31);
+    }
+
+    let filteredDataRows: CMMSChecklist[] = [];
+    if (data && dateStart && dateEnd) {
+      for (const row of data.rows) {
+        const rowCreatedDate = new Date(row.created_date);
+
+        if (rowCreatedDate >= dateStart && rowCreatedDate <= dateEnd) {
+          filteredDataRows.push(row);
+        }
+      }
+
+      setChecklistItems(
+        filteredDataRows.map((row: CMMSChecklist) => {
+          return {
+            id: row.checklist_id,
+            ...row,
+          };
+        })
+      );
+    }
+
+    setPickerWithType({
+      date: dateString ? moment(date?.toDate()).format("YYYY-MM-DD") : "all",
+      datetype: pickerwithtype.datetype,
+    });
+  };
+
+  const handleDateTypeChange = (value: PickerType) => {
+    let { date } = pickerwithtype;
+    setPickerWithType({ date: date || "all", datetype: value });
+  };
+
   return (
     <ModuleMain>
-      <ModuleHeader title="Checklist" header="Checklist">
-        <SearchBar
-          ref={searchRef}
-          onSubmit={() => {
-            setReady(false);
-            setChecklistItems([]);
-          }}
-        />
-        {userPermission('canCreateChecklist') && (
-          <Link href="/Checklist/Form?action=New">
-            <TooltipBtn text="New Checklist">
-              <BsFileEarmarkPlus size={20} />
-            </TooltipBtn>
-          </Link>
-        )}
-        <TooltipBtn
+      <div
+        style={{
+          display: "flex",
+          alignItems: "stretch",
+          flexDirection: "column",
+        }}
+      >
+        <ModuleHeader title="Checklist" header="Checklist">
+          <SearchBar
+            ref={searchRef}
+            onSubmit={() => {
+              setReady(false);
+              setChecklistItems([]);
+            }}
+          />
+          {userPermission("canCreateChecklist") && (
+            <Link href="/Checklist/Form?action=New">
+              <TooltipBtn text="New Checklist">
+                <BsFileEarmarkPlus size={20} />
+              </TooltipBtn>
+            </Link>
+          )}
+          {/* <TooltipBtn
           onClick={() => downloadCSV("checklist", activeTabIndex)}
           text="Export CSV"
-        >
-          <HiOutlineDownload size={20} />
-        </TooltipBtn>
-      </ModuleHeader>
-
+        > */}
+          <TooltipBtn
+            onClick={() => downloadMultipleChecklistPDF()}
+            text="Download PDF"
+          >
+            <HiOutlineDownload size={20} />
+          </TooltipBtn>
+        </ModuleHeader>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Select
+            value={pickerwithtype.datetype}
+            onChange={handleDateTypeChange}
+          >
+            <Option value="date">Date</Option>
+            <Option value="week">Week</Option>
+            <Option value="month">Month</Option>
+            <Option value="quarter">Quarter</Option>
+            <Option value="year">Year</Option>
+          </Select>
+          <div style={{ paddingLeft: "10px" }}>
+            <PickerWithType
+              type={pickerwithtype.datetype}
+              onChange={handleDateChange}
+            />
+          </div>
+        </div>
+      </div>
       <ModuleContent>
         {!props?.filter && (
           <ul className="nav nav-tabs">
@@ -719,9 +882,17 @@ export default function Checklist(props: ChecklistProps) {
                                       let dateToDisplay;
 
                                       if (activeTabIndex === 2) {
-                                        const statusArr = item?.checklist_status?.split(",");
-                                        const status = statusArr?.filter(element => element.includes('WORK DONE') || element.includes('REASSIGNMENT REQUESTS'))[0];
-                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
+                                        const statusArr =
+                                          item?.checklist_status?.split(",");
+                                        const status = statusArr?.filter(
+                                          (element) =>
+                                            element.includes("WORK DONE")
+                                        )[0];
+                                        const statusDate =
+                                          status &&
+                                          status.substring(
+                                            -status?.indexOf(":")
+                                          );
                                         dateToDisplay = statusDate;
                                         /*dateToDisplay = item.activity_log
                                           .reverse()
@@ -731,10 +902,17 @@ export default function Checklist(props: ChecklistProps) {
                                               "WORK DONE"
                                           )?.date;*/
                                       } else if (activeTabIndex === 3) {
-                                        const statusArr = item?.checklist_status?.split(",");
-                                        const status = statusArr?.filter(element => element.includes('APPROVED') || element.includes('CANCELLED'))[0];
-                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
-                                        dateToDisplay = statusDate;
+                                        const statusArr =
+                                          item?.checklist_status?.split(",");
+                                        const status = statusArr?.filter(
+                                          (element) =>
+                                            element.includes("APPROVED")
+                                        )[0];
+                                        const statusDate =
+                                          status &&
+                                          status.substring(
+                                            -status?.indexOf(":")
+                                          );
                                         /*dateToDisplay = statusDate;
                                         dateToDisplay = item.activity_log
                                           .reverse()
@@ -872,7 +1050,72 @@ export default function Checklist(props: ChecklistProps) {
                               </div>
                             </Tooltip>
                           </Cell>
-                          
+                          <Cell>
+                            {userPermission("canManageChecklist") &&
+                            [
+                              Checklist_Status.Work_Done,
+                              Checklist_Status.Reassignment_Request,
+                            ].includes(item.status_id) ? (
+                              <Link href={`/Checklist/Manage/${item.id}`}>
+                                <AiOutlineFileProtect
+                                  size={22}
+                                  title={"Manage"}
+                                />
+                              </Link>
+                            ) : userPermission("canCompleteChecklist") &&
+                              [
+                                Checklist_Status.Assigned,
+                                Checklist_Status.Reassigned,
+                                Checklist_Status.Rejected,
+                                Checklist_Status.Rejected_Cancellation,
+                              ].includes(item.status_id) ? (
+                              <>
+                                <Link href={`/Checklist/Complete/${item.id}`}>
+                                  <AiOutlineFileDone
+                                    size={22}
+                                    title={"Complete"}
+                                  />
+                                </Link>
+                                <Link
+                                  href={`/Checklist/Form/?action=Edit&id=${item.id}`}
+                                >
+                                  <AiOutlineEdit size={22} title={"Edit"} />
+                                </Link>
+                              </>
+                            ) : userPermission("canAssignChecklist") &&
+                              item.status_id === Checklist_Status.Pending ? (
+                              <Link
+                                href={`/Checklist/Form/?action=Edit&id=${item.id}`}
+                              >
+                                <AiOutlineEdit size={22} title={"Assign"} />
+                              </Link>
+                            ) : userPermission("canManageChecklist") &&
+                              item.status_id ===
+                                Checklist_Status.Pending_Cancellation ? (
+                              <Link
+                                href={`/Checklist/Cancellation/?id=${item.id}`}
+                              >
+                                <AiOutlineFileProtect
+                                  size={22}
+                                  title={"Manage"}
+                                />
+                              </Link>
+                            ) : (
+                              <div></div>
+                            )}
+                            <AiOutlineHistory
+                              color={"#C70F2B"}
+                              onClick={() => {
+                                setHistory(item.activity_log);
+                                setAssignedUserHistory(item.assigneduser);
+                              }}
+                              size={22}
+                              title={"View History"}
+                            />
+                            <Link href={`/Checklist/View/${item.id}`}>
+                              <AiOutlineFolderView size={22} title={"View"} />
+                            </Link>
+                          </Cell>
                         </Row>
                       );
                     })}

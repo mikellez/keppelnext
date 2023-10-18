@@ -27,6 +27,21 @@ async function fetchChecklist(checklistId) {
     });
 }
 
+async function fetchMultipleChecklists(checklistIdTuple) {
+  const checklistIdsString = checklistIdTuple.toString();
+  
+  return axios
+    .get(
+      `http://${process.env.SERVER}:${process.env.PORT}/api/checklist/record/compilation/${checklistIdsString}`
+    )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
+
 function placeTopInfo(doc, arr, marginX = 50, distance = 110) {
   arr.forEach((e) => {
     const y = doc.y;
@@ -87,9 +102,9 @@ async function generateChecklistPDF(checklistId) {
     { title: "Checklist Name", content: cl.chl_name },
     { title: "Checklist ID", content: cl.checklist_id },
     { title: "Plant", content: cl.plant_name },
-    { title: "Assigned To", content: cl.assigneduser.trim() },
+    { title: "Assigned To", content: cl.assigneduser.trim() || '-'},
     { title: "Created By", content: cl.createdbyuser.trim() },
-    { title: "Signoff By", content: cl.signoffuser.trim() },
+    { title: "Signoff By", content: cl.signoffuser.trim() || '-'},
     {
       title: "Created On",
       content: moment(new Date(cl.created_date)).format("lll"),
@@ -111,6 +126,8 @@ async function generateChecklistPDF(checklistId) {
       ],
       rows: historyArr,
     };
+
+    console.log("historyArr", historyArr);
 
     await doc.table(table, {
       prepareHeader: () => doc.font("Times-Bold").fontSize(10),
@@ -222,6 +239,203 @@ async function generateChecklistPDF(checklistId) {
   return docData;
 }
 
+async function generateCompiledChecklistsPDF(checklistIdList) {
+  const doc = new PDFDocument({ margin: 50, autoFirstPage: false });
+
+  // Specify the target checklist_id for filtering
+  const targetChecklistIds = checklistIdList;
+
+  // Filter the checklistIdList based on the target checklist_id
+  const filteredChecklistIdList = checklistIdList.filter((checklistId) =>
+    targetChecklistIds.includes(checklistId)
+  );
+
+  const checklist_ids_tuple = `(${filteredChecklistIdList.join(", ")})`;
+  const cls = await fetchMultipleChecklists(checklist_ids_tuple);
+  if (!cls) {
+    return null;
+  }
+
+  const marginX = 50;
+  // const doc = new PDFDocument({ margin: marginX, autoFirstPage: false });
+  const historyArr = [];
+
+  // The default header on every page
+  doc.on("pageAdded", () => {
+    doc
+      .image("public/keppellogo.png", { height: 20 })
+      .fontSize(10)
+      .font("Times-Roman");
+    const tmp = doc.y;
+    doc.fontSize(8).text("\n", marginX, 700);
+    placeFooter(doc, azSVG, marginX);
+    doc.text("\n", marginX, tmp);
+  });
+
+  for (const cl of cls) {
+    cl.activity_log.forEach((row) => {
+      arr = [];
+      arr.push(row.activity);
+      arr.push(row.activity_type);
+      arr.push(row.date);
+      arr.push(row.name);
+      historyArr.push(arr);
+    });
+
+    // Add First Page
+    doc.addPage();
+    
+    const headerObj = [
+      { title: "Checklist Name", content: cl.chl_name },
+      { title: "Checklist ID", content: cl.checklist_id },
+      { title: "Plant", content: cl.plant_name },
+      { title: "Assigned To", content: cl.assigneduser.trim() || "-" },
+      { title: "Created By", content: cl.createdbyuser.trim() },
+      { title: "Signoff By", content: cl.signoffuser.trim() || "-" },
+      {
+        title: "Created On",
+        content: moment(new Date(cl.created_date)).format("lll"),
+      },
+      { title: "Linked Assets", content: cl.linkedassets },
+    ];
+
+    placeTopInfo(doc, headerObj, marginX);
+
+    doc.text("\n", marginX);
+    (async function createTable() {
+      // Table
+      const table = {
+        title: {
+          label: "Checklist History",
+          fontSize: 10,
+          font: "Times-Roman",
+        },
+        headers: [
+          { label: "Status", width: 50 },
+          { label: "Activity", width: 148 },
+          { label: "Date", width: 148 },
+          { label: "Action By", width: 100 },
+        ],
+        rows: historyArr,
+      };
+
+      await doc.table(table, {
+        prepareHeader: () => doc.font("Times-Bold").fontSize(10),
+        prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+          doc.font("Times-Roman").fontSize(8);
+        },
+      });
+    })();
+
+    // The checklist contents
+    cl.datajson.forEach((sect) => {
+      // Page break
+      if (doc.y > 450) {
+        doc.addPage({ margin: 50 });
+      }
+      doc.font("Times-Bold").text(`${sect.description}`, { underline: true });
+      let count = 1;
+      sect.rows.forEach((row) => {
+        // Page break
+        if (doc.y > 590) {
+          doc.addPage({ margin: 50 });
+        }
+
+        if (row.checks) {
+          row.checks.forEach((check) => {
+            // Page break
+            if (doc.y > 600) {
+              doc.addPage({ margin: 50 });
+            }
+
+            doc.font("Times-Roman").fontSize(8).text(check.question.trim());
+            if (check.type === "SingleChoice") {
+              check.choices.forEach((choice) => {
+                if (check.value && choice === check.value) {
+                  doc
+                    .rect(doc.x + 1, doc.y + 1, 4, 4)
+                    .font("Times-Roman")
+                    .fillOpacity(1.0)
+                    .fillAndStroke("black", "black")
+                    .fontSize(8)
+                    .text(choice, marginX, doc.y, { indent: 7 });
+                } else {
+                  doc
+                    .rect(doc.x + 1, doc.y + 1, 4, 4)
+                    .font("Times-Roman")
+                    .stroke()
+                    .fontSize(8)
+                    .text(choice, marginX, doc.y, { indent: 7 });
+                }
+              });
+            } else if (check.type === "FreeText") {
+              if (check.value) {
+                //   doc.font("Times-Roman").fontSize(8).text(check.question.trim());
+                const startY = doc.y;
+                doc
+                  .text("\n")
+                  .text(check.value, marginX + 7, doc.y, { width: "496" })
+                  .text("\n");
+                const endY = doc.y;
+                doc.rect(marginX, startY + 5, 507, endY - startY - 10).stroke();
+              } else if (!check.value) {
+                if (check.value.trim().length != 0) {
+                  // doc.font("Times-Roman").fontSize(8).text(check.question.trim());
+                  doc
+                    .text()
+                    .rect(marginX, doc.y, 507, 40)
+                    .stroke()
+                    .text("\n\n\n\n");
+                }
+              }
+            } else if (check.type === "Signature") {
+              if (check.value) {
+                doc.image(check.value, marginX, doc.y, {
+                  width: 50,
+                  height: 50,
+                });
+              }
+            } else if (check.type === "FileUpload") {
+              if (check.value) {
+                doc.image(check.value, marginX, doc.y, { height: 100 });
+              }
+            } else if (check.type === "MultiChoice") {
+              check.choices.forEach((choice) => {
+                if (check.value && check.value.split(", ").includes(choice)) {
+                  doc
+                    .rect(doc.x + 1, doc.y + 1, 4, 4)
+                    .font("Times-Roman")
+                    .fillOpacity(1.0)
+                    .fillAndStroke("black", "black")
+                    .fontSize(8)
+                    .text(choice, marginX, doc.y, { indent: 7 });
+                } else {
+                  doc
+                    .rect(doc.x + 1, doc.y + 1, 4, 4)
+                    .font("Times-Roman")
+                    .stroke()
+                    .fontSize(8)
+                    .text(choice, marginX, doc.y, { indent: 7 });
+                }
+              });
+            }
+            doc.text("\n", marginX);
+          });
+        }
+      });
+    });
+  }
+  doc.end();
+  let docData;
+  try {
+    docData = await getStream.buffer(doc);
+    return docData;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+  return docData;
+}
+
 // Fetch a specific request by id
 async function fetchRequest(id) {
   return await axios
@@ -293,6 +507,7 @@ async function generateRequestPDF(id) {
   //             {label: "Date", width: 148},
   //             {label: "Role", width: 50},
   //             {label: "Action By", width: 100},
+
   // The default header on every page
   doc.on("pageAdded", () => {
     doc
@@ -321,7 +536,7 @@ async function generateRequestPDF(id) {
     null,
     { title: "Asset", content: request.asset_name },
     { title: "Fault Type", content: request.fault_name },
-    { title: "Assigned To", content: assigned },
+    { title: "Assigned To", content: assigned || '-'},
   ];
 
   const bodyObj = [{ title: "Fault Description", content: description }];
@@ -432,6 +647,7 @@ async function generateRequestPDF(id) {
   // EOF
   doc.end();
   let docData = await getStream.buffer(doc);
+  console.log("docData: ", docData);
   return docData;
 }
 
@@ -471,9 +687,31 @@ function sendChecklistPDF(req, res, next) {
     });
 }
 
+// Send a checklist pdf
+function sendAllChecklistsPDF(req, res, next) {
+
+  const checklistIdArray = req.params.checklistIds.split(",");
+  generateCompiledChecklistsPDF(checklistIdArray)
+    .then((result) => {
+      if (result === null) return res.status(400).send("No checklist found");
+
+      res.set({
+        "Content-Type": "application/pdf",
+        "Content-Length": result.len,
+      });
+
+      return res.status(200).send(result);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json("Error in generating PDF");
+    });
+}
+
 module.exports = {
   generateChecklistPDF,
   sendChecklistPDF,
   generateRequestPDF,
   sendRequestPDF,
+  sendAllChecklistsPDF,
 };
