@@ -19,12 +19,12 @@ const searchCondition = (search) => {
     return ``;
   } else if (!isNaN(search)) {
     //handling integer input
-    return `AND (
+    return `OR (
       r.request_id = ${searchInt}
-    )`;
+    ))`;
   } else if (typeof search === "string" && search !== "") {
     //handling text input
-    return ` AND(
+    return ` OR(
         pm.plant_name ILIKE '%${search}%'
         OR r.fault_description ILIKE '%${search}%'
         OR ft.fault_type ILIKE '%${search}%'
@@ -32,7 +32,7 @@ const searchCondition = (search) => {
         OR req_u.first_name || ' ' || req_u.last_name ILIKE '%${search}%'
         OR tmp1.asset_name ILIKE '%${search}%'  
         OR r.description_other ILIKE '%${search}%'
-    )`;
+    ))`;
   }
 };
 
@@ -111,7 +111,6 @@ async function fetchRequestQuery(
     const new_order_query = `ORDER BY ${sortField} ${sortOrder}`;
     order_query = new_order_query;
   }
-  console.log("replaced order query: " + order_query);
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
   // console.log(role_id)
   let userCond = "";
@@ -213,6 +212,7 @@ async function fetchRequestQuery(
   WHERE 1 = 1 
   AND ua.user_id = ${user_id}
   ${fuzzyWhere}
+  ${searchCondition(search)}
   ${status_query}
   ${userCond}
 
@@ -234,8 +234,7 @@ async function fetchRequestQuery(
     aa.item_name
   ) 
   ${search === ""? order_query : fuzzyOrder}`;
-  console.log(sql)
-  console.log(expandCond)
+  
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);
