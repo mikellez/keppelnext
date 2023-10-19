@@ -197,33 +197,37 @@ const checkAssetType = async (...args) => {
 const getAssetsFromPlant = async (req, res, next) => {
   const { plant_id } = req.params;
 
+  let sqlQuery = `
+  SELECT 
+    psa_id, 
+    concat( 
+      t3.system_name, 
+      ' | ', 
+      t1.system_asset , 
+      case when t2.system_asset_lvl6 != '' then ' | ' else '' end, 
+      t2.system_asset_lvl6, case WHEN t2.system_asset_lvl7 !='' then ' | ' else '' end, 
+      t2.system_asset_lvl7, case WHEN plant_asset_instrument is not null then ' | ' else '' end,  
+      plant_asset_instrument
+    ) as "asset_name"  
+  FROM 
+    keppel.system_assets AS t1 ,
+    keppel.plant_system_assets AS t2,
+    keppel.system_master AS t3
+
+  WHERE 
+    t2.status = 1 
+    AND t1.system_asset_id = t2.system_asset_id_lvl4 
+    AND t3.system_id = t2.system_id_lvl3`
+
   if (plant_id === undefined)
     res.status(400).json({ msg: "plant id not provided" });
+  // If plant_id = 0 means get all the linked assets - for universal checklist templates
+  else if(!(plant_id == 0)){
+    sqlQuery = sqlQuery + ` AND plant_id = ` + plant_id;
+  }
 
   global.db.query(
-    `
-    SELECT 
-      psa_id, 
-      concat( 
-        t3.system_name, 
-        ' | ', 
-        t1.system_asset , 
-        case when t2.system_asset_lvl6 != '' then ' | ' else '' end, 
-        t2.system_asset_lvl6, case WHEN t2.system_asset_lvl7 !='' then ' | ' else '' end, 
-        t2.system_asset_lvl7, case WHEN plant_asset_instrument is not null then ' | ' else '' end,  
-        plant_asset_instrument
-      ) as "asset_name"  
-    FROM 
-      keppel.system_assets AS t1 ,
-      keppel.plant_system_assets AS t2,
-      keppel.system_master AS t3
-
-    WHERE 
-      t2.status = 1 
-      AND t1.system_asset_id = t2.system_asset_id_lvl4 
-      AND t3.system_id = t2.system_id_lvl3
-      AND plant_id = $1`,
-    [plant_id],
+    sqlQuery,
     (err, result) => {
       if (err) return res.status(500).json({ msg: err });
 
@@ -745,15 +749,13 @@ const editAsset = async (req, res, next) => {
     },
   ];
 
-  // console.log(activity_log)
-
   await global.db.query(
     `
     UPDATE keppel.plant_system_assets
     SET activity_log = activity_log || $1::jsonb
-    WHERE psa_id = '${psa_id}';
+    WHERE psa_id = $2;
     `,
-    [JSON.stringify(activity_log)]
+    [JSON.stringify(activity_log), psa_id]
   );
 
   res.status(200).send({
@@ -893,7 +895,7 @@ const addNewAsset = (req, res, next) => {
     typeof req.body.system_lvl_5 === "undefined" &&
     asset_type != req.body.system_asset
   ) {
-    console.log(1);
+    //console.log(1);
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)
         VALUES ('${system_id_lvl3}', '${system_asset_id_lvl4}', '${system_asset_name}', '${asset_type}','${asset_description}','${asset_location}','${brand}','${system_asset_name_2}','${model_number}','${technical_specs}','${manufacture_country}','${warranty}','${remarks}','${system_asset_name}','','', '${uploaded_image}','${uploaded_files}','${plant_id}')`;
   }
@@ -902,24 +904,24 @@ const addNewAsset = (req, res, next) => {
     req.body.system_lvl_6 == "" &&
     typeof req.body.system_lvl_5 === "undefined"
   ) {
-    console.log(2);
+    //console.log(2);
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)
         VALUES ('${system_id_lvl3}', '${system_asset_id_lvl4}', '${system_asset_name_2}', '${system_asset_name_2}','${asset_description}','${asset_location}','${brand}','${system_asset_name_2}','${model_number}','${technical_specs}','${manufacture_country}','${warranty}','${remarks}','${system_asset_name}','${system_asset_name_2}','', '${uploaded_image}','${uploaded_files}','${plant_id}')`;
   } else if (req.body.system_lvl_5 === "" && req.body.system_lvl_6 === "") {
-    console.log(7);
+    //console.log(7);
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)
         VALUES ('${system_id_lvl3}', '${system_asset_id_lvl4}', '${asset_type}', '${asset_type}','${asset_description}','${asset_location}','${brand}','${plant_asset_instrument}','${model_number}','${technical_specs}','${manufacture_country}','${warranty}','${remarks}','${system_asset_name}','${asset_type}','', '${uploaded_image}','${uploaded_files}','${plant_id}')`;
   }
   // if only chosen up to System Asset Name and create a new Sub-Components 1 with an asset type
   else if (req.body.system_lvl_6 == "" && req.body.asset_type != "NA") {
-    console.log(3);
+    //console.log(3);
 
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)
         VALUES ('${system_id_lvl3}', '${system_asset_id_lvl4}', '${system_asset_name_2}', '${asset_type}','${asset_description}','${asset_location}','${brand}','${plant_asset_instrument}','${model_number}','${technical_specs}','${manufacture_country}','${warranty}','${remarks}','${system_asset_name}','${system_asset_name_2}','', '${uploaded_image}','${uploaded_files}','${plant_id}')`;
   }
   // if only chosen up to System Asset Name and create a new Sub-Components 1 without asset type
   else if (req.body.system_lvl_6 == "" && req.body.asset_type == "NA") {
-    console.log(4);
+    //console.log(4);
 
     var system_asset_name_2 = req.body.system_asset_name;
     sql = `INSERT INTO keppel.plant_system_assets (
@@ -967,14 +969,14 @@ const addNewAsset = (req, res, next) => {
   }
   // if all options are selected with an asset type
   else if (req.body.system_lvl_6 != "" && req.body.asset_type != "NA") {
-    console.log(5);
+    //console.log(5);
 
     var system_lvl_7 = req.body.system_lvl_5;
     var asset_type = req.body.asset_type;
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)
         VALUES ('${system_id_lvl3}', '${system_asset_id_lvl4}', '${system_asset_lvl5}', '${asset_type}','${asset_description}','${asset_location}','${brand}','${plant_asset_instrument}','${model_number}','${technical_specs}','${manufacture_country}','${warranty}','${remarks}','${system_asset_name}','${system_asset_name_2}','${system_lvl_7}', '${uploaded_image}','${uploaded_files}','${plant_id}')`;
   } else if (req.body.system_lvl_6 != "" && req.body.asset_type == "NA") {
-    console.log(6);
+    //console.log(6);
 
     var system_lvl_7 = req.body.system_lvl_5;
     sql = `INSERT INTO keppel.plant_system_assets (system_id_lvl3, system_asset_id_lvl4, parent_asset, asset_type,asset_description,asset_location,brand,plant_asset_instrument,model_number,technical_specs,manufacture_country,warranty,remarks,system_asset_lvl5,system_asset_lvl6,system_asset_lvl7, uploaded_image, uploaded_files, plant_id)

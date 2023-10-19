@@ -25,6 +25,7 @@ export default function AssetHistoryModalContainer({
   // requestHistory,
   assetHistory,
   id,
+  page
 }: //   page,
 {
   // checklistHistory: CMMSAssetChecklistHistory[];
@@ -34,12 +35,12 @@ export default function AssetHistoryModalContainer({
     total: number
   };
   id: number;
+  page: number;
 }) {
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
   const [isReady, setIsReady] = useState<boolean>(true);
   //   const [shownData, setShownData] = useState([]);
   //   const [currPage, setCurrPage] = useState<number>(1);
-  
 
   const switchColumns = (index: number) => {
     if (isReady) {
@@ -50,7 +51,6 @@ export default function AssetHistoryModalContainer({
   };
 
   useEffect(() => {
-
   }, [activeTabIndex]);
 
   return (

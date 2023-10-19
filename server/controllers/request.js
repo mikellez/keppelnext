@@ -1,6 +1,7 @@
 const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
+const { userPermission } = require("../global");
 const {fuzzySearchSelectQuery, fuzzySearchWhereQuery, fuzzySearchOrderByQuery} = require("../common/fuzzySearchQuery");
 
 /** Express router providing user related routes
@@ -28,7 +29,7 @@ const searchCondition = (search) => {
         OR r.fault_description ILIKE '%${search}%'
         OR ft.fault_type ILIKE '%${search}%'
         OR pri.priority ILIKE '${search}'
-	      OR req_u.first_name || ' ' || req_u.last_name ILIKE '%${search}%'
+        OR req_u.first_name || ' ' || req_u.last_name ILIKE '%${search}%'
         OR tmp1.asset_name ILIKE '%${search}%'  
         OR r.description_other ILIKE '%${search}%'
     )`;
@@ -84,26 +85,46 @@ const filterCondition = (status, plant, date, datetype) => {
     }
   }
   return `${statusCond} ${plantCond} ${dateCond}`;
-}
+};
 
 async function fetchRequestQuery(
   status_query,
   order_query,
-  role_id,
-  user_id,
-  page,
-  expand,
-  search = ""
+  req
 ) {
+  const role_id = req.user.role_id;
+  const user_id = req.user.id;
+  const page = req.query.page || 0;
+  const expand = req.query.expand || false;
+  const search = req.query.search || "";
+
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
+  //if sort states are specified, replace order query
+  // const sortField = req.query.sortField;
+  // const sortOrder = req.query.sortOrder;
+  //console.log(sortField, sortOrder);
+  if (sortField && sortOrder) {
+    const new_order_query = `ORDER BY ${sortField} ${sortOrder}`;
+    order_query = new_order_query;
+  }
+  console.log("replaced order query: " + order_query);
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
   // console.log(role_id)
   let userCond = "";
   let expandCond = "";
   let SELECT_ARR = [];
 
-  if (role_id === 4 ) {
+  if (role_id === 4) {
     userCond = `AND (r.assigned_user_id = ${user_id} OR r.user_id = ${user_id})`;
-  } 
+  }
+
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {
+    userCond = `AND aa.item_name like '%cmt%'`;
+  }
 
   const SELECT = {
     request_id: "r.request_id",
@@ -136,6 +157,9 @@ async function fetchRequestQuery(
     fault_id: "r.fault_id",
     overdue_status: "r.overdue_status",
     description_other: "r.description_other",
+    request_status: "STRING_AGG(rssp.status || ': ' || rs.date, ', ') AS request_status",
+    date: "rs.date",
+    request_user_role: "aa.item_name",
   };
 
   if (expand) {
@@ -172,6 +196,7 @@ async function fetchRequestQuery(
     JOIN keppel.user_access ua ON u.user_id = ua.user_id
     JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
     left JOIN keppel.users req_u ON r.user_id = req_u.user_id
+    left JOIN keppel.auth_assignment aa ON req_u.user_id = aa.user_id
     left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
     left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
     left JOIN keppel.request_type rt ON rt.req_id = r.req_id
@@ -182,13 +207,14 @@ async function fetchRequestQuery(
     left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
       from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
       WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
-      
+    left JOIN keppel.request_status rs on rs.request_id = r.request_id
+	  left JOIN keppel.status_pm rssp on rs.status_id = rssp.status_id
+
   WHERE 1 = 1 
   AND ua.user_id = ${user_id}
   ${fuzzyWhere}
   ${status_query}
   ${userCond}
-  
 
   GROUP BY (
     r.request_id,
@@ -203,42 +229,37 @@ async function fetchRequestQuery(
     tmp1.asset_name,
     req_u.last_name,
     au.first_name,
-    au.last_name
-  ) ${search === ""? order_query : fuzzyOrder}`
-  ;
-  console.log(sql);
+    au.last_name,
+    rs.request_id,
+    aa.item_name
+  ) 
+  ${search === ""? order_query : fuzzyOrder}`;
+  console.log(sql)
+  console.log(expandCond)
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);
 
-  if(page != 0) sql += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems};`;
+  if (page != 0) sql += ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems};`;
 
   return { sql, totalPages };
 }
 
 const fetchPendingRequests = async (req, res, next) => {
-  const page = req.query.page || 0;
-  const expand = req.query.expand || false;
-  const search = req.query.search || "";
-  
   const plant = req.params.plant;
   const date = req.params.date;
   const datetype = req.params.datetype;
 
   const filterCond = filterCondition("", plant, date, datetype);
-  console.log(filterCond)
+  //console.log(filterCond);
 
   const { sql, totalPages } = await fetchRequestQuery(
     `AND sc.status_id = 1 ${filterCond}`, //PENDING
     ` ORDER BY r.created_date DESC`,
-    req.user.role_id,
-    req.user.id,
-    page,
-    expand,
-    search
+    req
   );
 
-  console.log(sql)
+  // console.log(sql)
 
   const result = await global.db.query(sql);
 
@@ -246,10 +267,6 @@ const fetchPendingRequests = async (req, res, next) => {
 };
 
 const fetchOutstandingRequests = async (req, res, next) => {
-  const page = req.query.page || 0;
-  const expand = req.query.expand || false;
-  const search = req.query.search || "";
-
   const plant = req.params.plant;
   const date = req.params.date;
   const datetype = req.params.datetype;
@@ -257,13 +274,9 @@ const fetchOutstandingRequests = async (req, res, next) => {
   const filterCond = filterCondition("", plant, date, datetype);
 
   const { sql, totalPages } = await fetchRequestQuery(
-    `AND (sc.status_id = 2 or sc.status_id = 3 or sc.status_id = 5) ${filterCond}`, //PENDING
+    `AND (sc.status_id = 2 or sc.status_id = 5) ${filterCond}`, //ASSIGNED, REJECTED
     ` ORDER BY r.created_date DESC`,
-    req.user.role_id,
-    req.user.id,
-    page,
-    expand,
-    search
+    req
   );
 
   const result = await global.db.query(sql);
@@ -272,10 +285,6 @@ const fetchOutstandingRequests = async (req, res, next) => {
 };
 
 const fetchCompletedRequests = async (req, res, next) => {
-  const page = req.query.page || 0;
-  const expand = req.query.expand || false;
-  const search = req.query.search || "";
-
   const plant = req.params.plant;
   const date = req.params.date;
   const datetype = req.params.datetype;
@@ -283,13 +292,9 @@ const fetchCompletedRequests = async (req, res, next) => {
   const filterCond = filterCondition("", plant, date, datetype);
 
   const { sql, totalPages } = await fetchRequestQuery(
-    `AND (sc.status_id = 4 or sc.status_id = 6) ${filterCond}`, 
+    `AND (sc.status_id = 3) ${filterCond}`,
     ` ORDER BY r.created_date DESC`,
-    req.user.role_id,
-    req.user.id,
-    page,
-    expand,
-    search
+    req
   );
 
   const result = await global.db.query(sql);
@@ -298,18 +303,14 @@ const fetchCompletedRequests = async (req, res, next) => {
 };
 
 const fetchAssignedRequests = async (req, res, next) => {
-  const page = req.query.page || 1;
-  const expand = req.query.expand || false;
-  const search = req.query.search || "";
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND (sc.status_id = 2 OR sc.status_id = 5)", //ASSIGNED, REJECTED
     ` ORDER BY r.created_date DESC`,
-    req.user.role_id,
-    req.user.id,
-    page,
-    expand,
-    search
+    req
   );
 
   const result = await global.db.query(sql);
@@ -318,10 +319,6 @@ const fetchAssignedRequests = async (req, res, next) => {
 };
 
 const fetchOverdueRequests = async (req, res, next) => {
-  const page = req.query.page || 0;
-  const expand = req.query.expand || false;
-  const search = req.query.search || "";
-
   const plant = req.params.plant;
   const date = req.params.date;
   const datetype = req.params.datetype;
@@ -331,11 +328,7 @@ const fetchOverdueRequests = async (req, res, next) => {
   const { sql, totalPages } = await fetchRequestQuery(
     `AND r.overdue_status = true ${filterCond}`, // Overdue
     ` ORDER BY r.created_date DESC`,
-    req.user.role_id,
-    req.user.id,
-    page,
-    expand,
-    search
+    req
   );
 
   const result = await global.db.query(sql);
@@ -343,20 +336,17 @@ const fetchOverdueRequests = async (req, res, next) => {
   res.status(200).send({ rows: result.rows, total: totalPages });
 };
 
-
 const fetchReviewRequests = async (req, res, next) => {
-  const page = req.query.page || 1;
-  const expand = req.query.expand || false;
-  const search = req.query.search || "";
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
+
+
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND (sc.status_id = 3 OR sc.status_id = 6)", //COMPLETED, CANCELLED
-    ` ORDER BY r.activity_log -> (jsonb_array_length(r.activity_log) -1) ->> 'date' DESC`,
-    req.user.role_id,
-    req.user.id,
-    page,
-    expand,
-    search
+    ` ORDER BY r.created_date`,
+    req
   );
 
   const result = await global.db.query(sql);
@@ -365,18 +355,14 @@ const fetchReviewRequests = async (req, res, next) => {
 };
 
 const fetchApprovedRequests = async (req, res, next) => {
-  const page = req.query.page || 1;
-  const expand = req.query.expand || false;
-  const search = req.query.search || "";
+  const plant = req.params.plant;
+  const date = req.params.date;
+  const datetype = req.params.datetype;
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND sc.status_id = 4", //APPROVED
     ` ORDER BY r.activity_log -> (jsonb_array_length(r.activity_log) -1) ->> 'date' DESC`,
-    req.user.role_id,
-    req.user.id,
-    page,
-    expand,
-    search
+    req
   );
 
   const result = await global.db.query(sql);
@@ -422,6 +408,8 @@ const createRequest = async (req, res, next) => {
     plantLocationID,
     taggedAssetID,
     description_other,
+    priority,
+    assignedUser
   } = req.body;
   // console.log("json body", JSON.stringify(req.body));
   // console.log("^&*")
@@ -477,9 +465,9 @@ const createRequest = async (req, res, next) => {
   }
   if (!req.body.linkedRequestId) {
     const q = `INSERT INTO keppel.request(
-      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log, description_other
+      fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log, description_other, priority_id, assigned_user_id
     ) VALUES (
-      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13,$14
+      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13,$14,$15,$16
     ) RETURNING request_id;`;
 
     db.query(
@@ -499,6 +487,8 @@ const createRequest = async (req, res, next) => {
         null,
         JSON.stringify(activity_log),
         description_other,
+        priority || null,
+        assignedUser || null 
       ],
       (err, result) => {
         if (err) return res.status(500).json({ errormsg: err });
@@ -527,7 +517,7 @@ const createRequest = async (req, res, next) => {
     const updateQuery = `
     UPDATE keppel.request SET status_id = 3,
     overdue_status = false,
-		requesthistory = concat(requesthistory, $2::text),
+    requesthistory = concat(requesthistory, $2::text),
     activity_log = activity_log || 
         jsonb_build_object(
           'date', '${today}',
@@ -592,7 +582,7 @@ const updateRequest = async (req, res, next) => {
   // ]);
   global.db.query(
     `
-		UPDATE keppel.request SET 
+    UPDATE keppel.request SET 
       assigned_user_id = $1,
       priority_id = $2,
       requesthistory = concat(requesthistory, $3::text),
@@ -606,7 +596,7 @@ const updateRequest = async (req, res, next) => {
           'activity_type', 'ASSIGNED'
         )
     WHERE request_id = $4
-	`,
+  `,
 
     [
       req.body.assignedUser.value,
@@ -678,58 +668,58 @@ const fetchRequestCounts = async (req, res, next) => {
       sql =
         req.params.plant != 0
           ? `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, R.OVERDUE_STATUS AS OVERDUE_STATUS, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
-				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
-				WHERE R.PLANT_ID = ${req.params.plant}
+        JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
+        WHERE R.PLANT_ID = ${req.params.plant}
         ${userRoleCond}
-				${dateCond}	
-				GROUP BY(R.STATUS_ID, S.STATUS, R.OVERDUE_STATUS) ORDER BY (name)`
+        ${dateCond} 
+        GROUP BY(R.STATUS_ID, S.STATUS, R.OVERDUE_STATUS) ORDER BY (name)`
           : `SELECT S.STATUS AS NAME, R.STATUS_ID AS ID, R.OVERDUE_STATUS AS OVERDUE_STATUS, COUNT(R.STATUS_ID) AS VALUE FROM KEPPEL.REQUEST R
-				JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
-				WHERE 1 = 1 
+        JOIN KEPPEL.STATUS_PM S ON S.STATUS_ID = R.STATUS_ID
+        WHERE 1 = 1 
         ${userRoleCond}
-				${dateCond}
+        ${dateCond}
 
-				GROUP BY(R.STATUS_ID, S.STATUS, R.OVERDUE_STATUS) ORDER BY (name)`;
+        GROUP BY(R.STATUS_ID, S.STATUS, R.OVERDUE_STATUS) ORDER BY (name)`;
       break;
     case "fault":
       sql =
         req.params.plant != 0
           ? `SELECT FT.FAULT_TYPE AS NAME, R.FAULT_ID AS ID, COUNT(R.FAULT_ID) AS VALUE FROM 
-				KEPPEL.REQUEST R 
-				JOIN KEPPEL.FAULT_TYPES FT ON R.FAULT_ID = FT.FAULT_ID
-				WHERE R.STATUS_ID != 5 AND 
-				R.STATUS_ID != 7 AND
-				R.PLANT_ID = ${req.params.plant}
+        KEPPEL.REQUEST R 
+        JOIN KEPPEL.FAULT_TYPES FT ON R.FAULT_ID = FT.FAULT_ID
+        WHERE R.STATUS_ID != 5 AND 
+        R.STATUS_ID != 7 AND
+        R.PLANT_ID = ${req.params.plant}
         ${userRoleCond}
-				${dateCond}	
-				GROUP BY(FT.FAULT_TYPE, R.FAULT_ID) ORDER BY (name)`
+        ${dateCond} 
+        GROUP BY(FT.FAULT_TYPE, R.FAULT_ID) ORDER BY (name)`
           : `SELECT FT.FAULT_TYPE AS NAME, R.FAULT_ID AS ID, COUNT(R.FAULT_ID) AS VALUE FROM 
-				KEPPEL.REQUEST R 
-				JOIN KEPPEL.FAULT_TYPES FT ON R.FAULT_ID = FT.FAULT_ID
-				WHERE R.STATUS_ID != 5 AND R.STATUS_ID != 7
+        KEPPEL.REQUEST R 
+        JOIN KEPPEL.FAULT_TYPES FT ON R.FAULT_ID = FT.FAULT_ID
+        WHERE R.STATUS_ID != 5 AND R.STATUS_ID != 7
         ${userRoleCond}
-				${dateCond}	
-				GROUP BY(FT.FAULT_TYPE, R.FAULT_ID) ORDER BY (name)`;
+        ${dateCond} 
+        GROUP BY(FT.FAULT_TYPE, R.FAULT_ID) ORDER BY (name)`;
       break;
     case "priority":
       sql =
         req.params.plant != 0
           ? `SELECT P.PRIORITY AS NAME, R.PRIORITY_ID AS ID, COUNT(R.PRIORITY_ID) AS VALUE FROM 
-				KEPPEL.REQUEST R 
-				JOIN KEPPEL.PRIORITY P ON R.PRIORITY_ID = P.P_ID
-				WHERE R.STATUS_ID != 5 AND 
-				R.STATUS_ID != 7 AND
-				R.PLANT_ID = ${req.params.plant}
+        KEPPEL.REQUEST R 
+        JOIN KEPPEL.PRIORITY P ON R.PRIORITY_ID = P.P_ID
+        WHERE R.STATUS_ID != 5 AND 
+        R.STATUS_ID != 7 AND
+        R.PLANT_ID = ${req.params.plant}
         ${userRoleCond}
-				${dateCond}	
-				GROUP BY(P.PRIORITY, R.PRIORITY_ID) ORDER BY (ID)`
+        ${dateCond} 
+        GROUP BY(P.PRIORITY, R.PRIORITY_ID) ORDER BY (ID)`
           : `SELECT P.PRIORITY AS NAME, R.PRIORITY_ID AS ID, COUNT(R.PRIORITY_ID) AS VALUE FROM 
-				KEPPEL.REQUEST R 
-				JOIN KEPPEL.PRIORITY P ON R.PRIORITY_ID = P.P_ID
-				WHERE R.STATUS_ID != 5 AND R.STATUS_ID != 7
+        KEPPEL.REQUEST R 
+        JOIN KEPPEL.PRIORITY P ON R.PRIORITY_ID = P.P_ID
+        WHERE R.STATUS_ID != 5 AND R.STATUS_ID != 7
         ${userRoleCond}
-				${dateCond}	
-				GROUP BY(P.PRIORITY, R.PRIORITY_ID) ORDER BY (ID)`;
+        ${dateCond} 
+        GROUP BY(P.PRIORITY, R.PRIORITY_ID) ORDER BY (ID)`;
       break;
     default:
       return res
@@ -754,7 +744,7 @@ const fetchRequestPriority = async (req, res, next) => {
 };
 
 const fetchSpecificRequest = async (req, res, next) => {
-  console.log(req.params.request_id);
+  //console.log(req.params.request_id);
   const sql = `SELECT 
   r.request_id,
   rt.request as request_name, 
@@ -782,8 +772,12 @@ const fetchSpecificRequest = async (req, res, next) => {
   concat( concat(u.first_name,' '), u.last_name) AS assigned_user_name,
   CASE WHEN u1.first_name IS NULL THEN r.guestfullname ELSE CONCAT(CONCAT(u1.first_name, ' '), u1.last_name) END AS created_by,
   r.guestfullname,
-  r.created_date
+  r.created_date,
+  STRING_AGG(rssp.status || ': ' || rs.date, ', ') AS request_status
+
   FROM keppel.request AS r
+  left JOIN keppel.request_status rs on rs.request_id = r.request_id
+  left JOIN keppel.status_pm rssp on rs.status_id = rssp.status_id
   JOIN keppel.request_type AS rt ON rt.req_id = r.req_id
   JOIN keppel.fault_types  AS ft ON ft.fault_id = r.fault_id
   JOIN keppel.plant_master AS pm ON pm.plant_id = r.plant_id
@@ -795,7 +789,22 @@ LEFT JOIN keppel.users u1 ON r.user_id = u1.user_id
   LEFT JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
   from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
   WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
-  WHERE request_id = $1`;
+  WHERE r.request_id = $1
+  GROUP BY (
+	  r.request_id,
+	  rt.request,
+	  ft.fault_type,
+	  pm.plant_name,
+	  tmp1.asset_name,
+	  pr.priority,
+	  s.status,
+	  u.user_email,
+	  u.first_name,
+	  u.last_name,
+	  u1.first_name,
+	  u1.last_name
+  )
+  `;
 
   global.db.query(sql, [req.params.request_id], (err, result) => {
     if (err) return res.status(500).send("Error in fetching request");
@@ -809,91 +818,91 @@ const createRequestCSV = (req, res, next) => {
   const sql =
     req.user.role_id === 1 || req.user.role_id === 2 || req.user.role_id === 3
       ? `SELECT r.request_id , ft.fault_type, pm.plant_name,
-	rt.request, ro.role_name, sc.status,r.fault_description, r.description_other, rt.request AS request_type,
-	pri.priority, 
-	CASE 
-		WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
-		ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-	END AS Approver,
-	r.created_date,tmp1.asset_name, 
-	r.complete_comments,
-	concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-	, r.rejection_comments, r.status_id
-	FROM    
-		keppel.users u
-		JOIN keppel.user_access ua ON u.user_id = ua.user_id
-		JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
-		left JOIN keppel.users req_u ON r.user_id = req_u.user_id
-		left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
-		left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
-		left JOIN keppel.request_type rt ON rt.req_id = r.req_id
-		left JOIN keppel.priority pri ON pri.p_id = r.priority_id
-		left JOIN keppel.role ro ON ro.role_id = r.role_id
-		left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
-		left JOIN keppel.users au ON au.user_id = r.assigned_user_id
-		left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
-			from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
-			WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
+  rt.request, ro.role_name, sc.status,r.fault_description, r.description_other, rt.request AS request_type,
+  pri.priority, 
+  CASE 
+    WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
+    ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
+  END AS Approver,
+  r.created_date,tmp1.asset_name, 
+  r.complete_comments,
+  concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
+  , r.rejection_comments, r.status_id
+  FROM    
+    keppel.users u
+    JOIN keppel.user_access ua ON u.user_id = ua.user_id
+    JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
+    left JOIN keppel.users req_u ON r.user_id = req_u.user_id
+    left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
+    left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
+    left JOIN keppel.request_type rt ON rt.req_id = r.req_id
+    left JOIN keppel.priority pri ON pri.p_id = r.priority_id
+    left JOIN keppel.role ro ON ro.role_id = r.role_id
+    left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
+    left JOIN keppel.users au ON au.user_id = r.assigned_user_id
+    left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
+      from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
+      WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
     WHERE u.user_id = ${req.user.id}
-	GROUP BY (
-		r.request_id,
-		ft.fault_type,
-		pm.plant_name,
-		pm.plant_id,
-		rt.request,
-		ro.role_name,
-		sc.status,
-		pri.priority,
-		req_u.first_name,
-		tmp1.asset_name,
-		req_u.last_name,
-		au.first_name,
-		au.last_name
-	)
-	ORDER BY r.created_date DESC, r.status_id DESC;`
+  GROUP BY (
+    r.request_id,
+    ft.fault_type,
+    pm.plant_name,
+    pm.plant_id,
+    rt.request,
+    ro.role_name,
+    sc.status,
+    pri.priority,
+    req_u.first_name,
+    tmp1.asset_name,
+    req_u.last_name,
+    au.first_name,
+    au.last_name
+  )
+  ORDER BY r.created_date DESC, r.status_id DESC;`
       : `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
-	rt.request, ro.role_name, sc.status,r.fault_description, r.description_other, rt.request AS request_type,
-	pri.priority, 
-	CASE 
-		WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
-		ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-	END AS created_by,
-	r.created_date,tmp1.asset_name,
-	r.complete_comments,
-	concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-	, r.rejection_comments, r.status_id
-	FROM    
-		keppel.users u
-		JOIN keppel.user_access ua ON u.user_id = ua.user_id
-		JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
-		left JOIN keppel.users req_u ON r.user_id = req_u.user_id
-		left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
-		left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
-		left JOIN keppel.request_type rt ON rt.req_id = r.req_id
-		left JOIN keppel.priority pri ON pri.p_id = r.priority_id
-		left JOIN keppel.role ro ON ro.role_id = r.role_id
-		left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
-		left JOIN keppel.users au ON au.user_id = r.assigned_user_id
-		left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
-			from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
-			WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
-	WHERE r.assigned_user_id = ${req.user.id} OR r.user_id = ${req.user.id}
-	GROUP BY (
-		r.request_id,
-		ft.fault_type,
-		pm.plant_name,
-		pm.plant_id,
-		rt.request,
-		ro.role_name,
-		sc.status,
-		pri.priority,
-		req_u.first_name,
-		tmp1.asset_name,
-		req_u.last_name,
-		au.first_name,
-		au.last_name
-	)
-	ORDER BY r.created_date DESC, r.status_id DESC;`;
+  rt.request, ro.role_name, sc.status,r.fault_description, r.description_other, rt.request AS request_type,
+  pri.priority, 
+  CASE 
+    WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
+    ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
+  END AS created_by,
+  r.created_date,tmp1.asset_name,
+  r.complete_comments,
+  concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
+  , r.rejection_comments, r.status_id
+  FROM    
+    keppel.users u
+    JOIN keppel.user_access ua ON u.user_id = ua.user_id
+    JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
+    left JOIN keppel.users req_u ON r.user_id = req_u.user_id
+    left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
+    left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
+    left JOIN keppel.request_type rt ON rt.req_id = r.req_id
+    left JOIN keppel.priority pri ON pri.p_id = r.priority_id
+    left JOIN keppel.role ro ON ro.role_id = r.role_id
+    left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
+    left JOIN keppel.users au ON au.user_id = r.assigned_user_id
+    left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
+      from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
+      WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
+  WHERE r.assigned_user_id = ${req.user.id} OR r.user_id = ${req.user.id}
+  GROUP BY (
+    r.request_id,
+    ft.fault_type,
+    pm.plant_name,
+    pm.plant_id,
+    rt.request,
+    ro.role_name,
+    sc.status,
+    pri.priority,
+    req_u.first_name,
+    tmp1.asset_name,
+    req_u.last_name,
+    au.first_name,
+    au.last_name
+  )
+  ORDER BY r.created_date DESC, r.status_id DESC;`;
 
   global.db.query(sql, (err, result) => {
     if (err) return res.status(500).json({ errormsg: err });
@@ -915,8 +924,8 @@ const rejectRequest = async (req, res) => {
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const activity = `Rejected Request Case ID-${req.params.request_id}`;
   sql = `
-	UPDATE keppel.request SET 
-	status_id = 5,
+  UPDATE keppel.request SET 
+  status_id = 5,
   activity_log = activity_log || 
         jsonb_build_object(
           'date', $1::text,
@@ -926,7 +935,7 @@ const rejectRequest = async (req, res) => {
           'activity_type', 'REJECTED',
           'remarks', $5::text
         )
-	WHERE request_id = $6`;
+  WHERE request_id = $6`;
 
   // console.log("reject", sql);
   global.db.query(
@@ -957,8 +966,8 @@ const approveRequest = async (req, res, next) => {
   const activity = `Approved Request Case ID-${req.params.request_id}`;
 
   const sql = `
-	UPDATE keppel.request SET 
-	status_id = 4,
+  UPDATE keppel.request SET 
+  status_id = 4,
   overdue_status = false,
   activity_log = activity_log || 
         jsonb_build_object(
@@ -969,7 +978,7 @@ const approveRequest = async (req, res, next) => {
           'activity_type', 'APPROVED',
           'remarks', $5::text
         )
-	WHERE request_id = $6`;
+  WHERE request_id = $6`;
   // console.log(sql);
   global.db.query(
     sql,
@@ -996,12 +1005,12 @@ const completeRequest = async (req, res, next) => {
 
   // console.log(req.file)
   const sql = `UPDATE keppel.request SET
-		complete_comments = $1,
-		completion_file = $2,
-		completedfilemimetype = $3,
-		status_id = 3,
+    complete_comments = $1,
+    completion_file = $2,
+    completedfilemimetype = $3,
+    status_id = 3,
     overdue_status = false,
-		requesthistory = concat(requesthistory, $4::text),
+    requesthistory = concat(requesthistory, $4::text),
     activity_log = activity_log || 
         jsonb_build_object(
           'date', '${today}',
@@ -1010,7 +1019,7 @@ const completeRequest = async (req, res, next) => {
           'activity', 'Completed Request Case ID-${req.params.request_id}',
           'activity_type', 'COMPLETED'
         )
-		WHERE request_id = $5`;
+    WHERE request_id = $5`;
   global.db.query(
     sql,
     [
@@ -1096,53 +1105,53 @@ const fetchFilteredRequests = async (req, res, next) => {
   }
 
   const sql = `SELECT r.request_id , ft.fault_type AS fault_name, pm.plant_name,pm.plant_id,
-		rt.request, ro.role_name, sc.status,r.fault_description, r.description_other, rt.request AS request_type,
-		pri.priority, 
-		CASE 
-			WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
-			ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
-		END AS created_by,
-		r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
-		r.complete_comments,
-		concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
-		, r.activity_log, r.rejection_comments, r.status_id
-		FROM    
-			keppel.users u
-			JOIN keppel.user_access ua ON u.user_id = ua.user_id
-			JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
-			left JOIN keppel.users req_u ON r.user_id = req_u.user_id
-			left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
-			left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
-			left JOIN keppel.request_type rt ON rt.req_id = r.req_id
-			left JOIN keppel.priority pri ON pri.p_id = r.priority_id
-			left JOIN keppel.role ro ON ro.role_id = r.role_id
-			left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
-			left JOIN keppel.users au ON au.user_id = r.assigned_user_id
-			left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
-				from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
-				WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
+    rt.request, ro.role_name, sc.status,r.fault_description, r.description_other, rt.request AS request_type,
+    pri.priority, 
+    CASE 
+      WHEN (concat( concat(req_u.first_name ,' '), req_u.last_name) = ' ') THEN r.guestfullname
+      ELSE concat( concat(req_u.first_name ,' '), req_u.last_name )
+    END AS created_by,
+    r.created_date,tmp1.asset_name, r.uploadfilemimetype, r.completedfilemimetype, r.uploaded_file, r.completion_file,
+    r.complete_comments,
+    concat( concat(au.first_name,' '), au.last_name) AS assigned_user_name, r.associatedrequestid
+    , r.activity_log, r.rejection_comments, r.status_id
+    FROM    
+      keppel.users u
+      JOIN keppel.user_access ua ON u.user_id = ua.user_id
+      JOIN keppel.request r ON ua.allocatedplantids LIKE concat(concat('%',r.plant_id::text) , '%')
+      left JOIN keppel.users req_u ON r.user_id = req_u.user_id
+      left JOIN keppel.fault_types ft ON r.fault_id = ft.fault_id
+      left JOIN keppel.plant_master pm ON pm.plant_id = r.plant_id 
+      left JOIN keppel.request_type rt ON rt.req_id = r.req_id
+      left JOIN keppel.priority pri ON pri.p_id = r.priority_id
+      left JOIN keppel.role ro ON ro.role_id = r.role_id
+      left JOIN keppel.status_pm sc ON sc.status_id = r.status_id
+      left JOIN keppel.users au ON au.user_id = r.assigned_user_id
+      left JOIN (SELECT psa_id ,  concat( system_asset , ' | ' , plant_asset_instrument ) AS asset_name 
+        from  keppel.system_assets   AS t1 ,keppel.plant_system_assets AS t2
+        WHERE t1.system_asset_id = t2.system_asset_id_lvl4) tmp1 ON tmp1.psa_id = r.psa_id
         WHERE 1 = 1
       ${userRoleCond}
       ${dateCond}
       ${statusCond}
       ${plantCond}
 
-		GROUP BY (
-			r.request_id,
-			ft.fault_type,
-			pm.plant_name,
-			pm.plant_id,
-			rt.request,
-			ro.role_name,
-			sc.status,
-			pri.priority,
-			req_u.first_name,
-			tmp1.asset_name,
-			req_u.last_name,
-			au.first_name,
-			au.last_name
-		)
-		ORDER BY r.created_date DESC, r.status_id DESC
+    GROUP BY (
+      r.request_id,
+      ft.fault_type,
+      pm.plant_name,
+      pm.plant_id,
+      rt.request,
+      ro.role_name,
+      sc.status,
+      pri.priority,
+      req_u.first_name,
+      tmp1.asset_name,
+      req_u.last_name,
+      au.first_name,
+      au.last_name
+    )
+    ORDER BY r.created_date DESC, r.status_id DESC
     
     `;
 
@@ -1227,5 +1236,6 @@ module.exports = {
   fetchPlantRequest,
   fetchAssetRequest,
   fetchOutstandingRequests,
-  fetchCompletedRequests
+  fetchCompletedRequests,
 };
+

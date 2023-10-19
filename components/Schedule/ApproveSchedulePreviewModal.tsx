@@ -41,7 +41,7 @@ interface ApproveSchedulePreviewModalProps {
   remarks?: string;
 }
 
-const ContentHeader = (props: { tabIndex: number; setRemarks: (arg0: string) => void; scheduleInfo: { status: number; }[]; handleClick: (arg0: number) => void; remarks: string }) => {
+const ContentHeader = (props: { tabIndex: number; setRemarks: (arg0: string) => void; scheduleInfo: ScheduleInfo[]; handleClick: (arg0: number) => void; }) => {
   return (props.tabIndex == 1 || props.tabIndex == 2) ? (
     <div className="d-flex align-items-center justify-content-around py-3">
       <div style={{ flex: "4" }}>
@@ -58,7 +58,7 @@ const ContentHeader = (props: { tabIndex: number; setRemarks: (arg0: string) => 
             width: "80%",
           }}
           onChange={(e)=>props.setRemarks(e.target.value)}
-          value={props.remarks}
+          value={props.tabIndex === 2 ? props.scheduleInfo[0].timeline_remarks : undefined}
         />
       </div>
       {props.tabIndex !== 2 && 
@@ -135,7 +135,7 @@ export default function ApproveSchedulePreviewModal(
         .catch(console.log);
     }
   }
-
+  console.log(props.scheduleInfo)
 
   return (
     <>
@@ -151,7 +151,7 @@ export default function ApproveSchedulePreviewModal(
           title="Schedule Preview"
           header="Schedule Preview"
           schedules={props.scheduleInfo}
-          contentHeader={<ContentHeader tabIndex={props.tabIndex} scheduleInfo={props.scheduleInfo} handleClick={handleClick} setRemarks={setRemarks} remarks={props.remarks}/>}
+          contentHeader={<ContentHeader tabIndex={props.tabIndex} scheduleInfo={props.scheduleInfo} handleClick={handleClick} setRemarks={setRemarks} />}
         />
       </ModuleModal>
 

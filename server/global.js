@@ -34,6 +34,17 @@ function getFieldsDiff(oldSchedule, newSchedule) {
   return changes;
 }
 
+
+function userPermission(permission, permissions) {
+  const excludePermission = permission.replace("can", "exclude");
+  const ableAccess = permissions.includes(permission.trim());
+
+  if(permission.substring(0, 3) === 'can' && ableAccess && permissions.includes(excludePermission)) return false;
+
+  return ableAccess;
+}
+
 module.exports = {
   getFieldsDiff,
+  userPermission
 };

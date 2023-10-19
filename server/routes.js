@@ -7,7 +7,8 @@ const { fetchDBNames, dellocateGlobalDB } = require("./db/dbAPI");
 const express = require("express");
 
 const router = express.Router();
-const { sendRequestPDF, sendChecklistPDF } = require("./pdfGenerator");
+const { sendRequestPDF, sendChecklistPDF, sendAllChecklistsPDF } = require("./pdfGenerator");
+
 
 // checkIfLoggedInAPI   - auth failures send 401 requrest. use this for API routes
 function checkIfLoggedInAPI(req, res, next) {
@@ -729,6 +730,11 @@ router
   .post(controllers.checklist.createNewChecklistRecord)
   .patch(controllers.checklist.editChecklistRecord);
 
+router
+  .route("/checklist/record/compilation/:checklist_ids", checkIfLoggedInAPI)
+  .get(controllers.checklist.fetchMultipleChecklistRecords)
+  .post(controllers.checklist.createNewChecklistRecord)
+  .patch(controllers.checklist.editChecklistRecord);
 /**
  * @api {get} /checklist/approved Get Approved Checklists
  * @apiDescription Get all Approved Checklists
@@ -1161,6 +1167,12 @@ router.get(
   "/checklist/pdf/:checklist_id",
   checkIfLoggedInAPI,
   sendChecklistPDF
+);
+
+router.get(
+  "/checklist/pdf/compile/:checklistIds",
+  checkIfLoggedInAPI,
+  sendAllChecklistsPDF
 );
 
 /**
@@ -2347,6 +2359,11 @@ router
   .route("/logbook/:plant_id?", checkIfLoggedInAPI)
   .get(controllers.logbook.getLogbook)
   .post(controllers.logbook.addEntryToLogbook);
+
+//
+router
+  .route("/logbook_labels", checkIfLoggedInAPI)
+  .get(controllers.logbook.getAllLogbookLabels);
 
 router
   .route("/changeOfParts/all/:cop_id?", checkIfLoggedInAPI)

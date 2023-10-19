@@ -182,7 +182,7 @@ export default function SettingsPage(props: settingsProps) {
               type="text"
               name="roleType"
               value={
-                ["Admin", "Manager", "Engineer", "Operation Specialist"][
+                ["Admin", "Manager", "Engineer", "Operation Specialist", "CMT Engineer", "CMT Specialist"][
                   props.info.role_id - 1
                 ]
               }

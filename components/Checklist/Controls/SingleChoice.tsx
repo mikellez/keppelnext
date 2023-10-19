@@ -1,11 +1,13 @@
-import React, { useState, useContext } from 'react';
-import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
-import { updateSpecificCheck } from '../ChecklistEditableForm';
-import CheckControl from "../../../types/common/CheckControl";
+import React, { useContext, useEffect, useState } from 'react';
 import { ImCross } from "react-icons/im";
-import checklistStyles from "../ChecklistTemplateCreator.module.css";
-import { ModuleDivider } from "../../ModuleLayout/ModuleDivider";
+import { SectionsContext } from '../../../pages/Checklist/Complete/[id]';
 import styles from "../../../styles/Checklist.module.scss";
+import CheckControl from "../../../types/common/CheckControl";
+import { ModuleDivider } from "../../ModuleLayout/ModuleDivider";
+import RequiredIcon from '../../RequiredIcon';
+import ToggleSwitch from '../../ToggleSwitch/ToggleSwitch';
+import { updateSpecificCheck } from '../ChecklistEditableForm';
+import checklistStyles from "../ChecklistTemplateCreator.module.css";
 
 export class SingleChoiceControl extends CheckControl {
   choices: string[];
@@ -14,9 +16,10 @@ export class SingleChoiceControl extends CheckControl {
     question?: string,
     choices?: string[],
     value?: string,
-    id?: string
+    required?: boolean,
+    id?: string,
   ) {
-    super(question, value, id);
+    super(question, value, id, required);
     this.choices = choices !== undefined ? choices.slice() : [];
   }
 
@@ -25,12 +28,13 @@ export class SingleChoiceControl extends CheckControl {
       this.question,
       this.choices,
       this.value,
-      this.id
+      this.required,
+      this.id,
     );
   }
 
   duplicate() {
-    return new SingleChoiceControl(this.question, this.choices, this.value);
+    return new SingleChoiceControl(this.question, this.choices, this.value, this.required);
   }
 
   toString() {
@@ -43,6 +47,7 @@ export class SingleChoiceControl extends CheckControl {
       question: this.question,
       value: this.value,
       choices: this.choices,
+      required: this.required,
     };
   }
 
@@ -112,6 +117,7 @@ export function SingleChoice({
   onDelete: Function;
 }) {
   const [newChoice, setNewChoice] = useState<string>("");
+  const [isRequired, setIsRequired] = useState<boolean>(false);
 
   const updateChoiceInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewChoice(e.target.value);
@@ -152,6 +158,23 @@ export function SingleChoice({
     o.question = e.target.value;
     onChange(o);
   };
+
+  const handleRequired = () => {
+    setIsRequired(!isRequired);
+  }
+
+  useEffect(() => {
+    const retrievedIsRequired = singleChoiceObj.required;
+    setIsRequired(retrievedIsRequired);
+  }, []);
+  
+  useEffect (() => {
+    // console.log(isRequired);
+    const o = singleChoiceObj.clone();
+    o.required = isRequired;
+    onChange(o);
+
+  },[isRequired])
 
   return (
     <div className={checklistStyles.controlContainer}>
@@ -202,6 +225,13 @@ export function SingleChoice({
           />
         </div>
       </div>
+      <div style={{display: "flex", alignItems:"center", gap:"10px", justifyContent:"flex-end"}}>
+        <div>Required</div>
+        <ToggleSwitch 
+          isSelected = {isRequired}
+          onChange = {handleRequired}
+        />
+      </div>
     </div>
   );
 };
@@ -221,7 +251,10 @@ function SingleChoiceEditable({ singleChoiceObj, rowId, sectionId, index }: {
 
 	return (
 		<div className={styles.checkViewContainer}>
-			<h6>{singleChoiceObj.question}</h6>
+			<h6>
+        {singleChoiceObj.required === true ? <RequiredIcon /> : null}&nbsp;
+        {singleChoiceObj.question}
+      </h6>
 			{
 				singleChoiceObj.choices.map(choice => {
 					return (
@@ -248,7 +281,10 @@ function SingleChoiceEditable({ singleChoiceObj, rowId, sectionId, index }: {
 function SingleChoiceView({singleChoiceObj}: {singleChoiceObj: SingleChoiceControl}) {
   return (
     <div className={styles.checkViewContainer}>
-      <h6>{singleChoiceObj.question}</h6>
+      <h6>
+        {singleChoiceObj.required === true ? <RequiredIcon />: null}&nbsp;
+        { singleChoiceObj.question}
+      </h6>
       {
 				singleChoiceObj.choices.map(choice => {
 					return (

@@ -113,6 +113,7 @@ export interface ChecklistItem {
   status: string;
   activity_log: { [key: string]: string }[];
   overdue_status?: boolean;
+  checklist_status?: string;
 }
 
 export interface ChecklistProps {
@@ -167,6 +168,9 @@ export default function Checklist(props: ChecklistProps) {
   const [assignedToHeader, setAssignedToHeader] = useState("Assigned To");
   const [signOffHeader, setSignOffHeader] = useState("Signed Off By");
   const [createdByHeader, setCreatedByHeader] = useState("Created By");
+  const [sortField, setSortField] = useState("cl.checklist_id");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [dataChanged, setDataChanged] = useState(false);
 
   const fields = [
     "checklist_id",
@@ -181,27 +185,32 @@ export default function Checklist(props: ChecklistProps) {
     "status",
     "activity_log",
     "overdue_status",
+    "checklist_status"
   ];
+
   const filteredData = useChecklistFilter(props, page, searchRef.current.value, fields);
-  const columnData = useChecklist(
+  let columnData = useChecklist(
+
     indexedColumn[activeTabIndex],
     page,
     searchRef.current.value,
-    fields
+    fields,
+    sortField,
+    sortOrder
   );
   const router = useRouter();
-
+  
   const { data, error, isValidating, mutate } = props.filter
     ? filteredData
     : columnData;
-
+  
   // Used for adding the overdue column into the template when the assigned/pending tab is selected
   const tableFormat =
     activeTabIndex === 0 || activeTabIndex === 1 || activeTabIndex === 2
-      ? `--data-table-library_grid-template-columns:  5em 25em 7em 15em 10em 8em 8em 8em 8em;
+      ? `--data-table-library_grid-template-columns:  8em 5em 25em 7em 15em 10em 8em 8em 8em;
       
   `
-      : `--data-table-library_grid-template-columns:  5em 25em 7em 15em 8em 8em 8em 6em;
+      : `--data-table-library_grid-template-columns:  6em 5em 25em 7em 15em 8em 8em 8em;
       
   `;
 
@@ -225,7 +234,6 @@ export default function Checklist(props: ChecklistProps) {
   };
 
   useEffect(() => {
-    // console.log(props);
     if (data && !isValidating) {
       if (props?.filter) {
         if (data?.rows?.length > 0) {
@@ -237,13 +245,12 @@ export default function Checklist(props: ChecklistProps) {
               };
             })
           );
-
           setReady(true);
           setTotalPages(data.total);
         }
       }
     }
-  }, [data, isValidating, isReady, page, props?.isReady]);
+  }, [dataChanged, data, isValidating, isReady, page, props?.isReady]);
 
   useEffect(() => {
     if (!props?.filter) {
@@ -260,6 +267,7 @@ export default function Checklist(props: ChecklistProps) {
         "status",
         "activity_log",
         "overdue_status",
+        "checklist_status"
       ];
       const fieldsString = fields.join(",");
 
@@ -278,6 +286,17 @@ export default function Checklist(props: ChecklistProps) {
               })
             );
           }
+
+          if (dataChanged && data){
+            setChecklistItems(
+              data.rows.map((row: CMMSChecklist) => {
+                return {
+                  id: row.checklist_id,
+                  ...row,
+                };
+              })
+            );
+          }
           setTotalPages(response.data.total);
           setReady(true);
         })
@@ -285,7 +304,7 @@ export default function Checklist(props: ChecklistProps) {
           setChecklistItems([]);
         });
     }
-  }, [activeTabIndex, page, isReady]);
+  }, [data, dataChanged, activeTabIndex, page, isReady]);
 
   const updateTable = (foo: Function) => {
     setReady(false);
@@ -296,111 +315,87 @@ export default function Checklist(props: ChecklistProps) {
 
   async function sortId() {
     setBlockReset(true);
+    setSortField('cl.checklist_id');
+
     if (IdHeader === "ID" || IdHeader === "ID ▲") {
       setIdHeader("ID ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.id < b.id ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('desc')
     } else if (IdHeader === "ID ▼") {
       setIdHeader("ID ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.id > b.id ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('asc');
     }
+    setDataChanged(true);
   }
 
   async function sortDetails() {
     setBlockReset(true);
+    setSortField("cl.description")
     if (detailsHeader === "Details" || detailsHeader === "Details ▲") {
       setDetailsHeader("Details ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.description < b.description ? 1 : -1));
-        return newState;
-      });
+      setSortOrder("desc");
     } else if (detailsHeader === "Details ▼") {
       setDetailsHeader("Details ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.description > b.description ? 1 : -1));
-        return newState;
-      });
+      setSortOrder("asc");
     }
+    setDataChanged(true);
   }
 
-  const customSortStatus = (a: any, b: any) => {
-    const statusOrder = { ASSIGNED: 0, REJECTED: 1, null: 2 };
-    const statusA = statusOrder[a];
-    const statusB = statusOrder[b];
+  // const customSortStatus = (a: any, b: any) => {
+  //   const statusOrder = { ASSIGNED: 0, REJECTED: 1, null: 2 };
+  //   const statusA = statusOrder[a];
+  //   const statusB = statusOrder[b];
 
-    if (statusHeader === "Status" || statusHeader === "Status ▲") {
-      return statusA - statusB;
-    } else if (statusHeader === "Status ▼") {
-      return statusB - statusA;
-    }
-  };
+  //   if (statusHeader === "Status" || statusHeader === "Status ▲") {
+  //     return statusA - statusB;
+  //   } else if (statusHeader === "Status ▼") {
+  //     return statusB - statusA;
+  //   }
+  // };
 
   async function sortStatus() {
     setBlockReset(true);
+    setSortField('st.status')
     if (statusHeader === "Status" || statusHeader === "Status ▲") {
       setStatusHeader("Status ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => a.status_id - b.status_id);
-        return newState;
-      });
+      setSortOrder('desc');
     } else if (statusHeader === "Status ▼") {
       setStatusHeader("Status ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => b.status_id - a.status_id);
-        return newState;
-      });
+      setSortOrder('asc');
     }
+    setDataChanged(true);
   }
 
-  const customSortOverdue = (a: any, b: any) => {
-    const overdueOrder = { true: 0, false: 1, null: 2 };
-    const overdueStatusA = overdueOrder[a];
-    const overdueStatusB = overdueOrder[b];
-    console.log(overdueStatusA)
+  // const customSortOverdue = (a: any, b: any) => {
+  //   const overdueOrder = { true: 0, false: 1, null: 2 };
+  //   const overdueStatusA = overdueOrder[a];
+  //   const overdueStatusB = overdueOrder[b];
+  //   console.log(overdueStatusA)
 
-    if (
-      overdueStatusHeader === "Overdue" ||
-      overdueStatusHeader === "Overdue ▲"
-    ) {
-      return overdueStatusA - overdueStatusB;
-    } else if (overdueStatusHeader === "Overdue ▼") {
-      return overdueStatusB - overdueStatusA;
-    }
-  };
+  //   if (
+  //     overdueStatusHeader === "Overdue" ||
+  //     overdueStatusHeader === "Overdue ▲"
+  //   ) {
+  //     return overdueStatusA - overdueStatusB;
+  //   } else if (overdueStatusHeader === "Overdue ▼") {
+  //     return overdueStatusB - overdueStatusA;
+  //   }
+  // };
 
   async function sortOverdueStatus() {
     setBlockReset(true);
+    setSortField('cl.overdue_status');
     if (
       overdueStatusHeader === "Overdue" ||
       overdueStatusHeader === "Overdue ▲"
     ) {
       setOverdueStatusHeader("Overdue ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort(customSortOverdue);
-        return newState;
-      });
+      setSortOrder('desc');
     } else if (overdueStatusHeader === "Overdue ▼") {
       setOverdueStatusHeader("Overdue ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort(customSortOverdue);
-        return newState;
-      });
+      setSortOrder('asc');
     }
+    setDataChanged(true);
   }
-
   async function sortDate(activeTabIndex: any) {
     setBlockReset(true);
     let dateType =
@@ -409,112 +404,71 @@ export default function Checklist(props: ChecklistProps) {
         : activeTabIndex === 3
         ? "Approved Date"
         : "Created On";
+
+    if (dateType == "Created On") {
+      setSortField("cl.created_date");
+    } else if (dateType == "Completed Date") {
+      setSortField("cs.date");
+    } else if (dateType == "Approved Date") {
+      setSortField("cs.date");
+    }
+
     if (dateArrow == "" || dateArrow == " ▲") {
       setDateArrow(" ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        if (dateType == "Created On") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
-          );
-        } else if (dateType == "Completed Date") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
-          );
-        } else if (dateType == "Approved Date") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
-          );
-        }
-        return newState;
-      });
+      setSortOrder("desc");
     } else if (dateArrow == " ▼") {
       setDateArrow(" ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        if (dateType == "Created On") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
-          );
-        } else if (dateType == "Completed Date") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
-          );
-        } else if (dateType == "Approved Date") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
-          );
-        }
-
-        return newState;
-      });
+      setSortOrder("asc");
     }
+    setDataChanged(true);
   }
 
   async function sortAssignedTo() {
     setBlockReset(true);
+    setSortField('assigneduser')
     if (
       assignedToHeader === "Assigned To" ||
       assignedToHeader === "Assigned To ▲"
     ) {
       setAssignedToHeader("Assigned To ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.assigneduser < b.assigneduser ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('desc');
     } else if (assignedToHeader === "Assigned To ▼") {
       setAssignedToHeader("Assigned To ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.assigneduser > b.assigneduser ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('asc');
     }
+    setDataChanged(true);
   }
 
   async function sortSignOffBy() {
     setBlockReset(true);
+    setSortField('signoffuser')
     if (
       signOffHeader === "Signed Off By" ||
       signOffHeader === "Signed Off By ▲"
     ) {
       setSignOffHeader("Signed Off By ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.signoffuser < b.signoffuser ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('desc');
     } else if (signOffHeader === "Signed Off By ▼") {
       setSignOffHeader("Signed Off By ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.signoffuser > b.signoffuser ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('asc');
     }
+    setDataChanged(true);
   }
 
   async function sortCreatedBy() {
     setBlockReset(true);
+    setSortField('createdbyuser');
     if (
       createdByHeader === "Created By" ||
       createdByHeader === "Created By ▲"
     ) {
       setCreatedByHeader("Created By ▼");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.createdbyuser > b.createdbyuser ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('desc');
     } else if (createdByHeader === "Created By ▼") {
       setCreatedByHeader("Created By ▲");
-      setChecklistItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.createdbyuser < b.createdbyuser ? 1 : -1));
-        return newState;
-      });
+      setSortOrder('asc');
     }
+    setDataChanged(true);
   }
 
   return (
@@ -591,6 +545,7 @@ export default function Checklist(props: ChecklistProps) {
                 <>
                   <Header>
                     <HeaderRow>
+                      <HeaderCell resize>Action</HeaderCell>
                       <HeaderCell
                         resize
                         onClick={() => updateTable(sortId)}
@@ -659,7 +614,6 @@ export default function Checklist(props: ChecklistProps) {
                       >
                         {createdByHeader}
                       </HeaderCell>
-                      <HeaderCell resize>Action</HeaderCell>
                     </HeaderRow>
                   </Header>
 
@@ -667,171 +621,6 @@ export default function Checklist(props: ChecklistProps) {
                     {tableList.map((item) => {
                       return (
                         <Row key={item.id} item={item}>
-                          <Cell>{item.id}</Cell>
-                          <Cell>
-                            <Tooltip
-                              overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              placement="bottom"
-                              trigger={["hover"]}
-                              overlay={<span>{item.description}</span>}
-                            >
-                              <div>{item.description}</div>
-                            </Tooltip>
-                          </Cell>
-                          <Cell>
-                            <span
-                              style={{
-                                color: getColor(item.status),
-                                fontWeight: "bold",
-                              }}
-                            >
-                              {item.status}
-                            </span>
-                          </Cell>
-                          <Cell>
-                            <Tooltip
-                              overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              placement="bottom"
-                              trigger={["hover"]}
-                              overlay={
-                                <span>
-                                  {(() => {
-                                    try {
-                                      let dateToDisplay;
-
-                                      if (activeTabIndex === 2) {
-                                        dateToDisplay = item.activity_log
-                                          .reverse()
-                                          .find(
-                                            (activity) =>
-                                              activity["activity_type"] ===
-                                              "WORK DONE"
-                                          )?.date;
-                                      } else if (activeTabIndex === 3) {
-                                        dateToDisplay = item.activity_log
-                                          .reverse()
-                                          .find(
-                                            (activity) =>
-                                              activity["activity_type"] ===
-                                              "APPROVED"
-                                          )?.date;
-                                      } else {
-                                        dateToDisplay = item.created_date;
-                                      }
-
-                                      if (dateToDisplay) {
-                                        return moment(
-                                          new Date(dateToDisplay)
-                                        ).format("MMMM Do YYYY, h:mm:ss a");
-                                      } else {
-                                        return "Date not found";
-                                      }
-                                    } catch (error) {
-                                      console.error(
-                                        "An error occurred:",
-                                        error
-                                      );
-                                      return "Error occurred";
-                                    }
-                                  })()}
-                                </span>
-                              }
-                            >
-                              <div>
-                                {(() => {
-                                  try {
-                                    let dateToDisplay;
-
-                                    if (activeTabIndex === 2) {
-                                      dateToDisplay = item.activity_log
-                                        .reverse()
-                                        .find(
-                                          (activity) =>
-                                            activity["activity_type"] ===
-                                            "WORK DONE"
-                                        )?.date;
-                                    } else if (activeTabIndex === 3) {
-                                      dateToDisplay = item.activity_log
-                                        .reverse()
-                                        .find(
-                                          (activity) =>
-                                            activity["activity_type"] ===
-                                            "APPROVED"
-                                        )?.date;
-                                    } else {
-                                      dateToDisplay = item.created_date;
-                                    }
-
-                                    if (dateToDisplay) {
-                                      return moment(
-                                        new Date(dateToDisplay)
-                                      ).format("MMMM Do YYYY, h:mm:ss a");
-                                    } else {
-                                      return "Date not found";
-                                    }
-                                  } catch (error) {
-                                    console.error("An error occurred:", error);
-                                    return "Error occurred";
-                                  }
-                                })()}
-                              </div>
-                            </Tooltip>
-                          </Cell>
-                          {/*Only show the Overdue column for the pending, assigned and work done tabs*/}
-                          {(activeTabIndex === 0 ||
-                            activeTabIndex === 1 ||
-                            activeTabIndex === 2) && (
-                            <Cell
-                              style={{
-                                color: getColor(
-                                  item.overdue_status ? "OVERDUE" : "VALID"
-                                ),
-                                fontWeight: "bold",
-                              }}
-                            >
-                              {item.overdue_status ? "OVERDUE" : "VALID"}
-                            </Cell>
-                          )}
-                          <Cell>
-                            <Tooltip
-                              overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              placement="bottom"
-                              trigger={["hover"]}
-                              overlay={<span>{item.assigneduser}</span>}
-                            >
-                              <div>{item.assigneduser}</div>
-                            </Tooltip>
-                          </Cell>
-                          <Cell>
-                            <Tooltip
-                              overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              placement="bottom"
-                              trigger={["hover"]}
-                              overlay={<span>{item.signoffuser}</span>}
-                            >
-                              <div>{item.signoffuser}</div>
-                            </Tooltip>
-                          </Cell>
-                          <Cell>
-                            <Tooltip
-                              overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              placement="bottom"
-                              trigger={["hover"]}
-                              overlay={
-                                <span>
-                                  {item.createdbyuser != " "
-                                    ? item.createdbyuser
-                                    : "System Generated"}
-                                </span>
-                              }
-                            >
-                              <div>
-                                {item.createdbyuser != " "
-                                  ? item.createdbyuser
-                                  : "System Generated"}
-                              </div>
-                            </Tooltip>
-                          </Cell>
                           <Cell>
                             { userPermission('canManageChecklist') &&
                             [ 
@@ -897,6 +686,193 @@ export default function Checklist(props: ChecklistProps) {
                               <AiOutlineFolderView size={22} title={"View"} />
                             </Link>
                           </Cell>
+                          <Cell>{item.id}</Cell>
+                          <Cell>
+                            <Tooltip
+                              overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              placement="bottom"
+                              trigger={["hover"]}
+                              overlay={<span>{item.description}</span>}
+                            >
+                              <div>{item.description}</div>
+                            </Tooltip>
+                          </Cell>
+                          <Cell>
+                            <span
+                              style={{
+                                color: getColor(item.status),
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {item.status}
+                            </span>
+                          </Cell>
+                          <Cell>
+                            <Tooltip
+                              overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              placement="bottom"
+                              trigger={["hover"]}
+                              overlay={
+                                <span>
+                                  {(() => {
+                                    try {
+                                      let dateToDisplay;
+
+                                      if (activeTabIndex === 2) {
+                                        const statusArr = item?.checklist_status?.split(",");
+                                        const status = statusArr?.filter(element => element.includes('WORK DONE') || element.includes('REASSIGNMENT REQUESTS'))[0];
+                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
+                                        dateToDisplay = statusDate;
+                                        /*dateToDisplay = item.activity_log
+                                          .reverse()
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ===
+                                              "WORK DONE"
+                                          )?.date;*/
+                                      } else if (activeTabIndex === 3) {
+                                        const statusArr = item?.checklist_status?.split(",");
+                                        const status = statusArr?.filter(element => element.includes('APPROVED') || element.includes('CANCELLED'))[0];
+                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
+                                        dateToDisplay = statusDate;
+                                        /*dateToDisplay = statusDate;
+                                        dateToDisplay = item.activity_log
+                                          .reverse()
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ===
+                                              "APPROVED"
+                                          )?.date;*/
+                                      } else {
+                                        dateToDisplay = item.created_date;
+                                      }
+
+                                      if (dateToDisplay) {
+                                        return moment(
+                                          new Date(dateToDisplay)
+                                        ).format("MMMM Do YYYY, h:mm:ss a");
+                                      } else {
+                                        return "Date not found";
+                                      }
+                                    } catch (error) {
+                                      console.error(
+                                        "An error occurred:",
+                                        error
+                                      );
+                                      return "Error occurred";
+                                    }
+                                  })()}
+                                </span>
+                              }
+                            >
+                              <div>
+                                  {(() => {
+                                    try {
+                                      let dateToDisplay;
+
+                                      if (activeTabIndex === 2) {
+                                        const statusArr = item?.checklist_status?.split(",");
+                                        const status = statusArr?.filter(element => element.includes('WORK DONE'))[0];
+                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
+                                        dateToDisplay = statusDate;
+                                        /*dateToDisplay = item.activity_log
+                                          .reverse()
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ===
+                                              "WORK DONE"
+                                          )?.date;*/
+                                      } else if (activeTabIndex === 3) {
+                                        const statusArr = item?.checklist_status?.split(",");
+                                        const status = statusArr?.filter(element => element.includes('CANCELLED') || element.includes('APPROVED'))[0];
+                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
+                                        dateToDisplay = statusDate;
+                                        /*dateToDisplay = statusDate;
+                                        dateToDisplay = item.activity_log
+                                          .reverse()
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ===
+                                              "APPROVED"
+                                          )?.date;*/
+                                      } else {
+                                        dateToDisplay = item.created_date;
+                                      }
+
+                                      if (dateToDisplay) {
+                                        return moment(
+                                          new Date(dateToDisplay)
+                                        ).format("MMMM Do YYYY, h:mm:ss a");
+                                      } else {
+                                        return "Date not found";
+                                      }
+                                    } catch (error) {
+                                      console.error(
+                                        "An error occurred:",
+                                        error
+                                      );
+                                      return "Error occurred";
+                                    }
+                                  })()}
+                              </div>
+                            </Tooltip>
+                          </Cell>
+                          {/*Only show the Overdue column for the pending, assigned and work done tabs*/}
+                          {(activeTabIndex === 0 ||
+                            activeTabIndex === 1 ||
+                            activeTabIndex === 2) && (
+                            <Cell
+                              style={{
+                                color: getColor(
+                                  item.overdue_status ? "OVERDUE" : "VALID"
+                                ),
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {item.overdue_status ? "OVERDUE" : "VALID"}
+                            </Cell>
+                          )}
+                          <Cell>
+                            <Tooltip
+                              overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              placement="bottom"
+                              trigger={["hover"]}
+                              overlay={<span>{item.assigneduser}</span>}
+                            >
+                              <div>{item.assigneduser}</div>
+                            </Tooltip>
+                          </Cell>
+                          <Cell>
+                            <Tooltip
+                              overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              placement="bottom"
+                              trigger={["hover"]}
+                              overlay={<span>{item.signoffuser}</span>}
+                            >
+                              <div>{item.signoffuser}</div>
+                            </Tooltip>
+                          </Cell>
+                          <Cell>
+                            <Tooltip
+                              overlayInnerStyle={{ fontSize: "0.7rem" }}
+                              placement="bottom"
+                              trigger={["hover"]}
+                              overlay={
+                                <span>
+                                  {item.createdbyuser != " "
+                                    ? item.createdbyuser
+                                    : "System Generated"}
+                                </span>
+                              }
+                            >
+                              <div>
+                                {item.createdbyuser != " "
+                                  ? item.createdbyuser
+                                  : "System Generated"}
+                              </div>
+                            </Tooltip>
+                          </Cell>
+                          
                         </Row>
                       );
                     })}

@@ -31,6 +31,8 @@ import COPTable from "../../../components/ChangeOfParts/COPTable";
 import AssetHistoryModalContainer from "../../../components/Asset/AssetHistory/AssetHistoryModalContainer";
 import { useCurrentUser } from "../../../components/SWR";
 
+const page = 1; //default page number for AssetHistoryModelContainer
+
 // Get asset detail by psa id
 const getAsset = async (id: number) => {
   const url = "/api/assetDetails/";
@@ -316,7 +318,7 @@ export default function AssetDetails(props: {
           // requestHistory={assetRequestHistory!}
           assetHistory={props.assetHistory}
           id={props.id}
-          // page={page}
+          page={page}
         />
         {/* <table className="assetHistoryTable table">
           <thead>

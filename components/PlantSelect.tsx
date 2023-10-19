@@ -5,6 +5,7 @@ import { CMMSPlant } from "../types/common/interfaces";
 interface PlantSelectProps {
     onChange: React.ChangeEventHandler<HTMLSelectElement>;
     accessControl?: boolean; //plant select restricted to user
+    universalPlants?: boolean; // true: "All Plants", false: dont show anything
     allPlants?: boolean; // true : "view all plants", false: "Select a plant"
     name?: string;
     default?: boolean; // true: able to view all plants but dont have "view all plants" option
@@ -73,6 +74,7 @@ export default function PlantSelect(props: PlantSelectProps) {
             {props.allPlants
                 ? plantList.length > 1 && <option value={0}>View all Plants</option>
                 : !props.default && <option hidden>Select plant</option>}
+            {props.universalPlants && <option value={0}>All Plants</option>}
             {plantOptions}
         </select>
     );

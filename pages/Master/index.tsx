@@ -319,8 +319,8 @@ export default function Master() {
           <style>
             {`
           .scrollable-tabs::-webkit-scrollbar {
-            width: 0;
-            height: 0;
+            width: 40;
+            height: 40;
           }
         `}
           </style>

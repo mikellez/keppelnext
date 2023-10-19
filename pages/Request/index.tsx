@@ -112,6 +112,7 @@ export interface RequestItem {
   associatedrequestid?: number;
   overdue_status?: boolean;
   description_other?: string;
+  request_status?: string;
 }
 
 export interface RequestProps {
@@ -217,6 +218,10 @@ export default function Request(props: RequestProps) {
   const [assetNameHeader, setAssetNameHeader] = useState("Asset Name");
   const [requestedByHeader, setRequestedByHeader] = useState("Requested By");
 
+  const [sortField, setSortField] = useState("r.request_id");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [dataChanged, setDataChanged] = useState(false);
+
   const switchColumns = (index: number) => {
     setReady(false);
     setActiveTabIndex(index);
@@ -226,14 +231,13 @@ export default function Request(props: RequestProps) {
   };
 
   const handleExpand = async (item: RequestItem) => {
-    // console.log(item);
     if (ids.includes(item.id)) {
       setIds(ids.filter((id) => id !== item.id));
     } else {
       setIds(ids.concat(item.id));
       instance.get(`/api/request/${item.id}`).then((res: any) => {
         const request = res.data;
-        // console.log(request);
+        // console.log(request.associatedrequestid);
         // update with further details
         setRequestItems((prev) =>
           prev.map((req) =>
@@ -264,6 +268,7 @@ export default function Request(props: RequestProps) {
     "associatedrequestid",
     "activity_log",
     "overdue_status",
+    "request_status"
   ];
   
   const filteredRequest = useRequestFilter(props, page, searchRef.current.value, fields);
@@ -271,7 +276,9 @@ export default function Request(props: RequestProps) {
     indexedColumn[activeTabIndex],
     page,
     searchRef.current.value,
-    fields
+    fields,
+    sortField,
+    sortOrder
   );
 
   const {
@@ -321,8 +328,6 @@ export default function Request(props: RequestProps) {
         if (!blockReset) {
           setRequestItems(
             requestData.rows.map((row: CMMSRequest, total: number) => {
-              // console.log(requestData);
-
               return {
                 id: row.request_id,
                 ...row,
@@ -341,7 +346,25 @@ export default function Request(props: RequestProps) {
       // setRequestItems([]);
       setTotalPages(1);
     }
-  }, [requestData, requestIsFetchValidating, isReady, page, props?.isReady]);
+
+    if (dataChanged && requestData) {
+      setRequestItems(
+        requestData.rows.map((row: CMMSRequest, total: number) => {
+          return {
+            id: row.request_id,
+            ...row,
+            created_date: new Date(row.created_date),
+          };
+        })
+      );
+    }
+  }, [
+    dataChanged,
+    requestData,
+    requestIsFetchValidating,
+    page,
+    props?.isReady,
+  ]); //removed isReady from dependencies
 
   const updateTable = (foo: Function) => {
     setReady(false);
@@ -351,50 +374,32 @@ export default function Request(props: RequestProps) {
   };
 
   async function sortId() {
+    setBlockReset(true);
+    setSortField("r.request_id");
     if (IdHeader === "ID" || IdHeader === "ID ▲") {
       setIdHeader("ID ▼");
-      setBlockReset(true);
-      console.log("setting ID to Desc");
-      setRequestItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.id < b.id ? 1 : -1));
-        return newState;
-      });
+      setSortOrder("desc");
     } else if (IdHeader === "ID ▼") {
       setIdHeader("ID ▲");
-      setBlockReset(true);
-      console.log("setting ID to Asc");
-      setRequestItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.id > b.id ? 1 : -1));
-        return newState;
-      });
+      setSortOrder("asc");
     }
+    setDataChanged(true);
   }
 
   async function sortFaultType() {
+    setBlockReset(true);
+    setSortField("ft.fault_type");
     if (
       faultTypeHeader === "Fault Type" ||
       faultTypeHeader === "Fault Type ▲"
     ) {
       setFaultTypeHeader("Fault Type ▼");
-      setBlockReset(true);
-      console.log("setting FaultOrder to Desc");
-      setRequestItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.fault_name < b.fault_name ? 1 : -1));
-        return newState;
-      });
+      setSortOrder("desc");
     } else if (faultTypeHeader === "Fault Type ▼") {
       setFaultTypeHeader("Fault Type ▲");
-      setBlockReset(true);
-      console.log("setting FaultOrder to Asc");
-      setRequestItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.fault_name > b.fault_name ? 1 : -1));
-        return newState;
-      });
+      setSortOrder("asc");
     }
+    setDataChanged(true);
   }
 
   const customSortByPriority = (a: any, b: any) => {
@@ -410,43 +415,29 @@ export default function Request(props: RequestProps) {
   };
 
   async function sortPriority() {
+    setBlockReset(true);
+    setSortField("r.priority_id");
     if (priorityHeader === "Priority" || priorityHeader === "Priority ▲") {
       setPriorityHeader("Priority ▼");
-      setBlockReset(true);
-      console.log("setting Priority order to Desc");
-      setRequestItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort(customSortByPriority);
-        return newState;
-      });
+      setSortOrder("desc");
     } else if (priorityHeader === "Priority ▼") {
       setPriorityHeader("Priority ▲");
-      setBlockReset(true);
-      setRequestItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort(customSortByPriority);
-        return newState;
-      });
+      setSortOrder("asc");
     }
+    setDataChanged(true);
   }
 
   async function sortLocation() {
     setBlockReset(true);
+    setSortField("pm.plant_name");
     if (locationHeader === "Location" || locationHeader === "Location ▲") {
       setLocationHeader("Location ▼");
-      setRequestItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.plant_name < b.plant_name ? 1 : -1));
-        return newState;
-      });
+      setSortOrder("desc");
     } else if (locationHeader === "Location ▼") {
       setLocationHeader("Location ▲");
-      setRequestItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.plant_name > b.plant_name ? 1 : -1));
-        return newState;
-      });
+      setSortOrder("asc");
     }
+    setDataChanged(true);
   }
 
   async function sortDate(activeTabIndex: any) {
@@ -457,97 +448,59 @@ export default function Request(props: RequestProps) {
         : activeTabIndex === 3
         ? "Approved Date"
         : "Created On";
-    if (dateArrow == "" || dateArrow == " ▲") {
-      setDateArrow(" ▼");
-      setRequestItems((prevState) => {
-        const newState = [...prevState];
-        if (dateType == "Created On") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
-          );
-        } else if (dateType == "Completed Date") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
-          );
-        } else if (dateType == "Approved Date") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) > new Date(b.created_date) ? 1 : -1
-          );
-        }
-        return newState;
-      });
-    } else if (dateArrow == " ▼") {
-      setDateArrow(" ▲");
-      setRequestItems((prevState) => {
-        const newState = [...prevState];
-        if (dateType == "Created On") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
-          );
-        } else if (dateType == "Completed Date") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
-          );
-        } else if (dateType == "Approved Date") {
-          newState.sort((a, b) =>
-            new Date(a.created_date) < new Date(b.created_date) ? 1 : -1
-          );
-        }
 
-        return newState;
-      });
+    if (dateType == "Created On") {
+      setSortField("r.created_date");
+    } else if (dateType == "Completed Date") {
+      setSortField("rs.date");
+    } else if (dateType == "Approved Date") {
+      setSortField("rs.date");
     }
+
+    if (dateArrow == "" || dateArrow == " ▼") {
+      setDateArrow(" ▲");
+      setSortOrder("asc");
+      
+    } else if (dateArrow == " ▲") {
+      setDateArrow(" ▼");
+      setSortOrder("desc");
+    } 
+    setDataChanged(true);
   }
 
   async function sortAssetName() {
     setBlockReset(true);
+    setSortField("tmp1.asset_name");
     if (
       assetNameHeader === "Asset Name" ||
       assetNameHeader === "Asset Name ▲"
     ) {
       setAssetNameHeader("Asset Name ▼");
-      setRequestItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.asset_name > b.asset_name ? 1 : -1));
-        return newState;
-      });
+      setSortOrder("desc");
     } else if (assetNameHeader === "Asset Name ▼") {
       setAssetNameHeader("Asset Name ▲");
-      setRequestItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.asset_name < b.asset_name ? 1 : -1));
-        return newState;
-      });
+      setSortOrder("asc");
     }
+    setDataChanged(true);
   }
-
-  // const customSortRequestedBy = (a,b) => {
-  //   const usernameA =
-  // }
 
   async function sortRequestedBy() {
     //linked to user_id, related to user_name in users table
     setBlockReset(true);
+    setSortField("created_by");
     if (
       requestedByHeader === "Requested By" ||
       requestedByHeader === "Requested By ▲"
     ) {
       setRequestedByHeader("Requested By ▼");
-      setRequestItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.created_by > b.created_by ? 1 : -1));
-        return newState;
-      });
+      setSortOrder("desc");
     } else if (requestedByHeader === "Requested By ▼") {
       setRequestedByHeader("Requested By ▲");
-      setRequestItems((prevState) => {
-        const newState = [...prevState];
-        newState.sort((a, b) => (a.created_by < b.created_by ? 1 : -1));
-        return newState;
-      });
+      setSortOrder("asc");
     }
+    setDataChanged(true);
   }
-  3434;
+
   return (
     <ModuleMain>
       <ModuleHeader title="Request" header="Request">
@@ -848,76 +801,109 @@ export default function Request(props: RequestProps) {
                                 overlayInnerStyle={{ fontSize: "0.7rem" }}
                                 placement="bottom"
                                 trigger={["hover"]}
-                                overlay={
-                                  (() => {
-                                    try {
-                                      if (activeTabIndex === 2) {
-                                        const completedActivity = item.activity_log.reverse().find(
-                                          (activity) => activity["activity_type"] === "COMPLETED"
-                                        );
-                                        if (completedActivity) {
-                                          return moment(new Date(completedActivity.date)).format(
-                                            "MMMM Do YYYY, h:mm:ss a"
+                                overlay={(() => {
+                                  try {
+                                    if (activeTabIndex === 2) {
+                                      const completedActivity =
+                                        item.activity_log
+                                          .reverse()
+                                          .find(
+                                            (activity) =>
+                                              activity["activity_type"] ===
+                                              "COMPLETED"
                                           );
-                                        }
-                                      } else if (activeTabIndex === 3) {
-                                        const approvedActivity = item.activity_log.reverse().find(
-                                          (activity) => activity["activity_type"] === "APPROVED"
-                                        );
-                                        if (approvedActivity) {
-                                          return moment(new Date(approvedActivity.date)).format(
-                                            "MMMM Do YYYY, h:mm:ss a"
-                                          );
-                                        }
+                                      if (completedActivity) {
+                                        return moment(
+                                          new Date(completedActivity.date)
+                                        ).format("MMMM Do YYYY, h:mm:ss a");
                                       }
-
-                                      return moment(new Date(item.created_date)).format(
-                                        "MMMM Do YYYY, h:mm:ss a"
-                                      );
-                                    } catch (error) {
-                                      // Handle any parsing or formatting errors here
-                                      console.error("Date formatting error:", error);
-                                      return "Invalid Date"; // Or another error message or fallback
+                                    } else if (activeTabIndex === 3) {
+                                      const approvedActivity = item.activity_log
+                                        .reverse()
+                                        .find(
+                                          (activity) =>
+                                            activity["activity_type"] ===
+                                            "APPROVED"
+                                        );
+                                      if (approvedActivity) {
+                                        return moment(
+                                          new Date(approvedActivity.date)
+                                        ).format("MMMM Do YYYY, h:mm:ss a");
+                                      }
                                     }
-                                  })()}
-                                
+
+                                    return moment(
+                                      new Date(item.created_date)
+                                    ).format("MMMM Do YYYY, h:mm:ss a");
+                                  } catch (error) {
+                                    // Handle any parsing or formatting errors here
+                                    console.error(
+                                      "Date formatting error:",
+                                      error
+                                    );
+                                    return "Invalid Date"; // Or another error message or fallback
+                                  }
+                                })()}
                               >
                                 <div>
                                   {(() => {
                                     try {
+                                      let dateToDisplay;
+
                                       if (activeTabIndex === 2) {
-                                        const completedActivity = item.activity_log
-                                          .reverse()
-                                          .find((activity) => activity["activity_type"] === "COMPLETED");
 
-                                        if (completedActivity && completedActivity.date) {
-                                          return moment(new Date(completedActivity.date)).format(
-                                            "MMMM Do YYYY, h:mm:ss a"
-                                          );
-                                        }
+                                        const statusArr = item?.request_status?.split(",");
+                                        const status = statusArr?.filter(element => element.includes('COMPLETED'))[0];
+                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
+                                        dateToDisplay = statusDate;
+
+                                        /*const completedActivity =
+                                          item.activity_log
+                                            .reverse()
+                                            .find(
+                                              (activity) =>
+                                                activity["activity_type"] ===
+                                                "COMPLETED"
+                                            );
+                                            */
+
                                       } else if (activeTabIndex === 3) {
-                                        const approvedActivity = item.activity_log
-                                          .reverse()
-                                          .find((activity) => activity["activity_type"] === "APPROVED");
 
-                                        if (approvedActivity && approvedActivity.date) {
-                                          return moment(new Date(approvedActivity.date)).format(
-                                            "MMMM Do YYYY, h:mm:ss a"
-                                          );
-                                        }
+                                        const statusArr = item?.request_status?.split(",");
+                                        const status = statusArr?.filter(element => element.includes('APPROVED') || element.includes('CANCELLED'))[0];
+                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
+                                        dateToDisplay = statusDate;
+
+                                        /*const approvedActivity =
+                                          item.activity_log
+                                            .reverse()
+                                            .find(
+                                              (activity) =>
+                                                activity["activity_type"] ===
+                                                "APPROVED"
+                                            );
+                                            */
+
+                                      } else {
+                                        dateToDisplay = item.created_date;
                                       }
 
-                                      if (item.created_date) {
-                                        return moment(new Date(item.created_date)).format(
-                                          "MMMM Do YYYY, h:mm:ss a"
-                                        );
-                                      }
+                                      console.log(dateToDisplay)
 
                                       // Handle case where date information is missing
-                                      return "Date Missing";
+                                      if (dateToDisplay) {
+                                        return moment(
+                                          new Date(dateToDisplay)
+                                        ).format("MMMM Do YYYY, h:mm:ss a");
+                                      } else {
+                                        return "Date not found";
+                                      }
                                     } catch (error) {
                                       // Handle any parsing or formatting errors here
-                                      console.error("Date formatting error:", error);
+                                      console.error(
+                                        "Date formatting error:",
+                                        error
+                                      );
                                       return "Invalid Date"; // Or another error message or fallback
                                     }
                                   })()}
@@ -1086,7 +1072,12 @@ export default function Request(props: RequestProps) {
                                     >
                                       {(() => {
                                         try {
-                                          if ( userPermission('canManageRequestTicket') && item.status_id === 3) {
+                                          if (
+                                            userPermission(
+                                              "canManageRequestTicket"
+                                            ) &&
+                                            item.status_id === 3
+                                          ) {
                                             return (
                                               <Link
                                                 href={`/Request/Manage/${item.id}`}
@@ -1094,12 +1085,18 @@ export default function Request(props: RequestProps) {
                                                 <strong>Manage</strong>
                                               </Link>
                                             );
-                                          } else if ( userPermission('canCompleteRequestTicket') && (item.status_id === 2 || item.status_id === 5)) {
+                                          } else if (
+                                            userPermission(
+                                              "canCompleteRequestTicket"
+                                            ) &&
+                                            (item.status_id === 2 ||
+                                              item.status_id === 5)
+                                          ) {
                                             return (
                                               <Link
                                                 href={`/Request/Complete/${item.id}`}
                                               >
-                                                <strong>Complete</strong>
+                                                <strong>Start Work</strong>
                                               </Link>
                                             );
                                           } else if (

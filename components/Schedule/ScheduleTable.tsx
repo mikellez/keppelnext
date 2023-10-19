@@ -9,6 +9,7 @@ import styles from "../../styles/Schedule.module.scss";
 interface ScheduleTableProps {
     schedules?: ScheduleInfo[];
     viewRescheduled?: boolean;
+    viewNewScheduled?: boolean;
 }
 
 interface ScheduleInfoItem {
@@ -35,6 +36,7 @@ interface ScheduleInfoItem {
     isSingle: boolean;
     index?: number;
     status?: number;
+    isNewSchedule?: boolean;
 }
 
 const COLUMNS: Column<ScheduleInfoItem>[] = [
@@ -90,6 +92,10 @@ export default function ScheduleTable(props: ScheduleTableProps) {
             if (!props.viewRescheduled) {
                 schedules = schedules.filter((schedule) => schedule.end_date != null);
             }
+            if(props.viewNewScheduled) {
+                schedules = schedules.filter((schedule) => schedule.isNewSchedule);
+                console.log(schedules)
+            }
             setScheduleItems(
                 schedules.map((row) => {
                     return {
@@ -116,6 +122,7 @@ export default function ScheduleTable(props: ScheduleTableProps) {
                         isSingle: row.isSingle,
                         index: row.index,
                         status: row.status,
+                        isNewSchedule: row.isNewSchedule
                     };
                 })
             );

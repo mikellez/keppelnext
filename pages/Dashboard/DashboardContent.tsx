@@ -22,6 +22,8 @@ import ChangeOfPartsPage from "../ChangeOfParts";
 import Checklist from "../Checklist";
 import Feedback from "../Feedback";
 import Request from "../Request/index";
+import { fetchData } from ".";
+import BChart from "../../components/Dashboard/BChart";
 
 const { Option } = Select;
 
@@ -98,6 +100,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
   });
   const [checklistData, setChecklistData] = useState<CMMSDashboardData[]>();
   const [requestData, setRequestData] = useState<CMMSDashboardData[]>();
+  const [requestPriorityData, setRequestPriorityData] = useState<CMMSDashboardData[]>();
   const [copData, setCOPData] = useState<CMMSDashboardData[]>();
   const [feedbackData, setFeedbackData] = useState<CMMSDashboardData[]>();
   const [licenseData, setLicenseData] = useState<CMMSDashboardData[]>();
@@ -164,9 +167,12 @@ export default function DashboardContent({ permissions }: { permissions: string[
     //console.log(getAllRequest);
 
     // Don't include overdue requests in total number of requests
+    
     if(field != "status"){
       fetchData("request", plant, field, datetype, date).then((result) => {
-        if (result) setRequestData(result);
+        if (result) {
+          setRequestData(result);
+        }
       });
     }
     else{
@@ -191,6 +197,12 @@ export default function DashboardContent({ permissions }: { permissions: string[
         },
       ]);
     }
+    // For request bar chart
+    fetchData("request", plant, "priority", datetype, date).then((result) => {
+      if (result) {
+        setRequestPriorityData(result);
+      }
+    });
 
     setRequest({
       totalPendingRequest: pendingRequest?.length || 0,
@@ -681,7 +693,10 @@ export default function DashboardContent({ permissions }: { permissions: string[
 
           {showTotalContainer && requestAccess && (
             <DashboardBox
-              title={"Total Requests: " + totalRequest}
+              title={(requestPriorityData && requestPriorityData.length > 0) ?
+                (<BChart data={requestPriorityData} title={"Request By Priorities"} colors={["#8884d8", "#FFAC41", "#C74B50"]}/>)
+                :"Total Requests: " + totalRequest
+              }
               filter={
                 <select
                   className={`form-select ${styles.dashboardRequestButton}`}
@@ -691,13 +706,14 @@ export default function DashboardContent({ permissions }: { permissions: string[
                 >
                   <option value="status">Status</option>
                   <option value="fault">Fault Types</option>
-                  <option value="priority">Priority</option>
                 </select>
               }
               style={{ gridArea: "d" }}
             >
-              {requestData && requestData.length > 0 ? (
-                <PChart data={requestData} />
+              {requestData && requestPriorityData && requestPriorityData.length > 0 && requestData.length > 0 ? (
+                <div>
+                  <PChart data={requestData} />
+                </div>
               ) : (
                 <p className={styles.dashboardNoChart}>No requests</p>
               )}

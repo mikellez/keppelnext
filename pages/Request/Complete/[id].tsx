@@ -153,7 +153,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
             <table className={styles.table}>
               <tbody>
                 <tr>
-                  <th className="d-flex align-items-start">Completion File</th>
+                  <th>Completion File <RequiredIcon /></th>
                   <td valign="baseline">
                     <input
                       type="file"
@@ -179,7 +179,7 @@ export default function CompleteRequest(props: RequestPreviewProps) {
                 </tr>
                 <tr>
                   <th>
-                    <RequiredIcon /> Completion Comments
+                    Completion Comments <RequiredIcon /> 
                   </th>
                   <td>
                     <textarea

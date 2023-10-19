@@ -105,8 +105,9 @@ app.prepare().then(() => {
       { path: "/Asset/Edit", permission: "canEditAsset" },
       { path: "/Asset/Details", permission: "canViewAsset" },
       //Logbook
-      { path: "/Logbook", permission: "canViewLogbook" },
+      { path: "/Logbook", permission: "canViewLogbookEntry" },
       // Feedback
+      { path: "/Feedback", permission: "canViewFeedback" },
       // License
       { path: "/License/New", permission: "canCreateLicense"},
       { path: "/License/Acquire", permission: "canAcquireLicense"},
@@ -118,7 +119,6 @@ app.prepare().then(() => {
       // Master
       { path: "/Master/New", permission: "canCreateMaster"},
       { path: "/Master/Edit", permission: "canEditMaster"},
-      { path: "/Master", permission: "canViewMaster"},
       // User
       { path: "/User/Add", permission: "canCreateUserManagement"},
       { path: "/User/Edit", permission: "canEditUserManagement"},
@@ -129,7 +129,7 @@ app.prepare().then(() => {
     if (req.user) {
       for (const path of paths) {
         if (req.path.startsWith(path.path)) {
-          if (!req.user.permissions[path.permission]) {
+          if (!req.user.permissions.includes(path.permission)) {
             return res.redirect("/403");
           }
         }

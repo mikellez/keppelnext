@@ -12,6 +12,8 @@ import { changeTimelineStatus } from "../Manage";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import { getTimelinesByStatus } from "../../../components/Schedule/TimelineSelect";
 import ScheduleModal from "../../../components/Schedule/ScheduleModal";
+import { MdOutlineLocationOn } from "react-icons/md";
+import PlantSelect from "../../../components/PlantSelect";
 
 // Get timeline details
 export async function getTimeline(id: number): Promise<CMMSTimeline> {
@@ -31,12 +33,21 @@ export async function getSchedules(id: number) {
     return instance
         .get<ScheduleInfo[]>("/api/timeline/schedules/" + id)
         .then((res) => {
-            return res.data;
+            return res.data.map(item=>{return {...item, isNewSchedule: true}});
         })
         .catch((err) => {
             console.log(err.status);
         });
 }
+
+// Get schedules by plant id
+export async function getAllSchedules(id : number) {
+	return await instance.get<ScheduleInfo[]>(`/api/schedule/${id}`)
+	.then(res => {
+		return res.data.map(item=>{return {...item, isNewSchedule: false}})
+	})
+	.catch(err => console.log(err.message))
+};
 
 // Delete a timeline
 async function deleteTimeline(id: number) {
@@ -73,6 +84,28 @@ export default function Timeline() {
     const [invalidModal, setInvalidModal] = useState<boolean>(false);
     const [scheduleModal, setScheduleModal] = useState<boolean>(false);
     const [deleteModal, setDeleteModal] = useState<boolean>(false);
+	const [selectedPlant, setSelectedPlant] = useState<number>(0);
+
+	useEffect(() => {
+        if(timelineId) {
+		    updateSchedules(selectedPlant);
+        }
+
+	}, [selectedPlant, isLoading]);
+
+	function updateSchedules(id : number) {
+		getAllSchedules(id).then((schedules) => {	
+			if (schedules == null) {
+				return console.log("no schedules");	
+			}
+
+			setScheduleList(prev => [...prev.filter(item=>item.isNewSchedule), ...schedules]);
+		});
+	};
+
+	function changePlant(e : React.ChangeEvent<HTMLSelectElement>) {
+		setSelectedPlant(+e.target.value)
+	};
 
     useEffect(() => {
         setScheduleModal(false);
@@ -82,10 +115,16 @@ export default function Timeline() {
             validateTimeline(id).then((result) => {
                 if (!result) router.replace("/404");
                 else {
+                    setSelectedPlant(result.plantId);
                     setTimelineData(result);
                     getSchedules(id).then((schedules) => {
                         if (schedules) {
-                            setScheduleList(schedules);
+                            const updatedSchedules = schedules.map((schedule) => ({
+                                ...schedule,
+                                isNewSchedule: true
+                            }));
+
+                            setScheduleList(prev => [...prev, ...schedules]);
                         }
                     });
                 }
@@ -122,13 +161,25 @@ export default function Timeline() {
             </div>
         );
     } else if (isLoading == false) {
+        console.log('scheduleList', scheduleList)
         return (
             <>
                 <ScheduleTemplate
                     title="Draft Schedule"
                     header="Create Schedule"
                     schedules={scheduleList}
+                    eventClassNames={(args)=> {
+                        console.log(args)
+                        if(args.event.extendedProps.isNewSchedule) {
+                            return ['overlay'];
+                        }
+
+                        return [];
+                    }}
                 >
+                    {/*<MdOutlineLocationOn size={30} />
+                    <PlantSelect onChange={changePlant} allPlants={true} />*/}
+
                     <TooltipBtn
                         text="Delete this draft"
                         onClick={() => {
@@ -183,6 +234,7 @@ export default function Timeline() {
                     closeModal={() => setScheduleModal(false)}
                     title="Schedule Maintenance"
                     timeline={timelineData as CMMSTimeline}
+                    schedules={scheduleList}
                 />
 
                 <ModuleSimplePopup

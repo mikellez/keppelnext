@@ -1,7 +1,7 @@
 const db = require("../../db");
 const moment = require("moment");
 
-exports.getLogbook = async (req, res, next) => {
+const getLogbook = async (req, res, next) => {
   const ITEMS_PER_PAGE = 10;
   const page = req.query.page || 1;
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
@@ -10,12 +10,14 @@ exports.getLogbook = async (req, res, next) => {
     const result = await global.db.query(
       `SELECT concat(u1.first_name, ' ', u1.last_name) AS staff1, 
       concat(u2.first_name, ' ', u2.last_name)  AS staff2, 
-      lb.date, lb.label, lb.entry FROM keppel.logbook lb 
-      JOIN keppel.users u1
-      ON lb.staff1 = u1.user_id
-      JOIN keppel.users u2 
-      ON lb.staff2 = u2.user_id
+      lb.date, lb.label, lb.entry, l1.name, l1.description, lb.custom_description FROM keppel.logbook lb
+
+      JOIN keppel.users u1 ON lb.staff1 = u1.user_id
+      JOIN keppel.users u2 ON lb.staff2 = u2.user_id
+      LEFT JOIN keppel.logbook_labels l1 ON lb.label_id = l1.label_id
+      
       WHERE lb.plant_id = $1
+      
       ORDER BY lb.date DESC
       LIMIT ${ITEMS_PER_PAGE}
       OFFSET ${offsetItems}
@@ -33,8 +35,8 @@ exports.getLogbook = async (req, res, next) => {
   }
 };
 
-exports.addEntryToLogbook = async (req, res, next) => {
-  const { label, entry, staff, plant_id } = req.body;
+const addEntryToLogbook = async (req, res, next) => {
+  const { label, entry, staff, plant_id, label_id, custom_description } = req.body;
   // console.log("hello");
   let data;
   try {
@@ -53,9 +55,9 @@ exports.addEntryToLogbook = async (req, res, next) => {
   let result;
   try {
     result = await global.db.query(
-      `INSERT INTO keppel.logbook (label, entry, date, staff1, staff2, plant_id)
-    VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [label, entry, now, staff.first, staff.second, plant_id]
+      `INSERT INTO keppel.logbook (label, entry, date, staff1, staff2, plant_id, label_id, custom_description)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [label, entry, now, staff.first, staff.second, plant_id, label_id, custom_description]
     );
   } catch (err) {
     // console.log(err);
@@ -67,3 +69,25 @@ exports.addEntryToLogbook = async (req, res, next) => {
 
   res.status(201).send({ ...result.rows[0], staff1, staff2 });
 };
+
+// Gets all the logbook labels
+const getAllLogbookLabels = async (req, res, next) => {
+    try{
+      const result = await global.knex("keppel.logbook_labels").select("*");
+      if (result.length > 0) {
+        return res.status(200).send(result);
+      } else {
+        return res.status(404).json({ msg: "No labels found" });
+      }
+    }
+    catch(err){
+      console.log(err);
+      return res.status(500).json({ msg: err });
+    }
+}
+
+module.exports = {
+  getLogbook,
+  addEntryToLogbook,
+  getAllLogbookLabels,
+}

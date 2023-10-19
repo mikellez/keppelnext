@@ -133,7 +133,7 @@ const specificFeedbackQuery = async (req, options) => {
   }
 
   expandCond = SELECT_ARR;
-  console.log(SELECT_RAW_ARR);
+  //console.log(SELECT_RAW_ARR);
 
   const query = global.knex
     .select(expandCond)

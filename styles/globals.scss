@@ -13,6 +13,17 @@ body {
   box-sizing: border-box;
 }
 
+/*Global style used for overiding column resize handle for asset hierachy table - bug where span for resize
+handle always defaults to right side of table*/
+.tabulator .tabulator-col-resize-handle {
+  position: relative !important;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  display: inline-flex;
+}
+
 .nav-tabs:hover {
   cursor: pointer;
 }
@@ -58,4 +69,12 @@ body {
 
   width: 100%;
   height: 3px;
+}
+
+a.fc-event.fc-event-start.fc-event-end.fc-event-past.fc-daygrid-event.fc-daygrid-block-event.fc-h-event.overlay {
+  opacity: 0.5;
+}
+
+a.fc-event.fc-event-start.fc-event-end.fc-event-future.fc-daygrid-event.fc-daygrid-block-event.fc-h-event.overlay {
+  opacity: 0.5;
 }

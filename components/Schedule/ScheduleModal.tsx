@@ -1,26 +1,28 @@
+import moment from "moment";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { ThreeDots } from "react-loading-icons";
+import { SingleValue } from "react-select";
+import { ModalProps, ModuleModal } from "../";
+import styles from "../../styles/Schedule.module.scss";
+import instance from "../../types/common/axios.config";
 import {
-  CMMSTimeline,
   CMMSSchedule,
-  CMMSScheduleEvent,
+  CMMSTimeline
 } from "../../types/common/interfaces";
 import ChecklistSelect from "../Checklist/ChecklistSelect";
-import RecurrenceSelect from "./RecurrenceSelect";
-import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
-import TooltipBtn from "../TooltipBtn";
-import styles from "../../styles/Schedule.module.scss";
 import ModuleSimplePopup, {
   SimpleIcon,
 } from "../ModuleLayout/ModuleSimplePopup";
-import { ModuleModal, ModalProps } from "../";
-import { useRouter } from "next/router";
-import { ThreeDots } from "react-loading-icons";
-import instance from "../../types/common/axios.config";
-import { SingleValue } from "react-select";
+import TooltipBtn from "../TooltipBtn";
+import AssignToSelect, { AssignedUserOption } from "./AssignToSelect";
+import RecurrenceSelect from "./RecurrenceSelect";
+import { ScheduleInfo } from "./ScheduleTemplate";
 
 interface ScheduleMaintenanceModalProps extends ModalProps {
   timeline?: CMMSTimeline; // use to add schedule in draft
   scheduleEvent?: CMMSSchedule; // used to update schedule in draft
+  schedules?: ScheduleInfo[];
 }
 
 // Makes a post request to schedule a new maintenance
@@ -77,6 +79,7 @@ export default function ScheduleMaintenanceModal(
   const [successModal, setSuccessModal] = useState<boolean>(false);
   const [successEditModal, setSuccessEditModal] = useState<boolean>(false);
   const [failureModal, setFailureModal] = useState<boolean>(false);
+  const [existingModal, setExistingModal] = useState<boolean>(false);
   const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
   const [invalidDateCheck, setInvalidDateCheck] = useState<boolean>(false);
   const [isReady, setIsReady] = useState<boolean>(false);
@@ -96,7 +99,8 @@ export default function ScheduleMaintenanceModal(
           ? new Date(event.target.value)
           : event.target.name === "checklistId" ||
             event.target.name === "recurringPeriod" ||
-            event.target.name === "reminderRecurrence"
+            event.target.name === "reminderRecurrence" || 
+            event.target.name === "advanceSchedule"
           ? parseInt(event.target.value)
           : event.target.value;
       const tmp = { ...prev };
@@ -126,6 +130,30 @@ export default function ScheduleMaintenanceModal(
       };
     });
   }
+
+  const scheduleValidateExistingSchedule = (callback: () => void) => () => {
+    // find existing schedules
+    const existingSchedule = props.schedules?.find((schedule) => {
+      const scheduleStartDate = moment(schedule.start_date).format("YYYY-MM-DD");
+      const scheduleEndDate = moment(schedule.end_date).format("YYYY-MM-DD");
+      const newStartDate = moment(newSchedule.startDate).format("YYYY-MM-DD");
+      const newEndDate = moment(newSchedule.endDate).format("YYYY-MM-DD");
+
+      // Check if the existing schedule falls within the new date range
+      return (
+        (scheduleStartDate >= newStartDate && scheduleStartDate <= newEndDate) ||
+        (scheduleEndDate >= newStartDate && scheduleEndDate <= newEndDate) ||
+        (scheduleStartDate <= newStartDate && scheduleEndDate >= newEndDate) 
+      );
+    });
+
+    if (existingSchedule) {
+      setExistingModal(true);
+    } else {
+      setExistingModal(false);
+      callback();
+    }
+  };
 
   // Submit the new schedule for maintenance on submit click
   function handleSubmit() {
@@ -278,6 +306,23 @@ export default function ScheduleMaintenanceModal(
                   </td>
                 </tr>
                 <tr className={styles.eventModalTableRow}>
+                  <th>Advanced Schedule Period:</th>
+                  <td>
+                    <select
+                      className="form-select"
+                      name="advanceSchedule"
+                      onChange={updateSchedule}
+                      value={newSchedule.advanceSchedule}
+                    >
+                      <option hidden>Select Advanced Period</option>
+                      <option value={0}>No Advanced Checklist Creation</option>
+                      <option value={1}>1 Day in Advance</option>
+                      <option value={2}>2 Days in Advance</option>
+                      <option value={3}>3 Days in Advance</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr className={styles.eventModalTableRow}>
                   <th>Assigned To:</th>
                   <td>
                     <AssignToSelect
@@ -329,7 +374,7 @@ export default function ScheduleMaintenanceModal(
               </div>
               <TooltipBtn
                 toolTip={false}
-                onClick={handleSubmit}
+                onClick={scheduleValidateExistingSchedule(handleSubmit)}
                 disabled={disableSubmit}
               >
                 {props.timeline && <div>Create</div>}
@@ -368,6 +413,36 @@ export default function ScheduleMaintenanceModal(
         text="Please fill in the missing details for the maintenance."
         icon={SimpleIcon.Cross}
         shouldCloseOnOverlayClick={true}
+      />
+
+      <ModuleSimplePopup
+        modalOpenState={existingModal}
+        setModalOpenState={setExistingModal}
+        title="Existing Maintenance"
+        text="There is already an existing maintenance scheduled for this checklist. Do you still want to create?"
+        icon={SimpleIcon.Exclaim}
+        shouldCloseOnOverlayClick={true}
+        buttons={[
+          <TooltipBtn
+            key={1}
+            toolTip={false}
+            onClick={() => {
+              handleSubmit();
+            }}
+          >
+            Create
+          </TooltipBtn>,
+          <TooltipBtn
+            key={1}
+            toolTip={false}
+            onClick={() => {
+              setExistingModal(false);
+            }}
+          >
+            Cancel
+          </TooltipBtn>
+        ]}
+
       />
     </div>
   );

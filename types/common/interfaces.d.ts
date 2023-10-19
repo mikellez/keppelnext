@@ -135,6 +135,7 @@ interface CMMSEmployee extends CMMSUser {
   employee_id?: number;
   full_name: string;
   user_id: number;
+  user_name: string;
 }
 
 interface CMMSRequest {
@@ -220,10 +221,13 @@ interface CMMSScheduleEvent extends CMMSEvent {
     assignedUsernames: string[];
     assignedRoles: string[];
     remarks: string;
+    timeline_remarks: string;
     exclusionList?: number[];
     isSingle?: boolean;
     index?: number;
     status?: number;
+    isNewSchedule?: boolean;
+    advanceSchedule?: number;
   };
   color?: string;
   display?: string;
@@ -254,10 +258,12 @@ interface CMMSSchedule {
   plantName?: string;
   timelineId: number;
   reminderRecurrence: number;
-  prevId?: number;
+  prevId?: number | null;
   isComplete?: boolean;
   status?: number;
   index?: number;
+  mode?: string;
+  advanceSchedule?: number;
 }
 
 interface CMMSSystem {
@@ -563,11 +569,20 @@ interface CMMSLicenseForm {
   images: File[]
 }
 
+interface CMMSLogbookLabel {
+  label_id: number;
+  name: string; // Name of the label
+  description?: string; // Description of label
+  activity_log? : { [key: string]: string }[];
+  created_date? : Date;
+  allow_custom: boolean; // To allow for customization of the label description
+}
+
 export {
   CMMSActivitylog, CMMSAddUser, CMMSAsset, CMMSAssetChecklistHistory, CMMSAssetDetails, CMMSAssetDetailsState, CMMSAssetHistory,
   CMMSAssetRequestHistory, CMMSAssetType, CMMSBaseType, CMMSChangeOfParts, CMMSChangeOfPartsEvent, CMMSChangePassword, CMMSChecklist, CMMSDashboardData, CMMSEmployee, CMMSEvent, CMMSFaultTypes, CMMSFeedback, CMMSLicense, CMMSLicenseForm, CMMSLicenseType, CMMSMasterField, CMMSMasterSubmission, CMMSMasterTables, CMMSPlant, CMMSPlantLoc,
   CMMSPlantLocation, CMMSRequest,
   CMMSRequestTypes, CMMSSchedule, CMMSScheduleEvent, CMMSSubComponent1Name, CMMSSystem,
-  CMMSSystemAsset, CMMSSystemAssetName, CMMSTimeline, CMMSUser, CMMSUserInfo, CMMSUserSettings, CMMSWorkflow, postData
+  CMMSSystemAsset, CMMSSystemAssetName, CMMSTimeline, CMMSUser, CMMSUserInfo, CMMSUserSettings, CMMSWorkflow, postData, CMMSLogbookLabel
 };
 
