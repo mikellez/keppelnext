@@ -706,7 +706,6 @@ export default function DashboardContent({ permissions }: { permissions: string[
                 >
                   <option value="status">Status</option>
                   <option value="fault">Fault Types</option>
-                  <option value="priority">Priority</option>
                 </select>
               }
               style={{ gridArea: "d" }}

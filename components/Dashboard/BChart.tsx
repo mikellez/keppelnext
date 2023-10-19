@@ -9,7 +9,7 @@ import {
   Tooltip,
   Legend
 } from "recharts";
-import { display } from "html2canvas/dist/types/css/property-descriptors/display";
+
 
 interface ChartProps {
     data: CMMSDashboardData[];
@@ -21,6 +21,24 @@ interface ChartProps {
 export default function BChart(props: ChartProps) {
     const [chartData, setChartData] = useState<any>({name: props.title});
 
+    const CustomTooltip = ({ active, payload, label }) => {
+      if (active && payload && payload.length) {
+        return (
+          <div className="custom-tooltip" style={{ display: "inline-block"}}>
+            <p className="label" style={{ paddingLeft: 10}}>{`${label}`}</p>
+            <div style={{ display: "inline-flex"}}>
+              {payload.map((pld) => (
+                <div style={{ display: "inline-block", paddingLeft: 10 }}>
+                  <div>{pld.dataKey}</div>
+                  <div style={{ color: pld.fill }}>{pld.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+    };
+
     useEffect(() => {
         setChartData({name: props.title});
         props.data.map((data) => {
@@ -31,21 +49,21 @@ export default function BChart(props: ChartProps) {
   return (
     <div>
         <BarChart
-        width={500}
-        height={100}
+        width={300}
+        height={50}
         data={[chartData]}
         layout={"vertical"}
         margin={{
-            top: 20,
+            top: 0,
             right: 30,
-            left: 20,
-            bottom: 5
+            left: 10,
+            bottom: 10
         }}
         >
         <YAxis type="category" dataKey="name" hide/>
         <XAxis type="number" hide />
         
-        <Tooltip />
+        <Tooltip content={<CustomTooltip />} />
         {Object.keys(chartData).map((key: string, index: number): any => {
                 if(key != "name"){
                     const bars = [];
