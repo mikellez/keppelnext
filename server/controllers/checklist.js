@@ -443,7 +443,7 @@ const getOutstandingChecklistsQuery = (req) => {
     WHERE
         ua.user_id = $1
         ${userRoleCond} AND
-        (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
+        (cl.status_id = 2 OR cl.status_id = 6)
     ${condition(req)}
     ${advancedScheduleCond(req)}
     ${filterCondition("", plant, date, datetype)}
@@ -468,7 +468,7 @@ const getCompletedChecklistsQuery = (req) => {
     `
     WHERE
         ua.user_id = $1 AND
-        (cl.status_id = 6 OR cl.status_id = 11)
+        (cl.status_id = 4)
     ${condition(req)}
     ${filterCondition("", plant, date, datetype)}
     ${searchCondition(search)}
