@@ -386,6 +386,7 @@ const getAssignedChecklistsQuery = (req) => {
   const sortOrder = req.query.sortOrder;
 
   const fuzzyWhere = fuzzySearchWhereQuery(searchColumns, search);
+  const similarity_score = search == "" ? `` : `,similarity_score`;
 
   //console.log("Checklist Assigned: default sorting");
   //console.log(sortField, sortOrder);
@@ -409,7 +410,7 @@ const getAssignedChecklistsQuery = (req) => {
     ${searchCondition(search)}
     ${groupBYCondition()}
     ${(sortField == undefined || sortOrder == undefined) 
-      ? `ORDER BY cl.created_date DESC` 
+      ? `ORDER BY cl.created_date ${similarity_score} DESC` 
       : `ORDER BY ${sortField} ${sortOrder}`}
     `
   );
@@ -546,6 +547,7 @@ const getForReviewChecklistsQuery = (req) => {
   const sortOrder = req.query.sortOrder;
 
   const fuzzyWhere = fuzzySearchWhereQuery(searchColumns, search);
+  const similarity_score = search == "" ? `` : `,similarity_score`;
 
   return (
     getAllChecklistQuery(req, search) +
@@ -566,7 +568,7 @@ const getForReviewChecklistsQuery = (req) => {
     ${searchCondition(search)}
     ${groupBYCondition()}
     ${(sortField == undefined || sortOrder == undefined) 
-      ? `ORDER BY cs.date DESC` 
+      ? `ORDER BY cs.date ${similarity_score} DESC` 
       : `ORDER BY ${sortField} ${sortOrder}`}
   `
   );
@@ -578,6 +580,7 @@ const getApprovedChecklistsQuery = (req) => {
   const sortOrder = req.query.sortOrder;
 
   const fuzzyWhere = fuzzySearchWhereQuery(searchColumns, search);
+  const similarity_score = search == "" ? `` : `,similarity_score`;
 
   return (
     getAllChecklistQuery(req) +
@@ -598,7 +601,7 @@ const getApprovedChecklistsQuery = (req) => {
     ${searchCondition(search)}
     ${groupBYCondition()}
     ${(sortField == undefined || sortOrder == undefined) 
-      ? `ORDER BY cs.date DESC` 
+      ? `ORDER BY cs.date ${similarity_score} DESC` 
       : `ORDER BY ${sortField} ${sortOrder}`}
   `
   );
