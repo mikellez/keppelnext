@@ -1,15 +1,13 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import instance from '../../types/common/axios.config';
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Select, {
   ActionMeta,
-  GroupBase,
   MultiValue,
   SingleValue,
-  StylesConfig,
+  StylesConfig
 } from "react-select";
 import makeAnimated from "react-select/animated";
+import instance from '../../types/common/axios.config';
 import { CMMSUser } from "../../types/common/interfaces";
-import StateManagedSelect from "react-select/dist/declarations/src/stateManager";
 
 interface AssignToSelectProps {
   onChange: (
@@ -24,6 +22,7 @@ interface AssignToSelectProps {
   className?: string;
   disabled?: boolean;
   value?: any;
+  signoff?: boolean;
 }
 
 interface ErrorMsg {
@@ -41,9 +40,9 @@ export interface AssignedUserOption {
 }
 
 // Axios call to get all assigned users based on plant_id
-async function getAssignedUsers(plantId: number | number[]) {
+async function getAssignedUsers(plantId: number | number[], signoff: boolean) {
   return await instance
-    .get<CMMSUser[] | ErrorMsg>("/api/getAssignedUsers/" + plantId)
+    .get<CMMSUser[] | ErrorMsg>("/api/getAssignedUsers/" + plantId + "?signoff=" + signoff)
     .then((res) => {
       if(res.data)
         return res.data;
@@ -87,8 +86,8 @@ const AssignToSelect = (props: AssignToSelectProps) => {
 
   // Calls an api to get the list of assigned users upon change of plant id
   useEffect(() => {
-    if (props.plantId !== undefined) {
-      getAssignedUsers(props.plantId).then((users) => {
+    if (props.plantId !== undefined) {  
+    getAssignedUsers(props.plantId, props.signoff).then((users) => {
         if (users == null) {
           return console.log("no users");
         }

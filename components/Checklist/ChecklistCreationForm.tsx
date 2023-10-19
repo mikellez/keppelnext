@@ -218,6 +218,7 @@ const ChecklistCreationForm = (props: ChecklistCreationFormProps) => {
                   ? [props.checklistData.signoff_user_id as number]
                   : []
               }
+              signoff={true}
             />
           </div>
         </div>
