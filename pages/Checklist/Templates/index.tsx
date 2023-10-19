@@ -15,28 +15,27 @@
 */
 
 
-import styles from "../../../styles/Checklist.module.scss";
-import React, { useEffect, useState } from "react";
-import Iframe from "react-iframe";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect, useRef, useState } from "react";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import {
   ModuleContent,
-  ModuleDivider,
-  ModuleHeader,
-  ModuleMain,
   ModuleFooter,
+  ModuleHeader,
+  ModuleMain
 } from "../../../components";
+import ChecklistTemplatePane from "../../../components/Checklist/ChecklistTemplatePane";
 import ModuleSimplePopup, {
   SimpleIcon,
 } from "../../../components/ModuleLayout/ModuleSimplePopup";
-import { CMMSChecklist } from "../../../types/common/interfaces";
-import instance from "../../../types/common/axios.config";
 import { useCurrentUser } from "../../../components/SWR";
+import SearchBar from "../../../components/SearchBar/SearchBar";
 import TooltipBtn from "../../../components/TooltipBtn";
-import { useRouter } from "next/router";
+import styles from "../../../styles/Checklist.module.scss";
+import instance from "../../../types/common/axios.config";
 import { Role } from "../../../types/common/enums";
-import { RiDeleteBin6Line } from "react-icons/ri";
-import ChecklistTemplatePane from "../../../components/Checklist/ChecklistTemplatePane";
+import { CMMSChecklist } from "../../../types/common/interfaces";
 
 const deleteTemplate = async (checklistId: number) => {
   try {
@@ -55,13 +54,15 @@ const Templates = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<CMMSChecklist>();
   const [confirmModal, setConfirmModal] = useState<boolean>(false);
   const [successModal, setSuccessModal] = useState<boolean>(false);
+  const searchRef = useRef({ value: "" });
+  const [isReady, setReady] = useState(false);
 
   const router = useRouter();
 
   async function getChecklistTemplates(plants: number[]) {
     return await instance({
       method: "get",
-      url: `/api/checklist/templateNames`,
+      url: `/api/checklist/templateNames?search=${searchRef.current.value}`,
     })
       .then((res) => {
         return res.data;
@@ -76,10 +77,11 @@ const Templates = () => {
       getChecklistTemplates(user.data.allocated_plants)
         .then((result) => {
           setChecklistTemplates(result);
+          setReady(true);
         })
         .catch((err) => console.log(err));
     }
-  }, [user.data]);
+  }, [user.data, isReady]);
 
   const checklistTemplateHTML = checklistTemplates?.map((checklist) => {
     return (
@@ -121,6 +123,14 @@ const Templates = () => {
           title="Checklist Templates"
           header="Create From Checklist Templates"
         >
+        <SearchBar
+          ref={searchRef}
+          onSubmit={() => {
+            setReady(false);
+            setChecklistTemplates([]);
+            setSelectedTemplate(undefined);
+          }}
+        />
           <Link href="/Checklist" className="btn btn-secondary">
             Back
           </Link>

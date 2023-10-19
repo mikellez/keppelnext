@@ -49,6 +49,38 @@ const downloadChecklistPDF = async (checklistId: number) => {
   }
 };
 
+const downloadMultipleChecklistsPDF = async (checklistIdArray: number[]) => {
+  try {
+    const headers = {
+      "X-Download-PDF": "true",
+    };
+    // const checklistIdArrayString = checklistIdArray.join();
+    // console.log(checklistIdArrayString)
+    const checklistIdArrayString = checklistIdArray.join(',');
+
+  
+    const response = await instance({
+      url: '/api/checklist/pdf/compile/'+checklistIdArrayString,
+      method: "get",
+      responseType: "arraybuffer",
+      headers: headers
+    });
+
+    // console.log();
+
+    const blob = new Blob([response.data]);
+    // console.log(blob);
+    const url = URL.createObjectURL(blob);
+    const temp = document.createElement("a");
+    temp.download = `checklist compilation.pdf`;
+    temp.href = url;
+    temp.click();
+    temp.remove();
+  } catch (err) {
+    console.log(err + "error");
+  }
+};
+
 const sendCancelChecklist = async (remarks: string, id: number) => {
   // console.log(id);
   return await instance
@@ -194,4 +226,4 @@ export default ManageChecklistPage;
 const getServerSideProps: GetServerSideProps =
   createChecklistGetServerSideProps();
 
-export { getServerSideProps, downloadChecklistPDF };
+export { getServerSideProps, downloadChecklistPDF, downloadMultipleChecklistsPDF };

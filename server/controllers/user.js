@@ -53,8 +53,11 @@ const addUser = async (req, res, next) => {
     1: 'manager',
     2: 'engineer',
     3: 'specialist',
-    4: 'admin'
+    4: 'admin',
+    5: 'cmtEngineer',
+    6: 'cmtSpecialist'
   }
+  const role_parent = await global.db.query("SELECT * FROM keppel.role_parent WHERE role_id = $1", [req.body.roleType]);
 
   q = `DO $$ 
   DECLARE
@@ -79,12 +82,12 @@ const addUser = async (req, res, next) => {
     INSERT INTO keppel.user_role_privileges
     (role_parent_id, user_id)
     VALUES
-    ('${req.body.roleType}', new_user_id);
+    ('${role_parent.rows[0].role_parent_id}', new_user_id);
 
     Insert INTO keppel.user_role
     (user_id,role_parent_id)
     VALUES
-    (new_user_id,'${req.body.roleType}');
+    (new_user_id,'${role_parent.rows[0].role_parent_id}');
 
     Insert INTO keppel.auth_assignment
     (user_id,item_name)
@@ -248,25 +251,34 @@ const updateUser = async (req, res, next) => {
         `;
   }
 
-  role = ``;
-  role += `UPDATE keppel.user_role_privileges
-    SET role_parent_id = ${req.body.role_id}
-    WHERE user_id = ${user_id};`;
+  global.db.query("SELECT * FROM keppel.role_parent WHERE role_id = $1", [req.body.role_id], async (err, result) => {
+    if (err) throw err;
+    if (result.rows.length === 0) {
+      return res.status(400).json("Role does not exist");
+    }
+    role = ``;
+    role += `UPDATE keppel.user_role_privileges
+      SET role_parent_id = ${result.rows[0].role_parent_id}
+      WHERE user_id = ${user_id};`;
 
-  role += `UPDATE keppel.user_role
-    SET role_parent_id = ${req.body.role_id}
-    WHERE user_id = ${user_id};`;
+    role += `UPDATE keppel.user_role
+      SET role_parent_id = ${result.rows[0].role_parent_id}
+      WHERE user_id = ${user_id};`;
 
-  plants += query;
-  plants += role;
-  // console.log(plants)
+    plants += query;
+    plants += role;
+     console.log(plants)
+     console.log(result)
 
-  try {
-    await global.db.query(plants);
-    return res.status(200).json("success");
-  } catch (err) {
-    console.log(err);
-  }
+    try {
+      await global.db.query(plants);
+      return res.status(200).json("success");
+    } catch (err) {
+      console.log(err);
+    }
+
+  });
+
 };
 
 const checkEmail = async (req, res, next) => {

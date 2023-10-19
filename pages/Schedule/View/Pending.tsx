@@ -161,7 +161,7 @@ export default function Pending() {
       instance
         .get(url)
         .then((res: any) => {
-          console.log(res);
+          // console.log(res);
           setScheduleTimelines(res.data.rows);
           setTotalPages(res.data.totalPages);
         })

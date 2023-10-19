@@ -7,6 +7,7 @@ const {
   RejectChecklistMail,
   ApproveChecklistMail,
 } = require("../mailer/ChecklistMail");
+const { userPermission } = require("../global");
 
 const ITEMS_PER_PAGE = 10;
 const groupBYCondition = () => {  
@@ -26,10 +27,47 @@ const groupBYCondition = () => {
     )`;
 }
 
+const orderByCondition = (sortField, sortOrder) => {
+  if (sortField == undefined || sortOrder == undefined) {
+    return `ORDER BY cl.checklist_id DESC`;
+  } else {
+    return `ORDER BY ${sortField} ${sortOrder}`;
+  }
+}
+
+const condition = (req) => {
+  let cond = ``;
+
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {
+    cond = `AND aa.item_name like '%cmt%'`;
+  }
+
+  return cond;
+}
+
 var dateSelectClause = '';
   var dateWhereClause = '';
   var dateJoinClause = '';
   var dateOrderByClause = '';
+
+const advancedScheduleCond = (req) => {
+  // Get user role req.user.permissions
+  const user_role = req.user.permissions;
+  // Check if user if engineer or specialist - role contains "engineer" --> means engineer
+  if (user_role.includes('engineer')){
+    console.log('engineer view')
+    return ``;
+  }
+  
+  // otherwise it is specialist
+  // where condition for checking current date against created date:
+  else {
+    console.log('specialist view');
+    return `AND (
+      cl.created_date::DATE <= CURRENT_DATE
+    )`;
+  };
+}
 
 const searchCondition = (search) => {
   //fields to search by: checklist_id, description, status, assigneduser, signoffuser, createdbyuser
@@ -59,6 +97,42 @@ const searchCondition = (search) => {
         INNER JOIN keppel.users assigned_users ON cm.assigned_user_id = assigned_users.user_id
         INNER JOIN keppel.users sign_off_users ON cm.signoff_user_id = sign_off_users.user_id
         INNER JOIN keppel.users created_users ON cm.created_user_id = created_users.user_id
+        WHERE assigned_users.user_name ILIKE '%${search}%' 
+        OR assigned_users.first_name || ' ' || assigned_users.last_name ILIKE '%${search}%'
+        OR sign_off_users.first_name || ' ' || sign_off_users.last_name ILIKE '%${search}%'
+        OR created_users.first_name || ' ' || created_users.last_name ILIKE '%${search}%'
+      )  
+    )`;
+  }
+};
+
+const templateSearchCondition = (search) => {
+  //fields to search by: checklist_id, chl_name, description, assigneduser, signoffuser, createdbyuser
+  let searchInt = parseInt(search);
+
+  if (search === "") {
+    //handling empty search
+    return ``;
+  } else if (!isNaN(search)) {
+    //handling integer input
+    return `AND (
+      checklist_id = ${searchInt} OR
+      signoff_user_id = ${searchInt} OR
+      assigned_user_id = ${searchInt} 
+    )`;
+  } else if (typeof search === "string" && search !== "") {
+    //handling text input
+    return `
+    AND (
+      chl_name ILIKE '%${search}%' OR
+      description ILIKE '%${search}%' OR
+      
+      checklist_id IN (
+        SELECT ct.checklist_id
+        FROM keppel.checklist_templates ct
+        INNER JOIN keppel.users assigned_users ON ct.assigned_user_id = assigned_users.user_id
+        INNER JOIN keppel.users sign_off_users ON ct.signoff_user_id = sign_off_users.user_id
+        INNER JOIN keppel.users created_users ON ct.created_user_id = created_users.user_id
         WHERE assigned_users.user_name ILIKE '%${search}%' 
         OR assigned_users.first_name || ' ' || assigned_users.last_name ILIKE '%${search}%'
         OR sign_off_users.first_name || ' ' || sign_off_users.last_name ILIKE '%${search}%'
@@ -227,7 +301,8 @@ const getAllChecklistQuery = (req) => {
     completeremarks_req: "cl.completeremarks_req",
     updated_at: "cl.updated_at",
     checklist_status: "STRING_AGG(cscm.status || ': ' || cs.date, ', ') AS checklist_status",
-    date: "cs.date"
+    date: "cs.date",
+    checklist_user_role: "aa.item_name"
 
   };
 
@@ -281,6 +356,7 @@ const getAllChecklistQuery = (req) => {
         JOIN keppel.checklist_master cl on ua.allocatedplantids LIKE concat(concat('%',cl.plant_id::text), '%')
         LEFT JOIN keppel.users assignU ON assignU.user_id = cl.assigned_user_id
         LEFT JOIN keppel.users createdU ON createdU.user_id = cl.created_user_id
+        LEFT JOIN keppel.auth_assignment aa ON aa.user_id = cl.created_user_id
         LEFT JOIN keppel.users signoff ON signoff.user_id = cl.signoff_user_id
         LEFT JOIN keppel.plant_master pm ON pm.plant_id = cl.plant_id
         JOIN keppel.status_cm st ON st.status_id = cl.status_id	
@@ -296,52 +372,29 @@ const getAssignedChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
-  if (sortField == undefined || sortOrder == undefined) {
-    
-    //console.log("Checklist Assigned: default sorting");
-    //console.log(sortField, sortOrder);
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6 or cl.status_id = 10) AND
-          (CASE
-              WHEN (SELECT ua.role_id
-                  FROM
-                      keppel.user_access ua
-                  WHERE
-                      ua.user_id = $1) = 4
-              THEN assignU.user_id = $1
-              ELSE True
-              END) AND
-              ua.user_id = $1
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY cl.checklist_id ASC
+  //console.log("Checklist Assigned: default sorting");
+  //console.log(sortField, sortOrder);
+  return (
+    getAllChecklistQuery(req) +
     `
-    );
-  } else {
-    //console.log("Checklist Assigned: custom sorting");
-    //console.log(sortField, sortOrder);
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6 or cl.status_id = 10) AND
-          (CASE
-              WHEN (SELECT ua.role_id
-                  FROM
-                      keppel.user_access ua
-                  WHERE
-                      ua.user_id = $1) = 4
-              THEN assignU.user_id = $1
-              ELSE True
-              END) AND
-              ua.user_id = $1
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY ${sortField} ${sortOrder}
-    `
-    );
-  }
+    WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6 or cl.status_id = 10) AND
+        (CASE
+            WHEN (SELECT ua.role_id
+                FROM
+                    keppel.user_access ua
+                WHERE
+                    ua.user_id = $1) = 4
+            THEN assignU.user_id = $1
+            ELSE True
+            END) AND
+            ua.user_id = $1
+    ${condition(req)}
+    ${advancedScheduleCond(req)}
+    ${searchCondition(search)}
+    ${groupBYCondition()}
+    ${orderByCondition(sortField, sortOrder)}
+  `
+  );
 };
 
 const getPendingChecklistsQuery = (req) => {
@@ -352,33 +405,20 @@ const getPendingChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
-  if (sortField == undefined || sortOrder == undefined) {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 1)
-      ${filterCondition("", plant, date, datetype)}
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY cl.checklist_id DESC
+  return (
+    getAllChecklistQuery(req) +
     `
-    );
-  } else {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 1)
-      ${filterCondition("", plant, date, datetype)}
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY ${sortField} ${sortOrder}
-      `
-    );
-  }
+    WHERE
+        ua.user_id = $1 AND
+        (cl.status_id = 1)
+    ${condition(req)}
+    ${advancedScheduleCond(req)}
+    ${filterCondition("", plant, date, datetype)}
+    ${searchCondition(search)}
+    ${groupBYCondition()}
+    ${orderByCondition(sortField, sortOrder)}
+    `
+  );
 };
 
 const getOutstandingChecklistsQuery = (req) => {
@@ -397,35 +437,21 @@ const getOutstandingChecklistsQuery = (req) => {
     userRoleCond = "AND (createdU.user_id = $1 OR assignU.user_id = $1)";
   }
 
-  if (sortField == undefined || sortOrder == undefined) {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1
-          ${userRoleCond} AND
-          (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
-      ${filterCondition("", plant, date, datetype)}
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY cl.checklist_id DESC
+  return (
+    getAllChecklistQuery(req) +
     `
-    );
-  } else {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1
-          ${userRoleCond} AND
-          (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
-      ${filterCondition("", plant, date, datetype)}
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY ${sortField} ${sortOrder}
-    `
-    );
-  }
+    WHERE
+        ua.user_id = $1
+        ${userRoleCond} AND
+        (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
+    ${condition(req)}
+    ${advancedScheduleCond(req)}
+    ${filterCondition("", plant, date, datetype)}
+    ${searchCondition(search)}
+    ${groupBYCondition()}
+    ${orderByCondition(sortField, sortOrder)}
+  `
+  );
 };
 
 const getCompletedChecklistsQuery = (req) => {
@@ -437,33 +463,19 @@ const getCompletedChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
-  if (sortField == undefined || sortOrder == undefined) {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 6 OR cl.status_id = 11)
-      ${filterCondition("", plant, date, datetype)}
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY cl.checklist_id DESC
+  return (
+    getAllChecklistQuery(req) +
     `
-    );
-  } else {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 6 OR cl.status_id = 11)
-      ${filterCondition("", plant, date, datetype)}
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY ${sortField} ${sortOrder}
-    `
-    );
-  }
+    WHERE
+        ua.user_id = $1 AND
+        (cl.status_id = 6 OR cl.status_id = 11)
+    ${condition(req)}
+    ${filterCondition("", plant, date, datetype)}
+    ${searchCondition(search)}
+    ${groupBYCondition()}
+    ${orderByCondition(sortField, sortOrder)}
+  `
+  );
 };
 
 const getOverdueChecklistsQuery = (req) => {
@@ -478,6 +490,7 @@ const getOverdueChecklistsQuery = (req) => {
     WHERE
         ua.user_id = $1 AND
         cl.overdue_status = true
+    ${condition(req)}
     ${filterCondition("", plant, date, datetype)}
     ${searchCondition(search)}
     ${groupBYCondition()}
@@ -491,31 +504,18 @@ const getForReviewChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
-  if (sortField == undefined || sortOrder == undefined){
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY cl.activity_log -> (jsonb_array_length(cl.activity_log) -1) ->> 'date' DESC
+  return (
+    getAllChecklistQuery(req) +
     `
-    );
-  } else {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY ${sortField} ${sortOrder}
-    `
-    );
-  }
+    WHERE
+        ua.user_id = $1 AND
+        (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
+    ${condition(req)}
+    ${searchCondition(search)}
+    ${groupBYCondition()}
+    ${orderByCondition(sortField, sortOrder)}
+  `
+  );
 };
 
 const getApprovedChecklistsQuery = (req) => {
@@ -523,32 +523,18 @@ const getApprovedChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
   
-
-  if (sortField == undefined || sortOrder == undefined) {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY cl.checklist_id DESC
+  return (
+    getAllChecklistQuery(req) +
     `
-    );
-  } else {
-    return (
-      getAllChecklistQuery(req) +
-      `
-      WHERE
-          ua.user_id = $1 AND
-          (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
-      ${searchCondition(search)}
-      ${groupBYCondition()}
-      ORDER BY ${sortField} ${sortOrder}
-    `
-    );
-  }
+    WHERE
+        ua.user_id = $1 AND
+        (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
+    ${condition(req)}
+    ${searchCondition(search)}
+    ${groupBYCondition()}
+    ${orderByCondition(sortField, sortOrder)}
+  `
+  );
 };
 
 const fetchAssignedChecklists = async (req, res, next) => {
@@ -768,11 +754,21 @@ const fetchApprovedChecklists = async (req, res, next) => {
 
 // get checklist templates
 const fetchChecklistTemplateNames = async (req, res, next) => {
+  let userRoleCond = '';
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {
+    userRoleCond = `AND aa.item_name like '%cmt%'`;
+  }
+
+  const search = req.query.search || "";
   // Plant_id = 0 refers to fetching all the universal templates as well:
   const sql = req.params.id
-    ? `SELECT * from keppel.checklist_templates WHERE (plant_id = ${req.params.id} OR plant_id = 0)
+    ? `SELECT * from keppel.checklist_templates 
+    JOIN keppel.auth_assignment aa ON aa.user_id = keppel.checklist_templates.created_user_id
+    WHERE (plant_id = ${req.params.id} OR plant_id = 0) ${templateSearchCondition(search)} ${userRoleCond}
           ORDER BY keppel.checklist_templates.checklist_id DESC;` // templates are plant specificed (from that plant only)
-    : `SELECT * from keppel.checklist_templates WHERE (plant_id = any(ARRAY[${req.user.allocated_plants}]::int[]) OR plant_id = 0)
+    : `SELECT * from keppel.checklist_templates 
+    JOIN keppel.auth_assignment aa ON aa.user_id = keppel.checklist_templates.created_user_id
+    WHERE (plant_id = any(ARRAY[${req.user.allocated_plants}]::int[]) OR plant_id = 0) ${templateSearchCondition(search)} ${userRoleCond}
           ORDER BY keppel.checklist_templates.checklist_id DESC;`; // templates are plants specificed depending on user access(1 use can be assigned multiple plants)
 
   global.db.query(sql, (err, result) => {
@@ -839,6 +835,29 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
   });
 };
 
+const fetchMultipleChecklistRecords = async (req, res, next) => {
+  const checklist_ids_tuple = req.params.checklist_ids
+  console.log(checklist_ids_tuple)
+  const sql =
+    fetchAllChecklistQuery +
+    ` 
+    WHERE
+      cl.checklist_id in ${checklist_ids_tuple} AND
+      ua.user_id = $1 
+        
+      ${groupBYCondition()}
+    `;
+
+  global.db.query(sql, [17], (err, found) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json("No checklist template found");
+    }
+    console.log("found.rows",found.rows);
+    res.status(200).send(found.rows);
+  });
+};
+
 const fetchChecklistRecords = async (req, res, next) => {
   if (req.params.checklist_id) {
     return fetchSpecificChecklistRecord(req, res, next);
@@ -846,6 +865,8 @@ const fetchChecklistRecords = async (req, res, next) => {
     return fetchForReviewChecklists(req, res, next);
   }
 };
+
+
 
 const submitNewChecklistTemplate = async (req, res, next) => {
   if (req.body.checklistSections === undefined)
@@ -1978,4 +1999,5 @@ module.exports = {
   fetchCompletedChecklists,
   editChecklistRecord,
   fetchOverdueChecklists,
+  fetchMultipleChecklistRecords,
 };

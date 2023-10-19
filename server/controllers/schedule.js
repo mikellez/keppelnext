@@ -1,8 +1,8 @@
 const db = require("../../db");
 const moment = require("moment");
 const dateHandler = require("../dateHandler");
-const { getFieldsDiff } = require("../global");
-const { activity } = require(".");
+const { getFieldsDiff, userPermission } = require("../global");
+const { activity, user } = require(".");
 const { listenerCount } = require("process");
 
 const ITEMS_PER_PAGE = 10;
@@ -41,6 +41,7 @@ const makeScheduleDict = (arr) => {
       index: item["index"],
       prev_schedule_id: item["prev_schedule_id"],
       status: item["status"],
+      advance_schedule: item["advance_schedule"],
     });
   });
   return newArr;
@@ -52,7 +53,8 @@ const updateDates = async (scheduleList) => {
       const result = await global.db.query(`SELECT 
       (SC.START_DATE  + interval '8 hour' ) AS START_DATE, 
       (SC.END_DATE  + interval '8 hour' ) AS END_DATE,
-      SC.RECURRENCE_PERIOD
+      SC.RECURRENCE_PERIOD,
+      SC.ADVANCE_SCHEDULE
       FROM 
       KEPPEL.SCHEDULE_CHECKLIST SC
       WHERE 
@@ -61,6 +63,7 @@ const updateDates = async (scheduleList) => {
       scheduleList[i].start_date = result.rows[0].start_date;
       scheduleList[i].end_date = result.rows[0].end_date;
       scheduleList[i].period = result.rows[0].recurrence_period;
+      scheduleList[i].advance_schedule = result.rows[0].advance_schedule;
     }
   }
   return scheduleList;
@@ -69,6 +72,11 @@ const updateDates = async (scheduleList) => {
 // Get all schedules or plant specific schedules
 const getViewSchedules = async (req, res, next) => {
   let queryS = [];
+  let userRoleCond = "";
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {
+    userRoleCond = `AND AA.ITEM_NAME LIKE '%cmt%'`;
+  }
+
   if (req.params.id === "0") {
     if (req.user.role_id === 0 || req.user.role_id === 4) {
       queryS.push(`
@@ -79,7 +87,7 @@ const getViewSchedules = async (req, res, next) => {
                     STRING_AGG(UA.role_name, ' ,') AS ROLES,
                     STRING_AGG(U.first_name, ' ,') AS FNAME,
                     STRING_AGG(U.last_name, ' ,') AS LNAME,
-                    PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.STATUS, SC.PREV_SCHEDULE_ID
+                    PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
                 FROM 
                     KEPPEL.SCHEDULE_CHECKLIST  as SC,
                     KEPPEL.USERS AS U,
@@ -108,7 +116,7 @@ const getViewSchedules = async (req, res, next) => {
                     '' AS ROLES,
                     '' AS FNAME,
                     '' AS LNAME,
-                    PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.STATUS, SC.PREV_SCHEDULE_ID
+                    PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
                 FROM 
                     KEPPEL.SCHEDULE_CHECKLIST  as SC,
                     KEPPEL.PLANT_MASTER  AS PM,
@@ -134,16 +142,18 @@ const getViewSchedules = async (req, res, next) => {
                     STRING_AGG(UA.role_name, ' ,') AS ROLES,
                     STRING_AGG(U.first_name, ' ,') AS FNAME,
                     STRING_AGG(U.last_name, ' ,') AS LNAME,
-                    SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+                    SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
                 FROM 
                     KEPPEL.SCHEDULE_CHECKLIST  as SC,
                     KEPPEL.PLANT_MASTER  AS PM,
                     KEPPEL.CHECKLIST_TEMPLATES AS CT,
                     KEPPEL.USERS AS U,
                     KEPPEL.USER_ACCESS AS UA,
-                    KEPPEL.SCHEDULE_TIMELINES AS ST
+                    KEPPEL.SCHEDULE_TIMELINES AS ST,
+                    KEPPEL.AUTH_ASSIGNMENT AS AA
                 WHERE
                     ST.TIMELINE_ID = SC.TIMELINE_ID AND
+                    AA.USER_ID = ST.CREATED_BY AND
                     SC.PLANT_ID = PM.PLANT_ID AND 
                     CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
                     U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL)AND
@@ -152,6 +162,7 @@ const getViewSchedules = async (req, res, next) => {
                     SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1 OR STATUS = 5) AND
                     (SC.STATUS = 1 OR SC.STATUS = 5) AND
                     SC.ACTIVE = 1
+                    ${userRoleCond}
                 GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID, ST.REMARKS)
             UNION ALL 
             SELECT DISTINCT SC.SCHEDULE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
@@ -162,20 +173,23 @@ const getViewSchedules = async (req, res, next) => {
                     '' AS ROLES,
                     '' AS FNAME,
                     '' AS LNAME,
-                    SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+                    SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
                 FROM 
                     KEPPEL.SCHEDULE_CHECKLIST  as SC,
                     KEPPEL.PLANT_MASTER  AS PM,
                     KEPPEL.CHECKLIST_TEMPLATES AS CT,
-                    KEPPEL.SCHEDULE_TIMELINES AS ST
+                    KEPPEL.SCHEDULE_TIMELINES AS ST,
+                    KEPPEL.AUTH_ASSIGNMENT AS AA
                 WHERE
                     ST.TIMELINE_ID = SC.TIMELINE_ID AND
+                    AA.USER_ID = ST.CREATED_BY AND
                     SC.PLANT_ID = PM.PLANT_ID AND 
                     CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
                     (SC.SCHEDULER_USERIDS_FOR_EMAIL IS NULL OR SC.SCHEDULER_USERIDS_FOR_EMAIL = '{}')  AND
                     SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1 OR STATUS = 5) AND
                     (SC.STATUS = 1 OR SC.STATUS = 5) AND
                     SC.ACTIVE = 1
+                    ${userRoleCond}
                 GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID, ST.REMARKS)`);
     }
   } else {
@@ -187,16 +201,18 @@ const getViewSchedules = async (req, res, next) => {
                 STRING_AGG(U.first_name, ' ,') AS FNAME,
                 STRING_AGG(U.last_name, ' ,') AS LNAME,
                 PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, 
-                SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+                SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
             FROM 
                 KEPPEL.SCHEDULE_CHECKLIST  as SC,
                 KEPPEL.USERS AS U,
                 KEPPEL.USER_ACCESS AS UA,
                 KEPPEL.PLANT_MASTER  AS PM,
                 KEPPEL.CHECKLIST_TEMPLATES AS CT,
-                KEPPEL.SCHEDULE_TIMELINES AS ST
+                KEPPEL.SCHEDULE_TIMELINES AS ST,
+                KEPPEL.AUTH_ASSIGNMENT AS AA
             WHERE
                 ST.TIMELINE_ID = SC.TIMELINE_ID AND
+                AA.USER_ID = ST.CREATED_BY AND
                 U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
                 SC.PLANT_ID = PM.PLANT_ID AND 
                 CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND 
@@ -206,6 +222,7 @@ const getViewSchedules = async (req, res, next) => {
                 SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1 OR STATUS = 5) AND
                 (SC.STATUS = 1 OR SC.STATUS = 5) AND
                 SC.ACTIVE = 1
+                ${userRoleCond}
             GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID, ST.REMARKS)
         UNION ALL 
         SELECT DISTINCT SC.SCHEDULE_ID, SC.CHECKLIST_TEMPLATE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
@@ -216,14 +233,16 @@ const getViewSchedules = async (req, res, next) => {
                 '' AS FNAME,
                 '' AS LNAME,
                 PM.PLANT_NAME, PM.PLANT_ID, CT.CHL_NAME, 
-                SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+                SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
             FROM 
                 KEPPEL.SCHEDULE_CHECKLIST  as SC,
                 KEPPEL.PLANT_MASTER  AS PM,
                 KEPPEL.CHECKLIST_TEMPLATES AS CT,
-                KEPPEL.SCHEDULE_TIMELINES AS ST
+                KEPPEL.SCHEDULE_TIMELINES AS ST,
+                KEPPEL.AUTH_ASSIGNMENT AS AA
             WHERE
                 ST.TIMELINE_ID = SC.TIMELINE_ID AND
+                AA.USER_ID = ST.CREATED_BY AND
                 SC.PLANT_ID = PM.PLANT_ID AND 
                 CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND 
                 SC.PLANT_ID = ${req.params.id} AND
@@ -231,6 +250,7 @@ const getViewSchedules = async (req, res, next) => {
                 SC.timeline_id IN (SELECT timeline_id FROM KEPPEL.schedule_timelines WHERE STATUS = 1 OR STATUS = 5) AND
                 (SC.STATUS = 1 OR SC.STATUS = 5) AND
                 SC.ACTIVE = 1
+                ${userRoleCond}
             GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID, ST.REMARKS)`);
   }
   // console.log(queryS[0]);
@@ -288,8 +308,12 @@ const getPlantById = async (req, res, next) => {
 };
 
 const getUserPlants = async (req, res, next) => {
+
   global.db.query(
-    "SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) FROM keppel.user_access WHERE user_id = $1::integer)",
+    `SELECT * from keppel.plant_master WHERE plant_id IN (SELECT UNNEST(string_to_array(allocatedplantids, ', ')::int[]) 
+    FROM 
+      keppel.user_access 
+      WHERE user_id = $1::integer)`,
     [req.user.id],
     (err, result) => {
       if (err) throw err;
@@ -336,13 +360,21 @@ const createTimeline = async (req, res, next) => {
 
 // Get timeline details
 const getTimeline = async (req, res, next) => {
+  let userRoleCond = '';
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {  
+    userRoleCond = `AND aa.item_name like '%cmt%'`;
+  }
+
   global.db.query(
     `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, ST.status, PM.plant_name, ST.created_date
     FROM keppel.schedule_timelines ST 
+    JOIN keppel.auth_assignment AA
+    ON AA.user_id = ST.created_by
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
     WHERE timeline_id = $1 
-    AND active = 1`,
+    AND active = 1
+    ${userRoleCond}`,
     [req.params.id],
     (err, found) => {
       if (err) throw err;
@@ -359,6 +391,11 @@ const getTimeline = async (req, res, next) => {
 
 // Get timeline specific schedules
 const getSchedulesTimeline = async (req, res, next) => {
+  let userRoleCond = '';
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {  
+    userRoleCond = `AND aa.item_name like '%cmt%'`;
+  }
+
   global.db.query(
     // first select is for schedules that are assigned to specific users
     // second select is for schedules with no specific users assigned
@@ -370,22 +407,25 @@ const getSchedulesTimeline = async (req, res, next) => {
         STRING_AGG(UA.role_name, ' ,') AS ROLES,
         STRING_AGG(U.first_name, ' ,') AS FNAME,
         STRING_AGG(U.last_name, ' ,') AS LNAME,
-        SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+        SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
         FROM 
         KEPPEL.SCHEDULE_CHECKLIST  as SC,
         KEPPEL.PLANT_MASTER  AS PM,
         KEPPEL.CHECKLIST_TEMPLATES AS CT,
         KEPPEL.USERS AS U,
         KEPPEL.USER_ACCESS AS UA,
-        KEPPEL.SCHEDULE_TIMELINES AS ST
+        KEPPEL.SCHEDULE_TIMELINES AS ST,
+        KEPPEL.AUTH_ASSIGNMENT AS AA
         WHERE
         ST.TIMELINE_ID = SC.TIMELINE_ID AND
+        AA.USER_ID = ST.CREATED_BY AND
         SC.PLANT_ID = PM.PLANT_ID AND 
         CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
         U.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL)AND
         UA.USER_ID = ANY( SC.SCHEDULER_USERIDS_FOR_EMAIL) AND
         SC.timeline_id = $1 AND
         SC.active = 1
+        ${userRoleCond}
         GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID, ST.REMARKS)
     UNION ALL
     SELECT SC.SCHEDULE_ID, (SC.START_DATE  + interval '8 hour' ) as START_DATE,(SC.END_DATE  + interval '8 hour' ) as END_DATE,
@@ -396,19 +436,22 @@ const getSchedulesTimeline = async (req, res, next) => {
             '' AS ROLES,
             '' AS FNAME,
             '' AS LNAME,
-            SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+            SC.REMARKS, ST.REMARKS AS TIMELINE_REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
         FROM 
             KEPPEL.SCHEDULE_CHECKLIST  as SC,
             KEPPEL.PLANT_MASTER  AS PM,
             KEPPEL.CHECKLIST_TEMPLATES AS CT,
-            KEPPEL.SCHEDULE_TIMELINES AS ST
+            KEPPEL.SCHEDULE_TIMELINES AS ST,
+            KEPPEL.AUTH_ASSIGNMENT AS AA
         WHERE
             ST.TIMELINE_ID = SC.TIMELINE_ID AND
+            AA.USER_ID = ST.CREATED_BY AND
             SC.PLANT_ID = PM.PLANT_ID AND 
             CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID AND
             (SC.SCHEDULER_USERIDS_FOR_EMAIL IS NULL OR SC.SCHEDULER_USERIDS_FOR_EMAIL = '{}')  AND
             SC.timeline_id = $1 AND
             SC.active = 1
+            ${userRoleCond}
             GROUP BY (SC.SCHEDULE_ID, PM.PLANT_ID, CT.CHECKLIST_ID, ST.REMARKS)`,
     [req.params.id],
     (err, schedules) => {
@@ -427,6 +470,11 @@ const getSchedulesTimeline = async (req, res, next) => {
 
 // Get timeline by the status
 const getTimelineByStatus = (req, res, next) => {
+  let userRoleCond = '';
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {  
+    userRoleCond = `AND aa.item_name like '%cmt%'`;
+  }
+
   idRegex = new RegExp("^\\d+$", "m");
   if (req.params.id && !idRegex.test(req.params.id))
     return res.status(404).json({ message: "Invalid timeline id provided" });
@@ -434,15 +482,21 @@ const getTimelineByStatus = (req, res, next) => {
   const queryS = req.params.id
     ? `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name, ST.status, ST.created_date
     FROM keppel.schedule_timelines ST 
+    JOIN keppel.auth_assignment AA
+    ON AA.user_id = ST.created_by
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
     WHERE status = $1 AND
-    created_by = ${req.user.id}`
+    created_by = ${req.user.id}
+    ${userRoleCond}`
     : `SELECT ST.timeline_id as id, ST.timeline_name as name, ST.description, ST.plant_id, PM.plant_name, ST.status, ST.created_date
     FROM keppel.schedule_timelines ST 
+    JOIN keppel.auth_assignment AA
+    ON AA.user_id = ST.created_by
     JOIN keppel.plant_master PM 
     ON ST.plant_id = PM.plant_id
-    WHERE status = $1`;
+    WHERE status = $1
+    ${userRoleCond}`;
   global.db.query(queryS, [req.params.status], (err, found) => {
     if (err) throw err;
     if (found.rows.length != 0) {
@@ -463,6 +517,11 @@ const getScheduleDrafts = async (req, res) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
+  let userRoleCond = '';
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {  
+    userRoleCond = `AND aa.item_name like '%cmt%'`;
+  }
+
   let query = `
     SELECT 
       ST.timeline_id as id,
@@ -474,12 +533,15 @@ const getScheduleDrafts = async (req, res) => {
       ST.created_date,
       ST.remarks
     FROM keppel.schedule_timelines ST 
+    JOIN keppel.auth_assignment AA
+    ON AA.user_id = ST.created_by
     JOIN keppel.plant_master PM ON ST.plant_id = PM.plant_id
     JOIN keppel.status_sm SM on ST.status = SM.status_id
     WHERE 
       ST.status = 3
       AND created_by = $1
       AND active = 1
+      ${userRoleCond}
     ORDER BY ST.created_date DESC
   `
 
@@ -503,6 +565,12 @@ const getScheduleDrafts = async (req, res) => {
 const getApprovedTimelines = async (req, res) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+  
+  let userRoleCond = '';
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {  
+    userRoleCond = `AND aa.item_name like '%cmt%'`;
+  }
+
   let query = `
     SELECT 
       ST.timeline_id as id, 
@@ -517,11 +585,13 @@ const getApprovedTimelines = async (req, res) => {
       keppel.users u
       JOIN keppel.user_access ua ON u.user_id = ua.user_id
       JOIN keppel.schedule_timelines ST ON ua.allocatedplantids LIKE concat(concat('%',ST.plant_id::text), '%')
+      JOIN keppel.auth_assignment AA on ST.created_by = AA.user_id
       JOIN keppel.plant_master PM ON ST.plant_id = PM.plant_id
       JOIN keppel.status_sm SM on ST.status = SM.status_id
     WHERE 
       (ST.status = 1 OR ST.status = 7 OR ST.status = 8)
       AND ua.user_id = $1
+      ${userRoleCond}
     ORDER BY ST.activity_log -> (jsonb_array_length(ST.activity_log) -1) ->> 'date' DESC
 
   `
@@ -544,6 +614,12 @@ const getApprovedTimelines = async (req, res) => {
 const getPendingTimelines = async (req, res) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+
+  let userRoleCond = '';
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {  
+    userRoleCond = `AND aa.item_name like '%cmt%'`;
+  }
+
   let query = `
     SELECT 
       ST.timeline_id as id, 
@@ -559,12 +635,14 @@ const getPendingTimelines = async (req, res) => {
       keppel.users u
       JOIN keppel.user_access ua ON u.user_id = ua.user_id
       JOIN keppel.schedule_timelines ST ON ua.allocatedplantids LIKE concat(concat('%',ST.plant_id::text), '%')
+      JOIN keppel.auth_assignment AA on ST.created_by = AA.user_id
       JOIN keppel.plant_master PM ON ST.plant_id = PM.plant_id
       JOIN keppel.status_sm SM on ST.status = SM.status_id
     WHERE 
       (ST.status = 4 OR ST.status = 6)
       AND ua.user_id = $1
       AND active = 1
+      ${userRoleCond}
       ORDER BY COALESCE(TO_TIMESTAMP((ST.activity_log->>-1)::jsonb->>'date', 'YYYY-MM-DD HH24:MI:SS'), '1970-01-01'::timestamp) DESC
   `
   const pageQuery = `SELECT COUNT(*) AS row_count FROM (` +
@@ -586,6 +664,12 @@ const getPendingTimelines = async (req, res) => {
 const getCompletedTimelines = async (req, res) => {
   const page = req.query.page || 1;
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+
+  let userRoleCond = '';
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {  
+    userRoleCond = `AND aa.item_name like '%cmt%'`;
+  }
+
   let query = `
     SELECT 
       ST.timeline_id as id, 
@@ -600,12 +684,14 @@ const getCompletedTimelines = async (req, res) => {
       keppel.users u
       JOIN keppel.user_access ua ON u.user_id = ua.user_id
       JOIN keppel.schedule_timelines ST ON ua.allocatedplantids LIKE concat(concat('%',ST.plant_id::text), '%')
+      JOIN keppel.auth_assignment AA on ST.created_by = AA.user_id
       JOIN keppel.plant_master PM ON ST.plant_id = PM.plant_id
       JOIN keppel.status_sm SM on ST.status = SM.status_id
     WHERE 
       ST.status = 5
       AND ua.user_id = $1
       AND active = 1
+      ${userRoleCond}
     ORDER BY ST.activity_log -> (jsonb_array_length(ST.activity_log) -1) ->> 'date' DESC
 
   `
@@ -931,20 +1017,26 @@ const getOpsAndEngineers = async (req, res, next) => {
     arr[i] = +arr[i];
   }
 
+  let userRoleCond = '';
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {  
+    userRoleCond = `AND aa.item_name like '%cmt%'`;
+  }
+
   if (req.params.plant_id.toString().length > 1) {
     sql = `SELECT DISTINCT(u.user_id) as id, concat( concat(u.first_name , ' ') , u.last_name) AS name, user_email as email, first_name as fname, last_name as lname, user_name as username
           FROM keppel.users u
           LEFT JOIN keppel.user_plant up ON up.user_id = u.user_id
-          WHERE up.plant_id = ANY($1::int[])`;
+          JOIN keppel.auth_assignment aa ON aa.user_id = u.user_id
+          WHERE up.plant_id = ANY($1::int[]) ${userRoleCond};`;
   } else {
     sql = `SELECT u.user_id as id, r.role_id, role_name, concat( concat(u.first_name , ' ') , u.last_name) AS name, user_email as email, first_name as fname, last_name as lname, user_name as username
     FROM keppel.user_role ur, keppel.role r, keppel.role_parent rp, keppel.users u 
     LEFT JOIN keppel.user_plant up ON up.user_id = u.user_id
+    JOIN keppel.auth_assignment aa ON aa.user_id = u.user_id
         WHERE rp.role_id = r.role_id
             and rp.role_parent_id = ur.role_parent_id
             and u.user_id = ur.user_id
-            and (r.role_name = 'Operation Specialist' or r.role_name = 'Engineer' or r.role_name = 'Manager')
-            and up.plant_id = $1;`;
+            and up.plant_id = $1 ${userRoleCond};`;
   }
   global.db.query(
     sql,
@@ -981,8 +1073,8 @@ const insertSchedule = async (req, res, next) => {
 
   global.db.query(
     `INSERT INTO keppel.schedule_checklist
-        (checklist_template_id, remarks, start_date, end_date, recurrence_period, reminder_recurrence, scheduler_history, user_id, scheduler_userids_for_email, plant_id, timeline_id, prev_schedule_id, status, index, activity_log) 
-        VALUES ($1, $2, $3, $4, $5, $6, CONCAT('created by',$7::varchar), $8, $9::int[], $10, $11, $12, $13, $14, $15);`,
+        (checklist_template_id, remarks, start_date, end_date, recurrence_period, reminder_recurrence, scheduler_history, user_id, scheduler_userids_for_email, plant_id, timeline_id, prev_schedule_id, status, index, activity_log, advance_schedule) 
+        VALUES ($1, $2, $3, $4, $5, $6, CONCAT('created by',$7::varchar), $8, $9::int[], $10, $11, $12, $13, $14, $15, $16);`,
     [
       req.body.schedule.checklistId,
       req.body.schedule.remarks,
@@ -999,6 +1091,7 @@ const insertSchedule = async (req, res, next) => {
       req.body.schedule.status,
       req.body.schedule.index,
       JSON.stringify(activity_log),
+      req.body.schedule.advanceSchedule,
     ],
     (err, result) => {
       if (err) throw err;
@@ -1174,9 +1267,10 @@ const createSingleEvent = (req, res, next) => {
                 TIMELINE_ID,
                 STATUS,
                 INDEX,
-                ACTIVITY_LOG
+                ACTIVITY_LOG,
+                ADVANCE_SCHEDULE
             )
-            VALUES ($1, $2, $3, $4, 0, 1, $5, $6, ARRAY [${data.userIds}], $7, $8, $9, 4, $10, $11)`,
+            VALUES ($1, $2, $3, $4, 0, 1, $5, $6, ARRAY [${data.userIds}], $7, $8, $9, 4, $10, $11, $12)`,
     [
       data.checklistId,
       data.remarks,
@@ -1189,6 +1283,7 @@ const createSingleEvent = (req, res, next) => {
       data.timelineId,
       req.params.index,
       JSON.stringify(activity_log),
+      data.advance_schedule,
     ],
     (err) => {
       if (err) throw err;
@@ -1198,6 +1293,11 @@ const createSingleEvent = (req, res, next) => {
 };
 
 const getPendingSingleEvents = (req, res, next) => {
+  let userRoleCond = '';
+  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {  
+    userRoleCond = `AND aa.item_name like '%cmt%'`;
+  }
+
   global.db.query(
     `SELECT 
         ST.TIMELINE_ID,
@@ -1207,9 +1307,10 @@ const getPendingSingleEvents = (req, res, next) => {
         SC.SCHEDULE_ID,
         CT.CHL_NAME
         FROM KEPPEL.SCHEDULE_TIMELINES ST
+        JOIN KEPPEL.AUTH_ASSIGNMENT AA ON ST.CREATED_BY = AA.USER_ID
         JOIN KEPPEL.SCHEDULE_CHECKLIST SC ON ST.TIMELINE_ID = SC.TIMELINE_ID
         JOIN KEPPEL.CHECKLIST_TEMPLATES CT ON CT.CHECKLIST_ID = SC.CHECKLIST_TEMPLATE_ID
-        WHERE SC.INDEX IS NOT NULL AND SC.STATUS = 4`,
+        WHERE SC.INDEX IS NOT NULL AND SC.STATUS = 4 ${userRoleCond}`,
     (err, found) => {
       if (err) throw err;
       if (found.rows.length === 0)
@@ -1239,7 +1340,7 @@ const getScheduleById = (req, res, next) => {
             STRING_AGG(UA.role_name, ' ,') AS ROLES,
             STRING_AGG(U.first_name, ' ,') AS FNAME,
             STRING_AGG(U.last_name, ' ,') AS LNAME,
-            SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+            SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
         FROM 
             KEPPEL.SCHEDULE_CHECKLIST  as SC,
             KEPPEL.PLANT_MASTER  AS PM,
@@ -1262,7 +1363,7 @@ const getScheduleById = (req, res, next) => {
             '' AS ROLES,
             '' AS FNAME,
             '' AS LNAME,
-            SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID
+            SC.REMARKS, SC.TIMELINE_ID, SC.EXCLUSION_LIST, SC.INDEX, SC.STATUS, SC.PREV_SCHEDULE_ID, SC.ADVANCE_SCHEDULE
         FROM 
             KEPPEL.SCHEDULE_CHECKLIST  as SC,
             KEPPEL.PLANT_MASTER  AS PM,
@@ -1309,9 +1410,10 @@ const updateSchedule = async (req, res, next) => {
       plant_id = $10, 
       timeline_id = $11, 
       prev_schedule_id = $12, 
-      status = 3
+      status = 3,
+      advance_schedule = $13
     FROM keppel.schedule_checklist t
-    WHERE keppel.schedule_checklist.schedule_id = $13
+    WHERE keppel.schedule_checklist.schedule_id = $14
     AND keppel.schedule_checklist.schedule_id = t.schedule_id
     RETURNING 
       t.checklist_template_id AS checklistId,
@@ -1324,7 +1426,8 @@ const updateSchedule = async (req, res, next) => {
       t.scheduler_userids_for_email AS assignedIds,
       t.plant_id AS plantId,
       t.timeline_id AS timelineId,
-      t.prev_schedule_id AS prevId
+      t.prev_schedule_id AS prevId,
+      t.advance_schedule AS advanceSchedule
     ;`,
     [
       req.body.schedule.checklistId,
@@ -1339,6 +1442,7 @@ const updateSchedule = async (req, res, next) => {
       req.body.schedule.plantId,
       req.body.schedule.timelineId,
       req.body.schedule.prevId,
+      req.body.schedule.advanceSchedule,
       req.body.schedule.scheduleId,
     ],
     (err, result) => {
@@ -1347,6 +1451,7 @@ const updateSchedule = async (req, res, next) => {
         throw res.status(500).send("unable to update schedule");
       }
       if (result) {
+        console.log("result.rows", result.rows[0]);
         const updatedSchedule = result.rows[0];
         const fields = getFieldsDiff(updatedSchedule, req.body.schedule);
 

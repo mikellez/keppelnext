@@ -72,7 +72,7 @@ export default function New(props: NewMasterEntryProps) {
       return await instance
         .post("/api/master/new/add", data)
         .then((res) => {
-          console.log(res.data)
+          // console.log(res.data)
           setSubmissionModal(true);
           return res.data;
         })
