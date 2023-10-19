@@ -3,7 +3,7 @@ import styles from "../../styles/Dashboard.module.scss";
 
 interface DashboardBoxProps extends PropsWithChildren {
   id?: string;
-  title: string;
+  title: string | JSX.Element;
   filter?: React.ReactElement;
   style?: React.CSSProperties;
   className?: string;
