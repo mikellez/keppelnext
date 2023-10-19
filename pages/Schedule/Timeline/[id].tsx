@@ -136,7 +136,7 @@ export default function Timeline() {
     }, [timelineId, router]);
 
     function submitTimeline() {
-        if (scheduleList.length === 0) {
+        if (scheduleList.filter(item=>item.isNewSchedule).length === 0) {
             setEmptyModal(true);
         } else {
             // getTimelinesByStatus(4).then(result => {
@@ -161,7 +161,6 @@ export default function Timeline() {
             </div>
         );
     } else if (isLoading == false) {
-        console.log('scheduleList', scheduleList)
         return (
             <>
                 <ScheduleTemplate
@@ -169,8 +168,7 @@ export default function Timeline() {
                     header="Create Schedule"
                     schedules={scheduleList}
                     eventClassNames={(args)=> {
-                        console.log(args)
-                        if(args.event.extendedProps.isNewSchedule) {
+                        if(!args.event.extendedProps.isNewSchedule) {
                             return ['overlay'];
                         }
 

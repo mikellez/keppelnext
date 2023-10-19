@@ -58,7 +58,7 @@ const ContentHeader = (props: { tabIndex: number; setRemarks: (arg0: string) => 
             width: "80%",
           }}
           onChange={(e)=>props.setRemarks(e.target.value)}
-          value={props.tabIndex === 2 ? props.scheduleInfo[0].timeline_remarks : undefined}
+          value={props.tabIndex === 2 ? props?.scheduleInfo[0]?.timeline_remarks : undefined}
         />
       </div>
       {props.tabIndex !== 2 && 
