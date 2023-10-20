@@ -825,7 +825,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
           )}
           {feedbackAccess && (<DashboardBox
             id="pending-feedback-box"
-            title="Pending Public Feedbacks"
+            title="Pending Public Feedback"
             style={{ gridArea: "m" }}
             onClick={handleDashboardClick}
             className={active === "pending-feedback-box" ? styles.active : ""}
@@ -837,7 +837,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
           }
           {feedbackAccess && (<DashboardBox
             id="outstanding-feedback-box"
-            title="Outstanding Public Feedbacks"
+            title="Outstanding Public Feedback"
             style={{ gridArea: "n" }}
             onClick={handleDashboardClick}
             className={
@@ -851,7 +851,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
           )}
           {feedbackAccess && (<DashboardBox
             id="completed-feedback-box"
-            title="Completed Public Feedbacks"
+            title="Completed Public Feedback"
             style={{ gridArea: "o" }}
             onClick={handleDashboardClick}
             className={active === "completed-feedback-box" ? styles.active : ""}
@@ -863,7 +863,7 @@ export default function DashboardContent({ permissions }: { permissions: string[
           )}
           {showTotalContainer && feedbackAccess && (
             <DashboardBox
-              title={"Total Public Feedbacks: " + totalFeedback}
+              title={"Total Public Feedback: " + totalFeedback}
               style={{ gridArea: "p" }}
             >
               {feedbackData && feedbackData.length > 0 ? (

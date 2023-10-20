@@ -215,6 +215,15 @@ async function fetchRequestQuery(
   ${searchCondition(search)}
   ${status_query}
   ${userCond}
+  AND (
+    rs.date IS NULL OR
+    rs.date = (
+      SELECT rs.date
+        FROM keppel.request_status rs
+        WHERE r.request_id = rs.request_id
+        AND r.status_id = rs.status_id
+    )
+  )
 
   GROUP BY (
     r.request_id,
@@ -231,7 +240,8 @@ async function fetchRequestQuery(
     au.first_name,
     au.last_name,
     rs.request_id,
-    aa.item_name
+    aa.item_name,
+    rs.date
   ) 
   ${search === ""? order_query : fuzzyOrder}`;
   
@@ -363,6 +373,8 @@ const fetchApprovedRequests = async (req, res, next) => {
     ` ORDER BY r.activity_log -> (jsonb_array_length(r.activity_log) -1) ->> 'date' DESC`,
     req
   );
+
+  console.log("fetchrequest sql: ", sql)
 
   const result = await global.db.query(sql);
 
