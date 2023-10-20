@@ -19,8 +19,9 @@ interface ChartProps {
 
 
 export default function BChart(props: ChartProps) {
-    const [chartData, setChartData] = useState<any>({name: props.title});
+    const [chartData, setChartData] = useState<any>({});
 
+    /* //  If need to create custom tooltip:
     const CustomTooltip = ({ active, payload, label }) => {
       if (active && payload && payload.length) {
         return (
@@ -37,17 +38,18 @@ export default function BChart(props: ChartProps) {
           </div>
         );
       }
-    };
+    };*/
 
     useEffect(() => {
-        setChartData({name: props.title});
+        //setChartData({name: props.title});
         props.data.map((data) => {
             setChartData(chartData => {return {...chartData, [data.name] : data.value}}) 
         });
     }, [props.data])
 
   return (
-    <div>
+    <div style={{display:"block"}}>
+        <h5>{props.title}</h5>
         <BarChart
         width={300}
         height={50}
@@ -56,18 +58,18 @@ export default function BChart(props: ChartProps) {
         margin={{
             top: 0,
             right: 30,
-            left: 10,
-            bottom: 10
+            left: 0,
+            bottom: 0
         }}
         >
         <YAxis type="category" dataKey="name" hide/>
         <XAxis type="number" hide />
         
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip  />
         {Object.keys(chartData).map((key: string, index: number): any => {
                 if(key != "name"){
                     const bars = [];
-                    bars.push(<Bar dataKey={key} stackId="a" fill={props.colors[index-1]} />);
+                    bars.push(<Bar dataKey={key} stackId="a" fill={props.colors[index]} />);
                     return bars;
                 }
             })}
