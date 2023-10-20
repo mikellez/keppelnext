@@ -249,7 +249,7 @@ async function generateCompiledChecklistsPDF(checklistIdList) {
   const filteredChecklistIdList = checklistIdList.filter((checklistId) =>
     targetChecklistIds.includes(checklistId)
   );
-
+ 
   const checklist_ids_tuple = `(${filteredChecklistIdList.join(", ")})`;
   const cls = await fetchMultipleChecklists(checklist_ids_tuple);
   if (!cls) {

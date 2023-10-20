@@ -473,6 +473,7 @@ export default function Checklist(props: ChecklistProps) {
   }
 
   const downloadMultipleChecklistPDF = () => {
+   
     // let filteredDataRows: CMMSChecklist[] = [];
     // if (data) {
     //   console.log("startDate:",startDate)

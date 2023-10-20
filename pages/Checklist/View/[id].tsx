@@ -58,7 +58,6 @@ const downloadMultipleChecklistsPDF = async (checklistIdArray: number[]) => {
     // console.log(checklistIdArrayString)
     const checklistIdArrayString = checklistIdArray.join(',');
 
-  
     const response = await instance({
       url: '/api/checklist/pdf/compile/'+checklistIdArrayString,
       method: "get",

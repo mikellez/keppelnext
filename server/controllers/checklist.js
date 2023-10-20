@@ -213,7 +213,6 @@ SELECT
     pm.plant_name,
     pm.plant_id,
     completeremarks_req,
-    tmp1.assetNames AS linkedassets,
     linkedassetids,
     cl.chl_type,
     cl.created_date,
@@ -917,7 +916,7 @@ const fetchMultipleChecklistRecords = async (req, res, next) => {
         
       ${groupBYCondition()}
     `;
-
+  console.log("fetchMultipleChecklists sql: ", sql)
   global.db.query(sql, [17], (err, found) => {
     if (err) {
       console.log(err);
