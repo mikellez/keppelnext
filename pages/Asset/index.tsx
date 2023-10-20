@@ -15,6 +15,7 @@ import styles from "../../styles/Asset.module.scss";
 import { useRouter } from "next/router";
 import { Role } from "../../types/common/enums";
 import { useCurrentUser } from "../../components/SWR";
+import { levenshteinDistance } from "../../components/Common/FuzzySearch";
 
 /*
   EXPLANATION OF ASSETS MODULE
@@ -254,21 +255,30 @@ const Asset = () => {
         };
     }, []);
 
+
+    // For fuzzy matching on assets:
+    const quickFilterMatcher = (quickFilterParts : string[], rowQuickFilterAggregateText: string) => {
+        return quickFilterParts.every(part => levenshteinDistance(rowQuickFilterAggregateText,part) <= 3);
+    };
+
     useEffect(() => {
         getAssets().then((data) => {
             setRowData(data);
         });
     }, []);
+    
 
     return (
         <ModuleMain>
             <ModuleHeader header="Asset Management">
                 <div className={styles.gridSearch}>
-                    <input
+                    <input  
                         type="text"
-                        placeholder="Seach..."
+                        placeholder="Search..."
                         onChange={(e) => {
-                            if (gridApi) gridApi.setQuickFilter(e.target.value);
+                            if (gridApi) {
+                                gridApi.setQuickFilter(e.target.value);
+                            }
                         }}
                     />
                     <AiOutlineSearch size={20} color="#3C4048" />
@@ -292,6 +302,7 @@ const Asset = () => {
                         onGridReady={(params) => {
                             setGridApi(params.api);
                         }}
+                        quickFilterMatcher={quickFilterMatcher}
                         onRowDoubleClicked={handleDoubleClicked}
                     ></AgGridReact>
                 </div>
