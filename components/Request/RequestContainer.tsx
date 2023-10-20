@@ -662,7 +662,7 @@ export default function RequestContainer(props: RequestContainerProps) {
           {(props.assignRequestData || props.requestData) && (
             <div className="form-group">
               <label className="form-label">
-                <RequiredIcon /> Assign to:
+                {props.assignRequestData && <RequiredIcon />} Assign to:
               </label>
 
               {/* {!plantId && <select className="form-control" disabled></select>} */}
@@ -685,7 +685,7 @@ export default function RequestContainer(props: RequestContainerProps) {
           {(props.assignRequestData || props.requestData) && (
             <div className="form-group">
               <label className="form-label">
-                <RequiredIcon /> Priority
+                {props.assignRequestData && <RequiredIcon />} Priority
               </label>
               {isReady && (
                 <Select
