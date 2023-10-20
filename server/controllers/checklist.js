@@ -213,7 +213,7 @@ SELECT
     pm.plant_name,
     pm.plant_id,
     completeremarks_req,
-    linkedassetids,
+    tmp1.assetnames AS linkedassets,
     cl.chl_type,
     cl.created_date,
     cl.history,
@@ -905,6 +905,24 @@ const fetchSpecificChecklistRecord = async (req, res, next) => {
 };
 
 const fetchMultipleChecklistRecords = async (req, res, next) => {
+  const groupBYCondition2 = () => {  
+    return `
+      GROUP BY (
+        cl.checklist_id,
+        createdu.first_name,
+        createdu.last_name,
+        assignU.first_name,
+        assignU.last_name,
+        signoff.first_name,
+        signoff.last_name,
+        pm.plant_id,
+        pm.plant_name,
+        st.status,
+        cs.checklist_id,
+        cs.date,
+        tmp1.assetnames
+        )`;
+  }
   const checklist_ids_tuple = req.params.checklist_ids
   console.log(checklist_ids_tuple)
   const sql =
@@ -914,15 +932,14 @@ const fetchMultipleChecklistRecords = async (req, res, next) => {
       cl.checklist_id in ${checklist_ids_tuple} AND
       ua.user_id = $1 
         
-      ${groupBYCondition()}
+      ${groupBYCondition2()}
     `;
-  console.log("fetchMultipleChecklists sql: ", sql)
+  console.log("fetchmultiplechecklistrecords sql: ", sql)
   global.db.query(sql, [17], (err, found) => {
     if (err) {
       console.log(err);
       return res.status(500).json("No checklist template found");
     }
-    console.log("found.rows",found.rows);
     res.status(200).send(found.rows);
   });
 };

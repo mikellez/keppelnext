@@ -499,10 +499,8 @@ export default function Checklist(props: ChecklistProps) {
     //   console.log("filteredDataRows:"+filteredDataRows)
     //add filtered rows to array to be converted into PDF format
     if (data) {
-      console.log("data rows ", checklistItems);
       for (const row in checklistItems) {
         checklistIdArray.push(data.rows[row]["checklist_id"]);
-        console.log("rows in qn:", data.rows[row]["checklist_id"]);
       }
       downloadMultipleChecklistsPDF(checklistIdArray);
     }
