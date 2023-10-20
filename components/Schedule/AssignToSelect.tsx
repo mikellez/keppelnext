@@ -22,7 +22,7 @@ interface AssignToSelectProps {
   className?: string;
   disabled?: boolean;
   value?: any;
-  signoff?: boolean;
+  signoff?: boolean | undefined;
 }
 
 interface ErrorMsg {

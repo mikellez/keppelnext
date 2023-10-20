@@ -148,6 +148,7 @@ export interface RequestProps {
   requestTypes: CMMSRequestTypes[];
   faultTypes: CMMSFaultTypes[];
   priority: CMMSRequestPriority[];
+  assigned_user_id: number;
 }
 
 export interface AssignRequestProps {
@@ -183,6 +184,8 @@ export default function RequestContainer(props: RequestContainerProps) {
         description:
           "[Corrective Request] " + props.linkedRequestData.fault_description,
         description_other: props.linkedRequestData.description_other,
+        assignedUser: props.linkedRequestData.assigned_user_id,
+        priority: props.linkedRequestData.priority_id
       }
     : {};
 
@@ -210,7 +213,7 @@ export default function RequestContainer(props: RequestContainerProps) {
     if (props.linkedRequestData) {
       // console.log("Creating corrective request");
       const { id } = router.query;
-      await createRequest(data, plantId as number, id as string);
+      await createRequest(data, plantId as number, id as string, prioritySelected as CMMSRequestPriority, assignedUsers as AssignedUserOption);
     } else if (props.requestData) {
       // console.log("Creating new request");
       await createRequest(data, plantId as number, "", prioritySelected as CMMSRequestPriority, assignedUsers as AssignedUserOption);
@@ -670,9 +673,11 @@ export default function RequestContainer(props: RequestContainerProps) {
                 onChange={(value) => {
                   setAssignedUsers(value as AssignedUserOption);
                 }}
-                defaultIds={[
-                  (props.assignRequestData || props.requestData)?.requestData?.assigned_user_id,
-                ]}
+                defaultIds={
+                  assignedUsers 
+                    ? [assignedUsers.value] 
+                    : []
+                }
               />
             </div>
           )}

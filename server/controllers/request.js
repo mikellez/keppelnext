@@ -427,16 +427,29 @@ const createRequest = async (req, res, next) => {
       role_name = req.user.role_name;
       name = req.user.name;
     }
-    history = `PENDING_Request Created_${today}_${role_name}_${name}`;
-    activity_log = [
-      {
-        date: today,
-        name: name,
-        role: role_name,
-        activity: "Request Created",
-        activity_type: "PENDING",
-      },
-    ];
+    if (assignedUser === ""){
+      history = `PENDING_Request Created_${today}_${role_name}_${name}`;
+      activity_log = [
+        {
+          date: today,
+          name: name,
+          role: role_name,
+          activity: "Request Created",
+          activity_type: "PENDING",
+        },
+      ];
+    } else {
+      history = `ASSIGNED_Request Created_${today}_${role_name}_${name}`;
+      activity_log = [
+        {
+          date: today,
+          name: name,
+          role: role_name,
+          activity: `Request Created and Assigned`,
+          activity_type: "ASSIGNED",
+        },
+      ];
+    }
   } else {
     //guest
     user_id = null;
@@ -454,11 +467,14 @@ const createRequest = async (req, res, next) => {
       },
     ];
   }
+
+  const status_id = assignedUser ? '2' : '1'
+
   if (!req.body.linkedRequestId) {
     const q = `INSERT INTO keppel.request(
       fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log, description_other, priority_id, assigned_user_id
     ) VALUES (
-      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13,$14,$15,$16
+      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),$9,$10,$11,$12,$13,$14,$15,$16,$17
     ) RETURNING request_id;`;
 
     db.query(
@@ -472,6 +488,7 @@ const createRequest = async (req, res, next) => {
         role_id,
         taggedAssetID,
         guestfullname,
+        status_id,
         fileBuffer,
         fileType,
         history,
@@ -488,21 +505,34 @@ const createRequest = async (req, res, next) => {
       }
     );
   } else if (req.body.linkedRequestId) {
-    history = `PENDING_Corrective Request Created_${today}_${role_name}_${name}`;
-    activity_log = [
-      {
-        date: today,
-        name: name,
-        role: role_name,
-        activity: `Corrective Request Created From Request ${req.body.linkedRequestId}`,
-        activity_type: "PENDING",
-      },
-    ];
+    if(assignedUser === "") {
+      history = `PENDING_Corrective Request Created_${today}_${role_name}_${name}`;
+      activity_log = [
+        {
+          date: today,
+          name: name,
+          role: role_name,
+          activity: `Corrective Request Created From Request ${req.body.linkedRequestId}`,
+          activity_type: "PENDING",
+        },
+      ];
+    } else {
+      history = `ASSIGNED_Corrective Request Created_${today}_${role_name}_${name}`;
+      activity_log = [
+        {
+          date: today,
+          name: name,
+          role: role_name,
+          activity: `Corrective Request Created From Request ${req.body.linkedRequestId}`,
+          activity_type: "ASSIGNED",
+        },
+      ];
+    }
     const insertQuery = `
       INSERT INTO keppel.request(
-        fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log, description_other
+        fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log, description_other, priority_id, assigned_user_id
       ) VALUES (
-        $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12,$13
+        $1,$2,$3,$4,$5,$6,$7,NOW(),$8,$9,$10,$11,$12,$13,$14,$15,$16
       ) RETURNING request_id;
     `;
     const updateQuery = `
@@ -529,12 +559,15 @@ const createRequest = async (req, res, next) => {
         user_id,
         role_id,
         taggedAssetID,
+        status_id,
         fileBuffer,
         fileType,
         history,
         req.body.linkedRequestId,
         JSON.stringify(activity_log),
         description_other,
+        priority || null,
+        assignedUser || null
       ],
       (err, result) => {
         if (err) {
@@ -562,6 +595,7 @@ const createRequest = async (req, res, next) => {
 };
 
 const updateRequest = async (req, res, next) => {
+  console.log('update', req.body)
   const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;

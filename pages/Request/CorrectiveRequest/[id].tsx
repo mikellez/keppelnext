@@ -1,23 +1,20 @@
-import React from "react";
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import {
   ModuleContent,
-  ModuleDivider,
-  ModuleFooter,
   ModuleHeader,
-  ModuleMain,
+  ModuleMain
 } from "../../../components";
-import Link from "next/link";
 import RequestContainer, {
+  CMMSRequestPriority,
   RequestProps,
 } from "../../../components/Request/RequestContainer";
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import instance from "../../../types/common/axios.config";
 import {
-  CMMSUser,
-  CMMSRequestTypes,
-  CMMSRequest,
   CMMSFaultTypes,
+  CMMSRequest,
+  CMMSRequestTypes,
+  CMMSUser,
 } from "../../../types/common/interfaces";
 
 interface CorrenctiveRequestProps {
@@ -72,20 +69,26 @@ export const getServerSideProps: GetServerSideProps = async (
     `/api/request/` + context.params?.id,
     headers
   );
+  const getPriority = instance.get(
+    `/api/request/priority`, 
+    headers);
+
   const values = await Promise.all([
     getUser,
     getRequestTypes,
     getFaultTypes,
     getSpecificRequest,
+    getPriority
   ]);
 
   const u: CMMSUser = values[0].data;
   const r: CMMSRequestTypes[] = values[1].data;
   const f: CMMSFaultTypes[] = values[2].data;
   const l: CMMSRequest = values[3].data;
+  const p: CMMSRequestPriority[] = values[4].data;
 
   let props: CorrenctiveRequestProps = {
-    requestData: { user: u, requestTypes: r, faultTypes: f },
+    requestData: { user: u, requestTypes: r, faultTypes: f,  priority: p },
     linkedRequestData: l,
   };
 
