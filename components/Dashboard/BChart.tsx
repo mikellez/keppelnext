@@ -73,6 +73,7 @@ export default function BChart(props: ChartProps) {
                     return bars;
                 }
             })}
+        <Legend/>
         </BarChart>
     </div>
   );
