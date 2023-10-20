@@ -8,8 +8,12 @@ const {
   ApproveChecklistMail,
 } = require("../mailer/ChecklistMail");
 const { userPermission } = require("../global");
+const {fuzzySearchSelectQuery, fuzzySearchWhereQuery, fuzzySearchOrderByQuery} = require("../common/fuzzySearchQuery");
 
 const ITEMS_PER_PAGE = 10;
+
+// Defines the columns for fuzzy searching:
+const searchColumns = ["cl.chl_name","description", "st.status"];
 const groupBYCondition = () => {  
   return `
     GROUP BY (
@@ -23,13 +27,15 @@ const groupBYCondition = () => {
       pm.plant_id,
       pm.plant_name,
       st.status,
-      cs.checklist_id
-    )`;
+      cs.checklist_id,
+      cs.date
+      )`;
 }
 
-const orderByCondition = (sortField, sortOrder) => {
+const orderByCondition = (sortField, sortOrder, search) => {
+  const similarity_score = search == "" ? `` : `similarity_score,`
   if (sortField == undefined || sortOrder == undefined) {
-    return `ORDER BY cl.checklist_id DESC`;
+    return `ORDER BY ${similarity_score} cl.checklist_id DESC`;
   } else {
     return `ORDER BY ${sortField} ${sortOrder}`;
   }
@@ -55,20 +61,21 @@ const advancedScheduleCond = (req) => {
   const user_role = req.user.permissions;
   // Check if user if engineer or specialist - role contains "engineer" --> means engineer
   if (user_role.includes('engineer')){
-    console.log('engineer view')
+    // console.log('engineer view')
     return ``;
   }
   
   // otherwise it is specialist
   // where condition for checking current date against created date:
   else {
-    console.log('specialist view');
+    // console.log('specialist view');
     return `AND (
       cl.created_date::DATE <= CURRENT_DATE
     )`;
   };
 }
 
+// Should be used in conjunction with the fuzzySearching cond:
 const searchCondition = (search) => {
   //fields to search by: checklist_id, description, status, assigneduser, signoffuser, createdbyuser
   let searchInt = parseInt(search);
@@ -78,15 +85,15 @@ const searchCondition = (search) => {
     return ``;
   } else if (!isNaN(search)) {
     //handling integer input
-    return `AND (
+    return `OR (
       cl.checklist_id = ${searchInt} OR
       cl.signoff_user_id = ${searchInt} OR
       cl.assigned_user_id = ${searchInt} 
-    )`;
+    ))`;
   } else if (typeof search === "string" && search !== "") {
     //handling text input
     return `
-    AND (
+    OR (
       cl.chl_name ILIKE '%${search}%' OR
       description ILIKE '%${search}%' OR
       st.status ILIKE '%${search}%' OR
@@ -102,7 +109,7 @@ const searchCondition = (search) => {
         OR sign_off_users.first_name || ' ' || sign_off_users.last_name ILIKE '%${search}%'
         OR created_users.first_name || ' ' || created_users.last_name ILIKE '%${search}%'
       )  
-    )`;
+    ))`;
   }
 };
 
@@ -218,7 +225,8 @@ SELECT
     cl.overdue,
     cl.overdue_status,
     cl.updated_at,
-    STRING_AGG(cscm.status || ': ' || cs.date, ', ') AS checklist_status
+    STRING_AGG(cscm.status || ': ' || cs.date, ', ') AS checklist_status,
+    cs.date
     
 FROM 
     keppel.users u
@@ -264,7 +272,7 @@ const fetchAssignedChecklistsQuery =
   ORDER BY cl.checklist_id DESC
 `;
 
-const getAllChecklistQuery = (req) => {
+const getAllChecklistQuery = (req, search) => {
   const expand = req.query.expand || false;
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
@@ -323,6 +331,10 @@ const getAllChecklistQuery = (req) => {
 
   expandCond = SELECT_ARR.join(", ");
 
+
+
+  const fuzzySelect = fuzzySearchSelectQuery(searchColumns, search);
+
   // for approved date and completed date sorting
   
   // if (sortField){
@@ -350,6 +362,7 @@ const getAllChecklistQuery = (req) => {
   query = `
     SELECT 
       ${expandCond}
+      ${fuzzySelect? (expandCond ? `,` + fuzzySelect: fuzzySelect) : fuzzySelect }
     FROM 
         keppel.users u
         JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -372,10 +385,13 @@ const getAssignedChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
+  const fuzzyWhere = fuzzySearchWhereQuery(searchColumns, search);
+  const similarity_score = search == "" ? `` : `,similarity_score`;
+
   //console.log("Checklist Assigned: default sorting");
   //console.log(sortField, sortOrder);
   return (
-    getAllChecklistQuery(req) +
+    getAllChecklistQuery(req ,search) +
     `
     WHERE (cl.status_id is null or cl.status_id = 2 or cl.status_id = 3 or cl.status_id = 6 or cl.status_id = 10) AND
         (CASE
@@ -390,10 +406,13 @@ const getAssignedChecklistsQuery = (req) => {
             ua.user_id = $1
     ${condition(req)}
     ${advancedScheduleCond(req)}
+    ${fuzzyWhere}
     ${searchCondition(search)}
     ${groupBYCondition()}
-    ${orderByCondition(sortField, sortOrder)}
-  `
+    ${(sortField == undefined || sortOrder == undefined) 
+      ? `ORDER BY cl.created_date ${similarity_score} DESC` 
+      : `ORDER BY ${sortField} ${sortOrder}`}
+    `
   );
 };
 
@@ -405,8 +424,10 @@ const getPendingChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
+  const fuzzyWhere = fuzzySearchWhereQuery(searchColumns, search);
+
   return (
-    getAllChecklistQuery(req) +
+    getAllChecklistQuery(req, search) +
     `
     WHERE
         ua.user_id = $1 AND
@@ -414,9 +435,10 @@ const getPendingChecklistsQuery = (req) => {
     ${condition(req)}
     ${advancedScheduleCond(req)}
     ${filterCondition("", plant, date, datetype)}
+    ${fuzzyWhere}
     ${searchCondition(search)}
     ${groupBYCondition()}
-    ${orderByCondition(sortField, sortOrder)}
+    ${orderByCondition(sortField, sortOrder, search)}
     `
   );
 };
@@ -431,6 +453,8 @@ const getOutstandingChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
+  const fuzzyWhere = fuzzySearchWhereQuery(searchColumns, search);
+
   let userRoleCond = "";
 
   if (role_id === 4) {
@@ -438,18 +462,19 @@ const getOutstandingChecklistsQuery = (req) => {
   }
 
   return (
-    getAllChecklistQuery(req) +
+    getAllChecklistQuery(req, search) +
     `
     WHERE
         ua.user_id = $1
         ${userRoleCond} AND
-        (cl.status_id = 2 OR cl.status_id = 3 OR cl.status_id = 4 OR cl.status_id = 6 OR cl.status_id = 9 OR cl.status_id = 10)
+        (cl.status_id = 2 OR cl.status_id = 6)
     ${condition(req)}
     ${advancedScheduleCond(req)}
     ${filterCondition("", plant, date, datetype)}
+    ${fuzzyWhere}
     ${searchCondition(search)}
     ${groupBYCondition()}
-    ${orderByCondition(sortField, sortOrder)}
+    ${orderByCondition(sortField, sortOrder, search)}
   `
   );
 };
@@ -463,17 +488,28 @@ const getCompletedChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
+  const fuzzyWhere = fuzzySearchWhereQuery(searchColumns, search);
+
   return (
-    getAllChecklistQuery(req) +
+    getAllChecklistQuery(req, search) +
     `
     WHERE
         ua.user_id = $1 AND
-        (cl.status_id = 6 OR cl.status_id = 11)
+        (cl.status_id = 4)
+        AND (
+          cs.date IS NULL OR
+          cs.date = (
+              SELECT MAX(cs_sub.date)
+              FROM keppel.checklist_status cs_sub
+              WHERE cl.checklist_id = cs_sub.checklist_id
+          )
+        )
     ${condition(req)}
     ${filterCondition("", plant, date, datetype)}
+    ${fuzzyWhere}
     ${searchCondition(search)}
     ${groupBYCondition()}
-    ${orderByCondition(sortField, sortOrder)}
+    ${orderByCondition(sortField, sortOrder, search)}
   `
   );
 };
@@ -484,17 +520,23 @@ const getOverdueChecklistsQuery = (req) => {
   const plant = req.params.plant;
   const date = req.params.date;
   const datetype = req.params.datetype;
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
+
+  const fuzzyWhere = fuzzySearchWhereQuery(searchColumns, search);
+
   return (
-    getAllChecklistQuery(req) +
+    getAllChecklistQuery(req, search) +
     `
     WHERE
         ua.user_id = $1 AND
         cl.overdue_status = true
     ${condition(req)}
     ${filterCondition("", plant, date, datetype)}
+    ${fuzzyWhere}
     ${searchCondition(search)}
     ${groupBYCondition()}
-    ORDER BY cl.checklist_id DESC
+    ${orderByCondition(sortField, sortOrder, search)}
   `
   );
 };
@@ -504,16 +546,30 @@ const getForReviewChecklistsQuery = (req) => {
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
 
+  const fuzzyWhere = fuzzySearchWhereQuery(searchColumns, search);
+  const similarity_score = search == "" ? `` : `,similarity_score`;
+
   return (
-    getAllChecklistQuery(req) +
+    getAllChecklistQuery(req, search) +
     `
     WHERE
         ua.user_id = $1 AND
         (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
+        AND (
+          cs.date IS NULL OR
+          cs.date = (
+              SELECT MAX(cs_sub.date)
+              FROM keppel.checklist_status cs_sub
+              WHERE cl.checklist_id = cs_sub.checklist_id
+          )
+        )
     ${condition(req)}
+    ${fuzzyWhere}
     ${searchCondition(search)}
     ${groupBYCondition()}
-    ${orderByCondition(sortField, sortOrder)}
+    ${(sortField == undefined || sortOrder == undefined) 
+      ? `ORDER BY cs.date ${similarity_score} DESC` 
+      : `ORDER BY ${sortField} ${sortOrder}`}
   `
   );
 };
@@ -522,17 +578,31 @@ const getApprovedChecklistsQuery = (req) => {
   const search = req.query.search || "";
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
-  
+
+  const fuzzyWhere = fuzzySearchWhereQuery(searchColumns, search);
+  const similarity_score = search == "" ? `` : `,similarity_score`;
+
   return (
     getAllChecklistQuery(req) +
     `
     WHERE
         ua.user_id = $1 AND
         (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
+        AND (
+          cs.date IS NULL OR
+          cs.date = (
+              SELECT MAX(cs_sub.date)
+              FROM keppel.checklist_status cs_sub
+              WHERE cl.checklist_id = cs_sub.checklist_id
+          )
+        )
     ${condition(req)}
+    ${fuzzyWhere}
     ${searchCondition(search)}
     ${groupBYCondition()}
-    ${orderByCondition(sortField, sortOrder)}
+    ${(sortField == undefined || sortOrder == undefined) 
+      ? `ORDER BY cs.date ${similarity_score} DESC` 
+      : `ORDER BY ${sortField} ${sortOrder}`}
   `
   );
 };
@@ -550,7 +620,7 @@ const fetchAssignedChecklists = async (req, res, next) => {
   const query =
     getAssignedChecklistsQuery(req) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
-    console.log(getAssignedChecklistsQuery);
+    //console.log(getAssignedChecklistsQuery);
 
   try {
     const result = await global.db.query(query, [req.user.id]);

@@ -2,6 +2,7 @@ const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
 const { userPermission } = require("../global");
+const {fuzzySearchSelectQuery, fuzzySearchWhereQuery, fuzzySearchOrderByQuery} = require("../common/fuzzySearchQuery");
 
 /** Express router providing user related routes
  * @module controllers/request
@@ -18,12 +19,12 @@ const searchCondition = (search) => {
     return ``;
   } else if (!isNaN(search)) {
     //handling integer input
-    return `AND (
+    return `OR (
       r.request_id = ${searchInt}
-    )`;
+    ))`;
   } else if (typeof search === "string" && search !== "") {
     //handling text input
-    return ` AND(
+    return ` OR(
         pm.plant_name ILIKE '%${search}%'
         OR r.fault_description ILIKE '%${search}%'
         OR ft.fault_type ILIKE '%${search}%'
@@ -31,7 +32,7 @@ const searchCondition = (search) => {
         OR req_u.first_name || ' ' || req_u.last_name ILIKE '%${search}%'
         OR tmp1.asset_name ILIKE '%${search}%'  
         OR r.description_other ILIKE '%${search}%'
-    )`;
+    ))`;
   }
 };
 
@@ -110,7 +111,6 @@ async function fetchRequestQuery(
     const new_order_query = `ORDER BY ${sortField} ${sortOrder}`;
     order_query = new_order_query;
   }
-  console.log("replaced order query: " + order_query);
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
   // console.log(role_id)
   let userCond = "";
@@ -177,11 +177,19 @@ async function fetchRequestQuery(
   }
 
   expandCond = SELECT_ARR.join(", ");
+  let searchColumns = ["pm.plant_name", 
+  "r.fault_description", "ft.fault_type", "pri.priority", "req_u.first_name", "tmp1.asset_name",
+  "r.description_other"
+];
+
+  const fuzzySelect = fuzzySearchSelectQuery(searchColumns, search);
+  const fuzzyWhere = fuzzySearchWhereQuery(searchColumns, search);
+  const fuzzyOrder = fuzzySearchOrderByQuery(search);
 
   let sql;
   sql = `SELECT 
-  ${expandCond}
-    
+    ${expandCond}
+    ${fuzzySelect? (expandCond ? `,` + fuzzySelect: fuzzySelect) : fuzzySelect }
   FROM    
     keppel.users u
     JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -203,6 +211,7 @@ async function fetchRequestQuery(
 
   WHERE 1 = 1 
   AND ua.user_id = ${user_id}
+  ${fuzzyWhere}
   ${searchCondition(search)}
   ${status_query}
   ${userCond}
@@ -224,9 +233,8 @@ async function fetchRequestQuery(
     rs.request_id,
     aa.item_name
   ) 
-  ${order_query}`;
-  console.log(sql)
-  console.log(expandCond)
+  ${search === ""? order_query : fuzzyOrder}`;
+  
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);
@@ -265,7 +273,7 @@ const fetchOutstandingRequests = async (req, res, next) => {
   const filterCond = filterCondition("", plant, date, datetype);
 
   const { sql, totalPages } = await fetchRequestQuery(
-    `AND (sc.status_id = 2 or sc.status_id = 3 or sc.status_id = 5) ${filterCond}`, //PENDING
+    `AND (sc.status_id = 2 or sc.status_id = 5) ${filterCond}`, //ASSIGNED, REJECTED
     ` ORDER BY r.created_date DESC`,
     req
   );
@@ -283,7 +291,7 @@ const fetchCompletedRequests = async (req, res, next) => {
   const filterCond = filterCondition("", plant, date, datetype);
 
   const { sql, totalPages } = await fetchRequestQuery(
-    `AND (sc.status_id = 4 or sc.status_id = 6) ${filterCond}`,
+    `AND (sc.status_id = 3) ${filterCond}`,
     ` ORDER BY r.created_date DESC`,
     req
   );

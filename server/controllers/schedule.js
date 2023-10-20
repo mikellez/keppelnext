@@ -1013,6 +1013,7 @@ const deleteSchedule = async (req, res, next) => {
 const getOpsAndEngineers = async (req, res, next) => {
   let sql;
   const arr = req.params.plant_id.split(",");
+  const signoff = req.query.signoff;
   for (let i = 0; i < arr.length; i++) {
     arr[i] = +arr[i];
   }
@@ -1028,7 +1029,20 @@ const getOpsAndEngineers = async (req, res, next) => {
           LEFT JOIN keppel.user_plant up ON up.user_id = u.user_id
           JOIN keppel.auth_assignment aa ON aa.user_id = u.user_id
           WHERE up.plant_id = ANY($1::int[]) ${userRoleCond};`;
-  } else {
+
+  } else if ( req.params.plant_id.toString().length === 1 && signoff === "true" ) {
+    // console.log("signoff")
+    sql = `SELECT u.user_id as id, r.role_id, role_name, concat( concat(u.first_name , ' ') , u.last_name) AS name, user_email as email, first_name as fname, last_name as lname, user_name as username
+          FROM keppel.user_role ur, keppel.role r, keppel.role_parent rp, keppel.users u 
+          LEFT JOIN keppel.user_plant up ON up.user_id = u.user_id
+          WHERE rp.role_id = r.role_id
+              and rp.role_parent_id = ur.role_parent_id
+              and u.user_id = ur.user_id
+              and (r.role_name = 'Engineer' or r.role_name = 'Manager' or r.role_name = 'Admin')
+              and up.plant_id = $1;`;
+
+  } else if (req.params.plant_id.toString().length === 1 && signoff !== "true") {
+    // console.log("assign to")
     sql = `SELECT u.user_id as id, r.role_id, role_name, concat( concat(u.first_name , ' ') , u.last_name) AS name, user_email as email, first_name as fname, last_name as lname, user_name as username
     FROM keppel.user_role ur, keppel.role r, keppel.role_parent rp, keppel.users u 
     LEFT JOIN keppel.user_plant up ON up.user_id = u.user_id
