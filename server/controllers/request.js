@@ -110,7 +110,7 @@ async function fetchRequestQuery(
     const new_order_query = `ORDER BY ${sortField} ${sortOrder}`;
     order_query = new_order_query;
   }
-  console.log("replaced order query: " + order_query);
+
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
   // console.log(role_id)
   let userCond = "";
@@ -222,11 +222,12 @@ async function fetchRequestQuery(
     au.first_name,
     au.last_name,
     rs.request_id,
-    aa.item_name
+    aa.item_name,
+    rs.date
   ) 
   ${order_query}`;
-  console.log(sql)
-  console.log(expandCond)
+  // console.log("Request Page SQL: \n", sql)
+
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);

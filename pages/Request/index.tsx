@@ -20,11 +20,7 @@
     table library. It supports table dropdown features.
 */
 
-import React, {
-  useEffect,
-  useRef,
-  useState
-} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ModuleContent,
   ModuleHeader,
@@ -39,7 +35,7 @@ import {
   HeaderCell,
   HeaderRow,
   Row,
-  Table
+  Table,
 } from "@table-library/react-table-library";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import { useTheme } from "@table-library/react-table-library/theme";
@@ -62,14 +58,19 @@ import RequestHistory from "../../components/Request/RequestHistory";
 import {
   useCurrentUser,
   useRequest,
-  useRequestFilter
+  useRequestFilter,
 } from "../../components/SWR";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import TooltipBtn from "../../components/TooltipBtn";
 import styles from "../../styles/Request.module.scss";
 import animationStyles from "../../styles/animations.module.css";
 import { CMMSRequest } from "../../types/common/interfaces";
+import PickerWithType from "../../components/PickerWithType";
+import type { DatePickerProps } from "antd";
+import { Select } from "antd";
 
+const { Option } = Select;
+type PickerType = "date";
 
 /*export type TableNode<T> = {
   id: string;
@@ -201,7 +202,7 @@ export default function Request(props: RequestProps) {
   >();
   const { data, userPermission } = useCurrentUser();
   const [activeTabIndex, setActiveTabIndex] = useState(
-    userPermission("engineer") ? 0 : 1   // Specialists directed to "assigned tab" upon entering
+    userPermission("engineer") ? 0 : 1 // Specialists directed to "assigned tab" upon entering
   );
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -221,6 +222,10 @@ export default function Request(props: RequestProps) {
   const [sortField, setSortField] = useState("r.request_id");
   const [sortOrder, setSortOrder] = useState("desc");
   const [dataChanged, setDataChanged] = useState(false);
+  const [pickerwithtype, setPickerWithType] = useState<{
+    date: string;
+    datetype: PickerType;
+  }>({ date: "all", datetype: "date" });
 
   const switchColumns = (index: number) => {
     setReady(false);
@@ -268,10 +273,15 @@ export default function Request(props: RequestProps) {
     "associatedrequestid",
     "activity_log",
     "overdue_status",
-    "request_status"
+    "request_status",
   ];
-  
-  const filteredRequest = useRequestFilter(props, page, searchRef.current.value, fields);
+
+  const filteredRequest = useRequestFilter(
+    props,
+    page,
+    searchRef.current.value,
+    fields
+  );
   const allRequest = useRequest(
     indexedColumn[activeTabIndex],
     page,
@@ -402,18 +412,6 @@ export default function Request(props: RequestProps) {
     setDataChanged(true);
   }
 
-  const customSortByPriority = (a: any, b: any) => {
-    const priorityOrder = { LOW: 1, MEDIUM: 2, HIGH: 3, null: 0 };
-    const priorityA = priorityOrder[a.priority];
-    const priorityB = priorityOrder[b.priority];
-
-    if (priorityHeader === "Priority" || priorityHeader === "Priority ▲")
-      return priorityB - priorityA;
-    else if (priorityHeader === "Priority ▼") {
-      return priorityA - priorityB;
-    }
-  };
-
   async function sortPriority() {
     setBlockReset(true);
     setSortField("r.priority_id");
@@ -460,11 +458,10 @@ export default function Request(props: RequestProps) {
     if (dateArrow == "" || dateArrow == " ▼") {
       setDateArrow(" ▲");
       setSortOrder("asc");
-      
     } else if (dateArrow == " ▲") {
       setDateArrow(" ▼");
       setSortOrder("desc");
-    } 
+    }
     setDataChanged(true);
   }
 
@@ -499,6 +496,142 @@ export default function Request(props: RequestProps) {
       setSortOrder("asc");
     }
     setDataChanged(true);
+  }
+
+  const handleDateChange: DatePickerProps["onChange"] = (date, dateString) => {
+    //if no input display rows as per normal
+    if (dateString == null) {
+      return;
+    }
+
+    let dateStart;
+    let dateEnd;
+    let datetype = pickerwithtype.datetype;
+
+    if (datetype == "date") {
+      dateStart = new Date(dateString);
+      const endOfDay = new Date(dateStart);
+      endOfDay.setHours(23, 59, 59, 999);
+      dateEnd = endOfDay;
+    } else if (datetype == "week") {
+      const dateObjectWeek = new Date(parseWeekString(dateString));
+      const dateObjectWeekEnd = getEndOfWeek(dateObjectWeek);
+      dateStart = dateObjectWeek;
+      dateEnd = dateObjectWeekEnd;
+    } else if (datetype == "month") {
+      const dateObjectMonth = new Date(dateString);
+      const dateObjectMonthEnd = getEndOfMonth(dateObjectMonth);
+      dateStart = dateObjectMonth;
+      dateEnd = dateObjectMonthEnd;
+    } else if (datetype == "quarter") {
+      [dateStart, dateEnd] = getFirstDayOfQuarter(dateString);
+    } else if (datetype == "year") {
+      const year = parseInt(dateString.slice(0, 4), 10);
+      dateStart = new Date(year, 0, 1);
+      dateEnd = new Date(year, 11, 31);
+    }
+
+    let filteredDataRows: CMMSRequest[] = [];
+    if (requestData && dateStart && dateEnd) {
+      for (const row of requestData.rows) {
+        const rowCreatedDate = new Date(row.created_date);
+
+        if (rowCreatedDate >= dateStart && rowCreatedDate <= dateEnd) {
+          filteredDataRows.push(row);
+        }
+      }
+
+      setRequestItems(
+        filteredDataRows.map((row: CMMSRequest) => {
+          return {
+            id: row.request_id,
+            ...row,
+          };
+        })
+      );
+    }
+
+    setPickerWithType({
+      date: dateString ? moment(date?.toDate()).format("YYYY-MM-DD") : "all",
+      datetype: pickerwithtype.datetype,
+    });
+  };
+
+  const handleDateTypeChange = (value: PickerType) => {
+    let { date } = pickerwithtype;
+    setPickerWithType({ date: date || "all", datetype: value });
+  };
+
+  function parseWeekString(weekString: String) {
+    const numbersDashString = weekString.slice(0, -2);
+    const numbersArray = numbersDashString.split("-");
+    const year = parseInt(numbersArray[0], 10);
+    const week = parseInt(numbersArray[1], 10);
+    const januaryFirst = new Date(year, 0, 1);
+    januaryFirst.setHours(0, 0, 0, 0);
+    const daysToAdd = (week - 1) * 7 + 1;
+    januaryFirst.setDate(januaryFirst.getDate() + daysToAdd);
+    return januaryFirst;
+  }
+
+  function getEndOfWeek(date: Date) {
+    const endOfWeek = new Date(date);
+
+    // Calculate the number of days until the end of the week (Sunday)
+    const daysUntilSunday = 7 - endOfWeek.getUTCDay();
+
+    // Add the number of days to the current date
+    endOfWeek.setUTCDate(endOfWeek.getUTCDate() + daysUntilSunday);
+
+    // Set the time to the end of the day
+    endOfWeek.setUTCHours(23, 59, 59, 999);
+
+    return endOfWeek;
+  }
+
+  function getEndOfMonth(date: Date) {
+    // Create a new Date object based on the input date
+    const endOfMonth = new Date(date);
+
+    // Set the day of the month to the last day of the month
+    endOfMonth.setUTCDate(1); // Move to the beginning of the month
+    endOfMonth.setUTCMonth(endOfMonth.getUTCMonth() + 1); // Move to the next month
+    endOfMonth.setUTCDate(0); // Set to the last day of the previous month
+
+    // Set the time to the end of the day
+    endOfMonth.setUTCHours(23, 59, 59, 999);
+
+    return endOfMonth;
+  }
+
+  function getFirstDayOfQuarter(dateString: String) {
+    const year = parseInt(dateString.slice(0, 4), 10);
+    const quarter = dateString.slice(-2);
+    let firstDayOfQuarter;
+    let lastDayOfQuarter;
+    switch (quarter) {
+      case "Q1":
+        firstDayOfQuarter = new Date(year, 0, 1);
+        lastDayOfQuarter = new Date(year, 2, 31);
+        break;
+      case "Q2":
+        firstDayOfQuarter = new Date(year, 3, 1);
+        lastDayOfQuarter = new Date(year, 5, 31);
+        break;
+      case "Q3":
+        firstDayOfQuarter = new Date(year, 6, 1);
+        lastDayOfQuarter = new Date(year, 8, 31);
+        break;
+      case "Q4":
+        firstDayOfQuarter = new Date(year, 9, 1);
+        lastDayOfQuarter = new Date(year, 11, 31);
+        break;
+    }
+    return [firstDayOfQuarter, lastDayOfQuarter];
+  }
+
+  function handleStatusChange() {
+    
   }
 
   return (
@@ -616,27 +749,69 @@ export default function Request(props: RequestProps) {
                       >
                         {locationHeader}
                       </HeaderCell>
-                      <HeaderCell
-                        resize
-                        onClick={() => updateTable(sortPriority)}
-                        style={{ cursor: "pointer" }}
-                      >
-                        {priorityHeader}
+                      <HeaderCell resize style={{ cursor: "pointer" }}>
+                        <div
+                          id="priorityHeader"
+                          onClick={() => updateTable(sortPriority)}
+                        >
+                          {priorityHeader}
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          <Select
+                            value={pickerwithtype.datetype}
+                            onChange={handleStatusChange}
+                          >
+                            <Option value="LOW">LOW</Option>
+                            <Option value="MEDIUM">MEDIUM</Option>
+                            <Option value="HIGH">HIGH</Option>
+                            <Option value="-">UNASSIGNED</Option>
+                          </Select>
+                        </div>
                       </HeaderCell>
                       <HeaderCell resize>Status</HeaderCell>
-                      <HeaderCell
-                        resize
-                        onClick={() =>
-                          updateTable(() => sortDate(activeTabIndex))
-                        }
-                        style={{ cursor: "pointer" }}
-                      >
-                        {activeTabIndex === 2
-                          ? "Completed Date"
-                          : activeTabIndex === 3
-                          ? "Approved Date"
-                          : "Created On"}
-                        {dateArrow}
+                      <HeaderCell resize style={{ cursor: "pointer" }}>
+                        <div
+                          id="dateHeader"
+                          onClick={() =>
+                            updateTable(() => sortDate(activeTabIndex))
+                          }
+                        >
+                          {activeTabIndex === 2
+                            ? "Completed Date"
+                            : activeTabIndex === 3
+                            ? "Approved Date"
+                            : "Created On"}
+                          {dateArrow}
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          <Select
+                            value={pickerwithtype.datetype}
+                            onChange={handleDateTypeChange}
+                          >
+                            <Option value="date">Date</Option>
+                            <Option value="week">Week</Option>
+                            <Option value="month">Month</Option>
+                            <Option value="quarter">Quarter</Option>
+                            <Option value="year">Year</Option>
+                          </Select>
+                          <div style={{ paddingLeft: "10px" }}>
+                            <PickerWithType
+                              type={pickerwithtype.datetype}
+                              onChange={handleDateChange}
+                            />
+                          </div>
+                        </div>
                       </HeaderCell>
                       {/*Only show the Overdue column for the pending and assigned tabs*/}
                       {(activeTabIndex === 0 || activeTabIndex === 1) && (
@@ -851,10 +1026,17 @@ export default function Request(props: RequestProps) {
                                       let dateToDisplay;
 
                                       if (activeTabIndex === 2) {
-
-                                        const statusArr = item?.request_status?.split(",");
-                                        const status = statusArr?.filter(element => element.includes('COMPLETED'))[0];
-                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
+                                        const statusArr =
+                                          item?.request_status?.split(",");
+                                        const status = statusArr?.filter(
+                                          (element) =>
+                                            element.includes("COMPLETED")
+                                        )[0];
+                                        const statusDate =
+                                          status &&
+                                          status.slice(
+                                            status?.indexOf(":") + 2
+                                          );
                                         dateToDisplay = statusDate;
 
                                         /*const completedActivity =
@@ -866,12 +1048,19 @@ export default function Request(props: RequestProps) {
                                                 "COMPLETED"
                                             );
                                             */
-
                                       } else if (activeTabIndex === 3) {
-
-                                        const statusArr = item?.request_status?.split(",");
-                                        const status = statusArr?.filter(element => element.includes('APPROVED') || element.includes('CANCELLED'))[0];
-                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
+                                        const statusArr =
+                                          item?.request_status?.split(",");
+                                        const status = statusArr?.filter(
+                                          (element) =>
+                                            element.includes("APPROVED") ||
+                                            element.includes("CANCELLED")
+                                        )[0];
+                                        const statusDate =
+                                          status &&
+                                          status.slice(
+                                            status?.indexOf(":") + 2
+                                          );
                                         dateToDisplay = statusDate;
 
                                         /*const approvedActivity =
@@ -883,12 +1072,11 @@ export default function Request(props: RequestProps) {
                                                 "APPROVED"
                                             );
                                             */
-
                                       } else {
                                         dateToDisplay = item.created_date;
                                       }
 
-                                      console.log(dateToDisplay)
+                                      console.log(dateToDisplay);
 
                                       // Handle case where date information is missing
                                       if (dateToDisplay) {
@@ -955,17 +1143,16 @@ export default function Request(props: RequestProps) {
                               >
                                 <td style={{ flex: "1" }}>
                                   <ul className={styles.tableUL}>
-                                  {
-                                    item.fault_name === 'OTHERS' && 
-                                    <li
-                                      className={styles.tableDropdownListItem}
-                                    >
-                                      <p>
-                                        <strong>Fault Specification</strong>
-                                      </p>
-                                      <p>{item.description_other}</p>
-                                    </li>
-                                  }
+                                    {item.fault_name === "OTHERS" && (
+                                      <li
+                                        className={styles.tableDropdownListItem}
+                                      >
+                                        <p>
+                                          <strong>Fault Specification</strong>
+                                        </p>
+                                        <p>{item.description_other}</p>
+                                      </li>
+                                    )}
                                     <li
                                       className={styles.tableDropdownListItem}
                                     >
@@ -974,7 +1161,7 @@ export default function Request(props: RequestProps) {
                                       </p>
                                       <p>{item.fault_description}</p>
                                     </li>
-                                  
+
                                     <li
                                       className={styles.tableDropdownListItem}
                                     >
@@ -1065,63 +1252,58 @@ export default function Request(props: RequestProps) {
                                         <p>No File</p>
                                       )}
                                     </li>
-                                    
                                   </ul>
-                                  <li
-                                      className={styles.tableUL}
-                                    >
-                                      {(() => {
-                                        try {
-                                          if (
-                                            userPermission(
-                                              "canManageRequestTicket"
-                                            ) &&
-                                            item.status_id === 3
-                                          ) {
-                                            return (
-                                              <Link
-                                                href={`/Request/Manage/${item.id}`}
-                                              >
-                                                <strong>Manage</strong>
-                                              </Link>
-                                            );
-                                          } else if (
-                                            userPermission(
-                                              "canCompleteRequestTicket"
-                                            ) &&
-                                            (item.status_id === 2 ||
-                                              item.status_id === 5)
-                                          ) {
-                                            return (
-                                              <Link
-                                                href={`/Request/Complete/${item.id}`}
-                                              >
-                                                <strong>Start Work</strong>
-                                              </Link>
-                                            );
-                                          } else if (
-                                            userPermission(
-                                              "canViewRequestTicket"
-                                            )
-                                          ) {
-                                            return (
-                                              <Link
-                                                href={`/Request/View/${item.id}`}
-                                              >
-                                                <strong>View</strong>
-                                              </Link>
-                                            );
-                                          }
-                                        } catch (error) {
-                                          console.error("Error:", error);
+                                  <li className={styles.tableUL}>
+                                    {(() => {
+                                      try {
+                                        if (
+                                          userPermission(
+                                            "canManageRequestTicket"
+                                          ) &&
+                                          item.status_id === 3
+                                        ) {
                                           return (
-                                            <div>
-                                              Error: Unable to render content
-                                            </div>
+                                            <Link
+                                              href={`/Request/Manage/${item.id}`}
+                                            >
+                                              <strong>Manage</strong>
+                                            </Link>
+                                          );
+                                        } else if (
+                                          userPermission(
+                                            "canCompleteRequestTicket"
+                                          ) &&
+                                          (item.status_id === 2 ||
+                                            item.status_id === 5)
+                                        ) {
+                                          return (
+                                            <Link
+                                              href={`/Request/Complete/${item.id}`}
+                                            >
+                                              <strong>Start Work</strong>
+                                            </Link>
+                                          );
+                                        } else if (
+                                          userPermission("canViewRequestTicket")
+                                        ) {
+                                          return (
+                                            <Link
+                                              href={`/Request/View/${item.id}`}
+                                            >
+                                              <strong>View</strong>
+                                            </Link>
                                           );
                                         }
-                                      })()}
-                                    </li>
+                                      } catch (error) {
+                                        console.error("Error:", error);
+                                        return (
+                                          <div>
+                                            Error: Unable to render content
+                                          </div>
+                                        );
+                                      }
+                                    })()}
+                                  </li>
                                 </td>
                               </tr>
                             ) : (
