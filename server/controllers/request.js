@@ -2,6 +2,7 @@ const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
 const { userPermission } = require("../global");
+const {fuzzySearchSelectQuery, fuzzySearchWhereQuery, fuzzySearchOrderByQuery} = require("../common/fuzzySearchQuery");
 
 /** Express router providing user related routes
  * @module controllers/request
@@ -18,12 +19,12 @@ const searchCondition = (search) => {
     return ``;
   } else if (!isNaN(search)) {
     //handling integer input
-    return `AND (
+    return `OR (
       r.request_id = ${searchInt}
-    )`;
+    ))`;
   } else if (typeof search === "string" && search !== "") {
     //handling text input
-    return ` AND(
+    return ` OR(
         pm.plant_name ILIKE '%${search}%'
         OR r.fault_description ILIKE '%${search}%'
         OR ft.fault_type ILIKE '%${search}%'
@@ -31,7 +32,7 @@ const searchCondition = (search) => {
         OR req_u.first_name || ' ' || req_u.last_name ILIKE '%${search}%'
         OR tmp1.asset_name ILIKE '%${search}%'  
         OR r.description_other ILIKE '%${search}%'
-    )`;
+    ))`;
   }
 };
 
@@ -110,7 +111,6 @@ async function fetchRequestQuery(
     const new_order_query = `ORDER BY ${sortField} ${sortOrder}`;
     order_query = new_order_query;
   }
-
   const offsetItems = (page - 1) * ITEMS_PER_PAGE;
   // console.log(role_id)
   let userCond = "";
@@ -177,11 +177,19 @@ async function fetchRequestQuery(
   }
 
   expandCond = SELECT_ARR.join(", ");
+  let searchColumns = ["pm.plant_name", 
+  "r.fault_description", "ft.fault_type", "pri.priority", "req_u.first_name", "tmp1.asset_name",
+  "r.description_other"
+];
+
+  const fuzzySelect = fuzzySearchSelectQuery(searchColumns, search);
+  const fuzzyWhere = fuzzySearchWhereQuery(searchColumns, search);
+  const fuzzyOrder = fuzzySearchOrderByQuery(search);
 
   let sql;
   sql = `SELECT 
-  ${expandCond}
-    
+    ${expandCond}
+    ${fuzzySelect? (expandCond ? `,` + fuzzySelect: fuzzySelect) : fuzzySelect }
   FROM    
     keppel.users u
     JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -203,9 +211,19 @@ async function fetchRequestQuery(
 
   WHERE 1 = 1 
   AND ua.user_id = ${user_id}
+  ${fuzzyWhere}
   ${searchCondition(search)}
   ${status_query}
   ${userCond}
+  AND (
+    rs.date IS NULL OR
+    rs.date = (
+      SELECT rs.date
+        FROM keppel.request_status rs
+        WHERE r.request_id = rs.request_id
+        AND r.status_id = rs.status_id
+    )
+  )
 
   GROUP BY (
     r.request_id,
@@ -226,8 +244,8 @@ async function fetchRequestQuery(
     rs.date
   ) 
   ${order_query}`;
-  // console.log("Request Page SQL: \n", sql)
-
+  console.log(sql)
+  console.log(expandCond)
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);
@@ -266,7 +284,7 @@ const fetchOutstandingRequests = async (req, res, next) => {
   const filterCond = filterCondition("", plant, date, datetype);
 
   const { sql, totalPages } = await fetchRequestQuery(
-    `AND (sc.status_id = 2 or sc.status_id = 3 or sc.status_id = 5) ${filterCond}`, //PENDING
+    `AND (sc.status_id = 2 or sc.status_id = 5) ${filterCond}`, //ASSIGNED, REJECTED
     ` ORDER BY r.created_date DESC`,
     req
   );
@@ -284,7 +302,7 @@ const fetchCompletedRequests = async (req, res, next) => {
   const filterCond = filterCondition("", plant, date, datetype);
 
   const { sql, totalPages } = await fetchRequestQuery(
-    `AND (sc.status_id = 4 or sc.status_id = 6) ${filterCond}`,
+    `AND (sc.status_id = 3) ${filterCond}`,
     ` ORDER BY r.created_date DESC`,
     req
   );
@@ -357,6 +375,8 @@ const fetchApprovedRequests = async (req, res, next) => {
     req
   );
 
+  console.log("fetchrequest sql: ", sql)
+
   const result = await global.db.query(sql);
 
   res.status(200).send({ rows: result.rows, total: totalPages });
@@ -428,16 +448,29 @@ const createRequest = async (req, res, next) => {
       role_name = req.user.role_name;
       name = req.user.name;
     }
-    history = `PENDING_Request Created_${today}_${role_name}_${name}`;
-    activity_log = [
-      {
-        date: today,
-        name: name,
-        role: role_name,
-        activity: "Request Created",
-        activity_type: "PENDING",
-      },
-    ];
+    if (assignedUser === ""){
+      history = `PENDING_Request Created_${today}_${role_name}_${name}`;
+      activity_log = [
+        {
+          date: today,
+          name: name,
+          role: role_name,
+          activity: "Request Created",
+          activity_type: "PENDING",
+        },
+      ];
+    } else {
+      history = `ASSIGNED_Request Created_${today}_${role_name}_${name}`;
+      activity_log = [
+        {
+          date: today,
+          name: name,
+          role: role_name,
+          activity: `Request Created and Assigned`,
+          activity_type: "ASSIGNED",
+        },
+      ];
+    }
   } else {
     //guest
     user_id = null;
@@ -455,11 +488,14 @@ const createRequest = async (req, res, next) => {
       },
     ];
   }
+
+  const status_id = assignedUser ? '2' : '1'
+
   if (!req.body.linkedRequestId) {
     const q = `INSERT INTO keppel.request(
       fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, guestfullname, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log, description_other, priority_id, assigned_user_id
     ) VALUES (
-      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),'1',$9,$10,$11,$12,$13,$14,$15,$16
+      $1,$2,$3,$4,$5,$6,$7,$8,NOW(),$9,$10,$11,$12,$13,$14,$15,$16,$17
     ) RETURNING request_id;`;
 
     db.query(
@@ -473,6 +509,7 @@ const createRequest = async (req, res, next) => {
         role_id,
         taggedAssetID,
         guestfullname,
+        status_id,
         fileBuffer,
         fileType,
         history,
@@ -489,21 +526,34 @@ const createRequest = async (req, res, next) => {
       }
     );
   } else if (req.body.linkedRequestId) {
-    history = `PENDING_Corrective Request Created_${today}_${role_name}_${name}`;
-    activity_log = [
-      {
-        date: today,
-        name: name,
-        role: role_name,
-        activity: `Corrective Request Created From Request ${req.body.linkedRequestId}`,
-        activity_type: "PENDING",
-      },
-    ];
+    if(assignedUser === "") {
+      history = `PENDING_Corrective Request Created_${today}_${role_name}_${name}`;
+      activity_log = [
+        {
+          date: today,
+          name: name,
+          role: role_name,
+          activity: `Corrective Request Created From Request ${req.body.linkedRequestId}`,
+          activity_type: "PENDING",
+        },
+      ];
+    } else {
+      history = `ASSIGNED_Corrective Request Created_${today}_${role_name}_${name}`;
+      activity_log = [
+        {
+          date: today,
+          name: name,
+          role: role_name,
+          activity: `Corrective Request Created From Request ${req.body.linkedRequestId}`,
+          activity_type: "ASSIGNED",
+        },
+      ];
+    }
     const insertQuery = `
       INSERT INTO keppel.request(
-        fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log, description_other
+        fault_id,fault_description,plant_id, req_id, user_id, role_id, psa_id, created_date, status_id, uploaded_file, uploadfilemimetype, requesthistory, associatedrequestid, activity_log, description_other, priority_id, assigned_user_id
       ) VALUES (
-        $1,$2,$3,$4,$5,$6,$7,NOW(),'1',$8,$9,$10,$11,$12,$13
+        $1,$2,$3,$4,$5,$6,$7,NOW(),$8,$9,$10,$11,$12,$13,$14,$15,$16
       ) RETURNING request_id;
     `;
     const updateQuery = `
@@ -530,12 +580,15 @@ const createRequest = async (req, res, next) => {
         user_id,
         role_id,
         taggedAssetID,
+        status_id,
         fileBuffer,
         fileType,
         history,
         req.body.linkedRequestId,
         JSON.stringify(activity_log),
         description_other,
+        priority || null,
+        assignedUser || null
       ],
       (err, result) => {
         if (err) {
@@ -563,6 +616,7 @@ const createRequest = async (req, res, next) => {
 };
 
 const updateRequest = async (req, res, next) => {
+  console.log('update', req.body)
   const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;

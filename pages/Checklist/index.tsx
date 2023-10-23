@@ -86,6 +86,7 @@ import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 import Pagination from "../../components/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import { Checklist_Status } from "../../types/common/enums";
+import { downloadMultipleChecklistsPDF } from "./View/[id]";
 
 const indexedColumn: ("pending" | "assigned" | "record" | "approved")[] = [
   "pending",
@@ -471,6 +472,40 @@ export default function Checklist(props: ChecklistProps) {
     setDataChanged(true);
   }
 
+  const downloadMultipleChecklistPDF = () => {
+   
+    // let filteredDataRows: CMMSChecklist[] = [];
+    // if (data) {
+    //   console.log("startDate:",startDate)
+    //   console.log("endDate",endDate)
+    let checklistIdArray = [];
+    //   // const startDate = new Date('2023-08-01');
+    //   // startDate.setUTCHours(23, 0, 0, 0);
+
+    //   // const endDate = new Date('2023-08-30');
+    //   // endDate.setUTCHours(23, 0, 0, 0);
+    //   //get filtered rows rows based on chosen date range
+    //   console.log("unfiltered data.rows", data.rows)
+    //   for (const row of data.rows){
+    //     const rowCreatedDate = new Date(row.created_date);
+    //     console.log("rowcreatedDate:",rowCreatedDate)
+    //     console.log(typeof rowCreatedDate)
+    //     if (rowCreatedDate >= startDate && rowCreatedDate <= endDate) {
+    //       filteredDataRows.push(row);
+    //       console.log("pushed ",row)
+    //     }
+    //   }
+
+    //   console.log("filteredDataRows:"+filteredDataRows)
+    //add filtered rows to array to be converted into PDF format
+    if (data) {
+      for (const row in checklistItems) {
+        checklistIdArray.push(data.rows[row]["checklist_id"]);
+      }
+      downloadMultipleChecklistsPDF(checklistIdArray);
+    }
+  };
+
   return (
     <ModuleMain>
       <ModuleHeader title="Checklist" header="Checklist">
@@ -489,8 +524,8 @@ export default function Checklist(props: ChecklistProps) {
           </Link>
         )}
         <TooltipBtn
-          onClick={() => downloadCSV("checklist", activeTabIndex)}
-          text="Export CSV"
+          onClick={() => downloadMultipleChecklistPDF()}
+          text="Download PDF"
         >
           <HiOutlineDownload size={20} />
         </TooltipBtn>

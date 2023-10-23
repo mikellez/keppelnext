@@ -162,7 +162,7 @@ export default function ManageSchedule() {
         header="Manage Schedule"
         schedules={scheduleList}
         eventClassNames={(args)=> {
-            if(args.event.extendedProps.isNewSchedule) {
+            if(!args.event.extendedProps.isNewSchedule) {
                 return ['overlay'];
             }
 

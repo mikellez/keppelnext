@@ -14,6 +14,7 @@ import assetService from '../../services/assets';
 import 'react-tabulator/lib/styles.css';
 import { ReactTabulator } from 'react-tabulator'
 import 'react-tabulator/lib/css/tabulator_semanticui.min.css'; // theme - can be changed with other default themes https://tabulator.info/examples/5.5?#theming 
+import { levenshteinDistance } from "../../components/Common/FuzzySearch";
 
 
 // Using tabulator table library:
@@ -235,6 +236,25 @@ const Asset = () => {
         // note: setting fixed max height will have a scroll bar, but the scrollbar currently
         // has a bug (https://github.com/olifolkerd/tabulator/issues/4219) so temporarily will just leave the table as unlimited height
         }
+    
+    const customFuzzyFilter = (data, filterParams) => {
+        const cond = (data.plant_name ? levenshteinDistance(data.plant_name,filterParams.search) <= 1 : false) ||
+        (data.system_name ? levenshteinDistance(data.system_name,filterParams.search) <= 1 : false) ||
+        (data.system_asset ? levenshteinDistance(data.system_asset,filterParams.search) <= 1 : false) ||
+        (data.parent_asset ? levenshteinDistance(data.parent_asset,filterParams.search) <= 1 : false) ||
+        (data.asset_type ? levenshteinDistance(data.asset_type,filterParams.search) <= 1 : false) ||
+        (data.plant_asset_instrument ? levenshteinDistance(data.plant_asset_instrument,filterParams.search) <= 1 : false) ||
+        (data.asset_location ? levenshteinDistance(data.asset_location,filterParams.search) <= 1 : false) ||
+        (data.brand ? levenshteinDistance(data.brand,filterParams.search) <= 1 : false) ||
+        (data.model_number ? levenshteinDistance(data.model_number,filterParams.search) <= 1 : false) ||
+        (data.technical_specs ? levenshteinDistance(data.technical_specs,filterParams.search) <= 1 : false) ||
+        (data.manufacture_country ? levenshteinDistance(data.manufacture_country,filterParams.search) <= 1 : false) ||
+        (data.warranty ? levenshteinDistance(data.warranty,filterParams.search) <= 1 : false) ||
+        (data.remarks ? levenshteinDistance(data.remarks,filterParams.search) <= 1 : false) ;
+
+        return cond;
+        
+    }
 
     // Get request to fetch all the assets from db on 1st page render
     useEffect(() => {
@@ -253,8 +273,7 @@ const Asset = () => {
                         onChange={(e) => {
                             // Clear any existing filters and search all fields for all occurances of the search term
                             if (ref.current){
-                                ref.current.clearFilter();
-                                ref.current.addFilter([
+                                let searchFilter = [
                                     [
                                         {field:"plant_name", type:"like", value:e.target.value},
                                         {field:"system_name", type:"like", value:e.target.value},
@@ -270,7 +289,14 @@ const Asset = () => {
                                         {field:"warranty", type:"like", value:e.target.value},
                                         {field:"remarks", type:"like", value:e.target.value},
                                     ]
-                                ])
+                                ];
+                                ref.current.setFilter(customFuzzyFilter, {search:e.target.value})
+                                const currFilters = searchFilter[0].push(ref.current.getFilters());
+                                console.log(searchFilter);
+                                ref.current.clearFilter();
+                                ref.current.addFilter(searchFilter);
+                                console.log(ref.current.getFilters());
+                                
                             } 
                         }}
                     />
