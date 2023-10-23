@@ -170,7 +170,10 @@ export default function ScheduleMaintenanceModal(
       scheduleMaintenance(newSchedule).then((result) => {
         setSuccessModal(true);
         setTimeout(() => {
+          location.reload();
+          /*
           router.replace("/Schedule/Timeline/" + props.timeline?.id);
+          */
         }, 1000);
       });
     }

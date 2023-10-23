@@ -9,6 +9,7 @@ interface TimelineSelectProps {
   name: string;
   optionTitle?: string;
   specificTimelineId?: number;
+  autoSelect?: boolean;
 }
 // Get timeline by status
 export async function getTimelinesByStatus(
@@ -45,6 +46,7 @@ export function compareWords(a: string, b: string) {
 export default function TimelineSelect(props: TimelineSelectProps) {
   // Store the list of timelines in a state for dropdown
   const [timelineList, setTimelineList] = useState<CMMSTimeline[]>([]);
+  const [selectedValue, setSelectedValue] = useState<string>("");
 
   useEffect(() => {
     props.specificTimelineId
@@ -67,21 +69,30 @@ export default function TimelineSelect(props: TimelineSelectProps) {
             setTimelineList([]);
           }
         });
+
   }, [props.status, props.userCreated]);
+
+   useEffect(() => {
+      if(props.autoSelect) {
+        if(sortedTimelineList.length>0) {
+          setSelectedValue(sortedTimelineList[0]?.id.toString());
+        }
+      }
+  }, [timelineList]);
 
   const sortedTimelineList = timelineList.sort((a, b) => 
     a.name.localeCompare(b.name)
   );
 
   // Timeline dropdown options
-  const timelineOptions = sortedTimelineList.map((timeline) => (
-    <option key={timeline.id} value={timeline.id}>
+  const timelineOptions = sortedTimelineList.map((timeline, index) => (
+    <option key={index} value={timeline.id}>
       {`${timeline.name} (${timeline.plantName})`}
     </option>
   ));
 
   return (
-    <select className="form-select" onChange={props.onChange} name={props.name}>
+    <select className="form-select" onChange={props.onChange} name={props.name} value={selectedValue}>
       <option hidden>
         {!props.optionTitle ? "Select schedule" : "Select " + props.optionTitle}
       </option>

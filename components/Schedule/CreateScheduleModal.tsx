@@ -60,6 +60,7 @@ interface CreateScheduleModalProps extends ModalProps {
   isManage?: boolean;
   specificTimelineId?: number;
   closeOnBlur?: boolean;
+  autoSelect?: boolean;
 }
 
 // Create a new timeline
@@ -321,6 +322,7 @@ export default function CreateScheduleModal(props: CreateScheduleModalProps) {
           {props.option === ScheduleCreateOptions.Drafts && (
             <label>
               <TimelineSelect
+                autoSelect={true}
                 status={3}
                 onChange={(e) => {
                   changeTimelineDataOnTimelineSelect(e);

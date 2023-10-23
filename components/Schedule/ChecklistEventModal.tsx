@@ -83,9 +83,10 @@ export default function ChecklistEventModal(props: ModalProps) {
       deleteSchedule(props.event.extendedProps.scheduleId).then((result) => {
         setEditDeleteModal(true);
         setTimeout(() => {
-          router.replace(
+          location.reload();
+          /*router.replace(
             "/Schedule/Timeline/" + props.event?.extendedProps.timelineId
-          );
+          );*/
         }, 1000);
       });
     }

@@ -362,7 +362,7 @@ export default function Pending() {
                                 overlayInnerStyle={{ fontSize: "0.7rem" }}
                                 placement="bottom"
                                 trigger={["hover"]}
-                                overlay={<span>{"Approve"}</span>}
+                                overlay={<span>{"Edit"}</span>}
                               >
                                 <AiOutlineEdit
                                   color="#C70F2B"
@@ -467,6 +467,7 @@ export default function Pending() {
           option={handleOptions(activeTabIndex)}
           title={"Create from " + handleOptions(activeTabIndex)?.toString()}
           specificTimelineId={selectedTimeline}
+          autoSelect={true}
           closeOnBlur={true}
         />
         <ApproveSchedulePreviewModal
