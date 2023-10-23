@@ -73,6 +73,8 @@ import { PermissionsRoles } from "../../../types/common/enums";
 import {
   changeTimelineStatus
 } from "../../../pages/Schedule/Manage";
+import CellTooltip from "../../../components/CellTooltip";
+import ActivityLog_Helper from "../../../components/Common/ActivityLog_Helper";
 
 // 3 : Draft, 1 : approved
 const indexedColumn: (3 | 4)[] = [3, 4];
@@ -267,7 +269,7 @@ export default function Pending() {
                       <HeaderCell resize>Schedule Name</HeaderCell>
                       <HeaderCell resize>Plant Name</HeaderCell>
                       <HeaderCell resize>Description</HeaderCell>
-                      <HeaderCell resize>Date Created</HeaderCell>
+                      <HeaderCell resize>{activeTabIndex === 2 ? "Date Approved/Cancelled":"Date Created"}</HeaderCell>
                       <HeaderCell resize>Status</HeaderCell>
                       <HeaderCell resize>Actions</HeaderCell>
                     </HeaderRow>
@@ -321,28 +323,11 @@ export default function Pending() {
                             </Tooltip>
                           </Cell>
                           <Cell>
-                            <Tooltip
-                              overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              placement="bottom"
-                              trigger={["hover"]}
-                              overlay={
-                                <span>
-                                  {item.created_date
-                                    ? moment(
-                                        new Date(item.created_date)
-                                      ).format("MMMM Do YYYY, h:mm:ss a")
-                                    : null}
-                                </span>
-                              }
-                            >
-                              <div>
-                                {item.created_date
-                                  ? moment(new Date(item.created_date)).format(
-                                      "MMMM Do YYYY, h:mm:ss a"
-                                    )
-                                  : null}
-                              </div>
-                            </Tooltip>
+                            <CellTooltip CellContents={(activeTabIndex === 1 || activeTabIndex === 2) && 
+                            item.activity_log && item.activity_log.length > 0 && item.status ? 
+                            ActivityLog_Helper.getLatestDateByStatus(item.activity_log, item.status)
+                            : (item.created_date ? moment(new Date(item.created_date)).format("MMMM Do YYYY, h:mm:ss a")
+                                    : null)}/>
                           </Cell>
 
                           <Cell>

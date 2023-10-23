@@ -242,6 +242,7 @@ interface CMMSTimeline {
   status?: string;
   created_date? : Date;
   remarks?: string;
+  activity_log?: { [key: string]: string }[];
 }
 
 interface CMMSSchedule {
