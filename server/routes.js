@@ -921,6 +921,26 @@ router.patch(
 );
 
 /**
+ * @api {patch} /checklist/draft/:checklist_id Save an existing checklist
+ * @apiDescription Save an existing checklist
+ * Checklist will remain with same status but progress for checklist will be saved
+ * @apiName SaveChecklist
+ * @apiGroup Checklist
+ *
+ * @apiParam {String} checklist_id The ID of the "Assigned" checklist record
+ *
+ * @apiUse SubmitChecklistDataJSON
+ *
+ * @apiSuccess {String} Success "Checklist successfully saved"
+ *
+ * @apiError (Error 500) {String} InternalServerError "Failure to update checklist saving"
+ */
+router.patch(
+  "/checklist/draft/:checklist_id",
+  checkIfLoggedInAPI,
+  controllers.checklist.updateChecklist("save")
+);
+/**
  * @api {get} /checklist/filter/:status/:plant/:datetype/:date Get Filtered Checklist Records
  * @apiDescription  Get Filtered Checklist Records
  * @apiName GetFilteredChecklistsRecords

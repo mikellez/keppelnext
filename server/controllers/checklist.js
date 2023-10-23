@@ -1286,6 +1286,40 @@ const completeChecklist = async (req, res, next) => {
   }
 };
 
+const saveChecklist = async (req, res, next) => {
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
+  const updatehistory = `,Updated Record_SAVED DRAFT_${today}_${req.user.name}`;
+
+  const sql = `
+        UPDATE
+            keppel.checklist_master
+        SET 
+            datajson = $1,
+            history = concat(history,'${updatehistory}'),
+            activity_log = activity_log || 
+        jsonb_build_object(
+          'date', '${today}',
+          'name', '${req.user.name}',
+          'activity', 'Checklist ID-${req.params.checklist_id} Saved as Draft',
+          'activity_type', 'DRAFT'
+        )
+        WHERE 
+            checklist_id = $2
+    `;
+
+  try {
+    await global.db.query(sql, [
+      JSON.stringify(req.body.datajson),
+      req.params.checklist_id,
+    ]);
+    return res.status(200).json("Checklist successfully Saved");
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json("Failure to update checklist saving");
+  }
+};
+
 const editChecklistRecord = async (req, res, next) => {
   const data = req.body.checklistData;
   const assigned = req.body.assigned;
@@ -1888,6 +1922,8 @@ function updateChecklist(updateType) {
   switch (updateType) {
     case "complete":
       return completeChecklist;
+    case "save":
+      return saveChecklist;
     case "approve":
       return approveChecklist;
     case "reject":
@@ -2085,5 +2121,6 @@ module.exports = {
   fetchCompletedChecklists,
   editChecklistRecord,
   fetchOverdueChecklists,
+  saveChecklist,
   fetchMultipleChecklistRecords,
 };

@@ -59,10 +59,24 @@ const submitCompletedChecklist = async (data: CheckSection[], id: number) => {
     .catch((err) => console.log(err));
 };
 
+const saveChecklist = async (data: CheckSection[], id: number) => {
+  return await instance({
+    url: "/api/checklist/draft/" + id,
+    method: "patch",
+    data: {
+      datajson: data.map((section) => section.toJSON()),
+    },
+  })
+    .then((res) => res.data)
+    .catch((err) => console.log(err));
+};
+
 const CompleteChecklistPage = (props: ChecklistPageProps) => {
   const [sections, setSections] = useState<CheckSection[]>([]);
   const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
-  const [successModal, setSuccessModal] = useState<boolean>(false);
+  const [disableSave, setDisableSave] = useState<boolean>(false);
+  const [successCompleteModal, setSuccessCompleteModal] = useState<boolean>(false);
+  const [successSaveModal, setSuccessSaveModal] = useState<boolean>(false);
   const [incompleteModal, setIncompleteModal] = useState<boolean>(false);
 
   const router = useRouter();
@@ -88,7 +102,21 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
       sections,
       parseInt(router.query.id as string)
     ).then((result) => {
-      setSuccessModal(true);
+      setSuccessCompleteModal(true);
+      setTimeout(() => {
+        router.push("/Checklist");
+      }, 1000);
+    });
+  };
+
+  const handleSave = () => {
+    setDisableSave(false);
+
+    saveChecklist(
+      sections,
+      parseInt(router.query.id as string)
+    ).then((result) => {
+      setSuccessSaveModal(true);
       setTimeout(() => {
         router.push("/Checklist");
       }, 1000);
@@ -131,6 +159,13 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
           </SectionsContext.Provider>
         </ModuleContent>
         <ModuleFooter>
+        ``<TooltipBtn
+            toolTip={false}
+            onClick={handleSave}
+            disabled={disableSave}
+          >
+            Save
+          </TooltipBtn>
           <TooltipBtn
             toolTip={false}
             onClick={handleSubmit}
@@ -142,11 +177,20 @@ const CompleteChecklistPage = (props: ChecklistPageProps) => {
       </ModuleMain>
 
       <ModuleSimplePopup
-        modalOpenState={successModal}
-        setModalOpenState={setSuccessModal}
+        modalOpenState={successCompleteModal}
+        setModalOpenState={setSuccessCompleteModal}
         icon={SimpleIcon.Check}
         title="Completed"
         text="Checklist is successfully completed"
+        shouldCloseOnOverlayClick={true}
+      />
+
+      <ModuleSimplePopup
+        modalOpenState={successSaveModal}
+        setModalOpenState={setSuccessSaveModal}
+        icon={SimpleIcon.Check}
+        title="Saved"
+        text="Checklist is successfully saved as Draft"
         shouldCloseOnOverlayClick={true}
       />
 
