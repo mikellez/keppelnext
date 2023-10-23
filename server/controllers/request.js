@@ -218,7 +218,7 @@ async function fetchRequestQuery(
   AND (
     rs.date IS NULL OR
     rs.date = (
-      SELECT rs.date
+      SELECT MAX(rs.date)
         FROM keppel.request_status rs
         WHERE r.request_id = rs.request_id
         AND r.status_id = rs.status_id
@@ -354,7 +354,7 @@ const fetchReviewRequests = async (req, res, next) => {
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND (sc.status_id = 3 OR sc.status_id = 6)", //COMPLETED, CANCELLED
-    ` ORDER BY r.created_date`,
+    ` ORDER BY rs.date DESC`,
     req
   );
 
@@ -370,7 +370,7 @@ const fetchApprovedRequests = async (req, res, next) => {
 
   const { sql, totalPages } = await fetchRequestQuery(
     "AND sc.status_id = 4", //APPROVED
-    ` ORDER BY r.activity_log -> (jsonb_array_length(r.activity_log) -1) ->> 'date' DESC`,
+    ` ORDER BY rs.date DESC`,
     req
   );
 

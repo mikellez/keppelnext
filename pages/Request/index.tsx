@@ -228,6 +228,8 @@ export default function Request(props: RequestProps) {
     setRequestItems([]);
     setPage(1);
     setIds([]);
+    setSortField("");  // set sort field and order to be empty to take on backend 'order by' 
+    setSortOrder("");  // otherwise it will remain as 'r.request_id desc' 
   };
 
   const handleExpand = async (item: RequestItem) => {

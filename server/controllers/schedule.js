@@ -580,7 +580,8 @@ const getApprovedTimelines = async (req, res) => {
       PM.plant_name as "plantName", 
       SM.status, 
       ST.created_date,
-      ST.remarks
+      ST.remarks,
+      ST.activity_log
     FROM 
       keppel.users u
       JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -774,13 +775,13 @@ const changeTimelineStatus = (req, res, next) => {
     activityType = 'PENDING';
   } else if(status === 6) {
     activity = `Canceled Timeline Case ID-${req.params.id}`;
-    activityType = 'Canceled';
+    activityType = 'CANCELLED';
   } else if(status === 7) {
     activity = `Approved Cancelation Timeline Case ID-${req.params.id}`;
-    activityType = 'Approved canceled';
+    activityType = 'APPROVED CANCELLED';
   } else if(status === 8) {
     activity = `Rejected Cancelation Timeline Case ID-${req.params.id}`;
-    activityType = 'Rejected canceled';
+    activityType = 'REJECTED CANCELLED';
   }
 
   //console.log(status)
