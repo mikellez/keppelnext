@@ -18,21 +18,27 @@
   /components/License/LicenseCalendar
  */
 
-import React, { useEffect, useState } from "react";
-import instance from "../../types/common/axios.config";
-import { useRouter } from "next/router";
-import Link from "next/link";
-import TooltipBtn from "../../components/TooltipBtn";
 import {
-  Table,
-  Header,
-  HeaderRow,
-  HeaderCell,
   Body,
-  Row,
   Cell,
-  OnClick,
+  Header,
+  HeaderCell,
+  HeaderRow,
+  Row,
+  Table
 } from "@table-library/react-table-library";
+import { getTheme } from "@table-library/react-table-library/baseline";
+import { useTheme } from "@table-library/react-table-library/theme";
+import moment from "moment";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import {
+  AiOutlineEdit,
+  AiOutlineFileDone,
+  AiOutlineFolderView,
+  AiOutlineHistory,
+} from "react-icons/ai";
+import { BsCalendar4Week, BsListUl } from "react-icons/bs";
 import { MdPostAdd } from "react-icons/md";
 import {
   ModuleContent,
@@ -40,34 +46,31 @@ import {
   ModuleMain,
   ModuleModal,
 } from "../../components";
-import { useTheme } from "@table-library/react-table-library/theme";
-import { getTheme } from "@table-library/react-table-library/baseline";
-import { useCurrentUser } from "../../components/SWR";
-import { CMMSFeedback, CMMSLicense } from "../../types/common/interfaces";
+import { useCurrentUser, useLicense, useLicenseFilter } from "../../components/SWR";
+import TooltipBtn from "../../components/TooltipBtn";
+import { CMMSLicense } from "../../types/common/interfaces";
 import { getColor } from "../Request";
-import moment from "moment";
-import {
-  AiOutlineFileDone,
-  AiOutlineFolderView,
-  AiOutlineHistory,
-  AiOutlineEdit,
-} from "react-icons/ai";
-import { BsCalendar4Week, BsListUl } from "react-icons/bs";
 
-import { Role } from "../../types/common/enums";
-import Pagination from "../../components/Pagination";
-import LoadingHourglass from "../../components/LoadingHourglass";
-import PlantSelect from "../../components/PlantSelect";
-import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
-import LicenseHistory from "../../components/License/LicenseHistory";
-import scheduleStyles from "../../styles/Schedule.module.scss";
 import LicenseCalendar from "../../components/License/LicenseCalendar";
+import LicenseHistory from "../../components/License/LicenseHistory";
+import LoadingHourglass from "../../components/LoadingHourglass";
+import Pagination from "../../components/Pagination";
+import PlantSelect from "../../components/PlantSelect";
+import scheduleStyles from "../../styles/Schedule.module.scss";
+import { Role } from "../../types/common/enums";
 
 import Tooltip from "rc-tooltip";
 import "rc-tooltip/assets/bootstrap_white.css";
 import { BiRefresh } from "react-icons/bi";
-import fetchExpiredLicense from "../../server/services/licenseCron";
-import { Divider } from "antd";
+
+export interface LicenseProps {
+  filter?: boolean;
+  viewType?: string;
+  plant: number;
+  date: string;
+  datetype: string;
+  isReady?: boolean;
+}
 
 const indexedColumn: ("draft" | "acquired" | "expired" | "archived")[] = [
   "draft",
@@ -76,7 +79,7 @@ const indexedColumn: ("draft" | "acquired" | "expired" | "archived")[] = [
   "archived",
 ];
 
-const License = () => {
+const License = (props: LicenseProps) => {
   const [licenseItems, setLicenseItems] = useState<CMMSLicense[]>([]);
   const [isReady, setReady] = useState<boolean>(false);
   const [calendarView, setCalendarView] = useState<boolean>(false);
@@ -90,6 +93,34 @@ const License = () => {
     { [key: string]: string }[] | undefined
   >(undefined);
 
+  const PARAMS = [
+    "id",
+    "license_name",
+    "status",
+    "status_id",
+    "license_provider",
+    "license_type",
+    "license_details",
+    "expiry_date",
+    "linked_asset",
+    "plant_name",
+    "linked_asset_name",
+    "acquisition_date",
+    "activity_log",
+  ];
+
+  const filteredLicense = useLicenseFilter(props, page, PARAMS);
+  let columnData = useLicense(
+    indexedColumn[activeTabIndex],
+    page,
+    PARAMS,
+    selectedPlant
+  );
+
+  const { data, error, isValidating, mutate } = props.filter
+  ? filteredLicense
+  : columnData;
+
   const theme = useTheme([
     getTheme(),
     {
@@ -99,11 +130,10 @@ const License = () => {
   ]);
 
   const switchColumns = (index: number) => {
-    if (isReady) {
       setReady(false);
       setActiveTabIndex(index);
-      // setPage(1);
-    }
+      setLicenseItems([]);
+      setPage(1);
   };
 
   const changePlant = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -118,46 +148,31 @@ const License = () => {
   };
 
   useEffect(() => {
-    // console.log(selectedPlant);
-    setReady(false);
-
-    const PARAMS = [
-      "id",
-      "license_name",
-      "status",
-      "status_id",
-      "license_provider",
-      "license_type",
-      "license_details",
-      "expiry_date",
-      "linked_asset",
-      "plant_name",
-      "linked_asset_name",
-      "acquisition_date",
-      "activity_log",
-    ];
-
-    instance
-      .get(
-        `/api/license/${indexedColumn[activeTabIndex]}?page=${page}&expand=${PARAMS}&plantId=${selectedPlant}`
-      )
-      .then((response) => {
+    if (data && !isValidating) {
+      if (data?.rows?.length > 0) {
         setLicenseItems(
-          response.data.rows.map((row: CMMSLicense) => {
+          data.rows.map((row: CMMSLicense) => {
             return {
               ...row,
             };
           })
         );
-        setTotalPages(response.data.total);
         setReady(true);
-        // console.log(licenseItems);
-      })
-      .catch((e) => {
-        setReady(true);
-        setLicenseItems([]);
-      });
-  }, [selectedPlant, activeTabIndex, page]);
+        setTotalPages(data.total);
+      }
+    }
+    if (data?.rows.length === 0) {
+      setLicenseItems([]);
+      setReady(true);
+      setTotalPages(1);
+    }
+  }, [
+    data, 
+    isValidating, 
+    isReady, 
+    page,
+  ]);
+
 
   // useEffect(() => {
   //   console.log(licenseItems);
@@ -170,7 +185,7 @@ const License = () => {
       <ModuleHeader
         title="License"
         header={calendarView ? "Monitor License Expiry" : "License"}
-        leftChildren={
+        leftChildren={ !props.filter &&
           <div className={`${scheduleStyles.eventModalHeader} mt-2`}>
             <label className={scheduleStyles.toggle}>
               <input
@@ -194,7 +209,7 @@ const License = () => {
           </div>
         }
       >
-        <PlantSelect onChange={changePlant} allPlants={true} />
+        {!props?.filter && <PlantSelect onChange={changePlant} allPlants={true} />}
         { userPermission('canCreateLicense') &&<Link href="/License/New">
           <TooltipBtn text="New License">
             <MdPostAdd size={20} />
@@ -204,9 +219,9 @@ const License = () => {
       </ModuleHeader>
       {calendarView ? (
         <LicenseCalendar selectedPlant={selectedPlant} />
-      ) : (
+      ) : ( 
         <ModuleContent>
-          {
+          { !props.filter && (
             <ul className="nav nav-tabs">
               <li
                 onClick={() => {
@@ -241,8 +256,8 @@ const License = () => {
                 <span style={{ all: "unset" }}>Archived</span>
               </li>
             </ul>
-          }
-          {isReady && licenseItems.length === 0 && <div></div>}
+          )}
+          {isReady && licenseItems.length === 0 && <div>No Licenses</div>}
           {isReady ? (
             <>
               <Table

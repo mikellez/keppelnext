@@ -1,6 +1,7 @@
 import useSWR from "swr";
 import { ChecklistProps } from "../pages/Checklist";
 import { FeedbackFormProps } from "../pages/Feedback";
+import { LicenseProps } from "../pages/License";
 import { RequestProps } from "../pages/Request";
 import instance from "../types/common/axios.config";
 import {
@@ -9,6 +10,7 @@ import {
   CMMSChangeOfParts,
   CMMSChecklist,
   CMMSFeedback,
+  CMMSLicense,
   CMMSRequest,
   CMMSSubComponent1Name,
   CMMSSystemAsset,
@@ -417,6 +419,58 @@ function useChangeOfParts(
   );
 }
 
+function useLicense(
+  license_type: "draft" | "acquired" | "expired" | "archived",
+  page: number,
+  fields: string[],
+  selectedPlant: number
+) {
+  let responseResult;
+  const licenseFetcher = (url: string) =>
+    instance
+      .get<{ rows: CMMSLicense[]; total: number }>(url)
+      // .then((response) => response.data)
+      .then((response) => {
+        console.log("Response:", response.data); // Log the response here
+        responseResult = response.data;
+        return response.data;
+      })
+     
+      .catch((e) => {
+        throw new Error(e);
+      });
+  
+  let swrResult;
+  return useSWR<{ rows: CMMSLicense[]; total: number }, Error>(
+    [`/api/license/${license_type}?page=${page}&expand=${fields.join(",")}&plantId=${selectedPlant}`],
+    licenseFetcher,
+    { revalidateOnFocus: false }
+  );
+}
+
+function useLicenseFilter(
+  props: LicenseProps, 
+  page: number,
+  fields: string[]
+) {
+  const licenseFetcher = (url: string) =>
+    instance
+      .get<{ rows: CMMSLicense[]; total: number }>(url)
+      .then((response) => response.data)
+      .catch((e) => {
+        throw new Error(e);
+      });
+
+  return useSWR<{ rows: CMMSLicense[]; total: number }, Error>(
+    `/api/license/expired/${props?.plant || 0}/${
+      props?.datetype || "all"}/${props?.date || "all"
+      }/${props.viewType ?? '30'}?page=${page}&expand=${fields.join(",")}`,
+    licenseFetcher,
+    { revalidateOnFocus: false }
+  );
+}
+
+
 function useWorkflow(page: number) {
   const workflowFetcher = (url: string) =>
     instance
@@ -447,6 +501,8 @@ export {
   useCurrentUser,
   useFeedback,
   useFeedbackFilter,
+  useLicense,
+  useLicenseFilter,
   useRequest,
   useRequestFilter,
   useSpecificRequest,

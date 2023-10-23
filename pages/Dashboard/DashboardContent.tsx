@@ -2,12 +2,14 @@ import type { DatePickerProps } from "antd";
 import { Select } from "antd";
 import moment from "moment";
 import { useEffect, useState } from "react";
+import { fetchData } from ".";
 import {
   ModuleContent,
   ModuleHeader,
   ModuleMain,
   ModuleModal
 } from "../../components";
+import BChart from "../../components/Dashboard/BChart";
 import DashboardBox from "../../components/Dashboard/DashboardBox";
 import PChart from "../../components/Dashboard/PChart";
 import LoadingHourglass from "../../components/LoadingHourglass";
@@ -21,9 +23,8 @@ import { CMMSDashboardData } from "../../types/common/interfaces";
 import ChangeOfPartsPage from "../ChangeOfParts";
 import Checklist from "../Checklist";
 import Feedback from "../Feedback";
+import License from "../License";
 import Request from "../Request/index";
-import { fetchData } from ".";
-import BChart from "../../components/Dashboard/BChart";
 
 const { Option } = Select;
 
@@ -1071,6 +1072,31 @@ export default function DashboardContent({ permissions }: { permissions: string[
           )}
           {showDiv === "completed-feedback-box" && (
             <Feedback filter={true} activeTabIndex={2} />
+          )}
+          {showDiv === "30-expiry-license-box" && (
+            <License 
+              filter={true} 
+              date={date}
+              datetype={datetype}
+              plant={plant as number}
+              viewType="30"
+            />
+          )}
+          {showDiv === "60-expiry-license-box" && (
+            <License filter={true} 
+              date={date}
+              datetype={datetype}
+              plant={plant as number}
+              viewType="60" 
+            />
+          )}
+          {showDiv === "90-expiry-license-box" && (
+            <License filter={true} 
+              date={date}
+              datetype={datetype}
+              plant={plant as number}
+              viewType="90"
+            />
           )}
         </ModuleModal>
       </ModuleContent>
