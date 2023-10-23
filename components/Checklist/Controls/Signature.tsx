@@ -174,6 +174,12 @@ function SignatureEditable({
     );
   };
 
+  const clearSignature = () => {
+    if (sigRef.current) {
+      sigRef.current.clear();
+    }
+  };
+
   return (
     <div className={styles.checkViewContainer}>
       <h6>
@@ -191,6 +197,13 @@ function SignatureEditable({
           ref={sigRef}
           onEnd={handleSignatureEnd}
         />
+        <button 
+          className="btn btn-secondary" 
+          onClick={clearSignature} 
+          style={{ margin: '0', display: 'block' }}
+          > 
+          Clear Signature
+        </button>
       </div>
     </div>
   );
