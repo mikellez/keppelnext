@@ -108,7 +108,7 @@ const createChecklistFromTemplate = async (schedule) => {
     schedule.scheduler_userids_for_email.length > 0
       ? schedule.scheduler_userids_for_email[0]
       : null;
-  const today = moment();
+  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const advance_days = schedule.advance_schedule;
   const newDate = today.add(advance_days, 'days').format("YYYY-MM-DD HH:mm:ss");
 
