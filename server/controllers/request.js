@@ -2,7 +2,11 @@ const db = require("../../db");
 const { generateCSV } = require("../csvGenerator");
 const moment = require("moment");
 const { userPermission } = require("../global");
-const {fuzzySearchSelectQuery, fuzzySearchWhereQuery, fuzzySearchOrderByQuery} = require("../common/fuzzySearchQuery");
+const {
+  fuzzySearchSelectQuery,
+  fuzzySearchWhereQuery,
+  fuzzySearchOrderByQuery,
+} = require("../common/fuzzySearchQuery");
 
 /** Express router providing user related routes
  * @module controllers/request
@@ -87,11 +91,7 @@ const filterCondition = (status, plant, date, datetype) => {
   return `${statusCond} ${plantCond} ${dateCond}`;
 };
 
-async function fetchRequestQuery(
-  status_query,
-  order_query,
-  req
-) {
+async function fetchRequestQuery(status_query, order_query, req) {
   const role_id = req.user.role_id;
   const user_id = req.user.id;
   const page = req.query.page || 0;
@@ -103,10 +103,13 @@ async function fetchRequestQuery(
   const datetype = req.params.datetype;
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
-  //if sort states are specified, replace order query
-  // const sortField = req.query.sortField;
-  // const sortOrder = req.query.sortOrder;
-  //console.log(sortField, sortOrder);
+  const filterFaultType = req.query.FaultType || "";
+  const filterLocation = req.query.Location || "";
+  const filterPriority = req.query.Priority || "";
+  const filterOverdue = req.query.Overdue || "";
+
+  let filterWhereClause = "";
+
   if (sortField && sortOrder) {
     const new_order_query = `ORDER BY ${sortField} ${sortOrder}`;
     order_query = new_order_query;
@@ -121,7 +124,7 @@ async function fetchRequestQuery(
     userCond = `AND (r.assigned_user_id = ${user_id} OR r.user_id = ${user_id})`;
   }
 
-  if(userPermission('canOnlyViewCMTList', req.user.permissions)) {
+  if (userPermission("canOnlyViewCMTList", req.user.permissions)) {
     userCond = `AND aa.item_name like '%cmt%'`;
   }
 
@@ -156,7 +159,8 @@ async function fetchRequestQuery(
     fault_id: "r.fault_id",
     overdue_status: "r.overdue_status",
     description_other: "r.description_other",
-    request_status: "STRING_AGG(rssp.status || ': ' || rs.date, ', ') AS request_status",
+    request_status:
+      "STRING_AGG(rssp.status || ': ' || rs.date, ', ') AS request_status",
     date: "rs.date",
     request_user_role: "aa.item_name",
   };
@@ -177,19 +181,63 @@ async function fetchRequestQuery(
   }
 
   expandCond = SELECT_ARR.join(", ");
-  let searchColumns = ["pm.plant_name", 
-  "r.fault_description", "ft.fault_type", "pri.priority", "req_u.first_name", "tmp1.asset_name",
-  "r.description_other"
-];
+  let searchColumns = [
+    "pm.plant_name",
+    "r.fault_description",
+    "ft.fault_type",
+    "pri.priority",
+    "req_u.first_name",
+    "tmp1.asset_name",
+    "r.description_other",
+  ];
 
   const fuzzySelect = fuzzySearchSelectQuery(searchColumns, search);
   const fuzzyWhere = fuzzySearchWhereQuery(searchColumns, search);
   const fuzzyOrder = fuzzySearchOrderByQuery(search);
 
+  if (
+    filterFaultType !== "" &&
+    filterFaultType !== undefined &&
+    filterFaultType !== "All"
+  ) {
+    filterWhereClause += `AND ft.fault_type = '${filterFaultType}'`;
+  }
+  if (
+    filterLocation !== "" &&
+    filterLocation !== undefined &&
+    filterLocation !== "All"
+  ) {
+    filterWhereClause += `AND pm.plant_name = '${filterLocation}'`;
+  }
+  if (
+    filterPriority !== "" &&
+    filterPriority !== undefined &&
+    filterPriority !== "All"
+  ) {
+    if (filterPriority === "-") {
+      filterWhereClause = `AND pri.priority IS NULL`
+    } else {
+      filterWhereClause += `AND pri.priority = '${filterPriority}'`;
+    }
+  }
+  if (
+    filterOverdue !== "" &&
+    filterOverdue !== undefined &&
+    filterOverdue !== "All"
+  ) {
+    if (filterOverdue === "OVERDUE") {
+      filterWhereClause += `AND r.overdue_status = true`;
+    } else if (filterOverdue === "VALID") {
+      filterWhereClause += `AND (r.overdue_status = false OR r.overdue_status IS NULL)`;
+    }
+  }
+
   let sql;
   sql = `SELECT 
     ${expandCond}
-    ${fuzzySelect? (expandCond ? `,` + fuzzySelect: fuzzySelect) : fuzzySelect }
+    ${
+      fuzzySelect ? (expandCond ? `,` + fuzzySelect : fuzzySelect) : fuzzySelect
+    }
   FROM    
     keppel.users u
     JOIN keppel.user_access ua ON u.user_id = ua.user_id
@@ -215,6 +263,7 @@ async function fetchRequestQuery(
   ${searchCondition(search)}
   ${status_query}
   ${userCond}
+  ${filterWhereClause}
   AND (
     rs.date IS NULL OR
     rs.date = (
@@ -244,8 +293,8 @@ async function fetchRequestQuery(
     rs.date
   ) 
   ${order_query}`;
-  console.log(sql)
-  console.log(expandCond)
+  console.log(sql);
+  console.log(expandCond);
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);
@@ -351,8 +400,6 @@ const fetchReviewRequests = async (req, res, next) => {
   const date = req.params.date;
   const datetype = req.params.datetype;
 
-
-
   const { sql, totalPages } = await fetchRequestQuery(
     "AND (sc.status_id = 3 OR sc.status_id = 6)", //COMPLETED, CANCELLED
     ` ORDER BY r.created_date`,
@@ -374,8 +421,6 @@ const fetchApprovedRequests = async (req, res, next) => {
     ` ORDER BY r.activity_log -> (jsonb_array_length(r.activity_log) -1) ->> 'date' DESC`,
     req
   );
-
-  console.log("fetchrequest sql: ", sql)
 
   const result = await global.db.query(sql);
 
@@ -421,7 +466,7 @@ const createRequest = async (req, res, next) => {
     taggedAssetID,
     description_other,
     priority,
-    assignedUser
+    assignedUser,
   } = req.body;
   // console.log("json body", JSON.stringify(req.body));
   // console.log("^&*")
@@ -448,7 +493,7 @@ const createRequest = async (req, res, next) => {
       role_name = req.user.role_name;
       name = req.user.name;
     }
-    if (assignedUser === ""){
+    if (assignedUser === "") {
       history = `PENDING_Request Created_${today}_${role_name}_${name}`;
       activity_log = [
         {
@@ -489,7 +534,7 @@ const createRequest = async (req, res, next) => {
     ];
   }
 
-  const status_id = assignedUser ? '2' : '1'
+  const status_id = assignedUser ? "2" : "1";
 
   if (!req.body.linkedRequestId) {
     const q = `INSERT INTO keppel.request(
@@ -517,7 +562,7 @@ const createRequest = async (req, res, next) => {
         JSON.stringify(activity_log),
         description_other,
         priority || null,
-        assignedUser || null 
+        assignedUser || null,
       ],
       (err, result) => {
         if (err) return res.status(500).json({ errormsg: err });
@@ -526,7 +571,7 @@ const createRequest = async (req, res, next) => {
       }
     );
   } else if (req.body.linkedRequestId) {
-    if(assignedUser === "") {
+    if (assignedUser === "") {
       history = `PENDING_Corrective Request Created_${today}_${role_name}_${name}`;
       activity_log = [
         {
@@ -588,7 +633,7 @@ const createRequest = async (req, res, next) => {
         JSON.stringify(activity_log),
         description_other,
         priority || null,
-        assignedUser || null
+        assignedUser || null,
       ],
       (err, result) => {
         if (err) {
@@ -616,7 +661,7 @@ const createRequest = async (req, res, next) => {
 };
 
 const updateRequest = async (req, res, next) => {
-  console.log('update', req.body)
+  console.log("update", req.body);
   const assignUserName = req.body.assignedUser.label.split("|")[0].trim();
   const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   const history = `!ASSIGNED_Assign ${assignUserName} to Case ID: ${req.params.request_id}_${today}_${req.user.role_name}_${req.user.name}!ASSIGNED_Update Priority to ${req.body.priority.priority}_${today}_${req.user.role_name}_${req.user.name}`;
@@ -1284,4 +1329,3 @@ module.exports = {
   fetchOutstandingRequests,
   fetchCompletedRequests,
 };
-

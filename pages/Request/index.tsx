@@ -68,6 +68,7 @@ import { CMMSRequest } from "../../types/common/interfaces";
 import PickerWithType from "../../components/PickerWithType";
 import type { DatePickerProps } from "antd";
 import { Select } from "antd";
+import { toNamespacedPath } from "path";
 
 const { Option } = Select;
 type PickerType = "date";
@@ -115,6 +116,11 @@ export interface RequestItem {
   description_other?: string;
   request_status?: string;
 }
+
+interface DataItem {
+  fault_name: string;
+}
+
 
 export interface RequestProps {
   filter?: boolean;
@@ -226,6 +232,24 @@ export default function Request(props: RequestProps) {
     date: string;
     datetype: PickerType;
   }>({ date: "all", datetype: "date" });
+  const [faultTypePicker, setFaultTypePicker] = useState("");
+  const [uniqueFaultNames, setUniqueFaultNames] = useState<string[]>([]);
+  const [priorityPicker, setPriorityPicker] = useState("");
+  const [locationPicker, setLocationPicker] = useState("");
+  const [overduePicker, setOverduePicker] = useState("");
+  const [filter, setFilter] = useState<FilterState>({
+    FaultType: "",
+    Location: "",
+    Priority: "",
+    Overdue: "",
+  });
+
+  type FilterState = {
+    FaultType: string;
+    Location: string;
+    Priority: string;
+    Overdue: string;
+  };
 
   const switchColumns = (index: number) => {
     setReady(false);
@@ -288,7 +312,8 @@ export default function Request(props: RequestProps) {
     searchRef.current.value,
     fields,
     sortField,
-    sortOrder
+    sortOrder,
+    filter
   );
 
   const {
@@ -350,7 +375,16 @@ export default function Request(props: RequestProps) {
         setReady(true);
         setTotalPages(requestData.total);
       }
+      // Get unique fault IDs from your response.data
+      const uniqueFaultNamesSet = new Set<string>();
+      requestData?.rows?.forEach((row: DataItem) => {
+        uniqueFaultNamesSet.add(row.fault_name);
+      });
+
+      const uniqueFaultNamesArray: string[] = Array.from(uniqueFaultNamesSet);
+      setUniqueFaultNames(uniqueFaultNamesArray);
     }
+    
     if (requestData?.rows?.length === 0) {
       setReady(true);
       // setRequestItems([]);
@@ -374,6 +408,7 @@ export default function Request(props: RequestProps) {
     requestIsFetchValidating,
     page,
     props?.isReady,
+    filter,
   ]); //removed isReady from dependencies
 
   const updateTable = (foo: Function) => {
@@ -630,9 +665,37 @@ export default function Request(props: RequestProps) {
     return [firstDayOfQuarter, lastDayOfQuarter];
   }
 
-  function handleStatusChange() {
-    
-  }
+  const onFilterFaultType = (value: string) => {
+    setFaultTypePicker(value);
+    setFilter((prevFilter) => ({
+      ...prevFilter, // Spread the existing state object to keep its other properties
+      FaultType: value,
+    }));
+  };
+
+  const onFilterLocation = (value: string) => {
+    setLocationPicker(value);
+    setFilter((prevFilter) => ({
+      ...prevFilter,
+      Location: value,
+    }));
+  };
+
+  const onFilterPriority = (value: string) => {
+    setPriorityPicker(value);
+    setFilter((prevFilter) => ({
+      ...prevFilter,
+      Priority: value,
+    }));
+  };
+
+  const onFilterOverdue = (value: string) => {
+    setOverduePicker(value);
+    setFilter((prevFilter) => ({
+      ...prevFilter,
+      Overdue: value,
+    }));
+  };
 
   return (
     <ModuleMain>
@@ -735,19 +798,66 @@ export default function Request(props: RequestProps) {
                       >
                         {IdHeader}
                       </HeaderCell>
-                      <HeaderCell
-                        resize
-                        onClick={() => updateTable(sortFaultType)}
-                        style={{ cursor: "pointer" }}
-                      >
-                        {faultTypeHeader}
+                      <HeaderCell resize style={{ cursor: "pointer" }}>
+                        <div
+                          id="faultTypeHeader"
+                          onClick={() => updateTable(sortFaultType)}
+                        >
+                          {faultTypeHeader}
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "flex-start",
+                          }}
+                        >
+                          <Select
+                            value={faultTypePicker}
+                            onChange={onFilterFaultType}
+                            style={{ width: '300px' }} 
+                          >
+                            {/* Value of fault type is ft.fault_id */}
+                            {/* dynamically create an option for each unique ft.fault_id */}
+                            {uniqueFaultNames.map((name, index) => (
+                              <Option key={index} value={name}>
+                                {name}
+                              </Option>
+                            ))}
+                            {/* <Option value="9">CHANGE OF PARTS</Option>
+                            <Option value="2">CONDENSATION</Option>
+                            <Option value="1">COOLING TOWER</Option>
+                            <Option value="8">OTHERS</Option>
+                            <Option value="18">STRAINER CLEANER</Option> */}
+                            <Option value="All">All</Option>
+                          </Select>
+                        </div>
                       </HeaderCell>
-                      <HeaderCell
-                        resize
-                        onClick={() => updateTable(sortLocation)}
-                        style={{ cursor: "pointer" }}
-                      >
-                        {locationHeader}
+                      <HeaderCell resize style={{ cursor: "pointer" }}>
+                        <div
+                          id="locationHeader"
+                          onClick={() => updateTable(sortLocation)}
+                        >
+                          {locationHeader}
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "flex-start",
+                          }}
+                        >
+                          <Select
+                            value={locationPicker}
+                            onChange={onFilterLocation}
+                            style={{ width: '150px' }} 
+                          >
+                            <Option value="Biopolis">Biopolis</Option>
+                            <Option value="Changi DHCS">Changi DHCS</Option>
+                            <Option value="Mediapolis">MediaPolis</Option>
+                            <Option value="All">All</Option>
+                          </Select>
+                        </div>
                       </HeaderCell>
                       <HeaderCell resize style={{ cursor: "pointer" }}>
                         <div
@@ -760,17 +870,20 @@ export default function Request(props: RequestProps) {
                         <div
                           style={{
                             display: "flex",
-                            justifyContent: "flex-end",
+                            justifyContent: "flex-start",
+                            // justifyContent: "flex-end",
                           }}
                         >
                           <Select
-                            value={pickerwithtype.datetype}
-                            onChange={handleStatusChange}
+                            value={priorityPicker}
+                            onChange={onFilterPriority}
+                            style={{ width: '200px' }} 
                           >
                             <Option value="LOW">LOW</Option>
                             <Option value="MEDIUM">MEDIUM</Option>
                             <Option value="HIGH">HIGH</Option>
-                            <Option value="-">UNASSIGNED</Option>
+                            <Option value="-">-</Option>
+                            <Option value="All">All</Option>
                           </Select>
                         </div>
                       </HeaderCell>
@@ -815,7 +928,25 @@ export default function Request(props: RequestProps) {
                       </HeaderCell>
                       {/*Only show the Overdue column for the pending and assigned tabs*/}
                       {(activeTabIndex === 0 || activeTabIndex === 1) && (
-                        <HeaderCell resize>Overdue Status</HeaderCell>
+                        <HeaderCell resize>
+                          <div id="overdueHeader">Overdue Status</div>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "flex-start",
+                            }}
+                          >
+                            <Select
+                              value={overduePicker}
+                              onChange={onFilterOverdue}
+                              style={{ width: '150px' }} 
+                            >
+                              <Option value="OVERDUE">OVERDUE</Option>
+                              <Option value="VALID">VALID</Option>
+                              <Option value="All">All</Option>
+                            </Select>
+                          </div>
+                        </HeaderCell>
                       )}
                       <HeaderCell
                         resize
