@@ -25,6 +25,7 @@ function useRequest(
   fields: string[],
   sortField: string,
   sortOrder: string,
+  filter: { FaultType: string, Location: string; Priority: string, Overdue: string }
 ) {
   const requestFetcher = (url: string) =>
     instance
@@ -42,7 +43,7 @@ function useRequest(
 
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
     [
-      `/api/request/${request_type}?page=${page}&search=${search}&expand=${fieldsString}&sortField=${sortField}&sortOrder=${sortOrder}`,
+      `/api/request/${request_type}?page=${page}&search=${search}&expand=${fieldsString}&sortField=${sortField}&sortOrder=${sortOrder}&FaultType=${filter.FaultType}&Location=${filter.Location}&Priority=${filter.Priority}&Overdue=${filter.Overdue}`,
     ],
     requestFetcher,
     { revalidateOnFocus: false }
@@ -68,7 +69,7 @@ function useSpecificRequest(request_id: number) {
 }
 
 function useRequestFilter(
-  props: RequestProps, 
+  props: RequestProps,
   page: number,
   search: string = "",
   fields: string[]
@@ -89,9 +90,11 @@ function useRequestFilter(
       });
 
   return useSWR<{ rows: CMMSRequest[]; total: number }, Error>(
-    `/api/request/${props.viewType ?? 'pending'}/${props?.plant || 0}/${
+    `/api/request/${props.viewType ?? "pending"}/${props?.plant || 0}/${
       props.datetype || "all"
-    }/${props?.date || "all"}?page=${page}&search=${search}&expand=${fields.join(",")}`,
+    }/${
+      props?.date || "all"
+    }?page=${page}&search=${search}&expand=${fields.join(",")}`,
     requestFetcher,
     { revalidateOnFocus: false }
   );
@@ -167,7 +170,7 @@ function useChecklist(
   search: string = "",
   fields: string[],
   sortField: string,
-  sortOrder: string,
+  sortOrder: string
 ) {
   let responseResult;
   const checklistFetcher = (url: string) =>
@@ -179,21 +182,25 @@ function useChecklist(
         responseResult = response.data;
         return response.data;
       })
-     
+
       .catch((e) => {
         throw new Error(e);
       });
-  
+
   let swrResult;
   return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
-    [`/api/checklist/${checklist_type}?page=${page}&search=${search}&expand=${fields.join(",")}&sortField=${sortField}&sortOrder=${sortOrder}`],
+    [
+      `/api/checklist/${checklist_type}?page=${page}&search=${search}&expand=${fields.join(
+        ","
+      )}&sortField=${sortField}&sortOrder=${sortOrder}`,
+    ],
     checklistFetcher,
     { revalidateOnFocus: false }
   );
 }
 
 function useChecklistFilter(
-  props: ChecklistProps, 
+  props: ChecklistProps,
   page: number,
   search: string = "",
   fields: string[]
@@ -207,9 +214,11 @@ function useChecklistFilter(
       });
 
   return useSWR<{ rows: CMMSChecklist[]; total: number }, Error>(
-    `/api/checklist/${props.viewType ?? 'pending'}/${props?.plant || 0}/${
+    `/api/checklist/${props.viewType ?? "pending"}/${props?.plant || 0}/${
       props?.datetype || "all"
-    }/${props?.date || "all"}?page=${page}&search=${search}&expand=${fields.join(",")}`,
+    }/${
+      props?.date || "all"
+    }?page=${page}&search=${search}&expand=${fields.join(",")}`,
     checklistFetcher,
     { revalidateOnFocus: false }
   );
@@ -219,7 +228,7 @@ function useAccountlog(url: string) {
     instance
       .get(url)
       .then((response) => {
-        const logs = response.data.logs.map((singleLog:any) => {
+        const logs = response.data.logs.map((singleLog: any) => {
           return {
             id: singleLog.event_time,
             user_name: singleLog.user_name,
@@ -264,10 +273,14 @@ function useCurrentUser() {
         throw new Error(e);
       });
 
-  const { data, error } = useSWR<CMMSCurrentUser, Error>("/api/user", userFetcher, {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-  });
+  const { data, error } = useSWR<CMMSCurrentUser, Error>(
+    "/api/user",
+    userFetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
+  );
 
   const userPermission = (permission: string) => {
     if (!data) return false;
@@ -275,7 +288,12 @@ function useCurrentUser() {
     const excludePermission = permission.replace("can", "exclude");
     const ableAccess = data.permissions.includes(permission.trim());
 
-    if(permission.substring(0, 3) === 'can' && ableAccess && data.permissions.includes(excludePermission)) return false;
+    if (
+      permission.substring(0, 3) === "can" &&
+      ableAccess &&
+      data.permissions.includes(excludePermission)
+    )
+      return false;
 
     return ableAccess;
   };
@@ -283,8 +301,8 @@ function useCurrentUser() {
   return {
     data,
     error,
-    userPermission
-  }
+    userPermission,
+  };
 }
 
 function useSystemAsset(system_id: number | null) {
@@ -366,48 +384,46 @@ function useSubComponent1Name(
 function useChangeOfParts(
   copId: number | null,
   limit: number,
-  page : number,
+  page: number,
   options?: {
     plant_id?: number;
     psa_id?: number;
     type: "completed" | "scheduled" | null;
-    
-  },
-  
+  }
 ) {
   const changeOfPartsFetcher = async (url: string) => {
     let apiURL = url;
     if (options) {
-      if (options.type){
+      if (options.type) {
         // Add either completed or scheduled
         apiURL += `/${options.type}`;
-        if(options.plant_id){
+        if (options.plant_id) {
           // if have particular plant selected
-          apiURL += `/${options.plant_id}`
+          apiURL += `/${options.plant_id}`;
         }
-      }
-      else{
+      } else {
         // If type null, replace type with 'all'
         apiURL += `/all`;
         // If copId specified, then add it in
-        if(copId){
+        if (copId) {
           apiURL += `/${copId}`;
         }
       }
     }
     let psa_id = options?.psa_id ? options.psa_id : "";
-    if((limit && page) || (psa_id && copId === null)){
+    if ((limit && page) || (psa_id && copId === null)) {
       apiURL += `?limit=${limit}&offset=${(page - 1) * limit}&psa_id=${psa_id}`;
     }
-    //console.log("Final URL:" + apiURL); 
+    //console.log("Final URL:" + apiURL);
 
     return await instance
       .get<CMMSChangeOfParts[]>(apiURL)
       .then((response) => {
         // console.log(apiURL + "finding the query")
-        return response.data})
+        return response.data;
+      })
       .catch((e) => {
-        console.log(e + "in swr")
+        console.log(e + "in swr");
         throw new Error(e);
       });
   };
@@ -509,6 +525,5 @@ export {
   useSubComponent1Name,
   useSystemAsset,
   useSystemAssetName,
-  useWorkflow
+  useWorkflow,
 };
-
