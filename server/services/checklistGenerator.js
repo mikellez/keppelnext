@@ -108,13 +108,13 @@ const createChecklistFromTemplate = async (schedule) => {
     schedule.scheduler_userids_for_email.length > 0
       ? schedule.scheduler_userids_for_email[0]
       : null;
-  const today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+  const today = moment();
   const advance_days = schedule.advance_schedule;
   const newDate = today.add(advance_days, 'days').format("YYYY-MM-DD HH:mm:ss");
 
   const activity_log = [
     {
-      date: today,
+      date: today.format('YYYY-MM-DD HH:mm:ss'),
       name: "System Generated",
       activity: "Created Checklist Record",
       activity_type: assignedID ? "ASSIGNED" : "PENDING",
