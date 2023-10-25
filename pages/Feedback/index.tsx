@@ -232,7 +232,7 @@ export default function Feedback(props: FeedbackPageProps) {
             </li>
           </ul>
         )}
-        {isReady && feedbackItems.length === 0 && <div></div>}
+        {isReady && feedbackItems.length === 0 && <div>No Feedback</div>}
         {isReady ? (
           <>
             <Table
