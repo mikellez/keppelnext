@@ -227,6 +227,8 @@ export default function Checklist(props: ChecklistProps) {
       setReady(false);
       setActiveTabIndex(index);
       setPage(1);
+      setSortField("");
+      setSortOrder("");
     }
   };
 

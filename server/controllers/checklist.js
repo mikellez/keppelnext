@@ -36,10 +36,10 @@ const groupBYCondition = () => {
 
 const orderByCondition = (sortField, sortOrder, search) => {
   const similarity_score = search == "" ? `` : `similarity_score,`
-  if (sortField == undefined || sortOrder == undefined) {
-    return `ORDER BY ${similarity_score} cl.checklist_id DESC`;
-  } else {
+  if (sortField && sortOrder) {
     return `ORDER BY ${sortField} ${sortOrder}`;
+  } else {
+    return `ORDER BY ${similarity_score} cl.checklist_id DESC`;
   }
 }
 
@@ -428,9 +428,9 @@ const getAssignedChecklistsQuery = (req) => {
     ${fuzzyWhere}
     ${searchCondition(search)}
     ${groupBYCondition()}
-    ${(sortField == undefined || sortOrder == undefined) 
-      ? `ORDER BY cl.created_date ${similarity_score} DESC` 
-      : `ORDER BY ${sortField} ${sortOrder}`}
+    ${(sortField && sortOrder) 
+      ? `ORDER BY ${sortField} ${sortOrder}`
+      : `ORDER BY cl.created_date ${similarity_score} DESC`}
     `
   );
 };
@@ -586,9 +586,9 @@ const getForReviewChecklistsQuery = (req) => {
     ${fuzzyWhere}
     ${searchCondition(search)}
     ${groupBYCondition()}
-    ${(sortField == undefined || sortOrder == undefined) 
-      ? `ORDER BY cs.date ${similarity_score} DESC` 
-      : `ORDER BY ${sortField} ${sortOrder}`}
+    ${(sortField && sortOrder) 
+      ? `ORDER BY ${sortField} ${sortOrder}`
+      : `ORDER BY cs.date ${similarity_score} DESC`}
   `
   );
 };
@@ -619,9 +619,9 @@ const getApprovedChecklistsQuery = (req) => {
     ${fuzzyWhere}
     ${searchCondition(search)}
     ${groupBYCondition()}
-    ${(sortField == undefined || sortOrder == undefined) 
-      ? `ORDER BY cs.date ${similarity_score} DESC` 
-      : `ORDER BY ${sortField} ${sortOrder}`}
+    ${(sortField && sortOrder) 
+      ? `ORDER BY ${sortField} ${sortOrder}`
+      : `ORDER BY cs.date ${similarity_score} DESC`}
   `
   );
 };
