@@ -415,6 +415,14 @@ const getAssignedChecklistsQuery = (req) => {
             ELSE True
             END) AND
             ua.user_id = $1
+            AND (
+              cs.date IS NULL OR
+              cs.date = (
+                  SELECT MAX(cs_sub.date)
+                  FROM keppel.checklist_status cs_sub
+                  WHERE cl.checklist_id = cs_sub.checklist_id
+              )
+            )
     ${condition(req)}
     ${advancedScheduleCond(req)}
     ${fuzzyWhere}
