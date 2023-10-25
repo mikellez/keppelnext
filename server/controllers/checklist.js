@@ -28,7 +28,8 @@ const groupBYCondition = () => {
       pm.plant_name,
       st.status,
       cs.checklist_id,
-      cs.date
+      cs.date,
+      aa.item_name
       )`;
 }
 
@@ -619,7 +620,6 @@ const fetchAssignedChecklists = async (req, res, next) => {
   const query =
     getAssignedChecklistsQuery(req) +
     ` LIMIT ${ITEMS_PER_PAGE} OFFSET ${offsetItems}`;
-    //console.log(getAssignedChecklistsQuery);
 
   try {
     const result = await global.db.query(query, [req.user.id]);

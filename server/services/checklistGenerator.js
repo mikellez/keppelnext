@@ -114,7 +114,7 @@ const createChecklistFromTemplate = async (schedule) => {
 
   const activity_log = [
     {
-      date: today,
+      date: today.format('YYYY-MM-DD HH:mm:ss'),
       name: "System Generated",
       activity: "Created Checklist Record",
       activity_type: assignedID ? "ASSIGNED" : "PENDING",

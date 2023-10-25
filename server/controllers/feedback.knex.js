@@ -110,8 +110,8 @@ const specificFeedbackQuery = async (req, options) => {
 
   SELECT_ARR = [];
   SELECT_RAW_ARR = [];
-  if (req.expand) {
-    const expandArr = req.expand.split(",");
+  if (req.query.expand) {
+    const expandArr = req.query.expand.split(",");
 
     for (let i = 0; i < expandArr.length; i++) {
       if (rawFields.includes(expandArr[i])) {
@@ -136,8 +136,6 @@ const specificFeedbackQuery = async (req, options) => {
   //console.log(SELECT_RAW_ARR);
 
   const query = global.knex
-    .select(expandCond)
-    .select(SELECT_RAW_ARR.map((field) => global.knex.raw(field)))
     .from("keppel.users AS u")
     .join("keppel.user_access AS ua", "u.user_id", "=", "ua.user_id")
     .join(
@@ -190,17 +188,22 @@ const specificFeedbackQuery = async (req, options) => {
     query.whereRaw(cond.date);
   }
 
-  if (req.query.page) {
-    const page = req.query.page || 1;
-    const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
-    // }
-    // if (pageOptions) {
-    query.limit(ITEMS_PER_PAGE).offset(offsetItems);
-  }
 
-  query.orderBy("f.feedback_id", "desc");
+  const totalQuery = query.clone();
+  const totalCount = await totalQuery.count("* AS total");
+  const totalPages = Math.ceil(totalCount[0].total / ITEMS_PER_PAGE);
 
-  return query;
+  const page = req.query.page || 1;
+  const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
+
+  const mainQuery = query.clone();
+  const results = await mainQuery.select(expandCond)
+  .select(SELECT_RAW_ARR.map((field) => global.knex.raw(field)))
+  .orderBy("f.feedback_id", "desc")
+  .limit(ITEMS_PER_PAGE)
+  .offset(offsetItems);
+
+  return { results, totalPages };
 };
 
 const fetchPendingFeedback = async (req, res, next) => {
@@ -208,8 +211,8 @@ const fetchPendingFeedback = async (req, res, next) => {
     status_id: [1],
   };
   try {
-    const results = await specificFeedbackQuery(req, options);
-    return res.status(200).json({ rows: results });
+    const { results, totalPages } = await specificFeedbackQuery(req, options);
+    return res.status(200).json({ rows: results, total: totalPages });
   } catch (err) {
     console.log(err);
     //next(err);
@@ -226,7 +229,7 @@ const fetchAssignedFeedback = async (req, res, next) => {
   };
 
   try {
-    const results = await specificFeedbackQuery(req, options);
+    const { results, totalPages } = await specificFeedbackQuery(req, options);
     return res.status(200).json({ rows: results });
   } catch (err) {
     console.log(err);
@@ -244,7 +247,7 @@ const fetchOutstandingFeedback = async (req, res, next) => {
   };
 
   try {
-    const results = await specificFeedbackQuery(req, options);
+    const { results, totalPages } = await specificFeedbackQuery(req, options);
     return res.status(200).json({ rows: results });
   } catch (err) {
     console.log(err);
@@ -262,7 +265,7 @@ const fetchCompletedFeedback = async (req, res, next) => {
   };
 
   try {
-    const results = await specificFeedbackQuery(req, options);
+    const { results, totalPages } = await specificFeedbackQuery(req, options);
     return res.status(200).json({ rows: results });
   } catch (err) {
     console.log(err);
@@ -280,9 +283,9 @@ const fetchSingleFeedback = async (req, res, next) => {
   //     feedback_id: req.params.id
   // };
   try {
-    const result = await specificFeedbackQuery(req);
-    if (result.length > 0) {
-      return res.status(200).send(result[0]);
+    const { results, totalPages } = await specificFeedbackQuery(req);
+    if (results.length > 0) {
+      return res.status(200).send(results[0]);
     } else {
       return res.status(404).send("No Feedback found");
     }
