@@ -29,7 +29,8 @@ const groupBYCondition = () => {
       st.status,
       cs.checklist_id,
       cs.date,
-      aa.item_name
+      aa.item_name,
+      tmp1.assetnames
       )`;
 }
 
@@ -297,6 +298,7 @@ const getAllChecklistQuery = (req, search) => {
     plant_id: "pm.plant_id",
     completeremarks_req: "completeremarks_req",
     linkedassetids: "linkedassetids",
+    linkedassets: "assetNames as linkedassets",
     chl_type: "cl.chl_type",
     created_date: "cl.created_date",
     history: "cl.history",
@@ -375,6 +377,15 @@ const getAllChecklistQuery = (req, search) => {
         JOIN keppel.status_cm st ON st.status_id = cl.status_id	
         left JOIN keppel.checklist_status cs on cs.checklist_id = cl.checklist_id
         left JOIN keppel.status_cm cscm on cscm.status_id = cl.status_id
+        LEFT JOIN (
+					SELECT
+					t3.checklist_id,
+					string_agg(concat(system_asset, ' | ', plant_asset_instrument)::text, ', ' ORDER BY t2.psa_id ASC) AS assetNames
+				FROM keppel.system_assets AS t1
+				JOIN keppel.plant_system_assets AS t2 ON t1.system_asset_id = t2.system_asset_id_lvl4
+				JOIN keppel.checklist_master AS t3 ON t2.psa_id = ANY(string_to_array(t3.linkedassetids, ',')::int[])
+				GROUP BY t3.checklist_id
+			) tmp1 ON tmp1.checklist_id = cl.checklist_id
     `
   return query;
 };
@@ -467,7 +478,7 @@ const getOutstandingChecklistsQuery = (req) => {
     WHERE
         ua.user_id = $1
         ${userRoleCond} AND
-        (cl.status_id = 2 OR cl.status_id = 6)
+        (cl.status_id in (2,6))
     ${condition(req)}
     ${advancedScheduleCond(req)}
     ${filterCondition("", plant, date, datetype)}
@@ -554,7 +565,7 @@ const getForReviewChecklistsQuery = (req) => {
     `
     WHERE
         ua.user_id = $1 AND
-        (cl.status_id = 4 or cl.status_id = 8 or cl.status_id = 9)
+        (cl.status_id in (4,8,9))
         AND (
           cs.date IS NULL OR
           cs.date = (
@@ -587,7 +598,7 @@ const getApprovedChecklistsQuery = (req) => {
     `
     WHERE
         ua.user_id = $1 AND
-        (cl.status_id = 5 OR cl.status_id = 7 OR cl.status_id = 11)
+        (cl.status_id in (5,7,11))
         AND (
           cs.date IS NULL OR
           cs.date = (
@@ -792,7 +803,7 @@ const fetchApprovedChecklistsQuery =
   fetchAllChecklistQuery +
     `WHERE 
       ua.user_id = $1 AND 
-      (cl.status_id = 5 OR cl.status_id = 7 OR cl.status.id = 11)
+      cl.status_id in (5,7,11)
           ${groupBYCondition()}
     ORDER BY cl.checklist_id desc`;
 const fetchApprovedChecklists = async (req, res, next) => {

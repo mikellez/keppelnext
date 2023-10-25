@@ -236,7 +236,7 @@ export default function Checklist(props: ChecklistProps) {
 
   useEffect(() => {
     if (data && !isValidating) {
-      if (props?.filter) {
+      if (!props?.filter) {
         if (data?.rows?.length > 0) {
           setChecklistItems(
             data.rows.map((row: CMMSChecklist) => {
@@ -254,7 +254,7 @@ export default function Checklist(props: ChecklistProps) {
   }, [dataChanged, data, isValidating, isReady, page, props?.isReady]);
 
   useEffect(() => {
-    if (!props?.filter) {
+    if (props?.filter) {
       const fields = [
         "checklist_id",
         "chl_name",
