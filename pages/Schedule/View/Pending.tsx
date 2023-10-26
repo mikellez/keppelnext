@@ -69,7 +69,7 @@ import Pagination from "../../../components/Pagination";
 import { BsTrashFill } from "react-icons/bs";
 import ModuleSimplePopup, { SimpleIcon } from "../../../components/ModuleLayout/ModuleSimplePopup";
 import router from "next/router";
-import { PermissionsRoles } from "../../../types/common/enums";
+import { Module_Activity_Log, PermissionsRoles } from "../../../types/common/enums";
 import {
   changeTimelineStatus
 } from "../../../pages/Schedule/Manage";
@@ -325,7 +325,7 @@ export default function Pending() {
                           <Cell>
                             <CellTooltip CellContents={(activeTabIndex === 1 || activeTabIndex === 2) && 
                             item.activity_log && item.activity_log.length > 0 && item.status ? 
-                            ActivityLog_Helper.getLatestDateByStatus(item.activity_log, item.status)
+                            ActivityLog_Helper.getLatestDateByStatus(item.activity_log, item.status, Module_Activity_Log.Schedule)
                             : (item.created_date ? moment(new Date(item.created_date)).format("MMMM Do YYYY, h:mm:ss a")
                                     : null)}/>
                           </Cell>
