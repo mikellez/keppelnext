@@ -197,11 +197,17 @@ const specificFeedbackQuery = async (req, options) => {
   const offsetItems = (+page - 1) * ITEMS_PER_PAGE;
 
   const mainQuery = query.clone();
-  const results = await mainQuery.select(expandCond)
-  .select(SELECT_RAW_ARR.map((field) => global.knex.raw(field)))
-  .orderBy("f.feedback_id", "desc")
-  .limit(ITEMS_PER_PAGE)
-  .offset(offsetItems);
+  let results = mainQuery.select(expandCond)
+  .select(SELECT_RAW_ARR.map((field) => global.knex.raw(field)));
+
+  if(req.query.page) {
+    results = mainQuery.orderBy("f.feedback_id", "desc")
+    .limit(ITEMS_PER_PAGE)
+    .offset(offsetItems);
+
+  } 
+
+  results = await results;
 
   return { results, totalPages };
 };
