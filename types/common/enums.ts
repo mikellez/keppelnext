@@ -36,6 +36,15 @@ enum Checklist_Status {
     Approved_Cancellation = 11,
 };
 
+enum Module_Activity_Log {
+    Asset = "Asset",
+    ChangeOfParts = "ChangeOfParts",
+    Checklist = "Checklist",
+    Request = "Request",
+    Schedule = "Schedule",
+    License = "License",
+}
+
 enum PermissionsRoles {
     Admin = 'admin',
     Manager = 'manager',
@@ -109,5 +118,6 @@ export {
     Action,
     Checklist_Status,
     Request_Status,
-    PermissionsRoles
+    PermissionsRoles,
+    Module_Activity_Log
 }

@@ -293,8 +293,8 @@ async function fetchRequestQuery(status_query, order_query, req) {
     rs.date
   ) 
   ${order_query}`;
-  console.log(sql);
-  console.log(expandCond);
+  //console.log(sql);
+  //console.log(expandCond);
 
   const result = await global.db.query(sql);
   const totalPages = Math.ceil(result.rows.length / ITEMS_PER_PAGE);
