@@ -248,7 +248,7 @@ app.prepare().then(() => {
 
   let s = server;
 
-  if(!dev) {
+  if(!dev && !!process.env.ENABLE_HTTPS) {
     const privateKey = fs.readFileSync(path.join(__dirname,'/openssl/domain.key'), 'utf8');
     const certificate = fs.readFileSync(path.join(__dirname,'/openssl/domain.crt'), 'utf8');
     const credentials = { key: privateKey, cert: certificate };
