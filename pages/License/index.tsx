@@ -59,9 +59,8 @@ import PlantSelect from "../../components/PlantSelect";
 import scheduleStyles from "../../styles/Schedule.module.scss";
 import { Role } from "../../types/common/enums";
 
-import Tooltip from "rc-tooltip";
-import "rc-tooltip/assets/bootstrap_white.css";
 import { BiRefresh } from "react-icons/bi";
+import CellTooltip from "../../components/CellTooltip";
 
 export interface LicenseProps {
   filter?: boolean;
@@ -290,102 +289,33 @@ const License = (props: LicenseProps) => {
                           <Row key={item.id} item={item}>
                             <Cell>{item.id}</Cell>
                             <Cell>
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={<span>{item.linked_asset_name}</span>}
-                              >
-                                <div>{item.linked_asset_name}</div>
-                              </Tooltip>
+                              <CellTooltip CellContents={item.linked_asset_name}/>
                             </Cell>
                             <Cell>
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={<span>{item.plant_name}</span>}
-                              >
-                                <div>{item.plant_name}</div>
-                              </Tooltip>
+                              <CellTooltip CellContents={item.plant_name}/>
                             </Cell>
                             <Cell>
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={<span>{item.license_name}</span>}
-                              >
-                                <div>{item.license_name}</div>
-                              </Tooltip>
+                              <CellTooltip CellContents={item.license_name}/>
                             </Cell>
                             <Cell>
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={<span>{item.license_provider}</span>}
-                              >
-                                <div>{item.license_provider}</div>
-                              </Tooltip>
+                              <CellTooltip CellContents={item.license_provider}/>
                             </Cell>
                             <Cell>
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={<span>{item.license_type}</span>}
-                              >
-                                <div>{item.license_type}</div>
-                              </Tooltip>
+                              <CellTooltip CellContents={item.license_type}/>
                             </Cell>
                             <Cell>
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={
-                                  <span>
-                                    {item.acquisition_date
+                              <CellTooltip CellContents={item.acquisition_date
                                       ? moment(
                                           new Date(item.acquisition_date)
                                         ).format("MMMM Do YYYY, h:mm:ss a")
-                                      : null}
-                                  </span>
-                                }
-                              >
-                                <div>
-                                  {item.acquisition_date
-                                    ? moment(
-                                        new Date(item.acquisition_date)
-                                      ).format("MMMM Do YYYY, h:mm:ss a")
-                                    : null}
-                                </div>
-                              </Tooltip>
+                                      : null}/>
                             </Cell>
                             <Cell>
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={
-                                  <span>
-                                    {item.expiry_date
+                              <CellTooltip CellContents={item.expiry_date
                                       ? moment(
                                           new Date(item.expiry_date)
                                         ).format("MMMM Do YYYY, h:mm:ss a")
-                                      : null}
-                                  </span>
-                                }
-                              >
-                                <div>
-                                  {item.expiry_date
-                                    ? moment(new Date(item.expiry_date)).format(
-                                        "MMMM Do YYYY, h:mm:ss a"
-                                      )
-                                    : null}
-                                </div>
-                              </Tooltip>
+                                      : null}/>
                             </Cell>
                             <Cell>
                               {item.acquisition_date && item.expiry_date
