@@ -18,10 +18,15 @@ const workflowCron = require("./services/workflowCron");
 const feedbackCron = require("./services/feedbackCron");
 const requestCron = require("./services/requestCron");
 const checklistCron = require("./services/checklistCron");
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
+
+
 
 // const HOMEPAGE = "/Dashboard";
 
@@ -30,7 +35,7 @@ app.prepare().then(() => {
   //server.use(helmet());
   server.use(
     cors({
-      origin: `http://localhost:${process.env.PORT}`,
+      origin: `${process.env.API_BASE_URL}`,
       credentials: true,
     })
   );
@@ -241,10 +246,20 @@ app.prepare().then(() => {
     return handle(req, res);
   });
 
-  server.listen(process.env.PORT, () => {
+  let s = server;
+
+  if(!dev) {
+    const privateKey = fs.readFileSync(path.join(__dirname,'/openssl/domain.key'), 'utf8');
+    const certificate = fs.readFileSync(path.join(__dirname,'/openssl/domain.crt'), 'utf8');
+    const credentials = { key: privateKey, cert: certificate };
+
+    let httpsServer = https.createServer(credentials, server);
+
+  }
+
+  s.listen(process.env.PORT, () => {
     console.log(`Ready on Port ${process.env.PORT}`);
   });
-
 
   workflowCron.start();
   feedbackCron.start();

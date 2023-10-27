@@ -9,7 +9,7 @@ var task = cron.schedule(
 
     // run workflow task - auto assign user
     await axios
-      .get(`http://localhost:${process.env.PORT}/api/workflow/run/assign`)
+      .get(`${process.env.API_BASE_URL}/api/workflow/run/assign`)
       .catch((err) => {
         console.log(err.response);
         console.log("Unable to run workflow task - assign user");
@@ -17,7 +17,7 @@ var task = cron.schedule(
 
     // run workflow task - auto send email
     await axios
-      .get(`http://localhost:${process.env.PORT}/api/workflow/run/email`)
+      .get(`${process.env.API_BASE_URL}/api/workflow/run/email`)
       .catch((err) => {
         console.log(err.response);
         console.log("Unable to run workflow task - send email");

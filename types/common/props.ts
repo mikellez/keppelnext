@@ -17,7 +17,7 @@ const createChecklistGetServerSideProps = (allowedStatuses?: number[]) => {
 		if (context.query.id) {
 			const { id, action }  = context.query;
 			const chltype = action === "New" ? "template" : "record"
-			const response = await instance.get<CMMSChecklist>(`http://${process.env.SERVER}:${process.env.PORT}/api/checklist/${chltype}/${id}`, headers);
+			const response = await instance.get<CMMSChecklist>(`${process.env.API_BASE_URL}/api/checklist/${chltype}/${id}`, headers);
 			
 			if (
 				response.status == 500 || 
@@ -99,7 +99,7 @@ const createFeedbackServerSideProps = (allowedStatuses?: number[]) => {
 		};
 			
 	
-		const url = `http://${process.env.SERVER}:${process.env.PORT}/api/feedback/${context.query.id}`
+		const url = `${process.env.API_BASE_URL}:/api/feedback/${context.query.id}`
 	
 		const response = await instance.get<CMMSFeedback>(url, headers);
 
