@@ -11,8 +11,6 @@ import { getTheme } from "@table-library/react-table-library/baseline";
 import { useTheme } from "@table-library/react-table-library/theme";
 import moment from "moment";
 import { GetServerSidePropsContext } from "next";
-import Tooltip from 'rc-tooltip';
-import 'rc-tooltip/assets/bootstrap_white.css';
 import React, { FormEvent, useEffect, useState } from "react";
 import { FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
 import { SlLock, SlLockOpen } from "react-icons/sl";
@@ -33,6 +31,7 @@ import styles from "../styles/Logbook.module.css";
 import styles2 from "../styles/Request.module.scss";
 import { CMMSPlant } from "../types/common/interfaces";
 import LabelSelect from "../components/Logbook/LabelSelect";
+import CellTooltip from "../components/CellTooltip";
 
 export interface logbookData {
   [key: string]: string | number;
@@ -354,44 +353,19 @@ const Logbook = ({
                             )}
                           </Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{row.name}</span>}>
-                                  <div>{row.name}</div>
-                              </Tooltip>
+                            <CellTooltip CellContents={row.name}/>
                             </Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{row.custom_description? row.custom_description : row.description}</span>}>
-                                  <div>{row.custom_description? row.custom_description : row.description}</div>
-                              </Tooltip>
+                            <CellTooltip CellContents={row.custom_description? row.custom_description : row.description}/>
                             </Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{row.entry}</span>}>
-                                  <div>{row.entry}</div>
-                              </Tooltip>
+                            <CellTooltip CellContents={row.entry}/>
                           </Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{row.staff1}</span>}>
-                                  <div>{row.staff1}</div>
-                              </Tooltip>
+                            <CellTooltip CellContents={row.staff1}/>
                             </Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{row.staff2}</span>}>
-                                  <div>{row.staff2}</div>
-                              </Tooltip>
+                            <CellTooltip CellContents={row.staff2}/>
                             </Cell>
                         </Row>
                       );

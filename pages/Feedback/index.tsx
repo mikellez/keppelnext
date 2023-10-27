@@ -36,8 +36,6 @@ import { useTheme } from "@table-library/react-table-library/theme";
 import moment from "moment";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import Tooltip from 'rc-tooltip';
-import 'rc-tooltip/assets/bootstrap_white.css';
 import React, { useEffect, useState } from "react";
 import {
   AiOutlineCloudSync, AiOutlineFileDone, AiOutlineFolderView, AiOutlineHistory,
@@ -59,6 +57,7 @@ import TooltipBtn from "../../components/TooltipBtn";
 import instance from "../../types/common/axios.config";
 import { CMMSFeedback } from "../../types/common/interfaces";
 import { getColor } from "../Request";
+import CellTooltip from "../../components/CellTooltip";
 
 const indexedColumn: ("pending" | "assigned" | "completed")[] = [
   "pending",
@@ -263,12 +262,7 @@ export default function Feedback(props: FeedbackPageProps) {
                         <Row key={item.id} item={item}>
                           <Cell>{item.id}</Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{item.description}</span>}>
-                                  <div>{item.description}</div>
-                              </Tooltip>
+                            <CellTooltip CellContents={item.description ? item.description : ""}/>
                             </Cell>
                           <Cell>
                             <span
@@ -281,46 +275,19 @@ export default function Feedback(props: FeedbackPageProps) {
                             </span>
                           </Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{moment(new Date(item.created_date)).format("MMMM Do YYYY, h:mm:ss a")}</span>}>
-                                  <div>
-                                    {moment(new Date(item.created_date)).format("MMMM Do YYYY, h:mm:ss a")}
-                                  </div>
-                              </Tooltip>
+                            <CellTooltip CellContents={moment(new Date(item.created_date)).format("MMMM Do YYYY, h:mm:ss a")}/>
                           </Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{item.assigned_user_name}</span>}>
-                                  <div>{item.assigned_user_name}</div>
-                              </Tooltip>
+                            <CellTooltip CellContents={item.assigned_user_name}/>
                             </Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span>{item.plant_name}</span>}>
-                                  <div>{item.plant_name}</div>
-                              </Tooltip>
+                            <CellTooltip CellContents={item.plant_name}/>
                             </Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{item.loc_floor} floor, {item.loc_room}</span>}>
-                                  <div>{item.loc_floor} floor, {item.loc_room}</div>
-                              </Tooltip>
+                            <CellTooltip CellContents={item.loc_floor + " floor ," + item.loc_room}/>
                           </Cell>
                           <Cell>
-                            <Tooltip overlayInnerStyle={{"fontSize": "0.7rem"}} 
-                                placement="bottom" 
-                                trigger={["hover"]} 
-                                overlay={<span >{item.createdbyuser}</span>}>
-                                  <div>{item.createdbyuser}</div>
-                              </Tooltip>
+                            <CellTooltip CellContents={item.createdbyuser}/>
                             </Cell>
                           <Cell>
                             { userPermission('canCompleteFeedback') && (item.status_id === 2 || item.status_id === 3) ? (

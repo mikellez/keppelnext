@@ -77,8 +77,6 @@ import instance from "../../types/common/axios.config";
 import { CMMSChecklist } from "../../types/common/interfaces";
 import { getColor } from "../Request";
 
-import Tooltip from "rc-tooltip";
-import "rc-tooltip/assets/bootstrap_white.css";
 
 import moment from "moment";
 import { useRouter } from "next/router";
@@ -87,6 +85,7 @@ import Pagination from "../../components/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import { Checklist_Status } from "../../types/common/enums";
 import { downloadMultipleChecklistsPDF } from "./View/[id]";
+import CellTooltip from "../../components/CellTooltip";
 
 const indexedColumn: ("pending" | "assigned" | "record" | "approved")[] = [
   "pending",
@@ -725,14 +724,7 @@ export default function Checklist(props: ChecklistProps) {
                           </Cell>
                           <Cell>{item.id}</Cell>
                           <Cell>
-                            <Tooltip
-                              overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              placement="bottom"
-                              trigger={["hover"]}
-                              overlay={<span>{item.description}</span>}
-                            >
-                              <div>{item.description}</div>
-                            </Tooltip>
+                            <CellTooltip CellContents={item.description}/>
                           </Cell>
                           <Cell>
                             <span
@@ -745,13 +737,7 @@ export default function Checklist(props: ChecklistProps) {
                             </span>
                           </Cell>
                           <Cell>
-                            <Tooltip
-                              overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              placement="bottom"
-                              trigger={["hover"]}
-                              overlay={
-                                <span>
-                                  {(() => {
+                            <CellTooltip CellContents={(() => {
                                     try {
                                       let dateToDisplay;
 
@@ -798,61 +784,7 @@ export default function Checklist(props: ChecklistProps) {
                                       );
                                       return "Error occurred";
                                     }
-                                  })()}
-                                </span>
-                              }
-                            >
-                              <div>
-                                  {(() => {
-                                    try {
-                                      let dateToDisplay;
-
-                                      if (activeTabIndex === 2) {
-                                        const statusArr = item?.checklist_status?.split(",");
-                                        const status = statusArr?.filter(element => element.includes('WORK DONE'))[0];
-                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
-                                        dateToDisplay = statusDate;
-                                        /*dateToDisplay = item.activity_log
-                                          .reverse()
-                                          .find(
-                                            (activity) =>
-                                              activity["activity_type"] ===
-                                              "WORK DONE"
-                                          )?.date;*/
-                                      } else if (activeTabIndex === 3) {
-                                        const statusArr = item?.checklist_status?.split(",");
-                                        const status = statusArr?.filter(element => element.includes('CANCELLED') || element.includes('APPROVED'))[0];
-                                        const statusDate = status && status.slice(status?.indexOf(":")+2);
-                                        dateToDisplay = statusDate;
-                                        /*dateToDisplay = statusDate;
-                                        dateToDisplay = item.activity_log
-                                          .reverse()
-                                          .find(
-                                            (activity) =>
-                                              activity["activity_type"] ===
-                                              "APPROVED"
-                                          )?.date;*/
-                                      } else {
-                                        dateToDisplay = item.created_date;
-                                      }
-
-                                      if (dateToDisplay) {
-                                        return moment(
-                                          new Date(dateToDisplay)
-                                        ).format("MMMM Do YYYY, h:mm:ss a");
-                                      } else {
-                                        return "Date not found";
-                                      }
-                                    } catch (error) {
-                                      console.error(
-                                        "An error occurred:",
-                                        error
-                                      );
-                                      return "Error occurred";
-                                    }
-                                  })()}
-                              </div>
-                            </Tooltip>
+                                  })()}/>
                           </Cell>
                           {/*Only show the Overdue column for the pending, assigned and work done tabs*/}
                           {(activeTabIndex === 0 ||
@@ -870,44 +802,15 @@ export default function Checklist(props: ChecklistProps) {
                             </Cell>
                           )}
                           <Cell>
-                            <Tooltip
-                              overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              placement="bottom"
-                              trigger={["hover"]}
-                              overlay={<span>{item.assigneduser}</span>}
-                            >
-                              <div>{item.assigneduser}</div>
-                            </Tooltip>
+                            <CellTooltip CellContents={item.assigneduser}/>
                           </Cell>
                           <Cell>
-                            <Tooltip
-                              overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              placement="bottom"
-                              trigger={["hover"]}
-                              overlay={<span>{item.signoffuser}</span>}
-                            >
-                              <div>{item.signoffuser}</div>
-                            </Tooltip>
+                            <CellTooltip CellContents={item.signoffuser}/>
                           </Cell>
                           <Cell>
-                            <Tooltip
-                              overlayInnerStyle={{ fontSize: "0.7rem" }}
-                              placement="bottom"
-                              trigger={["hover"]}
-                              overlay={
-                                <span>
-                                  {item.createdbyuser != " "
+                            <CellTooltip CellContents={item.createdbyuser != " "
                                     ? item.createdbyuser
-                                    : "System Generated"}
-                                </span>
-                              }
-                            >
-                              <div>
-                                {item.createdbyuser != " "
-                                  ? item.createdbyuser
-                                  : "System Generated"}
-                              </div>
-                            </Tooltip>
+                                    : "System Generated"}/>
                           </Cell>
                           
                         </Row>

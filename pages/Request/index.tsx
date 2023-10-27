@@ -44,8 +44,6 @@ import moment from "moment";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import Tooltip from "rc-tooltip";
-import "rc-tooltip/assets/bootstrap_white.css";
 import { AiOutlineHistory, AiOutlineUserAdd } from "react-icons/ai";
 import { BiCommentCheck } from "react-icons/bi";
 import { BsFileEarmarkPlus } from "react-icons/bs";
@@ -69,6 +67,7 @@ import PickerWithType from "../../components/PickerWithType";
 import type { DatePickerProps } from "antd";
 import { Select } from "antd";
 import { toNamespacedPath } from "path";
+import CellTooltip from "../../components/CellTooltip";
 
 const { Option } = Select;
 type PickerType = "date";
@@ -1069,24 +1068,10 @@ export default function Request(props: RequestProps) {
 
                             <Cell>{item.id}</Cell>
                             <Cell>
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={<span>{item.fault_name}</span>}
-                              >
-                                <div>{item.fault_name}</div>
-                              </Tooltip>
+                              <CellTooltip CellContents={item.fault_name}/>
                             </Cell>
                             <Cell>
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={<span>{item.plant_name}</span>}
-                              >
-                                <div>{item.plant_name}</div>
-                              </Tooltip>
+                              <CellTooltip CellContents={item.plant_name}/>
                             </Cell>
                             <Cell
                               style={{
@@ -1105,11 +1090,7 @@ export default function Request(props: RequestProps) {
                               {item.status}
                             </Cell>
                             <Cell>
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={(() => {
+                              <CellTooltip CellContents={(() => {
                                   try {
                                     if (activeTabIndex === 2) {
                                       const completedActivity =
@@ -1151,85 +1132,7 @@ export default function Request(props: RequestProps) {
                                     );
                                     return "Invalid Date"; // Or another error message or fallback
                                   }
-                                })()}
-                              >
-                                <div>
-                                  {(() => {
-                                    try {
-                                      let dateToDisplay;
-
-                                      if (activeTabIndex === 2) {
-                                        const statusArr =
-                                          item?.request_status?.split(",");
-                                        const status = statusArr?.filter(
-                                          (element) =>
-                                            element.includes("COMPLETED")
-                                        )[0];
-                                        const statusDate =
-                                          status &&
-                                          status.slice(
-                                            status?.indexOf(":") + 2
-                                          );
-                                        dateToDisplay = statusDate;
-
-                                        /*const completedActivity =
-                                          item.activity_log
-                                            .reverse()
-                                            .find(
-                                              (activity) =>
-                                                activity["activity_type"] ===
-                                                "COMPLETED"
-                                            );
-                                            */
-                                      } else if (activeTabIndex === 3) {
-                                        const statusArr =
-                                          item?.request_status?.split(",");
-                                        const status = statusArr?.filter(
-                                          (element) =>
-                                            element.includes("APPROVED") ||
-                                            element.includes("CANCELLED")
-                                        )[0];
-                                        const statusDate =
-                                          status &&
-                                          status.slice(
-                                            status?.indexOf(":") + 2
-                                          );
-                                        dateToDisplay = statusDate;
-
-                                        /*const approvedActivity =
-                                          item.activity_log
-                                            .reverse()
-                                            .find(
-                                              (activity) =>
-                                                activity["activity_type"] ===
-                                                "APPROVED"
-                                            );
-                                            */
-                                      } else {
-                                        dateToDisplay = item.created_date;
-                                      }
-
-                                      console.log(dateToDisplay);
-
-                                      // Handle case where date information is missing
-                                      if (dateToDisplay) {
-                                        return moment(
-                                          new Date(dateToDisplay)
-                                        ).format("MMMM Do YYYY, h:mm:ss a");
-                                      } else {
-                                        return "Date not found";
-                                      }
-                                    } catch (error) {
-                                      // Handle any parsing or formatting errors here
-                                      console.error(
-                                        "Date formatting error:",
-                                        error
-                                      );
-                                      return "Invalid Date"; // Or another error message or fallback
-                                    }
-                                  })()}
-                                </div>
-                              </Tooltip>
+                                })()}/>
                             </Cell>
                             {/*Only show the Overdue column for the pending and assigned tabs*/}
                             {(activeTabIndex === 0 || activeTabIndex === 1) && (
@@ -1245,24 +1148,10 @@ export default function Request(props: RequestProps) {
                               </Cell>
                             )}
                             <Cell>
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={<span>{item.asset_name}</span>}
-                              >
-                                <div>{item.asset_name}</div>
-                              </Tooltip>
+                              <CellTooltip CellContents={item.asset_name}/>
                             </Cell>
                             <Cell>
-                              <Tooltip
-                                overlayInnerStyle={{ fontSize: "0.7rem" }}
-                                placement="bottom"
-                                trigger={["hover"]}
-                                overlay={<span>{item.created_by}</span>}
-                              >
-                                <div>{item.created_by}</div>
-                              </Tooltip>
+                              <CellTooltip CellContents={item.created_by}/>
                             </Cell>
                           </Row>
 
