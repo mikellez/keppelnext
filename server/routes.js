@@ -2828,6 +2828,71 @@ router
     controllers.setting.checkUsername
   );
 
+
+/**
+ * @api {get} /workflows Get All Workflows
+ * @apiDescription Get All Workflows
+ * @apiName getAllWorkflows
+ * @apiGroup Workflow
+ * 
+ * @apiSuccess {Object} - Object containing an Array of Workflows
+ * @apiSuccess {Object[]} -.rows Workflow Array
+ * @apiSuccess {Number} -.rows.id Workflow ID
+ * @apiSuccess {Number} -.rows.type Request Type ID
+ * @apiSuccess {Number} -.rows.fault_id Fault ID
+ * @apiSuccess {Number} -.rows.plant_id Plant ID
+ * @apiSuccess {Number} -.rows.is_assign_to Signifies if Action is to Assign to User
+ * @apiSuccess {Number} -.rows.is_send_email Signifies if Action is to Email User
+ * @apiSuccess {Number} -.rows.is_active Signifies if Workflow is Active
+ * @apiSuccess {Number} -.rows.user_id ID of User to Assign / Email to
+ * @apiSuccess {String} -.rows.created_at Date and Time of Workflow Creation
+ * @apiSuccess {String} -.rows.user_name Username of User to Assign / Email to
+ * @apiSuccess {String} -.rows.user_email Email of User to Assign / Email to
+ * @apiSuccess {String} -.rows.plant_name Plant Name
+ * @apiSuccess {String} -.rows.fault_type Fault Type
+ * 
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
+
+/**
+ * @api {post} /workflow Create New Workflow
+ * @apiDescription Create a New Workflow
+ * @apiName createNewWorkflow
+ * @apiGroup Workflow
+ * 
+ * @apiBody {Number} type Request Type ID (1 for Fault Request)
+ * @apiBody {Number} plant Plant ID
+ * @apiBody {Number} faultType Fault ID
+ * @apiBody {String} action "assign-to" or "send-email"
+ * @apiBody {Number} assignTo ID of User to Assign to, else 0
+ * @apiBody {Number} sendEmail ID of User to Email to, else 0
+ * 
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
+
+/**
+ * @api {put} /workflow/:id Update Workflow
+ * @apiDescription Update Workflow Active Status 
+ * @apiName updateWorkflow
+ * @apiGroup Workflow
+ * 
+ * @apiParam {Number} id Workflow ID
+ * 
+ * @apiBody {Number} is_active 0 for inactive, 1 for active
+ * 
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
+
+/**
+ * @api {delete} /workflow/:id Delete Workflow
+ * @apiDescription Delete a Workflow
+ * @apiName deleteWorkflow
+ * @apiGroup Workflow
+ * 
+ * @apiParam {Number} id Workflow ID
+ * 
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
 router
   .get("/workflow/run/assign", controllers.workflow.runWorkflowAssign)
   .get("/workflow/run/email", controllers.workflow.runWorkflowEmail)
