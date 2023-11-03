@@ -153,7 +153,7 @@ const createWorkflow = async (req, res, next) => {
 
   global.db.query(
     sql,
-    [type, plant, faultType, isAssignTo, isSendEmail, 1, user_id, activity_log],
+    [type, faultType, plant, isAssignTo, isSendEmail, 1, user_id, activity_log],
     (err, result) => {
       if (err) return res.status(500).json({ errormsg: err });
       res.status(200).json(result.rows);
