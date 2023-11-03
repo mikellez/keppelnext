@@ -487,6 +487,14 @@ const getOutstandingChecklistsQuery = (req) => {
         ua.user_id = $1
         ${userRoleCond} AND
         (cl.status_id in (2,6))
+        AND (
+          cs.date IS NULL OR
+          cs.date = (
+              SELECT MAX(cs_sub.date)
+              FROM keppel.checklist_status cs_sub
+              WHERE cl.checklist_id = cs_sub.checklist_id
+          )
+        )
     ${condition(req)}
     ${advancedScheduleCond(req)}
     ${filterCondition("", plant, date, datetype)}
