@@ -2631,12 +2631,127 @@ router.get(
   controllers.activity.getEventtHistoryDate
 );
 
+/**
+ * @api {get} /logbook/:plant_id? Get Logbook Entry by Plant
+ * @apiDescription Get Logbook Entry by Plant ID
+ * @apiName getLogbookEntry
+ * @apiGroup Logbook
+ *
+ * @apiParam {String} plant_id Plant ID
+ *
+ * @apiSuccess {Object} rows A list of logbook entry records
+ * @apiSuccess {Object} total The total number of pages of records
+ * 
+ * @apiSuccessExample {json} Success Response:
+ * HTTP/1.1 200 OK
+{
+    "rows": [
+        {
+            "staff1": "engineer jj",
+            "staff2": "Engineer one",
+            "date": "2023-10-20T07:10:56.000Z",
+            "label": "",
+            "entry": "sdf",
+            "name": "Others",
+            "description": null,
+            "custom_description": "sdf"
+        },
+        {
+            "staff1": "engineer jj",
+            "staff2": "Engineer one",
+            "date": "2023-10-20T07:10:49.000Z",
+            "label": "",
+            "entry": "bcs",
+            "name": "Others",
+            "description": null,
+            "custom_description": ""
+        },
+        {
+            "staff1": "engineer jj",
+            "staff2": "Engineer one",
+            "date": "2023-10-20T07:10:45.000Z",
+            "label": "Others",
+            "entry": "ssd",
+            "name": "Others",
+            "description": null,
+            "custom_description": "sss"
+        }
+    ],
+    "total": 1
+}
+ */
+
+/**
+ * @api {post} /logbook/:plant_id? Create New Logbook Entry
+ * @apiDescription Create New Logbook Entry
+ * @apiName CreateLogbookEntry
+ * @apiGroup Logbook
+ *
+ * @apiParam {Number} plant_id ID of Plant
+ * 
+ * @apiBody (Request Body) {String} label Label of Logbook Entry (Don't use this, use label_id instead)
+ * @apiBody (Request Body) {String} entry Description of the Logbook Entry
+ * @apiBody (Request Body) {Object} staff Staff Object that contains 2 users
+ * @apiBody (Request Body) {Number} staff.first user_id of the First User
+ * @apiBody (Request Body) {Number} staff.second user_id of the Second User
+ * @apiBody (Request Body) {Number} label_id ID of Label (related to logbook_labels label_id)
+ * @apiBody (Request Body) {String} [custom_description] Custom Description for the Label
+ *
+ * @apiSuccess {Object} Entry The Logbook Entry Record created
+ * @apiSuccess {Number} staff1 User ID of Staff1
+ * @apiSuccess {Number} staff2 User ID of Staff2
+ * 
+ *
+ */
 router
   .route("/logbook/:plant_id?", checkIfLoggedInAPI)
   .get(controllers.logbook.getLogbook)
   .post(controllers.logbook.addEntryToLogbook);
 
-//
+/**
+ * @api {get} /logbook_labels/ Get All Logbook Labels  
+ * @apiDescription Get All Logbook Labels
+ * @apiName getAllLogbookLabels
+ * @apiGroup Logbook
+ *
+ * @apiSuccess {Object[]} logbook_labels list of logbook_label objects
+ * @apiSuccess {Object} logbook_label logbook_label object
+ * @apiSuccess {Number} logbook_label.label_id ID of the Label
+ * @apiSuccess {String} logbook_label.name Name of the Label
+ * @apiSuccess {String} logbook_label.description Description of the Label
+ * @apiSuccess {Object} logbook_label.activity_log Activity Log object of the Label
+ * @apiSuccess {Date} logbook_label.created_date Date which Label was created
+ * @apiSuccess {Boolean} logbook_label.allow_custom Whether the label can have a customised description for the logbook entry
+ * 
+ * @apiSuccessExample {json} Success Response:
+ * HTTP/1.1 200 OK
+[
+    {
+        "label_id": 3,
+        "name": "Others",
+        "description": null,
+        "activity_log": null,
+        "created_date": null,
+        "allow_custom": true
+    },
+    {
+        "label_id": 2,
+        "name": "2nd test change",
+        "description": "change test description for label change",
+        "activity_log": null,
+        "created_date": null,
+        "allow_custom": false
+    },
+    {
+        "label_id": 1,
+        "name": "test 1",
+        "description": "test description for label 1",
+        "activity_log": null,
+        "created_date": null,
+        "allow_custom": false
+    }
+  ]
+ */
 router
   .route("/logbook_labels", checkIfLoggedInAPI)
   .get(controllers.logbook.getAllLogbookLabels);
