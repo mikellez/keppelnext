@@ -49,3 +49,4 @@ server/db/db.config.json
 #feedback storage
 *.csv
 /server/feedbackCSV
+/server/openssl

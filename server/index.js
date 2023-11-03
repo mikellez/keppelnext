@@ -248,13 +248,13 @@ app.prepare().then(() => {
 
   let s = server;
 
-  if(!dev && !!process.env.ENABLE_HTTPS) {
-    const privateKey = fs.readFileSync(path.join(__dirname,'/openssl/domain.key'), 'utf8');
-    const certificate = fs.readFileSync(path.join(__dirname,'/openssl/domain.crt'), 'utf8');
+  if(!!process.env.ENABLE_HTTPS) {
+    const privateKey = fs.readFileSync(path.join(__dirname,'/openssl/domain.key'));
+    const certificate = fs.readFileSync(path.join(__dirname,'/openssl/domain.crt'));
     const credentials = { key: privateKey, cert: certificate };
 
-    let httpsServer = https.createServer(credentials, server);
-
+    const httpsServer = https.createServer(credentials, server);
+    s = httpsServer;
   }
 
   s.listen(process.env.PORT, () => {

@@ -5,6 +5,8 @@ import getConfig  from "next/config";
 const { publicRuntimeConfig } = getConfig();
 const { apiBaseUrl } = publicRuntimeConfig;
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 const instance = axios.create({
   baseURL: `${apiBaseUrl}`,
 });
