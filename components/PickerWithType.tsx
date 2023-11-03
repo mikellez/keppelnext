@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { CSSProperties } from "react";
 
 import type { DatePickerProps, TimePickerProps } from 'antd';
-import { DatePicker, Select, Space, TimePicker } from 'antd';
-import dayjs, { Dayjs } from "dayjs";
+import { DatePicker, Select } from 'antd';
 
 const { Option } = Select;
 
@@ -10,13 +9,15 @@ type PickerType = 'time' | 'date';
 
 const PickerWithType = ({
     type,
-    onChange
+    onChange,
+    style
 }: {
     type: PickerType;
     onChange: TimePickerProps['onChange'] | DatePickerProps['onChange'];
+    style?: CSSProperties;
 }) => {
-    if (type === 'date') return <DatePicker onChange={onChange} />
-    return <DatePicker picker={type} onChange={onChange} />
+    if (type === 'date') return <DatePicker onChange={onChange} popupStyle={style}/>
+    return <DatePicker picker={type} onChange={onChange} popupStyle={style} />
 };
 
 

@@ -875,24 +875,192 @@ router.get(
   controllers.checklist.fetchChecklistCounts
 );
 
+/**
+ * @api {get} /checklist/pending/:plant/:datetype/:date Get Pending Checklist by Plant
+ * @apiDescription Get Pending Checklists by Plant, Datetype and Date
+ * @apiName GetPendingChecklistByPlant
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} plant Plant ID
+ * @apiParam {String} datetype "date", "week", "month", "quarter" or "year"
+ * @apiParam {String} date "all" or "YYYY-MM-DD"
+ * 
+ * @apiSuccess {Object} - Object containing "Pending" Checklists Array and side information
+ * @apiSuccess {Object[]} -.rows Checklists Array
+ * @apiSuccess {Number} -.rows.checklist_id Checklist ID
+ * @apiSuccess {String} -.rows.chl_name Checklist Name
+ * @apiSuccess {String} -.rows.description Checklist Description
+ * @apiSuccess {Number} -.rows.status_id Checklist Status (1 for Pending)
+ * @apiSuccess {Object[]} -.rows.activity_log Checklist History
+ * @apiSuccess {String} -.rows.createdbyuser User who created Checklist
+ * @apiSuccess {String} -.rows.assigneduser Name of assigned user
+ * @apiSuccess {String} -.rows.signoffuser Name of signoff user
+ * @apiSuccess {String} -.rows.plant_name Plant Name of plant associated with Checklist
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist
+ * @apiSuccess {String} -.rows.completeremarks_req Completed Request Remarks
+ * @apiSuccess {String} -.rows.linkedassetids Asset ID associated with Checklist
+ * @apiSuccess {String} -.rows.linkedassets Assets associated with Checklist
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Record
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist was created
+ * @apiSuccess {String} -.rows.history Deprecated. Use activity_log instead
+ * @apiSuccess {Object[]} -.rows.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {Number} -.rows.signoff_user_id Signoff user ID
+ * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
+ * @apiSuccess {String} -.rows.status Status (Should be "PENDING")
+ * @apiSuccess {String} -.rows.overdue When the Checklist Becomes Overdue
+ * @apiSuccess {Boolean} -.rows.overdue_status Represents if Checklist is Overdue or Valid
+ * @apiSuccess {String} -.rows.updated_at Indicates when the Checklist was last updated
+ * @apiSuccess {String} -.rows.checklist_status Indicates the current status and when it was updated to that status
+ * @apiSuccess {String} -.rows.date Date of latest update
+ * @apiSuccess {String} -.rows.item_name Role of User who created Checklist
+ * @apiSuccess {Number} -.total Total Pages of "Pending" Checklists
+ * 
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
 router.get(
   "/checklist/pending/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.checklist.fetchPendingChecklists
 );
 
+/**
+ * @api {get} /checklist/outstanding/:plant/:datetype/:date Get Outstanding Checklists
+ * @apiDescription Get Outstanding Checklists 
+ * @apiName GetOutstandingChecklist
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} plant Plant ID
+ * @apiParam {String} datetype "date", "week", "month", "quarter" or "year"
+ * @apiParam {String} date "all" or "YYYY-MM-DD"
+ * 
+ * @apiSuccess {Object} - Object containing "Outstanding" Checklists Array and side information
+ * @apiSuccess {Object[]} -.rows Checklists Array
+ * @apiSuccess {Number} -.rows.checklist_id Checklist ID
+ * @apiSuccess {String} -.rows.chl_name Checklist Name
+ * @apiSuccess {String} -.rows.description Checklist Description
+ * @apiSuccess {Number} -.rows.status_id Checklist Status (2 for Assigned, 6 for Rejected)
+ * @apiSuccess {Object[]} -.rows.activity_log Checklist History
+ * @apiSuccess {String} -.rows.createdbyuser User who created Checklist
+ * @apiSuccess {String} -.rows.assigneduser Name of assigned user
+ * @apiSuccess {String} -.rows.signoffuser Name of signoff user
+ * @apiSuccess {String} -.rows.plant_name Plant Name of plant associated with Checklist
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist
+ * @apiSuccess {String} -.rows.completeremarks_req Completed Request Remarks
+ * @apiSuccess {String} -.rows.linkedassetids Asset ID associated with Checklist
+ * @apiSuccess {String} -.rows.linkedassets Assets associated with Checklist
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Record
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist was created
+ * @apiSuccess {String} -.rows.history Deprecated. Use activity_log instead
+ * @apiSuccess {Object[]} -.rows.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {Number} -.rows.signoff_user_id Signoff user ID
+ * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
+ * @apiSuccess {String} -.rows.status Status (Should be "ASSIGNED" or "REJECTED")
+ * @apiSuccess {String} -.rows.overdue When the Checklist Becomes Overdue
+ * @apiSuccess {Boolean} -.rows.overdue_status Represents if Checklist is Overdue or Valid
+ * @apiSuccess {String} -.rows.updated_at Indicates when the Checklist was last updated
+ * @apiSuccess {String} -.rows.checklist_status Indicates the current status and when it was updated to that status
+ * @apiSuccess {String} -.rows.date Date of latest update
+ * @apiSuccess {String} -.rows.item_name Role of User who created Checklist
+ * @apiSuccess {Number} -.total Total Pages of "Outstanding" Checklists
+ * 
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
 router.get(
   "/checklist/outstanding/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.checklist.fetchOutstandingChecklists
 );
 
+/**
+ * @api {get} /checklist/completed/:plant/:datetype/:date Get Completed Checklists
+ * @apiDescription Get Completed Checklists 
+ * @apiName GetCompletedChecklist
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} plant Plant ID
+ * @apiParam {String} datetype "date", "week", "month", "quarter" or "year"
+ * @apiParam {String} date "all" or "YYYY-MM-DD"
+ * 
+ * @apiSuccess {Object} - Object containing "Completed" Checklists Array and side information
+ * @apiSuccess {Object[]} -.rows Checklists Array
+ * @apiSuccess {Number} -.rows.checklist_id Checklist ID
+ * @apiSuccess {String} -.rows.chl_name Checklist Name
+ * @apiSuccess {String} -.rows.description Checklist Description
+ * @apiSuccess {Number} -.rows.status_id Checklist Status (4 for Work Done)
+ * @apiSuccess {Object[]} -.rows.activity_log Checklist History
+ * @apiSuccess {String} -.rows.createdbyuser User who created Checklist
+ * @apiSuccess {String} -.rows.assigneduser Name of assigned user
+ * @apiSuccess {String} -.rows.signoffuser Name of signoff user
+ * @apiSuccess {String} -.rows.plant_name Plant Name of plant associated with Checklist
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist
+ * @apiSuccess {String} -.rows.completeremarks_req Completed Request Remarks
+ * @apiSuccess {String} -.rows.linkedassetids Asset ID associated with Checklist
+ * @apiSuccess {String} -.rows.linkedassets Assets associated with Checklist
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Record
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist was created
+ * @apiSuccess {String} -.rows.history Deprecated. Use activity_log instead
+ * @apiSuccess {Object[]} -.rows.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {Number} -.rows.signoff_user_id Signoff user ID
+ * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
+ * @apiSuccess {String} -.rows.status Status (Should be "WORK DONE")
+ * @apiSuccess {String} -.rows.overdue When the Checklist Becomes Overdue
+ * @apiSuccess {Boolean} -.rows.overdue_status Represents if Checklist is Overdue or Valid
+ * @apiSuccess {String} -.rows.updated_at Indicates when the Checklist was last updated
+ * @apiSuccess {String} -.rows.checklist_status Indicates the current status and when it was updated to that status
+ * @apiSuccess {String} -.rows.date Date of latest update
+ * @apiSuccess {String} -.rows.item_name Role of User who created Checklist
+ * @apiSuccess {Number} -.total Total Pages of "Completed" Checklists
+ * 
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
 router.get(
   "/checklist/completed/:plant/:datetype/:date",
   checkIfLoggedInAPI,
   controllers.checklist.fetchCompletedChecklists
 );
 
+/**
+ * @api {get} /checklist/overdue/:plant/:datetype/:date Get Overdue Checklists
+ * @apiDescription Get Overdue Checklists 
+ * @apiName GetOverdueChecklist
+ * @apiGroup Checklist
+ * 
+ * @apiParam {String} plant Plant ID
+ * @apiParam {String} datetype "date", "week", "month", "quarter" or "year"
+ * @apiParam {String} date "all" or "YYYY-MM-DD"
+ * 
+ * @apiSuccess {Object} - Object containing "Overdue" Checklists Array and side information
+ * @apiSuccess {Object[]} -.rows Checklists Array
+ * @apiSuccess {Number} -.rows.checklist_id Checklist ID
+ * @apiSuccess {String} -.rows.chl_name Checklist Name
+ * @apiSuccess {String} -.rows.description Checklist Description
+ * @apiSuccess {Number} -.rows.status_id Checklist Status
+ * @apiSuccess {Object[]} -.rows.activity_log Checklist History
+ * @apiSuccess {String} -.rows.createdbyuser User who created Checklist
+ * @apiSuccess {String} -.rows.assigneduser Name of assigned user
+ * @apiSuccess {String} -.rows.signoffuser Name of signoff user
+ * @apiSuccess {String} -.rows.plant_name Plant Name of plant associated with Checklist
+ * @apiSuccess {Number} -.rows.plant_id Plant ID of plant associated with Checklist
+ * @apiSuccess {String} -.rows.completeremarks_req Completed Request Remarks
+ * @apiSuccess {String} -.rows.linkedassetids Asset ID associated with Checklist
+ * @apiSuccess {String} -.rows.linkedassets Assets associated with Checklist
+ * @apiSuccess {String} -.rows.chl_type Checklist Type (Record / Template). Should be Record
+ * @apiSuccess {String} -.rows.created_date Date at which Checklist was created
+ * @apiSuccess {String} -.rows.history Deprecated. Use activity_log instead
+ * @apiSuccess {Object[]} -.rows.datajson Refer to "Checklist DataJSON format"
+ * @apiSuccess {Number} -.rows.signoff_user_id Signoff user ID
+ * @apiSuccess {Number} -.rows.assigned_user_id Assigned user ID
+ * @apiSuccess {String} -.rows.status Status
+ * @apiSuccess {String} -.rows.overdue When the Checklist Becomes Overdue
+ * @apiSuccess {Boolean} -.rows.overdue_status Represents if Checklist is Overdue or Valid
+ * @apiSuccess {String} -.rows.updated_at Indicates when the Checklist was last updated
+ * @apiSuccess {String} -.rows.checklist_status Indicates the current status and when it was updated to that status
+ * @apiSuccess {String} -.rows.date Date of latest update
+ * @apiSuccess {String} -.rows.item_name Role of User who created Checklist
+ * @apiSuccess {Number} -.total Total Pages of "Overdue" Checklists
+ * 
+ * @apiError (Error 500) {Object} InternalServerError {msg: ERRORMESSAGE}
+ */
 router.get(
   "/checklist/overdue/:plant/:datetype/:date",
   checkIfLoggedInAPI,
@@ -1032,7 +1200,7 @@ router.get(
 );
 
 /**
- * @api {patch} /checklist/approve/:checklist_id Approve an existing checklist
+ * @api {patch} /checklist/approve/:checklist_id Approve Existing Checklist
  * @apiDescription Approve an existing checklist
  * Checklist will go into "Approved" if successful
  * @apiName ApproveChecklist
@@ -1053,9 +1221,9 @@ router.patch(
 );
 
 /**
- * @api {patch} /checklist/approve/:checklist_id Reject an existing checklist
+ * @api {patch} /checklist/reject/:checklist_id Reject Existing Checklist
  * @apiDescription Reject an existing checklist
- * Checklist will go into "Reassigned" if successful
+ * Checklist will go into "Rejected" if successful
  * @apiName RejectChecklist
  * @apiGroup Checklist
  *
@@ -1074,13 +1242,13 @@ router.patch(
 );
 
 /**
- * @api {patch} /checklist/approve/:checklist_id cancel an
- * @apiDescription Reject an existing checklist
+ * @api {patch} /checklist/cancel/:checklist_id Cancel Checklist
+ * @apiDescription Cancel an existing checklist
  * Checklist will go into "Cancelled" if successful
  * @apiName CancelChecklist
  * @apiGroup Checklist
  *
- * @apiParam {String} checklist_id The ID of the "Work Done" checklist record
+ * @apiParam {String} checklist_id The ID of the checklist record
  *
  * @apiBody {String} remarks Cancel Remarks
  *
@@ -1094,33 +1262,87 @@ router.patch(
   controllers.checklist.updateChecklist("cancel")
 );
 
+/**
+ * @api {patch} /checklist/reassignReq/:checklist_id Request Checklist Reassignment
+ * @apiDescription Request Reassignment for an existing checklist
+ * Checklist will go into "Reassignment Request" if successful
+ * @apiName ReassignReqChecklist
+ * @apiGroup Checklist
+ *
+ * @apiParam {String} checklist_id The ID of the "Assigned" checklist record
+ *
+ * @apiBody {String} remarks Request Reassignment Remarks
+ *
+ * @apiSuccess {String} Success "Reassignment Request for Checklist ID Successfully Created"
+ *
+ * @apiError (Error 403) {String} ForbiddenError "Invalid Input IDs"
+ * @apiError (Error 404) {String} ErrorNotFound "Checklist does not exist"
+ * @apiError (Error 500) {String} InternalServerError "Failure to update checklist reassignment request"
+ */
 router.patch(
   "/checklist/reassignReq/:checklist_id",
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("requestReassign")
 );
+
+/**
+ * @api {patch} /checklist/reassignApprove/:checklist_id Approve Checklist Reassignment
+ * @apiDescription Approve Reassignment for an existing checklist
+ * Checklist will go into "Reassigned" if successful
+ * @apiName ApproveReassignChecklist
+ * @apiGroup Checklist
+ *
+ * @apiParam {String} checklist_id The ID of the "Reassignment Request" checklist record
+ *
+ * @apiBody {String} remarks Approve Reassignment Remarks
+ *
+ * @apiSuccess {String} Success "Checklist successfully approved for reassignment request"
+ *
+ * @apiError (Error 403) {String} ForbiddenError "Invalid Input IDs"
+ * @apiError (Error 404) {String} ErrorNotFound "Checklist does not exist"
+ * @apiError (Error 500) {String} InternalServerError "Failure to update checklist approval of reassignment request"
+ */
 router.patch(
   "/checklist/reassignApprove/:checklist_id",
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("approveReassign")
 );
+
+/**
+ * @api {patch} /checklist/reassignReject/:checklist_id Reject Checklist Reassignment
+ * @apiDescription Reject Reassignment for an existing checklist
+ * Checklist will go into "Assigned" if successful
+ * @apiName RejectReassignChecklist
+ * @apiGroup Checklist
+ *
+ * @apiParam {String} checklist_id The ID of the "Reassignment Request" checklist record
+ *
+ * @apiBody {String} remarks Reject Reassignment Remarks
+ *
+ * @apiSuccess {String} Success "Checklist successfully reject for reassignment request"
+ *
+ * @apiError (Error 403) {String} ForbiddenError "Invalid Input IDs"
+ * @apiError (Error 404) {String} ErrorNotFound "Checklist does not exist"
+ * @apiError (Error 500) {String} InternalServerError "Failure to update checklist rejection of reassignment request"
+ */
 router.patch(
   "/checklist/reassignReject/:checklist_id",
   checkIfLoggedInAPI,
   controllers.checklist.updateChecklist("rejectReassign")
 );
+
 /**
- * @api {patch} /checklist/approve/:checklist_id Request to cancel a checklist
+ * @api {patch} /checklist/requestCancel/:checklist_id Request Checklist Cancellation
  * @apiDescription request to cancel an existing checklist
  * Checklist will go into "request cancellation" if successful
  * @apiName RequestCancel
  * @apiGroup Checklist
  *
- * @apiParam {String} checklist_id The ID of the "Work Done" checklist record
+ * @apiParam {String} checklist_id The ID of the checklist record
  *
  * @apiBody {String} remarks request cancellation Remarks
  *
- * @apiSuccess {String} Success "Checklist successfullyr equest cancellation"
+ * @apiSuccess {String} Success "Checklist successfullyr request cancellation"
  *
  * @apiError (Error 500) {String} InternalServerError "Failure to update checklist request cancellation"
  */
@@ -1130,13 +1352,13 @@ router.patch(
   controllers.checklist.updateChecklist("requestCancel")
 );
 /**
- * @api {patch} /checklist/approve/:checklist_id approve cancellation of a checklist
+ * @api {patch} /checklist/approveCancel/:checklist_id Approve Checklist Cancellation
  * @apiDescription approve cancellation for an existing checklist
  * Checklist will go into "approve cancellation" if successful
  * @apiName RequestCancel
  * @apiGroup Checklist
  *
- * @apiParam {String} checklist_id The ID of the "Work Done" checklist record
+ * @apiParam {String} checklist_id The ID of the checklist record
  *
  * @apiBody {String} remarks approve cancellation Remarks
  *
@@ -1151,13 +1373,13 @@ router.patch(
 );
 
 /**
- * @api {patch} /checklist/approve/:checklist_id reject cancellation of a checklist
- * @apiDescription approve cancellation for an existing checklist
+ * @api {patch} /checklist/rejectCancel/:checklist_id Reject Checklist Cancellation
+ * @apiDescription reject cancellation for an existing checklist
  * Checklist will go into "reject cancellation" if successful
  * @apiName RequestCancel
  * @apiGroup Checklist
  *
- * @apiParam {String} checklist_id The ID of the "Work Done" checklist record
+ * @apiParam {String} checklist_id The ID of the checklist record
  *
  * @apiBody {String} remarks recject cancellation Remarks
  *
@@ -2359,6 +2581,21 @@ router.post("/feedback/csv", controllers.feedbackKnex.createFeedbackCSV);
 
 router.post("/feedback/sync", checkIfLoggedInAPI, controllers.feedbackKnex.triggerSyncAndCreateFeedback);
 
+/**
+ * @api {get} /activity/account_log Get Account Log
+ * @apiDescription Get Account Activity Log
+ * @apiName GetAccountLog
+ * @apiGroup ActivityLog
+ * 
+ * @apiSuccess {Object} - Object containing Activity Log Array and side information
+ * @apiSuccess {Object[]} -.logs Activity Log Array
+ * @apiSuccess {String} -.logs.user_name User's Username
+ * @apiSuccess {String} -.logs.type Event type
+ * @apiSuccess {String} -.logs.event_time Date and Time of Event
+ * @apiSuccess {String} -.logs.description Description of Event
+ * 
+ * @apiError (Error 500) {String} InternalServerError {msg: ERRORMESSAGE}
+ */
 router.get(
   "/activity/account_log",
   checkIfLoggedInAPI,
@@ -2369,18 +2606,152 @@ router.post(
   checkIfLoggedInAPI,
   controllers.activity.createActivityCSV
 );
+
+/**
+ * @api {get} /activity/account_log/:type/:date Get Account Log By Date
+ * @apiDescription Get Account Activity Log By Date
+ * @apiName GetAccountLogByDate
+ * @apiGroup ActivityLog
+ * 
+ * @apiParam {String} type "day", "month" or "year"
+ * @apiParam {String} date "YYYY-MM-DD"
+ * 
+ * @apiSuccess {Object} - Object containing Activity Log Array and side information
+ * @apiSuccess {Object[]} -.logs Activity Log Array
+ * @apiSuccess {String} -.logs.user_name User's Username
+ * @apiSuccess {String} -.logs.type Event type
+ * @apiSuccess {String} -.logs.event_time Date and Time of Event
+ * @apiSuccess {String} -.logs.description Description of Event
+ * 
+ * @apiError (Error 500) {String} InternalServerError {msg: ERRORMESSAGE}
+ */
 router.get(
   "/activity/account_log/:type/:date",
   checkIfLoggedInAPI,
   controllers.activity.getEventtHistoryDate
 );
 
+/**
+ * @api {get} /logbook/:plant_id? Get Logbook Entry by Plant
+ * @apiDescription Get Logbook Entry by Plant ID
+ * @apiName getLogbookEntry
+ * @apiGroup Logbook
+ *
+ * @apiParam {String} plant_id Plant ID
+ *
+ * @apiSuccess {Object} rows A list of logbook entry records
+ * @apiSuccess {Object} total The total number of pages of records
+ * 
+ * @apiSuccessExample {json} Success Response:
+ * HTTP/1.1 200 OK
+{
+    "rows": [
+        {
+            "staff1": "engineer jj",
+            "staff2": "Engineer one",
+            "date": "2023-10-20T07:10:56.000Z",
+            "label": "",
+            "entry": "sdf",
+            "name": "Others",
+            "description": null,
+            "custom_description": "sdf"
+        },
+        {
+            "staff1": "engineer jj",
+            "staff2": "Engineer one",
+            "date": "2023-10-20T07:10:49.000Z",
+            "label": "",
+            "entry": "bcs",
+            "name": "Others",
+            "description": null,
+            "custom_description": ""
+        },
+        {
+            "staff1": "engineer jj",
+            "staff2": "Engineer one",
+            "date": "2023-10-20T07:10:45.000Z",
+            "label": "Others",
+            "entry": "ssd",
+            "name": "Others",
+            "description": null,
+            "custom_description": "sss"
+        }
+    ],
+    "total": 1
+}
+ */
+
+/**
+ * @api {post} /logbook/:plant_id? Create New Logbook Entry
+ * @apiDescription Create New Logbook Entry
+ * @apiName CreateLogbookEntry
+ * @apiGroup Logbook
+ *
+ * @apiParam {Number} plant_id ID of Plant
+ * 
+ * @apiBody (Request Body) {String} label Label of Logbook Entry (Don't use this, use label_id instead)
+ * @apiBody (Request Body) {String} entry Description of the Logbook Entry
+ * @apiBody (Request Body) {Object} staff Staff Object that contains 2 users
+ * @apiBody (Request Body) {Number} staff.first user_id of the First User
+ * @apiBody (Request Body) {Number} staff.second user_id of the Second User
+ * @apiBody (Request Body) {Number} label_id ID of Label (related to logbook_labels label_id)
+ * @apiBody (Request Body) {String} [custom_description] Custom Description for the Label
+ *
+ * @apiSuccess {Object} Entry The Logbook Entry Record created
+ * @apiSuccess {Number} staff1 User ID of Staff1
+ * @apiSuccess {Number} staff2 User ID of Staff2
+ * 
+ *
+ */
 router
   .route("/logbook/:plant_id?", checkIfLoggedInAPI)
   .get(controllers.logbook.getLogbook)
   .post(controllers.logbook.addEntryToLogbook);
 
-//
+/**
+ * @api {get} /logbook_labels/ Get All Logbook Labels  
+ * @apiDescription Get All Logbook Labels
+ * @apiName getAllLogbookLabels
+ * @apiGroup Logbook
+ *
+ * @apiSuccess {Object[]} logbook_labels list of logbook_label objects
+ * @apiSuccess {Object} logbook_label logbook_label object
+ * @apiSuccess {Number} logbook_label.label_id ID of the Label
+ * @apiSuccess {String} logbook_label.name Name of the Label
+ * @apiSuccess {String} logbook_label.description Description of the Label
+ * @apiSuccess {Object} logbook_label.activity_log Activity Log object of the Label
+ * @apiSuccess {Date} logbook_label.created_date Date which Label was created
+ * @apiSuccess {Boolean} logbook_label.allow_custom Whether the label can have a customised description for the logbook entry
+ * 
+ * @apiSuccessExample {json} Success Response:
+ * HTTP/1.1 200 OK
+[
+    {
+        "label_id": 3,
+        "name": "Others",
+        "description": null,
+        "activity_log": null,
+        "created_date": null,
+        "allow_custom": true
+    },
+    {
+        "label_id": 2,
+        "name": "2nd test change",
+        "description": "change test description for label change",
+        "activity_log": null,
+        "created_date": null,
+        "allow_custom": false
+    },
+    {
+        "label_id": 1,
+        "name": "test 1",
+        "description": "test description for label 1",
+        "activity_log": null,
+        "created_date": null,
+        "allow_custom": false
+    }
+  ]
+ */
 router
   .route("/logbook_labels", checkIfLoggedInAPI)
   .get(controllers.logbook.getAllLogbookLabels);

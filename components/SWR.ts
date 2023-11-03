@@ -72,7 +72,10 @@ function useRequestFilter(
   props: RequestProps,
   page: number,
   search: string = "",
-  fields: string[]
+  fields: string[],
+  sortField: string,
+  sortOrder: string,
+  filter: { FaultType: string, Location: string; Priority: string, Overdue: string }
 ) {
   const requestFetcher = (url: string) =>
     instance
@@ -94,7 +97,8 @@ function useRequestFilter(
       props.datetype || "all"
     }/${
       props?.date || "all"
-    }?page=${page}&search=${search}&expand=${fields.join(",")}`,
+    }?page=${page}&search=${search}&expand=${fields.join(",")}&sortField=${sortField}&sortOrder=${sortOrder}
+    &FaultType=${filter.FaultType}&Location=${filter.Location}&Priority=${filter.Priority}&Overdue=${filter.Overdue}`,
     requestFetcher,
     { revalidateOnFocus: false }
   );
@@ -203,7 +207,9 @@ function useChecklistFilter(
   props: ChecklistProps,
   page: number,
   search: string = "",
-  fields: string[]
+  fields: string[],
+  sortField: string,
+  sortOrder: string
 ) {
   const checklistFetcher = (url: string) =>
     instance
@@ -218,7 +224,7 @@ function useChecklistFilter(
       props?.datetype || "all"
     }/${
       props?.date || "all"
-    }?page=${page}&search=${search}&expand=${fields.join(",")}`,
+    }?page=${page}&search=${search}&expand=${fields.join(",")}&sortField=${sortField}&sortOrder=${sortOrder}`,
     checklistFetcher,
     { revalidateOnFocus: false }
   );
@@ -525,5 +531,6 @@ export {
   useSubComponent1Name,
   useSystemAsset,
   useSystemAssetName,
-  useWorkflow,
+  useWorkflow
 };
+

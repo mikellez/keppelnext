@@ -80,12 +80,12 @@ import { getColor } from "../Request";
 
 import moment from "moment";
 import { useRouter } from "next/router";
+import CellTooltip from "../../components/CellTooltip";
 import ChecklistHistory from "../../components/Checklist/ChecklistHistory";
 import Pagination from "../../components/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import { Checklist_Status } from "../../types/common/enums";
 import { downloadMultipleChecklistsPDF } from "./View/[id]";
-import CellTooltip from "../../components/CellTooltip";
 
 const indexedColumn: ("pending" | "assigned" | "record" | "approved")[] = [
   "pending",
@@ -188,7 +188,7 @@ export default function Checklist(props: ChecklistProps) {
     "checklist_status"
   ];
 
-  const filteredData = useChecklistFilter(props, page, searchRef.current.value, fields);
+  const filteredData = useChecklistFilter(props, page, searchRef.current.value, fields, sortField, sortOrder);
   let columnData = useChecklist(
 
     indexedColumn[activeTabIndex],
@@ -203,7 +203,7 @@ export default function Checklist(props: ChecklistProps) {
   const { data, error, isValidating, mutate } = props.filter
     ? filteredData
     : columnData;
-  
+
   // Used for adding the overdue column into the template when the assigned/pending tab is selected
   const tableFormat =
     activeTabIndex === 0 || activeTabIndex === 1 || activeTabIndex === 2
@@ -228,6 +228,15 @@ export default function Checklist(props: ChecklistProps) {
       setPage(1);
       setSortField("");
       setSortOrder("");
+
+      setIdHeader("ID");
+      setDetailsHeader("Details");
+      setStatusHeader("Status");
+      setOverdueStatusHeader("Overdue");
+      setDateArrow("");
+      setAssignedToHeader("Assigned To");
+      setSignOffHeader("Signed Off By");
+      setCreatedByHeader("Created By");
     }
   };
 
@@ -237,59 +246,8 @@ export default function Checklist(props: ChecklistProps) {
 
   useEffect(() => {
     if (data && !isValidating) {
-      if (!props?.filter) {
+      // if (!props?.filter) {
         if (data?.rows?.length > 0) {
-          setChecklistItems(
-            data.rows.map((row: CMMSChecklist) => {
-              return {
-                id: row.checklist_id,
-                ...row,
-              };
-            })
-          );
-          setReady(true);
-          setTotalPages(data.total);
-        }
-      }
-    }
-  }, [dataChanged, data, isValidating, isReady, page, props?.isReady]);
-
-  useEffect(() => {
-    if (props?.filter) {
-      const fields = [
-        "checklist_id",
-        "chl_name",
-        "description",
-        "status_id",
-        "created_date",
-        "createdbyuser",
-        "assigneduser",
-        "signoffuser",
-        "plant_name",
-        "status",
-        "activity_log",
-        "overdue_status",
-        "checklist_status"
-      ];
-      const fieldsString = fields.join(",");
-
-      instance
-        .get(
-          `/api/checklist/${indexedColumn[activeTabIndex]}?page=${page}&expand=${fieldsString}&search=${searchRef.current.value}`
-        )
-        .then((response) => {
-          if (!blockReset) {
-            setChecklistItems(
-              response.data.rows.map((row: CMMSChecklist) => {
-                return {
-                  id: row.checklist_id,
-                  ...row,
-                };
-              })
-            );
-          }
-
-          if (dataChanged && data){
             setChecklistItems(
               data.rows.map((row: CMMSChecklist) => {
                 return {
@@ -298,15 +256,69 @@ export default function Checklist(props: ChecklistProps) {
                 };
               })
             );
-          }
-          setTotalPages(response.data.total);
-          setReady(true);
-        })
-        .catch((e) => {
-          setChecklistItems([]);
-        });
+            setReady(true);
+            setTotalPages(data.total);
+        }
+      // }
     }
-  }, [data, dataChanged, activeTabIndex, page, isReady]);
+  }, [dataChanged, data, isValidating, isReady, page, props?.isReady]);
+
+  // removed below for standardisation: all data is retrieved using SWR and passed to above
+
+  // dashboard checklist data
+  // useEffect(() => {
+  //   if (props?.filter) {
+  //     const fields = [
+  //       "checklist_id",
+  //       "chl_name",
+  //       "description",
+  //       "status_id",
+  //       "created_date",
+  //       "createdbyuser",
+  //       "assigneduser",
+  //       "signoffuser",
+  //       "plant_name",
+  //       "status",
+  //       "activity_log",
+  //       "overdue_status",
+  //       "checklist_status"
+  //     ];
+  //     const fieldsString = fields.join(",");
+
+  //     instance
+  //       .get(
+  //         `/api/checklist/${indexedColumn[activeTabIndex]}?page=${page}&expand=${fieldsString}&search=${searchRef.current.value}&sortField=${sortField}&sortOrder=${sortOrder}`
+  //       )
+  //       .then((response) => {
+  //         if (!blockReset) {
+  //           setChecklistItems(
+  //             response.data.rows.map((row: CMMSChecklist) => {
+  //               return {
+  //                 id: row.checklist_id,
+  //                 ...row,
+  //               };
+  //             })
+  //           );
+  //         }
+
+  //         if (dataChanged && data){
+  //           setChecklistItems(
+  //             data.rows.map((row: CMMSChecklist) => {
+  //               return {
+  //                 id: row.checklist_id,
+  //                 ...row,
+  //               };
+  //             })
+  //           );
+  //         }
+  //         setTotalPages(response.data.total);
+  //         setReady(true);
+  //       })
+  //       .catch((e) => {
+  //         setChecklistItems([]);
+  //       });
+  //   }
+  // }, [data, dataChanged, activeTabIndex, page, isReady]);
 
   const updateTable = (foo: Function) => {
     setReady(false);
@@ -319,12 +331,15 @@ export default function Checklist(props: ChecklistProps) {
     setBlockReset(true);
     setSortField('cl.checklist_id');
 
-    if (IdHeader === "ID" || IdHeader === "ID ▲") {
+    if (IdHeader === "ID" ) {
       setIdHeader("ID ▼");
       setSortOrder('desc')
     } else if (IdHeader === "ID ▼") {
       setIdHeader("ID ▲");
       setSortOrder('asc');
+    } else if (IdHeader === "ID ▲") {
+      setIdHeader("ID");
+      setSortOrder('');
     }
     setDataChanged(true);
   }
@@ -332,12 +347,15 @@ export default function Checklist(props: ChecklistProps) {
   async function sortDetails() {
     setBlockReset(true);
     setSortField("cl.description")
-    if (detailsHeader === "Details" || detailsHeader === "Details ▲") {
+    if (detailsHeader === "Details") {
       setDetailsHeader("Details ▼");
       setSortOrder("desc");
     } else if (detailsHeader === "Details ▼") {
       setDetailsHeader("Details ▲");
       setSortOrder("asc");
+    } else if (detailsHeader === "Details ▲") {
+      setDetailsHeader("Details");
+      setSortOrder("");
     }
     setDataChanged(true);
   }
@@ -357,12 +375,15 @@ export default function Checklist(props: ChecklistProps) {
   async function sortStatus() {
     setBlockReset(true);
     setSortField('st.status')
-    if (statusHeader === "Status" || statusHeader === "Status ▲") {
+    if (statusHeader === "Status") {
       setStatusHeader("Status ▼");
       setSortOrder('desc');
     } else if (statusHeader === "Status ▼") {
       setStatusHeader("Status ▲");
       setSortOrder('asc');
+    } else if (statusHeader === "Status ▲") {
+      setStatusHeader("Status");
+      setSortOrder('');
     }
     setDataChanged(true);
   }
@@ -386,15 +407,15 @@ export default function Checklist(props: ChecklistProps) {
   async function sortOverdueStatus() {
     setBlockReset(true);
     setSortField('cl.overdue_status');
-    if (
-      overdueStatusHeader === "Overdue" ||
-      overdueStatusHeader === "Overdue ▲"
-    ) {
+    if (overdueStatusHeader === "Overdue") {
       setOverdueStatusHeader("Overdue ▼");
       setSortOrder('desc');
     } else if (overdueStatusHeader === "Overdue ▼") {
       setOverdueStatusHeader("Overdue ▲");
       setSortOrder('asc');
+    } else if (overdueStatusHeader === "Overdue ▲") {
+      setOverdueStatusHeader("Overdue");
+      setSortOrder('');
     }
     setDataChanged(true);
   }
@@ -415,12 +436,15 @@ export default function Checklist(props: ChecklistProps) {
       setSortField("cs.date");
     }
 
-    if (dateArrow == "" || dateArrow == " ▲") {
+    if (dateArrow == "") {
       setDateArrow(" ▼");
       setSortOrder("desc");
     } else if (dateArrow == " ▼") {
       setDateArrow(" ▲");
       setSortOrder("asc");
+    } else if (dateArrow == " ▲") {
+      setDateArrow("");
+      setSortOrder("");
     }
     setDataChanged(true);
   }
@@ -428,15 +452,15 @@ export default function Checklist(props: ChecklistProps) {
   async function sortAssignedTo() {
     setBlockReset(true);
     setSortField('assigneduser')
-    if (
-      assignedToHeader === "Assigned To" ||
-      assignedToHeader === "Assigned To ▲"
-    ) {
+    if (assignedToHeader === "Assigned To") {
       setAssignedToHeader("Assigned To ▼");
       setSortOrder('desc');
     } else if (assignedToHeader === "Assigned To ▼") {
       setAssignedToHeader("Assigned To ▲");
       setSortOrder('asc');
+    } else if (assignedToHeader === "Assigned To ▲") {
+      setAssignedToHeader("Assigned To");
+      setSortOrder('');
     }
     setDataChanged(true);
   }
@@ -444,15 +468,15 @@ export default function Checklist(props: ChecklistProps) {
   async function sortSignOffBy() {
     setBlockReset(true);
     setSortField('signoffuser')
-    if (
-      signOffHeader === "Signed Off By" ||
-      signOffHeader === "Signed Off By ▲"
-    ) {
+    if (signOffHeader === "Signed Off By" ) {
       setSignOffHeader("Signed Off By ▼");
       setSortOrder('desc');
     } else if (signOffHeader === "Signed Off By ▼") {
       setSignOffHeader("Signed Off By ▲");
       setSortOrder('asc');
+    } else if (signOffHeader === "Signed Off By ▲") {
+      setSignOffHeader("Signed Off By");
+      setSortOrder('');
     }
     setDataChanged(true);
   }
@@ -460,15 +484,15 @@ export default function Checklist(props: ChecklistProps) {
   async function sortCreatedBy() {
     setBlockReset(true);
     setSortField('createdbyuser');
-    if (
-      createdByHeader === "Created By" ||
-      createdByHeader === "Created By ▲"
-    ) {
+    if (createdByHeader === "Created By" ) {
       setCreatedByHeader("Created By ▼");
       setSortOrder('desc');
     } else if (createdByHeader === "Created By ▼") {
       setCreatedByHeader("Created By ▲");
       setSortOrder('asc');
+    } else if (createdByHeader === "Created By ▲") {
+      setCreatedByHeader("Created By");
+      setSortOrder('');
     }
     setDataChanged(true);
   }
