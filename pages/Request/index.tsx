@@ -40,6 +40,8 @@ import {
 import { getTheme } from "@table-library/react-table-library/baseline";
 import { useTheme } from "@table-library/react-table-library/theme";
 
+import type { DatePickerProps } from "antd";
+import { Select } from "antd";
 import moment from "moment";
 import Image from "next/image";
 import Link from "next/link";
@@ -50,8 +52,10 @@ import { BsFileEarmarkPlus } from "react-icons/bs";
 import { FiRefreshCw } from "react-icons/fi";
 import { HiOutlineDownload, HiOutlineLink } from "react-icons/hi";
 import instance from "../../axios.config.js";
+import CellTooltip from "../../components/CellTooltip";
 import LoadingHourglass from "../../components/LoadingHourglass";
 import Pagination from "../../components/Pagination";
+import PickerWithType from "../../components/PickerWithType";
 import RequestHistory from "../../components/Request/RequestHistory";
 import {
   useCurrentUser,
@@ -63,11 +67,6 @@ import TooltipBtn from "../../components/TooltipBtn";
 import styles from "../../styles/Request.module.scss";
 import animationStyles from "../../styles/animations.module.css";
 import { CMMSRequest } from "../../types/common/interfaces";
-import PickerWithType from "../../components/PickerWithType";
-import type { DatePickerProps } from "antd";
-import { Select } from "antd";
-import { toNamespacedPath } from "path";
-import CellTooltip from "../../components/CellTooltip";
 
 const { Option } = Select;
 type PickerType = "date";
@@ -258,6 +257,14 @@ export default function Request(props: RequestProps) {
     setIds([]);
     setSortField("");  // set sort field and order to be empty to take on backend 'order by' 
     setSortOrder("");  // otherwise it will remain as 'r.request_id desc' 
+
+    setIdHeader("ID");
+    setFaultTypeHeader("Fault Type");
+    setPriorityHeader("Priority");
+    setLocationHeader("Location");
+    setDateArrow("");
+    setAssetNameHeader("Asset Name");
+    setRequestedByHeader("Requested By");
   };
 
   const handleExpand = async (item: RequestItem) => {
@@ -305,7 +312,10 @@ export default function Request(props: RequestProps) {
     props,
     page,
     searchRef.current.value,
-    fields
+    fields,
+    sortField,
+    sortOrder,
+    filter
   );
   const allRequest = useRequest(
     indexedColumn[activeTabIndex],
@@ -327,10 +337,10 @@ export default function Request(props: RequestProps) {
   // Used for adding the overdue column into the template when the assigned/pending tab is selected
   const tableFormat =
     activeTabIndex === 0 || activeTabIndex === 1
-      ? `--data-table-library_grid-template-columns:  6em 4em 13em 8em 6em 6em 14em 10em 15em 8em;
+      ? `--data-table-library_grid-template-columns:  6em 4em 13em 8em 6em 6em 14em 10em 15em 10em;
       
   `
-      : `--data-table-library_grid-template-columns:  6em 4em 13em 8em 6em 6em 14em 15em 8em;
+      : `--data-table-library_grid-template-columns:  6em 4em 13em 8em 6em 6em 14em 15em 10em;
       
   `;
 
@@ -422,12 +432,15 @@ export default function Request(props: RequestProps) {
   async function sortId() {
     setBlockReset(true);
     setSortField("r.request_id");
-    if (IdHeader === "ID" || IdHeader === "ID ▲") {
+    if (IdHeader === "ID") {
       setIdHeader("ID ▼");
       setSortOrder("desc");
     } else if (IdHeader === "ID ▼") {
       setIdHeader("ID ▲");
       setSortOrder("asc");
+    } else if (IdHeader === "ID ▲") {
+      setIdHeader("ID");
+      setSortOrder("");
     }
     setDataChanged(true);
   }
@@ -435,15 +448,15 @@ export default function Request(props: RequestProps) {
   async function sortFaultType() {
     setBlockReset(true);
     setSortField("ft.fault_type");
-    if (
-      faultTypeHeader === "Fault Type" ||
-      faultTypeHeader === "Fault Type ▲"
-    ) {
+    if (faultTypeHeader === "Fault Type") {
       setFaultTypeHeader("Fault Type ▼");
       setSortOrder("desc");
     } else if (faultTypeHeader === "Fault Type ▼") {
       setFaultTypeHeader("Fault Type ▲");
       setSortOrder("asc");
+    } else if (faultTypeHeader === "Fault Type ▲") {
+      setFaultTypeHeader("Fault Type");
+      setSortOrder("");
     }
     setDataChanged(true);
   }
@@ -451,12 +464,15 @@ export default function Request(props: RequestProps) {
   async function sortPriority() {
     setBlockReset(true);
     setSortField("r.priority_id");
-    if (priorityHeader === "Priority" || priorityHeader === "Priority ▲") {
+    if (priorityHeader === "Priority") {
       setPriorityHeader("Priority ▼");
       setSortOrder("desc");
     } else if (priorityHeader === "Priority ▼") {
       setPriorityHeader("Priority ▲");
       setSortOrder("asc");
+    } else if (priorityHeader === "Priority ▲") {
+      setPriorityHeader("Priority");
+      setSortOrder("");
     }
     setDataChanged(true);
   }
@@ -464,12 +480,15 @@ export default function Request(props: RequestProps) {
   async function sortLocation() {
     setBlockReset(true);
     setSortField("pm.plant_name");
-    if (locationHeader === "Location" || locationHeader === "Location ▲") {
+    if (locationHeader === "Location") {
       setLocationHeader("Location ▼");
       setSortOrder("desc");
     } else if (locationHeader === "Location ▼") {
       setLocationHeader("Location ▲");
       setSortOrder("asc");
+    } else if (locationHeader === "Location ▲") {
+      setLocationHeader("Location");
+      setSortOrder("");
     }
     setDataChanged(true);
   }
@@ -491,12 +510,15 @@ export default function Request(props: RequestProps) {
       setSortField("rs.date");
     }
 
-    if (dateArrow == "" || dateArrow == " ▼") {
+    if (dateArrow == "") {
       setDateArrow(" ▲");
       setSortOrder("asc");
     } else if (dateArrow == " ▲") {
       setDateArrow(" ▼");
       setSortOrder("desc");
+    } else if (dateArrow == " ▼") {
+      setDateArrow("");
+      setSortOrder("");
     }
     setDataChanged(true);
   }
@@ -504,15 +526,15 @@ export default function Request(props: RequestProps) {
   async function sortAssetName() {
     setBlockReset(true);
     setSortField("tmp1.asset_name");
-    if (
-      assetNameHeader === "Asset Name" ||
-      assetNameHeader === "Asset Name ▲"
-    ) {
+    if (assetNameHeader === "Asset Name") {
       setAssetNameHeader("Asset Name ▼");
       setSortOrder("desc");
     } else if (assetNameHeader === "Asset Name ▼") {
       setAssetNameHeader("Asset Name ▲");
       setSortOrder("asc");
+    } else if (assetNameHeader === "Asset Name ▲") {
+      setAssetNameHeader("Asset Name");
+      setSortOrder("");
     }
     setDataChanged(true);
   }
@@ -521,15 +543,15 @@ export default function Request(props: RequestProps) {
     //linked to user_id, related to user_name in users table
     setBlockReset(true);
     setSortField("created_by");
-    if (
-      requestedByHeader === "Requested By" ||
-      requestedByHeader === "Requested By ▲"
-    ) {
+    if (requestedByHeader === "Requested By") {
       setRequestedByHeader("Requested By ▼");
       setSortOrder("desc");
     } else if (requestedByHeader === "Requested By ▼") {
       setRequestedByHeader("Requested By ▲");
       setSortOrder("asc");
+    } else if (requestedByHeader === "Requested By ▲") {
+      setRequestedByHeader("Requested By");
+      setSortOrder("");
     }
     setDataChanged(true);
   }
@@ -817,6 +839,7 @@ export default function Request(props: RequestProps) {
                             value={faultTypePicker}
                             onChange={onFilterFaultType}
                             style={{ width: '300px' }} 
+                            dropdownStyle={{zIndex: 10001}}
                           >
                             {/* Value of fault type is ft.fault_id */}
                             {/* dynamically create an option for each unique ft.fault_id */}
@@ -852,6 +875,7 @@ export default function Request(props: RequestProps) {
                             value={locationPicker}
                             onChange={onFilterLocation}
                             style={{ width: '150px' }} 
+                            dropdownStyle={{zIndex: 10001}}
                           >
                             <Option value="Biopolis">Biopolis</Option>
                             <Option value="Changi DHCS">Changi DHCS</Option>
@@ -879,6 +903,7 @@ export default function Request(props: RequestProps) {
                             value={priorityPicker}
                             onChange={onFilterPriority}
                             style={{ width: '200px' }} 
+                            dropdownStyle={{zIndex: 10001}}
                           >
                             <Option value="LOW">LOW</Option>
                             <Option value="MEDIUM">MEDIUM</Option>
@@ -912,6 +937,7 @@ export default function Request(props: RequestProps) {
                           <Select
                             value={pickerwithtype.datetype}
                             onChange={handleDateTypeChange}
+                            dropdownStyle={{zIndex: 10001}}
                           >
                             <Option value="date">Date</Option>
                             <Option value="week">Week</Option>
@@ -923,6 +949,7 @@ export default function Request(props: RequestProps) {
                             <PickerWithType
                               type={pickerwithtype.datetype}
                               onChange={handleDateChange}
+                              style={{zIndex: 10001}}
                             />
                           </div>
                         </div>
@@ -941,6 +968,7 @@ export default function Request(props: RequestProps) {
                               value={overduePicker}
                               onChange={onFilterOverdue}
                               style={{ width: '150px' }} 
+                              dropdownStyle={{zIndex: 10001}}
                             >
                               <Option value="OVERDUE">OVERDUE</Option>
                               <Option value="VALID">VALID</Option>
