@@ -34,7 +34,7 @@ const dbConnection = async (req, res, next) => {
     const { database } = req.body;
     if (!database) await connectDB("cmms");
     else {
-      console.log("here");
+      //console.log("here");
       await connectDB(database);
     }
   }
@@ -43,7 +43,7 @@ const dbConnection = async (req, res, next) => {
 };
 
 const connectDB = async (dbName) => {
-  console.log('her')
+  //console.log('her')
    if (!dbPool) {
     const dbConfig = dbJSON[dbName];
     dbPool = new Pool(dbConfig);
