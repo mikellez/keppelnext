@@ -1,7 +1,10 @@
 import formStyles from "../../styles/formStyles.module.css";
 
-import React, { useState, useEffect } from "react";
-import Select, { defaultTheme } from "react-select";
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import React, { useState } from "react";
+import Select from "react-select";
 import {
   ModuleContent,
   ModuleDivider,
@@ -9,23 +12,16 @@ import {
   ModuleHeader,
   ModuleMain,
 } from "../../components";
-import RequiredIcon from "../../components/RequiredIcon";
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import instance from "../../types/common/axios.config";
-import LoadingIcon from "../../components/LoadingIcon";
 import ModuleSimplePopup, {
   SimpleIcon,
 } from "../../components/ModuleLayout/ModuleSimplePopup";
-import router from "next/router";
-import Link from "next/link";
-import Head from "next/head";
+import RequiredIcon from "../../components/RequiredIcon";
+import instance from "../../types/common/axios.config";
 import {
   CMMSPlant,
   CMMSUserInfo,
   CMMSUserSettings,
 } from "../../types/common/interfaces";
-import { useCurrentUser } from "../../components/SWR";
-import { useRouter } from "next/router";
 
 interface settingsProps {
   plants: CMMSPlant[];
@@ -201,7 +197,7 @@ export default function SettingsPage(props: settingsProps) {
               defaultValue={props.info.allocated_plants.map((p) => {
                 return {
                   value: p,
-                  label: props.sortedPlants[parseInt(p) - 1].label,
+                  label: props.sortedPlants[parseInt(p) - 1]?.label,
                 };
               })}
               isDisabled={true}

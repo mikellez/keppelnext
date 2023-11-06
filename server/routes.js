@@ -2068,6 +2068,8 @@ router
  * @apiSuccess {String} -.rows.created_date Timeline Creation Date and Time
  * @apiSuccess {String} -.rows.remarks Remarks
  * @apiSuccess {Number} -.totalPages Total Pages
+ * 
+ * @apiError (Error 500) {String} InternalServerError
  */
 router.get(
   "/timeline_drafts",
@@ -2093,6 +2095,8 @@ router.get(
  * @apiSuccess {Object[]} -.rows.activity_log Activity Log of Timeline
  * @apiSuccess {String} -.rows.remarks Remarks
  * @apiSuccess {Number} -.totalPages Total Pages
+ * 
+ * @apiError (Error 500) {String} InternalServerError
  */
 router.get(
   "/timeline_pending",
@@ -2118,7 +2122,8 @@ router.get(
  * @apiSuccess {String} -.rows.remarks Remarks
  * @apiSuccess {Object[]} -.rows.activity_log Activity Log of Timeline
  * @apiSuccess {Number} -.totalPages Total Pages
-
+ * 
+ * @apiError (Error 500) {String} InternalServerError
  */
 router.get(
   "/timeline_approved",
@@ -2143,6 +2148,8 @@ router.get(
  * @apiSuccess {String} -.rows.created_date Timeline Creation Date and Time
  * @apiSuccess {String} -.rows.remarks Remarks
  * @apiSuccess {Number} -.totalPages Total Pages
+ * 
+ * @apiError (Error 500) {String} InternalServerError
  */
 router.get(
   "/timeline_completed",
@@ -2166,6 +2173,8 @@ router.get(
  * @apiSuccess {String} -.fname User's First Name
  * @apiSuccess {String} -.lname User's Last Name 
  * @apiSuccess {String} -.username User's username
+ * 
+ * @apiError (Error 201) {String} EmptyList "No Operators Added"
  */
 router.get(
   "/getAssignedUsers/:plant_id",
@@ -2880,6 +2889,97 @@ router
   .route("/changeOfParts/completed/:plant/:datetype/:date", checkIfLoggedInAPI)
   .get(controllers.changeOfParts.fetchCompletedChangeOfParts);
 
+
+/**
+ * @api {get} /user/getUsers Get All Users
+ * @apiDescription Get List of All Users
+ * @apiName GetAllUsers
+ * @apiGroup User
+ * 
+ * @apiSuccess {Object} - Object containing List of Object Users
+ * @apiSuccess {Object[]} -.rows List of User Objects
+ * @apiSuccess {String} -.rows.employee_id Employee ID
+ * @apiSuccess {String} -.rows.full_name Employee's Full Name
+ * @apiSuccess {Number} -.rows.user_id User ID
+ * @apiSuccess {String} -.rows.user_name Username
+ * @apiSuccess {String} -.rows.role_name Employee's Role Name
+ * @apiSuccess {Number} -.total Total Pages
+ */
+
+/**
+ * @api {post} /user/addUser Create New User
+ * @apiDescription Create New User
+ * @apiName CreateNewUser
+ * @apiGroup User
+ * 
+ * @apiBody {String} firstName First Name
+ * @apiBody {String} lastName Last Name
+ * @apiBody {String} username Username
+ * @apiBody {String} password Password
+ * @apiBody {String} employeeId Employee ID
+ * @apiBody {String} email Email
+ * @apiBody {Number} roleType Role ID
+ * @apiBody {Number[]} allocatedPlants List of Allocated Plants
+ */
+
+/**
+ * @api {get} /user/getUsersData/:id Get Specific User Data
+ * @apiDescription Get User Data of Specific User using User ID
+ * @apiName GetUserData
+ * @apiGroup User
+ * 
+ * @apiParam {Number} id User ID
+ * 
+ * @apiSuccess {String} first_name First Name
+ * @apiSuccess {String} last_name Last Name
+ * @apiSuccess {String} employee_id Employee ID
+ * @apiSuccess {String} allocated_plants Allocated Plant Names
+ * @apiSuccess {Number} allocatedplantids IDs of Allocated Plants
+ * @apiSuccess {String} user_name Username
+ * @apiSuccess {String} user_email User Email
+ * @apiSuccess {Number} role_id User Role ID
+ */
+
+/**
+ * @api {get} /user/getUsersplantData/:id Get User Plant Data by User ID
+ * @apiDescription Get Plants related to user by User ID (assigned to or signed off by user)
+ * @apiName GetUserPlantData
+ * @apiGroup User
+ * 
+ * @apiParam {Number} id User ID
+ * 
+ * @apiSuccess {Object[]} - Array of Plant ID Objects
+ * @apiSuccess {Number} -.plant_id ID of Plants related to user 
+ */
+
+/**
+ * @api {post} /user/updateUser Update Existing User
+ * @apiDescription Update Existing User
+ * @apiName UpdateUser
+ * @apiGroup User
+ * 
+ * @apiBody {Number} user_id User ID
+ * @apiBody {String} first_name First Name
+ * @apiBody {String} last_name Last Name
+ * @apiBody {String} employee_id Employee ID
+ * @apiBody {Number[]} addplantids Plant IDs to assign to user
+ * @apiBody {Number[]} removeplantids Plant IDs to unassign from user
+ * @apiBody {String} password New Password
+ * @apiBody {String} user_name Username
+ * @apiBody {String} user_email Email
+ * @apiBody {Number} role_id Role ID
+ * 
+ * @apiError (Error 400) {Object} BadRequestError "Role does not exist"
+ */
+
+/**
+ * @api {delete} /user/deleteUser/:id Delete Existing User
+ * @apiDescription Delete Existing User using User ID
+ * @apiName DeleteUser
+ * @apiGroup User
+ * 
+ * @apiParam {Number} id User ID
+ */
 router
   .get("/user/getUsers", checkIfLoggedInAPI, controllers.user.getUsers)
   .get("/user/getUsersCSV", checkIfLoggedInAPI, controllers.user.getUsersCSV)
@@ -2904,6 +3004,52 @@ router.delete(
 );
 router.get("/user/logouthistory", checkIfLoggedInAPI, controllers.user.logout);
 
+/**
+ * @api {post} /setting/update Update User Details
+ * @apiDescription Update Own User Details via Settings
+ * @apiName UpdateUserDetails
+ * @apiGroup Settings
+ * 
+ * @apiBody {String} username Updated Username
+ * @apiBody {String} email Updated Email
+ * @apiBody {Number} userId User ID
+ */
+
+/**
+ * @api {post} /setting/updatePassword Update Password
+ * @apiDescription Update Password via Settings
+ * @apiName UpdatePassword
+ * @apiGroup Settings
+ * 
+ * @apiBody {String} current_password Current Password
+ * @apiBody {String} new_password New Password
+ * @apiBody {String} confirm_password Confirm Password
+ * @apiBody {Number} id User ID
+ * 
+ * @apiError (Error 400) {String} BadRequest "error"
+ */
+
+/**
+ * @api {get} /setting/check/email/:id Check For Unique Email
+ * @apiDescription Check for Unique Email
+ * @apiName CheckUniqueEmail
+ * @apiGroup Settings
+ * 
+ * @apiParam {Number} id User ID
+ * 
+ * @apiSuccess {Boolean} - Shows if an email is unique
+ */
+
+/**
+ * @api {get} /setting/check/username/:id Check For Unique Username
+ * @apiDescription Check for Unique Username
+ * @apiName CheckUniqueUsername
+ * @apiGroup Settings
+ * 
+ * @apiParam {Number} id User ID
+ * 
+ * @apiSuccess {Boolean} - Shows if an Username is unique
+ */
 router
   .post("/setting/update", checkIfLoggedInAPI, controllers.setting.updateUser)
   .post(
