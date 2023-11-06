@@ -2051,28 +2051,122 @@ router
   .get(controllers.schedule.getTimelineByStatus)
   .patch(controllers.schedule.changeTimelineStatus);
 
+/**
+ * @api {get} /timeline_drafts Get Timeline Drafts
+ * @apiDescription Get Timeline Drafts
+ * @apiName GetTimelineDrafts
+ * @apiGroup Schedule
+ * 
+ * @apiSuccess {Object} - Object containing Timeline Drafts Array and side information
+ * @apiSuccess {Object[]} -.rows Timeline Drafts Array
+ * @apiSuccess {Number} -.rows.id Timeline ID
+ * @apiSuccess {String} -.rows.name Timeline Name
+ * @apiSuccess {String} -.rows.description Timeline Description
+ * @apiSuccess {Number} -.rows.plantId Plant ID
+ * @apiSuccess {String} -.rows.plantName Plant Name
+ * @apiSuccess {String} -.rows.status Timeline Status (Should be "DRAFT")
+ * @apiSuccess {String} -.rows.created_date Timeline Creation Date and Time
+ * @apiSuccess {String} -.rows.remarks Remarks
+ * @apiSuccess {Number} -.totalPages Total Pages
+ */
 router.get(
   "/timeline_drafts",
   checkIfLoggedInAPI,
   controllers.schedule.getScheduleDrafts
 );
+
+/**
+ * @api {get} /timeline_pending Get Pending Timelines
+ * @apiDescription Get Timelines that are Pending or Pending Cancellation
+ * @apiName GetPendingTimelines
+ * @apiGroup Schedule
+ * 
+ * @apiSuccess {Object} - Object containing Timeline Array and side information
+ * @apiSuccess {Object[]} -.rows Timeline Array
+ * @apiSuccess {Number} -.rows.id Timeline ID
+ * @apiSuccess {String} -.rows.name Timeline Name
+ * @apiSuccess {String} -.rows.description Timeline Description
+ * @apiSuccess {Number} -.rows.plantId Plant ID
+ * @apiSuccess {String} -.rows.plantName Plant Name
+ * @apiSuccess {String} -.rows.status Timeline Status (Should be "PENDING" or "PENDING CANCELLED")
+ * @apiSuccess {String} -.rows.created_date Timeline Creation Date and Time
+ * @apiSuccess {Object[]} -.rows.activity_log Activity Log of Timeline
+ * @apiSuccess {String} -.rows.remarks Remarks
+ * @apiSuccess {Number} -.totalPages Total Pages
+ */
 router.get(
   "/timeline_pending",
   checkIfLoggedInAPI,
   controllers.schedule.getPendingTimelines
 );
+
+/**
+ * @api {get} /timeline_approved Get Approved Timelines
+ * @apiDescription Get Approved Timelines
+ * @apiName GetAppovedTimelines
+ * @apiGroup Schedule
+ * 
+ * @apiSuccess {Object} - Object containing Timeline Array and side information
+ * @apiSuccess {Object[]} -.rows Timeline Array
+ * @apiSuccess {Number} -.rows.id Timeline ID
+ * @apiSuccess {String} -.rows.name Timeline Name
+ * @apiSuccess {String} -.rows.description Timeline Description
+ * @apiSuccess {Number} -.rows.plantId Plant ID
+ * @apiSuccess {String} -.rows.plantName Plant Name
+ * @apiSuccess {String} -.rows.status Timeline Status (Should be "APPROVED" or "CANCELLED" or "REJECTED CANCELLED")
+ * @apiSuccess {String} -.rows.created_date Timeline Creation Date and Time
+ * @apiSuccess {String} -.rows.remarks Remarks
+ * @apiSuccess {Object[]} -.rows.activity_log Activity Log of Timeline
+ * @apiSuccess {Number} -.totalPages Total Pages
+
+ */
 router.get(
   "/timeline_approved",
   checkIfLoggedInAPI,
   controllers.schedule.getApprovedTimelines
 );
 
+/**
+ * @api {get} /timeline_completed Get Completed Timelines
+ * @apiDescription Get Timelines that are Completed
+ * @apiName GetCompletedTimelines
+ * @apiGroup Schedule
+ * 
+ * @apiSuccess {Object} - Object containing Timeline Array and side information
+ * @apiSuccess {Object[]} -.rows Timeline Array
+ * @apiSuccess {Number} -.rows.id Timeline ID
+ * @apiSuccess {String} -.rows.name Timeline Name
+ * @apiSuccess {String} -.rows.description Timeline Description
+ * @apiSuccess {Number} -.rows.plantId Plant ID
+ * @apiSuccess {String} -.rows.plantName Plant Name
+ * @apiSuccess {String} -.rows.status Timeline Status (Should be "COMPLETED")
+ * @apiSuccess {String} -.rows.created_date Timeline Creation Date and Time
+ * @apiSuccess {String} -.rows.remarks Remarks
+ * @apiSuccess {Number} -.totalPages Total Pages
+ */
 router.get(
   "/timeline_completed",
   checkIfLoggedInAPI,
   controllers.schedule.getCompletedTimelines
 );
 
+/**
+ * @api {get} /getAssignedUsers/:plant_id Get Assigned Users by Plant ID
+ * @apiDescription Get Assigned Users by Plant ID
+ * @apiName GetAssignedUsersByPlantID
+ * @apiGroup Schedule
+ * 
+ * @apiParam {Number} plant_id Plant ID
+ * 
+ * @apiSuccess {Object[]} - Object Array containing Assigned Users
+ * @apiSuccess {Number} -.id User's ID
+ * @apiSuccess {Number} -.role_id User Role ID
+ * @apiSuccess {String} -.role_name User's Role Name
+ * @apiSuccess {String} -.email User Email
+ * @apiSuccess {String} -.fname User's First Name
+ * @apiSuccess {String} -.lname User's Last Name 
+ * @apiSuccess {String} -.username User's username
+ */
 router.get(
   "/getAssignedUsers/:plant_id",
   checkIfLoggedInAPI,
@@ -2296,7 +2390,7 @@ router.get(
 );
 
 /**
- * @api {get} /feedback/pending Get Assigned Feedback
+ * @api {get} /feedback/assigned Get Assigned Feedback
  * @apiDescription Get Assigned Feedback
  * @apiName GetAssignedFeedback
  * @apiGroup Feedback
@@ -2386,7 +2480,7 @@ router.get(
 );
 
 /**
- * @api {get} /feedback/pending Get Completed Feedback
+ * @api {get} /feedback/completed Get Completed Feedback
  * @apiDescription Get Completed Feedback
  * @apiName GetCompletedFeedback
  * @apiGroup Feedback
@@ -2402,8 +2496,8 @@ router.get(
  * @apiSuccess {Number} -.rows.contact.whatsapp Contact Method of Whatsapp, 0 if No, 1 if Yes
  * @apiSuccess {Number} -.rows.contact.telegram Contact Method of Telegram, 0 if No, 1 if Yes
  * @apiSuccess {String} -.rows.image base64 eoncded string of image
- * @apiSuccess {String} -.rows.status_id Status ID (1 for Pending)
- * @apiSuccess {String} -.rows.status Status of Feedback ("PENDING")
+ * @apiSuccess {String} -.rows.status_id Status ID (4 for Completed)
+ * @apiSuccess {String} -.rows.status Status of Feedback ("COMPLETED")
  * @apiSuccess {String} -.rows.activity_log Activity Log of Feedback
  * @apiSuccess {String} -.rows.createdByUser Name of user who created feedback ("Guest" if external)
  * @apiSuccess {String} -.rows.assigned_user_name Name of assignee
