@@ -34,7 +34,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
         <div>
           <p className={styles.checklistDetailsHeading}>Completed Date</p>
           <p className={styles.checklistDetailsContent}>
-            {moment(new Date(completionLog!.date)).format(
+            {moment(completionLog!.date).format(
               "MMMM Do YYYY, h:mm:ss a"
             )}
           </p>
@@ -52,7 +52,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
           <div className="mb-4">
             <p className={styles.checklistDetailsHeading}>Completed Date</p>
             <p className={styles.checklistDetailsContent}>
-              {moment(new Date(completionLog!.date)).format(
+              {moment(completionLog!.date).format(
                 "MMMM Do YYYY, h:mm:ss a"
               )}
             </p>
@@ -60,7 +60,7 @@ const ChecklistDetails = (props: ChecklistPageProps) => {
           <div>
             <p className={styles.checklistDetailsHeading}>Approval Date</p>
             <p className={styles.checklistDetailsContent}>
-              {moment(new Date(approvalLog!.date)).format(
+              {moment(approvalLog!.date).format(
                 "MMMM Do YYYY, h:mm:ss a"
               )}
             </p>

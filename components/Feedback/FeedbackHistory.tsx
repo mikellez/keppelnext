@@ -15,6 +15,7 @@
  * - /pages/Feedback/index.tsx
  *
  */
+import moment from "moment";
 import React, { useState, useEffect } from "react";
 
 interface FeedbackHistoryProps {
@@ -30,7 +31,9 @@ function rowElements(rows: { [key: string]: string }[]) {
           <tr key={index}>
             <td>{row["activity_type"]}</td>
             <td>{row["activity"]}</td>
-            <td>{row["date"]}</td>
+            <td>
+              {moment(row["date"]).format("MMMM Do YYYY, h:mm:ss a")}
+            </td>
             <td>{row["name"]}</td>
           </tr>
         );

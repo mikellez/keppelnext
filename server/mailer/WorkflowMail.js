@@ -19,7 +19,10 @@ class AutoSendWorkflowMail extends WorkflowMail {
           }</strong> has been created at location <strong>${
       workflow.plant_name
     }</strong> on <strong>${
-      workflow.created_at
+      //workflow.created_at
+      moment(workflow.created_at).format(
+        "MMMM Do YYYY, h:mm:ss a"
+      )
     }</strong>.<br></br><strong>ID:</strong> ${
       workflow.request_id
     }<br/><strong>Fault Description:</strong> ${

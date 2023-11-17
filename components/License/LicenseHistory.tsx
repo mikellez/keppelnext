@@ -16,7 +16,7 @@ function rowElements(rows: { [key: string]: string }[]) {
             <td>{row["activity_type"]}</td>
             <td>{row["activity"]}</td>
             <td>
-              {moment(new Date(row["date"])).format("MMMM Do YYYY, h:mm:ss a")}
+              {moment(row["date"]).format("MMMM Do YYYY, h:mm:ss a")}
             </td>
             <td>{row["name"]}</td>
           </tr>

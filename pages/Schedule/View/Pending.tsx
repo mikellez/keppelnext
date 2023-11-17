@@ -297,7 +297,7 @@ export default function Pending() {
                               (activeTabIndex === 1 || activeTabIndex === 2) && 
                                 item.activity_log && item.activity_log.length > 0 && item.status ? 
                             ActivityLog_Helper.getLatestDateByStatus(item.activity_log, item.status, Module_Activity_Log.Schedule)
-                            : (item.created_date ? moment(new Date(item.created_date)).format("MMMM Do YYYY, h:mm:ss a")
+                            : (item.created_date ? moment(item.created_date).format("MMMM Do YYYY, h:mm:ss a")
                                     : null)}/>
                           </Cell>
 
